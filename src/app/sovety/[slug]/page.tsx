@@ -57,9 +57,25 @@ export default async function ArticlePage({
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
 
+  const breadcrumbJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Главная", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Советы", item: `${SITE_URL}/sovety` },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: article.title,
+        item: url,
+      },
+    ],
+  };
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <JsonLd data={articleJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
 
       <nav
         aria-label="Хлебные крошки"
