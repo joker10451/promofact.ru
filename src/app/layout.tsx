@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 import "./globals.css";
+import YandexMetrika from "@/components/YandexMetrika";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 const unbounded = Unbounded({
@@ -47,7 +48,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" className={`${unbounded.variable} ${golos.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-paper text-ink font-sans">{children}</body>
+      <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
+        <YandexMetrika />
+        {children}
+      </body>
     </html>
   );
 }

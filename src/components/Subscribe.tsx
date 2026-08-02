@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ymReachGoal } from "@/components/YandexMetrika";
 
 export default function Subscribe() {
   const [email, setEmail] = useState("");
@@ -9,6 +10,7 @@ export default function Subscribe() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
+    ymReachGoal("subscribe", { email: email.trim() });
     setDone(true);
   };
 

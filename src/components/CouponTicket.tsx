@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { daysLeft, formatExpires } from "@/lib/format";
+import { ymReachGoal } from "@/components/YandexMetrika";
 import type { Coupon } from "@/lib/types";
 
 export default function CouponTicket({
@@ -30,6 +31,10 @@ export default function CouponTicket({
     }
     setCopied(true);
     setToast(true);
+    ymReachGoal("copy_code", {
+      code: code,
+      store: store.name,
+    });
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       setCopied(false);
@@ -172,6 +177,12 @@ export default function CouponTicket({
             href={affiliate.link || store.site || "#"}
             target="_blank"
             rel="nofollow sponsored noopener"
+            onClick={() =>
+              ymReachGoal("click_store", {
+                code: promocode.code,
+                store: store.name,
+              })
+            }
             className="block w-full rounded-xl bg-ink py-3 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
           >
             В магазин
