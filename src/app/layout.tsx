@@ -26,7 +26,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ru_RU",
+    url: SITE_URL,
     siteName: SITE_NAME,
+    title: `${SITE_TAGLINE} — ${SITE_NAME}`,
+    description:
+      "Рабочие промокоды и купоны на скидку: Золотое Яблоко, Lamoda, DNS, Самокат и ещё 900+ магазинов.",
+  },
+  twitter: {
+    card: "summary",
     title: `${SITE_TAGLINE} — ${SITE_NAME}`,
     description:
       "Рабочие промокоды и купоны на скидку: Золотое Яблоко, Lamoda, DNS, Самокат и ещё 900+ магазинов.",

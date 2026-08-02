@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
+import JsonLd from "@/components/JsonLd";
 import Reveal from "@/components/Reveal";
 import SeoArticle from "@/components/SeoArticle";
 import StoresMarquee from "@/components/StoresMarquee";
@@ -59,31 +60,25 @@ const FAQ_JSONLD = [
 export default function Home() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: FAQ_JSONLD,
-          }),
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: FAQ_JSONLD,
         }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            name: SITE_NAME,
-            url: SITE_URL,
-            inLanguage: "ru-RU",
-            potentialAction: {
-              "@type": "SearchAction",
-              target: `${SITE_URL}/?q={search_term_string}`,
-              "query-input": "required name=search_term_string",
-            },
-          }),
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: SITE_NAME,
+          url: SITE_URL,
+          inLanguage: "ru-RU",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: `${SITE_URL}/?q={search_term_string}`,
+            "query-input": "required name=search_term_string",
+          },
         }}
       />
 

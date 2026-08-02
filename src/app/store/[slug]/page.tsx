@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
 import HowToApply from "@/components/HowToApply";
+import JsonLd from "@/components/JsonLd";
 import OtherStores from "@/components/OtherStores";
 import { getStoreBySlug, getStores } from "@/lib/data";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -20,12 +22,23 @@ export async function generateMetadata({
   const { slug } = await params;
   const store = getStoreBySlug(slug);
   if (!store) return {};
+  const pageUrl = `${SITE_URL}/store/${slug}`;
   return {
     title: `Промокод ${store.name} — актуальные скидки`,
     description: `Рабочие промокоды ${store.name}: ${store.coupons
       .map((c) => `${c.code} (${c.discount})`)
       .join(", ")}. Проверяем коды каждый день, обновляем в реальном времени.`,
-    alternates: { canonical: `/store/${slug}` },
+    alternates: { canonical: pageUrl },
+    openGraph: {
+      title: `Промокод ${store.name} — актуальные скидки`,
+      description: `Рабочие промокоды ${store.name}: ${store.coupons
+        .map((c) => `${c.code} (${c.discount})`)
+        .join(", ")}. Проверяем коды каждый день.`,
+      url: pageUrl,
+      type: "website",
+      locale: "ru_RU",
+      siteName: SITE_NAME,
+    },
   };
 }
 
@@ -39,9 +52,44 @@ export default async function StorePage({
   if (!store) notFound();
 
   const best = store.coupons[0];
+  const pageUrl = `${SITE_URL}/store/${slug}`;
+
+  const breadcrumb: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Главная", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Купоны", item: `${SITE_URL}/#coupons` },
+      { "@type": "ListItem", position: 3, name: store.name, item: pageUrl },
+    ],
+  };
+
+  const coupons: Record<string, unknown>[] = store.coupons.map((c) => ({
+    "@context": "https://schema.org",
+    "@type": "Coupon",
+    name: `Промокод ${c.code}: ${c.discount} в ${c.store}`,
+    description: c.description,
+    code: c.code,
+    category: "Промокод",
+    validTo: c.expires,
+    url: c.affiliateUrl,
+    seller: { "@type": "Organization", name: c.store },
+    offers: {
+      "@type": "Offer",
+      url: c.affiliateUrl,
+      priceCurrency: "RUB",
+      price: 0,
+      availability: "https://schema.org/InStock",
+    },
+  }));
 
   return (
     <main>
+      <JsonLd data={breadcrumb} />
+      {coupons.map((c) => (
+        <JsonLd key={c.code as string} data={c} />
+      ))}
+
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
         <nav aria-label="Хлебные крошки" className="text-xs font-semibold text-ink/45">
           <Link href="/" className="hover:text-ink transition-colors">

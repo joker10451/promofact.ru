@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
+import JsonLd from "@/components/JsonLd";
 import OtherCategories from "@/components/OtherCategories";
 import { categories, categoriesGenitive, categorySlugs, getCouponsByCategory, type CategorySlug } from "@/lib/data";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -20,10 +22,19 @@ export async function generateMetadata({
   const label = categories[slug as CategorySlug];
   if (!label) return {};
   const list = getCouponsByCategory(slug).map((c) => c.store).join(", ");
+  const pageUrl = `${SITE_URL}/category/${slug}`;
   return {
     title: `Промокоды и купоны: ${label}`,
     description: `Скидки на ${label.toLowerCase()}: промокоды ${list}. Проверенные купоны, срок действия, условия применения — всё в одном месте.`,
-    alternates: { canonical: `/category/${slug}` },
+    alternates: { canonical: pageUrl },
+    openGraph: {
+      title: `Промокоды и купоны: ${label}`,
+      description: `Скидки на ${label.toLowerCase()}: промокоды ${list}. Проверенные купоны — всё в одном месте.`,
+      url: pageUrl,
+      type: "website",
+      locale: "ru_RU",
+      siteName: SITE_NAME,
+    },
   };
 }
 
@@ -58,9 +69,44 @@ export default async function CategoryPage({
 
   const list = getCouponsByCategory(slug);
   const paragraphs = seoText(slug, label);
+  const pageUrl = `${SITE_URL}/category/${slug}`;
+
+  const breadcrumb: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Главная", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Купоны", item: `${SITE_URL}/#coupons` },
+      { "@type": "ListItem", position: 3, name: label, item: pageUrl },
+    ],
+  };
+
+  const listing: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `Промокоды и купоны: ${label}`,
+    numberOfItems: list.length,
+    itemListElement: list.map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Offer",
+        name: `Промокод ${c.code}: ${c.discount} в ${c.store}`,
+        description: c.description,
+        url: c.affiliateUrl,
+        validTo: c.expires,
+        priceCurrency: "RUB",
+        price: 0,
+        seller: { "@type": "Organization", name: c.store },
+      },
+    })),
+  };
 
   return (
     <main>
+      <JsonLd data={breadcrumb} />
+      <JsonLd data={listing} />
+
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
         <nav aria-label="Хлебные крошки" className="text-xs font-semibold text-ink/45">
           <Link href="/" className="hover:text-ink transition-colors">
