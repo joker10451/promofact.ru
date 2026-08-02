@@ -9,13 +9,13 @@ export default async function StoresMarquee() {
     <div className="marquee-pause overflow-hidden bg-yellow py-3 border-y-4 border-ink">
       <div className="flex w-max animate-marquee-fast whitespace-nowrap">
         <span className="font-display text-sm sm:text-base font-bold tracking-wide pr-10">
-          {names}  •
+          {names} •
         </span>
         <span
           className="font-display text-sm sm:text-base font-bold tracking-wide pr-10"
           aria-hidden="true"
         >
-          {names}  •
+          {names} •
         </span>
       </div>
     </div>

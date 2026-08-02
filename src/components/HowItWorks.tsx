@@ -18,7 +18,7 @@ export default function HowItWorks() {
       <div className="mt-10 mx-auto max-w-md">
         <div className="zigzag-both bg-white border border-line pt-5 pb-4 px-7 rotate-[2deg] transition-transform duration-500 hover:rotate-0 shadow-[0_14px_0_rgba(11,16,43,0.08)]">
           <div className="text-center font-display text-lg font-extrabold tracking-wide">
-            ПРОМО<span className="text-red">·</span>ДРОМ
+            ПРОМО<span className="text-red">·</span>ФАКТ
           </div>
           <div className="mt-1 text-center text-[10px] font-bold uppercase tracking-widest text-ink/40">
             Кассовый чек №001

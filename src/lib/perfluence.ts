@@ -4,11 +4,11 @@ import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 
 const REVALIDATE_SECONDS = 30 * 60; // 1800 — ISR
 
-const API_BASE = process.env.PERFLUENCE_API_URL ?? "https://dash.perfluence.net/blogger/promocode-api";
-const API_KEY = process.env.PERFLUENCE_API_KEY ?? "";
+const WIDGET_URL = process.env.PERFLUENCE_WIDGET_URL ?? "";
+const RESULTS_URL = process.env.PERFLUENCE_RESULTS_URL ?? "";
 
 export function isPerfluenceConfigured(): boolean {
-  return Boolean(API_BASE && API_KEY);
+  return Boolean(WIDGET_URL);
 }
 
 /* ---------- примитивы ---------- */
@@ -33,8 +33,18 @@ function bool(v: unknown): boolean {
 function isoDate(v: unknown): string | null {
   const s = str(v);
   if (!s) return null;
+  // widget-json отдаёт "31.08.2026"
+  const ru = s.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+  if (ru) return `${ru[3]}-${ru[2]}-${ru[1]}`;
   const m = s.match(/^\d{4}-\d{2}-\d{2}/);
   return m ? m[0] : s.slice(0, 10);
+}
+
+function stripHtml(v: unknown): string {
+  return str(v)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function dateTs(date: string | null): number {
@@ -42,6 +52,34 @@ function dateTs(date: string | null): number {
 }
 
 /* ---------- трансформация ответа API → Coupon[] ---------- */
+
+type Rec = Record<string, unknown>;
+
+function asRec(v: unknown): Rec {
+  return (v ?? {}) as Rec;
+}
+
+function regionStr(v: unknown): string | null {
+  if (Array.isArray(v)) return v.map((x) => String(x)).join(", ") || null;
+  const s = str(v).trim();
+  return s || null;
+}
+
+/**
+ * Собирает пары (промокод, группа) из ответа.
+ * widget-json: data[].groups[].promocodes; legacy /json: data[].promocodes.
+ */
+function collectPromos(item: Rec): { promo: Rec; group: Rec }[] {
+  const out: { promo: Rec; group: Rec }[] = [];
+  const groups = Array.isArray(item.groups) ? (item.groups as Rec[]) : [item];
+  for (const group of groups) {
+    const promos = Array.isArray(group.promocodes)
+      ? (group.promocodes as Rec[])
+      : [];
+    for (const promo of promos) out.push({ promo, group });
+  }
+  return out;
+}
 
 export function parsePayload(payloadJson: string): Coupon[] {
   const body: { data?: unknown } = JSON.parse(payloadJson);
@@ -52,11 +90,8 @@ export function parsePayload(payloadJson: string): Coupon[] {
   let fallbackPromoId = 0;
 
   for (const raw of items as unknown[]) {
-    const item = (raw ?? {}) as Record<string, unknown>;
-    const project = (item.project ?? item.shop ?? item) as Record<string, unknown>;
-    const promocodes = Array.isArray(item.promocodes)
-      ? (item.promocodes as Record<string, unknown>[])
-      : [];
+    const item = asRec(raw);
+    const project = asRec(item.project ?? item.shop ?? item);
 
     const name = str(project.name || project.store_name).trim() || "Магазин";
     let slug = translit(name) || "magazin";
@@ -67,27 +102,9 @@ export function parsePayload(payloadJson: string): Coupon[] {
     }
     seenSlugs.add(slug);
 
-    const categoryName = str(project.category_name || project.category).trim() || "Другое";
-    const landing = item.landing as Record<string, unknown> | undefined;
-    const links = Array.isArray(item.links_for_subscribers)
-      ? (item.links_for_subscribers as Record<string, unknown>[])
-      : [];
-
-    const primaryLink = str(links[0]?.link);
-    const landingLink = str(landing?.link);
+    const categoryName =
+      str(project.category_name || project.category).trim() || "Другое";
     const site = str(project.site || project.url);
-
-    const affiliate: Affiliate = {
-      link: primaryLink || landingLink || site,
-      landingLink: landingLink || primaryLink || site,
-      ordMarker: str(landing?.ord_marker),
-      ordText: str(landing?.ord_custom_text),
-    };
-
-    const extraLinks = links
-      .slice(1)
-      .map((l) => ({ title: str(l.title) || "Ссылка", link: str(l.link) }))
-      .filter((l) => l.link);
 
     const store: Store = {
       id: num(project.id ?? project.project_id),
@@ -96,31 +113,62 @@ export function parsePayload(payloadJson: string): Coupon[] {
       logo: str(project.logo || project.logo_url) || null,
       category: categoryName,
       categorySlug: translit(categoryName),
-      about: str(project.product_info) || null,
-      conditions: str(project.subscribers_condition) || null,
+      about: stripHtml(project.product_info) || null,
+      conditions: stripHtml(project.subscribers_condition) || null,
       site,
       activeBloggers: num(project.activeBloggers ?? project.active_bloggers),
     };
 
-    promocodes.forEach((p) => {
-      const promoId = num(p.id);
+    for (const { promo: p, group } of collectPromos(item)) {
+      const links = Array.isArray(group.links_for_subscribers)
+        ? (group.links_for_subscribers as Rec[])
+        : [];
+      const landingArr = Array.isArray(group.landing)
+        ? (group.landing as Rec[])
+        : [];
+      const landing = asRec(landingArr[0] ?? group.landing);
+
+      const primaryLink = str(links[0]?.link);
+      const landingLink = str(landing?.link);
+      const ordMarker = str(p.ord_marker || landing?.ord_marker);
+      const ordText = str(p.ord_custom_text || landing?.ord_custom_text);
+
+      const affiliate: Affiliate = {
+        link: primaryLink || landingLink || site,
+        landingLink: landingLink || primaryLink || site,
+        ordMarker,
+        ordText,
+      };
+
+      const extraLinks = links
+        .slice(1)
+        .map((l) => ({ title: str(l.title) || "Ссылка", link: str(l.link) }))
+        .filter((l) => l.link);
+
+      const promoId = num(p.id ?? p.post_id ?? p.bonus_id);
       fallbackPromoId += 1;
       const promocode: Promocode = {
         id: promoId || fallbackPromoId,
         code: str(p.code).trim(),
-        bonusName: str(p.name) || null,
-        terms: str(p.promo_terms || p.terms) || null,
+        bonusName: str(p.name || p.comment).trim() || null,
+        terms: stripHtml(p.promo_terms || p.terms) || null,
         expires: isoDate(p.date || p.expires),
         isHit: bool(p.is_hit),
         isUniversal: bool(p.is_universal),
         isFirstOrderOnly: !bool(p.repeat_order),
-        region: str(p.region_promo || p.region) || null,
+        region: regionStr(p.region_promo ?? p.region),
         isBarcode: bool(p.is_barcode),
         barcodeImage: str(p.image || p.barcode_image) || null,
         group: str(p.group) || null,
       };
-      coupons.push({ id: promocode.id, promocode, store, affiliate, extraLinks });
-    });
+      coupons.push({
+        id: promocode.id,
+        promocode,
+        store,
+        affiliate,
+        extraLinks,
+      });
+    }
   }
 
   return coupons;
@@ -131,24 +179,67 @@ export function parsePayload(payloadJson: string): Coupon[] {
 let cache: Coupon[] | null = null;
 let cacheFailed = false;
 
+function topLevelCount(payload: string): number {
+  try {
+    const body = JSON.parse(payload) as { data?: unknown };
+    return Array.isArray(body.data) ? body.data.length : 0;
+  } catch {
+    return -1; // невалидный JSON
+  }
+}
+
+async function devMockFallback(reason: string): Promise<Coupon[]> {
+  if (process.env.NODE_ENV === "production") return [];
+  console.warn(`[perfluence] ${reason} — отдаю DEV-мок`);
+  return (await import("@/lib/mockCoupons")).DEV_MOCK_COUPONS;
+}
+
 async function fetchData(): Promise<Coupon[]> {
-  if (!isPerfluenceConfigured()) return [];
+  if (!isPerfluenceConfigured())
+    return devMockFallback("PERFLUENCE_WIDGET_URL не задан");
 
   try {
-    const url = `${API_BASE}/json?key=${encodeURIComponent(API_KEY)}`;
-    const res = await fetch(url, {
+    const res = await fetch(WIDGET_URL, {
       headers: { Accept: "application/json" },
       next: { revalidate: REVALIDATE_SECONDS },
     });
-    if (!res.ok) throw new Error(`Perfluence API: ${res.status} ${res.statusText}`);
-    cache = parsePayload(await res.text());
+    const text = await res.text();
+    if (!res.ok)
+      throw new Error(`Perfluence widget-json: ${res.status} ${res.statusText}`);
+
+    const top = topLevelCount(text);
+    const coupons = parsePayload(text);
+    console.log(
+      "[perfluence] status:",
+      res.status,
+      "| верхний уровень элементов:",
+      top,
+      "| купонов после трансформации:",
+      coupons.length,
+    );
+
+    if (top > 0 && coupons.length === 0) {
+      console.log(
+        "[perfluence] первый элемент ответа:",
+        JSON.stringify(
+          (JSON.parse(text) as { data?: unknown[] }).data?.[0],
+        ).slice(0, 1200),
+      );
+      return devMockFallback("элементы есть, но трансформация дала 0");
+    }
+
+    if (coupons.length === 0)
+      return devMockFallback("API вернул пустой список купонов");
+
+    cache = coupons;
     cacheFailed = false;
+    console.log(`[perfluence] реальные данные: ${coupons.length}`);
     return cache;
   } catch (e) {
     console.error("[perfluence] fetch failed, отдаём кэш:", e);
     cacheFailed = true;
     if (cache) return cache;
-    return [];
+    return devMockFallback("запрос упал: " + (e as Error).message);
   }
 }
 
@@ -246,4 +337,113 @@ export async function getBestCoupons(): Promise<Coupon[]> {
     if (!cur || byScore(c, cur) < 0) best.set(c.store.slug, c);
   }
   return [...best.values()].sort(byScore);
+}
+
+/* ---------- статистика заказов (/results) ---------- */
+
+export interface Result {
+  datetime: string; // "YYYY-MM-DD HH:MM:SS"
+  fee: number;
+  stackedCount: number;
+  promocode: string;
+  comment: string | null;
+  project: { id: number; name: string; logo: string | null };
+}
+
+const RESULTS_REVALIDATE = 5 * 60; // 300 — ISR
+
+function feeNum(v: unknown): number {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  const m = String(v).match(/\d+(?:[.,]\d+)?/);
+  if (!m) return 0;
+  return Number(m[0].replace(",", "."));
+}
+
+export function parseResults(payloadJson: string): Result[] {
+  const body: { data?: unknown } = JSON.parse(payloadJson);
+  const items = Array.isArray(body.data) ? body.data : [];
+
+  const results: Result[] = [];
+  for (const raw of items as unknown[]) {
+    const item = (raw ?? {}) as Record<string, unknown>;
+    const project = (item.project ?? {}) as Record<string, unknown>;
+    const datetime = str(item.datetime);
+    const promo = str(item.promocode);
+    if (!datetime || !promo) continue;
+
+    results.push({
+      datetime,
+      fee: feeNum(item.fee),
+      stackedCount: num(item.stacked_count),
+      promocode: promo,
+      comment: str(item.comment) || null,
+      project: {
+        id: num(project.id ?? project.project_id),
+        name: str(project.name).trim() || "Магазин",
+        logo: str(project.logo) || null,
+      },
+    });
+  }
+
+  return results.sort((a, b) => b.datetime.localeCompare(a.datetime));
+}
+
+async function devMockResultsFallback(reason: string): Promise<Result[]> {
+  if (process.env.NODE_ENV === "production") return [];
+  console.warn(`[perfluence/results] ${reason} — отдаю DEV-мок`);
+  return (await import("@/lib/mockCoupons")).DEV_MOCK_RESULTS;
+}
+
+function isResultsConfigured(): boolean {
+  return Boolean(RESULTS_URL);
+}
+
+export async function fetchResults(): Promise<Result[]> {
+  if (!isResultsConfigured())
+    return devMockResultsFallback("PERFLUENCE_RESULTS_URL не задан");
+
+  try {
+    const res = await fetch(RESULTS_URL, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: RESULTS_REVALIDATE },
+    });
+    const text = await res.text();
+    if (!res.ok)
+      throw new Error(`Perfluence API /results: ${res.status} ${res.statusText}`);
+
+    const results = parseResults(text);
+    console.log(
+      "[perfluence/results] status:",
+      res.status,
+      "| результатов:",
+      results.length,
+    );
+
+    if (results.length === 0)
+      return devMockResultsFallback("API вернул пустой список заказов");
+
+    return results;
+  } catch (e) {
+    console.error("[perfluence/results] fetch failed:", e);
+    return devMockResultsFallback("запрос упал: " + (e as Error).message);
+  }
+}
+
+/* ---------- статистика сработавших промокодов (доказательства) ---------- */
+
+export interface UsesStats {
+  usesByCode: Map<string, number>;
+  usesByStore: Map<number, number>;
+}
+
+export async function getUsesStats(): Promise<UsesStats> {
+  const results = await fetchResults();
+  const usesByCode = new Map<string, number>();
+  const usesByStore = new Map<number, number>();
+  for (const r of results) {
+    const n = r.stackedCount > 0 ? r.stackedCount : 1;
+    usesByCode.set(r.promocode, (usesByCode.get(r.promocode) ?? 0) + n);
+    usesByStore.set(r.project.id, (usesByStore.get(r.project.id) ?? 0) + n);
+  }
+  return { usesByCode, usesByStore };
 }

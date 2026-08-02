@@ -6,5 +6,8 @@ export function daysLeft(iso: string | null): number {
 }
 
 export function formatExpires(iso: string): string {
-  return new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+  return new Date(iso).toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+  });
 }

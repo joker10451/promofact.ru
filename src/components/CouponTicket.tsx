@@ -4,7 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { daysLeft, formatExpires } from "@/lib/format";
 import type { Coupon } from "@/lib/types";
 
-export default function CouponTicket({ coupon }: { coupon: Coupon }) {
+export default function CouponTicket({
+  coupon,
+  proofCount = 0,
+  storeProofCount = 0,
+}: {
+  coupon: Coupon;
+  proofCount?: number;
+  storeProofCount?: number;
+}) {
   const { promocode, store, affiliate } = coupon;
 
   const [copied, setCopied] = useState(false);
@@ -36,13 +44,26 @@ export default function CouponTicket({ coupon }: { coupon: Coupon }) {
   }, []);
 
   const badges: { key: string; label: string; cls: string }[] = [];
-  if (promocode.isHit) badges.push({ key: "hit", label: "🔥 хит", cls: "bg-red text-white" });
+  if (promocode.isHit)
+    badges.push({ key: "hit", label: "🔥 хит", cls: "bg-red text-white" });
   if (promocode.isFirstOrderOnly)
-    badges.push({ key: "first", label: "первый заказ", cls: "bg-mint/15 border border-mint/40 text-ink" });
-  if (promocode.isUniversal)
-    badges.push({ key: "univ", label: "общий", cls: "bg-paper border border-line text-ink/70" });
+    badges.push({
+      key: "first",
+      label: "первый заказ",
+      cls: "bg-mint/15 border border-mint/40 text-ink",
+    });
+  else if (promocode.isUniversal)
+    badges.push({
+      key: "all",
+      label: "для всех",
+      cls: "bg-ink text-white",
+    });
   if (promocode.region)
-    badges.push({ key: "region", label: promocode.region, cls: "bg-yellow text-ink" });
+    badges.push({
+      key: "region",
+      label: promocode.region,
+      cls: "bg-yellow text-ink",
+    });
 
   return (
     <article className="group relative flex flex-col bg-white border border-line rounded-2xl overflow-hidden transition-transform duration-300 hover:-translate-y-1.5 shadow-[0_6px_0_rgba(11,16,43,0.08)] hover:shadow-[0_10px_0_rgba(11,16,43,0.1)]">
@@ -69,18 +90,43 @@ export default function CouponTicket({ coupon }: { coupon: Coupon }) {
         </div>
       </div>
 
+      {proofCount > 0 ? (
+        <div className="px-5 pt-3">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-2.5 py-1 text-[10px] font-bold text-ink/80">
+            <span aria-hidden="true">✓</span>
+            оформлено {proofCount}{" "}
+            {proofCount === 1 ? "раз" : proofCount >= 2 && proofCount <= 4 ? "раза" : "раз"} за последнее время
+          </span>
+        </div>
+      ) : storeProofCount > 0 ? (
+        <div className="px-5 pt-3">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-2.5 py-1 text-[10px] font-bold text-ink/80">
+            <span aria-hidden="true">✓</span>
+            по промокодам {store.name} оформлено {storeProofCount}{" "}
+            {storeProofCount === 1 ? "заказ" : storeProofCount >= 2 && storeProofCount <= 4 ? "заказа" : "заказов"}
+          </span>
+        </div>
+      ) : null}
+
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-1.5 px-5 pt-3">
           {badges.map((b) => (
-            <span key={b.key} className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${b.cls}`}>
+            <span
+              key={b.key}
+              className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${b.cls}`}
+            >
               {b.label}
             </span>
           ))}
         </div>
       )}
 
-      <p className={`px-5 pt-3 text-xs font-semibold ${urgent ? "text-red" : "text-mint"}`}>
-        {promocode.expires ? `Действует до ${formatExpires(promocode.expires)}` : "Без срока действия"}
+      <p
+        className={`px-5 pt-3 text-xs font-semibold ${urgent ? "text-red" : "text-mint"}`}
+      >
+        {promocode.expires
+          ? `Действует до ${formatExpires(promocode.expires)}`
+          : "Без срока действия"}
       </p>
 
       <div className="dashed-line relative my-5 mx-1">
@@ -116,7 +162,9 @@ export default function CouponTicket({ coupon }: { coupon: Coupon }) {
         )}
 
         {promocode.terms && (
-          <p className="mt-2 text-[11px] leading-snug text-ink/45">{promocode.terms}</p>
+          <p className="mt-2 text-[11px] leading-snug text-ink/45">
+            {promocode.terms}
+          </p>
         )}
 
         <div className="mt-3 space-y-2">
@@ -129,7 +177,9 @@ export default function CouponTicket({ coupon }: { coupon: Coupon }) {
             В магазин
           </a>
           {affiliate.ordText && (
-            <p className="text-center text-[10px] leading-snug text-ink/40">{affiliate.ordText}</p>
+            <p className="text-center text-[10px] leading-snug text-ink/40">
+              {affiliate.ordText}
+            </p>
           )}
         </div>
 
@@ -157,7 +207,10 @@ export default function CouponTicket({ coupon }: { coupon: Coupon }) {
           role="dialog"
           aria-modal="true"
         >
-          <div className="rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <img
               src={promocode.barcodeImage}
               alt={`Штрихкод ${store.name}`}

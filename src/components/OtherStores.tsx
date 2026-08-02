@@ -1,14 +1,28 @@
 import Link from "next/link";
 import { getStores } from "@/lib/perfluence";
 
-export default async function OtherStores({ current }: { current?: string }) {
+export default async function OtherStores({
+  current,
+  category,
+}: {
+  current?: string;
+  category?: string;
+}) {
   const stores = (await getStores()).filter((s) => s.slug !== current);
+  const sameCategory = category
+    ? stores.filter((s) => s.categorySlug === category).slice(0, 8)
+    : [];
+  const list = sameCategory.length > 0 ? sameCategory : stores.slice(0, 8);
+  const title =
+    sameCategory.length > 0 && category
+      ? `Другие магазины в категории ${stores.find((s) => s.categorySlug === category)?.category ?? ""}`
+      : "Промокоды в других магазинах";
 
   return (
     <nav aria-label="Другие магазины" className="mt-12">
-      <div className="font-display text-lg font-extrabold">Промокоды в других магазинах</div>
+      <div className="font-display text-lg font-extrabold">{title.trim()}</div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {stores.map((store) => (
+        {list.map((store) => (
           <Link
             key={store.slug}
             href={`/store/${store.slug}`}
@@ -19,7 +33,8 @@ export default async function OtherStores({ current }: { current?: string }) {
                 {store.name}
               </div>
               <div className="text-xs text-ink/50">
-                {store.coupons.length} {store.coupons.length === 1 ? "промокод" : "промокода"}
+                {store.coupons.length}{" "}
+                {store.coupons.length === 1 ? "промокод" : "промокода"}
               </div>
             </div>
             <span

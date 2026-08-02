@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { getCategories } from "@/lib/perfluence";
 
-export default async function OtherCategories({ current }: { current?: string }) {
+export default async function OtherCategories({
+  current,
+}: {
+  current?: string;
+}) {
   const categories = await getCategories();
   const others = categories.filter((c) => c.slug !== current);
   if (others.length === 0) return null;
 
   return (
     <nav aria-label="Другие категории" className="mt-12">
-      <div className="font-display text-lg font-extrabold">Другие категории</div>
+      <div className="font-display text-lg font-extrabold">
+        Популярные категории
+      </div>
       <div className="mt-4 flex flex-wrap gap-2.5">
         {others.map((cat) => (
           <Link
