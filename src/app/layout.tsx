@@ -24,6 +24,15 @@ export const metadata: Metadata = {
   },
   description:
     "Рабочие промокоды и купоны на скидку: Золотое Яблоко, Lamoda, DNS, Самокат и ещё 900+ магазинов. Проверяем каждый код каждый день.",
+  verification: {
+    yandex: process.env.YANDEX_VERIFICATION || undefined,
+    google: process.env.GOOGLE_VERIFICATION || undefined,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
   openGraph: {
     type: "website",
     locale: "ru_RU",
