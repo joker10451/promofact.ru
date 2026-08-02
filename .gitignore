@@ -40,7 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local artifacts
 dev.log
 *.log
-.vercel
-.env*
+
+# remotion video project (separate, 875 MB) — not part of the site repo
+coupon-video/
