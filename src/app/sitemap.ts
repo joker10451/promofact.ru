@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getCategories, getCoupons, getStores } from "@/lib/perfluence";
+import { ARTICLES } from "@/lib/articles";
 import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -34,6 +35,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "daily",
     priority: 0.8,
   }));
+  const tipsMap: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE_URL}/sovety`,
+      lastModified: today,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    ...ARTICLES.map((a) => ({
+      url: `${SITE_URL}/sovety/${a.slug}`,
+      lastModified: today,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
+  ];
 
-  return [...home, ...categoryMap, ...storeMap];
+  return [...home, ...categoryMap, ...storeMap, ...tipsMap];
 }

@@ -36,7 +36,13 @@ export default async function Footer() {
                 </li>
               ))}
             </ul>
-          </nav>
+              <Link
+                href="/sovety"
+                className="mt-4 inline-block font-semibold text-white/70 hover:text-white transition-colors"
+              >
+                Советы по экономии →
+              </Link>
+            </nav>
         )}
 
         {stores.length > 0 && (
