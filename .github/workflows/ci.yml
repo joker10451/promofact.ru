@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # В CI нет ключей Perfluence — Next.js использует DEV-моки (см. perfluence.ts).
+      # Этот шаг гарантирует, что код компилируется и все страницы (вкл. SSG
+      # /store, /category) успешно пререндерятся на мок-данных.
+      - name: Build
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
+
+      # Примечание: `npm run build:check` (fail, если 0 SEO-страниц) НЕ запускаем
+      # в CI — он валиден только в прод-окружении Vercel, где задан
+      # PERFLUENCE_WIDGET_URL. Там он уже срабатывает как прод-гейт.

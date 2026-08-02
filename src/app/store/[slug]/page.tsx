@@ -133,7 +133,7 @@ export default async function StorePage({
     <main>
       <JsonLd data={breadcrumb} />
       {couponsJsonLd.map((c) => (
-        <JsonLd key={c.code as string} data={c} />
+        <JsonLd key={(c.discountCode as string) ?? JSON.stringify(c)} data={c} />
       ))}
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
