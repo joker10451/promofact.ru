@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: `%s — ${SITE_NAME}`,
   },
   description:
-    "Рабочие промокоды и купоны на скидку: Золотое Яблоко, Lamoda, DNS, Самокат и ещё 900+ магазинов. Проверяем каждый код каждый день.",
+    "Рабочие промокоды и купоны на скидку: Самокат, РИВ ГОШ, SOKOLOV, Отелло и сотни других магазинов. Проверяем каждый код каждый день.",
   verification: {
     yandex: process.env.YANDEX_VERIFICATION || undefined,
     google: process.env.GOOGLE_VERIFICATION || undefined,
@@ -40,13 +40,13 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: `${SITE_TAGLINE} — ${SITE_NAME}`,
     description:
-      "Рабочие промокоды и купоны на скидку: Золотое Яблоко, Lamoda, DNS, Самокат и ещё 900+ магазинов.",
+      "Рабочие промокоды и купоны на скидку: Самокат, РИВ ГОШ, SOKOLOV, Отелло и сотни других магазинов.",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: `${SITE_TAGLINE} — ${SITE_NAME}`,
     description:
-      "Рабочие промокоды и купоны на скидку: Золотое Яблоко, Lamoda, DNS, Самокат и ещё 900+ магазинов.",
+      "Рабочие промокоды и купоны на скидку: Самокат, РИВ ГОШ, SOKOLOV, Отелло и сотни других магазинов.",
   },
 };
 
