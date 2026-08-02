@@ -1,7 +1,8 @@
-import { getStores } from "@/lib/data";
+import { getStores } from "@/lib/perfluence";
 
-export default function StoresMarquee() {
-  const stores = getStores();
+export default async function StoresMarquee() {
+  const stores = await getStores();
+  if (stores.length === 0) return null;
   const names = stores.map((s) => s.name).join("  •  ");
 
   return (
@@ -10,7 +11,10 @@ export default function StoresMarquee() {
         <span className="font-display text-sm sm:text-base font-bold tracking-wide pr-10">
           {names}  •
         </span>
-        <span className="font-display text-sm sm:text-base font-bold tracking-wide pr-10" aria-hidden="true">
+        <span
+          className="font-display text-sm sm:text-base font-bold tracking-wide pr-10"
+          aria-hidden="true"
+        >
           {names}  •
         </span>
       </div>

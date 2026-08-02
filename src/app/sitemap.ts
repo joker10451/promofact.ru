@@ -1,11 +1,19 @@
 import type { MetadataRoute } from "next";
-import { categorySlugs, coupons, getStores } from "@/lib/data";
+import { getCategories, getCoupons, getStores } from "@/lib/perfluence";
 import { SITE_URL } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [coupons, categories, stores] = await Promise.all([
+    getCoupons(),
+    getCategories(),
+    getStores(),
+  ]);
   const today = new Date();
   const lastModified = coupons.reduce(
-    (max, c) => (new Date(c.expires) > max ? new Date(c.expires) : max),
+    (max, c) => {
+      const t = new Date(c.promocode.expires ?? "");
+      return Number.isNaN(t.getTime()) ? max : t > max ? t : max;
+    },
     today
   );
 
@@ -17,18 +25,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
   ];
-  const categories: MetadataRoute.Sitemap = categorySlugs.map((slug) => ({
-    url: `${SITE_URL}/category/${slug}`,
+  const categoryMap: MetadataRoute.Sitemap = categories.map((cat) => ({
+    url: `${SITE_URL}/category/${cat.slug}`,
     lastModified: today,
     changeFrequency: "daily",
     priority: 0.8,
   }));
-  const stores: MetadataRoute.Sitemap = getStores().map((store) => ({
+  const storeMap: MetadataRoute.Sitemap = stores.map((store) => ({
     url: `${SITE_URL}/store/${store.slug}`,
     lastModified,
     changeFrequency: "daily",
     priority: 0.9,
   }));
 
-  return [...home, ...categories, ...stores];
+  return [...home, ...categoryMap, ...storeMap];
 }

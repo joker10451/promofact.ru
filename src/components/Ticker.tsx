@@ -1,7 +1,12 @@
-import { coupons } from "@/lib/data";
+import { getBestCoupons } from "@/lib/perfluence";
 
-export default function Ticker() {
-  const items = coupons.map((c) => `${c.discount} ${c.store}`).join(" · ");
+export default async function Ticker() {
+  const coupons = await getBestCoupons();
+  if (coupons.length === 0) return null;
+  const items = coupons
+    .slice(0, 12)
+    .map((c) => `${c.promocode.bonusName || c.promocode.code} · ${c.store.name}`)
+    .join(" · ");
 
   return (
     <div className="marquee-pause overflow-hidden bg-ink text-white py-2.5 border-b-4 border-yellow">

@@ -1,13 +1,10 @@
 "use client";
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import CouponTicket from "@/components/CouponTicket";
-import { categories, categorySlugs, type CategorySlug, type Coupon } from "@/lib/data";
-
-type Filter = "all" | CategorySlug;
+import type { Coupon } from "@/lib/types";
 
 export default function CouponGrid({ coupons }: { coupons: Coupon[] }) {
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -21,20 +18,40 @@ export default function CouponGrid({ coupons }: { coupons: Coupon[] }) {
     return () => window.removeEventListener("promo:search", handler);
   }, []);
 
+  // Категории собираем из самих купонов (из API), сортируем по алфавиту (ru)
+  const cats = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of coupons) map.set(c.store.categorySlug, c.store.category);
+    return [...map.entries()]
+      .map(([slug, name]) => ({ slug, name }))
+      .sort((a, b) => a.name.localeCompare(b.name, "ru"));
+  }, [coupons]);
+
+  const countByCat = (slug: string) =>
+    coupons.filter((c) => c.store.categorySlug === slug).length;
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return coupons.filter((c) => {
-      if (filter !== "all" && c.category !== filter) return false;
+      if (filter !== "all" && c.store.categorySlug !== filter) return false;
       if (!q) return true;
       return (
-        c.store.toLowerCase().includes(q) ||
-        c.code.toLowerCase().includes(q) ||
-        c.description.toLowerCase().includes(q)
+        c.store.name.toLowerCase().includes(q) ||
+        c.promocode.code.toLowerCase().includes(q) ||
+        (c.promocode.bonusName ?? "").toLowerCase().includes(q)
       );
     });
   }, [coupons, filter, query]);
 
-  return (    <section id="coupons" className="scroll-mt-24">
+  const chipCls = (active: boolean) =>
+    `rounded-full px-4 py-2 text-sm font-bold transition-all ${
+      active
+        ? "bg-ink text-white shadow-offset"
+        : "bg-white border border-line text-ink/70 hover:border-ink/30"
+    }`;
+
+  return (
+    <section id="coupons" className="scroll-mt-24">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
         <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
           Купоны на сегодня
@@ -50,29 +67,12 @@ export default function CouponGrid({ coupons }: { coupons: Coupon[] }) {
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setFilter("all")}
-          className={`rounded-full px-4 py-2 text-sm font-bold transition-all ${
-            filter === "all"
-              ? "bg-ink text-white shadow-offset"
-              : "bg-white border border-line text-ink/70 hover:border-ink/30"
-          }`}
-        >
+        <button type="button" onClick={() => setFilter("all")} className={chipCls(filter === "all")}>
           Все · {coupons.length}
         </button>
-        {categorySlugs.map((slug) => (
-          <button
-            key={slug}
-            type="button"
-            onClick={() => setFilter(slug)}
-            className={`rounded-full px-4 py-2 text-sm font-bold transition-all ${
-              filter === slug
-                ? "bg-ink text-white shadow-offset"
-                : "bg-white border border-line text-ink/70 hover:border-ink/30"
-            }`}
-          >
-            {categories[slug]} · {coupons.filter((c) => c.category === slug).length}
+        {cats.map(({ slug, name }) => (
+          <button key={slug} type="button" onClick={() => setFilter(slug)} className={chipCls(filter === slug)}>
+            {name} · {countByCat(slug)}
           </button>
         ))}
       </div>
@@ -90,10 +90,7 @@ export default function CouponGrid({ coupons }: { coupons: Coupon[] }) {
           </p>
           <button
             type="button"
-            onClick={() => {
-              setQuery("");
-              setFilter("all");
-            }}
+            onClick={() => { setQuery(""); setFilter("all"); }}
             className="mt-5 rounded-full bg-yellow text-ink px-5 py-2.5 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition-all"
           >
             Сбросить фильтры

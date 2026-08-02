@@ -11,8 +11,10 @@ import SeoArticle from "@/components/SeoArticle";
 import StoresMarquee from "@/components/StoresMarquee";
 import Subscribe from "@/components/Subscribe";
 import Ticker from "@/components/Ticker";
-import { coupons } from "@/lib/data";
+import { getBestCoupons, getCoupons } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+
+export const revalidate = 1800;
 
 const FAQ_JSONLD = [
   {
@@ -57,7 +59,10 @@ const FAQ_JSONLD = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const [coupons, best] = await Promise.all([getCoupons(), getBestCoupons()]);
+  const featured = best[0];
+
   return (
     <>
       <JsonLd
@@ -85,7 +90,7 @@ export default function Home() {
       <Ticker />
       <Header />
       <main>
-        <Hero />
+        <Hero featured={featured} />
         <StoresMarquee />
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
           <Reveal>

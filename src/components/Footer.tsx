@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { categories, categorySlugs, getStores } from "@/lib/data";
+import { getCategories, getStores } from "@/lib/perfluence";
 import { SITE_NAME } from "@/lib/site";
 
-export default function Footer() {
-  const stores = getStores().slice(0, 12);
+export default async function Footer() {
+  const categories = await getCategories();
+  const stores = (await getStores()).slice(0, 12);
 
   return (
     <footer className="bg-ink text-white">
@@ -13,40 +14,44 @@ export default function Footer() {
             ПРОМО<span className="text-red">·</span>ДРОМ
           </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/55">
-            Проверенные промокоды и купоны на скидку от 900+ магазинов.
+            Проверенные промокоды и купоны на скидку от магазинов-партнёров.
             Обновляем каждый день, проверяем каждый код.
           </p>
         </div>
 
-        <nav aria-label="Категории">
-          <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
-            Категории
-          </div>
-          <ul className="mt-4 space-y-2.5 text-sm text-white/70">
-            {categorySlugs.map((slug) => (
-              <li key={slug}>
-                <Link href={`/category/${slug}`} className="hover:text-white transition-colors">
-                  {categories[slug]}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        {categories.length > 0 && (
+          <nav aria-label="Категории">
+            <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
+              Категории
+            </div>
+            <ul className="mt-4 space-y-2.5 text-sm text-white/70">
+              {categories.map((cat) => (
+                <li key={cat.slug}>
+                  <Link href={`/category/${cat.slug}`} className="hover:text-white transition-colors">
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
 
-        <nav aria-label="Магазины">
-          <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
-            Магазины
-          </div>
-          <ul className="mt-4 space-y-2.5 text-sm text-white/70">
-            {stores.map((store) => (
-              <li key={store.slug}>
-                <Link href={`/store/${store.slug}`} className="hover:text-white transition-colors">
-                  {store.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        {stores.length > 0 && (
+          <nav aria-label="Магазины">
+            <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
+              Магазины
+            </div>
+            <ul className="mt-4 space-y-2.5 text-sm text-white/70">
+              {stores.map((store) => (
+                <li key={store.slug}>
+                  <Link href={`/store/${store.slug}`} className="hover:text-white transition-colors">
+                    {store.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
 
         <div>
           <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">

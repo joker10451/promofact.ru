@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { getStores } from "@/lib/data";
+import { getStores } from "@/lib/perfluence";
 
-export default function OtherStores({ current }: { current?: string }) {
-  const stores = getStores().filter((s) => s.slug !== current);
+export default async function OtherStores({ current }: { current?: string }) {
+  const stores = (await getStores()).filter((s) => s.slug !== current);
 
   return (
     <nav aria-label="Другие магазины" className="mt-12">
@@ -22,7 +22,10 @@ export default function OtherStores({ current }: { current?: string }) {
                 {store.coupons.length} {store.coupons.length === 1 ? "промокод" : "промокода"}
               </div>
             </div>
-            <span className="shrink-0 font-display text-red transition-transform group-hover:translate-x-1" aria-hidden="true">
+            <span
+              className="shrink-0 font-display text-red transition-transform group-hover:translate-x-1"
+              aria-hidden="true"
+            >
               →
             </span>
           </Link>

@@ -4,13 +4,15 @@ import { notFound } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
 import OtherCategories from "@/components/OtherCategories";
-import { categories, categoriesGenitive, categorySlugs, getCouponsByCategory, type CategorySlug } from "@/lib/data";
+import { getCategories, getCoupons } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const dynamicParams = false;
+export const dynamicParams = true;
+export const revalidate = 1800;
 
-export function generateStaticParams() {
-  return categorySlugs.map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  const categories = await getCategories();
+  return categories.map((cat) => ({ slug: cat.slug }));
 }
 
 export async function generateMetadata({
@@ -19,17 +21,17 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const label = categories[slug as CategorySlug];
-  if (!label) return {};
-  const list = getCouponsByCategory(slug).map((c) => c.store).join(", ");
+  const categories = await getCategories();
+  const cat = categories.find((c) => c.slug === slug);
+  if (!cat) return {};
   const pageUrl = `${SITE_URL}/category/${slug}`;
   return {
-    title: `Промокоды и купоны: ${label}`,
-    description: `Скидки на ${label.toLowerCase()}: промокоды ${list}. Проверенные купоны, срок действия, условия применения — всё в одном месте.`,
+    title: `Промокоды и купоны: ${cat.name}`,
+    description: `Скидки на ${cat.name.toLowerCase()}: проверенные промокоды магазинов-партнёров. Срок действия, условия применения — всё в одном месте.`,
     alternates: { canonical: pageUrl },
     openGraph: {
-      title: `Промокоды и купоны: ${label}`,
-      description: `Скидки на ${label.toLowerCase()}: промокоды ${list}. Проверенные купоны — всё в одном месте.`,
+      title: `Промокоды и купоны: ${cat.name}`,
+      description: `Скидки на ${cat.name.toLowerCase()}: проверенные промокоды. Обновляем ежедневно.`,
       url: pageUrl,
       type: "website",
       locale: "ru_RU",
@@ -38,23 +40,12 @@ export async function generateMetadata({
   };
 }
 
-function seoText(slug: string, label: string): string[] {
-  const stores = getCouponsByCategory(slug).map((c) => c.store);
-  const storeList = stores.join(", ");
-  const top = stores[0] ?? "";
-  const words: Record<CategorySlug, string> = {
-    beauty: "косметика, парфюмерия и уход",
-    fashion: "одежда, обувь и аксессуары",
-    electro: "смартфоны, ноутбуки и техника для дома",
-    food: "продукты и доставка",
-    home: "мебель и товары для дома",
-    travel: "авиабилеты и путешествия",
-  };
-
+function seoText(catName: string, storeList: string): string[] {
+  const top = storeList.split(", ")[0] ?? "";
   return [
-    `Подборка рабочих промокодов для категории «${label}»: ${words[slug as CategorySlug] ?? "товары"}. Собрали ${stores.length > 0 ? "актуальные купоны" : "акции"} от проверенных магазинов, которые участвуют в акциях и распродажах. Каждый промокод перед публикацией проходит ручную проверку, поэтому в подборке нет нерабочих кодов.`,
+    `Подборка рабочих промокодов для категории «${catName}»: собрали актуальные купоны от проверенных магазинов, которые участвуют в акциях и распродажах. Каждый промокод перед публикацией проходит ручную проверку, поэтому в подборке нет нерабочих кодов.`,
     `В этой категории вы найдёте ${storeList || "скидки на популярные бренды"}. Условия у каждого купона свои: где-то нужна минимальная сумма заказа, где-то промокод действует только для новых клиентов. Обязательно читайте описание перед переходом в магазин — так скидка применится с первого раза.`,
-    `Новые ${words[slug as CategorySlug]?.split(",")[0] ?? "скидки"} появляются ежедневно: мы отслеживаем запуски акций и добавляем свежие промокоды в день старта. Подпишитесь на рассылку, чтобы не пропустить ${top ? `новые акции ${top}` : "выгодные предложения"} и другие жирные скидки недели.`,
+    `Новые скидки появляются в течение дня: мы отслеживаем запуски акций и добавляем свежие промокоды в день старта. Подпишитесь на рассылку, чтобы не пропустить ${top ? `новые акции ${top}` : "выгодные предложения"} и другие жирные скидки недели.`,
   ];
 }
 
@@ -64,11 +55,13 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const label = categories[slug as CategorySlug];
-  if (!label) notFound();
+  const [categories, all] = await Promise.all([getCategories(), getCoupons()]);
+  const cat = categories.find((c) => c.slug === slug);
+  if (!cat) notFound();
 
-  const list = getCouponsByCategory(slug);
-  const paragraphs = seoText(slug, label);
+  const list = all.filter((c) => c.store.categorySlug === slug);
+  const storeNames = [...new Set(list.map((c) => c.store.name))].join(", ");
+  const paragraphs = seoText(cat.name, storeNames);
   const pageUrl = `${SITE_URL}/category/${slug}`;
 
   const breadcrumb: Record<string, unknown> = {
@@ -77,27 +70,27 @@ export default async function CategoryPage({
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Главная", item: SITE_URL },
       { "@type": "ListItem", position: 2, name: "Купоны", item: `${SITE_URL}/#coupons` },
-      { "@type": "ListItem", position: 3, name: label, item: pageUrl },
+      { "@type": "ListItem", position: 3, name: cat.name, item: pageUrl },
     ],
   };
 
   const listing: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `Промокоды и купоны: ${label}`,
+    name: `Промокоды и купоны: ${cat.name}`,
     numberOfItems: list.length,
     itemListElement: list.map((c, i) => ({
       "@type": "ListItem",
       position: i + 1,
       item: {
         "@type": "Offer",
-        name: `Промокод ${c.code}: ${c.discount} в ${c.store}`,
-        description: c.description,
-        url: c.affiliateUrl,
-        validTo: c.expires,
+        name: `Промокод ${c.promocode.code}`,
+        description: c.promocode.bonusName || c.store.name,
+        url: c.affiliate.link,
+        validTo: c.promocode.expires,
         priceCurrency: "RUB",
         price: 0,
-        seller: { "@type": "Organization", name: c.store },
+        seller: { "@type": "Organization", name: c.store.name },
       },
     })),
   };
@@ -117,15 +110,15 @@ export default async function CategoryPage({
             Купоны
           </Link>
           <span className="mx-2" aria-hidden="true">/</span>
-          <span aria-current="page">{label}</span>
+          <span aria-current="page">{cat.name}</span>
         </nav>
 
         <h1 className="mt-6 max-w-3xl font-display text-2xl font-extrabold leading-tight sm:text-3xl">
-          Промокоды и купоны: {label}
+          Промокоды и купоны: {cat.name}
         </h1>
         <p className="mt-3 max-w-2xl text-ink/60">
           {list.length} {list.length === 1 ? "промокод" : "промокодов"} в категории
-          «{label.toLowerCase()}». Обновляем ежедневно.
+          «{cat.name.toLowerCase()}». Обновляем ежедневно.
         </p>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -134,11 +127,11 @@ export default async function CategoryPage({
           ))}
         </div>
 
-        <OtherCategories current={slug as CategorySlug} />
+        <OtherCategories current={cat.slug} />
 
         <article className="mt-14 max-w-3xl">
           <h2 className="font-display text-lg font-extrabold">
-            Купоны на {categoriesGenitive[slug as CategorySlug]} — что учесть перед покупкой
+            Купоны на {cat.name.toLowerCase()} — что учесть перед покупкой
           </h2>
           {paragraphs.map((p, i) => (
             <p key={i} className="mt-4 leading-relaxed text-ink/70">

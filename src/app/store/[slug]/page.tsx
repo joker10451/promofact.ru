@@ -5,13 +5,15 @@ import CouponTicket from "@/components/CouponTicket";
 import HowToApply from "@/components/HowToApply";
 import JsonLd from "@/components/JsonLd";
 import OtherStores from "@/components/OtherStores";
-import { getStoreBySlug, getStores } from "@/lib/data";
+import { getStores } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const dynamicParams = false;
+export const dynamicParams = true;
+export const revalidate = 1800;
 
-export function generateStaticParams() {
-  return getStores().map((store) => ({ slug: store.slug }));
+export async function generateStaticParams() {
+  const stores = await getStores();
+  return stores.map((store) => ({ slug: store.slug }));
 }
 
 export async function generateMetadata({
@@ -20,19 +22,20 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const store = getStoreBySlug(slug);
+  const stores = await getStores();
+  const store = stores.find((s) => s.slug === slug);
   if (!store) return {};
   const pageUrl = `${SITE_URL}/store/${slug}`;
   return {
     title: `Промокод ${store.name} — актуальные скидки`,
     description: `Рабочие промокоды ${store.name}: ${store.coupons
-      .map((c) => `${c.code} (${c.discount})`)
+      .map((c) => c.promocode.code)
       .join(", ")}. Проверяем коды каждый день, обновляем в реальном времени.`,
     alternates: { canonical: pageUrl },
     openGraph: {
       title: `Промокод ${store.name} — актуальные скидки`,
       description: `Рабочие промокоды ${store.name}: ${store.coupons
-        .map((c) => `${c.code} (${c.discount})`)
+        .map((c) => c.promocode.code)
         .join(", ")}. Проверяем коды каждый день.`,
       url: pageUrl,
       type: "website",
@@ -48,7 +51,8 @@ export default async function StorePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const store = getStoreBySlug(slug);
+  const stores = await getStores();
+  const store = stores.find((s) => s.slug === slug);
   if (!store) notFound();
 
   const best = store.coupons[0];
@@ -64,19 +68,19 @@ export default async function StorePage({
     ],
   };
 
-  const coupons: Record<string, unknown>[] = store.coupons.map((c) => ({
+  const couponsJsonLd: Record<string, unknown>[] = store.coupons.map((c) => ({
     "@context": "https://schema.org",
     "@type": "Coupon",
-    name: `Промокод ${c.code}: ${c.discount} в ${c.store}`,
-    description: c.description,
-    code: c.code,
+    name: `Промокод ${c.promocode.code}`,
+    description: c.promocode.bonusName || store.name,
+    code: c.promocode.code,
     category: "Промокод",
-    validTo: c.expires,
-    url: c.affiliateUrl,
-    seller: { "@type": "Organization", name: c.store },
+    validTo: c.promocode.expires,
+    url: c.affiliate.link || store.site,
+    seller: { "@type": "Organization", name: store.name },
     offers: {
       "@type": "Offer",
-      url: c.affiliateUrl,
+      url: c.affiliate.link || store.site,
       priceCurrency: "RUB",
       price: 0,
       availability: "https://schema.org/InStock",
@@ -86,7 +90,7 @@ export default async function StorePage({
   return (
     <main>
       <JsonLd data={breadcrumb} />
-      {coupons.map((c) => (
+      {couponsJsonLd.map((c) => (
         <JsonLd key={c.code as string} data={c} />
       ))}
 
@@ -104,25 +108,58 @@ export default async function StorePage({
         </nav>
 
         <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="max-w-3xl font-display text-2xl font-extrabold leading-tight sm:text-3xl">
-              Промокод {store.name} — актуальные скидки
-            </h1>
-            <p className="mt-3 max-w-2xl text-ink/60">
-              {store.coupons.length} {store.coupons.length === 1 ? "рабочий промокод" : "рабочих промокода"}.
-              {best ? ` Лучшая скидка — ${best.discount}.` : ""} Коды проверены сегодня, срок действия указан в карточке.
-            </p>
+          <div className="flex items-start gap-4">
+            {store.logo && (
+              <img
+                src={store.logo}
+                alt={store.name}
+                className="h-16 w-16 rounded-2xl border border-line bg-white object-contain p-1"
+              />
+            )}
+            <div>
+              <h1 className="max-w-3xl font-display text-2xl font-extrabold leading-tight sm:text-3xl">
+                Промокод {store.name} — актуальные скидки
+              </h1>
+              <p className="mt-3 max-w-2xl text-ink/60">
+                {store.coupons.length} {store.coupons.length === 1 ? "рабочий промокод" : "рабочих промокода"}.
+                Коды проверены сегодня, срок действия указан в карточке.
+              </p>
+            </div>
           </div>
           <div className="rounded-full bg-mint/10 border border-mint/30 px-4 py-1.5 text-xs font-bold text-ink/70">
             Проверено сегодня ✓
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {store.coupons.map((coupon) => (
-            <CouponTicket key={coupon.id} coupon={coupon} />
-          ))}
-        </div>
+        {store.coupons.length === 0 ? (
+          <div className="mt-8 rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
+            <div className="font-display text-4xl font-extrabold text-ink/15">Скоро</div>
+            <p className="mt-3 font-bold text-ink/70">Здесь появится купон {store.name}</p>
+            <p className="mt-1 text-sm text-ink/50">
+              Партнёрские акции ещё не запущены — вернись позже.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {store.coupons.map((coupon) => (
+              <CouponTicket key={coupon.id} coupon={coupon} />
+            ))}
+          </div>
+        )}
+
+        {store.about && (
+          <article className="mt-12 max-w-3xl">
+            <div className="font-display text-lg font-extrabold">О магазине</div>
+            <p className="mt-3 leading-relaxed text-ink/70">{store.about}</p>
+          </article>
+        )}
+
+        {store.conditions && (
+          <article className="mt-8 max-w-3xl">
+            <div className="font-display text-lg font-extrabold">Условия</div>
+            <p className="mt-3 leading-relaxed text-ink/70">{store.conditions}</p>
+          </article>
+        )}
 
         <HowToApply />
 
