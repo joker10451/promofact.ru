@@ -29,7 +29,7 @@ export default function LatestTips({ limit = 3 }: { limit?: number }) {
           <Link
             key={a.slug}
             href={`/sovety/${a.slug}`}
-            className="group flex flex-col rounded-2xl border border-line bg-white p-6 transition-shadow hover:shadow-offset-red"
+            className="card-hover group flex flex-col rounded-2xl border border-line bg-white p-6 transition-shadow hover:shadow-offset-red"
           >
             <h3 className="font-display text-lg font-extrabold leading-snug group-hover:text-red transition-colors">
               {a.title}

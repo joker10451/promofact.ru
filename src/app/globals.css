@@ -181,13 +181,28 @@ body {
   box-shadow: 0 5px 0 var(--color-red-dark);
 }
 
-/* Scroll-reveal */
+/* Глубокий ховер карточки */
+.card-hover {
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+  border-color: var(--color-red);
+  box-shadow: 0 18px 40px -12px rgba(255, 51, 85, 0.35);
+}
+
+/* Scroll-reveal (безопасный: без JS контент виден) */
 .reveal {
+  opacity: 1;
+  transform: none;
+}
+.js .reveal {
   opacity: 0;
   transform: translateY(26px);
   transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.reveal.is-visible {
+.js .reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
 }

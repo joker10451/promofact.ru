@@ -75,7 +75,7 @@ export default function CouponReels() {
               <div className="mt-1 text-sm text-ink/60">{r.caption}</div>
               <Link
                 href={r.href}
-                className="mt-2 inline-block rounded-full bg-ink px-4 py-2 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
+                className="mt-2 inline-block rounded-full bg-gradient-to-r from-red to-red-dark px-4 py-2 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
               >
                 Смотреть промокоды →
               </Link>

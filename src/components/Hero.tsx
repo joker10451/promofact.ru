@@ -27,14 +27,22 @@ export default function Hero({ featured }: { featured?: Coupon }) {
   };
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden bg-gradient-to-br from-ink via-ink-soft to-ink">
       <div
-        className="halftone pointer-events-none absolute inset-0 opacity-60"
+        className="halftone pointer-events-none absolute inset-0 opacity-50"
         aria-hidden="true"
       />
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:gap-10 lg:py-20">
+      <div
+        className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-yellow/20 blur-3xl"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute -right-10 top-1/3 h-64 w-64 rounded-full bg-red/20 blur-3xl"
+        aria-hidden="true"
+      />
+      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:gap-10 lg:py-24 text-white">
         <div className="relative">
-          <div className="inline-flex items-center gap-2 rounded-full bg-mint/10 border border-mint/30 px-4 py-1.5 text-xs font-bold text-ink/70">
+          <div className="inline-flex items-center gap-2 rounded-full bg-mint/15 border border-mint/40 px-4 py-1.5 text-xs font-bold text-white/90">
             <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
             Промокоды проверяются каждый день
           </div>
@@ -44,7 +52,7 @@ export default function Hero({ featured }: { featured?: Coupon }) {
             <span className="marker-underline">реально</span> работают
           </h1>
 
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-ink/65 sm:text-lg">
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
             Собираем и проверяем промокоды магазинов-партнёров каждый день.
             Копируй код, переходи в магазин и экономь — без регистрации и без
             подписок.
@@ -60,7 +68,7 @@ export default function Hero({ featured }: { featured?: Coupon }) {
             />
             <button
               type="submit"
-              className="rounded-full bg-red px-6 py-3 text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
+              className="rounded-full bg-gradient-to-r from-red to-red-dark px-6 py-3 text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
             >
               Найти
             </button>

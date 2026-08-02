@@ -56,7 +56,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className={`${unbounded.variable} ${golos.variable} h-full antialiased`}>
+    <html
+      lang="ru"
+      className={`${unbounded.variable} ${golos.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js');",
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
         <YandexMetrika />
         {children}
