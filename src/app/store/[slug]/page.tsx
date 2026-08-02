@@ -158,10 +158,34 @@ export default async function StorePage({
     })),
   };
 
+  const howToJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: `Как применить промокод ${store.name}`,
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Скопируйте промокод",
+        text: "Нажмите кнопку «Копировать» на карточке купона на этой странице, чтобы скопировать код в буфер обмена.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Перейдите в магазин",
+        text: `Откройте ${store.name} по нашей партнёрской ссылке с сайта.`,
+      },
+      {
+        "@type": "HowToStep",
+        name: "Вставьте код в корзине",
+        text: "Добавьте товары в корзину и вставьте промокод в поле «Промокод» на этапе оплаты. Скидка применится автоматически.",
+      },
+    ],
+  };
+
   return (
     <main>
       <JsonLd data={breadcrumb} />
       <JsonLd data={faqJsonLd} />
+      <JsonLd data={howToJsonLd} />
       {couponsJsonLd.map((c) => (
         <JsonLd key={(c.discountCode as string) ?? JSON.stringify(c)} data={c} />
       ))}

@@ -9,3 +9,9 @@ function resolveSiteUrl(): string {
 export const SITE_URL = resolveSiteUrl();
 export const SITE_NAME = "ПромоФакт";
 export const SITE_TAGLINE = "Промокоды и купоны на скидку";
+
+export const CHANNELS = {
+  telegram: "https://t.me/smart_zakupka",
+  youtube: "https://www.youtube.com/@SmartShopping-o9k",
+  dzen: "https://dzen.ru/id/66d486816000f25d542e7180",
+};

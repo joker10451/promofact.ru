@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import JsonLd from "@/components/JsonLd";
 import { ARTICLES, getArticle } from "@/lib/articles";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
 export const revalidate = 1800;
 
@@ -112,6 +112,41 @@ export default async function ArticlePage({
           </ul>
         </section>
       )}
+
+      <section className="mt-6 rounded-2xl border border-mint/30 bg-mint/10 p-6">
+        <h2 className="font-display text-lg font-extrabold">
+          Подпишитесь на выгодные новости
+        </h2>
+        <p className="mt-2 text-sm text-ink/60">
+          Свежие промокоды и лайфхаки экономии — в наших каналах.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <a
+            href={CHANNELS.telegram}
+            target="_blank"
+            rel="noopener nofollow"
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
+          >
+            Telegram
+          </a>
+          <a
+            href={CHANNELS.youtube}
+            target="_blank"
+            rel="noopener nofollow"
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
+          >
+            YouTube
+          </a>
+          <a
+            href={CHANNELS.dzen}
+            target="_blank"
+            rel="noopener nofollow"
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
+          >
+            Дзен
+          </a>
+        </div>
+      </section>
 
       <div className="mt-10">
         <Link
