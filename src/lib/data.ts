@@ -26,6 +26,15 @@ export const categories: Record<CategorySlug, string> = {
   travel: "Путешествия",
 };
 
+export const categoriesGenitive: Record<CategorySlug, string> = {
+  beauty: "красоту",
+  fashion: "одежду и обувь",
+  electro: "электронику",
+  food: "продукты",
+  home: "дом и мебель",
+  travel: "путешествия",
+};
+
 export const categorySlugs = Object.keys(categories) as CategorySlug[];
 
 export function getCouponById(id: string): Coupon | undefined {
@@ -40,8 +49,19 @@ export function getCouponsByStore(storeSlug: string): Coupon[] {
   return coupons.filter((c) => c.storeSlug === storeSlug);
 }
 
-export function getStores(): { slug: string; name: string; coupons: Coupon[] }[] {
-  const map = new Map<string, { slug: string; name: string; coupons: Coupon[] }>();
+export interface Store {
+  slug: string;
+  name: string;
+  coupons: Coupon[];
+}
+
+export function getStoreBySlug(slug: string): Store | undefined {
+  const store = getStores().find((s) => s.slug === slug);
+  return store;
+}
+
+export function getStores(): Store[] {
+  const map = new Map<string, Store>();
   for (const coupon of coupons) {
     const entry = map.get(coupon.storeSlug);
     if (entry) {
