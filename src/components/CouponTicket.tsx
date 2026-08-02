@@ -50,7 +50,7 @@ export default function CouponTicket({
 
   const badges: { key: string; label: string; cls: string }[] = [];
   if (promocode.isHit)
-    badges.push({ key: "hit", label: "🔥 хит", cls: "bg-red text-white" });
+    badges.push({ key: "hit", label: "🔥 хит", cls: "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red" });
   if (promocode.isFirstOrderOnly)
     badges.push({
       key: "first",
@@ -71,7 +71,7 @@ export default function CouponTicket({
     });
 
   return (
-    <article className="group relative flex flex-col bg-white border border-line rounded-2xl overflow-hidden transition-transform duration-300 hover:-translate-y-1.5 shadow-[0_6px_0_rgba(11,16,43,0.08)] hover:shadow-[0_10px_0_rgba(11,16,43,0.1)]">
+    <article className="group relative flex flex-col bg-white border border-line rounded-2xl overflow-hidden transition-transform duration-300 card-hover shadow-[0_6px_0_rgba(11,16,43,0.08)] hover:shadow-[0_10px_0_rgba(11,16,43,0.1)]">
       <div className="flex items-start gap-3 px-5 pt-5">
         {store.logo ? (
           <img
@@ -185,7 +185,7 @@ export default function CouponTicket({
                 store: store.name,
               })
             }
-            className="block w-full rounded-xl bg-ink py-3 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
+            className="block w-full rounded-xl bg-gradient-to-r from-red to-red-dark py-3 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
           >
             В магазин
           </a>

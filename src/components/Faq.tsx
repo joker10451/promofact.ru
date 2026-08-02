@@ -45,7 +45,7 @@ export default function Faq() {
               <div
                 key={item.q}
                 className={`bg-white border border-line rounded-2xl transition-shadow ${
-                  isOpen ? "shadow-offset" : ""
+                  isOpen ? "shadow-offset border-yellow/60" : ""
                 }`}
               >
                 <button
