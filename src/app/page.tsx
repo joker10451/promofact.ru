@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CouponReels from "@/components/CouponReels";
+import LatestTips from "@/components/LatestTips";
 import CouponGrid from "@/components/CouponGrid";
 import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
@@ -185,6 +186,9 @@ export default async function Home() {
         </div>
         <Reveal>
           <CouponReels />
+        </Reveal>
+        <Reveal>
+          <LatestTips />
         </Reveal>
         <Reveal>
           <Subscribe />
