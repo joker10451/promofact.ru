@@ -1,0 +1,136 @@
+[
+  {
+    "id": "ya25",
+    "store": "Золотое Яблоко",
+    "storeSlug": "zolotoe-yabloko",
+    "discount": "−25%",
+    "code": "YA25",
+    "category": "beauty",
+    "description": "Скидка 25% на весь ассортимент косметики и парфюмерии при заказе от 2 000 ₽.",
+    "expires": "2026-09-30",
+    "affiliateUrl": "https://perfluence.net/campaign/zolotoe-yabloko?subid=promodrom",
+    "badge": "эксклюзив"
+  },
+  {
+    "id": "lamoda15",
+    "store": "Lamoda",
+    "storeSlug": "lamoda",
+    "discount": "−15%",
+    "code": "LAMODA15",
+    "category": "fashion",
+    "description": "15% скидка на первый заказ одежды и обуви, включая распродажу.",
+    "expires": "2026-09-15",
+    "affiliateUrl": "https://perfluence.net/campaign/lamoda?subid=promodrom"
+  },
+  {
+    "id": "dns10",
+    "store": "DNS",
+    "storeSlug": "dns",
+    "discount": "−10%",
+    "code": "DNS10",
+    "category": "electro",
+    "description": "10% на компьютеры, ноутбуки и комплектующие. Действует на всё кроме акционных позиций.",
+    "expires": "2026-10-31",
+    "affiliateUrl": "https://perfluence.net/campaign/dns?subid=promodrom"
+  },
+  {
+    "id": "samokat300",
+    "store": "Самокат",
+    "storeSlug": "samokat",
+    "discount": "−300 ₽",
+    "code": "SAMOKAT300",
+    "category": "food",
+    "description": "Скидка 300 ₽ на первый заказ продуктов с доставкой от 1 500 ₽.",
+    "expires": "2026-08-31",
+    "affiliateUrl": "https://perfluence.net/campaign/samokat?subid=promodrom"
+  },
+  {
+    "id": "letual3",
+    "store": "Летуаль",
+    "storeSlug": "letual",
+    "discount": "3=2",
+    "code": "LETUAL3",
+    "category": "beauty",
+    "description": "Три товара по цене двух на парфюмерию и декоративную косметику.",
+    "expires": "2026-09-30",
+    "affiliateUrl": "https://perfluence.net/campaign/letual?subid=promodrom",
+    "badge": "эксклюзив"
+  },
+  {
+    "id": "sport20",
+    "store": "Спортмастер",
+    "storeSlug": "sportmaster",
+    "discount": "−20%",
+    "code": "SPORT20",
+    "category": "fashion",
+    "description": "20% скидка на спортивную одежду, обувь и инвентарь для тренировок.",
+    "expires": "2026-09-30",
+    "affiliateUrl": "https://perfluence.net/campaign/sportmaster?subid=promodrom"
+  },
+  {
+    "id": "mvideo15",
+    "store": "М.Видео",
+    "storeSlug": "m-video",
+    "discount": "кэшбэк 15%",
+    "code": "MVIDEO15",
+    "category": "electro",
+    "description": "Кэшбэк 15% бонусами на телевизоры, смартфоны и бытовую технику.",
+    "expires": "2026-10-15",
+    "affiliateUrl": "https://perfluence.net/campaign/m-video?subid=promodrom"
+  },
+  {
+    "id": "vkusvill15",
+    "store": "ВкусВилл",
+    "storeSlug": "vkusvill",
+    "discount": "−15%",
+    "code": "VKUSVILL15",
+    "category": "food",
+    "description": "15% на первый заказ в приложении. Промокод суммируется со скидками недели.",
+    "expires": "2026-09-20",
+    "affiliateUrl": "https://perfluence.net/campaign/vkusvill?subid=promodrom"
+  },
+  {
+    "id": "ostin30",
+    "store": "O'STIN",
+    "storeSlug": "ostin",
+    "discount": "−30%",
+    "code": "OSTIN30",
+    "category": "fashion",
+    "description": "30% скидка на одежду для всей семьи при заказе на сайте магазина.",
+    "expires": "2026-09-10",
+    "affiliateUrl": "https://perfluence.net/campaign/ostin?subid=promodrom"
+  },
+  {
+    "id": "hoff20",
+    "store": "Hoff",
+    "storeSlug": "hoff",
+    "discount": "−20%",
+    "code": "HOFF20",
+    "category": "home",
+    "description": "20% на мебель и товары для дома из каталога. Действует на первую покупку.",
+    "expires": "2026-10-31",
+    "affiliateUrl": "https://perfluence.net/campaign/hoff?subid=promodrom"
+  },
+  {
+    "id": "s7fly",
+    "store": "S7 Airlines",
+    "storeSlug": "s7",
+    "discount": "−15%",
+    "code": "S7FLY",
+    "category": "travel",
+    "description": "15% на авиабилеты по России и СНГ при оплате на сайте авиакомпании.",
+    "expires": "2026-11-30",
+    "affiliateUrl": "https://perfluence.net/campaign/s7?subid=promodrom"
+  },
+  {
+    "id": "ym500",
+    "store": "Яндекс Маркет",
+    "storeSlug": "yandex-market",
+    "discount": "−500 ₽",
+    "code": "YM500",
+    "category": "electro",
+    "description": "500 ₽ на первый заказ от 3 000 ₽. Подходит для электроники и бытовой техники.",
+    "expires": "2026-09-25",
+    "affiliateUrl": "https://perfluence.net/campaign/yandex-market?subid=promodrom"
+  }
+]

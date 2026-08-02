@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0b102b;
+  --color-ink-soft: #1c2345;
+  --color-paper: #f2f4fa;
+  --color-red: #ff3355;
+  --color-red-dark: #d61f3f;
+  --color-yellow: #ffd02f;
+  --color-yellow-dark: #e8b81c;
+  --color-mint: #16c784;
+  --color-line: #d9deec;
+
+  --font-display: var(--font-unbounded);
+  --font-sans: var(--font-golos);
+
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-marquee-fast: marquee 18s linear infinite;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-ticker: ticker 22s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(var(--tilt, 3deg));
+    }
+    50% {
+      transform: translateY(-12px) rotate(var(--tilt, 3deg));
+    }
+  }
+
+  @keyframes ticker {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-yellow);
+  color: var(--color-ink);
+}
+
+/* Маркер-подчёркивание */
+.marker-underline {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+.marker-underline::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: 0.08em;
+  height: 0.42em;
+  background: var(--color-yellow);
+  z-index: -1;
+  border-radius: 3px;
+  transform: rotate(-1.5deg);
+}
+
+/* Halftone-точки на тёмных секциях */
+.halftone {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1.2px, transparent 1.3px);
+  background-size: 14px 14px;
+}
+
+/* Водяной знак «%» */
+.watermark {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(9rem, 22vw, 20rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.08);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Перфорация купонов: круглые вырубки по краю разделителя */
+.perforation {
+  position: relative;
+}
+.perforation::before,
+.perforation::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-paper);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.perforation::before {
+  left: -12px;
+}
+.perforation::after {
+  right: -12px;
+}
+
+/* Зигзаг-край (чек) */
+.zigzag {
+  clip-path: polygon(
+    0% 8px, 12.5% 0, 25% 8px, 37.5% 0, 50% 8px, 62.5% 0, 75% 8px, 87.5% 0,
+    100% 8px, 100% 100%, 0% 100%
+  );
+}
+.zigzag-both {
+  clip-path: polygon(
+    0% 8px, 12.5% 0, 25% 8px, 37.5% 0, 50% 8px, 62.5% 0, 75% 8px, 87.5% 0,
+    100% 8px, 100% calc(100% - 8px), 87.5% 100%, 75% calc(100% - 8px),
+    62.5% 100%, 50% calc(100% - 8px), 37.5% 100%, 25% calc(100% - 8px),
+    12.5% 100%, 0% calc(100% - 8px)
+  );
+}
+
+/* Штрих-код на CSS */
+.barcode {
+  height: 44px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-ink) 0 2px,
+    transparent 2px 4px,
+    var(--color-ink) 4px 7px,
+    transparent 7px 9px,
+    var(--color-ink) 9px 10px,
+    transparent 10px 14px,
+    var(--color-ink) 14px 17px,
+    transparent 17px 18px
+  );
+}
+
+/* Пунктирный разделитель */
+.dashed-line {
+  background-image: linear-gradient(90deg, var(--color-line) 50%, transparent 50%);
+  background-size: 10px 2px;
+  background-repeat: repeat-x;
+  height: 2px;
+}
+
+/* Пунктирный чек */
+.receipt-dashed {
+  background-image: linear-gradient(90deg, currentColor 55%, transparent 55%);
+  background-size: 12px 2px;
+  background-repeat: repeat-x;
+  height: 2px;
+}
+
+/* Offset-тень */
+.shadow-offset {
+  box-shadow: 0 5px 0 var(--color-ink);
+}
+.shadow-offset-red {
+  box-shadow: 0 5px 0 var(--color-red-dark);
+}
+
+/* Scroll-reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-marquee,
+  .animate-marquee-fast,
+  .animate-float,
+  .animate-ticker {
+    animation: none !important;
+  }
+}
+
+/* Пауза marquee при hover */
+.marquee-pause:hover .animate-marquee,
+.marquee-pause:hover .animate-marquee-fast,
+.marquee-pause:hover .animate-ticker {
+  animation-play-state: paused;
+}
