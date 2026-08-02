@@ -129,9 +129,39 @@ export default async function StorePage({
     },
   }));
 
+  const faqItems = [
+    {
+      q: `Как применить промокод ${store.name}?`,
+      a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Скидка применится сразу — её обычно видно до подтверждения заказа.`,
+    },
+    {
+      q: `Где искать свежие промокоды ${store.name}?`,
+      a: `Актуальные купоны ${store.name} мы собираем на этой странице и обновляем каждый день по мере запуска акций. Подпишитесь на уведомления или заходите раз в несколько дней — истёкшие коды убираем сразу.`,
+    },
+    {
+      q: `Почему промокод ${store.name} не сработал?`,
+      a: `Чаще всего причина в условиях: купон истёк, действует только для новых клиентов, требует минимальной суммы заказа или не суммируется с распродажей. Все ограничения указаны в карточке купона — прочитайте их перед переходом в магазин.`,
+    },
+    {
+      q: `Сколько стоит промокод ${store.name} на ПромоФакт?`,
+      a: `Все промокоды бесплатны. Мы зарабатываем на партнёрских CPA-ссылках: если вы закажете что-то по нашей ссылке, магазин заплатит нам комиссию. На размер вашей скидки это не влияет.`,
+    },
+  ];
+
+  const faqJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((it) => ({
+      "@type": "Question",
+      name: it.q,
+      acceptedAnswer: { "@type": "Answer", text: it.a },
+    })),
+  };
+
   return (
     <main>
       <JsonLd data={breadcrumb} />
+      <JsonLd data={faqJsonLd} />
       {couponsJsonLd.map((c) => (
         <JsonLd key={(c.discountCode as string) ?? JSON.stringify(c)} data={c} />
       ))}
@@ -238,50 +268,58 @@ export default async function StorePage({
           </div>
         )}
 
-        {store.about ? (
-          <article className="mt-12 max-w-3xl">
-            <h2 className="font-display text-lg font-extrabold">
-              О магазине {store.name}
-            </h2>
+        <article className="mt-12 max-w-3xl">
+          <h2 className="font-display text-xl font-extrabold">
+            Промокод {store.name} — как получить максимальную скидку
+          </h2>
+          {store.about ? (
             <p className="mt-3 leading-relaxed text-ink/70">{store.about}</p>
-          </article>
-        ) : (
-          <article className="mt-12 max-w-3xl">
-            <h2 className="font-display text-lg font-extrabold">
-              О магазине {store.name}
-            </h2>
+          ) : (
             <p className="mt-3 leading-relaxed text-ink/70">
-              На этой странице собраны актуальные промокоды и купоны{" "}
-              {store.name} на {new Date().toLocaleDateString("ru-RU")}. Категория:{" "}
-              {store.category}. Ниже — рабочие коды, проверенные по CPA-кампаниям
-              Perfluence; копируйте код и применяйте в корзине.
+              На этой странице собраны все актуальные промокоды и купоны{" "}
+              {store.name} на {new Date().toLocaleDateString("ru-RU")}. Магазин
+              относится к категории «{store.category}». Ниже — рабочие коды,
+              проверенные по партнёрским CPA-кампаниям Perfluence: копируйте
+              промокод одной кнопкой и применяйте в корзине{" "}
+              {store.name} для мгновенной скидки.
             </p>
+          )}
+
+          {store.coupons.length > 0 ? (
             <p className="mt-3 leading-relaxed text-ink/70">
-              {store.coupons.length > 0 ? (
-                <>
-                  Сейчас у {store.name} действует{" "}
-                  {store.coupons.length === 1 ? "промокод" : "промокода"}{" "}
-                  {store.coupons.map((c) => c.promocode.code).join(", ")}.
-                  Срок действия и условия применения указаны в карточке купона —
-                  обязательно прочитайте их перед переходом в магазин, чтобы
-                  скидка применилась с первого раза.
-                </>
-              ) : (
-                <>
-                  Партнёрские акции {store.name} ещё не запущены: новые промокоды
-                  появляются на этой странице в день старта акции. Заглядывайте
-                  позже или подпишитесь на рассылку, чтобы не пропустить скидки.
-                </>
-              )}
+              Сейчас у {store.name} действует{" "}
+              {store.coupons.length === 1 ? "промокод" : "промокода"}{" "}
+              {store.coupons.map((c) => c.promocode.code).join(", ")}. Срок
+              действия и условия применения указаны в карточке каждого купона —
+              обязательно прочитайте их перед переходом в магазин, чтобы скидка
+              применилась с первого раза. Если код не сработал, проверьте
+              минимальную сумму заказа и ограничения по категории товаров.
             </p>
+          ) : (
             <p className="mt-3 leading-relaxed text-ink/70">
-              Все коды мы проверяем вручную раз в 1–2 дня: истёкшие промокоды
-              убираем сразу, а рабочие — отмечаем на главной. Если купон
-              перестал действовать, оставьте заявку на сайте — мы обновим
-              подборку {store.name} в ближайшее время.
+              Партнёрские акции {store.name} ещё не запущены: новые промокоды
+              появляются на этой странице в день старта акции. Заглядывайте
+              позже или подпишитесь на рассылку, чтобы не пропустить свежие
+              скидки {store.name}.
             </p>
-          </article>
-        )}
+          )}
+
+          <p className="mt-3 leading-relaxed text-ink/70">
+            Все коды мы проверяем вручную раз в 1–2 дня: истёкшие промокоды
+            убираем сразу, а рабочие отмечаем на главной. Открыть официальный
+            сайт {store.name} можно{" "}
+            <a
+              href={store.site}
+              target="_blank"
+              rel="noopener nofollow sponsored"
+              className="font-semibold text-ink underline underline-offset-2 hover:text-red transition-colors"
+            >
+              по этой ссылке
+            </a>
+            . Если купон перестал действовать — оставьте заявку, и мы обновим
+            подборку {store.name} в ближайшее время.
+          </p>
+        </article>
 
         {store.conditions && (
           <article className="mt-8 max-w-3xl">
@@ -291,6 +329,31 @@ export default async function StorePage({
             </p>
           </article>
         )}
+
+        <section className="mt-10 max-w-3xl" aria-label="Частые вопросы">
+          <h2 className="font-display text-xl font-extrabold">
+            Частые вопросы про промокоды {store.name}
+          </h2>
+          <div className="mt-5 space-y-3">
+            {faqItems.map((item) => (
+              <details
+                key={item.q}
+                className="group rounded-2xl border border-line bg-white px-5 py-4"
+              >
+                <summary className="cursor-pointer list-none font-bold text-ink">
+                  {item.q}
+                  <span className="float-right text-red group-open:hidden">+</span>
+                  <span className="float-right text-red hidden group-open:inline">
+                    −
+                  </span>
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-ink/70">
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </section>
 
         <HowToApply />
 
