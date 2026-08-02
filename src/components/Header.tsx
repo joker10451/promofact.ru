@@ -22,7 +22,7 @@ export default function Header() {
         </nav>
         <a
           href="#subscribe"
-          className="rounded-full bg-red px-4 py-2 text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
+          className="rounded-full bg-gradient-to-r from-red to-red-dark px-4 py-2 text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
         >
           Ловить скидки
         </a>

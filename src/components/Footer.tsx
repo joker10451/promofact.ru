@@ -8,6 +8,7 @@ export default async function Footer() {
 
   return (
     <footer className="bg-ink text-white">
+      <div className="h-1.5 w-full bg-gradient-to-r from-yellow via-red to-mint" />
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <div className="font-display text-xl font-extrabold">
@@ -90,7 +91,7 @@ export default async function Footer() {
                 href="https://t.me/smart_zakupka"
                 target="_blank"
                 rel="noopener nofollow"
-                className="inline-flex items-center gap-2 hover:text-white transition-colors"
+                className="social-link hover:text-white transition-colors"
               >
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
                   <path d="M21.94 4.4a1.5 1.5 0 0 0-2.05-.93L3.4 10.6c-.9.36-.85 1.67.07 1.96l4.14 1.3 1.72 5.29c.34 1.05 1.68 1.25 2.34.35l2.06-2.82a.5.5 0 0 1 .6-.13l4.66 2.16c.86.4 1.87-.2 1.88-1.1l.55-14.08a1 1 0 0 0-.44-.8Z" />
@@ -103,7 +104,7 @@ export default async function Footer() {
                 href="https://dzen.ru/id/66d486816000f25d542e7180"
                 target="_blank"
                 rel="noopener nofollow"
-                className="inline-flex items-center gap-2 hover:text-white transition-colors"
+                className="social-link hover:text-white transition-colors"
               >
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
                   <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.6 11.2-4.2 2.2c-.5.3-1.1-.1-.9-.6l.9-3-2.6-2c-.5-.4-.2-1.1.4-1.1h4.9c.5 0 .8.5.6 1l-1.2 2.8 2.7 1.9c.5.4.2 1.1-.6 1Z" />
@@ -116,7 +117,7 @@ export default async function Footer() {
                 href="https://www.youtube.com/@SmartShopping-o9k"
                 target="_blank"
                 rel="noopener nofollow"
-                className="inline-flex items-center gap-2 hover:text-white transition-colors"
+                className="social-link hover:text-white transition-colors"
               >
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
                   <path d="M23 12s0-3.2-.4-4.7a2.5 2.5 0 0 0-1.8-1.8C19.2 5 12 5 12 5s-7.2 0-8.8.5A2.5 2.5 0 0 0 1.4 7.3C1 8.8 1 12 1 12s0 3.2.4 4.7a2.5 2.5 0 0 0 1.8 1.8C4.8 19 12 19 12 19s7.2 0 8.8-.5a2.5 2.5 0 0 0 1.8-1.8C23 15.2 23 12 23 12Zm-13 3V9l5 3-5 3Z" />

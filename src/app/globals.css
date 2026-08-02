@@ -192,6 +192,30 @@ body {
   box-shadow: 0 18px 40px -12px rgba(255, 51, 85, 0.35);
 }
 
+/* Соцссылки в футере */
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.social-link:hover {
+  color: #fff;
+  transform: translateX(3px);
+}
+.social-link svg {
+  flex: none;
+  padding: 6px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  transition: background 0.2s ease;
+}
+.social-link:hover svg {
+  background: rgba(255, 255, 255, 0.16);
+}
+
 /* Scroll-reveal (безопасный: без JS контент виден) */
 .reveal {
   opacity: 1;
