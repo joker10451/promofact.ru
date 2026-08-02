@@ -143,6 +143,8 @@ export default async function StatsPage() {
                         <img
                           src={s.logo}
                           alt={s.name}
+                          width={32}
+                          height={32}
                           className="h-8 w-8 shrink-0 rounded-lg border border-line bg-paper object-contain"
                         />
                       ) : (

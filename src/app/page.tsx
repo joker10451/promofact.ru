@@ -132,6 +132,8 @@ export default async function Home() {
                       <img
                         src={store.logo}
                         alt=""
+                        width={36}
+                        height={36}
                         className="h-9 w-9 shrink-0 rounded-lg border border-line bg-white object-contain p-0.5"
                       />
                     ) : null}

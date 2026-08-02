@@ -78,6 +78,8 @@ export default function CouponTicket({
             src={store.logo}
             alt={store.name}
             loading="lazy"
+            width={40}
+            height={40}
             className="h-10 w-10 shrink-0 rounded-xl border border-line bg-paper object-contain"
           />
         ) : (

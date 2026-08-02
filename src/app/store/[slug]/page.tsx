@@ -195,6 +195,8 @@ export default async function StorePage({
               <img
                 src={store.logo}
                 alt={store.name}
+                width={64}
+                height={64}
                 className="h-16 w-16 rounded-2xl border border-line bg-white object-contain p-1"
               />
             )}
