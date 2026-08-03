@@ -34,3 +34,11 @@ jobs:
       # Примечание: `npm run build:check` (fail, если 0 SEO-страниц) НЕ запускаем
       # в CI — он валиден только в прод-окружении Vercel, где задан
       # PERFLUENCE_WIDGET_URL. Там он уже срабатывает как прод-гейт.
+
+      # IndexNow: уведомляем Яндекс/Bing об изменениях после деплоя.
+      # Только на push в main (не на PR), с паузой, чтобы Vercel успел задеплоить.
+      - name: IndexNow push (main only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          sleep 60
+          node scripts/indexnow-push.mjs https://promofact.ru
