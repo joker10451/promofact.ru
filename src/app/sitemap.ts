@@ -29,12 +29,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "daily",
     priority: 0.7,
   }));
-  const storeMap: MetadataRoute.Sitemap = stores.map((store) => ({
-    url: `${SITE_URL}/store/${store.slug}`,
-    lastModified,
-    changeFrequency: "daily",
-    priority: 0.8,
-  }));
+  const storeMap: MetadataRoute.Sitemap = stores.flatMap((store) => [
+    {
+      url: `${SITE_URL}/store/${store.slug}`,
+      lastModified,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    },
+    ...store.coupons
+      .filter((c) => c.promocode.code)
+      .map((c) => ({
+        url: `${SITE_URL}/store/${store.slug}/${c.promocode.code}`,
+        lastModified,
+        changeFrequency: "daily" as const,
+        priority: 0.6,
+      })),
+  ]);
   const tipsMap: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/sovety`,
