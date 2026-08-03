@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getCategories, getCoupons, getStores } from "@/lib/perfluence";
 import { ARTICLES } from "@/lib/articles";
+import { ACTIONS } from "@/lib/actions";
 import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -60,5 +61,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  return [...home, ...categoryMap, ...storeMap, ...tipsMap];
+  const actionsMap: MetadataRoute.Sitemap = ACTIONS.map((a) => ({
+    url: `${SITE_URL}/actions/${a.slug}`,
+    lastModified: today,
+    changeFrequency: "monthly" as const,
+    priority: 0.55,
+  }));
+
+  return [...home, ...categoryMap, ...storeMap, ...tipsMap, ...actionsMap];
 }
