@@ -37,7 +37,11 @@ jobs:
 
       # IndexNow: уведомляем Яндекс/Bing об изменениях после деплоя.
       # Только на push в main (не на PR), с паузой, чтобы Vercel успел задеплоить.
-      - name: IndexNow push (main only)
+      - name: IndexNow push new articles (instant)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: node scripts/indexnow-new.mjs ${{ github.event.before }} ${{ github.sha }}
+
+      - name: IndexNow push all (main only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           sleep 60
