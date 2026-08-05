@@ -44,6 +44,8 @@ export default async function ArticlePage({
   const article = getArticle(slug);
   if (!article) notFound();
 
+  const moreArticles = ARTICLES.filter((a) => a.slug !== slug).slice(0, 3);
+
   const url = `${SITE_URL}/sovety/${slug}`;
   const articleJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -128,6 +130,24 @@ export default async function ArticlePage({
           </ul>
         </section>
       )}
+
+      <section className="mt-6 rounded-2xl border border-line bg-white p-6">
+        <h2 className="font-display text-lg font-extrabold">
+          Читайте также
+        </h2>
+        <ul className="mt-4 space-y-3">
+          {moreArticles.map((a) => (
+            <li key={a.slug}>
+              <Link
+                href={`/sovety/${a.slug}`}
+                className="font-semibold text-ink underline underline-offset-2 hover:text-red transition-colors"
+              >
+                {a.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="mt-6 rounded-2xl border border-mint/30 bg-mint/10 p-6">
         <h2 className="font-display text-lg font-extrabold">
