@@ -68,5 +68,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.55,
   }));
 
-  return [...home, ...categoryMap, ...storeMap, ...tipsMap, ...actionsMap];
+  const miscMap: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}/sitemap-html`, lastModified: today, changeFrequency: "daily" as const, priority: 0.3 },
+  ];
+
+  return [...home, ...categoryMap, ...storeMap, ...tipsMap, ...actionsMap, ...miscMap];
 }
