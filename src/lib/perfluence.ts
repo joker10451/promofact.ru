@@ -2,7 +2,7 @@ import "server-only";
 import { translit } from "@/lib/translit";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 
-const REVALIDATE_SECONDS = 30 * 60; // 1800 — ISR
+const REVALIDATE_SECONDS = 10 * 60; // 600 — ISR: свежие купоны подтягиваются за 10 мин
 
 const WIDGET_URL = process.env.PERFLUENCE_WIDGET_URL ?? "";
 const RESULTS_URL = process.env.PERFLUENCE_RESULTS_URL ?? "";
