@@ -1,9 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 import "./globals.css";
 import YandexMetrika from "@/components/YandexMetrika";
 import ChatHelper from "@/components/ChatHelper";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
+
+export const viewport: Viewport = {
+  themeColor: "#FFE600",
+  colorScheme: "light",
+};
 
 const unbounded = Unbounded({
   variable: "--font-unbounded",
@@ -24,7 +29,8 @@ export const metadata: Metadata = {
     template: `%s — ${SITE_NAME}`,
   },
   description:
-    "Рабочие промокоды и купоны на скидку: Самокат, РИВ ГОШ, SOKOLOV, Отелло и сотни других магазинов. Проверяем каждый код каждый день.",
+    "Рабочие промокоды и купоны на скидку в проверенных магазинах: РИВ ГОШ, Отелло, Пятёрочка, Тануки, Start.ru и другие. Бесплатно, обновляем каждый день.",
+  alternates: { canonical: SITE_URL },
   verification: {
     yandex: process.env.YANDEX_VERIFICATION || undefined,
     google: process.env.GOOGLE_VERIFICATION || undefined,
@@ -41,13 +47,13 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: `${SITE_TAGLINE} — ${SITE_NAME}`,
     description:
-      "Рабочие промокоды и купоны на скидку: Самокат, РИВ ГОШ, SOKOLOV, Отелло и сотни других магазинов.",
+      "Рабочие промокоды и купоны на скидку в проверенных магазинах: РИВ ГОШ, Отелло, Пятёрочка, Тануки, Start.ru и другие.",
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE_TAGLINE} — ${SITE_NAME}`,
     description:
-      "Рабочие промокоды и купоны на скидку: Самокат, РИВ ГОШ, SOKOLOV, Отелло и сотни других магазинов.",
+      "Рабочие промокоды и купоны на скидку в проверенных магазинах: РИВ ГОШ, Отелло, Пятёрочка, Тануки, Start.ru и другие.",
   },
 };
 
