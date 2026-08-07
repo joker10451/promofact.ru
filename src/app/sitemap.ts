@@ -37,15 +37,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.8,
     },
-    ...store.coupons
-      .filter((c) => c.promocode.code)
-      .map((c) => ({
-        url: `${SITE_URL}/store/${store.slug}/${c.promocode.code}`,
-        lastModified,
-        changeFrequency: "daily" as const,
-        priority: 0.6,
-      })),
   ]);
+
+  const couponMap: MetadataRoute.Sitemap = coupons
+    .filter((c) => c.promocode?.code && c.store?.slug)
+    .map((c) => ({
+      url: `${SITE_URL}/store/${c.store.slug}/${c.promocode.code}`,
+      lastModified,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    }));
   const tipsMap: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/sovety`,
@@ -74,5 +75,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/partner/netprint`, lastModified: today, changeFrequency: "monthly" as const, priority: 0.4 },
   ];
 
-  return [...home, ...categoryMap, ...storeMap, ...tipsMap, ...actionsMap, ...miscMap];
+  return [...home, ...categoryMap, ...storeMap, ...couponMap, ...tipsMap, ...actionsMap, ...miscMap];
 }

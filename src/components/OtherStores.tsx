@@ -10,9 +10,10 @@ export default async function OtherStores({
 }) {
   const stores = (await getStores()).filter((s) => s.slug !== current);
   const sameCategory = category
-    ? stores.filter((s) => s.categorySlug === category).slice(0, 8)
+    ? stores.filter((s) => s.categorySlug === category)
     : [];
-  const list = sameCategory.length > 0 ? sameCategory : stores.slice(0, 8);
+  const others = stores.filter((s) => s.categorySlug !== category);
+  const list = [...sameCategory, ...others].slice(0, 12);
   const title =
     sameCategory.length > 0 && category
       ? `Другие магазины в категории ${stores.find((s) => s.categorySlug === category)?.category ?? ""}`
