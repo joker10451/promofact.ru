@@ -130,6 +130,29 @@ export default async function CategoryPage({
     ],
   };
 
+  const faqJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: `Где искать промокоды ${cat.name.toLowerCase()}?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `Все актуальные купоны ${cat.name.toLowerCase()} собраны на этой странице. Мы обновляем их каждый день по мере запуска акций партнёров.`,
+        },
+      },
+      {
+        "@type": "Question",
+        name: `Как применить промокод ${cat.name.toLowerCase()}?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Скопируйте код кнопкой «Копировать» на карточке, перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Скидка применится сразу.",
+        },
+      },
+    ],
+  };
+
   const listing: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -155,6 +178,7 @@ export default async function CategoryPage({
   return (
     <main>
       <JsonLd data={breadcrumb} />
+      <JsonLd data={faqJsonLd} />
       <JsonLd data={listing} />
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
@@ -202,6 +226,38 @@ export default async function CategoryPage({
             </p>
           ))}
         </article>
+
+        <section className="mt-12 max-w-3xl" aria-label="Частые вопросы">
+          <h2 className="font-display text-xl font-extrabold">
+            Частые вопросы про купоны {cat.name.toLowerCase()}
+          </h2>
+          <div className="mt-5 space-y-3">
+            <details className="group rounded-2xl border border-line bg-white px-5 py-4">
+              <summary className="cursor-pointer list-none font-bold text-ink">
+                Где искать промокоды {cat.name.toLowerCase()}?
+                <span className="float-right text-red group-open:hidden">+</span>
+                <span className="float-right text-red hidden group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-ink/70">
+                Все актуальные купоны {cat.name.toLowerCase()} собраны на этой
+                странице. Мы обновляем их каждый день по мере запуска акций
+                партнёров.
+              </p>
+            </details>
+            <details className="group rounded-2xl border border-line bg-white px-5 py-4">
+              <summary className="cursor-pointer list-none font-bold text-ink">
+                Как применить промокод {cat.name.toLowerCase()}?
+                <span className="float-right text-red group-open:hidden">+</span>
+                <span className="float-right text-red hidden group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-ink/70">
+                Скопируйте код кнопкой «Копировать» на карточке, перейдите в
+                магазин по нашей ссылке и вставьте код в поле «Промокод» на
+                этапе оплаты. Скидка применится сразу.
+              </p>
+            </details>
+          </div>
+        </section>
       </div>
     </main>
   );
