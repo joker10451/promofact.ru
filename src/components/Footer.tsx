@@ -81,6 +81,27 @@ export default async function Footer() {
                 Perfluence — CPA-сеть
               </a>
             </li>
+            <li className="pt-3">
+              <Link
+                href="/partner/yookassa"
+                className="group flex items-center gap-3 rounded-xl border border-white/15 bg-gradient-to-r from-yellow/20 via-red/20 to-mint/20 px-4 py-3 transition-transform hover:scale-[1.02]"
+              >
+                <span className="text-xl" aria-hidden="true">
+                  💳
+                </span>
+                <span className="flex flex-col">
+                  <span className="font-bold text-white">
+                    ЮKassa для бизнеса
+                  </span>
+                  <span className="text-xs text-white/55">
+                    Платежи без комиссии 90 дней
+                  </span>
+                </span>
+                <span className="ml-auto text-white/40 transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+            </li>
           </ul>
           <div className="mt-6 font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
             Мы в соцсетях
