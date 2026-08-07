@@ -81,6 +81,10 @@ export default function RootLayout({
           name="perfluence-verification"
           content={process.env.PERFLUENCE_VERIFICATION || "9be70c96a175"}
         />
+        <meta
+          name="msvalidate.01"
+          content={process.env.BING_VERIFICATION || "09EEE6E2B1C92C9DC90FAA19E59A7574"}
+        />
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
         <YandexMetrika />
