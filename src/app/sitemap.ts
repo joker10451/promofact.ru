@@ -71,6 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const miscMap: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/sitemap-html`, lastModified: today, changeFrequency: "daily" as const, priority: 0.3 },
     { url: `${SITE_URL}/partner/yookassa`, lastModified: today, changeFrequency: "monthly" as const, priority: 0.4 },
+    { url: `${SITE_URL}/partner/netprint`, lastModified: today, changeFrequency: "monthly" as const, priority: 0.4 },
   ];
 
   return [...home, ...categoryMap, ...storeMap, ...tipsMap, ...actionsMap, ...miscMap];
