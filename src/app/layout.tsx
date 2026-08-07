@@ -69,6 +69,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <link rel="preconnect" href="https://mc.yandex.ru" />
+        <link rel="preconnect" href="https://widget.perfluence.net" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://promofact.perfluence.net" crossOrigin="anonymous" />
         <script
           dangerouslySetInnerHTML={{
             __html: "document.documentElement.classList.add('js');",

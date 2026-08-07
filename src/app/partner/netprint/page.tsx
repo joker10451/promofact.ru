@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import JsonLd from "@/components/JsonLd";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 
@@ -86,11 +87,12 @@ export default function NetprintPage() {
         интерьере.
       </p>
 
-      <img
-        src="/partner/netprint-banner.png"
+      <Image
+        src="/partner/netprint-banner.webp"
         alt="Net Print — интерьерная печать: скидка 30% на первый заказ"
         width={1200}
-        height={630}
+        height={857}
+        loading="lazy"
         className="mt-6 w-full rounded-2xl border border-line"
       />
 
