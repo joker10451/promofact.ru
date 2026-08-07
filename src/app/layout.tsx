@@ -67,6 +67,10 @@ export default function RootLayout({
             __html: "document.documentElement.classList.add('js');",
           }}
         />
+        <meta
+          name="perfluence-verification"
+          content={process.env.PERFLUENCE_VERIFICATION || "9be70c96a175"}
+        />
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
         <YandexMetrika />
