@@ -1,6 +1,7 @@
 import Link from "next/link";
 import CouponReels from "@/components/CouponReels";
 import LatestTips from "@/components/LatestTips";
+import PopularStores from "@/components/PopularStores";
 import CouponGrid from "@/components/CouponGrid";
 import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
@@ -190,6 +191,7 @@ export default async function Home() {
         <Reveal>
           <LatestTips />
         </Reveal>
+        <PopularStores />
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
           <Reveal>
             <section aria-label="Партнёрам">
