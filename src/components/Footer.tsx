@@ -11,7 +11,14 @@ export default async function Footer() {
       <div className="h-1.5 w-full bg-gradient-to-r from-yellow via-red to-mint" />
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
-          <div className="font-display text-xl font-extrabold">
+          <div className="flex items-center gap-2 font-display text-xl font-extrabold">
+            <img
+              src="/icon.svg"
+              alt="ПРОМО·ФАКТ"
+              width={28}
+              height={28}
+              className="h-7 w-7"
+            />
             ПРОМО<span className="text-red">·</span>ФАКТ
           </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/55">

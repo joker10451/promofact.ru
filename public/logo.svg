@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" width="200" height="48">
+  <defs>
+    <style>
+      .mark { stroke:#111; stroke-width:3; }
+      .word { font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:26px; fill:#111; }
+      .dot { fill:#FF4D4D; }
+    </style>
+  </defs>
+  <g>
+    <rect class="mark" x="1.5" y="8" width="32" height="32" rx="8" fill="#FFD23F"/>
+    <rect class="mark" x="6" y="12" width="9" height="9" rx="2" fill="#FF4D4D"/>
+    <rect class="mark" x="19" y="12" width="9" height="9" rx="2" fill="#3DDC97"/>
+    <rect class="mark" x="6" y="25" width="9" height="9" rx="2" fill="#3DDC97"/>
+    <circle class="mark" cx="23.5" cy="29.5" r="5.5" fill="#111"/>
+    <circle cx="23.5" cy="29.5" r="2.4" fill="#fff"/>
+  </g>
+  <text x="44" y="35" class="word">ПРОМО<tspan class="dot">·</tspan>ФАКТ</text>
+</svg>
