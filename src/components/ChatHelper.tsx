@@ -243,12 +243,18 @@ const FALLBACK: Item = {
     "Не совсем понял вопрос 🤔 Уточните: вас интересует, как применить промокод, где его найти или почему он не сработал? Или напишите нам в ТГ @smart_zakupka — там подскажем быстрее.",
 };
 
-function findItem(text: string): Item | typeof FALLBACK {
+function pickBest(text: string): Item | typeof FALLBACK {
   const lower = text.toLowerCase();
+  let best: { item: Item; score: number } | null = null;
   for (const item of KB) {
-    if (item.keys.some((k) => lower.includes(k))) return item;
+    const hits = item.keys.filter((k) => lower.includes(k)).length;
+    if (hits === 0) continue;
+    // магазины и конкретные бренды важнее общих фраз
+    const isStore = !!item.link && item.link.startsWith("/store/");
+    const score = hits * 10 + (isStore ? 5 : 0);
+    if (!best || score > best.score) best = { item, score };
   }
-  return FALLBACK;
+  return best ? best.item : FALLBACK;
 }
 
 export default function ChatHelper() {
@@ -261,17 +267,17 @@ export default function ChatHelper() {
   ]);
   const [input, setInput] = useState("");
 
-  function send() {
-    const text = input.trim();
-    if (!text) return;
-    const item = findItem(text);
+  function send(text?: string) {
+    const value = (text ?? input).trim();
+    if (!value) return;
+    const item = pickBest(value);
     const botMsg: Msg = {
       from: "bot",
       text: item.answer,
       ...(item.link ? { link: item.link } : {}),
       ...(item.cta ? { cta: item.cta } : {}),
     };
-    setMsgs((m) => [...m, { from: "user", text }, botMsg]);
+    setMsgs((m) => [...m, { from: "user", text: value }, botMsg]);
     setInput("");
   }
 
@@ -311,6 +317,25 @@ export default function ChatHelper() {
               </div>
             ))}
           </div>
+          <div className="flex flex-wrap gap-1.5 border-t border-line px-2 pt-2">
+            {[
+              "Как применить промокод",
+              "Где магазины",
+              "Пятёрочка",
+              "Тануки",
+              "РИВ ГОШ",
+            ].map((q) => (
+              <button
+                key={q}
+                onClick={() => {
+                  send(q);
+                }}
+                className="rounded-full border border-line bg-paper px-2.5 py-1 text-xs text-ink/70 transition-colors hover:border-red hover:text-red"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
           <div className="flex gap-2 border-t border-line p-2">
             <input
               value={input}
@@ -320,7 +345,9 @@ export default function ChatHelper() {
               className="flex-1 rounded-full border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-red"
             />
             <button
-              onClick={send}
+              onClick={() => {
+                send();
+              }}
               className="rounded-full bg-red px-4 py-2 text-sm font-bold text-white"
             >
               ➤
