@@ -190,6 +190,60 @@ export default async function Home() {
         <Reveal>
           <LatestTips />
         </Reveal>
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+          <Reveal>
+            <section aria-label="Партнёрам">
+              <h2 className="font-display text-2xl font-extrabold sm:text-3xl">
+                Партнёрам и бизнесу
+              </h2>
+              <p className="mt-3 max-w-2xl text-ink/60">
+                Проверенные сервисы, которые пригодятся, если вы ведёте своё
+                дело или только думаете открыть. По партнёрским ссылкам —
+                скидки на первый заказ.
+              </p>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <Link
+                  href="/partner/yookassa"
+                  className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-transform hover:scale-[1.02]"
+                >
+                  <span className="text-2xl" aria-hidden="true">
+                    💳
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="font-bold text-ink">
+                      ЮKassa для бизнеса
+                    </span>
+                    <span className="text-sm text-ink/55">
+                      Платежи без комиссии 90 дней
+                    </span>
+                  </span>
+                  <span className="ml-auto text-red/60 transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+                <Link
+                  href="/partner/netprint"
+                  className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-transform hover:scale-[1.02]"
+                >
+                  <span className="text-2xl" aria-hidden="true">
+                    🖼️
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="font-bold text-ink">
+                      Net Print: интерьерная печать
+                    </span>
+                    <span className="text-sm text-ink/55">
+                      Скидка 30% на первый заказ
+                    </span>
+                  </span>
+                  <span className="ml-auto text-red/60 transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+              </div>
+            </section>
+          </Reveal>
+        </div>
         <Reveal>
           <Subscribe />
         </Reveal>
