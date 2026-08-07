@@ -13,20 +13,25 @@ function escapeXml(s: string): string {
 }
 
 export async function GET() {
-  const items = ARTICLES.map((a) => {
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const items = ARTICLES.map((a, i) => {
     const url = `${SITE_URL}/sovety/${a.slug}`;
     const desc = a.description ?? a.title;
+    const pub = new Date(now - (ARTICLES.length - i) * dayMs).toUTCString();
+    const body = a.body?.join("\n\n") ?? desc;
     return `    <item>
       <title>${escapeXml(a.title)}</title>
       <link>${url}</link>
       <guid isPermaLink="true">${url}</guid>
       <description>${escapeXml(desc)}</description>
-      <pubDate>${new Date().toUTCString()}</pubDate>
+      <pubDate>${pub}</pubDate>
+      <content:encoded><![CDATA[${body}]]></content:encoded>
     </item>`;
   }).join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>${escapeXml(SITE_NAME)} — ${escapeXml(SITE_TAGLINE)}</title>
     <link>${SITE_URL}</link>
