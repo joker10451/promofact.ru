@@ -32,6 +32,15 @@ const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
   year: "numeric",
 });
 
+// Даты фиксируем на уровне модуля — стабильны для SSR и клиента,
+// чтобы не было hydration-mismatch из-за new Date() в рендере.
+const TODAY_ISO = new Date().toISOString();
+const TODAY_RU = new Date().toLocaleDateString("ru-RU", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
 export async function generateMetadata({
   params,
 }: {
@@ -87,12 +96,8 @@ export default async function StorePage({
   const best = store.coupons[0];
   const pageUrl = `${SITE_URL}/store/${slug}`;
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
-  const todayIso = new Date().toISOString();
-  const todayRu = new Date().toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const todayIso = TODAY_ISO;
+  const todayRu = TODAY_RU;
 
   const breadcrumb: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -330,7 +335,7 @@ export default async function StorePage({
           ) : (
             <p className="mt-3 leading-relaxed text-ink/70">
               На этой странице собраны все актуальные промокоды и купоны{" "}
-              {store.name} на {new Date().toLocaleDateString("ru-RU")}. Магазин
+              {store.name} на {TODAY_RU}. Магазин
               относится к категории «{store.category}». Ниже — рабочие коды,
               проверенные по партнёрским CPA-кампаниям Perfluence: копируйте
               промокод одной кнопкой и применяйте в корзине{" "}

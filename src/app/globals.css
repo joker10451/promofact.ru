@@ -230,6 +230,16 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+/* Фолбэк: если JS не сработал/медленный — показываем контент через 1.2s */
+.js .reveal:not(.is-visible) {
+  animation: reveal-failsafe 0.01s linear 1.2s forwards;
+}
+@keyframes reveal-failsafe {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {

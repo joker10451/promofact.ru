@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { daysLeft, formatExpires } from "@/lib/format";
 import { ymReachGoal } from "@/components/YandexMetrika";
+import { CheckIcon } from "@/components/CheckIcon";
 import type { Coupon } from "@/lib/types";
 
 export default function CouponTicket({

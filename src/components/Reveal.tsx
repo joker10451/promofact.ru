@@ -31,10 +31,16 @@ export default function Reveal({
           }
         }
       },
-      { threshold: 0.12 }
+      { threshold: 0.01, rootMargin: "0px 0px -5% 0px" }
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    // Фолбэк: если IntersectionObserver не сработал (медленный скролл/JS),
+    // показываем контент через 1.5s, чтобы он не остался скрытым.
+    const t = setTimeout(() => el.classList.add("is-visible"), 1500);
+    return () => {
+      observer.disconnect();
+      clearTimeout(t);
+    };
   }, []);
 
   return (
