@@ -67,12 +67,12 @@ export default function CouponTicket({
   if (promocode.region)
     badges.push({
       key: "region",
-      label: promocode.region,
+      label: `регион: ${promocode.region}`,
       cls: "bg-yellow text-ink",
     });
 
   return (
-    <article className="group relative flex flex-col bg-white border border-line rounded-2xl overflow-hidden transition-transform duration-300 card-hover shadow-[0_6px_0_rgba(11,16,43,0.08)] hover:shadow-[0_10px_0_rgba(11,16,43,0.1)]">
+    <article className="group relative flex flex-col bg-white border border-line rounded-2xl overflow-hidden transition-transform duration-300 card-hover shadow-[0_6px_0_rgba(11,16,43,0.08),0_12px_24px_-12px_rgba(11,16,43,0.18)] hover:shadow-[0_10px_0_rgba(11,16,43,0.1),0_18px_32px_-12px_rgba(11,16,43,0.22)]">
       <div className="flex items-start gap-3 px-5 pt-5">
         {store.logo ? (
           <img
@@ -101,7 +101,7 @@ export default function CouponTicket({
       {proofCount > 0 ? (
         <div className="px-5 pt-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-2.5 py-1 text-[10px] font-bold text-ink/80">
-            <span aria-hidden="true">✓</span>
+          <CheckIcon className="h-3 w-3 text-mint" />
             оформлено {proofCount}{" "}
             {proofCount === 1 ? "раз" : proofCount >= 2 && proofCount <= 4 ? "раза" : "раз"} за последнее время
           </span>
@@ -109,7 +109,7 @@ export default function CouponTicket({
       ) : storeProofCount > 0 ? (
         <div className="px-5 pt-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-2.5 py-1 text-[10px] font-bold text-ink/80">
-            <span aria-hidden="true">✓</span>
+          <CheckIcon className="h-3 w-3 text-mint" />
             по промокодам {store.name} оформлено {storeProofCount}{" "}
             {storeProofCount === 1 ? "заказ" : storeProofCount >= 2 && storeProofCount <= 4 ? "заказа" : "заказов"}
           </span>
@@ -164,7 +164,13 @@ export default function CouponTicket({
                   : "bg-yellow text-ink shadow-offset hover:translate-y-[2px] hover:shadow-none"
               }`}
             >
-              {copied ? "Скопировано ✓" : "Копировать"}
+              {copied ? (
+                <span className="inline-flex items-center gap-1">
+                  <CheckIcon className="h-3.5 w-3.5" /> Скопировано
+                </span>
+              ) : (
+                "Копировать"
+              )}
             </button>
           </div>
         )}
@@ -246,7 +252,7 @@ export default function CouponTicket({
           role="status"
           className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-lg"
         >
-          Код {promocode.code} скопирован ✓
+          Код {promocode.code} скопирован <CheckIcon className="h-3.5 w-3.5" />
         </div>
       )}
     </article>

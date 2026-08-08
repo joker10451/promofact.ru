@@ -264,3 +264,11 @@ body {
 .marquee-pause:hover .animate-ticker {
   animation-play-state: paused;
 }
+
+/* Крупные заголовки: плотный line-height (убираем «воздух») */
+h1, h2 {
+  line-height: 1.05;
+}
+h1.font-display, h2.font-display {
+  line-height: 1.02;
+}
