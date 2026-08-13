@@ -27,7 +27,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды на доставку продуктов", href: "/category/dostavka-produktov" },
-      { text: "Самокат — промокоды и скидки", href: "/store/samokat" },
+      { text: "Пятёрочка Доставка — промокоды", href: "/store/pyaterochka" },
     ],
   },
   {
@@ -44,7 +44,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Все магазины с промокодами", href: "/" },
-      { text: "Самокат — промокоды и скидки", href: "/store/samokat" },
+      { text: "Пятёрочка Доставка — промокоды", href: "/store/pyaterochka" },
     ],
   },
   {
