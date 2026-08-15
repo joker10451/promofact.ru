@@ -15,9 +15,10 @@ export async function POST(req: NextRequest) {
 
     // 1. Подтверждение адреса сервера для ВКонтакте (confirmation)
     if (type === "confirmation") {
-      const confirmationCode = process.env.VK_CONFIRMATION_CODE || "ok";
+      const confirmationCode = (process.env.VK_CONFIRMATION_CODE || "be170407").trim().replace(/^\uFEFF/, "");
       return new Response(confirmationCode, {
-        headers: { "Content-Type": "text/plain" },
+        status: 200,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
       });
     }
 
