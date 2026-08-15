@@ -40,10 +40,6 @@ export function formatVkPost(coupon: Coupon): string {
     `#скидки #${coupon.store.categorySlug.replace(/-/g, "_")} #промокод #${coupon.store.slug.replace(/-/g, "_")} #промофакт`,
   ];
 
-  if (coupon.affiliate.ordText) {
-    lines.push(``, `Реклама. ${coupon.affiliate.ordText}`);
-  }
-
   return lines.filter((l) => l !== undefined).join("\n");
 }
 
