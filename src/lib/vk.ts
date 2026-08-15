@@ -74,7 +74,6 @@ export async function sendCouponToVk(coupon: Coupon): Promise<VkPostResult> {
       owner_id: ownerId,
       from_group: "1",
       message,
-      attachments: postUrl,
     });
 
     const res = await fetch(`https://api.vk.com/method/wall.post`, {
