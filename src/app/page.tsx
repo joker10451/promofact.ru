@@ -103,7 +103,9 @@ export default async function Home() {
       <main>
         <Hero featured={featured} stores={stores} coupons={coupons} />
         <StoresMarquee />
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+        
+        {/* Каталог купонов */}
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <CouponGrid
               coupons={coupons}
@@ -112,35 +114,51 @@ export default async function Home() {
             />
           </Reveal>
         </div>
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+
+        {/* Как это работает */}
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <HowItWorks />
           </Reveal>
         </div>
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+
+        {/* Популярные магазины */}
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <section>
-              <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
-                Популярные магазины
-              </h2>
-              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
+                  Популярные магазины
+                </h2>
+                <Link
+                  href="/store"
+                  className="text-xs sm:text-sm font-bold text-red hover:underline transition-all"
+                >
+                  Все магазины ({stores.length}) →
+                </Link>
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {topStores.map((store) => (
                   <Link
                     key={store.slug}
                     href={`/store/${store.slug}`}
-                    className="group flex items-center gap-3 rounded-2xl bg-white border border-line px-4 py-3 transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_0_rgba(11,16,43,0.08)]"
+                    className="group flex items-center gap-3 rounded-2xl bg-white border border-line p-3 sm:p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_0_rgba(11,16,43,0.08)]"
                   >
                     {store.logo ? (
                       <img
                         src={store.logo}
-                        alt=""
+                        alt={store.name}
                         width={36}
                         height={36}
                         className="h-9 w-9 shrink-0 rounded-lg border border-line bg-white object-contain p-0.5"
                       />
-                    ) : null}
+                    ) : (
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-yellow font-bold text-xs text-ink">
+                        {store.name.slice(0, 1)}
+                      </span>
+                    )}
                     <span className="min-w-0">
-                      <span className="block truncate font-bold group-hover:text-red transition-colors">
+                      <span className="block truncate font-bold text-sm text-ink group-hover:text-red transition-colors">
                         {store.name}
                       </span>
                       <span className="block text-xs text-ink/50">
@@ -154,7 +172,9 @@ export default async function Home() {
             </section>
           </Reveal>
         </div>
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+
+        {/* Категории */}
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <section>
               <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
@@ -174,21 +194,27 @@ export default async function Home() {
             </section>
           </Reveal>
         </div>
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+
+        {/* SEO статья */}
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <SeoArticle />
           </Reveal>
         </div>
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+
+        {/* FAQ */}
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <Faq />
           </Reveal>
         </div>
+
         <Reveal>
           <LatestTips />
         </Reveal>
-        <PopularStores />
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+
+        {/* Партнерам и бизнесу */}
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <section aria-label="Партнёрам">
               <h2 className="font-display text-2xl font-extrabold sm:text-3xl">
@@ -250,3 +276,4 @@ export default async function Home() {
     </>
   );
 }
+

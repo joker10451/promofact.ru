@@ -160,11 +160,10 @@ export default async function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
           <p className="text-xs leading-relaxed text-white/40">
-            Переходы по ссылкам на сайтах магазинов — по партнёрским CPA-ссылкам
-            Perfluence: {SITE_NAME} может получать комиссию за заказы,
+            Переходы по ссылкам на сайтах магазинов — по партнёрским CPA-программам
+            (Perfluence, Saleads, Яндекс и др.): {SITE_NAME} может получать вознаграждение за заказы,
             совершённые после перехода. Это не влияет на размер твоей скидки.
-            Информация о промокодах носит справочный характер и может меняться в
-            зависимости от условий магазинов.
+            Информация о промокодах носит справочный характер и проверяется ежедневно.
           </p>
           <p className="mt-3 text-xs text-white/30">
             © {new Date().getFullYear()} {SITE_NAME}. Все права защищены.

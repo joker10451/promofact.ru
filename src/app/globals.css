@@ -265,10 +265,20 @@ body {
   animation-play-state: paused;
 }
 
-/* Крупные заголовки: плотный line-height (убираем «воздух») */
-h1, h2 {
-  line-height: 1.05;
+/* Утилита для горизонтального скролла без полосы прокрутки */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Крупные заголовки: гармоничный line-height без наложения строк */
+h1, h2, h3 {
+  line-height: 1.2;
 }
 h1.font-display, h2.font-display {
-  line-height: 1.02;
+  line-height: 1.14;
 }
+

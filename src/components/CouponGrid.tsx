@@ -69,22 +69,33 @@ export default function CouponGrid({
         <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
           Купоны на сегодня
         </h2>
-        <input
-          ref={inputRef}
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Поиск: магазин или промокод…"
-          className="w-full sm:w-80 rounded-full border-2 border-ink/15 bg-white px-5 py-2.5 text-sm outline-none focus:border-ink transition-colors"
-        />
+        <div className="relative w-full sm:w-80">
+          <input
+            ref={inputRef}
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Поиск: магазин или промокод…"
+            className="w-full rounded-full border-2 border-ink/15 bg-white px-5 py-2.5 pr-9 text-sm text-ink outline-none focus:border-ink transition-colors"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-ink/40 hover:text-ink"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pb-1 sm:flex-wrap sm:pb-0">
           <button
             type="button"
             onClick={() => setFilter("all")}
-            className={chipCls(filter === "all")}
+            className={`shrink-0 ${chipCls(filter === "all")}`}
           >
             Все · {coupons.length}
           </button>
@@ -93,7 +104,7 @@ export default function CouponGrid({
               key={slug}
               type="button"
               onClick={() => setFilter(slug)}
-              className={chipCls(filter === slug)}
+              className={`shrink-0 ${chipCls(filter === slug)}`}
             >
               {name} · {countByCat(slug)}
             </button>
@@ -103,7 +114,7 @@ export default function CouponGrid({
         <div
           role="group"
           aria-label="Применимость промокодов"
-          className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-white p-1"
+          className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-white p-1 self-start sm:self-auto"
         >
           {(
             [
