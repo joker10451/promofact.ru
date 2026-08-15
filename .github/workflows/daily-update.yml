@@ -1,0 +1,21 @@
+name: Daily Update & IndexNow
+
+on:
+  schedule:
+    - cron: '0 5 * * *' # Каждый день в 08:00 МСК (05:00 UTC)
+  workflow_dispatch: # Возможность запустить вручную
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Ping Search Engines (IndexNow)
+        run: node scripts/indexnow-push.mjs https://promofact.ru
