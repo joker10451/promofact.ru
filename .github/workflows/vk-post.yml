@@ -1,0 +1,40 @@
+name: Auto Post to VKontakte Group
+
+on:
+  schedule:
+    - cron: '0 10 * * *' # Каждый день в 13:00 МСК (10:00 UTC)
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Количество постов (от 1 до 5)'
+        required: false
+        default: '1'
+      store:
+        description: 'Slug магазина (например, tanukifamily, litres)'
+        required: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger VK Posting API
+        run: |
+          LIMIT="${{ github.event.inputs.limit || '1' }}"
+          STORE="${{ github.event.inputs.store || '' }}"
+          
+          URL="https://promofact.ru/api/vk/post?hitOnly=true&limit=$LIMIT"
+          if [ -n "$STORE" ]; then
+            URL="$URL&store=$STORE"
+          fi
+          
+          echo "Sending request to $URL"
+          
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$URL" \
+            -H "Authorization: Bearer ${{ secrets.VK_POSTING_SECRET || secrets.TELEGRAM_POSTING_SECRET }}")
+          
+          cat response.json
+          
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "::error::API request failed with status $HTTP_STATUS"
+            exit 1
+          fi
