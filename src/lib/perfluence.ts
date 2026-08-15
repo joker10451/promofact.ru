@@ -257,14 +257,15 @@ function byScore(a: Coupon, b: Coupon): number {
 /* ---------- публичное API ---------- */
 
 export async function getCoupons(): Promise<Coupon[]> {
-  const [perfluenceCoupons, admitadCoupons] = await Promise.all([
+  const [perfluenceCoupons, admitadCoupons, saleadsCoupons] = await Promise.all([
     fetchData(),
     (await import("@/lib/admitad")).fetchAdmitadCoupons(),
+    (await import("@/lib/saleads")).fetchSaleadsCoupons(),
   ]);
 
   const customCoupons = (await import("@/lib/customCoupons")).CUSTOM_COUPONS;
 
-  const all = [...perfluenceCoupons, ...admitadCoupons, ...customCoupons];
+  const all = [...perfluenceCoupons, ...admitadCoupons, ...saleadsCoupons, ...customCoupons];
   return all.filter(isActive).sort(byScore);
 }
 

@@ -1,8 +1,7 @@
 import type { Coupon } from "@/lib/types";
 
 /**
- * Ручные и эксклюзивные промокоды (Яндекс Дистрибуция, прямые рекламодатели, банки)
- * Можно пополнять вручную или загружать из JSON
+ * Ручные и эксклюзивные промокоды (Яндекс Дистрибуция, прямые рекламодатели, российские банки)
  */
 export const CUSTOM_COUPONS: Coupon[] = [
   {
@@ -74,6 +73,78 @@ export const CUSTOM_COUPONS: Coupon[] = [
       landingLink: "https://plus.yandex.ru",
       ordMarker: "2RanykPlus",
       ordText: "Реклама. ООО «Яндекс Медиасервисы», ИНН 7705935687",
+    },
+    extraLinks: [],
+  },
+  {
+    id: 50003,
+    promocode: {
+      id: 50003,
+      code: "EDA20",
+      bonusName: "Скидка 20% на первый заказ из ресторанов от 900 ₽",
+      terms: "Действует на первый заказ в сервисе Яндекс Еда из подборки ресторанов.",
+      expires: "2026-12-31",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "yandex",
+    },
+    store: {
+      id: 5003,
+      name: "Яндекс Еда",
+      slug: "yandex-eda",
+      logo: "https://avatars.mds.yandex.net/get-bunker/998550/db08ca783f9822a578964097f485e927c94514ba/orig",
+      category: "Доставка из ресторанов",
+      categorySlug: "dostavka-iz-restoranov",
+      about: "Яндекс Еда — сервис быстрой доставки еды из любимых ресторанов и кафе прямо к вашей двери за 30–45 минут.",
+      conditions: "Скидка применяется в приложении Яндекс Еда.",
+      site: "https://eda.yandex.ru",
+      activeBloggers: 11200,
+    },
+    affiliate: {
+      link: "https://eda.yandex.ru",
+      landingLink: "https://eda.yandex.ru",
+      ordMarker: "2RanykEda",
+      ordText: "Реклама. ООО «ЯНДЕКС.ЕДА», ИНН 9705114405",
+    },
+    extraLinks: [],
+  },
+  {
+    id: 50004,
+    promocode: {
+      id: 50004,
+      code: "TRAVEL15",
+      bonusName: "Скидка 15% на первое бронирование отелей",
+      terms: "Действует на первое бронирование отелей и гостиниц по всей России и за рубежом.",
+      expires: "2026-12-31",
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: true,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "yandex",
+    },
+    store: {
+      id: 5004,
+      name: "Яндекс Путешествия",
+      slug: "yandex-travel",
+      logo: "https://avatars.mds.yandex.net/get-vertis-journal/4465440/travel_logo.png_1650376483569/orig",
+      category: "Путешествия и туризм",
+      categorySlug: "puteshestviya-i-turizm",
+      about: "Яндекс Путешествия — удобный сервис для поиска и бронирования отелей, покупки ж/д и авиабилетов с кэшбэком баллами Яндекс Плюса до 20%.",
+      conditions: "Оплата онлайн на сайте или в приложении.",
+      site: "https://travel.yandex.ru",
+      activeBloggers: 6800,
+    },
+    affiliate: {
+      link: "https://travel.yandex.ru",
+      landingLink: "https://travel.yandex.ru",
+      ordMarker: "2RanykTravel",
+      ordText: "Реклама. ООО «Яндекс.Вертикали», ИНН 7704340327",
     },
     extraLinks: [],
   },
