@@ -53,6 +53,38 @@ export default async function Footer() {
             </nav>
         )}
 
+        <nav aria-label="Подборки">
+          <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
+            Подборки
+          </div>
+          <ul className="mt-4 space-y-2.5 text-sm text-white/70">
+            <li>
+              <Link
+                href="/collections/first-order"
+                className="hover:text-white transition-colors"
+              >
+                Скидки на первый заказ
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/collections/food-delivery"
+                className="hover:text-white transition-colors"
+              >
+                Доставка еды и продуктов
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/collections/exclusive"
+                className="hover:text-white transition-colors"
+              >
+                Эксклюзивные промокоды
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
         {stores.length > 0 && (
           <nav aria-label="Магазины">
             <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">

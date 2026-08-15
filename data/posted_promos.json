@@ -1,0 +1,24 @@
+{
+  "postedIds": [
+    1006,
+    50005
+  ],
+  "history": [
+    {
+      "id": 1006,
+      "code": "a5w5yh74pr5",
+      "store": "Пятёрочка",
+      "date": "2026-08-14T15:31:55.132Z",
+      "messageId": 37
+    },
+    {
+      "id": 50005,
+      "code": "SALEADS2026",
+      "store": "Плати по миру",
+      "storeSlug": "plati-po-miru",
+      "postUrl": "https://t.me/smart_zakupka/38",
+      "date": "2026-08-15T17:23:26.229Z",
+      "messageId": 38
+    }
+  ]
+}
