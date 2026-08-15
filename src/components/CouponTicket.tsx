@@ -21,6 +21,7 @@ export default function CouponTicket({
   const [toast, setToast] = useState(false);
   const [showBarcode, setShowBarcode] = useState(false);
   const [vote, setVote] = useState<"up" | "down" | null>(null);
+  const [imgError, setImgError] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const urgent = daysLeft(promocode.expires) < 3;
@@ -97,17 +98,18 @@ export default function CouponTicket({
   return (
     <article className="group relative flex flex-col bg-white border border-line rounded-2xl overflow-hidden transition-transform duration-300 card-hover shadow-[0_6px_0_rgba(11,16,43,0.08),0_12px_24px_-12px_rgba(11,16,43,0.18)] hover:shadow-[0_10px_0_rgba(11,16,43,0.1),0_18px_32px_-12px_rgba(11,16,43,0.22)]">
       <div className="flex items-start gap-3 px-5 pt-5">
-        {store.logo ? (
+        {store.logo && !imgError ? (
           <img
             src={store.logo}
             alt={store.name}
             loading="lazy"
             width={40}
             height={40}
-            className="h-10 w-10 shrink-0 rounded-xl border border-line bg-paper object-contain"
+            onError={() => setImgError(true)}
+            className="h-10 w-10 shrink-0 rounded-xl border border-line bg-white object-contain p-0.5"
           />
         ) : (
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow font-display text-base font-extrabold">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow font-display text-base font-extrabold text-ink">
             {store.name.slice(0, 1)}
           </span>
         )}
