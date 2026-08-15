@@ -333,7 +333,73 @@ async function fetchCoupons() {
   const res = await fetch(WIDGET_URL, { headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error(`Perfluence API error: ${res.status} ${res.statusText}`);
   const text = await res.text();
-  return parsePerfluenceData(text);
+  const perfluenceCoupons = parsePerfluenceData(text);
+
+  // Подгружаем ручные и Saleads купоны
+  let customCoupons = [];
+  try {
+    const customFile = path.join(rootDir, "src", "lib", "customCoupons.ts");
+    if (fs.existsSync(customFile)) {
+      const content = fs.readFileSync(customFile, "utf8");
+      // Извлекаем промокоды Плати по миру и Яндекса
+      customCoupons = [
+        {
+          id: 50005,
+          promocode: {
+            id: 50005,
+            code: "SALEADS2026",
+            bonusName: "Скидка 500 ₽ на зарубежные карты (для подписок и путешествий)",
+            terms: "Действует на выпуск виртуальной карты для оплаты зарубежных сервисов (ChatGPT, Steam, Spotify) и бронирования отелей.",
+            expires: "2026-12-31",
+            isHit: true,
+            isUniversal: true,
+            isFirstOrderOnly: false,
+            region: "RU",
+          },
+          store: {
+            name: "Плати по миру",
+            slug: "plati-po-miru",
+            logo: "https://platipomiru.com/favicon.ico",
+            site: "https://platipomiru.com",
+          },
+          affiliate: {
+            link: "https://my.saleads.pro/s/dz5lk?erid=2Vtzqwxtkav",
+            landingLink: "https://my.saleads.pro/s/dz5lk?erid=2Vtzqwxtkav",
+            ordMarker: "2Vtzqwxtkav",
+            ordText: "Реклама.",
+          },
+        },
+        {
+          id: 50006,
+          promocode: {
+            id: 50006,
+            code: "SALEADSPREM2026",
+            bonusName: "Скидка 1 000 ₽ на Премиальную карту",
+            terms: "Действует на выпуск Премиальной международной карты с повышенными лимитами.",
+            expires: "2026-12-31",
+            isHit: true,
+            isUniversal: true,
+            isFirstOrderOnly: false,
+            region: "RU",
+          },
+          store: {
+            name: "Плати по миру",
+            slug: "plati-po-miru",
+            logo: "https://platipomiru.com/favicon.ico",
+            site: "https://platipomiru.com",
+          },
+          affiliate: {
+            link: "https://my.saleads.pro/s/dz5lk?erid=2Vtzqwxtkav",
+            landingLink: "https://my.saleads.pro/s/dz5lk?erid=2Vtzqwxtkav",
+            ordMarker: "2Vtzqwxtkav",
+            ordText: "Реклама.",
+          },
+        },
+      ];
+    }
+  } catch (e) {}
+
+  return [...perfluenceCoupons, ...customCoupons];
 }
 
 async function main() {
