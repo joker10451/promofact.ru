@@ -10,10 +10,12 @@ export default function CouponTicket({
   coupon,
   proofCount = 0,
   storeProofCount = 0,
+  isDetailPage = false,
 }: {
   coupon: Coupon;
   proofCount?: number;
   storeProofCount?: number;
+  isDetailPage?: boolean;
 }) {
   const { promocode, store, affiliate } = coupon;
 
@@ -361,6 +363,28 @@ export default function CouponTicket({
               Подписаться на скидки в Telegram →
             </a>
           </div>
+        </div>
+      )}
+
+      {isDetailPage && !promocode.isBarcode && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white px-4 py-3 pb-safe md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+          <button
+            type="button"
+            onClick={() => copy(promocode.code)}
+            className={`w-full rounded-xl py-3.5 text-sm font-bold shadow-sm transition-all ${
+              copied
+                ? "bg-mint text-white"
+                : "bg-yellow text-ink active:scale-[0.98]"
+            }`}
+          >
+            {copied ? (
+              <span className="flex items-center justify-center gap-2">
+                <CheckIcon className="h-4 w-4" /> Скопировано
+              </span>
+            ) : (
+              `Скопировать: ${promocode.code}`
+            )}
+          </button>
         </div>
       )}
     </article>

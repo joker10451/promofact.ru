@@ -148,7 +148,7 @@ export default async function CouponPage({
       )}
 
       <div className="mt-6">
-        <CouponTicket coupon={coupon} storeProofCount={storeProofCount} />
+        <CouponTicket coupon={coupon} storeProofCount={storeProofCount} isDetailPage={true} />
       </div>
 
       <section className="mt-8 rounded-2xl border border-line bg-white p-6">
