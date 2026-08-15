@@ -114,9 +114,9 @@ export function formatTelegramPost(coupon: Coupon): {
   lines.push("\n────────────────────");
   if (ordText || ordMarker) {
     const markerStr = ordMarker ? ` erid: ${ordMarker}` : "";
-    lines.push(`<tg-spoiler><i>${ordText}${markerStr}</i></tg-spoiler>`);
+    lines.push(`<i>${ordText}${markerStr}</i>`);
   } else {
-    lines.push(`<tg-spoiler><i>Реклама.</i></tg-spoiler>`);
+    lines.push(`<i>Реклама.</i>`);
   }
 
   // Кнопки
