@@ -65,6 +65,7 @@ export async function sendCouponToVk(coupon: Coupon): Promise<VkPostResult> {
   }
 
   const message = formatVkPost(coupon);
+  const postUrl = `${SITE_URL}/store/${coupon.store.slug}/${encodeURIComponent(coupon.promocode.code)}`;
 
   try {
     const params = new URLSearchParams({
