@@ -102,7 +102,7 @@ export default async function Home() {
       <Ticker />
       <Header />
       <main>
-        <Hero featured={featured} />
+        <Hero featured={featured} stores={stores} coupons={coupons} />
         <StoresMarquee />
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
           <Reveal>

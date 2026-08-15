@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Countdown from "@/components/Countdown";
 import { formatExpires } from "@/lib/format";
-import type { Coupon } from "@/lib/types";
+import type { Coupon, Store } from "@/lib/types";
 
-export default function Hero({ featured }: { featured?: Coupon }) {
+interface HeroProps {
+  featured?: Coupon;
+  stores?: Array<Store & { coupons?: Coupon[] }>;
+  coupons?: Coupon[];
+}
+
+export default function Hero({ featured, stores = [], coupons = [] }: HeroProps) {
   const [q, setQ] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const expiresToday =
     !!featured?.promocode.expires &&
@@ -19,9 +29,53 @@ export default function Hero({ featured }: { featured?: Coupon }) {
       ]
     : [];
 
+  const query = q.trim().toLowerCase();
+
+  // Фильтрация подсказок магазинов
+  const matchedStores = query
+    ? stores
+        .filter((s) => s.name.toLowerCase().includes(query) || s.category.toLowerCase().includes(query))
+        .slice(0, 4)
+    : [];
+
+  // Фильтрация подсказок купонов
+  const matchedCoupons = query
+    ? coupons
+        .filter(
+          (c) =>
+            c.promocode.code.toLowerCase().includes(query) ||
+            c.store.name.toLowerCase().includes(query) ||
+            (c.promocode.bonusName && c.promocode.bonusName.toLowerCase().includes(query))
+        )
+        .slice(0, 4)
+    : [];
+
+  const hasResults = matchedStores.length > 0 || matchedCoupons.length > 0;
+
+  // Закрытие при клике снаружи
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleCopyCode = async (e: React.MouseEvent, code: string) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      setTimeout(() => setCopiedCode(null), 2000);
+    } catch {}
+  };
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const v = q.trim();
+    setIsOpen(false);
     window.dispatchEvent(new CustomEvent("promo:search", { detail: v }));
     document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -58,21 +112,142 @@ export default function Hero({ featured }: { featured?: Coupon }) {
             подписок.
           </p>
 
-          <form onSubmit={submit} className="mt-7 flex max-w-xl gap-2">
-            <input
-              type="search"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Например: промокод Lamoda"
-              className="flex-1 rounded-full border-2 border-ink bg-white px-5 py-3 text-sm outline-none focus:border-red transition-colors"
-            />
-            <button
-              type="submit"
-              className="rounded-full bg-gradient-to-r from-red to-red-dark px-6 py-3 text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
-            >
-              Найти
-            </button>
-          </form>
+          <div ref={containerRef} className="relative mt-7 max-w-xl">
+            <form onSubmit={submit} className="relative flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="search"
+                  value={q}
+                  onFocus={() => setIsOpen(true)}
+                  onChange={(e) => {
+                    setQ(e.target.value);
+                    setIsOpen(true);
+                  }}
+                  placeholder="Поиск магазина или скидки (Тануки, РИВ ГОШ...)"
+                  className="w-full rounded-full border-2 border-ink bg-white px-5 py-3 pr-10 text-sm text-ink outline-none focus:border-red transition-colors"
+                />
+                {q && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQ("");
+                      setIsOpen(false);
+                    }}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-ink/40 hover:text-ink"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <button
+                type="submit"
+                className="shrink-0 rounded-full bg-gradient-to-r from-red to-red-dark px-6 py-3 text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
+              >
+                Найти
+              </button>
+            </form>
+
+            {/* Выпадающий список Live Autocomplete */}
+            {isOpen && query.length >= 1 && (
+              <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-line bg-white text-ink shadow-[0_18px_40px_rgba(11,16,43,0.3)]">
+                {hasResults ? (
+                  <div className="max-h-[380px] overflow-y-auto p-2">
+                    {/* Секция Магазины */}
+                    {matchedStores.length > 0 && (
+                      <div className="mb-2">
+                        <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink/45">
+                          Магазины
+                        </div>
+                        <div className="space-y-1">
+                          {matchedStores.map((s) => (
+                            <Link
+                              key={s.slug}
+                              href={`/store/${s.slug}`}
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between rounded-xl px-3 py-2 transition-colors hover:bg-paper"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                {s.logo ? (
+                                  <img
+                                    src={s.logo}
+                                    alt={s.name}
+                                    className="h-7 w-7 shrink-0 rounded-lg border border-line bg-white object-contain p-0.5"
+                                  />
+                                ) : (
+                                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-yellow font-bold text-xs">
+                                    {s.name.slice(0, 1)}
+                                  </span>
+                                )}
+                                <span className="truncate font-bold text-sm text-ink">{s.name}</span>
+                              </div>
+                              <span className="shrink-0 text-xs font-semibold text-red">
+                                Открыть магазин →
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Секция Купоны */}
+                    {matchedCoupons.length > 0 && (
+                      <div>
+                        <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink/45">
+                          Промокоды и акции
+                        </div>
+                        <div className="space-y-1">
+                          {matchedCoupons.map((c) => (
+                            <div
+                              key={c.id}
+                              className="flex items-center justify-between gap-2 rounded-xl px-3 py-2 transition-colors hover:bg-paper"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-ink/50">
+                                  {c.store.name}
+                                </div>
+                                <div className="truncate font-semibold text-xs text-ink">
+                                  {c.promocode.bonusName || `Скидка по промокоду ${c.promocode.code}`}
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => handleCopyCode(e, c.promocode.code)}
+                                className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                                  copiedCode === c.promocode.code
+                                    ? "bg-mint text-white"
+                                    : "bg-yellow text-ink shadow-[0_2px_0_rgba(11,16,43,0.15)] hover:translate-y-[1px]"
+                                }`}
+                              >
+                                {copiedCode === c.promocode.code ? "Скопировано ✓" : c.promocode.code}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Нижняя кнопка Показать все */}
+                    <div className="mt-2 border-t border-line pt-1 text-center">
+                      <button
+                        type="button"
+                        onClick={submit}
+                        className="w-full rounded-xl py-2 text-xs font-bold text-red hover:bg-red/5 transition-colors"
+                      >
+                        Показать все результаты в каталоге ({matchedStores.length + matchedCoupons.length}) ↓
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-5 text-center text-sm text-ink/60">
+                    По запросу «<span className="font-bold text-ink">{q}</span>» ничего не найдено.
+                    <div className="mt-2 text-xs text-ink/40">
+                      Попробуйте: Тануки, Ив Роше, РИВ ГОШ, Пятёрочка
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {featured && (
@@ -143,3 +318,4 @@ export default function Hero({ featured }: { featured?: Coupon }) {
     </section>
   );
 }
+

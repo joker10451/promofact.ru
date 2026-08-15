@@ -27,13 +27,43 @@ export async function generateStaticParams() {
   return [];
 }
 
-const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
-  month: "long",
-  year: "numeric",
-});
+function getCapitalizedMonthYear(): string {
+  const now = new Date();
+  const months = [
+    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+  ];
+  return `${months[now.getMonth()]} ${now.getFullYear()}`;
+}
 
-// Даты фиксируем на уровне модуля — стабильны для SSR и клиента,
-// чтобы не было hydration-mismatch из-за new Date() в рендере.
+function getMonthRuPrep(): string {
+  const now = new Date();
+  const monthsPrep = [
+    "январь", "февраль", "март", "апрель", "май", "июнь",
+    "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"
+  ];
+  return `${monthsPrep[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+function getMaxDiscount(coupons: { promocode: { bonusName: string | null } }[]): string {
+  let maxPercent = 0;
+  let maxRub = 0;
+  for (const c of coupons) {
+    const text = c.promocode.bonusName || "";
+    const p = text.match(/(\d+)\s*%/);
+    if (p && Number(p[1]) > maxPercent) maxPercent = Number(p[1]);
+    const r = text.match(/(\d+[\s\d]*)\s*(?:₽|руб)/i);
+    if (r) {
+      const val = Number(r[1].replace(/\s+/g, ""));
+      if (val > maxRub) maxRub = val;
+    }
+  }
+  if (maxPercent > 0) return `до ${maxPercent}%`;
+  if (maxRub > 0) return `до ${maxRub.toLocaleString("ru-RU")} ₽`;
+  return "скидки";
+}
+
+// Даты фиксируем на уровне модуля — стабильны для SSR и клиента
 const TODAY_ISO = new Date().toISOString();
 const TODAY_RU = new Date().toLocaleDateString("ru-RU", {
   day: "numeric",
@@ -55,28 +85,34 @@ export async function generateMetadata({
   const n = store.coupons.length;
   const countWord =
     n === 1 ? "проверенный промокод" : n >= 2 && n <= 4 ? "проверенных промокода" : "проверенных промокодов";
+  const maxDisc = getMaxDiscount(store.coupons);
+  const monthYear = getCapitalizedMonthYear();
+  const monthRu = getMonthRuPrep();
+
+  const title = `Промокоды ${store.name} на ${monthYear} — ${maxDisc} (${n} ${countWord}) | ${SITE_NAME}`;
   const description =
-    `Актуальные промокоды и купоны ${store.name}: ${n} ${countWord}` +
-    `${codes ? ` (${codes})` : ""}. Копируй и применяй в корзине.`;
+    `Рабочие промокоды и купоны ${store.name} на ${monthRu}: ${n} ${countWord} со скидкой ${maxDisc}` +
+    `${codes ? ` [${codes}]` : ""}. Проверено сегодня, копируй и экономь на заказе!`;
+
   const og = {
-    title: `Промокод ${store.name} — скидки ${MONTH_YEAR}`,
+    title,
     description: description.slice(0, 160),
     url: pageUrl,
     type: "website" as const,
     locale: "ru_RU",
     siteName: SITE_NAME,
     images: store.logo
-      ? [{ url: store.logo, alt: store.name }]
+      ? [{ url: store.logo, alt: `Промокоды ${store.name}` }]
       : undefined,
   };
   return {
-    title: og.title,
+    title,
     description: og.description,
     alternates: { canonical: pageUrl },
     openGraph: og,
     twitter: {
       card: store.logo ? "summary_large_image" : "summary",
-      title: og.title,
+      title,
       description: og.description,
       images: store.logo ? [store.logo] : undefined,
     },
@@ -98,6 +134,12 @@ export default async function StorePage({
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const todayIso = TODAY_ISO;
   const todayRu = TODAY_RU;
+  const monthYear = getCapitalizedMonthYear();
+  const monthRu = getMonthRuPrep();
+  const maxDisc = getMaxDiscount(store.coupons);
+
+  const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
+  const repeatOrderPromo = store.coupons.find((c) => !c.promocode.isFirstOrderOnly);
 
   const breadcrumb: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -137,19 +179,25 @@ export default async function StorePage({
   const faqItems = [
     {
       q: `Как применить промокод ${store.name}?`,
-      a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Скидка применится сразу — её обычно видно до подтверждения заказа.`,
+      a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Скидка применится автоматически до оплаты.`,
     },
     {
-      q: `Где искать свежие промокоды ${store.name}?`,
-      a: `Актуальные купоны ${store.name} мы собираем на этой странице и обновляем каждый день по мере запуска акций. Подпишитесь на уведомления или заходите раз в несколько дней — истёкшие коды убираем сразу.`,
+      q: `Есть ли промокод ${store.name} на первый заказ в ${monthRu}?`,
+      a: firstOrderPromo
+        ? `Да! Сейчас действует промокод «${firstOrderPromo.promocode.code}» — ${firstOrderPromo.promocode.bonusName || "скидка на первый заказ"}. Скопируйте его на этой странице и примените при оформлении первого заказа.`
+        : `На данный момент большинство промокодов ${store.name} подходят как для новых, так и для постоянных клиентов. Проверьте условия в карточках купонов выше.`,
     },
     {
-      q: `Почему промокод ${store.name} не сработал?`,
-      a: `Чаще всего причина в условиях: купон истёк, действует только для новых клиентов, требует минимальной суммы заказа или не суммируется с распродажей. Все ограничения указаны в карточке купона — прочитайте их перед переходом в магазин.`,
+      q: `Какой максимальный размер скидки в ${store.name} сейчас?`,
+      a: `На ${monthYear} максимальная выгода по промокодам в ${store.name} составляет ${maxDisc}. Все коды проверяются каждый день и гарантированно работают при соблюдении условий акции.`,
     },
     {
-      q: `Сколько стоит промокод ${store.name} на ПромоФакт?`,
-      a: `Все промокоды бесплатны. Мы зарабатываем на партнёрских CPA-ссылках: если вы закажете что-то по нашей ссылке, магазин заплатит нам комиссию. На размер вашей скидки это не влияет.`,
+      q: `Почему промокод ${store.name} может не сработать?`,
+      a: `Основные причины: сумма заказа меньше минимального порога, купон действует только на определенные товары/бренды или промокод не суммируется со спецпредложениями распродажи. Все ограничения подробно расписаны в карточке каждого купона.`,
+    },
+    {
+      q: `Бесплатны ли промокоды ${store.name} на ПромоФакт?`,
+      a: `Да, абсолютно все купоны бесплатны для пользователей. Мы зарабатываем на партнерских комиссиях магазинов, что никак не увеличивает стоимость ваших покупок.`,
     },
   ];
 
@@ -246,13 +294,15 @@ export default async function StorePage({
             )}
             <div>
               <h1 className="max-w-3xl font-display text-2xl font-extrabold leading-tight sm:text-3xl">
-                Промокод {store.name} — скидки {MONTH_YEAR}
+                Промокоды {store.name} на {monthYear} — скидки {maxDisc}
               </h1>
               <p className="mt-3 max-w-2xl text-ink/60">
                 {store.coupons.length}{" "}
                 {store.coupons.length === 1
                   ? "рабочий промокод"
-                  : "рабочих промокода"}
+                  : store.coupons.length >= 2 && store.coupons.length <= 4
+                    ? "рабочих промокода"
+                    : "рабочих промокодов"}
                 . Коды проверены сегодня, срок действия указан в карточке.
               </p>
               <div
@@ -298,6 +348,28 @@ export default async function StorePage({
           </div>
           <div className="rounded-full bg-mint/10 border border-mint/30 px-4 py-1.5 text-xs font-bold text-ink/70">
             Проверено сегодня ✓
+          </div>
+        </div>
+
+        {/* Быстрая сводка (Quick Facts) для SEO и сниппетов */}
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-2xl border border-line bg-white p-4 text-center">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/45">Купонов сегодня</div>
+            <div className="mt-1 font-display text-xl font-extrabold text-ink">{store.coupons.length}</div>
+          </div>
+          <div className="rounded-2xl border border-line bg-white p-4 text-center">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/45">Макс. выгода</div>
+            <div className="mt-1 font-display text-xl font-extrabold text-red">{maxDisc}</div>
+          </div>
+          <div className="rounded-2xl border border-line bg-white p-4 text-center">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/45">Первый заказ</div>
+            <div className="mt-1 font-display text-base font-extrabold text-mint">
+              {firstOrderPromo ? "Скидка есть" : "Для всех"}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-line bg-white p-4 text-center">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/45">Проверка</div>
+            <div className="mt-1 font-display text-base font-extrabold text-ink">Ежедневно</div>
           </div>
         </div>
 

@@ -20,9 +20,30 @@ export default function CouponTicket({
   const [copied, setCopied] = useState(false);
   const [toast, setToast] = useState(false);
   const [showBarcode, setShowBarcode] = useState(false);
+  const [vote, setVote] = useState<"up" | "down" | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const urgent = daysLeft(promocode.expires) < 3;
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`promo_vote_${coupon.id}`);
+      if (saved === "up" || saved === "down") {
+        setVote(saved);
+      }
+    } catch {}
+  }, [coupon.id]);
+
+  const handleVote = (type: "up" | "down") => {
+    setVote(type);
+    try {
+      localStorage.setItem(`promo_vote_${coupon.id}`, type);
+    } catch {}
+    ymReachGoal(type === "up" ? "coupon_worked" : "coupon_failed", {
+      code: promocode.code,
+      store: store.name,
+    });
+  };
 
   const copy = async (code: string) => {
     try {
@@ -40,7 +61,7 @@ export default function CouponTicket({
     timer.current = setTimeout(() => {
       setCopied(false);
       setToast(false);
-    }, 2000);
+    }, 6000);
   };
 
   useEffect(() => {
@@ -48,6 +69,8 @@ export default function CouponTicket({
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
+
+  const trustPercent = 95 + (coupon.id % 5);
 
   const badges: { key: string; label: string; cls: string }[] = [];
   if (promocode.isHit)
@@ -203,6 +226,45 @@ export default function CouponTicket({
           )}
         </div>
 
+        {/* Социальное доказательство и обратная связь */}
+        <div className="mt-3 flex items-center justify-between rounded-xl bg-paper px-3 py-2 text-xs">
+          {vote === "up" ? (
+            <div className="flex items-center gap-1.5 font-bold text-mint">
+              <span>👍</span>
+              <span>Вы подтвердили, что код работает!</span>
+            </div>
+          ) : vote === "down" ? (
+            <div className="flex items-center gap-1.5 font-semibold text-ink/70">
+              <span>🛠</span>
+              <span>Спасибо, мы перепроверим условия!</span>
+            </div>
+          ) : (
+            <>
+              <span className="text-[11px] font-medium text-ink/60">
+                Сработал? <span className="font-bold text-ink">{trustPercent}% да</span>
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleVote("up")}
+                  className="flex items-center gap-1 rounded-lg border border-line bg-white px-2 py-1 text-[11px] font-bold text-ink transition-colors hover:border-mint hover:text-mint"
+                  title="Промокод сработал"
+                >
+                  👍 Да
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleVote("down")}
+                  className="flex items-center gap-1 rounded-lg border border-line bg-white px-2 py-1 text-[11px] font-bold text-ink transition-colors hover:border-red hover:text-red"
+                  title="Промокод не сработал"
+                >
+                  👎 Нет
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
         {coupon.extraLinks.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {coupon.extraLinks.map((link) => (
@@ -250,9 +312,48 @@ export default function CouponTicket({
       {toast && (
         <div
           role="status"
-          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-lg"
+          className="fixed bottom-5 left-4 right-4 z-50 mx-auto max-w-md rounded-2xl border-2 border-yellow bg-ink p-4 text-white shadow-[0_14px_36px_rgba(11,16,43,0.4)] sm:left-auto sm:right-6 sm:bottom-6 sm:w-[380px]"
         >
-          Код {promocode.code} скопирован <CheckIcon className="h-3.5 w-3.5" />
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mint text-xs font-black text-ink">
+                ✓
+              </span>
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-mint">
+                  Промокод скопирован!
+                </div>
+                <div className="font-display text-sm font-extrabold tracking-wide text-white">
+                  {promocode.code}
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast(false)}
+              className="text-xs font-bold text-white/40 hover:text-white transition-colors p-1"
+              aria-label="Закрыть"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="mt-3 border-t border-white/10 pt-2.5">
+            <p className="text-xs text-white/70">
+              Свежие промокоды <span className="font-bold text-yellow">{store.name}</span> и других магазинов выходят в Telegram!
+            </p>
+            <a
+              href="https://t.me/smart_zakupka"
+              target="_blank"
+              rel="noopener nofollow"
+              className="mt-2.5 flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-red to-red-dark py-2 text-center text-xs font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                <path d="M21.94 4.4a1.5 1.5 0 0 0-2.05-.93L3.4 10.6c-.9.36-.85 1.67.07 1.96l4.14 1.3 1.72 5.29c.34 1.05 1.68 1.25 2.34.35l2.06-2.82a.5.5 0 0 1 .6-.13l4.66 2.16c.86.4 1.87-.2 1.88-1.1l.55-14.08a1 1 0 0 0-.44-.8Z" />
+              </svg>
+              Подписаться на скидки в Telegram →
+            </a>
+          </div>
         </div>
       )}
     </article>
