@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 const NAV = [
-  { href: "#coupons", label: "Купоны" },
-  { href: "#how", label: "Как работает" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/#catalog", label: "Купоны" },
+  { href: "/category/finansy-i-keshbek", label: "💳 Финансы и кэшбэк" },
+  { href: "/#how", label: "Как работает" },
+  { href: "/sovety", label: "Советы" },
 ];
 
 export default function Header() {
