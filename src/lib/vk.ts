@@ -73,7 +73,6 @@ export async function sendCouponToVk(coupon: Coupon): Promise<VkPostResult> {
       owner_id: ownerId,
       from_group: "1", // Публикация от имени группы
       message,
-      attachments: postUrl, // Прикрепляем ссылку с красивым сниппетом (OpenGraph)
     });
 
     const res = await fetch(`https://api.vk.com/method/wall.post`, {
