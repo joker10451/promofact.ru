@@ -3,6 +3,7 @@ import { Golos_Text, Unbounded } from "next/font/google";
 import "./globals.css";
 import YandexMetrika from "@/components/YandexMetrika";
 import ChatHelper from "@/components/ChatHelper";
+import PwaInstallBanner from "@/components/PwaInstallBanner";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 export const viewport: Viewport = {
@@ -90,6 +91,7 @@ export default function RootLayout({
         <YandexMetrika />
         <ChatHelper />
         {children}
+        <PwaInstallBanner />
       </body>
     </html>
   );

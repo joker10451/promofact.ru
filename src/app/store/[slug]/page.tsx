@@ -395,6 +395,44 @@ export default async function StorePage({
                 storeProofCount={storeProofCount}
               />
             ))}
+        {/* Сводная таблица для Быстрого ответа (Колдунщика) Яндекса и Google */}
+        {store.coupons.length > 0 && (
+          <div className="mt-10 overflow-hidden rounded-2xl border border-line bg-white shadow-[0_4px_0_rgba(11,16,43,0.06)]">
+            <div className="bg-ink px-5 py-3 text-xs font-bold uppercase tracking-wider text-yellow">
+              📊 Сводная таблица актуальных промокодов {store.name} на {monthYear}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="border-b border-line bg-paper text-xs font-extrabold uppercase text-ink/60">
+                  <tr>
+                    <th scope="col" className="px-5 py-3">Предложение / Скидка</th>
+                    <th scope="col" className="px-5 py-3">Промокод</th>
+                    <th scope="col" className="px-5 py-3">Условия</th>
+                    <th scope="col" className="px-5 py-3 text-right">Срок действия</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {store.coupons.map((c) => (
+                    <tr key={c.id} className="hover:bg-paper/50 transition-colors">
+                      <td className="px-5 py-3.5 font-bold text-ink">
+                        {c.promocode.bonusName || `Скидка по коду ${c.promocode.code}`}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="inline-block rounded-lg bg-yellow/30 border border-yellow px-2.5 py-1 font-mono text-xs font-extrabold text-ink">
+                          {c.promocode.code}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-xs text-ink/70 max-w-xs">
+                        {c.promocode.terms || (c.promocode.isFirstOrderOnly ? "На первый заказ" : "Для всех клиентов")}
+                      </td>
+                      <td className="px-5 py-3.5 text-xs text-right font-medium text-ink/60 whitespace-nowrap">
+                        до 31 декабря
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
