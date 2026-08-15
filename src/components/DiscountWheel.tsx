@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { trackGoal } from "@/lib/metrika";
+import { ymReachGoal } from "@/components/YandexMetrika";
 
 interface WheelPrize {
   id: number;
@@ -128,7 +128,7 @@ export default function DiscountWheel() {
       setWonPrize(selectedPrize);
       setHasSpun(true);
       localStorage.setItem("promofact_wheel_prize", JSON.stringify(selectedPrize));
-      trackGoal("wheel_spin_win");
+      ymReachGoal("wheel_spin_win");
     }, 4000);
   };
 
@@ -136,7 +136,7 @@ export default function DiscountWheel() {
     navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
-    trackGoal("wheel_code_copied");
+    ymReachGoal("wheel_code_copied");
   };
 
   return (
