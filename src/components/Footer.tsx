@@ -191,15 +191,14 @@ export default async function Footer() {
 
       <div className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
-          <p className="text-xs leading-relaxed text-white/40">
-            Переходы по ссылкам на сайтах магазинов — по партнёрским CPA-программам
-            (Perfluence, Saleads, Яндекс и др.): {SITE_NAME} может получать вознаграждение за заказы,
-            совершённые после перехода. Это не влияет на размер твоей скидки.
-            Информация о промокодах носит справочный характер и проверяется ежедневно.
+          <p className="text-xs leading-relaxed text-white/40 mb-3">
+            {SITE_NAME} — это бесплатный информационный сервис-каталог, созданный для сравнения скидочных предложений. Сайт носит исключительно информационный характер, не является интернет-магазином и не продает товары или услуги напрямую. Мы не несем ответственности за точность информации, предоставленной партнерами, за условия акций, а также за любую другую информацию. Все торговые марки, логотипы и названия брендов, представленные на сайте, являются собственностью их соответствующих владельцев и взяты из открытых источников или предоставлены партнерскими программами (Perfluence, Saleads, Яндекс и др.).
           </p>
-          <p className="mt-3 text-xs text-white/30">
-            © {new Date().getFullYear()} {SITE_NAME}. Все права защищены.
-          </p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <p className="text-xs text-white/30">
+              © {new Date().getFullYear()} {SITE_NAME}. Все права защищены.
+            </p>
+          </div>
         </div>
       </div>
     </footer>
