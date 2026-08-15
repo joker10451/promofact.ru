@@ -395,6 +395,9 @@ export default async function StorePage({
                 storeProofCount={storeProofCount}
               />
             ))}
+          </div>
+        )}
+
         {/* Сводная таблица для Быстрого ответа (Колдунщика) Яндекса и Google */}
         {store.coupons.length > 0 && (
           <div className="mt-10 overflow-hidden rounded-2xl border border-line bg-white shadow-[0_4px_0_rgba(11,16,43,0.06)]">
