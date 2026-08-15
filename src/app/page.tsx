@@ -70,7 +70,7 @@ export default async function Home() {
     getUsesStats(),
   ]);
   const featured = best[0];
-  const topStores = [...stores].sort((a, b) => b.coupons.length - a.coupons.length).slice(0, 8);
+  const topStores = [...stores].sort((a, b) => b.coupons.length - a.coupons.length).slice(0, 16);
   const proofsByCode = Object.fromEntries(uses.usesByCode);
   const proofsByStore = Object.fromEntries(uses.usesByStore);
 
