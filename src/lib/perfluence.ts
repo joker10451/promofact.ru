@@ -257,7 +257,14 @@ function byScore(a: Coupon, b: Coupon): number {
 /* ---------- публичное API ---------- */
 
 export async function getCoupons(): Promise<Coupon[]> {
-  const all = await fetchData();
+  const [perfluenceCoupons, admitadCoupons] = await Promise.all([
+    fetchData(),
+    (await import("@/lib/admitad")).fetchAdmitadCoupons(),
+  ]);
+
+  const customCoupons = (await import("@/lib/customCoupons")).CUSTOM_COUPONS;
+
+  const all = [...perfluenceCoupons, ...admitadCoupons, ...customCoupons];
   return all.filter(isActive).sort(byScore);
 }
 
