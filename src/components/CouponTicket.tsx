@@ -54,6 +54,11 @@ export default function CouponTicket({
     }
     setCopied(true);
     setToast(true);
+    try {
+      if (typeof window !== "undefined" && window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+      }
+    } catch {}
     ymReachGoal("copy_code", {
       code: code,
       store: store.name,

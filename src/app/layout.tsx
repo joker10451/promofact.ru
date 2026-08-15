@@ -4,6 +4,7 @@ import "./globals.css";
 import YandexMetrika from "@/components/YandexMetrika";
 import ChatHelper from "@/components/ChatHelper";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
+import TelegramWebAppInit from "@/components/TelegramWebAppInit";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 export const viewport: Viewport = {
@@ -86,8 +87,10 @@ export default function RootLayout({
           name="msvalidate.01"
           content={process.env.BING_VERIFICATION || "09EEE6E2B1C92C9DC90FAA19E59A7574"}
         />
+        <script src="https://telegram.org/js/telegram-web-app.js" async />
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
+        <TelegramWebAppInit />
         <YandexMetrika />
         <ChatHelper />
         {children}
