@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ymReachGoal } from "@/components/YandexMetrika";
 import Countdown from "@/components/Countdown";
 import { formatExpires } from "@/lib/format";
 import type { Coupon, Store } from "@/lib/types";
@@ -63,11 +64,15 @@ export default function Hero({ featured, stores = [], coupons = [] }: HeroProps)
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleCopyCode = async (e: React.MouseEvent, code: string) => {
+  const handleCopyCode = async (e: React.MouseEvent, code: string, storeName: string) => {
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
+      ymReachGoal("copy_code", {
+        code: code,
+        store: storeName,
+      });
       setTimeout(() => setCopiedCode(null), 2000);
     } catch {}
   };
@@ -211,7 +216,7 @@ export default function Hero({ featured, stores = [], coupons = [] }: HeroProps)
                               </div>
                               <button
                                 type="button"
-                                onClick={(e) => handleCopyCode(e, c.promocode.code)}
+                                onClick={(e) => handleCopyCode(e, c.promocode.code, c.store.name)}
                                 className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
                                   copiedCode === c.promocode.code
                                     ? "bg-mint text-white"
