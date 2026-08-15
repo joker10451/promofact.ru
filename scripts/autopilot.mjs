@@ -1,10 +1,29 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { execSync } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, "..");
+
+const MAP = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z",
+  и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r",
+  с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh",
+  щ: "shch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+};
+
+function translitName(input) {
+  const lower = input.toLowerCase().trim();
+  let out = "";
+  for (const ch of lower) {
+    if (MAP[ch]) out += MAP[ch];
+    else if (/[a-z0-9]/.test(ch)) out += ch;
+    else out += "-";
+  }
+  return out.replace(/-{2,}/g, "-").replace(/^-|-$/g, "");
+}
 
 // Загрузка переменных окружения
 function loadEnv() {
@@ -112,6 +131,87 @@ async function getAffiliateLink(offerUuid) {
 }
 
 /**
+ * Автоматическое добавление оффера на сайт promofact.ru
+ */
+function syncOfferToWebsite(cleanName, offer, affiliate, dryRun = false) {
+  const customFile = path.join(ROOT_DIR, "src", "lib", "customCoupons.ts");
+  if (!fs.existsSync(customFile)) return null;
+
+  let content = fs.readFileSync(customFile, "utf8");
+  const slug = translitName(cleanName) || "store-" + Date.now();
+
+  // Проверяем, есть ли уже такой магазин
+  if (content.includes(`slug: "${slug}"`) || content.includes(`name: "${cleanName}"`)) {
+    console.log(`ℹ️ Магазин [${cleanName}] уже есть на сайте (/store/${slug})`);
+    return slug;
+  }
+
+  console.log(`🌐 Добавляем [${cleanName}] на сайт promofact.ru (/store/${slug})...`);
+
+  const nextId = 50010 + Math.floor(Math.random() * 9000);
+  const goalPrice = offer.goals?.[0]?.price ? `Скидки и спецпредложения (выгода до ${Math.round(offer.goals[0].price)} ₽)` : `Скидки и акции в ${cleanName}`;
+  const domain = `${slug}.ru`;
+
+  const newCouponBlock = `  {
+    id: ${nextId},
+    promocode: {
+      id: ${nextId},
+      code: "SALE",
+      bonusName: "${goalPrice}",
+      terms: "Действует на заказ в интернет-магазине ${cleanName} при переходе по специальной ссылке.",
+      expires: "2026-12-31",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "saleads",
+    },
+    store: {
+      id: ${nextId - 45000},
+      name: "${cleanName}",
+      slug: "${slug}",
+      logo: "https://www.google.com/s2/favicons?domain=${domain}&sz=128",
+      category: "Интернет-магазины",
+      categorySlug: "internet-magaziny",
+      about: "${cleanName} — официальный интернет-магазин с большим выбором качественных товаров, регулярными скидками и быстрой доставкой по России.",
+      conditions: "Спецпредложение активируется автоматически при переходе по ссылке.",
+      site: "${affiliate.url}",
+      activeBloggers: 3200,
+    },
+    affiliate: {
+      link: "${affiliate.url}",
+      landingLink: "${affiliate.url}",
+      ordMarker: "${affiliate.erid || ""}",
+      ordText: "Реклама. erid: ${affiliate.erid || ""}",
+    },
+    extraLinks: [],
+  },
+];`;
+
+  // Вставляем перед последним '];'
+  content = content.replace(/\];\s*$/, newCouponBlock);
+  fs.writeFileSync(customFile, content, "utf8");
+  console.log(`✅ Магазин успешно прописан в src/lib/customCoupons.ts!`);
+
+  if (!dryRun) {
+    try {
+      console.log("🚀 Коммитим и пушим изменения на Vercel...");
+      execSync(`git add src/lib/customCoupons.ts && git commit -m "feat(autopilot): add ${cleanName} from Saleads" && git push origin main`, {
+        cwd: ROOT_DIR,
+        stdio: "ignore",
+      });
+      console.log(`🎉 Страница /store/${slug} отправлена в продакшн!`);
+    } catch (e) {
+      console.log("Внимание: git push пропущен или выполнен локально:", e.message);
+    }
+  }
+
+  return slug;
+}
+
+/**
  * Отправка сообщения в Telegram
  */
 async function sendToTelegram(text, replyMarkup) {
@@ -133,7 +233,7 @@ async function sendToTelegram(text, replyMarkup) {
 }
 
 export async function runAutopilot({ dryRun = false, search, categoryId } = {}) {
-  console.log("🤖 Запуск Автопилота Saleads ➔ Telegram...");
+  console.log("🤖 Запуск Автопилота Saleads ➔ Сайт + Telegram...");
   console.log(`📌 Канал: ${CHANNEL_ID}`);
   console.log(`⚙️ Режим: ${dryRun ? "DRY-RUN (тест)" : "LIVE"}`);
   if (search) console.log(`🔍 Фильтр поиска: "${search}"`);
@@ -189,9 +289,12 @@ export async function runAutopilot({ dryRun = false, search, categoryId } = {}) 
   console.log(`\n🎉 Выбран и подключен оффер: [${offer.name}]`);
   console.log(`🔗 Получена ссылка: ${affiliate.url}`);
 
-  // Формируем текст поста
   const cleanName = offer.name.replace(/\(.*?\)/g, "").trim();
   const goalPrice = offer.goals?.[0]?.price ? `Выгода до ${Math.round(offer.goals[0].price)} ₽` : "Скидки и спецпредложения";
+
+  // Автозаливка оффера на сайт
+  const storeSlug = syncOfferToWebsite(cleanName, offer, affiliate, dryRun);
+  const storePageUrl = storeSlug ? `${SITE_URL}/store/${storeSlug}` : SITE_URL;
 
   let text = `🔥 <b>ХИТ ДНЯ! Специальное предложение от ${cleanName}</b>\n\n`;
   text += `✨ <b>${cleanName}</b> — ${goalPrice}\n\n`;
@@ -214,8 +317,8 @@ export async function runAutopilot({ dryRun = false, search, categoryId } = {}) 
       ],
       [
         {
-          text: "🌐 Все промокоды на сайте",
-          url: SITE_URL,
+          text: `🌐 Страница ${cleanName} на сайте`,
+          url: storePageUrl,
         },
       ],
     ],
@@ -231,9 +334,9 @@ export async function runAutopilot({ dryRun = false, search, categoryId } = {}) 
   }
 
   const msg = await sendToTelegram(text, buttons);
-  console.log(`✅ Успешно опубликовано! Message ID: ${msg.message_id}`);
+  console.log(`✅ Успешно опубликовано в TG! Message ID: ${msg.message_id}`);
   const postUrl = `https://t.me/smart_zakupka/${msg.message_id}`;
-  console.log(`👉 Ссылка: ${postUrl}`);
+  console.log(`👉 Ссылка на пост: ${postUrl}`);
 
   history.postedUuids.push(offer.uuid);
   history.history.push({
@@ -252,5 +355,3 @@ const searchArg = process.argv.find((a) => a.startsWith("--search="))?.split("="
 const catArg = process.argv.find((a) => a.startsWith("--category="))?.split("=")[1];
 
 runAutopilot({ dryRun: isDry, search: searchArg, categoryId: catArg }).catch(console.error);
-
-
