@@ -7,7 +7,11 @@
 export const LEGACY_STORE_REDIRECTS: Record<string, string> = {
   ostin: "/category/marketpleysy",
   hoff: "/category/marketpleysy",
-  "m-video": "/store/mvideo",
+  "m-video": "/category/elektronika-i-tehnika",
+  mvideo: "/category/elektronika-i-tehnika",
+  wildberries: "/category/marketpleysy",
+  ozon: "/category/marketpleysy",
+  dns: "/category/elektronika-i-tehnika",
   vkusvill: "/category/dostavka-produktov",
   s7: "/category/puteshestviya-i-turizm",
 };
