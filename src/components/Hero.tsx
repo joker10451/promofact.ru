@@ -82,7 +82,7 @@ export default function Hero({ featured, stores = [], coupons = [] }: HeroProps)
     const v = q.trim();
     setIsOpen(false);
     window.dispatchEvent(new CustomEvent("promo:search", { detail: v }));
-    document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (

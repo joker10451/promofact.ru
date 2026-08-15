@@ -64,7 +64,7 @@ export default function CouponGrid({
     }`;
 
   return (
-    <section id="coupons" className="scroll-mt-24">
+    <section id="catalog" className="scroll-mt-24">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
         <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
           Купоны на сегодня
