@@ -161,7 +161,7 @@ export default async function Footer() {
             </li>
             <li>
               <a
-                href="https://vk.com/club240879299"
+                href="https://vk.com/promofact"
                 target="_blank"
                 rel="noopener nofollow"
                 className="social-link hover:text-white transition-colors"

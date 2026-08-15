@@ -12,7 +12,7 @@ export const SITE_TAGLINE = "Промокоды и купоны на скидк�
 
 export const CHANNELS = {
   telegram: "https://t.me/smart_zakupka",
-  vk: "https://vk.com/club240879299",
+  vk: "https://vk.com/promofact",
   youtube: "https://www.youtube.com/@SmartShopping-o9k",
   dzen: "https://dzen.ru/id/66d486816000f25d542e7180",
 };
