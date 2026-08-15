@@ -6,17 +6,21 @@ export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Проверяем, было ли уже получено согласие
-    const hasConsented = localStorage.getItem("cookie_consent");
-    if (!hasConsented) {
-      // Показываем с небольшой задержкой для плавности
-      const timer = setTimeout(() => setIsVisible(true), 1500);
-      return () => clearTimeout(timer);
+    try {
+      const hasConsented = localStorage.getItem("cookie_consent");
+      if (!hasConsented) {
+        const timer = setTimeout(() => setIsVisible(true), 1500);
+        return () => clearTimeout(timer);
+      }
+    } catch (e) {
+      console.warn("localStorage is not available");
     }
   }, []);
 
   const acceptCookies = () => {
-    localStorage.setItem("cookie_consent", "true");
+    try {
+      localStorage.setItem("cookie_consent", "true");
+    } catch (e) {}
     setIsVisible(false);
   };
 

@@ -24,12 +24,14 @@ export default function TelegramWebAppInit() {
     try {
       if (typeof window !== "undefined" && window.Telegram?.WebApp) {
         const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        tg.setHeaderColor("#0b102b");
-        tg.setBackgroundColor("#f2f4fa");
+        if (tg.ready) tg.ready();
+        if (tg.expand) tg.expand();
+        if (tg.setHeaderColor) tg.setHeaderColor("#0b102b");
+        if (tg.setBackgroundColor) tg.setBackgroundColor("#f2f4fa");
       }
-    } catch {}
+    } catch (e) {
+      console.warn("Telegram WebApp init error", e);
+    }
   }, []);
 
   return null;
