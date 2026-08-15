@@ -69,10 +69,21 @@ export default async function CouponPage({
   params: Promise<{ slug: string; code: string }>;
 }) {
   const { slug, code } = await params;
+  const decodedCode = decodeURIComponent(code).trim();
   const [stores, uses] = await Promise.all([getStores(), getUsesStats()]);
   const store = stores.find((s) => s.slug === slug);
   if (!store) notFound();
-  const coupon = store.coupons.find((c) => c.promocode.code === code);
+
+  // Ищем точное совпадение или регистронезависимое
+  let coupon = store.coupons.find(
+    (c) => c.promocode.code === decodedCode || c.promocode.code.toLowerCase() === decodedCode.toLowerCase()
+  );
+
+  // Если конкретный промокод истек или сменился, берем первый активный промокод магазина
+  if (!coupon && store.coupons.length > 0) {
+    coupon = store.coupons[0];
+  }
+
   if (!coupon) notFound();
 
   const p = coupon.promocode;
