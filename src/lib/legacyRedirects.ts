@@ -5,17 +5,11 @@
  * на ближайшую по смыслу живую категорию.
  */
 export const LEGACY_STORE_REDIRECTS: Record<string, string> = {
-  "zolotoe-yabloko": "/category/kosmetika-i-parfyumeriya",
-  letual: "/category/kosmetika-i-parfyumeriya",
-  lamoda: "/category/marketpleysy",
   ostin: "/category/marketpleysy",
   hoff: "/category/marketpleysy",
-  dns: "/category/marketpleysy",
-  "m-video": "/category/marketpleysy",
-  sportmaster: "/category/marketpleysy",
+  "m-video": "/store/mvideo",
   vkusvill: "/category/dostavka-produktov",
   s7: "/category/puteshestviya-i-turizm",
-  "yandex-market": "/category/marketpleysy",
 };
 
 export const LEGACY_CATEGORY_REDIRECTS: Record<string, string> = {
