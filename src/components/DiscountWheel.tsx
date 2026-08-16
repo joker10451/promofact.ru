@@ -141,15 +141,14 @@ export default function DiscountWheel() {
 
   return (
     <>
-      {/* Плавающая кнопка-виджет на экране */}
+      {/* Плавающая аккуратная кнопка-виджет на экране */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-40 flex items-center gap-2.5 rounded-full bg-gradient-to-r from-amber-500 via-red-500 to-rose-600 px-4 py-3 text-sm font-extrabold text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-red-500/30 active:scale-95 animate-bounce-subtle"
-        aria-label="Колесо фортуны со скидками"
+        className="fixed bottom-5 left-5 z-40 flex items-center gap-2 rounded-full border border-line bg-white/95 backdrop-blur px-3.5 py-2 text-xs font-extrabold text-ink shadow-[0_4px_16px_rgba(11,16,43,0.12)] transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+        aria-label="Колесо скидок"
       >
-        <span className="text-xl animate-spin-slow">🎰</span>
-        <span className="hidden sm:inline">Крутить колесо скидок</span>
-        <span className="sm:hidden font-bold">Скидка дня</span>
+        <span className="text-base">🎰</span>
+        <span className="font-bold">Колесо скидок</span>
       </button>
 
       {/* Модальное окно с колесом */}

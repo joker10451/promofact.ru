@@ -99,14 +99,12 @@ export default async function Home() {
         }}
       />
 
-      <Ticker />
       <Header />
       <main>
         <Hero featured={featured} stores={stores} coupons={coupons} />
-        <StoresMarquee />
         
         {/* Сгорающие горячие предложения дня с таймером */}
-        <div className="mx-auto max-w-7xl px-4 pt-8 pb-2 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 pt-10 pb-2 sm:px-6">
           <Reveal>
             <ExpiringDeals coupons={coupons} />
           </Reveal>
