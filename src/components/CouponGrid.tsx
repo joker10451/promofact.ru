@@ -14,8 +14,24 @@ export default function CouponGrid({
 }) {
   const [filter, setFilter] = useState<string>("all");
   const [applicability, setApplicability] = useState<string>("all");
+  const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Автоопределение или восстановление выбранного города
+    const savedCity = localStorage.getItem("promofact_selected_city");
+    if (savedCity) {
+      setSelectedRegion(savedCity);
+    }
+  }, []);
+
+  const handleCityChange = (city: string) => {
+    setSelectedRegion(city);
+    try {
+      localStorage.setItem("promofact_selected_city", city);
+    } catch {}
+  };
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -26,6 +42,22 @@ export default function CouponGrid({
     window.addEventListener("promo:search", handler);
     return () => window.removeEventListener("promo:search", handler);
   }, []);
+
+  // Список всех уникальных городов из активных купонов
+  const regionsList = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of coupons) {
+      const r = c.promocode.region;
+      if (r && r !== "RU" && r !== "Россия") {
+        // Если регион содержит несколько городов через запятую
+        r.split(",").forEach((item) => {
+          const trimmed = item.trim();
+          if (trimmed) set.add(trimmed);
+        });
+      }
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "ru"));
+  }, [coupons]);
 
   // Категории собираем из самих купонов (из API), сортируем по алфавиту (ru)
   const cats = useMemo(() => {
@@ -47,6 +79,15 @@ export default function CouponGrid({
         return false;
       if (applicability === "first" && !c.promocode.isFirstOrderOnly)
         return false;
+
+      // Фильтрация по региону / городу
+      if (selectedRegion !== "all") {
+        const r = (c.promocode.region || "").toLowerCase();
+        const isAllRu = !r || r === "ru" || r === "россия";
+        const matchesCity = r.includes(selectedRegion.toLowerCase());
+        if (!isAllRu && !matchesCity) return false;
+      }
+
       if (!q) return true;
       return (
         c.store.name.toLowerCase().includes(q) ||
@@ -54,7 +95,7 @@ export default function CouponGrid({
         (c.promocode.bonusName ?? "").toLowerCase().includes(q)
       );
     });
-  }, [coupons, filter, query, applicability]);
+  }, [coupons, filter, query, applicability, selectedRegion]);
 
   const chipCls = (active: boolean) =>
     `rounded-full px-4 py-2 text-sm font-bold transition-all ${
@@ -111,31 +152,55 @@ export default function CouponGrid({
           ))}
         </div>
 
-        <div
-          role="group"
-          aria-label="Применимость промокодов"
-          className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-white p-1 self-start sm:self-auto"
-        >
-          {(
-            [
-              ["all", "Все"],
-              ["everyone", "Для всех"],
-              ["first", "Первый заказ"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setApplicability(value)}
-              className={`rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
-                applicability === value
-                  ? "bg-ink text-white"
-                  : "text-ink/60 hover:text-ink"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {/* Селектор города / региона */}
+          {regionsList.length > 0 && (
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-xs pointer-events-none">📍</span>
+              <select
+                value={selectedRegion}
+                onChange={(e) => handleCityChange(e.target.value)}
+                className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-sm outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
+                aria-label="Фильтр по городу"
+              >
+                <option value="all">Вся Россия</option>
+                {regionsList.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+              <span className="absolute right-2.5 text-[10px] pointer-events-none text-ink/40">▼</span>
+            </div>
+          )}
+
+          {/* Фильтр применимости */}
+          <div
+            role="group"
+            aria-label="Применимость промокодов"
+            className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-white p-1"
+          >
+            {(
+              [
+                ["all", "Все"],
+                ["everyone", "Для всех"],
+                ["first", "Первый заказ"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setApplicability(value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
+                  applicability === value
+                    ? "bg-ink text-white"
+                    : "text-ink/60 hover:text-ink"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
