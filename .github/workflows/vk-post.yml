@@ -2,7 +2,7 @@ name: Auto Post to VKontakte Group
 
 on:
   schedule:
-    - cron: '0 10 * * *' # Каждый день в 13:00 МСК (10:00 UTC)
+    - cron: '0 11 * * *' # Каждый день в 14:00 МСК (11:00 UTC) - пик активности в ВК
   workflow_dispatch:
     inputs:
       limit:

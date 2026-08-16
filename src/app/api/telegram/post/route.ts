@@ -39,10 +39,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "No matching coupons found" }, { status: 404 });
     }
 
-    // Сортировка: хиты первыми
-    filtered.sort((a, b) => (b.promocode.isHit ? 1 : 0) - (a.promocode.isHit ? 1 : 0));
+    // Сортировка: хиты первыми, с ротацией (рандомизация топ-хитов для разнообразия контента)
+    const hits = filtered.filter((c) => c.promocode.isHit);
+    const nonHits = filtered.filter((c) => !c.promocode.isHit);
 
-    const toPost = filtered.slice(0, limit);
+    // Перемешиваем хиты, чтобы в канале каждый день были разные магазины
+    const shuffledHits = hits.sort(() => Math.random() - 0.5);
+    const shuffledNonHits = nonHits.sort(() => Math.random() - 0.5);
+    const pool = [...shuffledHits, ...shuffledNonHits];
+
+    const toPost = pool.slice(0, limit);
     const results = [];
 
     for (const coupon of toPost) {
