@@ -62,13 +62,13 @@ function formatDate(iso: string | null): string {
 }
 
 /**
- * Генерирует HTML-разметку поста для Telegram
+ * Генерирует HTML-разметку поста для Telegram по стандарту 2026
  */
 export function formatTelegramPost(coupon: Coupon): {
   text: string;
   buttons: TelegramButton[][];
 } {
-  const storeName = escapeHtml(coupon.store.name);
+  const storeName = escapeHtml(coupon.store.name.toUpperCase());
   const bonus = escapeHtml(stripHtml(coupon.promocode.bonusName) || "Скидка по промокоду");
   const code = escapeHtml(coupon.promocode.code);
   const terms = escapeHtml(stripHtml(coupon.promocode.terms));
@@ -77,37 +77,38 @@ export function formatTelegramPost(coupon: Coupon): {
 
   const lines: string[] = [];
 
-  // Заголовок
+  // 1. Яркий заголовок с эмодзи
   if (coupon.promocode.isHit) {
-    lines.push(`🔥 <b>ХИТ! Скидка в ${storeName}</b>\n`);
+    lines.push(`🔥 <b>ХИТ СКИДКА В ${storeName}!</b>\n`);
   } else {
-    lines.push(`🏷 <b>Скидка в ${storeName}</b>\n`);
+    lines.push(`🛍 <b>${storeName} — СВЕЖИЙ ПРОМОКОД</b>\n`);
   }
 
-  // Описание бонуса
-  lines.push(`<b>${bonus}</b>\n`);
+  // 2. Выгода крупно
+  lines.push(`🎁 <b>${bonus}</b>\n`);
 
-  // Промокод (копируется в 1 клик на мобильном телефоне)
-  lines.push(`🎟 Промокод: <code>${code}</code> <i>(нажми, чтобы скопировать)</i>`);
+  // 3. Промокод для копирования в 1 клик
+  lines.push(`🎟 Промокод: <code>${code}</code>`);
+  lines.push(`<i>(нажмите на промокод, чтобы скопировать 👆)</i>\n`);
 
-  // Условия
+  // 4. Условия
   if (coupon.promocode.isFirstOrderOnly) {
-    lines.push(`⚡️ <i>Только на первый заказ</i>`);
+    lines.push(`⚡️ <b>Только на первый заказ</b>`);
   } else if (coupon.promocode.isUniversal) {
-    lines.push(`✨ <i>Для всех (на повторные заказы тоже)</i>`);
+    lines.push(`✨ <b>Действует для всех (и на повторные заказы)</b>`);
   }
 
   if (region && region !== "RU") {
-    lines.push(`📍 Регион: ${region}`);
+    lines.push(`📍 <b>Регион:</b> ${region}`);
   }
 
   if (terms) {
-    lines.push(`ℹ️ Условия: ${terms}`);
+    lines.push(`ℹ️ <b>Условия:</b> ${terms}`);
   }
 
-  lines.push(`⏳ Срок действия: до ${expires}`);
+  lines.push(`⏳ <b>Действует до:</b> ${expires}`);
 
-  // ОРД маркировка (строго обязательно по ФЗ о рекламе)
+  // 5. Маркировка ОРД (Закон о рекламе)
   const ordText = escapeHtml(coupon.affiliate.ordText);
   const ordMarker = escapeHtml(coupon.affiliate.ordMarker);
 
@@ -119,13 +120,13 @@ export function formatTelegramPost(coupon: Coupon): {
     lines.push(`<i>Реклама.</i>`);
   }
 
-  // Кнопки
+  // 6. Широкие интерактивные кнопки
   const affiliateUrl = coupon.affiliate.link || coupon.affiliate.landingLink;
   const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
 
   const buttons: TelegramButton[][] = [
-    [{ text: `🛒 В магазин ${coupon.store.name}`, url: affiliateUrl }],
-    [{ text: `🌐 Все скидки ${coupon.store.name} на сайте`, url: storeUrl }],
+    [{ text: `🛒 Перейти в ${coupon.store.name} и применить →`, url: affiliateUrl }],
+    [{ text: `🌐 Больше скидок на Promofact.ru`, url: storeUrl }],
   ];
 
   return {
@@ -167,7 +168,7 @@ export async function sendCouponToTelegram(
       text,
       parse_mode: "HTML",
       reply_markup: replyMarkup,
-      disable_web_page_preview: opts?.disableWebPagePreview ?? false,
+      disable_web_page_preview: opts?.disableWebPagePreview ?? true,
     };
 
     // Если есть валидный логотип, отправляем красивым sendPhoto
