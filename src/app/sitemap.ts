@@ -75,5 +75,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/partner/netprint`, lastModified: today, changeFrequency: "monthly" as const, priority: 0.4 },
   ];
 
-  return [...home, ...categoryMap, ...storeMap, ...couponMap, ...tipsMap, ...actionsMap, ...miscMap];
+  const promokodyMap: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE_URL}/promokody`,
+      lastModified: today,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    },
+    ...stores.map((store) => ({
+      url: `${SITE_URL}/promokody/${store.slug}`,
+      lastModified: today,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    })),
+  ];
+
+  return [...home, ...categoryMap, ...storeMap, ...couponMap, ...promokodyMap, ...tipsMap, ...actionsMap, ...miscMap];
 }

@@ -382,6 +382,7 @@ async function fetchCoupons() {
             isFirstOrderOnly: false,
             region: "RU",
           },
+        },
         {
           id: 50007,
           promocode: {
@@ -441,11 +442,18 @@ async function main() {
   const coupons = await fetchCoupons();
   console.log(`📦 Всего доступно промокодов в API: ${coupons.length}`);
 
+  const postedCodes = new Set(
+    (history.history || [])
+      .map((h) => h.code)
+      .filter((code) => Boolean(code)),
+  );
+
   let eligible = coupons.filter((c) => {
     if (!c.promocode.code) return false;
     if (isHitOnly && !c.promocode.isHit) return false;
     if (storeFilter && !c.store.slug.includes(storeFilter)) return false;
     if (!isForce && history.postedIds.includes(c.id)) return false;
+    if (!isForce && postedCodes.has(c.promocode.code)) return false;
     return true;
   });
 

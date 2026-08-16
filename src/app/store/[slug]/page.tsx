@@ -535,6 +535,25 @@ export default async function StorePage({
 
         <HowToApply />
 
+        <section className="mt-10 max-w-3xl rounded-2xl border border-mint/30 bg-mint/10 p-5">
+          <Link
+            href={`/promokody/${store.slug}`}
+            className="flex items-center justify-between gap-3 group"
+          >
+            <div>
+              <div className="font-display font-extrabold group-hover:text-red transition-colors">
+                📝 Полный гайд по промокодам {store.name}
+              </div>
+              <p className="mt-1 text-sm text-ink/55">
+                Таблица всех кодов, инструкция и ответы на частые вопросы
+              </p>
+            </div>
+            <span className="text-lg font-bold text-ink/30 group-hover:text-red transition-colors shrink-0">
+              →
+            </span>
+          </Link>
+        </section>
+
         <OtherStores current={store.slug} category={store.categorySlug} />
       </div>
     </main>
