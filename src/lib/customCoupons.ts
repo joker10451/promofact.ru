@@ -1,7 +1,7 @@
 import type { Coupon } from "@/lib/types";
 
 /**
- * Проверенные партнерские предложения и промокоды из CPA-сети Saleads.pro с официальной маркировкой (ОРД / erid)
+ * Проверенные эксклюзивные промокоды для покупок и сервисов
  */
 export const CUSTOM_COUPONS: Coupon[] = [
   {
@@ -27,8 +27,8 @@ export const CUSTOM_COUPONS: Coupon[] = [
       logo: "https://www.google.com/s2/favicons?domain=platipomiru.com&sz=128",
       category: "Сервисы и подписки",
       categorySlug: "servisy-i-podpiski",
-      about: "Плати по миру — выпуск международных виртуальных карт для оплаты ChatGPT, Steam, Spotify, PlayStation и зарубежных покупок.",
-      conditions: "Скидка применяется при переходе по партнерской ссылке и вводе промокода.",
+      about: "Плати по миру — выпуск международных виртуальных карт для оплаты зарубежных сервисов и покупок.",
+      conditions: "Скидка применяется при переходе по ссылке и вводе промокода.",
       site: "https://platipomiru.com",
       activeBloggers: 3400,
     },
@@ -73,78 +73,6 @@ export const CUSTOM_COUPONS: Coupon[] = [
       landingLink: "https://my.saleads.pro/s/wxcod?erid=2VtzqxMLcBU",
       ordMarker: "2VtzqxMLcBU",
       ordText: "Реклама. erid: 2VtzqxMLcBU",
-    },
-    extraLinks: [],
-  },
-  {
-    id: 50020,
-    promocode: {
-      id: 50020,
-      code: "", // Акция по ссылке
-      bonusName: "1 000 ₽ бонус + вечное бесплатное обслуживание",
-      terms: "Оформите бесплатную дебетовую карту Т-Банк Black. Получите 1 000 ₽ кэшбэка при первой покупке от 500 ₽, кэшбэк до 30% у партнеров и бесплатные переводы без комиссий.",
-      expires: "2026-12-31",
-      isHit: true,
-      isUniversal: true,
-      isFirstOrderOnly: false,
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "saleads",
-    },
-    store: {
-      id: 5020,
-      name: "Т-Банк",
-      slug: "t-bank",
-      logo: "https://www.google.com/s2/favicons?domain=tbank.ru&sz=128",
-      category: "Финансы и кэшбэк",
-      categorySlug: "finansy-i-keshbek",
-      about: "Т-Банк (Тинькофф) — ведущий онлайн-банк с лучшим мобильным приложением, выгодным кэшбэком рублями и бесплатной доставкой карты представителем за 1 день.",
-      conditions: "Промокод не требуется. Бонус и бесплатное обслуживание активируются автоматически при переходе и оформлении онлайн.",
-      site: "https://my.saleads.pro/s/1f4rx?erid=2Vtzquih2e9",
-      activeBloggers: 12500,
-    },
-    affiliate: {
-      link: "https://my.saleads.pro/s/1f4rx?erid=2Vtzquih2e9",
-      landingLink: "https://my.saleads.pro/s/1f4rx?erid=2Vtzquih2e9",
-      ordMarker: "2Vtzquih2e9",
-      ordText: "Реклама. АО «ТБанк» erid: 2Vtzquih2e9",
-    },
-    extraLinks: [],
-  },
-  {
-    id: 50021,
-    promocode: {
-      id: 50021,
-      code: "", // Акция по партнерской ссылке
-      bonusName: "Кэшбэк до 5% на такси, АЗС и развлечения + до 10% на остаток",
-      terms: "Дебетовая Барс Карта от Ак Барс Банка. Бесплатное обслуживание, до 10% годовых на остаток, до 5% кэшбэк на такси, АЗС, красоту и развлечения, бесплатная доставка курьером.",
-      expires: "2026-12-31",
-      isHit: true,
-      isUniversal: true,
-      isFirstOrderOnly: false,
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "saleads",
-    },
-    store: {
-      id: 5021,
-      name: "Ак Барс Банк",
-      slug: "ak-bars-bank",
-      logo: "https://www.google.com/s2/favicons?domain=akbars.ru&sz=128",
-      category: "Финансы и кэшбэк",
-      categorySlug: "finansy-i-keshbek",
-      about: "Ак Барс Банк — крупный федеральный банк (ТОП-25 РФ). Дебетовая «Барс Карта» с выгодным начислением процентов на остаток, повышенным кэшбэком и бесплатной доставкой на дом.",
-      conditions: "Промокод не требуется. Бесплатное обслуживание и бонусы активируются при оформлении онлайн по партнерской ссылке.",
-      site: "https://my.saleads.pro/s/yc86u?erid=2VtzqwFPgna",
-      activeBloggers: 7800,
-    },
-    affiliate: {
-      link: "https://my.saleads.pro/s/yc86u?erid=2VtzqwFPgna",
-      landingLink: "https://my.saleads.pro/s/yc86u?erid=2VtzqwFPgna",
-      ordMarker: "2VtzqwFPgna",
-      ordText: "Реклама. ПАО «АК БАРС» БАНК ИНН: 1653001805 erid: 2VtzqwFPgna",
     },
     extraLinks: [],
   },
