@@ -7,6 +7,7 @@ import PwaInstallBanner from "@/components/PwaInstallBanner";
 import TelegramWebAppInit from "@/components/TelegramWebAppInit";
 import CookieBanner from "@/components/CookieBanner";
 import DiscountWheel from "@/components/DiscountWheel";
+import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 export const viewport: Viewport = {
@@ -103,6 +104,7 @@ export default function RootLayout({
         <YandexMetrika />
         <ChatHelper />
         <DiscountWheel />
+        <PushNotificationPrompt />
         {children}
         <CookieBanner />
         <PwaInstallBanner />
