@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
 import OtherCategories from "@/components/OtherCategories";
+import YandexAdBlock from "@/components/YandexAdBlock";
 import { getCategories, getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -213,6 +214,11 @@ export default async function CategoryPage({
             />
           ))}
         </div>
+
+        <YandexAdBlock
+          blockId={process.env.NEXT_PUBLIC_YANDEX_CATEGORY_AD_ID || "R-A-1234567-3"}
+          className="my-10"
+        />
 
         <OtherCategories current={cat.slug} />
 

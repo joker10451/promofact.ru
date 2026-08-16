@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import JsonLd from "@/components/JsonLd";
+import YandexAdBlock from "@/components/YandexAdBlock";
 import { ARTICLES, getArticle } from "@/lib/articles";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
@@ -105,11 +106,22 @@ export default async function ArticlePage({
 
       <article className="mt-8 space-y-4">
         {article.body.map((p, i) => (
-          <p key={i} className="leading-relaxed text-ink/70">
-            {p}
-          </p>
+          <div key={i}>
+            <p className="leading-relaxed text-ink/70">{p}</p>
+            {i === 1 && (
+              <YandexAdBlock
+                blockId={process.env.NEXT_PUBLIC_YANDEX_ARTICLE_AD_ID || "R-A-1234567-1"}
+                className="my-6"
+              />
+            )}
+          </div>
         ))}
       </article>
+
+      <YandexAdBlock
+        blockId={process.env.NEXT_PUBLIC_YANDEX_ARTICLE_BOTTOM_AD_ID || "R-A-1234567-2"}
+        className="mt-8"
+      />
 
       {article.related.length > 0 && (
         <section className="mt-10 rounded-2xl border border-line bg-white p-6">

@@ -90,6 +90,8 @@ export default function RootLayout({
           content={process.env.BING_VERIFICATION || "09EEE6E2B1C92C9DC90FAA19E59A7574"}
         />
         <script src="https://telegram.org/js/telegram-web-app.js" async />
+        <script>window.yaContextCb=window.yaContextCb||[]</script>
+        <script src="https://yandex.ru/ads/system/context.js" async />
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
         <TelegramWebAppInit />

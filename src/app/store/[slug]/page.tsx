@@ -5,6 +5,8 @@ import CouponTicket from "@/components/CouponTicket";
 import HowToApply from "@/components/HowToApply";
 import JsonLd from "@/components/JsonLd";
 import OtherStores from "@/components/OtherStores";
+import OtherCategories from "@/components/OtherCategories";
+import YandexAdBlock from "@/components/YandexAdBlock";
 import { getStores, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -397,6 +399,11 @@ export default async function StorePage({
             ))}
           </div>
         )}
+
+        <YandexAdBlock
+          blockId={process.env.NEXT_PUBLIC_YANDEX_STORE_AD_ID || "R-A-1234567-4"}
+          className="my-10"
+        />
 
         {/* Сводная таблица для Быстрого ответа (Колдунщика) Яндекса и Google */}
         {store.coupons.length > 0 && (
