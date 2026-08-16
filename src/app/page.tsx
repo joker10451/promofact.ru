@@ -2,6 +2,7 @@ import Link from "next/link";
 import LatestTips from "@/components/LatestTips";
 import PopularStores from "@/components/PopularStores";
 import CouponGrid from "@/components/CouponGrid";
+import ExpiringDeals from "@/components/ExpiringDeals";
 import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -104,6 +105,13 @@ export default async function Home() {
         <Hero featured={featured} stores={stores} coupons={coupons} />
         <StoresMarquee />
         
+        {/* Сгорающие горячие предложения дня с таймером */}
+        <div className="mx-auto max-w-7xl px-4 pt-8 pb-2 sm:px-6">
+          <Reveal>
+            <ExpiringDeals coupons={coupons} />
+          </Reveal>
+        </div>
+
         {/* Каталог купонов */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
