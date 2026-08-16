@@ -77,36 +77,38 @@ export function formatTelegramPost(coupon: Coupon): {
 
   const lines: string[] = [];
 
-  // 1. Яркий заголовок с эмодзи
+  // 1. Интригующий заголовок с акцентом на выгоду
   if (coupon.promocode.isHit) {
-    lines.push(`🔥 <b>ХИТ СКИДКА В ${storeName}!</b>\n`);
+    lines.push(`🔥 <b>Секретная скидка в ${storeName}!</b>\n`);
   } else {
-    lines.push(`🛍 <b>${storeName} — СВЕЖИЙ ПРОМОКОД</b>\n`);
+    lines.push(`✨ <b>Лайфхак для заказа в ${storeName}</b>\n`);
   }
 
   // 2. Выгода крупно
   lines.push(`🎁 <b>${bonus}</b>\n`);
 
-  // 3. Промокод для копирования в 1 клик
-  lines.push(`🎟 Промокод: <code>${code}</code>`);
+  // 3. Инструкция по экономии
+  lines.push(`📋 <b>Как применить выгоду:</b>`);
+  lines.push(`1. Перейдите по кнопке ниже`);
+  lines.push(`2. Соберите заказ в корзину`);
+  lines.push(`3. Введите промокод в поле заказа:\n`);
+
+  // 4. Промокод для копирования в 1 клик
+  lines.push(`🎟 Код: <code>${code}</code>`);
   lines.push(`<i>(нажмите на промокод, чтобы скопировать 👆)</i>\n`);
 
-  // 4. Условия
+  // 5. Условия
   if (coupon.promocode.isFirstOrderOnly) {
-    lines.push(`⚡️ <b>Только на первый заказ</b>`);
+    lines.push(`⚡️ <i>Работает на первый заказ</i>`);
   } else if (coupon.promocode.isUniversal) {
-    lines.push(`✨ <b>Действует для всех (и на повторные заказы)</b>`);
+    lines.push(`✨ <i>Работает для всех (и на повторные заказы!)</i>`);
   }
 
   if (region && region !== "RU") {
-    lines.push(`📍 <b>Регион:</b> ${region}`);
+    lines.push(`📍 <i>Город: ${region}</i>`);
   }
 
-  if (terms) {
-    lines.push(`ℹ️ <b>Условия:</b> ${terms}`);
-  }
-
-  lines.push(`⏳ <b>Действует до:</b> ${expires}`);
+  lines.push(`⏳ <i>Актуально до ${expires}</i>`);
 
   // 5. Маркировка ОРД (Закон о рекламе)
   const ordText = escapeHtml(coupon.affiliate.ordText);
@@ -180,7 +182,10 @@ export async function sendCouponToTelegram(
         caption: text,
         parse_mode: "HTML",
         reply_markup: replyMarkup,
+        disable_notification: true, // Тихий режим без звукового пищания
       };
+    } else {
+      body.disable_notification = true;
     }
 
     const res = await fetch(endpoint, {
