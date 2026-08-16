@@ -182,7 +182,7 @@ export default function CouponTicket({
           >
             Показать штрихкод
           </button>
-        ) : (
+        ) : promocode.code ? (
           <div className="flex items-center justify-between gap-2 rounded-xl border-2 border-dashed border-ink/25 px-3 py-2.5 transition-colors">
             <span className="truncate font-display font-bold tracking-widest text-ink">
               {promocode.code}
@@ -204,6 +204,12 @@ export default function CouponTicket({
                 "Копировать"
               )}
             </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-mint/40 bg-mint/5 px-3 py-2.5">
+            <span className="text-xs font-bold text-mint-dark">
+              ✨ Промокод не требуется — скидка по ссылке
+            </span>
           </div>
         )}
 
