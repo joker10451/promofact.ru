@@ -85,25 +85,53 @@ export default async function Footer() {
           </ul>
         </nav>
 
-        {stores.length > 0 && (
-          <nav aria-label="Магазины">
-            <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
-              Магазины
-            </div>
-            <ul className="mt-4 space-y-2.5 text-sm text-white/70">
-              {stores.map((store) => (
-                <li key={store.slug}>
-                  <Link
-                    href={`/store/${store.slug}`}
-                    className="hover:text-white transition-colors"
-                  >
-                    {store.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        )}
+        <div>
+          <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
+            Промокоды по городам
+          </div>
+          <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-white/70">
+            <li>
+              <Link href="/gorod/moskva" className="hover:text-white transition-colors">
+                Москва
+              </Link>
+            </li>
+            <li>
+              <Link href="/gorod/spb" className="hover:text-white transition-colors">
+                Санкт-Петербург
+              </Link>
+            </li>
+            <li>
+              <Link href="/gorod/kazan" className="hover:text-white transition-colors">
+                Казань
+              </Link>
+            </li>
+            <li>
+              <Link href="/gorod/ekaterinburg" className="hover:text-white transition-colors">
+                Екатеринбург
+              </Link>
+            </li>
+            <li>
+              <Link href="/gorod/krasnodar" className="hover:text-white transition-colors">
+                Краснодар
+              </Link>
+            </li>
+            <li>
+              <Link href="/gorod/samara" className="hover:text-white transition-colors">
+                Самара
+              </Link>
+            </li>
+            <li>
+              <Link href="/gorod/nizhniy-novgorod" className="hover:text-white transition-colors">
+                Нижний Новгород
+              </Link>
+            </li>
+            <li>
+              <Link href="/gorod/ufa" className="hover:text-white transition-colors">
+                Уфа
+              </Link>
+            </li>
+          </ul>
+        </div>
 
         <div>
           <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">

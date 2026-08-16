@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { getCategories, getCoupons, getStores } from "@/lib/perfluence";
 import { ARTICLES } from "@/lib/articles";
 import { ACTIONS } from "@/lib/actions";
+import { CITIES_SEO } from "@/lib/citiesSeo";
 import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -47,6 +48,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.6,
     }));
+
+  const citiesMap: MetadataRoute.Sitemap = CITIES_SEO.map((city) => ({
+    url: `${SITE_URL}/gorod/${city.slug}`,
+    lastModified: today,
+    changeFrequency: "daily" as const,
+    priority: 0.85,
+  }));
+
   const tipsMap: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/sovety`,
@@ -90,5 +99,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  return [...home, ...categoryMap, ...storeMap, ...couponMap, ...promokodyMap, ...tipsMap, ...actionsMap, ...miscMap];
+  return [...home, ...citiesMap, ...categoryMap, ...storeMap, ...couponMap, ...promokodyMap, ...tipsMap, ...actionsMap, ...miscMap];
 }
