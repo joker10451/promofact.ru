@@ -3,6 +3,7 @@ import LatestTips from "@/components/LatestTips";
 import PopularStores from "@/components/PopularStores";
 import CouponGrid from "@/components/CouponGrid";
 import ExpiringDeals from "@/components/ExpiringDeals";
+import SavingsCalculator from "@/components/SavingsCalculator";
 import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -125,6 +126,13 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <HowItWorks />
+          </Reveal>
+        </div>
+
+        {/* Калькулятор выгоды */}
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+          <Reveal>
+            <SavingsCalculator coupons={coupons} />
           </Reveal>
         </div>
 
