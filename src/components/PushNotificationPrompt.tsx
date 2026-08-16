@@ -25,12 +25,12 @@ export default function PushNotificationPrompt() {
       // Регистрируем service worker
       navigator.serviceWorker.register("/sw.js").catch(() => {});
 
-      // Показываем предложение подписаться, если статус default и не закрывали недавно
+      // Показываем предложение подписаться только через 12 секунд активного пребывания на сайте
       if (Notification.permission === "default") {
         try {
           const dismissedAt = localStorage.getItem("push_prompt_dismissed");
-          if (!dismissedAt || Date.now() - Number(dismissedAt) > 3 * 24 * 60 * 60 * 1000) {
-            const timer = setTimeout(() => setIsVisible(true), 4000);
+          if (!dismissedAt || Date.now() - Number(dismissedAt) > 7 * 24 * 60 * 60 * 1000) {
+            const timer = setTimeout(() => setIsVisible(true), 12000);
             return () => clearTimeout(timer);
           }
         } catch {}

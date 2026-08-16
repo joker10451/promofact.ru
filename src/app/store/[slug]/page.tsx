@@ -348,8 +348,21 @@ export default async function StorePage({
               </div>
             </div>
           </div>
-          <div className="rounded-full bg-mint/10 border border-mint/30 px-4 py-1.5 text-xs font-bold text-ink/70">
-            Проверено сегодня ✓
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href="https://t.me/smart_zakupka"
+              target="_blank"
+              rel="noopener nofollow"
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-xs font-bold text-ink shadow-[0_2px_0_rgba(11,16,43,0.06)] hover:border-ink transition-all"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="#0088cc" aria-hidden="true">
+                <path d="M21.94 4.4a1.5 1.5 0 0 0-2.05-.93L3.4 10.6c-.9.36-.85 1.67.07 1.96l4.14 1.3 1.72 5.29c.34 1.05 1.68 1.25 2.34.35l2.06-2.82a.5.5 0 0 1 .6-.13l4.66 2.16c.86.4 1.87-.2 1.88-1.1l.55-14.08a1 1 0 0 0-.44-.8Z" />
+              </svg>
+              <span>Скидки {store.name} в Telegram</span>
+            </a>
+            <div className="rounded-full bg-mint/10 border border-mint/30 px-3.5 py-2 text-xs font-bold text-ink/70">
+              Проверено сегодня ✓
+            </div>
           </div>
         </div>
 
