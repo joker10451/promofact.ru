@@ -214,7 +214,50 @@ export async function sendCouponToTelegram(
       return { ok: false, error: data.description || "Ошибка Telegram API" };
     }
 
-    return { ok: true, messageId: data.result?.message_id };
+    const messageId = data.result?.message_id;
+
+    // Авто-уведомление администратора в ЛС со ссылкой для сдачи отчета в Perfluence
+    const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+    if (adminChatId && messageId) {
+      const channelUsername = (process.env.TELEGRAM_CHANNEL_ID || "@smart_zakupka").replace("@", "");
+      const postUrl = `https://t.me/${channelUsername}/${messageId}`;
+      const perfluenceProjectUrl = `https://dash.perfluence.net/my-projects/${coupon.store.id}`;
+
+      const adminText = [
+        `📢 <b>Опубликован пост для отчета Perfluence!</b>`,
+        ``,
+        `🏬 Магазин: <b>${escapeHtml(coupon.store.name)}</b>`,
+        `🎟 Промокод: <code>${escapeHtml(coupon.promocode.code)}</code>`,
+        ``,
+        `🔗 <b>Ссылка на пост (нажмите, чтобы скопировать):</b>`,
+        `<code>${postUrl}</code>`,
+      ].join("\n");
+
+      const adminMarkup = {
+        inline_keyboard: [
+          [{ text: "⚡ Сдать отчет в Perfluence →", url: perfluenceProjectUrl }],
+          [{ text: "👁 Открыть пост в канале", url: postUrl }],
+        ],
+      };
+
+      try {
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: adminChatId,
+            text: adminText,
+            parse_mode: "HTML",
+            reply_markup: adminMarkup,
+            disable_web_page_preview: true,
+          }),
+        });
+      } catch (adminErr) {
+        console.error("Admin notification error:", adminErr);
+      }
+    }
+
+    return { ok: true, messageId };
   } catch (err) {
     return { ok: false, error: (err as Error).message };
   }
