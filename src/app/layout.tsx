@@ -18,12 +18,14 @@ const unbounded = Unbounded({
   variable: "--font-unbounded",
   subsets: ["cyrillic", "latin"],
   weight: "variable",
+  display: "swap",
 });
 
 const golos = Golos_Text({
   variable: "--font-golos",
   subsets: ["cyrillic", "latin"],
   weight: "variable",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -74,8 +76,11 @@ export default function RootLayout({
     >
       <head>
         <link rel="preconnect" href="https://mc.yandex.ru" />
+        <link rel="dns-prefetch" href="https://mc.yandex.ru" />
         <link rel="preconnect" href="https://widget.perfluence.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://widget.perfluence.net" />
         <link rel="preconnect" href="https://promofact.perfluence.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://promofact.perfluence.net" />
         <script
           dangerouslySetInnerHTML={{
             __html: "document.documentElement.classList.add('js');",
@@ -89,9 +94,9 @@ export default function RootLayout({
           name="msvalidate.01"
           content={process.env.BING_VERIFICATION || "09EEE6E2B1C92C9DC90FAA19E59A7574"}
         />
-        <script src="https://telegram.org/js/telegram-web-app.js" async />
+        <script src="https://telegram.org/js/telegram-web-app.js" async defer />
         <script>window.yaContextCb=window.yaContextCb||[]</script>
-        <script src="https://yandex.ru/ads/system/context.js" async />
+        <script src="https://yandex.ru/ads/system/context.js" async defer />
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
         <TelegramWebAppInit />
