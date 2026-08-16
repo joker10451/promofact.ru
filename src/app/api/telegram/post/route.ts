@@ -6,9 +6,14 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   const secret = process.env.TELEGRAM_POSTING_SECRET;
+  const statsPassword = process.env.STATS_PASSWORD;
   const authHeader = req.headers.get("authorization");
 
-  if (!secret || authHeader !== `Bearer ${secret}`) {
+  const isAuthorized =
+    (secret && authHeader === `Bearer ${secret}`) ||
+    (statsPassword && authHeader === `Bearer ${statsPassword}`);
+
+  if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
