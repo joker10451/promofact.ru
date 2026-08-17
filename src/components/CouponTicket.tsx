@@ -130,6 +130,19 @@ export default function CouponTicket({
         </div>
       </div>
 
+      {/* Красивый баннер-макет оффера, если прикреплен */}
+      {promocode.barcodeImage && !promocode.isBarcode && (
+        <div className="px-5 pt-4">
+          <div className="relative overflow-hidden rounded-xl border border-line bg-paper aspect-[9/14] max-h-72 w-full flex items-center justify-center">
+            <img
+              src={promocode.barcodeImage}
+              alt={store.name}
+              className="h-full w-full object-contain"
+            />
+          </div>
+        </div>
+      )}
+
       {proofCount > 0 ? (
         <div className="px-5 pt-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-2.5 py-1 text-[10px] font-bold text-ink/80">
