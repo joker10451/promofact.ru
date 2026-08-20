@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import JsonLd from "@/components/JsonLd";
+import SberStickyCta from "@/components/SberStickyCta";
+import SberSavingsCalc from "@/components/SberSavingsCalc";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
-const AFFILIATE_URL =
-  "https://sberbank1.prfl.me/sites/lccq8a?erid=2RanynFCKB1";
+const BASE_URL = "https://sberbank1.prfl.me/sites/lccq8a?erid=2RanynFCKB1";
+const AFFILIATE_URL = `${BASE_URL}&utm_source=promofact&utm_medium=landing&utm_campaign=sbercard`;
 
 export const revalidate = 86400;
 
@@ -35,7 +37,7 @@ const benefits = [
   {
     icon: "🗓",
     title: "До 120 дней без процентов",
-    text: "Грейс-период на покупки: оплачивайте в рамках льготного периода и не платите проценты за пользование.",
+    text: "Грейс-период на покупки: оплачивайте в рамках льготного периода и не платите проценты за пользование. Беспроцентная рассрочка на 4 месяца.",
   },
   {
     icon: "💳",
@@ -71,6 +73,10 @@ const faq = [
     q: "Кому одобрят карту?",
     a: "Решение принимает банк на основе скоринга: возраст, доход, кредитная история. Заявку можно подать с 18 лет.",
   },
+  {
+    q: "Что будет, если не закрыть долг вовремя?",
+    a: "На сумму сверх льготного периода начислятся проценты по ставке договора (49,8–59,8% годовых). Поэтому картой выгодно пользоваться именно в рамках 120 дней.",
+  },
 ];
 
 export default function SberCardPage() {
@@ -88,7 +94,7 @@ export default function SberCardPage() {
       priceCurrency: "RUB",
       price: 0,
       availability: "https://schema.org/InStock",
-      url: AFFILIATE_URL,
+      url: BASE_URL,
       seller: { "@type": "Organization", name: "ПАО Сбербанк" },
     },
   };
@@ -118,8 +124,15 @@ export default function SberCardPage() {
     })),
   };
 
+  const proofStats = [
+    { value: "120", label: "дней без %" },
+    { value: "1 млн ₽", label: "лимит" },
+    { value: "30%", label: "кешбэк" },
+    { value: "0 ₽", label: "обслуживание" },
+  ];
+
   return (
-    <main className="min-h-screen bg-paper pb-20">
+    <main className="min-h-screen bg-paper pb-28">
       <JsonLd data={productJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
       <JsonLd data={faqJsonLd} />
@@ -148,7 +161,7 @@ export default function SberCardPage() {
         </nav>
 
         {/* HERO */}
-        <section className="mt-6 overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-white to-mint/20 p-6 shadow-[0_4px_0_rgba(11,16,43,0.06)] sm:p-10">
+        <section className="mt-6 relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-white to-mint/20 p-6 shadow-[0_4px_0_rgba(11,16,43,0.06)] sm:p-10">
           <span className="inline-flex items-center gap-2 rounded-full bg-red/10 px-3 py-1 text-xs font-bold text-red">
             🔥 Финансовый запас на каждый день
           </span>
@@ -159,9 +172,9 @@ export default function SberCardPage() {
             120 дней уверенности в завтрашнем дне
           </p>
           <p className="mt-3 max-w-2xl text-base font-medium text-ink/70 sm:text-lg">
-            Удобный способ оплачивать покупки сейчас и возвращать деньги позже.
-            До 120 дней без процентов, лимит до 1 млн ₽ и кешбэк до 30% у
-            партнёров.
+            Покупайте сейчас, платите потом — и не отдавайте банку ни копейки
+            процентов целых 4 месяца. Лимит до 1 млн ₽, кешбэк до 30% и
+            обслуживание 0₽.
           </p>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -169,7 +182,7 @@ export default function SberCardPage() {
               href={AFFILIATE_URL}
               target="_blank"
               rel="nofollow noopener sponsored"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red px-6 py-4 text-base font-extrabold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red px-7 py-4 text-base font-extrabold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
             >
               Оформить СберКарту →
             </a>
@@ -177,22 +190,44 @@ export default function SberCardPage() {
               Доставка карты уже сегодня
             </span>
           </div>
+
+          {/* Социальное доказательство / статистика */}
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {proofStats.map((s) => (
+              <div
+                key={s.label}
+                className="rounded-2xl border border-line bg-white/70 px-3 py-3 text-center"
+              >
+                <div className="font-display text-2xl font-black text-ink sm:text-3xl">
+                  {s.value}
+                </div>
+                <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-ink/50">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
-        {/* CAMPAIGN BANNER (из официального креатива Сбера) */}
+        {/* КАЛЬКУЛЯТОР ВЫГОДЫ */}
+        <section className="mt-10">
+          <SberSavingsCalc affiliateUrl={AFFILIATE_URL} />
+        </section>
+
+        {/* CAMPAIGN BANNER */}
         <Image
           src="/sberkarta-banner.webp"
           alt="Кредитная СберКарта — 120 дней уверенности в завтрашнем дне"
           width={2100}
           height={1500}
           loading="lazy"
-          className="mt-8 w-full rounded-3xl border border-line shadow-[0_4px_0_rgba(11,16,43,0.06)]"
+          className="mt-10 w-full rounded-3xl border border-line shadow-[0_4px_0_rgba(11,16,43,0.06)]"
         />
 
         {/* BENEFITS */}
         <section className="mt-10">
           <h2 className="font-display text-2xl font-extrabold text-ink">
-            Что внутри карты
+            Почему СберКарта — это выгодно
           </h2>
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {benefits.map((b) => (
@@ -214,47 +249,81 @@ export default function SberCardPage() {
           </div>
         </section>
 
-        {/* CONDITIONS TABLE */}
-        <section className="mt-10 overflow-hidden rounded-2xl border border-line bg-white shadow-[0_4px_0_rgba(11,16,43,0.06)]">
-          <div className="bg-ink px-5 py-3 text-xs font-bold uppercase tracking-wider text-yellow">
-            📊 Условия Кредитной СберКарты
-          </div>
-          <div className="divide-y divide-line">
-            {[
-              ["Льготный период", "до 120 дней без процентов"],
-              ["Кредитный лимит", "до 1 000 000 ₽"],
-              ["Кешбэк у партнёров", "до 30%"],
-              ["Обслуживание", "0 ₽ в месяц"],
-              ["Оформление", "онлайн, доставка сегодня"],
-            ].map(([k, v]) => (
-              <div
-                key={k}
-                className="flex items-center justify-between px-5 py-3.5 text-sm"
-              >
-                <span className="font-medium text-ink/60">{k}</span>
-                <span className="font-extrabold text-ink">{v}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* CTA SECONDARY */}
-        <section className="mt-8 rounded-3xl border border-mint/40 bg-mint/10 p-6 text-center sm:p-8">
+        {/* ПРИМЕР КОНКРЕТНОЙ ПОКУПКИ (снятие возражений) */}
+        <section className="mt-10 rounded-3xl border border-line bg-white p-6 shadow-[0_4px_0_rgba(11,16,43,0.06)] sm:p-8">
           <h2 className="font-display text-xl font-extrabold text-ink sm:text-2xl">
-            Заберите карту с доставкой уже сегодня
+            Пример: холодильник за 60 000 ₽
           </h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-ink/65">
-            Оформление онлайн занимает несколько минут. Курьер привезёт карту —
-            в ряде регионов в день заявки.
-          </p>
+          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl bg-paper p-4">
+              <div className="text-sm font-bold text-ink/60">Без карты</div>
+              <div className="mt-1 font-mono text-lg font-black text-ink">
+                60 000 ₽ сразу
+              </div>
+              <p className="mt-2 text-xs text-ink/50">
+                Отдаёте всю сумму из бюджета одним платежом.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-mint/10 p-4">
+              <div className="text-sm font-bold text-ink/60">
+                СберКарта, 120 дней
+              </div>
+              <div className="mt-1 font-mono text-lg font-black text-mint">
+                0 ₽ процентов
+              </div>
+              <p className="mt-2 text-xs text-ink/50">
+                Делите 60 000 на 4 месяца, проценты не капают.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-red/5 p-4">
+              <div className="text-sm font-bold text-ink/60">Плюс кешбэк</div>
+              <div className="mt-1 font-mono text-lg font-black text-red">
+                до +18 000 ₽
+              </div>
+              <p className="mt-2 text-xs text-ink/50">
+                Вернётся на карту, если магазин — партнёр.
+              </p>
+            </div>
+          </div>
           <a
             href={AFFILIATE_URL}
             target="_blank"
             rel="nofollow noopener sponsored"
-            className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-ink px-8 py-4 text-base font-extrabold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-8 py-4 text-base font-extrabold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
           >
             Оформить Кредитную СберКарту
           </a>
+        </section>
+
+        {/* ДОВЕРИЕ / БЕЗОПАСНОСТЬ */}
+        <section className="mt-10 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-line bg-white p-5 text-center">
+            <div className="text-3xl" aria-hidden="true">
+              🛡️
+            </div>
+            <h3 className="mt-2 font-bold text-ink">Данные под защитой</h3>
+            <p className="mt-1 text-xs text-ink/55">
+              Оформление на официальном сайте банка с шифрованием.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-line bg-white p-5 text-center">
+            <div className="text-3xl" aria-hidden="true">
+              🏦
+            </div>
+            <h3 className="mt-2 font-bold text-ink">Лицензия ЦБ РФ</h3>
+            <p className="mt-1 text-xs text-ink/55">
+              №1481 от 11.08.2015 — ПАО Сбербанк.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-line bg-white p-5 text-center">
+            <div className="text-3xl" aria-hidden="true">
+              ⚡
+            </div>
+            <h3 className="mt-2 font-bold text-ink">Решение за 2 минуты</h3>
+            <p className="mt-1 text-xs text-ink/55">
+              Заявка онлайн, без справок о доходах.
+            </p>
+          </div>
         </section>
 
         {/* FAQ */}
@@ -270,16 +339,12 @@ export default function SberCardPage() {
               >
                 <summary className="cursor-pointer list-none font-bold text-ink">
                   {f.q}
-                  <span className="float-right text-red group-open:hidden">
-                    +
-                  </span>
+                  <span className="float-right text-red group-open:hidden">+</span>
                   <span className="float-right text-red hidden group-open:inline">
                     −
                   </span>
                 </summary>
-                <p className="mt-3 text-sm leading-relaxed text-ink/70">
-                  {f.a}
-                </p>
+                <p className="mt-3 text-sm leading-relaxed text-ink/70">{f.a}</p>
               </details>
             ))}
           </div>
@@ -396,6 +461,9 @@ export default function SberCardPage() {
           </details>
         </section>
       </div>
+
+      {/* STICKY CTA — всегда видна при скролле */}
+      <SberStickyCta affiliateUrl={AFFILIATE_URL} />
     </main>
   );
 }
