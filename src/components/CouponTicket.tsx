@@ -32,7 +32,7 @@ export default function CouponTicket({
     try {
       const saved = localStorage.getItem(`promo_vote_${coupon.id}`);
       if (saved === "up" || saved === "down") {
-        setVote(saved);
+        queueMicrotask(() => setVote(saved));
       }
     } catch {}
   }, [coupon.id]);
