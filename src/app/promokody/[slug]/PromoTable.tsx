@@ -104,7 +104,17 @@ export default function PromoTable({
                 {row.expires}
               </td>
               <td className="py-3 text-right">
-                <CopyButton code={row.code} />
+                <div className="flex items-center justify-end gap-2">
+                  <CopyButton code={row.code} />
+                  <a
+                    href={row.affiliateLink}
+                    target="_blank"
+                    rel="nofollow sponsored noopener"
+                    className="rounded-lg bg-red px-3 py-1.5 text-xs font-bold text-white transition-all hover:translate-y-[-1px] hover:shadow-sm"
+                  >
+                    В магазин →
+                  </a>
+                </div>
               </td>
             </tr>
           ))}
@@ -127,6 +137,14 @@ export default function PromoTable({
             <div className="mt-2 text-sm font-semibold">{row.bonus}</div>
             <div className="mt-1 text-xs text-ink/50">{row.terms}</div>
             <div className="mt-1 text-xs text-ink/40">До: {row.expires}</div>
+            <a
+              href={row.affiliateLink}
+              target="_blank"
+              rel="nofollow sponsored noopener"
+              className="mt-3 inline-block rounded-lg bg-red px-4 py-2 text-xs font-bold text-white transition-all hover:translate-y-[-1px] hover:shadow-sm"
+            >
+              В магазин →
+            </a>
           </div>
         ))}
       </div>
