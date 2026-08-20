@@ -154,6 +154,9 @@ export default function SberCardPage() {
           <h1 className="mt-4 font-display text-3xl font-black leading-tight text-ink sm:text-4xl lg:text-5xl">
             Кредитная СберКарта
           </h1>
+          <p className="mt-2 font-display text-xl font-extrabold text-red sm:text-2xl">
+            120 дней уверенности в завтрашнем дне
+          </p>
           <p className="mt-3 max-w-2xl text-base font-medium text-ink/70 sm:text-lg">
             Удобный способ оплачивать покупки сейчас и возвращать деньги позже.
             До 120 дней без процентов, лимит до 1 млн ₽ и кешбэк до 30% у
@@ -348,6 +351,24 @@ export default function SberCardPage() {
             11.08.2015 г. Кредитные карты предусматривают начисление процентов на
             сумму задолженности при её несвоевременном погашении. Условия
             кредитования и лимит устанавливаются банком индивидуально.
+          </p>
+          <p className="mt-2 font-bold text-ink/60">
+            Оценивайте свои финансовые возможности и риски перед оформлением
+            кредитной карты.
+          </p>
+          <p className="mt-2">
+            Льготный период — до 120 дней 0%. Далее процентная ставка составляет
+            49,8–59,8% годовых. Полная стоимость кредита (ПСК): 48,816%–58,320%
+            годовых. Подробные условия — на официальном сайте банка:{" "}
+            <a
+              href="https://www.sberbank.ru/ru/person/cards/credit/sbercard?tab=5"
+              target="_blank"
+              rel="nofollow noopener"
+              className="font-semibold text-ink underline underline-offset-2 hover:text-red"
+            >
+              sberbank.ru/credit_sberkarta
+            </a>
+            .
           </p>
           <p className="mt-2">
             Информация носит справочный характер. Нажимая на кнопку «Оформить»,
