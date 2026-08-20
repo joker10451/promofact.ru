@@ -127,6 +127,9 @@ function formatDate(iso) {
 }
 
 function formatPost(coupon) {
+  if (!coupon.store || !coupon.store.name) {
+    throw new Error(`Купон ${coupon.id} (${coupon.promocode?.code}) не содержит данных магазина (store.name) — пропуск.`);
+  }
   const storeName = escapeHtml(coupon.store.name);
   const bonus = escapeHtml(stripHtml(coupon.promocode.bonusName) || "Скидка по промокоду");
   const code = escapeHtml(coupon.promocode.code);
@@ -381,6 +384,18 @@ async function fetchCoupons() {
             isUniversal: true,
             isFirstOrderOnly: false,
             region: "RU",
+          },
+          store: {
+            name: "Плати по миру",
+            slug: "plati-po-miru",
+            logo: "https://platipomiru.com/favicon.ico",
+            site: "https://platipomiru.com",
+          },
+          affiliate: {
+            link: "https://my.saleads.pro/s/dz5lk?erid=2Vtzqwxtkav",
+            landingLink: "https://my.saleads.pro/s/dz5lk?erid=2Vtzqwxtkav",
+            ordMarker: "2Vtzqwxtkav",
+            ordText: "Реклама.",
           },
         },
         {
