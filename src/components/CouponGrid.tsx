@@ -27,6 +27,7 @@ export default function CouponGrid({
     const t = setTimeout(() => el.classList.add("is-visible"), 60);
     return () => clearTimeout(t);
   }, [filtered.length]);
+  useEffect(() => {
     // Автоопределение или восстановление выбранного города
     const savedCity = localStorage.getItem("promofact_selected_city");
     if (savedCity) {
