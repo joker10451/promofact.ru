@@ -6,25 +6,38 @@ export default async function Footer() {
   const categories = await getCategories();
   const stores = (await getStores()).slice(0, 12);
 
+  const footerLink =
+    "group/fl flex items-center gap-1.5 text-white/60 transition-all hover:text-white hover:translate-x-1";
+
   return (
-    <footer className="bg-ink text-white">
+    <footer className="relative mt-10 bg-ink text-white">
       <div className="h-1.5 w-full bg-gradient-to-r from-yellow via-red to-mint" />
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-2 font-display text-xl font-extrabold">
-            <img
-              src="/icon.svg"
-              alt="ПРОМО·ФАКТ"
-              width={28}
-              height={28}
-              className="h-7 w-7"
-            />
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-red via-red-dark to-yellow shadow-[0_4px_14px_-4px_rgba(255,51,85,0.7)]">
+              <img
+                src="/icon.svg"
+                alt=""
+                width={20}
+                height={20}
+                className="h-5 w-5 brightness-0 invert"
+              />
+            </span>
             ПРОМО<span className="text-red">·</span>ФАКТ
           </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/55">
             Проверенные промокоды и купоны на скидку от магазинов-партнёров.
             Обновляем каждый день, проверяем каждый код.
           </p>
+          <a
+            href="https://t.me/smart_zakupka"
+            target="_blank"
+            rel="noopener nofollow"
+            className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red to-red-dark px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(255,51,85,0.7)] transition-all hover:translate-y-[2px]"
+          >
+            Подписаться на Telegram →
+          </a>
         </div>
 
         {categories.length > 0 && (
@@ -32,53 +45,45 @@ export default async function Footer() {
             <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
               Категории
             </div>
-            <ul className="mt-4 space-y-2.5 text-sm text-white/70">
+            <ul className="mt-4 space-y-2.5 text-sm">
               {categories.map((cat) => (
                 <li key={cat.slug}>
-                  <Link
-                    href={`/category/${cat.slug}`}
-                    className="hover:text-white transition-colors"
-                  >
+                  <Link href={`/category/${cat.slug}`} className={footerLink}>
+                    <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
                     {cat.name}
                   </Link>
                 </li>
               ))}
             </ul>
-              <Link
-                href="/sovety"
-                className="mt-4 inline-block font-semibold text-white/70 hover:text-white transition-colors"
-              >
-                Советы по экономии →
-              </Link>
-            </nav>
+            <Link
+              href="/sovety"
+              className="mt-4 inline-block font-semibold text-white/70 hover:text-white transition-colors"
+            >
+              Советы по экономии →
+            </Link>
+          </nav>
         )}
 
         <nav aria-label="Подборки">
           <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
             Подборки
           </div>
-          <ul className="mt-4 space-y-2.5 text-sm text-white/70">
+          <ul className="mt-4 space-y-2.5 text-sm">
             <li>
-              <Link
-                href="/collections/first-order"
-                className="hover:text-white transition-colors"
-              >
+              <Link href="/collections/first-order" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
                 Скидки на первый заказ
               </Link>
             </li>
             <li>
-              <Link
-                href="/collections/food-delivery"
-                className="hover:text-white transition-colors"
-              >
+              <Link href="/collections/food-delivery" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
                 Доставка еды и продуктов
               </Link>
             </li>
             <li>
-              <Link
-                href="/collections/exclusive"
-                className="hover:text-white transition-colors"
-              >
+              <Link href="/collections/exclusive" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
                 Эксклюзивные промокоды
               </Link>
             </li>
@@ -89,62 +94,40 @@ export default async function Footer() {
           <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
             Промокоды по городам
           </div>
-          <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-white/70">
-            <li>
-              <Link href="/gorod/moskva" className="hover:text-white transition-colors">
-                Москва
-              </Link>
-            </li>
-            <li>
-              <Link href="/gorod/spb" className="hover:text-white transition-colors">
-                Санкт-Петербург
-              </Link>
-            </li>
-            <li>
-              <Link href="/gorod/kazan" className="hover:text-white transition-colors">
-                Казань
-              </Link>
-            </li>
-            <li>
-              <Link href="/gorod/ekaterinburg" className="hover:text-white transition-colors">
-                Екатеринбург
-              </Link>
-            </li>
-            <li>
-              <Link href="/gorod/krasnodar" className="hover:text-white transition-colors">
-                Краснодар
-              </Link>
-            </li>
-            <li>
-              <Link href="/gorod/samara" className="hover:text-white transition-colors">
-                Самара
-              </Link>
-            </li>
-            <li>
-              <Link href="/gorod/nizhniy-novgorod" className="hover:text-white transition-colors">
-                Нижний Новгород
-              </Link>
-            </li>
-            <li>
-              <Link href="/gorod/ufa" className="hover:text-white transition-colors">
-                Уфа
-              </Link>
-            </li>
+          <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            {[
+              ["Москва", "/gorod/moskva"],
+              ["Санкт-Петербург", "/gorod/spb"],
+              ["Казань", "/gorod/kazan"],
+              ["Екатеринбург", "/gorod/ekaterinburg"],
+              ["Краснодар", "/gorod/krasnodar"],
+              ["Самара", "/gorod/samara"],
+              ["Нижний Новгород", "/gorod/nizhniy-novgorod"],
+              ["Уфа", "/gorod/ufa"],
+            ].map(([label, href]) => (
+              <li key={href}>
+                <Link href={href} className={footerLink}>
+                  <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                  {label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
-        <div>
+        <div className="md:col-span-1">
           <div className="font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
             Партнёрам
           </div>
-          <ul className="mt-4 space-y-2.5 text-sm text-white/70">
+          <ul className="mt-4 space-y-2.5 text-sm">
             <li>
               <a
                 href="https://perfluence.net"
                 target="_blank"
                 rel="noopener nofollow sponsored"
-                className="hover:text-white transition-colors"
+                className={footerLink}
               >
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
                 Perfluence — CPA-сеть
               </a>
             </li>
@@ -157,12 +140,8 @@ export default async function Footer() {
                   💳
                 </span>
                 <span className="flex flex-col">
-                  <span className="font-bold text-white">
-                    ЮKassa для бизнеса
-                  </span>
-                  <span className="text-xs text-white/55">
-                    Платежи без комиссии 90 дней
-                  </span>
+                  <span className="font-bold text-white">ЮKassa для бизнеса</span>
+                  <span className="text-xs text-white/55">Платежи без комиссии 90 дней</span>
                 </span>
                 <span className="ml-auto text-white/40 transition-transform group-hover:translate-x-1">
                   →
@@ -173,7 +152,7 @@ export default async function Footer() {
           <div className="mt-6 font-display text-xs font-extrabold uppercase tracking-widest text-yellow">
             Мы в соцсетях
           </div>
-          <ul className="mt-3 space-y-2.5 text-sm text-white/70">
+          <ul className="mt-3 space-y-2.5 text-sm">
             <li>
               <a
                 href="https://t.me/smart_zakupka"

@@ -139,11 +139,14 @@ export default async function Home() {
         {/* Популярные магазины */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
-            <section>
+            <section className="section-shell p-6 sm:p-10">
               <div className="flex items-center justify-between">
-                <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
-                  Популярные магазины
-                </h2>
+                <div>
+                  <span className="eyebrow mb-3">🔥 Топ магазинов</span>
+                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
+                    Популярные магазины
+                  </h2>
+                </div>
                 <Link
                   href="/store"
                   className="text-xs sm:text-sm font-bold text-red hover:underline transition-all"
@@ -187,10 +190,15 @@ export default async function Home() {
           </Reveal>
         </div>
 
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="divider-wave" />
+        </div>
+
         {/* Категории */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
-            <section>
+            <section className="section-shell p-6 sm:p-10">
+              <span className="eyebrow mb-3">🗂 Все направления</span>
               <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
                 Категории
               </h2>
@@ -207,6 +215,10 @@ export default async function Home() {
               </div>
             </section>
           </Reveal>
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="divider-wave" />
         </div>
 
         {/* SEO статья */}
@@ -227,10 +239,11 @@ export default async function Home() {
           <LatestTips />
         </Reveal>
 
-        {/* Партнерам и бизнесу */}
+        {/* Партнёрам и бизнесу */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
-            <section aria-label="Партнёрам">
+            <section aria-label="Партнёрам" className="section-shell p-6 sm:p-10">
+              <span className="eyebrow mb-3">🤝 Для бизнеса</span>
               <h2 className="font-display text-2xl font-extrabold sm:text-3xl">
                 Партнёрам и бизнесу
               </h2>

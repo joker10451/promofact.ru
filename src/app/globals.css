@@ -282,3 +282,124 @@ h1.font-display, h2.font-display {
   line-height: 1.14;
 }
 
+/* ===== ВИЗУАЛЬНЫЙ АПГРЕЙД: глобальный декоративный фон ===== */
+body {
+  position: relative;
+  background-color: var(--color-paper);
+  background-image:
+    radial-gradient(60rem 60rem at 110% -10%, rgba(255, 51, 85, 0.07), transparent 60%),
+    radial-gradient(50rem 50rem at -10% 10%, rgba(22, 199, 132, 0.07), transparent 55%),
+    radial-gradient(40rem 40rem at 50% 120%, rgba(255, 208, 47, 0.06), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Тонкая сетка-«бумага» поверх фона (почти незаметна, добавляет текстуру) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(11, 16, 43, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(11, 16, 43, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%);
+}
+
+/* ===== Утилиты для «богатых» секций ===== */
+
+/* Надзаголовок-акцент (eyebrow) */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 9999px;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  background: linear-gradient(135deg, var(--color-yellow), var(--color-mint));
+  box-shadow: 0 4px 14px -4px rgba(255, 208, 47, 0.6);
+}
+
+/* Стеклянная карточка */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Свечение под кнопкой/карточкой */
+.glow-red {
+  box-shadow: 0 12px 40px -10px rgba(255, 51, 85, 0.45);
+}
+.glow-mint {
+  box-shadow: 0 12px 40px -10px rgba(22, 199, 132, 0.4);
+}
+
+/* Крупная «пилюля-статистика» */
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.25rem;
+  padding: 1rem 0.75rem;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.stat-pill:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-mint);
+  box-shadow: 0 16px 34px -14px rgba(22, 199, 132, 0.35);
+}
+
+/* Чередующаяся «оболочка» секции для ритма страницы */
+.section-shell {
+  border-radius: 2rem;
+  border: 1px solid var(--color-line);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Градиентный разделитель-волна между секциями */
+.divider-wave {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-red) 20%,
+    var(--color-yellow) 50%,
+    var(--color-mint) 80%,
+    transparent
+  );
+  opacity: 0.5;
+}
+
+/* Кнопка-«призыв» с градиентом (общий стиль) */
+.btn-gradient {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1rem;
+  padding: 0.9rem 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-red), var(--color-red-dark));
+  box-shadow: 0 5px 0 var(--color-red-dark);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-gradient:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--color-red-dark);
+}
+
