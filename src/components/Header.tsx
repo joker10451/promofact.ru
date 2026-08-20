@@ -3,8 +3,8 @@ import HeaderSearch from "@/components/HeaderSearch";
 
 const NAV = [
   { href: "/#catalog", label: "Купоны" },
-  { href: "/promokody", label: "📝 Промокоды" },
-  { href: "/gorod/moskva", label: "📍 Города" },
+  { href: "/promokody", label: "Промокоды" },
+  { href: "/gorod/moskva", label: "Города" },
   { href: "/#how", label: "Как работает" },
   { href: "/sovety", label: "Советы" },
 ];

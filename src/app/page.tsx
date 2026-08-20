@@ -15,6 +15,7 @@ import SeoArticle from "@/components/SeoArticle";
 import StoresMarquee from "@/components/StoresMarquee";
 import Subscribe from "@/components/Subscribe";
 import Ticker from "@/components/Ticker";
+import { IconCard, IconGift, IconBolt } from "@/components/SberIcons";
 import { getBestCoupons, getCategories, getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -255,10 +256,10 @@ export default async function Home() {
               <div className="mt-6 grid gap-4 sm:grid-cols-3">
                 <Link
                   href="/partner/yookassa"
-                  className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-transform hover:scale-[1.02]"
+                  className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-all hover:-translate-y-1 hover:shadow-[0_12px_30px_-12px_rgba(11,16,43,0.25)]"
                 >
-                  <span className="text-2xl" aria-hidden="true">
-                    💳
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-red/10 to-mint/10 text-red">
+                    <IconCard />
                   </span>
                   <span className="flex flex-col">
                     <span className="font-bold text-ink">
@@ -274,10 +275,10 @@ export default async function Home() {
                 </Link>
                 <Link
                   href="/partner/netprint"
-                  className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-transform hover:scale-[1.02]"
+                  className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-all hover:-translate-y-1 hover:shadow-[0_12px_30px_-12px_rgba(11,16,43,0.25)]"
                 >
-                  <span className="text-2xl" aria-hidden="true">
-                    🖼️
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-red/10 to-mint/10 text-red">
+                    <IconGift />
                   </span>
                   <span className="flex flex-col">
                     <span className="font-bold text-ink">
@@ -293,10 +294,10 @@ export default async function Home() {
                 </Link>
                 <Link
                   href="/sberkarta"
-                  className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-transform hover:scale-[1.02]"
+                  className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-all hover:-translate-y-1 hover:shadow-[0_12px_30px_-12px_rgba(11,16,43,0.25)]"
                 >
-                  <span className="text-2xl" aria-hidden="true">
-                    🏦
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-red/10 to-mint/10 text-red">
+                    <IconBolt />
                   </span>
                   <span className="flex flex-col">
                     <span className="font-bold text-ink">
