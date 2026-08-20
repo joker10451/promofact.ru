@@ -30,9 +30,8 @@ export default function CouponGrid({
   useEffect(() => {
     // Автоопределение или восстановление выбранного города
     const savedCity = localStorage.getItem("promofact_selected_city");
-    if (savedCity) {
-      setSelectedRegion(savedCity);
-    }
+    if (!savedCity) return;
+    queueMicrotask(() => setSelectedRegion(savedCity));
   }, []);
 
   const handleCityChange = (city: string) => {
