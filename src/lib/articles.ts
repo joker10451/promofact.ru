@@ -114,6 +114,7 @@ export const ARTICLES: Article[] = [
     related: [
       { text: "Промокоды: Маркетплейсы", href: "/category/marketpleysy" },
       { text: "Лайфхаки шопинга на маркетплейсах", href: "/sovety/laifhaki-shoppinga-na-marketpleysah" },
+      { text: "Кредитная СберКарта: 120 дней без %", href: "/sberkarta" },
     ],
   },
   {

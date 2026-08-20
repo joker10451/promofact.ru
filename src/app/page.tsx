@@ -252,7 +252,7 @@ export default async function Home() {
                 дело или только думаете открыть. По партнёрским ссылкам —
                 скидки на первый заказ.
               </p>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div className="mt-6 grid gap-4 sm:grid-cols-3">
                 <Link
                   href="/partner/yookassa"
                   className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-transform hover:scale-[1.02]"
@@ -285,6 +285,25 @@ export default async function Home() {
                     </span>
                     <span className="text-sm text-ink/55">
                       Скидка 30% на первый заказ
+                    </span>
+                  </span>
+                  <span className="ml-auto text-red/60 transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+                <Link
+                  href="/sberkarta"
+                  className="group flex items-center gap-3 rounded-2xl border border-line bg-white p-5 transition-transform hover:scale-[1.02]"
+                >
+                  <span className="text-2xl" aria-hidden="true">
+                    🏦
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="font-bold text-ink">
+                      Кредитная СберКарта
+                    </span>
+                    <span className="text-sm text-ink/55">
+                      120 дней без процентов
                     </span>
                   </span>
                   <span className="ml-auto text-red/60 transition-transform group-hover:translate-x-1">
