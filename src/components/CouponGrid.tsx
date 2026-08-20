@@ -17,8 +17,16 @@ export default function CouponGrid({
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Показываем карточки каскадом после загрузки (безопасный фолбэк:
+    // если IntersectionObserver не нужен, просто добавляем класс)
+    const el = gridRef.current;
+    if (!el) return;
+    const t = setTimeout(() => el.classList.add("is-visible"), 60);
+    return () => clearTimeout(t);
+  }, [filtered.length]);
     // Автоопределение или восстановление выбранного города
     const savedCity = localStorage.getItem("promofact_selected_city");
     if (savedCity) {
@@ -230,7 +238,7 @@ export default function CouponGrid({
           </button>
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div ref={gridRef} className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal-stagger">
           {filtered.map((coupon) => (
             <CouponTicket
               key={`${coupon.id}-${coupon.promocode.code}`}

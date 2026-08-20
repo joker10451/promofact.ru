@@ -103,7 +103,7 @@ export default function CouponTicket({
     });
 
   return (
-    <article className="group relative flex flex-col bg-white border border-line rounded-2xl overflow-hidden transition-transform duration-300 card-hover shadow-[0_6px_0_rgba(11,16,43,0.08),0_12px_24px_-12px_rgba(11,16,43,0.18)] hover:shadow-[0_10px_0_rgba(11,16,43,0.1),0_18px_32px_-12px_rgba(11,16,43,0.22)]">
+    <article className="shine group relative flex flex-col bg-white border border-line rounded-2xl overflow-hidden transition-transform duration-300 card-hover shadow-[0_6px_0_rgba(11,16,43,0.08),0_12px_24px_-12px_rgba(11,16,43,0.18)] hover:shadow-[0_10px_0_rgba(11,16,43,0.1),0_18px_32px_-12px_rgba(11,16,43,0.22)]">
       <div className="flex items-start gap-3 px-5 pt-5">
         {store.logo && !imgError ? (
           <img
