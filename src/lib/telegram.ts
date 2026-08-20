@@ -208,6 +208,8 @@ export async function sendCouponToTelegram(
               text,
               parse_mode: "HTML",
               reply_markup: replyMarkup,
+              disable_web_page_preview: true,
+              disable_notification: true,
             }),
           },
         );
@@ -215,8 +217,15 @@ export async function sendCouponToTelegram(
         if (fallbackData.ok) {
           return { ok: true, messageId: fallbackData.result?.message_id };
         }
+        return {
+          ok: false,
+          error: `sendPhoto err: ${data.description || res.statusText} (${res.status}) | fallback err: ${fallbackData.description || fallbackRes.statusText} (${fallbackRes.status})`,
+        };
       }
-      return { ok: false, error: data.description || "Ошибка Telegram API" };
+      return {
+        ok: false,
+        error: `Telegram API: ${data.description || res.statusText} (status: ${res.status}, tokenPrefix: ${token ? token.slice(0, 5) : "none"}..., chatId: ${chatId})`,
+      };
     }
 
     const messageId = data.result?.message_id;
