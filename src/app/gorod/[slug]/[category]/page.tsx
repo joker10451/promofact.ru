@@ -98,7 +98,6 @@ export default async function CityCategoryPage({
     return (isAllRu || matchesCity) && c.store.categorySlug === catSlug;
   });
 
-  const storeNames = [...new Set(list.map((c) => c.store.name))];
   const pageUrl = `${SITE_URL}/gorod/${citySlug}/${catSlug}`;
 
   const breadcrumb: Record<string, unknown> = {
