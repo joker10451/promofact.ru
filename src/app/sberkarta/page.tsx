@@ -178,6 +178,18 @@ export default function SberCardPage() {
           </div>
         </section>
 
+        {/* CAMPAIGN BANNER (из официального креатива Сбера) */}
+        <section className="mt-8 overflow-hidden rounded-3xl border border-line bg-ink shadow-[0_4px_0_rgba(11,16,43,0.06)]">
+          <img
+            src="/sberkarta-banner.png"
+            alt="Кредитная СберКарта — 120 дней уверенности в завтрашнем дне"
+            width={2100}
+            height={1500}
+            loading="lazy"
+            className="h-auto w-full object-cover"
+          />
+        </section>
+
         {/* BENEFITS */}
         <section className="mt-10">
           <h2 className="font-display text-2xl font-extrabold text-ink">
