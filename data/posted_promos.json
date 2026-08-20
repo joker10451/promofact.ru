@@ -1,7 +1,9 @@
 {
   "postedIds": [
     1006,
-    50005
+    50005,
+    50007,
+    50040
   ],
   "history": [
     {
@@ -19,6 +21,24 @@
       "postUrl": "https://t.me/smart_zakupka/38",
       "date": "2026-08-15T17:23:26.229Z",
       "messageId": 38
+    },
+    {
+      "id": 50007,
+      "code": "VKMESTA",
+      "store": "VK Места",
+      "storeSlug": "vk-mesta",
+      "postUrl": "https://t.me/smart_zakupka/41",
+      "date": "2026-08-20T17:30:00.000Z",
+      "messageId": 41
+    },
+    {
+      "id": 50040,
+      "code": "E-FIX-AU1A2MZ",
+      "store": "Fix Price",
+      "storeSlug": "fix-price",
+      "postUrl": "https://t.me/smart_zakupka/43",
+      "date": "2026-08-20T18:00:00.000Z",
+      "messageId": 43
     }
   ]
 }
