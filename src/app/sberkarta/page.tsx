@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import JsonLd from "@/components/JsonLd";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
@@ -179,16 +180,14 @@ export default function SberCardPage() {
         </section>
 
         {/* CAMPAIGN BANNER (из официального креатива Сбера) */}
-        <section className="mt-8 overflow-hidden rounded-3xl border border-line bg-ink shadow-[0_4px_0_rgba(11,16,43,0.06)]">
-          <img
-            src="/sberkarta-banner.png"
-            alt="Кредитная СберКарта — 120 дней уверенности в завтрашнем дне"
-            width={2100}
-            height={1500}
-            loading="lazy"
-            className="h-auto w-full object-cover"
-          />
-        </section>
+        <Image
+          src="/sberkarta-banner.webp"
+          alt="Кредитная СберКарта — 120 дней уверенности в завтрашнем дне"
+          width={2100}
+          height={1500}
+          loading="lazy"
+          className="mt-8 w-full rounded-3xl border border-line shadow-[0_4px_0_rgba(11,16,43,0.06)]"
+        />
 
         {/* BENEFITS */}
         <section className="mt-10">
