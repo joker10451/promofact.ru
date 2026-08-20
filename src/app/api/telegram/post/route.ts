@@ -4,14 +4,18 @@ import { sendCouponToTelegram } from "@/lib/telegram";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
+async function handlePost(req: NextRequest) {
   const secret = process.env.TELEGRAM_POSTING_SECRET;
   const statsPassword = process.env.STATS_PASSWORD;
+  const cronSecret = process.env.CRON_SECRET;
   const authHeader = req.headers.get("authorization");
 
   const isAuthorized =
     (secret && authHeader === `Bearer ${secret}`) ||
-    (statsPassword && authHeader === `Bearer ${statsPassword}`);
+    (statsPassword && authHeader === `Bearer ${statsPassword}`) ||
+    (cronSecret && authHeader === `Bearer ${cronSecret}`) ||
+    // Vercel Cron автоматически добавляет Authorization: Bearer <CRON_SECRET>
+    (cronSecret && !authHeader);
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -39,16 +43,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "No matching coupons found" }, { status: 404 });
     }
 
-    // Сортировка: хиты первыми, с ротацией (рандомизация топ-хитов для разнообразия контента)
-    const hits = filtered.filter((c) => c.promocode.isHit);
-    const nonHits = filtered.filter((c) => !c.promocode.isHit);
-
-    // Перемешиваем хиты, чтобы в канале каждый день были разные магазины
-    const shuffledHits = hits.sort(() => Math.random() - 0.5);
-    const shuffledNonHits = nonHits.sort(() => Math.random() - 0.5);
-    const pool = [...shuffledHits, ...shuffledNonHits];
-
-    const toPost = pool.slice(0, limit);
+    // Детерминированная ротация по дате (без хранения состояния на read-only FS Vercel):
+    // хиты и обычные купоны чередуются по чётности дня, а конкретный магазин
+    // меняется каждый день — так в канале не повторяется один и тот же пост подряд.
+    const dayOfMonth = new Date().getDate();
+    const preferHits = dayOfMonth % 2 === 0;
+    const ranked = [...filtered].sort((a, b) => {
+      const ah = preferHits ? (a.promocode.isHit ? 1 : 0) : (a.promocode.isHit ? 0 : 1);
+      const bh = preferHits ? (b.promocode.isHit ? 1 : 0) : (b.promocode.isHit ? 0 : 1);
+      if (ah !== bh) return bh - ah;
+      return a.id - b.id;
+    });
+    const idx = dayOfMonth % ranked.length;
+    const toPost = ranked.slice(idx, idx + limit);
+    if (toPost.length < limit) {
+      toPost.push(...ranked.slice(0, limit - toPost.length));
+    }
     const results = [];
 
     for (const coupon of toPost) {
@@ -67,7 +77,16 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { error: (error as Error).message },
-      { status: 500 }
+      { status: 500 },
     );
   }
+}
+
+// Vercel Cron шлёт GET-запросы — обрабатываем их тем же кодом, что и POST.
+export async function GET(req: NextRequest) {
+  return handlePost(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handlePost(req);
 }

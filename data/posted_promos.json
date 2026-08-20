@@ -3,7 +3,8 @@
     1006,
     50005,
     50007,
-    50040
+    50040,
+    16990201
   ],
   "history": [
     {
@@ -39,6 +40,15 @@
       "postUrl": "https://t.me/smart_zakupka/43",
       "date": "2026-08-20T18:00:00.000Z",
       "messageId": 43
+    },
+    {
+      "id": 16990201,
+      "code": "TB1388",
+      "store": "TanukiFamily",
+      "storeSlug": "tanukifamily",
+      "postUrl": "https://t.me/smart_zakupka/44",
+      "date": "2026-08-20T18:40:00.000Z",
+      "messageId": 44
     }
   ]
 }
