@@ -4,6 +4,15 @@ import Image from "next/image";
 import JsonLd from "@/components/JsonLd";
 import SberStickyCta from "@/components/SberStickyCta";
 import SberSavingsCalc from "@/components/SberSavingsCalc";
+import {
+  IconCalendar,
+  IconCard,
+  IconGift,
+  IconZero,
+  IconShield,
+  IconLicense,
+  IconBolt,
+} from "@/components/SberIcons";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
 const BASE_URL = "https://sberbank1.prfl.me/sites/lccq8a?erid=2RanynFCKB1";
@@ -35,22 +44,22 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const benefits = [
   {
-    icon: "🗓",
+    icon: <IconCalendar />,
     title: "До 120 дней без процентов",
     text: "Грейс-период на покупки: оплачивайте в рамках льготного периода и не платите проценты за пользование. Беспроцентная рассрочка на 4 месяца.",
   },
   {
-    icon: "💳",
+    icon: <IconCard />,
     title: "Лимит до 1 млн ₽",
     text: "Достаточно на крупные покупки и повседневные расходы. Решение по лимиту принимает банк индивидуально.",
   },
   {
-    icon: "🎁",
+    icon: <IconGift />,
     title: "До 30% кешбэк у партнёров",
     text: "Возврат на карту за покупки у партнёров Сбера и в популярных категориях — от кафе до маркетплейсов.",
   },
   {
-    icon: "💰",
+    icon: <IconZero />,
     title: "0₽ за обслуживание",
     text: "Нет абонентской платы за пользование картой. Платите только за пользование кредитом вне льготного периода.",
   },
@@ -233,9 +242,9 @@ export default function SberCardPage() {
             {benefits.map((b) => (
               <div
                 key={b.title}
-                className="rounded-2xl border border-line bg-white p-5 transition-all hover:border-mint"
+                className="group rounded-2xl border border-line bg-white p-5 transition-all hover:border-mint hover:shadow-[0_10px_30px_-12px_rgba(22,199,132,0.35)]"
               >
-                <div className="text-3xl" aria-hidden="true">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-red/10 to-mint/10 text-red transition-transform group-hover:scale-110">
                   {b.icon}
                 </div>
                 <h3 className="mt-3 font-display text-lg font-extrabold text-ink">
@@ -297,27 +306,27 @@ export default function SberCardPage() {
 
         {/* ДОВЕРИЕ / БЕЗОПАСНОСТЬ */}
         <section className="mt-10 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-line bg-white p-5 text-center">
-            <div className="text-3xl" aria-hidden="true">
-              🛡️
+          <div className="rounded-2xl border border-line bg-white p-5 text-center transition-all hover:-translate-y-1 hover:shadow-[0_12px_30px_-12px_rgba(11,16,43,0.25)]">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-red/10 to-mint/10 text-red">
+              <IconShield />
             </div>
             <h3 className="mt-2 font-bold text-ink">Данные под защитой</h3>
             <p className="mt-1 text-xs text-ink/55">
               Оформление на официальном сайте банка с шифрованием.
             </p>
           </div>
-          <div className="rounded-2xl border border-line bg-white p-5 text-center">
-            <div className="text-3xl" aria-hidden="true">
-              🏦
+          <div className="rounded-2xl border border-line bg-white p-5 text-center transition-all hover:-translate-y-1 hover:shadow-[0_12px_30px_-12px_rgba(11,16,43,0.25)]">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-red/10 to-mint/10 text-red">
+              <IconLicense />
             </div>
             <h3 className="mt-2 font-bold text-ink">Лицензия ЦБ РФ</h3>
             <p className="mt-1 text-xs text-ink/55">
               №1481 от 11.08.2015 — ПАО Сбербанк.
             </p>
           </div>
-          <div className="rounded-2xl border border-line bg-white p-5 text-center">
-            <div className="text-3xl" aria-hidden="true">
-              ⚡
+          <div className="rounded-2xl border border-line bg-white p-5 text-center transition-all hover:-translate-y-1 hover:shadow-[0_12px_30px_-12px_rgba(11,16,43,0.25)]">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-red/10 to-mint/10 text-red">
+              <IconBolt />
             </div>
             <h3 className="mt-2 font-bold text-ink">Решение за 2 минуты</h3>
             <p className="mt-1 text-xs text-ink/55">
