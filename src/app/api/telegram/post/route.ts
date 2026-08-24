@@ -61,18 +61,6 @@ async function handlePost(req: NextRequest) {
     }
     const results = [];
 
-    // Временная диагностика env-переменных
-    const tgToken = process.env.TELEGRAM_BOT_TOKEN || "";
-    const tgChannel = process.env.TELEGRAM_CHANNEL_ID || "";
-    const envDebug = {
-      tokenPrefix: tgToken.slice(0, 10),
-      tokenLen: tgToken.length,
-      tokenHasNewline: tgToken.includes("\n") || tgToken.includes("\r"),
-      channelId: tgChannel,
-      channelLen: tgChannel.length,
-      channelHasNewline: tgChannel.includes("\n") || tgChannel.includes("\r"),
-    };
-
     for (const coupon of toPost) {
       const res = await sendCouponToTelegram(coupon);
       results.push({
@@ -82,7 +70,6 @@ async function handlePost(req: NextRequest) {
         status: res.ok ? "posted" : "failed",
         error: res.error,
         messageId: res.messageId,
-        envDebug,
       });
     }
 
