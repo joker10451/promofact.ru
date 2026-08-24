@@ -43,22 +43,42 @@ async function handlePost(req: NextRequest) {
       return NextResponse.json({ message: "No matching coupons found" }, { status: 404 });
     }
 
-    // Детерминированная ротация по дате (без хранения состояния на read-only FS Vercel):
-    // хиты и обычные купоны чередуются по чётности дня, а конкретный магазин
-    // меняется каждый день — так в канале не повторяется один и тот же пост подряд.
-    const dayOfMonth = new Date().getDate();
-    const preferHits = dayOfMonth % 2 === 0;
-    const ranked = [...filtered].sort((a, b) => {
-      const ah = preferHits ? (a.promocode.isHit ? 1 : 0) : (a.promocode.isHit ? 0 : 1);
-      const bh = preferHits ? (b.promocode.isHit ? 1 : 0) : (b.promocode.isHit ? 0 : 1);
-      if (ah !== bh) return bh - ah;
-      return a.id - b.id;
-    });
-    const idx = dayOfMonth % ranked.length;
-    const toPost = ranked.slice(idx, idx + limit);
-    if (toPost.length < limit) {
-      toPost.push(...ranked.slice(0, limit - toPost.length));
+    // Ротация по уникальным магазинам (день года → уникальный магазин)
+    // Гарантирует, что каждый день публикуется другой магазин без повторов в цикле.
+    // Сначала группируем купоны по магазинам и выбираем лучший купон из каждого.
+    const storeMap = new Map<string, typeof filtered>();
+    for (const c of filtered) {
+      const arr = storeMap.get(c.store.slug) || [];
+      arr.push(c);
+      storeMap.set(c.store.slug, arr);
     }
+
+    // Из каждого магазина берём лучший купон (хит > обычный, ближайший срок)
+    const bestPerStore = [...storeMap.entries()]
+      .map(([slug, coupons]) => {
+        const sorted = coupons.sort((a, b) => {
+          if (a.promocode.isHit !== b.promocode.isHit) return a.promocode.isHit ? -1 : 1;
+          return a.id - b.id;
+        });
+        return sorted[0];
+      })
+      .sort((a, b) => a.store.slug.localeCompare(b.store.slug)); // стабильная сортировка
+
+    if (bestPerStore.length === 0) {
+      return NextResponse.json({ message: "No stores available" }, { status: 404 });
+    }
+
+    // День года (1–366) гарантирует уникальный магазин каждый день в цикле
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / 86400000);
+    const idx = dayOfYear % bestPerStore.length;
+
+    const toPost = [];
+    for (let i = 0; i < Math.min(limit, bestPerStore.length); i++) {
+      toPost.push(bestPerStore[(idx + i) % bestPerStore.length]);
+    }
+
     const results = [];
 
     for (const coupon of toPost) {
@@ -70,6 +90,8 @@ async function handlePost(req: NextRequest) {
         status: res.ok ? "posted" : "failed",
         error: res.error,
         messageId: res.messageId,
+        scheduledDay: dayOfYear,
+        storeIndex: `${(idx % bestPerStore.length) + 1}/${bestPerStore.length}`,
       });
     }
 

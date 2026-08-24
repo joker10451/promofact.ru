@@ -1,8 +1,8 @@
 name: Auto Post to Telegram (Dzen Crosspost)
 
 on:
-  schedule:
-    - cron: '0 11 * * *'   # 14:00 МСК (1 качественный пост в день в пик обеденных заказов)
+  # schedule:
+  #   - cron: '0 11 * * *'   # Отключен — постим вручную
   workflow_dispatch:
     inputs:
       limit:
