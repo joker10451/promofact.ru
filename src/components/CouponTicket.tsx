@@ -48,29 +48,40 @@ export default function CouponTicket({
     });
   };
 
-  const copy = async (code: string) => {
+  const copyAndOpen = async (code: string, url: string) => {
     try {
-      await navigator.clipboard.writeText(code);
-    } catch {
-      return;
-    }
+      if (code) {
+        await navigator.clipboard.writeText(code);
+      }
+    } catch {}
+
     setCopied(true);
     setToast(true);
+
     try {
       if (typeof window !== "undefined" && window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
       }
     } catch {}
-    ymReachGoal("copy_code", {
-      code: code,
-      store: store.name,
-    });
+
+    if (code) {
+      ymReachGoal("copy_code", { code, store: store.name });
+    }
+    ymReachGoal("click_store", { code: code || "no-code", store: store.name });
+
+    // Открываем магазин в новой вкладке
+    if (typeof window !== "undefined" && url && url !== "#") {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       setCopied(false);
       setToast(false);
-    }, 6000);
+    }, 7000);
   };
+
+  const targetUrl = affiliate.link || affiliate.landingLink || store.site || "#";
 
   useEffect(() => {
     return () => {
@@ -196,13 +207,23 @@ export default function CouponTicket({
             Показать штрихкод
           </button>
         ) : promocode.code ? (
-          <div className="flex items-center justify-between gap-2 rounded-xl border-2 border-dashed border-ink/25 px-3 py-2.5 transition-colors">
-            <span className="truncate font-display font-bold tracking-widest text-ink">
-              {promocode.code}
-            </span>
+          <div
+            onClick={() => copyAndOpen(promocode.code, targetUrl)}
+            className="group/code flex cursor-pointer items-center justify-between gap-2 rounded-xl border-2 border-dashed border-ink/25 bg-paper/60 px-3 py-2.5 transition-all hover:border-yellow hover:bg-yellow/10"
+            title="Нажмите, чтобы скопировать код и открыть магазин"
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="text-xs">🎟</span>
+              <span className="truncate font-display font-bold tracking-widest text-ink">
+                {promocode.code}
+              </span>
+            </div>
             <button
               type="button"
-              onClick={() => copy(promocode.code)}
+              onClick={(e) => {
+                e.stopPropagation();
+                copyAndOpen(promocode.code, targetUrl);
+              }}
               className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                 copied
                   ? "bg-mint text-white"
@@ -233,20 +254,31 @@ export default function CouponTicket({
         )}
 
         <div className="mt-3 space-y-2">
-          <a
-            href={affiliate.link || store.site || "#"}
-            target="_blank"
-            rel="nofollow sponsored noopener"
-            onClick={() =>
-              ymReachGoal("click_store", {
-                code: promocode.code,
-                store: store.name,
-              })
-            }
-            className="block w-full rounded-xl bg-gradient-to-r from-red to-red-dark py-3 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[2px] hover:shadow-none transition-all"
+          <button
+            type="button"
+            onClick={() => copyAndOpen(promocode.code, targetUrl)}
+            className={`group relative flex w-full items-center justify-center gap-2 rounded-xl py-3 px-4 text-center text-sm font-bold shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none ${
+              copied
+                ? "bg-mint text-white shadow-offset"
+                : "bg-gradient-to-r from-red to-red-dark text-white"
+            }`}
           >
-            В магазин
-          </a>
+            {copied ? (
+              <span className="inline-flex items-center gap-1.5 font-bold">
+                <CheckIcon className="h-4 w-4" /> Код скопирован! Магазин открыт →
+              </span>
+            ) : promocode.code ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span>Скопировать и в {store.name}</span>
+                <span className="transition-transform group-hover:translate-x-1">→</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                <span>В магазин {store.name}</span>
+                <span className="transition-transform group-hover:translate-x-1">→</span>
+              </span>
+            )}
+          </button>
           {affiliate.ordText && (
             <p className="text-center text-[10px] leading-snug text-ink/40">
               {affiliate.ordText}
@@ -344,14 +376,14 @@ export default function CouponTicket({
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mint text-xs font-black text-ink">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mint text-sm font-black text-ink shadow-sm">
                 ✓
               </span>
               <div>
                 <div className="text-[11px] font-bold uppercase tracking-wider text-mint">
-                  Промокод скопирован!
+                  Код скопирован! Магазин открыт в новой вкладке
                 </div>
-                <div className="font-display text-sm font-extrabold tracking-wide text-white">
+                <div className="font-display text-base font-extrabold tracking-wide text-white">
                   {promocode.code}
                 </div>
               </div>
@@ -367,8 +399,11 @@ export default function CouponTicket({
           </div>
 
           <div className="mt-3 border-t border-white/10 pt-2.5">
-            <p className="text-xs text-white/70">
-              Свежие промокоды <span className="font-bold text-yellow">{store.name}</span> и других магазинов выходят в Telegram!
+            <p className="text-xs text-white/80">
+              💡 Вставьте код <span className="font-mono font-bold text-yellow">{promocode.code}</span> в поле промокода в корзине <span className="font-bold text-white">{store.name}</span>.
+            </p>
+            <p className="mt-1 text-[11px] text-white/60">
+              Свежие секретные промокоды выходят в нашем Telegram-канале:
             </p>
             <a
               href="https://t.me/smart_zakupka"
@@ -389,7 +424,7 @@ export default function CouponTicket({
         <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white px-4 py-3 pb-safe md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
           <button
             type="button"
-            onClick={() => copy(promocode.code)}
+            onClick={() => copyAndOpen(promocode.code, targetUrl)}
             className={`w-full rounded-xl py-3.5 text-sm font-bold shadow-sm transition-all ${
               copied
                 ? "bg-mint text-white"
@@ -398,10 +433,10 @@ export default function CouponTicket({
           >
             {copied ? (
               <span className="flex items-center justify-center gap-2">
-                <CheckIcon className="h-4 w-4" /> Скопировано
+                <CheckIcon className="h-4 w-4" /> Код скопирован! Магазин открыт →
               </span>
             ) : (
-              `Скопировать: ${promocode.code}`
+              `Скопировать код и открыть ${store.name} →`
             )}
           </button>
         </div>
