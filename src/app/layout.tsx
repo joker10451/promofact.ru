@@ -42,6 +42,9 @@ export const metadata: Metadata = {
   verification: {
     yandex: process.env.YANDEX_VERIFICATION || undefined,
     google: process.env.GOOGLE_VERIFICATION || undefined,
+    other: {
+      "mitgo-verification": ["65f662ae-8b60-472f-bb3c-d5c04488f5ce"],
+    },
   },
   robots: {
     index: true,
@@ -95,6 +98,10 @@ export default function RootLayout({
         <meta
           name="msvalidate.01"
           content={process.env.BING_VERIFICATION || "09EEE6E2B1C92C9DC90FAA19E59A7574"}
+        />
+        <meta
+          name="mitgo-verification"
+          content="65f662ae-8b60-472f-bb3c-d5c04488f5ce"
         />
         <script src="https://telegram.org/js/telegram-web-app.js" async defer />
         <script>window.yaContextCb=window.yaContextCb||[]</script>
