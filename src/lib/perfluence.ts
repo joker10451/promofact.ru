@@ -264,8 +264,11 @@ export async function getCoupons(): Promise<Coupon[]> {
   ]);
 
   const customCoupons = (await import("@/lib/customCoupons")).CUSTOM_COUPONS;
+  // Дубль Кинопоиска: кастомная версия с обновлённой ссылкой kp45.prfl.me имеет приоритет — глушим Perfluence-дубль с тем же кодом
+  const customCodes = new Set(customCoupons.map((c) => c.promocode.code).filter(Boolean));
+  const filteredPerfluence = perfluenceCoupons.filter((c) => !customCodes.has(c.promocode.code));
 
-  const all = [...perfluenceCoupons, ...admitadCoupons, ...saleadsCoupons, ...customCoupons];
+  const all = [...filteredPerfluence, ...admitadCoupons, ...saleadsCoupons, ...customCoupons];
   return all.filter(isActive).sort(byScore);
 }
 
