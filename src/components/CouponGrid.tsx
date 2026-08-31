@@ -27,7 +27,7 @@ export default function CouponGrid({
   proofsByStore?: Record<number, number>;
 }) {
   const [filter, setFilter] = useState<string>("all");
-  const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20">("hit");
+  const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20">("all");
   const [sortBy, setSortBy] = useState<"hits" | "discount" | "expiring">("hits");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState("");
@@ -400,7 +400,7 @@ export default function CouponGrid({
               </button>
             </div>
           ) : (
-            <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 reveal-stagger">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {groupedStoreList.map(({ store, primaryCoupon, otherCoupons }) => {
                 const isExpanded = !!expandedStores[store.id];
 
