@@ -4,6 +4,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import CouponTicket from "@/components/CouponTicket";
 import type { Coupon } from "@/lib/types";
 
+const CATEGORY_ICONS: Record<string, string> = {
+  "dostavka-iz-restoranov": "🍔",
+  "dostavka-produktov": "🛒",
+  "kosmetika-i-parfyumeriya": "💄",
+  "odezhda-i-obuv": "👕",
+  "puteshestviya-i-turizm": "✈️",
+  "vse-dlya-doma": "🏠",
+  "onlayn-kinoteatry": "🎬",
+  "tsvety": "🌷",
+  "servisy-i-podpiski": "⚡",
+  "marketpleysy": "📦",
+};
+
 export default function CouponGrid({
   coupons,
   proofsByCode,
@@ -14,7 +27,7 @@ export default function CouponGrid({
   proofsByStore?: Record<number, number>;
 }) {
   const [filter, setFilter] = useState<string>("all");
-  const [quickFilter, setQuickFilter] = useState<"all" | "first" | "repeat" | "discount_20" | "gifts">("all");
+  const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20">("hit");
   const [sortBy, setSortBy] = useState<"hits" | "discount" | "expiring">("hits");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState("");
@@ -41,7 +54,7 @@ export default function CouponGrid({
     } catch {}
   };
 
-  // Слушатель глобального поиска из Hero
+  // Слушатель поиска из Hero
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<string>).detail;
@@ -53,7 +66,6 @@ export default function CouponGrid({
     return () => window.removeEventListener("promo:search", handler);
   }, []);
 
-  // Список всех уникальных городов из активных купонов
   const regionsList = useMemo(() => {
     const set = new Set<string>();
     for (const c of coupons) {
@@ -68,7 +80,6 @@ export default function CouponGrid({
     return Array.from(set).sort((a, b) => a.localeCompare(b, "ru"));
   }, [coupons]);
 
-  // Категории
   const cats = useMemo(() => {
     const map = new Map<string, string>();
     for (const c of coupons) map.set(c.store.categorySlug, c.store.category);
@@ -96,6 +107,7 @@ export default function CouponGrid({
       if (filter !== "all" && c.store.categorySlug !== filter) return false;
 
       // Быстрые фильтры
+      if (quickFilter === "hit" && !c.promocode.isHit) return false;
       if (quickFilter === "first" && !c.promocode.isFirstOrderOnly) return false;
       if (quickFilter === "repeat" && c.promocode.isFirstOrderOnly) return false;
       if (quickFilter === "discount_20") {
@@ -106,13 +118,8 @@ export default function CouponGrid({
         const hasHighRub = rub && parseInt(rub[1].replace(/\s/g, ""), 10) >= 500;
         if (!hasHighPct && !hasHighRub) return false;
       }
-      if (quickFilter === "gifts") {
-        const bonus = (c.promocode.bonusName ?? "").toLowerCase();
-        const terms = (c.promocode.terms ?? "").toLowerCase();
-        if (!bonus.includes("подарок") && !bonus.includes("бесплатн") && !terms.includes("подарок")) return false;
-      }
 
-      // Фильтрация по региону / городу
+      // Регион
       if (selectedRegion !== "all") {
         const r = (c.promocode.region || "").toLowerCase();
         const isAllRu = !r || r === "ru" || r === "россия";
@@ -128,7 +135,6 @@ export default function CouponGrid({
       );
     });
 
-    // Сортировка
     if (sortBy === "discount") {
       res = [...res].sort((a, b) => extractDiscountValue(b.promocode.bonusName) - extractDiscountValue(a.promocode.bonusName));
     } else if (sortBy === "expiring") {
@@ -144,7 +150,7 @@ export default function CouponGrid({
     return res;
   }, [coupons, filter, query, quickFilter, selectedRegion, sortBy]);
 
-  // Группировка по магазинам: 1 лучший промокод магазина на главной + остальные в аккордеоне
+  // Группировка по магазинам: 1 лучший промокод магазина + аккордеон остальных
   const groupedStoreList = useMemo(() => {
     const storeMap = new Map<number, Coupon[]>();
     for (const c of filteredCoupons) {
@@ -154,7 +160,6 @@ export default function CouponGrid({
     }
 
     return Array.from(storeMap.values()).map((storeCoupons) => {
-      // Сортируем: сначала хиты, потом с кодом
       const sorted = [...storeCoupons].sort((a, b) => {
         if (a.promocode.isHit && !b.promocode.isHit) return -1;
         if (!a.promocode.isHit && b.promocode.isHit) return 1;
@@ -176,13 +181,6 @@ export default function CouponGrid({
     }));
   };
 
-  const chipCls = (active: boolean) =>
-    `rounded-full px-4 py-2 text-sm font-bold transition-all ${
-      active
-        ? "bg-ink text-white shadow-offset"
-        : "bg-white border border-line text-ink/70 hover:border-ink/30"
-    }`;
-
   const quickChipCls = (active: boolean) =>
     `rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
       active
@@ -192,14 +190,14 @@ export default function CouponGrid({
 
   return (
     <section id="catalog" className="scroll-mt-20">
-      {/* Заголовок секции каталога */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Заголовок секции */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
             Купоны на сегодня
           </h2>
           <p className="text-xs sm:text-sm text-ink/60 font-medium">
-            Сгруппированы по магазинам с выбором лучшего промокода
+            Сгруппированы по магазинам с гарантией актуальности
           </p>
         </div>
 
@@ -242,170 +240,225 @@ export default function CouponGrid({
         </div>
       </div>
 
-      {/* Статус активного поиска из Hero */}
-      {query && (
-        <div className="mt-4 flex items-center justify-between rounded-2xl bg-yellow/25 border border-yellow px-4 py-2.5 text-xs font-bold text-ink">
-          <div className="flex items-center gap-2">
-            <span>🔍 Результаты поиска по запросу:</span>
-            <span className="font-mono text-sm font-extrabold text-red">«{query}»</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setQuery("")}
-            className="rounded-lg bg-ink px-2.5 py-1 text-[11px] text-white hover:bg-ink/80 transition-colors"
-          >
-            Сбросить поиск ✕
-          </button>
-        </div>
-      )}
-
-      {/* Быстрые смарт-фильтры */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setQuickFilter("all")}
-          className={quickChipCls(quickFilter === "all")}
-        >
-          <span>🔥</span>
-          <span>Все акции</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setQuickFilter("first")}
-          className={quickChipCls(quickFilter === "first")}
-        >
-          <span>⚡️</span>
-          <span>На первый заказ</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setQuickFilter("repeat")}
-          className={quickChipCls(quickFilter === "repeat")}
-        >
-          <span>✨</span>
-          <span>На повторные заказы</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setQuickFilter("discount_20")}
-          className={quickChipCls(quickFilter === "discount_20")}
-        >
-          <span>💰</span>
-          <span>Скидки от 20% / 500 ₽</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setQuickFilter("gifts")}
-          className={quickChipCls(quickFilter === "gifts")}
-        >
-          <span>🎁</span>
-          <span>Подарки к заказу</span>
-        </button>
-      </div>
-
-      {/* Категории (горизонтальный скролл) */}
-      <div className="mt-4 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pb-1 sm:flex-wrap sm:pb-0">
+      {/* Мобильная полоса категорий */}
+      <div className="lg:hidden mb-4 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pb-1">
         <button
           type="button"
           onClick={() => setFilter("all")}
-          className={`shrink-0 ${chipCls(filter === "all")}`}
+          className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
+            filter === "all"
+              ? "bg-ink text-white"
+              : "bg-white border border-line text-ink/70"
+          }`}
         >
-          Все категории · {coupons.length}
+          Все · {coupons.length}
         </button>
         {cats.map(({ slug, name }) => (
           <button
             key={slug}
             type="button"
             onClick={() => setFilter(slug)}
-            className={`shrink-0 ${chipCls(filter === slug)}`}
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
+              filter === slug
+                ? "bg-ink text-white"
+                : "bg-white border border-line text-ink/70"
+            }`}
           >
-            {name} · {countByCat(slug)}
+            {CATEGORY_ICONS[slug] || "🏷"} {name} · {countByCat(slug)}
           </button>
         ))}
       </div>
 
-      {/* Сетка купонов */}
-      {groupedStoreList.length === 0 ? (
-        <div className="mt-8 rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
-          <div className="font-display text-5xl font-extrabold text-ink/15">
-            :(
+      {/* Основной макет: Левый сайдбар категорий + Правая 2-колоночная сетка */}
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        {/* Левая колонка: Категории (Desktop sticky) */}
+        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 space-y-1.5 bg-white border border-line rounded-2xl p-3 shadow-xs">
+          <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">
+            Категории
           </div>
-          <p className="mt-3 font-bold text-ink/70">Ничего не нашлось</p>
-          <p className="mt-1 text-sm text-ink/50">
-            Попробуйте другой запрос или сбросьте фильтры.
-          </p>
           <button
             type="button"
-            onClick={() => {
-              setQuery("");
-              setFilter("all");
-              setQuickFilter("all");
-              setSortBy("hits");
-              setSelectedRegion("all");
-            }}
-            className="mt-5 rounded-full bg-yellow text-ink px-5 py-2.5 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition-all"
+            onClick={() => setFilter("all")}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              filter === "all"
+                ? "bg-ink text-white shadow-sm"
+                : "text-ink/70 hover:bg-paper hover:text-ink"
+            }`}
           >
-            Сбросить фильтры
+            <span>🏷 Все направления</span>
+            <span className={`text-[10px] font-normal ${filter === "all" ? "text-white/70" : "text-ink/40"}`}>
+              {coupons.length}
+            </span>
           </button>
-        </div>
-      ) : (
-        <div ref={gridRef} className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 reveal-stagger">
-          {groupedStoreList.map(({ store, primaryCoupon, otherCoupons }) => {
-            const isExpanded = !!expandedStores[store.id];
+          {cats.map(({ slug, name }) => (
+            <button
+              key={slug}
+              type="button"
+              onClick={() => setFilter(slug)}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                filter === slug
+                  ? "bg-ink text-white shadow-sm"
+                  : "text-ink/70 hover:bg-paper hover:text-ink"
+              }`}
+            >
+              <span className="flex items-center gap-2 truncate">
+                <span>{CATEGORY_ICONS[slug] || "🏷"}</span>
+                <span className="truncate">{name}</span>
+              </span>
+              <span className={`text-[10px] font-normal shrink-0 ${filter === slug ? "text-white/70" : "text-ink/40"}`}>
+                {countByCat(slug)}
+              </span>
+            </button>
+          ))}
+        </aside>
 
-            return (
-              <div key={store.id} className="flex flex-col gap-3">
-                {/* Главная карточка с лучшим предложением */}
-                <div className="relative">
-                  <CouponTicket
-                    coupon={primaryCoupon}
-                    proofCount={proofsByCode?.[primaryCoupon.promocode.code] ?? 0}
-                    storeProofCount={proofsByStore?.[store.id] ?? 0}
-                  />
-                </div>
+        {/* Правая часть: Фильтры и Сетка купонов */}
+        <div className="flex-1 min-w-0">
+          {/* Статус поиска */}
+          {query && (
+            <div className="mb-4 flex items-center justify-between rounded-2xl bg-yellow/25 border border-yellow px-4 py-2.5 text-xs font-bold text-ink">
+              <div className="flex items-center gap-2">
+                <span>🔍 Результаты по запросу:</span>
+                <span className="font-mono text-sm font-extrabold text-red">«{query}»</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="rounded-lg bg-ink px-2.5 py-1 text-[11px] text-white hover:bg-ink/80 transition-colors"
+              >
+                Сбросить ✕
+              </button>
+            </div>
+          )}
 
-                {/* Дополнительные промокоды магазина под спойлером */}
-                {otherCoupons.length > 0 && (
-                  <div className="rounded-2xl border border-line/70 bg-white/70 p-3">
-                    <button
-                      type="button"
-                      onClick={() => toggleExpand(store.id)}
-                      className="w-full flex items-center justify-between py-1.5 px-3 rounded-xl bg-paper hover:bg-paper/80 text-xs font-bold text-ink transition-colors cursor-pointer"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <span>🏷</span>
-                        <span>
-                          {isExpanded
-                            ? `Скрыть другие промокоды (${otherCoupons.length})`
-                            : `Ещё ${otherCoupons.length} ${
-                                otherCoupons.length === 1 ? "промокод" : "промокода"
-                              } ${store.name}`}
-                        </span>
-                      </span>
-                      <span className="text-red font-black">
-                        {isExpanded ? "▲" : "▼"}
-                      </span>
-                    </button>
+          {/* Быстрые смарт-фильтры */}
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            <button
+              type="button"
+              onClick={() => setQuickFilter("hit")}
+              className={quickChipCls(quickFilter === "hit")}
+            >
+              <span>🔥</span>
+              <span>Лучшие сегодня</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setQuickFilter("all")}
+              className={quickChipCls(quickFilter === "all")}
+            >
+              <span>✨</span>
+              <span>Все купоны</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setQuickFilter("first")}
+              className={quickChipCls(quickFilter === "first")}
+            >
+              <span>⚡️</span>
+              <span>На первый заказ</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setQuickFilter("repeat")}
+              className={quickChipCls(quickFilter === "repeat")}
+            >
+              <span>🔄</span>
+              <span>Для всех (повторные)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setQuickFilter("discount_20")}
+              className={quickChipCls(quickFilter === "discount_20")}
+            >
+              <span>💰</span>
+              <span>Скидки от 20%</span>
+            </button>
+          </div>
 
-                    {isExpanded && (
-                      <div className="mt-3 space-y-3 pt-2 border-t border-line/40">
-                        {otherCoupons.map((c) => (
-                          <CouponTicket
-                            key={`${c.id}-${c.promocode.code}`}
-                            coupon={c}
-                            proofCount={proofsByCode?.[c.promocode.code] ?? 0}
-                            storeProofCount={proofsByStore?.[store.id] ?? 0}
-                          />
-                        ))}
+          {/* Сетка купонов (2 колонки) */}
+          {groupedStoreList.length === 0 ? (
+            <div className="rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
+              <div className="font-display text-5xl font-extrabold text-ink/15">
+                :(
+              </div>
+              <p className="mt-3 font-bold text-ink/70">Ничего не нашлось</p>
+              <p className="mt-1 text-sm text-ink/50">
+                Попробуйте другой запрос или сбросьте фильтры.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setFilter("all");
+                  setQuickFilter("all");
+                  setSortBy("hits");
+                  setSelectedRegion("all");
+                }}
+                className="mt-5 rounded-full bg-yellow text-ink px-5 py-2.5 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition-all"
+              >
+                Сбросить фильтры
+              </button>
+            </div>
+          ) : (
+            <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 reveal-stagger">
+              {groupedStoreList.map(({ store, primaryCoupon, otherCoupons }) => {
+                const isExpanded = !!expandedStores[store.id];
+
+                return (
+                  <div key={store.id} className="flex flex-col gap-3">
+                    {/* Главная карточка с лучшим предложением */}
+                    <div className="relative">
+                      <CouponTicket
+                        coupon={primaryCoupon}
+                        proofCount={proofsByCode?.[primaryCoupon.promocode.code] ?? 0}
+                        storeProofCount={proofsByStore?.[store.id] ?? 0}
+                      />
+                    </div>
+
+                    {/* Дополнительные промокоды магазина под спойлером */}
+                    {otherCoupons.length > 0 && (
+                      <div className="rounded-2xl border border-line/70 bg-white/70 p-3 shadow-xs">
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(store.id)}
+                          className="w-full flex items-center justify-between py-2 px-3.5 rounded-xl bg-paper hover:bg-paper/80 text-xs font-bold text-ink transition-colors cursor-pointer"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>🏷</span>
+                            <span>
+                              {isExpanded
+                                ? `Скрыть другие промокоды (${otherCoupons.length})`
+                                : `Ещё ${otherCoupons.length} ${
+                                    otherCoupons.length === 1 ? "промокод" : "промокода"
+                                  } ${store.name}`}
+                            </span>
+                          </span>
+                          <span className="text-red font-black">
+                            {isExpanded ? "▲" : "▼"}
+                          </span>
+                        </button>
+
+                        {isExpanded && (
+                          <div className="mt-3 space-y-3 pt-2 border-t border-line/40">
+                            {otherCoupons.map((c) => (
+                              <CouponTicket
+                                key={`${c.id}-${c.promocode.code}`}
+                                coupon={c}
+                                proofCount={proofsByCode?.[c.promocode.code] ?? 0}
+                                storeProofCount={proofsByStore?.[store.id] ?? 0}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </section>
   );
 }

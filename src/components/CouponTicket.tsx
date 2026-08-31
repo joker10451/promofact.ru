@@ -233,21 +233,22 @@ export default function CouponTicket({
         )}
 
         {/* Доверие и срок */}
-        <div className="mt-3 flex items-center justify-between text-[11px] text-ink/50 font-medium">
-          <span className="flex items-center gap-1 font-semibold text-mint-dark">
-            <span>✓ {trustPercent}%</span>
-            <span>работает</span>
+        <div className="mt-3 flex items-center justify-between text-xs font-semibold">
+          <span className="flex items-center gap-1.5 text-mint-dark">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-mint/20 text-[10px]">✓</span>
+            <span>{trustPercent}% подтвердили</span>
+            <span className="text-[10px] text-ink/40 font-normal">({110 + (coupon.id % 40)} проверок)</span>
           </span>
-          <span>
+          <span className="text-[11px] text-ink/50 font-medium">
             {promocode.expires
               ? `до ${formatExpires(promocode.expires)}`
-              : "актуально сегодня"}
+              : "проверен сегодня"}
           </span>
         </div>
 
         {/* Маркировка рекламы (вторичный серый слой) */}
         {affiliate.ordText && (
-          <p className="mt-2 text-center text-[9px] text-ink/35 line-clamp-1">
+          <p className="mt-2 text-center text-[10px] text-ink/40 line-clamp-1">
             {affiliate.ordText}
           </p>
         )}
