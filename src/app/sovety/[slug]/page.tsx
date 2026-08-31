@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import { ARTICLES, getArticle } from "@/lib/articles";
@@ -76,134 +78,143 @@ export default async function ArticlePage({
   };
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <JsonLd data={articleJsonLd} />
-      <JsonLd data={breadcrumbJsonLd} />
+    <>
+      <Header />
 
-      <nav
-        aria-label="Хлебные крошки"
-        className="text-xs font-semibold text-ink/45"
-      >
-        <Link href="/" className="hover:text-ink transition-colors">
-          Главная
-        </Link>
-        <span className="mx-2" aria-hidden="true">
-          /
-        </span>
-        <Link href="/sovety" className="hover:text-ink transition-colors">
-          Советы
-        </Link>
-        <span className="mx-2" aria-hidden="true">
-          /
-        </span>
-        <span aria-current="page">{article.title}</span>
-      </nav>
+      <main className="min-h-screen bg-paper/30 py-10 sm:py-14 border-b border-line">
+        <JsonLd data={articleJsonLd} />
+        <JsonLd data={breadcrumbJsonLd} />
 
-      <h1 className="mt-6 font-display text-2xl font-extrabold leading-tight sm:text-3xl">
-        {article.title}
-      </h1>
-      <p className="mt-3 text-ink/60">{article.description}</p>
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <nav
+            aria-label="Хлебные крошки"
+            className="text-xs font-semibold text-ink/45"
+          >
+            <Link href="/" className="hover:text-ink transition-colors">
+              Главная
+            </Link>
+            <span className="mx-2" aria-hidden="true">
+              /
+            </span>
+            <Link href="/sovety" className="hover:text-ink transition-colors">
+              Советы
+            </Link>
+            <span className="mx-2" aria-hidden="true">
+              /
+            </span>
+            <span aria-current="page" className="text-ink truncate max-w-[200px] inline-block align-bottom">
+              {article.title}
+            </span>
+          </nav>
 
-      <article className="mt-8 space-y-4">
-        {article.body.map((p, i) => (
-          <div key={i}>
-            <p className="leading-relaxed text-ink/70">{p}</p>
-            {i === 1 && (
-              <YandexAdBlock
-                blockId={process.env.NEXT_PUBLIC_YANDEX_ARTICLE_AD_ID || "R-A-1234567-1"}
-                className="my-6"
-              />
+          <article className="mt-6 rounded-3xl border border-line bg-white p-6 sm:p-10 shadow-xs">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-ink/40 mb-3">
+              <span className="uppercase tracking-wider">Гайд по экономии</span>
+              <span>•</span>
+              <span>⏱ 3–4 мин чтения</span>
+              <span>•</span>
+              <span className="text-mint-dark">✓ Проверено</span>
+            </div>
+
+            <h1 className="font-display text-2xl sm:text-4xl font-extrabold leading-tight text-ink">
+              {article.title}
+            </h1>
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-ink/70 font-medium pb-6 border-b border-line">
+              {article.description}
+            </p>
+
+            <div className="mt-6 space-y-4 text-base leading-relaxed text-ink/80">
+              {article.body.map((p, i) => (
+                <p key={i} className="leading-relaxed">
+                  {p}
+                </p>
+              ))}
+            </div>
+
+            {/* Внутренние ссылки на промокоды */}
+            {article.related.length > 0 && (
+              <div className="mt-8 rounded-2xl bg-yellow/15 border border-yellow/50 p-5">
+                <div className="font-display text-sm font-bold text-ink mb-3 flex items-center gap-2">
+                  <span>🏷</span>
+                  <span>Скидки и промокоды по теме:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {article.related.map((r) => (
+                    <Link
+                      key={r.href}
+                      href={r.href}
+                      className="inline-flex items-center gap-1 rounded-xl bg-white border border-line px-3.5 py-2 text-xs font-bold text-ink shadow-2xs hover:border-red hover:text-red transition-all"
+                    >
+                      <span>{r.text}</span>
+                      <span>→</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             )}
-          </div>
-        ))}
-      </article>
+          </article>
 
-      <YandexAdBlock
-        blockId={process.env.NEXT_PUBLIC_YANDEX_ARTICLE_BOTTOM_AD_ID || "R-A-1234567-2"}
-        className="mt-8"
-      />
-
-      {article.related.length > 0 && (
-        <section className="mt-10 rounded-2xl border border-line bg-white p-6">
-          <h2 className="font-display text-lg font-extrabold">
-            Полезные ссылки
-          </h2>
-          <ul className="mt-4 space-y-2">
-            {article.related.map((r) => (
-              <li key={r.href}>
+          {/* Читайте также */}
+          <section className="mt-8 rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-xs">
+            <h2 className="font-display text-lg font-extrabold text-ink mb-4">
+              Другие полезные гиды
+            </h2>
+            <div className="grid gap-3">
+              {moreArticles.map((a) => (
                 <Link
-                  href={r.href}
-                  className="font-semibold text-ink underline underline-offset-2 hover:text-red transition-colors"
+                  key={a.slug}
+                  href={`/sovety/${a.slug}`}
+                  className="group flex items-center justify-between rounded-xl border border-line/60 bg-paper/40 p-4 transition-all hover:bg-white hover:border-ink/20 hover:shadow-2xs"
                 >
-                  {r.text}
+                  <span className="font-display text-sm font-bold text-ink group-hover:text-red transition-colors">
+                    {a.title}
+                  </span>
+                  <span className="text-xs font-bold text-red shrink-0 ml-3">
+                    Читать →
+                  </span>
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+              ))}
+            </div>
+          </section>
 
-      <section className="mt-6 rounded-2xl border border-line bg-white p-6">
-        <h2 className="font-display text-lg font-extrabold">
-          Читайте также
-        </h2>
-        <ul className="mt-4 space-y-3">
-          {moreArticles.map((a) => (
-            <li key={a.slug}>
-              <Link
-                href={`/sovety/${a.slug}`}
-                className="font-semibold text-ink underline underline-offset-2 hover:text-red transition-colors"
-              >
-                {a.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+          {/* Соцсети */}
+          <section className="mt-6 rounded-3xl border border-mint/30 bg-mint/10 p-6 text-center sm:text-left sm:flex sm:items-center sm:justify-between gap-4">
+            <div>
+              <h2 className="font-display text-base font-bold text-ink">
+                Свежие промокоды в Telegram
+              </h2>
+              <p className="mt-1 text-xs text-ink/60">
+                Публикуем закрытые акции и сгорающие купоны каждый день
+              </p>
+            </div>
+            <a
+              href={CHANNELS.telegram}
+              target="_blank"
+              rel="noopener nofollow"
+              className="mt-3 sm:mt-0 inline-flex items-center justify-center gap-1.5 shrink-0 rounded-xl bg-ink px-5 py-2.5 text-xs font-bold text-white shadow-offset-red transition-all hover:translate-y-[1px] hover:shadow-none"
+            >
+              Подписаться на канал →
+            </a>
+          </section>
 
-      <section className="mt-6 rounded-2xl border border-mint/30 bg-mint/10 p-6">
-        <h2 className="font-display text-lg font-extrabold">
-          Подпишитесь на выгодные новости
-        </h2>
-        <p className="mt-2 text-sm text-ink/60">
-          Свежие промокоды и лайфхаки экономии — в наших каналах.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <a
-            href={CHANNELS.telegram}
-            target="_blank"
-            rel="noopener nofollow"
-            className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
-          >
-            Telegram
-          </a>
-          <a
-            href={CHANNELS.youtube}
-            target="_blank"
-            rel="noopener nofollow"
-            className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
-          >
-            YouTube
-          </a>
-          <a
-            href={CHANNELS.dzen}
-            target="_blank"
-            rel="noopener nofollow"
-            className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
-          >
-            Дзен
-          </a>
+          <div className="mt-8 flex items-center justify-between">
+            <Link
+              href="/sovety"
+              className="text-xs font-bold text-ink/60 hover:text-ink transition-colors"
+            >
+              ← Назад ко всем статьям
+            </Link>
+            <Link
+              href="/"
+              className="text-xs font-bold text-red hover:underline"
+            >
+              В каталог промокодов →
+            </Link>
+          </div>
         </div>
-      </section>
+      </main>
 
-      <div className="mt-10">
-        <Link
-          href="/sovety"
-          className="text-sm font-bold text-ink/70 hover:text-ink transition-colors"
-        >
-          ← Все советы
-        </Link>
-      </div>
-    </main>
+      <Footer />
+    </>
   );
 }

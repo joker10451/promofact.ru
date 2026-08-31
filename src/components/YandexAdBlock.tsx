@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 declare global {
   interface Window {
@@ -16,18 +16,30 @@ declare global {
 }
 
 interface YandexAdBlockProps {
-  blockId: string;
+  blockId?: string;
   className?: string;
 }
 
 /**
  * Адаптивный рекламный блок Яндекс РСЯ (Рекламная сеть Яндекса)
+ * Отображается только при наличии валидного ID рекламного блока (не заглушки).
  */
 export default function YandexAdBlock({ blockId, className = "" }: YandexAdBlockProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Если блок не настроен или содержит плейсхолдер 1234567 — ничего не рендерим
+  if (!blockId || blockId.includes("1234567") || !blockId.startsWith("R-A-")) {
+    return null;
+  }
+
   const containerId = `yandex_rtb_${blockId.replace(/-/g, "_")}`;
 
   useEffect(() => {
-    if (!blockId) return;
+    if (!mounted) return;
 
     window.yaContextCb = window.yaContextCb || [];
     window.yaContextCb.push(() => {
@@ -38,12 +50,10 @@ export default function YandexAdBlock({ blockId, className = "" }: YandexAdBlock
         });
       }
     });
-  }, [blockId, containerId]);
+  }, [mounted, blockId, containerId]);
 
   return (
-    <div
-      className={`my-6 flex min-h-[140px] w-full items-center justify-center overflow-hidden rounded-2xl border border-line/60 bg-slate-50/50 p-2 text-center transition-all ${className}`}
-    >
+    <div className={`my-4 flex w-full items-center justify-center overflow-hidden text-center transition-all ${className}`}>
       <div id={containerId} className="w-full flex justify-center" />
     </div>
   );
