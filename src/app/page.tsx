@@ -8,6 +8,7 @@ import HowItWorks from "@/components/HowItWorks";
 import VisualCategoryTiles from "@/components/VisualCategoryTiles";
 import WhyUs from "@/components/WhyUs";
 import Faq from "@/components/Faq";
+import LatestTips from "@/components/LatestTips";
 import SeoArticle from "@/components/SeoArticle";
 import Subscribe from "@/components/Subscribe";
 import Footer from "@/components/Footer";
@@ -137,7 +138,12 @@ export default async function Home() {
           <WhyUs />
         </Reveal>
 
-        {/* 10. Частые вопросы (FAQ Accordion) */}
+        {/* 10. Полезные статьи и советы */}
+        <Reveal>
+          <LatestTips limit={3} />
+        </Reveal>
+
+        {/* 11. Частые вопросы (FAQ Accordion) */}
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
           <Reveal>
             <Faq />
