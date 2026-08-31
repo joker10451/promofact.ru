@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import CouponTicket from "@/components/CouponTicket";
 import type { Coupon } from "@/lib/types";
@@ -13,11 +14,11 @@ export default function CouponGrid({
   proofsByStore?: Record<number, number>;
 }) {
   const [filter, setFilter] = useState<string>("all");
-  const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20" | "gifts">("all");
+  const [quickFilter, setQuickFilter] = useState<"all" | "first" | "repeat" | "discount_20" | "gifts">("all");
   const [sortBy, setSortBy] = useState<"hits" | "discount" | "expiring">("hits");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>({});
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,11 +41,13 @@ export default function CouponGrid({
     } catch {}
   };
 
+  // Слушатель глобального поиска из Hero
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<string>).detail;
-      if (detail) setQuery(detail);
-      inputRef.current?.focus();
+      if (typeof detail === "string") {
+        setQuery(detail);
+      }
     };
     window.addEventListener("promo:search", handler);
     return () => window.removeEventListener("promo:search", handler);
@@ -82,17 +85,17 @@ export default function CouponGrid({
     const pct = bonus.match(/(\d+)\s*%/);
     if (pct) return parseInt(pct[1], 10);
     const rub = bonus.match(/(\d+[\s\d]*)\s*₽/);
-    if (rub) return parseInt(rub[1].replace(/\s/g, ""), 10) / 50; // примерный эквивалент
+    if (rub) return parseInt(rub[1].replace(/\s/g, ""), 10) / 50;
     return 0;
   };
 
-  const filtered = useMemo(() => {
+  // Фильтрация
+  const filteredCoupons = useMemo(() => {
     const q = query.trim().toLowerCase();
     let res = coupons.filter((c) => {
       if (filter !== "all" && c.store.categorySlug !== filter) return false;
 
       // Быстрые фильтры
-      if (quickFilter === "hit" && !c.promocode.isHit) return false;
       if (quickFilter === "first" && !c.promocode.isFirstOrderOnly) return false;
       if (quickFilter === "repeat" && c.promocode.isFirstOrderOnly) return false;
       if (quickFilter === "discount_20") {
@@ -135,12 +138,43 @@ export default function CouponGrid({
         return d1 - d2;
       });
     } else {
-      // По умолчанию: сначала хиты
       res = [...res].sort((a, b) => (b.promocode.isHit ? 1 : 0) - (a.promocode.isHit ? 1 : 0));
     }
 
     return res;
   }, [coupons, filter, query, quickFilter, selectedRegion, sortBy]);
+
+  // Группировка по магазинам: 1 лучший промокод магазина на главной + остальные в аккордеоне
+  const groupedStoreList = useMemo(() => {
+    const storeMap = new Map<number, Coupon[]>();
+    for (const c of filteredCoupons) {
+      const list = storeMap.get(c.store.id) || [];
+      list.push(c);
+      storeMap.set(c.store.id, list);
+    }
+
+    return Array.from(storeMap.values()).map((storeCoupons) => {
+      // Сортируем: сначала хиты, потом с кодом
+      const sorted = [...storeCoupons].sort((a, b) => {
+        if (a.promocode.isHit && !b.promocode.isHit) return -1;
+        if (!a.promocode.isHit && b.promocode.isHit) return 1;
+        return (b.promocode.code ? 1 : 0) - (a.promocode.code ? 1 : 0);
+      });
+
+      return {
+        store: sorted[0].store,
+        primaryCoupon: sorted[0],
+        otherCoupons: sorted.slice(1),
+      };
+    });
+  }, [filteredCoupons]);
+
+  const toggleExpand = (storeId: number) => {
+    setExpandedStores((prev) => ({
+      ...prev,
+      [storeId]: !prev[storeId],
+    }));
+  };
 
   const chipCls = (active: boolean) =>
     `rounded-full px-4 py-2 text-sm font-bold transition-all ${
@@ -153,38 +187,80 @@ export default function CouponGrid({
     `rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
       active
         ? "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red"
-        : "bg-white border border-line text-ink/80 hover:border-ink/40 shadow-sm"
+        : "bg-white border border-line text-ink/80 hover:border-ink/40 shadow-xs"
     }`;
 
   return (
-    <section id="catalog" className="scroll-mt-24">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
-        <h2 className="font-display text-2xl sm:text-3xl font-extrabold">
-          Купоны на сегодня
-        </h2>
-        <div className="relative w-full sm:w-80">
-          <input
-            ref={inputRef}
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск: магазин или промокод…"
-            className="w-full rounded-full border-2 border-ink/15 bg-white px-5 py-2.5 pr-9 text-sm text-ink outline-none focus:border-ink transition-colors"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-ink/40 hover:text-ink"
-            >
-              ✕
-            </button>
+    <section id="catalog" className="scroll-mt-20">
+      {/* Заголовок секции каталога */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
+            Купоны на сегодня
+          </h2>
+          <p className="text-xs sm:text-sm text-ink/60 font-medium">
+            Сгруппированы по магазинам с выбором лучшего промокода
+          </p>
+        </div>
+
+        {/* Сортировка и выбор города */}
+        <div className="flex flex-wrap items-center gap-2">
+          {regionsList.length > 0 && (
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-xs pointer-events-none">📍</span>
+              <select
+                value={selectedRegion}
+                onChange={(e) => handleCityChange(e.target.value)}
+                className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-xs outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
+                aria-label="Фильтр по городу"
+              >
+                <option value="all">Вся Россия</option>
+                {regionsList.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+              <span className="absolute right-2.5 text-[10px] pointer-events-none text-ink/40">▼</span>
+            </div>
           )}
+
+          <div className="relative flex items-center">
+            <span className="absolute left-3 text-xs pointer-events-none">⚡</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-xs outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
+              aria-label="Сортировка промокодов"
+            >
+              <option value="hits">По популярности (Хиты)</option>
+              <option value="discount">По размеру скидки</option>
+              <option value="expiring">Скоро сгорают</option>
+            </select>
+            <span className="absolute right-2.5 text-[10px] pointer-events-none text-ink/40">▼</span>
+          </div>
         </div>
       </div>
 
-      {/* Строка быстрых смарт-фильтров */}
-      <div className="mt-5 flex flex-wrap items-center gap-2">
+      {/* Статус активного поиска из Hero */}
+      {query && (
+        <div className="mt-4 flex items-center justify-between rounded-2xl bg-yellow/25 border border-yellow px-4 py-2.5 text-xs font-bold text-ink">
+          <div className="flex items-center gap-2">
+            <span>🔍 Результаты поиска по запросу:</span>
+            <span className="font-mono text-sm font-extrabold text-red">«{query}»</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className="rounded-lg bg-ink px-2.5 py-1 text-[11px] text-white hover:bg-ink/80 transition-colors"
+          >
+            Сбросить поиск ✕
+          </button>
+        </div>
+      )}
+
+      {/* Быстрые смарт-фильтры */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setQuickFilter("all")}
@@ -227,80 +303,36 @@ export default function CouponGrid({
         </button>
       </div>
 
-      {/* Категории и элементы управления */}
-      <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pb-1 sm:flex-wrap sm:pb-0">
+      {/* Категории (горизонтальный скролл) */}
+      <div className="mt-4 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pb-1 sm:flex-wrap sm:pb-0">
+        <button
+          type="button"
+          onClick={() => setFilter("all")}
+          className={`shrink-0 ${chipCls(filter === "all")}`}
+        >
+          Все категории · {coupons.length}
+        </button>
+        {cats.map(({ slug, name }) => (
           <button
+            key={slug}
             type="button"
-            onClick={() => setFilter("all")}
-            className={`shrink-0 ${chipCls(filter === "all")}`}
+            onClick={() => setFilter(slug)}
+            className={`shrink-0 ${chipCls(filter === slug)}`}
           >
-            Все категории · {coupons.length}
+            {name} · {countByCat(slug)}
           </button>
-          {cats.map(({ slug, name }) => (
-            <button
-              key={slug}
-              type="button"
-              onClick={() => setFilter(slug)}
-              className={`shrink-0 ${chipCls(filter === slug)}`}
-            >
-              {name} · {countByCat(slug)}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-          {/* Селектор города / региона */}
-          {regionsList.length > 0 && (
-            <div className="relative flex items-center">
-              <span className="absolute left-3 text-xs pointer-events-none">📍</span>
-              <select
-                value={selectedRegion}
-                onChange={(e) => handleCityChange(e.target.value)}
-                className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-sm outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
-                aria-label="Фильтр по городу"
-              >
-                <option value="all">Вся Россия</option>
-                {regionsList.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-              <span className="absolute right-2.5 text-[10px] pointer-events-none text-ink/40">▼</span>
-            </div>
-          )}
-
-          {/* Сортировка */}
-          <div className="relative flex items-center">
-            <span className="absolute left-3 text-xs pointer-events-none">⚡</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-sm outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
-              aria-label="Сортировка промокодов"
-            >
-              <option value="hits">По популярности (Хиты)</option>
-              <option value="discount">По размеру скидки</option>
-              <option value="expiring">Скоро сгорают</option>
-            </select>
-            <span className="absolute right-2.5 text-[10px] pointer-events-none text-ink/40">▼</span>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <p className="mt-5 text-sm font-semibold text-ink/50" aria-live="polite">
-        Найдено: {filtered.length}
-      </p>
-
-      {filtered.length === 0 ? (
-        <div className="mt-6 rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
+      {/* Сетка купонов */}
+      {groupedStoreList.length === 0 ? (
+        <div className="mt-8 rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
           <div className="font-display text-5xl font-extrabold text-ink/15">
             :(
           </div>
           <p className="mt-3 font-bold text-ink/70">Ничего не нашлось</p>
           <p className="mt-1 text-sm text-ink/50">
-            Попробуй другой запрос или сбрось фильтр категории.
+            Попробуйте другой запрос или сбросьте фильтры.
           </p>
           <button
             type="button"
@@ -318,14 +350,60 @@ export default function CouponGrid({
         </div>
       ) : (
         <div ref={gridRef} className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 reveal-stagger">
-          {filtered.map((coupon) => (
-            <CouponTicket
-              key={`${coupon.id}-${coupon.promocode.code}`}
-              coupon={coupon}
-              proofCount={proofsByCode?.[coupon.promocode.code] ?? 0}
-              storeProofCount={proofsByStore?.[coupon.store.id] ?? 0}
-            />
-          ))}
+          {groupedStoreList.map(({ store, primaryCoupon, otherCoupons }) => {
+            const isExpanded = !!expandedStores[store.id];
+
+            return (
+              <div key={store.id} className="flex flex-col gap-3">
+                {/* Главная карточка с лучшим предложением */}
+                <div className="relative">
+                  <CouponTicket
+                    coupon={primaryCoupon}
+                    proofCount={proofsByCode?.[primaryCoupon.promocode.code] ?? 0}
+                    storeProofCount={proofsByStore?.[store.id] ?? 0}
+                  />
+                </div>
+
+                {/* Дополнительные промокоды магазина под спойлером */}
+                {otherCoupons.length > 0 && (
+                  <div className="rounded-2xl border border-line/70 bg-white/70 p-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(store.id)}
+                      className="w-full flex items-center justify-between py-1.5 px-3 rounded-xl bg-paper hover:bg-paper/80 text-xs font-bold text-ink transition-colors cursor-pointer"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span>🏷</span>
+                        <span>
+                          {isExpanded
+                            ? `Скрыть другие промокоды (${otherCoupons.length})`
+                            : `Ещё ${otherCoupons.length} ${
+                                otherCoupons.length === 1 ? "промокод" : "промокода"
+                              } ${store.name}`}
+                        </span>
+                      </span>
+                      <span className="text-red font-black">
+                        {isExpanded ? "▲" : "▼"}
+                      </span>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="mt-3 space-y-3 pt-2 border-t border-line/40">
+                        {otherCoupons.map((c) => (
+                          <CouponTicket
+                            key={`${c.id}-${c.promocode.code}`}
+                            coupon={c}
+                            proofCount={proofsByCode?.[c.promocode.code] ?? 0}
+                            storeProofCount={proofsByStore?.[store.id] ?? 0}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </section>

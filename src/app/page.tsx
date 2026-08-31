@@ -1,9 +1,10 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import HotDeals from "@/components/HotDeals";
-import CouponGrid from "@/components/CouponGrid";
 import PopularStores from "@/components/PopularStores";
+import CouponGrid from "@/components/CouponGrid";
 import SavingsCalculator from "@/components/SavingsCalculator";
+import HowItWorks from "@/components/HowItWorks";
 import VisualCategoryTiles from "@/components/VisualCategoryTiles";
 import WhyUs from "@/components/WhyUs";
 import Faq from "@/components/Faq";
@@ -31,7 +32,7 @@ const FAQ_JSONLD = [
     name: "Как применить промокод в интернет-магазине?",
     acceptedAnswer: {
       "@type": "Answer",
-      text: "Скопируйте код кнопкой «Копировать», перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» при оформлении корзины.",
+      text: "Скопируйте код кнопкой «Скопировать», перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» при оформлении корзины.",
     },
   },
   {
@@ -86,19 +87,25 @@ export default async function Home() {
         }}
       />
 
+      {/* 1. Хедер с лаконичной навигацией */}
       <Header />
 
       <main className="min-h-screen">
-        {/* 1. Hero с массивным поиском и trust-метриками */}
+        {/* 2. Hero + ЕДИНСТВЕННЫЙ крупный поиск + Trust bar */}
         <Hero stores={stores} coupons={coupons} />
 
-        {/* 2. 🔥 Горит сегодня — Топ-3 супер-скидки */}
+        {/* 3. 🔥 Горит сегодня — Топ-3 супер-скидки с FOMO-таймером */}
         <Reveal>
           <HotDeals coupons={coupons} />
         </Reveal>
 
-        {/* 3. Основной каталог купонов (2 колонки, смарт-чипы, фильтры) */}
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16">
+        {/* 4. Популярные магазины — быстрый вход по брендам перед каталогом */}
+        <Reveal>
+          <PopularStores />
+        </Reveal>
+
+        {/* 5. Купоны на сегодня — сгруппированный каталог (лучший промокод + аккордеон) */}
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-14">
           <Reveal>
             <CouponGrid
               coupons={coupons}
@@ -108,44 +115,47 @@ export default async function Home() {
           </Reveal>
         </div>
 
-        {/* 4. Популярные магазины (брендовые плитки) */}
-        <Reveal>
-          <PopularStores />
-        </Reveal>
-
-        {/* 5. Интерактивный калькулятор выгоды */}
+        {/* 6. 💰 Сколько вы сэкономите? — компактный калькулятор выгоды */}
         <Reveal>
           <SavingsCalculator />
         </Reveal>
 
-        {/* 6. Категории скидок (плитки с эмодзи) */}
+        {/* 7. Как это работает — 4 понятных шага */}
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+          <Reveal>
+            <HowItWorks />
+          </Reveal>
+        </div>
+
+        {/* 8. Скидки по категориям — плитки с эмодзи */}
         <Reveal>
           <VisualCategoryTiles />
         </Reveal>
 
-        {/* 7. Почему ПромоФакт? (УТП и доверие) */}
+        {/* 9. Почему ПромоФакт? — элементы доверия и прозрачности */}
         <Reveal>
           <WhyUs />
         </Reveal>
 
-        {/* 8. Частые вопросы (FAQ Accordion) */}
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+        {/* 10. Частые вопросы (FAQ Accordion) */}
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
           <Reveal>
             <Faq />
           </Reveal>
         </div>
 
-        {/* 9. SEO-статья (под аккуратным спойлером) */}
+        {/* 11. О сервисе ПромоФакт — SEO-блок под аккуратным спойлером */}
         <Reveal>
           <SeoArticle />
         </Reveal>
 
-        {/* 10. Newsletter (Подписка на еженедельные лучшие скидки) */}
+        {/* 12. Подписка на еженедельные лучшие скидки */}
         <Reveal>
           <Subscribe />
         </Reveal>
       </main>
 
+      {/* 13. Футер */}
       <Footer />
     </>
   );
