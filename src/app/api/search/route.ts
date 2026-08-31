@@ -21,9 +21,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ stores: popularStores, coupons: [] });
   }
 
-  // Фильтруем магазины
+  // Фильтруем магазины (имя, категория, slug — покрывает латиницу для кириллических названий)
   const matchingStores = stores
-    .filter((s) => s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q))
+    .filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q) ||
+        s.slug.toLowerCase().includes(q)
+    )
     .slice(0, 5)
     .map((s) => ({
       name: s.name,
@@ -33,13 +38,14 @@ export async function GET(request: Request) {
       couponCount: s.coupons.length,
     }));
 
-  // Фильтруем купоны
+  // Фильтруем купоны (код, описание, имя и slug магазина)
   const matchingCoupons = coupons
     .filter(
       (c) =>
         c.promocode.code.toLowerCase().includes(q) ||
         (c.promocode.bonusName ?? "").toLowerCase().includes(q) ||
-        c.store.name.toLowerCase().includes(q)
+        c.store.name.toLowerCase().includes(q) ||
+        c.store.slug.toLowerCase().includes(q)
     )
     .slice(0, 5)
     .map((c) => ({
