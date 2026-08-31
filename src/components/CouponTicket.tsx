@@ -84,18 +84,33 @@ export default function CouponTicket({
   // Извлечение крупного размера скидки (например "-30%", "-1 500 ₽" или короткий бонус)
   const extractBigDiscount = (): { discount: string; description: string } => {
     const raw = promocode.bonusName || "";
+
+    const cleanDescription = (text: string) => {
+      let res = text
+        .replace(/^(скидка|минус|до|на|в|от|[,\s–—-])+/i, "")
+        .replace(/[,\s–—-]+$/g, "")
+        .trim();
+      if (!res) return promocode.terms || "Скидка на заказ";
+      if (res.startsWith("+") || res.startsWith("на ") || res.startsWith("в ") || res.startsWith("от ")) {
+        return res;
+      }
+      return `на ${res}`;
+    };
+
     const pctMatch = raw.match(/(\d+\s*%)/);
     if (pctMatch) {
+      const remaining = raw.replace(new RegExp(`(скидка\\s+)?(до\\s+)?${pctMatch[1]}`, "i"), "");
       return {
         discount: `−${pctMatch[1]}`,
-        description: raw.replace(pctMatch[0], "").replace(/^[,\s-]+|[,\s-]+$/g, "") || "Скидка по промокоду",
+        description: cleanDescription(remaining),
       };
     }
     const rubMatch = raw.match(/(\d+[\s\d]*\s*₽)/);
     if (rubMatch) {
+      const remaining = raw.replace(new RegExp(`(скидка\\s+)?(до\\s+)?${rubMatch[1]}`, "i"), "");
       return {
         discount: `−${rubMatch[1]}`,
-        description: raw.replace(rubMatch[0], "").replace(/^[,\s-]+|[,\s-]+$/g, "") || "Скидка на заказ",
+        description: cleanDescription(remaining),
       };
     }
     return {
