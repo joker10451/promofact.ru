@@ -257,18 +257,19 @@ function byScore(a: Coupon, b: Coupon): number {
 /* ---------- публичное API ---------- */
 
 export async function getCoupons(): Promise<Coupon[]> {
-  const [perfluenceCoupons, admitadCoupons, saleadsCoupons] = await Promise.all([
+  const [perfluenceCoupons, admitadCoupons, saleadsCoupons, supabaseCoupons] = await Promise.all([
     fetchData(),
     (await import("@/lib/admitad")).fetchAdmitadCoupons(),
     (await import("@/lib/saleads")).fetchSaleadsCoupons(),
+    (await import("@/lib/supabaseCoupons")).fetchSupabaseCoupons(),
   ]);
 
   const customCoupons = (await import("@/lib/customCoupons")).CUSTOM_COUPONS;
   // Дубль Кинопоиска: кастомная версия с обновлённой ссылкой kp45.prfl.me имеет приоритет — глушим Perfluence-дубль с тем же кодом
-  const customCodes = new Set(customCoupons.map((c) => c.promocode.code).filter(Boolean));
+  const customCodes = new Set([...customCoupons, ...supabaseCoupons].map((c) => c.promocode.code).filter(Boolean));
   const filteredPerfluence = perfluenceCoupons.filter((c) => !customCodes.has(c.promocode.code));
 
-  const all = [...filteredPerfluence, ...admitadCoupons, ...saleadsCoupons, ...customCoupons];
+  const all = [...filteredPerfluence, ...admitadCoupons, ...saleadsCoupons, ...customCoupons, ...supabaseCoupons];
   return all.filter(isActive).sort(byScore);
 }
 
