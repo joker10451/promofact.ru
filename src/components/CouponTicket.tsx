@@ -185,13 +185,17 @@ export default function CouponTicket({
         </div>
       )}
 
-      <p
-        className={`px-5 pt-3 text-xs font-semibold ${urgent ? "text-red" : "text-mint"}`}
-      >
-        {promocode.expires
-          ? `Действует до ${formatExpires(promocode.expires)}`
-          : "Без срока действия"}
-      </p>
+      <div className="flex items-center justify-between gap-2 px-5 pt-3 text-xs">
+        <p className={`font-semibold ${urgent ? "text-red" : "text-ink/60"}`}>
+          {promocode.expires
+            ? `До ${formatExpires(promocode.expires)}`
+            : "Без срока"}
+        </p>
+        <span className="inline-flex items-center gap-1 rounded-full bg-mint/15 px-2 py-0.5 text-[10px] font-bold text-mint-dark">
+          <span className="h-1.5 w-1.5 rounded-full bg-mint animate-pulse" />
+          Проверен сегодня
+        </span>
+      </div>
 
       <div className="dashed-line relative my-5 mx-1">
         <span className="perforation absolute inset-0" aria-hidden="true" />

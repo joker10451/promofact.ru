@@ -9,6 +9,7 @@ import CookieBanner from "@/components/CookieBanner";
 import ScrollProgress from "@/components/ScrollProgress";
 import DiscountWheel from "@/components/DiscountWheel";
 import PushNotificationPrompt from "@/components/PushNotificationPrompt";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 export const viewport: Viewport = {
@@ -107,7 +108,7 @@ export default function RootLayout({
         <script>window.yaContextCb=window.yaContextCb||[]</script>
         <script src="https://yandex.ru/ads/system/context.js" async defer />
       </head>
-      <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
+      <body className="min-h-full flex flex-col bg-paper text-ink font-sans pb-14 md:pb-0">
         <ScrollProgress />
         <TelegramWebAppInit />
         <YandexMetrika />
@@ -117,6 +118,7 @@ export default function RootLayout({
         {children}
         <CookieBanner />
         <PwaInstallBanner />
+        <MobileBottomNav />
       </body>
     </html>
   );

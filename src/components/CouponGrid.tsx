@@ -13,22 +13,21 @@ export default function CouponGrid({
   proofsByStore?: Record<number, number>;
 }) {
   const [filter, setFilter] = useState<string>("all");
-  const [applicability, setApplicability] = useState<string>("all");
+  const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20" | "gifts">("all");
+  const [sortBy, setSortBy] = useState<"hits" | "discount" | "expiring">("hits");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Показываем карточки каскадом после загрузки (безопасный фолбэк:
-    // если IntersectionObserver не нужен, просто добавляем класс)
     const el = gridRef.current;
     if (!el) return;
     const t = setTimeout(() => el.classList.add("is-visible"), 60);
     return () => clearTimeout(t);
   }, []);
+
   useEffect(() => {
-    // Автоопределение или восстановление выбранного города
     const savedCity = localStorage.getItem("promofact_selected_city");
     if (!savedCity) return;
     queueMicrotask(() => setSelectedRegion(savedCity));
@@ -57,7 +56,6 @@ export default function CouponGrid({
     for (const c of coupons) {
       const r = c.promocode.region;
       if (r && r !== "RU" && r !== "Россия") {
-        // Если регион содержит несколько городов через запятую
         r.split(",").forEach((item) => {
           const trimmed = item.trim();
           if (trimmed) set.add(trimmed);
@@ -67,7 +65,7 @@ export default function CouponGrid({
     return Array.from(set).sort((a, b) => a.localeCompare(b, "ru"));
   }, [coupons]);
 
-  // Категории собираем из самих купонов (из API), сортируем по алфавиту (ru)
+  // Категории
   const cats = useMemo(() => {
     const map = new Map<string, string>();
     for (const c of coupons) map.set(c.store.categorySlug, c.store.category);
@@ -79,14 +77,37 @@ export default function CouponGrid({
   const countByCat = (slug: string) =>
     coupons.filter((c) => c.store.categorySlug === slug).length;
 
+  const extractDiscountValue = (bonus: string | null): number => {
+    if (!bonus) return 0;
+    const pct = bonus.match(/(\d+)\s*%/);
+    if (pct) return parseInt(pct[1], 10);
+    const rub = bonus.match(/(\d+[\s\d]*)\s*₽/);
+    if (rub) return parseInt(rub[1].replace(/\s/g, ""), 10) / 50; // примерный эквивалент
+    return 0;
+  };
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return coupons.filter((c) => {
+    let res = coupons.filter((c) => {
       if (filter !== "all" && c.store.categorySlug !== filter) return false;
-      if (applicability === "everyone" && c.promocode.isFirstOrderOnly)
-        return false;
-      if (applicability === "first" && !c.promocode.isFirstOrderOnly)
-        return false;
+
+      // Быстрые фильтры
+      if (quickFilter === "hit" && !c.promocode.isHit) return false;
+      if (quickFilter === "first" && !c.promocode.isFirstOrderOnly) return false;
+      if (quickFilter === "repeat" && c.promocode.isFirstOrderOnly) return false;
+      if (quickFilter === "discount_20") {
+        const bonus = c.promocode.bonusName ?? "";
+        const m = bonus.match(/(\d+)\s*%/);
+        const rub = bonus.match(/(\d+[\s\d]*)\s*₽/);
+        const hasHighPct = m && parseInt(m[1], 10) >= 20;
+        const hasHighRub = rub && parseInt(rub[1].replace(/\s/g, ""), 10) >= 500;
+        if (!hasHighPct && !hasHighRub) return false;
+      }
+      if (quickFilter === "gifts") {
+        const bonus = (c.promocode.bonusName ?? "").toLowerCase();
+        const terms = (c.promocode.terms ?? "").toLowerCase();
+        if (!bonus.includes("подарок") && !bonus.includes("бесплатн") && !terms.includes("подарок")) return false;
+      }
 
       // Фильтрация по региону / городу
       if (selectedRegion !== "all") {
@@ -103,13 +124,36 @@ export default function CouponGrid({
         (c.promocode.bonusName ?? "").toLowerCase().includes(q)
       );
     });
-  }, [coupons, filter, query, applicability, selectedRegion]);
+
+    // Сортировка
+    if (sortBy === "discount") {
+      res = [...res].sort((a, b) => extractDiscountValue(b.promocode.bonusName) - extractDiscountValue(a.promocode.bonusName));
+    } else if (sortBy === "expiring") {
+      res = [...res].sort((a, b) => {
+        const d1 = a.promocode.expires ? new Date(a.promocode.expires).getTime() : Infinity;
+        const d2 = b.promocode.expires ? new Date(b.promocode.expires).getTime() : Infinity;
+        return d1 - d2;
+      });
+    } else {
+      // По умолчанию: сначала хиты
+      res = [...res].sort((a, b) => (b.promocode.isHit ? 1 : 0) - (a.promocode.isHit ? 1 : 0));
+    }
+
+    return res;
+  }, [coupons, filter, query, quickFilter, selectedRegion, sortBy]);
 
   const chipCls = (active: boolean) =>
     `rounded-full px-4 py-2 text-sm font-bold transition-all ${
       active
         ? "bg-ink text-white shadow-offset"
         : "bg-white border border-line text-ink/70 hover:border-ink/30"
+    }`;
+
+  const quickChipCls = (active: boolean) =>
+    `rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+      active
+        ? "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red"
+        : "bg-white border border-line text-ink/80 hover:border-ink/40 shadow-sm"
     }`;
 
   return (
@@ -139,14 +183,59 @@ export default function CouponGrid({
         </div>
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      {/* Строка быстрых смарт-фильтров */}
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setQuickFilter("all")}
+          className={quickChipCls(quickFilter === "all")}
+        >
+          <span>🔥</span>
+          <span>Все акции</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickFilter("first")}
+          className={quickChipCls(quickFilter === "first")}
+        >
+          <span>⚡️</span>
+          <span>На первый заказ</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickFilter("repeat")}
+          className={quickChipCls(quickFilter === "repeat")}
+        >
+          <span>✨</span>
+          <span>На повторные заказы</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickFilter("discount_20")}
+          className={quickChipCls(quickFilter === "discount_20")}
+        >
+          <span>💰</span>
+          <span>Скидки от 20% / 500 ₽</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickFilter("gifts")}
+          className={quickChipCls(quickFilter === "gifts")}
+        >
+          <span>🎁</span>
+          <span>Подарки к заказу</span>
+        </button>
+      </div>
+
+      {/* Категории и элементы управления */}
+      <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pb-1 sm:flex-wrap sm:pb-0">
           <button
             type="button"
             onClick={() => setFilter("all")}
             className={`shrink-0 ${chipCls(filter === "all")}`}
           >
-            Все · {coupons.length}
+            Все категории · {coupons.length}
           </button>
           {cats.map(({ slug, name }) => (
             <button
@@ -182,32 +271,20 @@ export default function CouponGrid({
             </div>
           )}
 
-          {/* Фильтр применимости */}
-          <div
-            role="group"
-            aria-label="Применимость промокодов"
-            className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-white p-1"
-          >
-            {(
-              [
-                ["all", "Все"],
-                ["everyone", "Для всех"],
-                ["first", "Первый заказ"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setApplicability(value)}
-                className={`rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
-                  applicability === value
-                    ? "bg-ink text-white"
-                    : "text-ink/60 hover:text-ink"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          {/* Сортировка */}
+          <div className="relative flex items-center">
+            <span className="absolute left-3 text-xs pointer-events-none">⚡</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-sm outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
+              aria-label="Сортировка промокодов"
+            >
+              <option value="hits">По популярности (Хиты)</option>
+              <option value="discount">По размеру скидки</option>
+              <option value="expiring">Скоро сгорают</option>
+            </select>
+            <span className="absolute right-2.5 text-[10px] pointer-events-none text-ink/40">▼</span>
           </div>
         </div>
       </div>
@@ -230,7 +307,9 @@ export default function CouponGrid({
             onClick={() => {
               setQuery("");
               setFilter("all");
-              setApplicability("all");
+              setQuickFilter("all");
+              setSortBy("hits");
+              setSelectedRegion("all");
             }}
             className="mt-5 rounded-full bg-yellow text-ink px-5 py-2.5 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition-all"
           >
