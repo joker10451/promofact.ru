@@ -11,13 +11,14 @@ interface HeroProps {
   coupons?: Coupon[];
 }
 
-const POPULAR_TAGS = [
-  "Золотое Яблоко",
-  "Яндекс Еда",
-  "Тануки",
-  "Пятёрочка",
-  "Кинопоиск",
+// Реальные актуальные магазины нашего сайта
+const REAL_POPULAR_TAGS = [
   "Отелло",
+  "Ив Роше",
+  "Яндекс Цветы",
+  "Пятёрочка",
+  "Важная Рыба",
+  "Кинопоиск",
   "Fix Price",
   "FMART",
 ];
@@ -29,14 +30,12 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
 
   const query = q.trim().toLowerCase();
 
-  // Фильтрация подсказок магазинов
   const matchedStores = query
     ? stores
         .filter((s) => s.name.toLowerCase().includes(query) || s.category.toLowerCase().includes(query))
         .slice(0, 4)
     : [];
 
-  // Фильтрация подсказок купонов
   const matchedCoupons = query
     ? coupons
         .filter(
@@ -75,8 +74,8 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-paper via-white to-paper pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-line">
-      {/* Декоративный фоновый узор */}
+    <section className="relative overflow-hidden bg-gradient-to-b from-paper via-white to-paper pt-12 pb-14 sm:pt-18 sm:pb-20 border-b border-line">
+      {/* Декоративные световые пятна */}
       <div
         className="pointer-events-none absolute -left-20 top-10 h-72 w-72 rounded-full bg-yellow/15 blur-3xl"
         aria-hidden="true"
@@ -95,7 +94,7 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
 
         {/* Подзаголовок */}
         <p className="mx-auto mt-4 max-w-2xl text-base text-ink/70 sm:text-lg">
-          Проверенные промокоды и купоны магазинов. Обновляем каждый день, чтобы скидка гарантированно сработала.
+          Проверенные промокоды магазинов и сервисов. Регулярно проверяем каждый код и удаляем неработающие.
         </p>
 
         {/* Главная поисковая строка */}
@@ -113,12 +112,12 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
                   setQ(e.target.value);
                   setIsOpen(true);
                 }}
-                placeholder="Найти магазин, товар или промокод..."
+                placeholder="Найти магазин или промокод (Отелло, Ив Роше, Пятёрочка...)"
                 className="h-16 w-full rounded-2xl border-2 border-ink/15 bg-white pl-14 pr-32 text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
               />
               <button
                 type="submit"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-xl bg-gradient-to-r from-red to-red-dark px-5 py-3 text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-xl bg-gradient-to-r from-red to-red-dark px-5 py-3 text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
               >
                 <span>Найти</span>
                 <span>→</span>
@@ -126,7 +125,7 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
             </div>
           </form>
 
-          {/* Выпадающие подсказки */}
+          {/* Подсказки автодополнения */}
           {isOpen && query && hasResults && (
             <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-line bg-white p-3 text-left shadow-xl">
               {matchedStores.length > 0 && (
@@ -181,10 +180,10 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
           )}
         </div>
 
-        {/* Популярные теги */}
+        {/* Быстрые теги (реальные магазины) */}
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-ink/70">
           <span className="text-ink/40">Популярное:</span>
-          {POPULAR_TAGS.map((tag) => (
+          {REAL_POPULAR_TAGS.map((tag) => (
             <button
               key={tag}
               type="button"
@@ -196,31 +195,31 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
           ))}
         </div>
 
-        {/* Trust Indicators Bar (Доверие) */}
+        {/* Блок доверия (Trust Indicators) */}
         <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-6 border-t border-line/60">
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
               ✓
             </span>
-            <span>Проверяем каждый день</span>
+            <span>Проверяем промокоды</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow/40 text-ink text-[11px]">
               ⚡
             </span>
-            <span>{coupons.length > 0 ? coupons.length : 20}+ активных скидок</span>
+            <span>{coupons.length > 0 ? coupons.length : 23} активных акции</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
               96%
             </span>
-            <span>Подтверждают работу</span>
+            <span>Работают у пользователей</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red/15 text-red text-[11px]">
               0₽
             </span>
-            <span>Бесплатно и без спама</span>
+            <span>Бесплатно и без регистрации</span>
           </div>
         </div>
       </div>
