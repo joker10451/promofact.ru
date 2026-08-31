@@ -8,8 +8,6 @@ import type { Coupon } from "@/lib/types";
 
 export default function CouponTicket({
   coupon,
-  proofCount = 0,
-  storeProofCount = 0,
   isDetailPage = false,
 }: {
   coupon: Coupon;
@@ -27,6 +25,7 @@ export default function CouponTicket({
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const urgent = daysLeft(promocode.expires) < 3;
+  const trustPercent = 95 + (coupon.id % 5);
 
   useEffect(() => {
     try {
@@ -69,7 +68,6 @@ export default function CouponTicket({
     }
     ymReachGoal("click_store", { code: code || "no-code", store: store.name });
 
-    // Открываем магазин в новой вкладке
     if (typeof window !== "undefined" && url && url !== "#") {
       window.open(url, "_blank", "noopener,noreferrer");
     }
@@ -83,296 +81,161 @@ export default function CouponTicket({
 
   const targetUrl = affiliate.link || affiliate.landingLink || store.site || "#";
 
-  useEffect(() => {
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
+  // Извлечение крупного размера скидки (например "-30%", "-1 500 ₽" или короткий бонус)
+  const extractBigDiscount = (): { discount: string; description: string } => {
+    const raw = promocode.bonusName || "";
+    const pctMatch = raw.match(/(\d+\s*%)/);
+    if (pctMatch) {
+      return {
+        discount: `−${pctMatch[1]}`,
+        description: raw.replace(pctMatch[0], "").replace(/^[,\s-]+|[,\s-]+$/g, "") || "Скидка по промокоду",
+      };
+    }
+    const rubMatch = raw.match(/(\d+[\s\d]*\s*₽)/);
+    if (rubMatch) {
+      return {
+        discount: `−${rubMatch[1]}`,
+        description: raw.replace(rubMatch[0], "").replace(/^[,\s-]+|[,\s-]+$/g, "") || "Скидка на заказ",
+      };
+    }
+    return {
+      discount: raw ? (raw.length > 22 ? `${raw.slice(0, 22)}…` : raw) : `Скидка`,
+      description: promocode.terms || "Выгода по промокоду",
     };
-  }, []);
+  };
 
-  const trustPercent = 95 + (coupon.id % 5);
-
-  const badges: { key: string; label: string; cls: string }[] = [];
-  if (promocode.isHit)
-    badges.push({ key: "hit", label: "🔥 хит", cls: "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red" });
-  if (promocode.isFirstOrderOnly)
-    badges.push({
-      key: "first",
-      label: "первый заказ",
-      cls: "bg-mint/15 border border-mint/40 text-ink",
-    });
-  else if (promocode.isUniversal)
-    badges.push({
-      key: "all",
-      label: "для всех",
-      cls: "bg-ink text-white",
-    });
-  if (promocode.region)
-    badges.push({
-      key: "region",
-      label: `регион: ${promocode.region}`,
-      cls: "bg-yellow text-ink",
-    });
+  const { discount, description } = extractBigDiscount();
 
   return (
-    <article className="shine group relative flex flex-col bg-white border border-line rounded-2xl overflow-hidden transition-transform duration-300 card-hover shadow-[0_6px_0_rgba(11,16,43,0.08),0_12px_24px_-12px_rgba(11,16,43,0.18)] hover:shadow-[0_10px_0_rgba(11,16,43,0.1),0_18px_32px_-12px_rgba(11,16,43,0.22)]">
-      <div className="flex items-start gap-3 px-5 pt-5">
-        {store.logo && !imgError ? (
-          <img
-            src={store.logo}
-            alt={store.name}
-            loading="lazy"
-            width={40}
-            height={40}
-            onError={() => setImgError(true)}
-            className="h-10 w-10 shrink-0 rounded-xl border border-line bg-white object-contain p-0.5"
-          />
-        ) : (
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow font-display text-base font-extrabold text-ink">
-            {store.name.slice(0, 1)}
-          </span>
-        )}
-        <div className="min-w-0">
-          <div className="truncate text-[11px] font-bold uppercase tracking-widest text-ink/45">
-            {store.name}
-          </div>
-          <div className="mt-1 font-display font-extrabold text-2xl leading-tight text-ink">
-            {promocode.bonusName || `Промокод ${promocode.code}`}
-          </div>
-        </div>
-      </div>
-
-      {/* Красивый баннер-макет оффера, если прикреплен */}
-      {promocode.barcodeImage && !promocode.isBarcode && (
-        <div className="px-5 pt-4">
-          <div className="relative overflow-hidden rounded-xl border border-line bg-paper aspect-[9/14] max-h-72 w-full flex items-center justify-center">
-            <img
-              src={promocode.barcodeImage}
-              alt={store.name}
-              className="h-full w-full object-contain"
-            />
-          </div>
-        </div>
-      )}
-
-      {proofCount > 0 ? (
-        <div className="px-5 pt-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-2.5 py-1 text-[10px] font-bold text-ink/80">
-          <CheckIcon className="h-3 w-3 text-mint" />
-            оформлено {proofCount}{" "}
-            {proofCount === 1 ? "раз" : proofCount >= 2 && proofCount <= 4 ? "раза" : "раз"} за последнее время
-          </span>
-        </div>
-      ) : storeProofCount > 0 ? (
-        <div className="px-5 pt-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-2.5 py-1 text-[10px] font-bold text-ink/80">
-          <CheckIcon className="h-3 w-3 text-mint" />
-            по промокодам {store.name} оформлено {storeProofCount}{" "}
-            {storeProofCount === 1 ? "заказ" : storeProofCount >= 2 && storeProofCount <= 4 ? "заказа" : "заказов"}
-          </span>
-        </div>
-      ) : null}
-
-      {badges.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 px-5 pt-3">
-          {badges.map((b) => (
-            <span
-              key={b.key}
-              className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${b.cls}`}
-            >
-              {b.label}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="flex items-center justify-between gap-2 px-5 pt-3 text-xs">
-        <p className={`font-semibold ${urgent ? "text-red" : "text-ink/60"}`}>
-          {promocode.expires
-            ? `До ${formatExpires(promocode.expires)}`
-            : "Без срока"}
-        </p>
-        <span className="inline-flex items-center gap-1 rounded-full bg-mint/15 px-2 py-0.5 text-[10px] font-bold text-mint-dark">
-          <span className="h-1.5 w-1.5 rounded-full bg-mint animate-pulse" />
-          Проверен сегодня
-        </span>
-      </div>
-
-      <div className="dashed-line relative my-5 mx-1">
-        <span className="perforation absolute inset-0" aria-hidden="true" />
-      </div>
-
-      <div className="px-5 pb-5">
-        {promocode.isBarcode && promocode.barcodeImage ? (
-          <button
-            type="button"
-            onClick={() => setShowBarcode(true)}
-            className="w-full rounded-xl border-2 border-dashed border-ink/25 bg-paper px-3 py-3 text-sm font-bold text-ink transition-colors hover:border-ink"
-          >
-            Показать штрихкод
-          </button>
-        ) : promocode.code ? (
-          <div
-            onClick={() => copyAndOpen(promocode.code, targetUrl)}
-            className="group/code flex cursor-pointer items-center justify-between gap-2 rounded-xl border-2 border-dashed border-ink/25 bg-paper/60 px-3 py-2.5 transition-all hover:border-yellow hover:bg-yellow/10"
-            title="Нажмите, чтобы скопировать код и открыть магазин"
-          >
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="text-xs">🎟</span>
-              <span className="truncate font-display font-bold tracking-widest text-ink">
-                {promocode.code}
+    <article className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-ink/25 hover:shadow-[0_12px_30px_rgba(11,16,43,0.08)]">
+      {/* Шапка карточки: Логотип + Название + Бейдж верификации */}
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            {store.logo && !imgError ? (
+              <img
+                src={store.logo}
+                alt={store.name}
+                loading="lazy"
+                width={36}
+                height={36}
+                onError={() => setImgError(true)}
+                className="h-9 w-9 shrink-0 rounded-xl border border-line bg-paper object-contain p-0.5"
+              />
+            ) : (
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-yellow font-display text-sm font-extrabold text-ink">
+                {store.name.slice(0, 1)}
               </span>
+            )}
+            <div className="min-w-0">
+              <h3 className="truncate font-display text-sm font-bold text-ink">
+                {store.name}
+              </h3>
+              <p className="text-[11px] text-ink/45 truncate">
+                {store.category}
+              </p>
             </div>
+          </div>
+
+          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-mint/15 px-2.5 py-1 text-[10px] font-bold text-mint-dark">
+            <span className="h-1.5 w-1.5 rounded-full bg-mint animate-pulse" />
+            Проверен
+          </span>
+        </div>
+
+        {/* Уровень 1: Крупный акцент на скидке */}
+        <div className="mt-4">
+          <div className="font-display text-3xl font-black tracking-tight text-ink">
+            {discount}
+          </div>
+          <p className="mt-1 text-sm font-medium text-ink/75 line-clamp-2">
+            {description}
+          </p>
+        </div>
+
+        {/* Бейджи условий */}
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {promocode.isHit && (
+            <span className="rounded-full bg-red/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red">
+              🔥 Хит дня
+            </span>
+          )}
+          {promocode.isFirstOrderOnly ? (
+            <span className="rounded-full bg-mint/15 px-2.5 py-0.5 text-[10px] font-bold text-ink/80">
+              ⚡️ Первый заказ
+            </span>
+          ) : (
+            <span className="rounded-full bg-paper border border-line px-2.5 py-0.5 text-[10px] font-bold text-ink/70">
+              ✨ Для всех
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Нижний блок: Код + Кнопка копирования + Инфо */}
+      <div className="mt-5 pt-4 border-t border-line/60">
+        {promocode.code ? (
+          <div className="flex items-stretch gap-2">
+            {/* Рамка с промокодом */}
+            <div
+              onClick={() => copyAndOpen(promocode.code, targetUrl)}
+              className="flex flex-1 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-ink/20 bg-paper px-3 py-2.5 font-mono text-sm font-bold tracking-wider text-ink transition-colors hover:border-red hover:bg-red/5"
+              title="Нажмите, чтобы скопировать"
+            >
+              <span className="truncate">{promocode.code}</span>
+            </div>
+
+            {/* Главная кнопка Копировать */}
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                copyAndOpen(promocode.code, targetUrl);
-              }}
-              className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+              onClick={() => copyAndOpen(promocode.code, targetUrl)}
+              className={`shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold transition-all shadow-sm ${
                 copied
                   ? "bg-mint text-white"
-                  : "bg-yellow text-ink shadow-offset hover:translate-y-[2px] hover:shadow-none"
+                  : "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none"
               }`}
             >
               {copied ? (
                 <span className="inline-flex items-center gap-1">
-                  <CheckIcon className="h-3.5 w-3.5" /> Скопировано
+                  <CheckIcon className="h-3.5 w-3.5" /> Скопировано!
                 </span>
               ) : (
-                "Копировать"
+                "КОПИРОВАТЬ"
               )}
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-mint/40 bg-mint/5 px-3 py-2.5">
-            <span className="text-xs font-bold text-mint-dark">
-              ✨ Промокод не требуется — скидка по ссылке
-            </span>
-          </div>
-        )}
-
-        {promocode.terms && (
-          <p className="mt-2 text-[11px] leading-snug text-ink/45">
-            {promocode.terms}
-          </p>
-        )}
-
-        <div className="mt-3 space-y-2">
           <button
             type="button"
-            onClick={() => copyAndOpen(promocode.code, targetUrl)}
-            className={`group relative flex w-full items-center justify-center gap-2 rounded-xl py-3 px-4 text-center text-sm font-bold shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none ${
-              copied
-                ? "bg-mint text-white shadow-offset"
-                : "bg-gradient-to-r from-red to-red-dark text-white"
-            }`}
+            onClick={() => copyAndOpen("", targetUrl)}
+            className="w-full rounded-xl bg-gradient-to-r from-red to-red-dark py-3 text-center text-xs font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
           >
-            {copied ? (
-              <span className="inline-flex items-center gap-1.5 font-bold">
-                <CheckIcon className="h-4 w-4" /> Код скопирован! Магазин открыт →
-              </span>
-            ) : promocode.code ? (
-              <span className="inline-flex items-center gap-1.5">
-                <span>Скопировать и в {store.name}</span>
-                <span className="transition-transform group-hover:translate-x-1">→</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5">
-                <span>В магазин {store.name}</span>
-                <span className="transition-transform group-hover:translate-x-1">→</span>
-              </span>
-            )}
+            Перейти в {store.name} со скидкой →
           </button>
-          {affiliate.ordText && (
-            <p className="text-center text-[10px] leading-snug text-ink/40">
-              {affiliate.ordText}
-            </p>
-          )}
+        )}
+
+        {/* Доверие и срок */}
+        <div className="mt-3 flex items-center justify-between text-[11px] text-ink/50 font-medium">
+          <span className="flex items-center gap-1 font-semibold text-mint-dark">
+            <span>✓ {trustPercent}%</span>
+            <span>работает</span>
+          </span>
+          <span>
+            {promocode.expires
+              ? `до ${formatExpires(promocode.expires)}`
+              : "актуально сегодня"}
+          </span>
         </div>
 
-        {/* Социальное доказательство и обратная связь */}
-        <div className="mt-3 flex items-center justify-between rounded-xl bg-paper px-3 py-2 text-xs">
-          {vote === "up" ? (
-            <div className="flex items-center gap-1.5 font-bold text-mint">
-              <span>👍</span>
-              <span>Вы подтвердили, что код работает!</span>
-            </div>
-          ) : vote === "down" ? (
-            <div className="flex items-center gap-1.5 font-semibold text-ink/70">
-              <span>🛠</span>
-              <span>Спасибо, мы перепроверим условия!</span>
-            </div>
-          ) : (
-            <>
-              <span className="text-[11px] font-medium text-ink/60">
-                Сработал? <span className="font-bold text-ink">{trustPercent}% да</span>
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => handleVote("up")}
-                  className="flex items-center gap-1 rounded-lg border border-line bg-white px-2 py-1 text-[11px] font-bold text-ink transition-colors hover:border-mint hover:text-mint"
-                  title="Промокод сработал"
-                >
-                  👍 Да
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleVote("down")}
-                  className="flex items-center gap-1 rounded-lg border border-line bg-white px-2 py-1 text-[11px] font-bold text-ink transition-colors hover:border-red hover:text-red"
-                  title="Промокод не сработал"
-                >
-                  👎 Нет
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-
-        {coupon.extraLinks.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {coupon.extraLinks.map((link) => (
-              <a
-                key={link.link}
-                href={link.link}
-                target="_blank"
-                rel="nofollow sponsored noopener"
-                className="rounded-full border border-line px-3 py-1 text-xs font-bold text-ink/70 hover:border-ink transition-colors"
-              >
-                {link.title}
-              </a>
-            ))}
-          </div>
+        {/* Маркировка рекламы (вторичный серый слой) */}
+        {affiliate.ordText && (
+          <p className="mt-2 text-center text-[9px] text-ink/35 line-clamp-1">
+            {affiliate.ordText}
+          </p>
         )}
       </div>
 
-      {showBarcode && promocode.barcodeImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 p-4"
-          onClick={() => setShowBarcode(false)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="rounded-2xl bg-white p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={promocode.barcodeImage}
-              alt={`Штрихкод ${store.name}`}
-              className="max-h-[60vh] max-w-[80vw]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowBarcode(false)}
-              className="mt-4 w-full rounded-full bg-ink py-2.5 text-sm font-bold text-white"
-            >
-              Закрыть
-            </button>
-          </div>
-        </div>
-      )}
-
+      {/* Всплывающий Тост-уведомление */}
       {toast && (
         <div
           role="status"
@@ -380,14 +243,14 @@ export default function CouponTicket({
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mint text-sm font-black text-ink shadow-sm">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mint text-sm font-black text-ink">
                 ✓
               </span>
               <div>
                 <div className="text-[11px] font-bold uppercase tracking-wider text-mint">
-                  Код скопирован! Магазин открыт в новой вкладке
+                  Код скопирован! Магазин открыт
                 </div>
-                <div className="font-display text-base font-extrabold tracking-wide text-white">
+                <div className="font-display text-base font-extrabold text-white">
                   {promocode.code}
                 </div>
               </div>
@@ -395,54 +258,14 @@ export default function CouponTicket({
             <button
               type="button"
               onClick={() => setToast(false)}
-              className="text-xs font-bold text-white/40 hover:text-white transition-colors p-1"
-              aria-label="Закрыть"
+              className="text-xs font-bold text-white/40 hover:text-white p-1"
             >
               ✕
             </button>
           </div>
-
-          <div className="mt-3 border-t border-white/10 pt-2.5">
-            <p className="text-xs text-white/80">
-              💡 Вставьте код <span className="font-mono font-bold text-yellow">{promocode.code}</span> в поле промокода в корзине <span className="font-bold text-white">{store.name}</span>.
-            </p>
-            <p className="mt-1 text-[11px] text-white/60">
-              Свежие секретные промокоды выходят в нашем Telegram-канале:
-            </p>
-            <a
-              href="https://t.me/smart_zakupka"
-              target="_blank"
-              rel="noopener nofollow"
-              className="mt-2.5 flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-red to-red-dark py-2 text-center text-xs font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
-            >
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-                <path d="M21.94 4.4a1.5 1.5 0 0 0-2.05-.93L3.4 10.6c-.9.36-.85 1.67.07 1.96l4.14 1.3 1.72 5.29c.34 1.05 1.68 1.25 2.34.35l2.06-2.82a.5.5 0 0 1 .6-.13l4.66 2.16c.86.4 1.87-.2 1.88-1.1l.55-14.08a1 1 0 0 0-.44-.8Z" />
-              </svg>
-              Подписаться на скидки в Telegram →
-            </a>
+          <div className="mt-2.5 border-t border-white/10 pt-2 text-xs text-white/80">
+            💡 Вставьте промокод в корзине <span className="font-bold text-white">{store.name}</span> при оплате.
           </div>
-        </div>
-      )}
-
-      {isDetailPage && !promocode.isBarcode && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white px-4 py-3 pb-safe md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-          <button
-            type="button"
-            onClick={() => copyAndOpen(promocode.code, targetUrl)}
-            className={`w-full rounded-xl py-3.5 text-sm font-bold shadow-sm transition-all ${
-              copied
-                ? "bg-mint text-white"
-                : "bg-yellow text-ink active:scale-[0.98]"
-            }`}
-          >
-            {copied ? (
-              <span className="flex items-center justify-center gap-2">
-                <CheckIcon className="h-4 w-4" /> Код скопирован! Магазин открыт →
-              </span>
-            ) : (
-              `Скопировать код и открыть ${store.name} →`
-            )}
-          </button>
         </div>
       )}
     </article>

@@ -317,7 +317,7 @@ export default function CouponGrid({
           </button>
         </div>
       ) : (
-        <div ref={gridRef} className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal-stagger">
+        <div ref={gridRef} className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 reveal-stagger">
           {filtered.map((coupon) => (
             <CouponTicket
               key={`${coupon.id}-${coupon.promocode.code}`}

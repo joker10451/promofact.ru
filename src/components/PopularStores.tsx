@@ -8,46 +8,61 @@ export default async function PopularStores() {
   } catch {
     stores = [];
   }
-  const top = stores.slice(0, 12);
+  const top = stores.slice(0, 10);
   if (top.length === 0) return null;
 
   return (
-    <section aria-label="Популярные магазины" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
-      <h2 className="font-display text-2xl font-extrabold sm:text-3xl">
-        Популярные магазины
-      </h2>
-      <p className="mt-3 max-w-2xl text-ink/60">
-        Промокоды проверены сегодня. Нажмите, чтобы открыть страницу магазина
-        и скопировать код.
-      </p>
-      <div className="mt-6 flex flex-wrap gap-3">
-        {top.map((s) => (
+    <section aria-label="Популярные магазины" className="py-12 sm:py-16 border-t border-line">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
+              🔥 Популярные магазины
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-ink/60 font-medium">
+              Скидки и промокоды в любимых сервисах
+            </p>
+          </div>
           <Link
-            key={s.slug}
-            href={`/store/${s.slug}`}
-            className="group flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm font-bold text-ink transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_0_rgba(11,16,43,0.08)]"
+            href="/promokody"
+            className="text-xs sm:text-sm font-bold text-red hover:text-red-dark transition-colors whitespace-nowrap"
           >
-            {s.logo ? (
-              <img
-                src={s.logo}
-                alt={s.name}
-                width={20}
-                height={20}
-                className="h-5 w-5 rounded object-contain"
-              />
-            ) : null}
-            <span className="group-hover:text-red transition-colors">{s.name}</span>
-            <span className="text-xs font-normal text-ink/40">
-              {s.coupons.length}
-            </span>
+            Все бренды ({stores.length}) →
           </Link>
-        ))}
-        <Link
-          href="/store"
-          className="rounded-full border border-red/30 bg-red/5 px-4 py-2 text-sm font-bold text-red transition-colors hover:bg-red/10"
-        >
-          Все магазины →
-        </Link>
+        </div>
+
+        {/* Сетка брендовых карточек */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          {top.map((s) => (
+            <Link
+              key={s.slug}
+              href={`/store/${s.slug}`}
+              className="group flex flex-col items-center justify-center rounded-2xl border border-line bg-white p-5 text-center shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-ink/30 hover:shadow-md"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-paper p-2 border border-line/60 group-hover:scale-105 transition-transform">
+                {s.logo ? (
+                  <img
+                    src={s.logo}
+                    alt={s.name}
+                    width={40}
+                    height={40}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <span className="font-display text-lg font-black text-ink">
+                    {s.name[0]}
+                  </span>
+                )}
+              </div>
+              <span className="mt-3 block font-display text-sm font-bold text-ink group-hover:text-red transition-colors truncate max-w-full">
+                {s.name}
+              </span>
+              <span className="mt-0.5 text-xs font-semibold text-mint-dark">
+                {s.coupons.length} {s.coupons.length === 1 ? "промокод" : s.coupons.length < 5 ? "промокода" : "промокодов"}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
