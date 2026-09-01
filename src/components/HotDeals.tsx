@@ -74,12 +74,18 @@ export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
             </div>
           </div>
 
-          {/* Индикатор ежедневной синхронизации */}
-          <div className="flex items-center gap-2 self-start sm:self-auto rounded-xl border border-line bg-white px-3.5 py-1.5 text-xs font-bold text-ink shadow-2xs">
-            <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
-            <span className="text-ink/60 font-medium">Синхронизация через:</span>
-            <span className="font-mono text-sm font-black text-ink">
-              {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
+          {/* Раньше здесь было «Синхронизация через: 04:25:39» — техножаргон,
+              который читался как таймер сгорающей акции. Теперь просто
+              говорим, когда обновится подборка. */}
+          <div className="flex items-center gap-2 self-start sm:self-auto rounded-xl border border-line bg-white px-3.5 py-1.5 text-xs font-medium text-ink/60 shadow-2xs">
+            <span className="h-2 w-2 rounded-full bg-mint" />
+            <span>
+              Подборка обновится через{" "}
+              <span className="font-bold text-ink">
+                {timeLeft.hours === "00"
+                  ? `${Number(timeLeft.minutes)} мин`
+                  : `${Number(timeLeft.hours)} ч`}
+              </span>
             </span>
           </div>
         </div>

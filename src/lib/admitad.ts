@@ -3,10 +3,14 @@ import { translit } from "@/lib/translit";
 import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Coupon, Store, Promocode, Affiliate } from "@/lib/types";
 
-const DEFAULT_ADMITAD_XML_URL =
-  "https://export.admitad.com/ru/webmaster/websites/2990501/coupons/export/?code=jdskmibwva&user=ilia_pisklov6ed68&region=00&format=xml&v=1";
-
-const ADMITAD_FEED_URL = process.env.ADMITAD_FEED_URL || DEFAULT_ADMITAD_XML_URL;
+/**
+ * URL выгрузки задаётся только переменной окружения.
+ *
+ * Раньше здесь лежал рабочий адрес с параметром `code` и логином аккаунта —
+ * в публичном репозитории это выдача доступа к фиду кому угодно. Значения
+ * по умолчанию нет намеренно: без переменной источник просто отключается.
+ */
+const ADMITAD_FEED_URL = process.env.ADMITAD_FEED_URL ?? "";
 
 export function isAdmitadConfigured(): boolean {
   return Boolean(ADMITAD_FEED_URL);
@@ -241,7 +245,14 @@ let lastFetchTime = 0;
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 минут
 
 export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
-  if (!isAdmitadConfigured()) return [];
+  if (!isAdmitadConfigured()) {
+    // Громко, а не молча: без этой переменной купоны Admitad просто пропадут
+    // с витрины, и по тихому пустому массиву причину не найти.
+    console.warn(
+      "[admitad] ADMITAD_FEED_URL не задан — источник отключён, купоны Admitad не загружаются",
+    );
+    return [];
+  }
 
   const now = Date.now();
   if (admitadCache && now - lastFetchTime < CACHE_TTL_MS) {

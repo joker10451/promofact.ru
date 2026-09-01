@@ -28,6 +28,12 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Прежняя подсказка «Найти магазин или промокод (Отелло, Ив Роше,
+  // Пятёрочка...)» на мобильном обрезалась на полуслове — «Найти магазин ил».
+  // Короткая помещается на любом экране, примеры магазинов и так стоят
+  // чипами прямо под полем.
+  const placeholder = "Магазин или код";
+
   const query = q.trim().toLowerCase();
 
   const matchedStores = query
@@ -112,7 +118,7 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
                   setQ(e.target.value);
                   setIsOpen(true);
                 }}
-                placeholder="Найти магазин или промокод (Отелло, Ив Роше, Пятёрочка...)"
+                placeholder={placeholder}
                 className="h-16 w-full rounded-2xl border-2 border-ink/15 bg-white pl-14 pr-32 text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
               />
               <button

@@ -286,7 +286,7 @@ export default function ChatHelper() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Открыть помощника"
-        className="fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-red text-2xl text-white shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-[72px] right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-red text-2xl text-white shadow-lg transition-transform hover:scale-105 sm:bottom-4"
       >
         {open ? "×" : "💬"}
       </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 declare global {
   interface Window {
@@ -25,32 +25,31 @@ interface YandexAdBlockProps {
  * Отображается только при наличии валидного ID рекламного блока (не заглушки).
  */
 export default function YandexAdBlock({ blockId, className = "" }: YandexAdBlockProps) {
-  const [mounted, setMounted] = useState(false);
+  // Блок настроен, если id реальный, а не плейсхолдер из примера.
+  const isConfigured = Boolean(
+    blockId && !blockId.includes("1234567") && blockId.startsWith("R-A-"),
+  );
+  const containerId = blockId ? `yandex_rtb_${blockId.replace(/-/g, "_")}` : "";
 
+  // Все хуки вызываются безусловно и до любого return: раньше этот useEffect
+  // стоял ПОСЛЕ раннего `return null`, и при смене blockId порядок хуков
+  // менялся — React падает с ошибкой «change in the order of Hooks».
+  // Отдельное состояние mounted не нужно: эффекты и так идут только на клиенте.
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Если блок не настроен или содержит плейсхолдер 1234567 — ничего не рендерим
-  if (!blockId || blockId.includes("1234567") || !blockId.startsWith("R-A-")) {
-    return null;
-  }
-
-  const containerId = `yandex_rtb_${blockId.replace(/-/g, "_")}`;
-
-  useEffect(() => {
-    if (!mounted) return;
+    if (!isConfigured) return;
 
     window.yaContextCb = window.yaContextCb || [];
     window.yaContextCb.push(() => {
       if (window.Ya?.Context?.AdvManager) {
         window.Ya.Context.AdvManager.render({
-          blockId,
+          blockId: blockId as string,
           renderTo: containerId,
         });
       }
     });
-  }, [mounted, blockId, containerId]);
+  }, [isConfigured, blockId, containerId]);
+
+  if (!isConfigured) return null;
 
   return (
     <div className={`my-4 flex w-full items-center justify-center overflow-hidden text-center transition-all ${className}`}>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 import "./globals.css";
 import YandexMetrika from "@/components/YandexMetrika";
+import YandexAds from "@/components/YandexAds";
 import ChatHelper from "@/components/ChatHelper";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import TelegramWebAppInit from "@/components/TelegramWebAppInit";
@@ -105,13 +106,15 @@ export default function RootLayout({
           content="65f662ae-8b60-472f-bb3c-d5c04488f5ce"
         />
         <script src="https://telegram.org/js/telegram-web-app.js" async defer />
+        {/* Очередь колбэков РСЯ объявляем сразу — это просто массив.
+            Сам context.js грузит <YandexAds /> и только после согласия. */}
         <script>window.yaContextCb=window.yaContextCb||[]</script>
-        <script src="https://yandex.ru/ads/system/context.js" async defer />
       </head>
-      <body className="min-h-full flex flex-col bg-paper text-ink font-sans pb-14 md:pb-0">
+      <body className="min-h-full flex flex-col bg-paper text-ink font-sans pb-16 md:pb-0">
         <ScrollProgress />
         <TelegramWebAppInit />
         <YandexMetrika />
+        <YandexAds />
         <ChatHelper />
         <DiscountWheel />
         <PushNotificationPrompt />

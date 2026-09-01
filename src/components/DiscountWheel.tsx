@@ -144,7 +144,7 @@ export default function DiscountWheel() {
       {/* Плавающая аккуратная кнопка-виджет на экране */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-5 left-5 z-40 flex items-center gap-2 rounded-full border border-line bg-white/95 backdrop-blur px-3.5 py-2 text-xs font-extrabold text-ink shadow-[0_4px_16px_rgba(11,16,43,0.12)] transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+        className="fixed bottom-5 left-5 z-40 hidden items-center gap-2 rounded-full border border-line bg-white/95 px-3.5 py-2 text-xs font-extrabold text-ink shadow-[0_4px_16px_rgba(11,16,43,0.12)] transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 sm:flex"
         aria-label="Колесо скидок"
       >
         <span className="text-base">🎰</span>

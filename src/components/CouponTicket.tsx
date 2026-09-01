@@ -75,46 +75,50 @@ export default function CouponTicket({
     <article className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-xs">
       {/* 1. Верхняя строка: Логотип + Название + Бейджи */}
       <div>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            {logoSrc ? (
-              <img
-                src={logoSrc}
-                alt={store.name}
-                loading="lazy"
-                width={40}
-                height={40}
-                onError={() => setImgError(true)}
-                className="h-10 w-10 shrink-0 rounded-xl border border-line/60 bg-white object-contain p-1 shadow-2xs"
-              />
-            ) : (
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${brandMeta.bgGradient} ${brandMeta.textColor} shadow-2xs font-display text-base font-black`}
-              >
-                {brandMeta.emoji}
-              </div>
-            )}
-            <div className="min-w-0">
-              <h3 className="truncate font-display text-base font-bold text-ink group-hover:text-red transition-colors">
-                {store.name}
-              </h3>
-              <p className="text-xs text-ink/45 truncate font-medium">
-                {store.category}
-              </p>
+        {/* Название магазина занимает всю ширину строки: раньше его съедали
+            бейджи справа, и «Плати по миру» превращалось в «Плати …». */}
+        <div className="flex items-start gap-3">
+          {logoSrc ? (
+            <img
+              src={logoSrc}
+              alt={store.name}
+              loading="lazy"
+              width={40}
+              height={40}
+              onError={() => setImgError(true)}
+              className="h-10 w-10 shrink-0 rounded-xl border border-line/60 bg-white object-contain p-1 shadow-2xs"
+            />
+          ) : (
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${brandMeta.bgGradient} ${brandMeta.textColor} shadow-2xs font-display text-base font-black`}
+            >
+              {brandMeta.emoji}
             </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <h3
+              title={store.name}
+              className="font-display text-base font-bold leading-snug text-ink group-hover:text-red transition-colors line-clamp-2 [overflow-wrap:anywhere]"
+            >
+              {store.name}
+            </h3>
+            <p className="mt-0.5 text-xs font-medium text-ink/45 line-clamp-1">
+              {store.category}
+            </p>
           </div>
+        </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            {promocode.isHit && (
-              <span className="rounded-full bg-red/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-red">
-                🔥 Хит
-              </span>
-            )}
-            <span className="inline-flex items-center gap-1 rounded-full bg-mint/15 px-2.5 py-0.5 text-[10px] font-bold text-mint-dark">
-              <span className="h-1.5 w-1.5 rounded-full bg-mint animate-pulse" />
-              Проверен
+        {/* Бейджи вынесены под заголовок — так они не отнимают ширину у названия */}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          {promocode.isHit && (
+            <span className="rounded-full bg-red/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-red">
+              🔥 Хит
             </span>
-          </div>
+          )}
+          <span className="inline-flex items-center gap-1 rounded-full bg-mint/15 px-2.5 py-0.5 text-[10px] font-bold text-mint-dark">
+            <span className="h-1.5 w-1.5 rounded-full bg-mint" />
+            Проверен
+          </span>
         </div>
 
         {/* 2. ГЛАВНЫЙ АКЦЕНТ: Очищенная скидка и условие */}
@@ -122,7 +126,9 @@ export default function CouponTicket({
           <div className="font-display text-3xl sm:text-4xl font-black tracking-tight text-ink leading-none">
             {offer.discount}
           </div>
-          <p className="mt-2 text-xs sm:text-sm font-medium text-ink/75 line-clamp-1">
+          {/* Фиксированная высота нужна только в сетке, чтобы карточки были
+              одного роста; на узком экране колонка одна — там она даёт дыру. */}
+          <p className="mt-2 text-xs sm:text-sm font-medium text-ink/75 line-clamp-2 sm:min-h-[2.5rem]">
             {offer.condition}
           </p>
         </div>
@@ -178,7 +184,14 @@ export default function CouponTicket({
                   <CheckIcon className="h-4 w-4" /> Код скопирован! Магазин открыт →
                 </span>
               ) : (
-                <span className="truncate">Скопировать и открыть {store.name} →</span>
+                // На узких экранах длинное имя магазина обрезало всю подпись —
+                // там показываем короткий вариант, имя видно в заголовке карточки.
+                <>
+                  <span className="sm:hidden">Скопировать и перейти →</span>
+                  <span className="hidden sm:inline">
+                    Скопировать и открыть {store.name} →
+                  </span>
+                </>
               )}
             </button>
           </div>
@@ -186,9 +199,10 @@ export default function CouponTicket({
           <button
             type="button"
             onClick={() => copyAndOpen("", targetUrl)}
-            className="w-full rounded-xl bg-gradient-to-r from-red to-red-dark py-3 px-4 text-center text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer truncate"
+            className="w-full rounded-xl bg-gradient-to-r from-red to-red-dark py-3 px-4 text-center text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
           >
-            Получить скидку в {store.name} →
+            <span className="sm:hidden">Получить скидку →</span>
+            <span className="hidden sm:inline">Получить скидку в {store.name} →</span>
           </button>
         )}
 
