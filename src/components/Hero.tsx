@@ -9,6 +9,16 @@ interface HeroProps {
   featured?: Coupon;
   stores?: Array<Store & { coupons?: Coupon[] }>;
   coupons?: Coupon[];
+  proofTotal?: number;
+}
+
+/** Склонение «заказ/заказа/заказов». */
+function pluralOrders(n: number): string {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return "заказ";
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return "заказа";
+  return "заказов";
 }
 
 // Реальные актуальные магазины нашего сайта
@@ -23,7 +33,7 @@ const REAL_POPULAR_TAGS = [
   "FMART",
 ];
 
-export default function Hero({ stores = [], coupons = [] }: HeroProps) {
+export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: HeroProps) {
   const [q, setQ] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -201,7 +211,11 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
               ✓
             </span>
-            <span>Проверяем каждый день</span>
+            <span>
+              {proofTotal > 0
+                ? `${proofTotal} ${pluralOrders(proofTotal)} подтверждено`
+                : "Проверяем каждый день"}
+            </span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow/40 text-ink text-[11px]">

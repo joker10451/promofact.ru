@@ -63,6 +63,7 @@ export default async function Home() {
 
   const proofsByCode = Object.fromEntries(uses.usesByCode);
   const proofsByStore = Object.fromEntries(uses.usesByStore);
+  const proofTotal = Object.values(proofsByCode).reduce((a, b) => a + b, 0);
 
   return (
     <>
@@ -93,7 +94,7 @@ export default async function Home() {
 
       <main className="min-h-screen">
         {/* 2. Hero + ЕДИНСТВЕННЫЙ крупный поиск + Trust bar */}
-        <Hero stores={stores} coupons={coupons} />
+        <Hero stores={stores} coupons={coupons} proofTotal={proofTotal} />
 
         {/* 3. 🔥 Горит сегодня — Топ-3 супер-скидки с FOMO-таймером */}
         <Reveal>

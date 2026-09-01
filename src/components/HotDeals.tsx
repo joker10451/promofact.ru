@@ -85,12 +85,12 @@ export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
             </div>
           </div>
 
-          {/* Индикатор ежедневной синхронизации (никогда не показывает 00:00:00) */}
+          {/* Индикатор свежести подборки (не показываем 00:00:00) */}
           <div className="flex items-center gap-2 self-start sm:self-auto rounded-xl border border-line bg-white px-3.5 py-1.5 text-xs font-bold text-ink shadow-2xs">
             <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
-            <span className="text-ink/60 font-medium">Синхронизация:</span>
+            <span className="text-ink/60 font-medium">Свежие скидки, обновление через:</span>
             {isInvalidCountdown ? (
-              <span className="font-mono text-xs font-bold text-ink">сегодня в 00:00</span>
+              <span className="font-mono text-xs font-bold text-ink">уже сегодня</span>
             ) : (
               <span className="font-mono text-sm font-black text-ink">
                 {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
