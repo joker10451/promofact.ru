@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { formatExpires } from "@/lib/format";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import { CheckIcon } from "@/components/CheckIcon";
+import { getBrandMeta } from "@/lib/brandLogos";
 import type { Coupon } from "@/lib/types";
 
 export default function CouponTicket({
@@ -21,6 +22,9 @@ export default function CouponTicket({
   const [toast, setToast] = useState(false);
   const [imgError, setImgError] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const brandMeta = getBrandMeta(store.slug, store.name, store.site);
+  const logoSrc = (!imgError && (store.logo || brandMeta.logoUrl)) || null;
 
   const copyAndOpen = (code: string, url: string) => {
     // 1. Синхронное открытие ссылки магазина
@@ -100,7 +104,6 @@ export default function CouponTicket({
     const pctMatch = raw.match(/(\d+\s*%)/);
     if (pctMatch) {
       const pct = pctMatch[1].replace(/\s/g, "");
-      // Очищаем хвост от повторения процентов и мусора
       let cleaned = raw
         .replace(new RegExp(`(скидка\\s+)?(до\\s+)?[-−]?\\s*${pctMatch[1]}`, "gi"), "")
         .replace(/^(на|в|от|при)\s+\d+\s*%/gi, "")
@@ -170,20 +173,22 @@ export default function CouponTicket({
       <div>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            {store.logo && !imgError ? (
+            {logoSrc ? (
               <img
-                src={store.logo}
+                src={logoSrc}
                 alt={store.name}
                 loading="lazy"
-                width={38}
-                height={38}
+                width={40}
+                height={40}
                 onError={() => setImgError(true)}
-                className="h-10 w-10 shrink-0 rounded-xl border border-line bg-paper object-contain p-1"
+                className="h-10 w-10 shrink-0 rounded-xl border border-line/60 bg-white object-contain p-1 shadow-2xs"
               />
             ) : (
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow font-display text-sm font-black text-ink">
-                {store.name.slice(0, 1).toUpperCase()}
-              </span>
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${brandMeta.bgGradient} ${brandMeta.textColor} shadow-2xs font-display text-base font-black`}
+              >
+                {brandMeta.emoji}
+              </div>
             )}
             <div className="min-w-0">
               <h3 className="truncate font-display text-base font-bold text-ink group-hover:text-red transition-colors">
