@@ -149,7 +149,10 @@ export function parseAdmitadXml(xml: string): Coupon[] {
 let admitadCache: Coupon[] | null = null;
 let lastFetchTime = 0;
 let pendingFetch: Promise<Coupon[]> | null = null;
-const CACHE_TTL_MS = 2 * 60 * 1000; // 2 минуты для быстрого появления новых промокодов
+// Фид Admitad ~65 МБ (52k купонов). Next.js Data Cache не хранит элементы >2 МБ,
+// поэтому next.revalidate фактически не работает — реальный кэш это модульный
+// admitadCache. TTL 15 мин: фид меняется разы в день, а докачка 65 МБ дорогая.
+const CACHE_TTL_MS = 15 * 60 * 1000;
 
 export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
   if (!isAdmitadConfigured()) return [];
