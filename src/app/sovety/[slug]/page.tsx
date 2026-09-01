@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
-import YandexAdBlock from "@/components/YandexAdBlock";
+import CouponTicket from "@/components/CouponTicket";
 import { ARTICLES, getArticle } from "@/lib/articles";
+import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
 export const revalidate = 1800;
@@ -46,6 +47,24 @@ export default async function ArticlePage({
   const { slug } = await params;
   const article = getArticle(slug);
   if (!article) notFound();
+
+  const [allCoupons, uses] = await Promise.all([getCoupons(), getUsesStats()]);
+
+  // Подбираем 2-3 релевантных промокода по теме статьи
+  const relevantCoupons = (() => {
+    const textToMatch = `${article.title} ${article.description} ${article.slug}`.toLowerCase();
+    const matches = allCoupons.filter((c) => {
+      const storeName = c.store.name.toLowerCase();
+      const catName = c.store.category.toLowerCase();
+      return textToMatch.includes(storeName) || textToMatch.includes(catName);
+    });
+
+    if (matches.length >= 2) return matches.slice(0, 3);
+
+    // Если точных совпадений мало, дополняем топовыми проверенными хитами
+    const hits = allCoupons.filter((c) => c.promocode.isHit && !matches.some((m) => m.id === c.id));
+    return [...matches, ...hits].slice(0, 3);
+  })();
 
   const moreArticles = ARTICLES.filter((a) => a.slug !== slug).slice(0, 3);
 
@@ -102,7 +121,7 @@ export default async function ArticlePage({
             <span className="mx-2" aria-hidden="true">
               /
             </span>
-            <span aria-current="page" className="text-ink truncate max-w-[200px] inline-block align-bottom">
+            <span aria-current="page" className="truncate">
               {article.title}
             </span>
           </nav>
@@ -131,12 +150,39 @@ export default async function ArticlePage({
               ))}
             </div>
 
+            {/* SEO Воронка: Встроенные рабочие промокоды по теме статьи */}
+            {relevantCoupons.length > 0 && (
+              <div className="mt-10 pt-8 border-t border-line">
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🔥</span>
+                    <h2 className="font-display text-lg sm:text-xl font-bold text-ink">
+                      Рабочие промокоды по теме статьи
+                    </h2>
+                  </div>
+                  <span className="text-xs font-bold text-mint-dark bg-mint/10 px-2.5 py-1 rounded-full">
+                    Проверены сегодня
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {relevantCoupons.map((c) => (
+                    <CouponTicket
+                      key={c.id}
+                      coupon={c}
+                      proofCount={uses.usesByCode.get(c.promocode.code) ?? 0}
+                      storeProofCount={uses.usesByStore.get(c.store.id) ?? 0}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Внутренние ссылки на промокоды */}
             {article.related.length > 0 && (
               <div className="mt-8 rounded-2xl bg-yellow/15 border border-yellow/50 p-5">
                 <div className="font-display text-sm font-bold text-ink mb-3 flex items-center gap-2">
                   <span>🏷</span>
-                  <span>Скидки и промокоды по теме:</span>
+                  <span>Смотрите также скидки по магазинам:</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {article.related.map((r) => (
@@ -208,7 +254,7 @@ export default async function ArticlePage({
               href="/"
               className="text-xs font-bold text-red hover:underline"
             >
-              В каталог промокодов →
+              На главную →
             </Link>
           </div>
         </div>

@@ -1,3 +1,5 @@
+import { extractMinimumOrder } from "@/lib/admitadNormalizer";
+
 /**
  * Модуль семантической очистки и обогащения условий акций (Offer Refiner).
  * Превращает сырые обрывки и опечатки из CPA-фидов в понятный, красивый русский текст.
@@ -20,114 +22,188 @@ export function refineOffer(
   const title = (rawTitle || "").trim();
   const terms = (rawTerms || "").trim();
   const isNoCode = !code || code.trim() === "";
+  const combined = `${title} ${terms}`;
 
-  // 1. Фиксированные спец-предложения
-  if (isNoCode) {
-    if (/60\s*дней|плюс/i.test(title)) {
-      return {
-        discount: "60 дней за 1 ₽",
-        condition: "подписка Яндекс Плюс и Кинопоиск для новых пользователей",
-        fullTerms: "60 дней бесплатного доступа к сервисам Яндекс Плюс, затем 299 ₽/мес. Отмена подписки в любой момент в личном кабинете.",
-        isNoCode: true,
-      };
-    }
+  const minOrder = extractMinimumOrder(combined);
+
+  // 1. Фиксированные спец-предложения и подписки (СберПрайм, Яндекс Плюс)
+  if (/60\s*дней|подписк\w*\s+(плюс|кинопоиск|яндекс|сбер)/i.test(title) && !/(\d+)\s*%/.test(title)) {
+    const isSber = /сбер/i.test(title) || /сбер/i.test(terms) || /сбер/i.test(storeName);
     return {
-      discount: title.length > 28 ? title.slice(0, 28) + "…" : title || "Скидка",
-      condition: "акция действует по ссылке без ввода кода",
-      fullTerms: terms || "Перейдите в магазин по кнопке, скидка применится автоматически в корзине.",
-      isNoCode: true,
+      discount: "60 дней за 1 ₽",
+      condition: isSber
+        ? "подписка СберПрайм для новых пользователей"
+        : "подписка Яндекс Плюс и Кинопоиск для новых пользователей",
+      fullTerms:
+        terms ||
+        (isSber
+          ? "Оформите пробный период СберПрайм 60 дней за 1 ₽ при переходе по ссылке."
+          : "60 дней бесплатного доступа к сервисам Яндекс Плюс, затем стандартная цена."),
+      isNoCode,
     };
   }
 
-  // 2. Подарки к заказу
-  if (/подарок|ролл|фото|пицца|подвеск/i.test(title) || /подарок|ролл|фото/i.test(terms)) {
-    let giftTitle = "🎁 Подарок к заказу";
-    if (/ролл/i.test(title) || /ролл/i.test(terms)) giftTitle = "🎁 Ролл в подарок";
-    else if (/фото/i.test(title)) giftTitle = "🎁 50 фото в подарок";
-    else if (/подвеск/i.test(title)) giftTitle = "🎁 Подвеска в подарок";
-    else if (/пицц/i.test(title)) giftTitle = "🎁 Пицца в подарок";
+  // 2. Комбинация: Скидка (%) + Подарок (например, Кинопоиск 50% + 60 дней)
+  const pctMatch = title.match(/(\d+)\s*%/) || terms.match(/(\d+)\s*%/);
+  const isGiftInText =
+    /подарок|ролл|фото|пицца|подвеск|gift|в\s+подарок/i.test(title) ||
+    /подарок|ролл|фото|пицца|подвеск|в\s+подарок/i.test(terms);
 
-    const thresholdMatch = (title + " " + terms).match(/от\s+([\d\s]+)\s*₽/i);
-    const condition = thresholdMatch
-      ? `при заказе от ${thresholdMatch[1].trim()} ₽`
+  if (pctMatch && isGiftInText) {
+    const val = parseInt(pctMatch[1], 10);
+    let condition = cleanConditionText(title, pctMatch[0]);
+    if (!condition || condition.length < 3) {
+      if (/60\s*дней/i.test(title) || /60\s*дней/i.test(terms)) {
+        condition = "+ 60 дней подписки в подарок";
+      } else if (terms.startsWith("+")) {
+        condition = terms;
+      } else {
+        condition = "+ подарок к заказу";
+      }
+    }
+    return {
+      discount: `−${val}%`,
+      condition: condition.startsWith("+") || condition.startsWith("на") || condition.startsWith("при") ? condition : `+ ${condition}`,
+      fullTerms: terms || `Скидка ${val}% и подарок при оформлении заказа.`,
+      isNoCode,
+    };
+  }
+
+  // 3. Подарки к заказу (Gift) — срабатывает если нет процентной скидки
+  if (isGiftInText) {
+    let giftTitle = "🎁 Подарок к заказу";
+
+    if (/фреш\s*ролл/i.test(title) || /ролл\s+с\s+креветкой/i.test(title) || /ролл\s+с\s+креветкой/i.test(terms)) {
+      giftTitle = "🎁 Ролл с креветкой и авокадо в подарок";
+    } else if (/ролл/i.test(title) || /ролл/i.test(terms)) {
+      giftTitle = "🎁 Ролл в подарок";
+    } else if (/50\s*фото/i.test(title) || /50\s*фото/i.test(terms)) {
+      giftTitle = "🎁 50 фото в подарок";
+    } else if (/фото/i.test(title) || /фото/i.test(terms)) {
+      giftTitle = "🎁 50 фото в подарок";
+    } else if (/подвеск/i.test(title) || /подвеск/i.test(terms)) {
+      giftTitle = "🎁 Подвеска в подарок";
+    } else if (/пицц/i.test(title) || /пицц/i.test(terms)) {
+      giftTitle = "🎁 Пицца в подарок";
+    } else if (title.startsWith("🎁")) {
+      giftTitle = title;
+    }
+
+    const condition = minOrder
+      ? `При заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
+      : isFirstOrder
+      ? "на первый заказ"
       : "по промокоду при оформлении заказа";
 
     return {
       discount: giftTitle,
       condition,
-      fullTerms: terms || `Добавьте товары в корзину и введите промокод ${code} для получения подарка к заказу.`,
-      isNoCode: false,
+      fullTerms:
+        terms ||
+        `Добавьте товары в корзину и примените предложение для получения подарка к заказу в ${storeName}.`,
+      isNoCode,
     };
   }
 
-  // 3. Процентные скидки
-  const pctMatch = title.match(/(\d+\s*%)/);
+  // 4. Процентные скидки
   if (pctMatch) {
-    const pct = pctMatch[1].replace(/\s/g, "");
+    const val = parseInt(pctMatch[1], 10);
     let cleaned = cleanConditionText(title, pctMatch[1]);
+    if (!cleaned || cleaned.length < 3) {
+      cleaned = cleanConditionText(terms, pctMatch[1]);
+    }
 
-    if (!cleaned || cleaned === "!" || cleaned.length < 3) {
+    if (minOrder) {
+      cleaned = `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+    } else if (!cleaned || cleaned === "!" || cleaned.length < 3) {
       cleaned = isFirstOrder ? "на первый заказ" : "на весь ассортимент";
     }
 
     return {
-      discount: `−${pct}`,
+      discount: `−${val}%`,
       condition: formatConditionPrefix(cleaned),
-      fullTerms: terms || `Скидка ${pct} применяется в корзине при вводе промокода ${code}.`,
-      isNoCode: false,
+      fullTerms: terms || `Скидка ${val}% применяется в корзине при оформлении заказа.`,
+      isNoCode,
     };
   }
 
-  // 4. Фиксированные скидки в рублях
-  const rubMatch = title.match(/(\d+[\s\d]*\s*₽|\d+[\s\d]*\s*р\b|\d+[\s\d]*\s*руб)/i);
-  if (rubMatch) {
-    const rubNum = rubMatch[1].replace(/[^\d]/g, "").trim();
-    let cleaned = cleanConditionText(title, rubMatch[1]);
+  // 5. Фиксированные скидки в рублях
+  const rubMatch =
+    title.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб)/i) ||
+    title.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб)/i) ||
+    terms.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб)/i) ||
+    terms.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб)/i);
 
-    if (!cleaned || cleaned === "!" || cleaned.length < 3) {
+  if (rubMatch) {
+    const rubVal = parseInt(rubMatch[1].replace(/\s/g, ""), 10);
+    const formattedRub = rubVal.toLocaleString("ru-RU").replace(/\s/g, " ") + " ₽";
+    let cleaned = cleanConditionText(title, rubMatch[0]);
+    if (!cleaned || cleaned.length < 3) {
+      cleaned = cleanConditionText(terms, rubMatch[0]);
+    }
+
+    if (minOrder && minOrder.value !== rubVal) {
+      cleaned = `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+    } else if (!cleaned || cleaned === "!" || cleaned.length < 3) {
       cleaned = isFirstOrder ? "на первый заказ" : "на заказ по акции";
     }
 
     return {
-      discount: `−${rubNum} ₽`,
+      discount: `−${formattedRub}`,
       condition: formatConditionPrefix(cleaned),
-      fullTerms: terms || `Скидка ${rubNum} ₽ активируется при оформлении заказа с промокодом ${code}.`,
-      isNoCode: false,
+      fullTerms: terms || `Скидка ${formattedRub} активируется при оформлении заказа в ${storeName}.`,
+      isNoCode,
     };
   }
 
-  // 5. Бонусы / баллы
-  const bonusMatch = title.match(/(\d+[\s\d]*)\s*(бонусов|баллов)/i);
+  // 6. Бонусы / баллы
+  const bonusMatch = title.match(/(\d+[\s\d]*)\s*(бонусов|баллов)/i) || terms.match(/(\d+[\s\d]*)\s*(бонусов|баллов)/i);
   if (bonusMatch) {
+    const val = parseInt(bonusMatch[1].replace(/\s/g, ""), 10);
     return {
-      discount: `+${bonusMatch[1].trim()} бонусов`,
-      condition: "на оплату заказов",
-      fullTerms: terms || `Начисление ${bonusMatch[1].trim()} бонусов при активации промокода ${code}.`,
-      isNoCode: false,
+      discount: `+${val} бонусов`,
+      condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : "на оплату заказов",
+      fullTerms: terms || `Начисление ${val} бонусов при оформлении заказа в ${storeName}.`,
+      isNoCode,
+    };
+  }
+
+  // 7. Дефолтный переход по ссылке без кода
+  if (isNoCode) {
+    return {
+      discount: title.length > 28 ? title.slice(0, 28) + "…" : title || "Скидка",
+      condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : "акция действует по ссылке без ввода кода",
+      fullTerms: terms || "Перейдите в магазин по кнопке, скидка применится автоматически в корзине.",
+      isNoCode: true,
     };
   }
 
   return {
     discount: title.length > 24 ? title.slice(0, 24) + "…" : title || "Скидка",
-    condition: isFirstOrder ? "на первый заказ" : "по промокоду",
+    condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : isFirstOrder ? "на первый заказ" : "по промокоду",
     fullTerms: terms || `Промокод ${code} действует в интернет-магазине ${storeName}.`,
     isNoCode: false,
   };
 }
 
 /**
- * Очистка сырого текста условий от мусора
+ * Очистка сырого текста условий от мусора и опечаток
  */
-function cleanConditionText(raw: string, matchedPart: string): string {
-  return raw
-    .replace(new RegExp(`(скидка\\s+)?(до\\s+)?[-−]?\\s*${matchedPart}`, "gi"), "")
+function cleanConditionText(raw: string, matchedPart?: string): string {
+  if (!raw) return "";
+  let text = raw;
+  if (matchedPart) {
+    text = text.replace(new RegExp(`(скидка\\s+)?(до\\s+)?[-−]?\\s*${matchedPart}`, "gi"), "");
+  }
+  return text
     .replace(/^(на|в|от|при)\s+\d+[\s\d]*(%|₽|р|руб)/gi, "")
     .replace(/^(скидка|минус|до|на|в|от|[,\s–—-])+/gi, "")
     .replace(/\(\s*\)/g, "") // удаление пустых скобок ()
     .replace(/не суммируется с другими акциями.*$/i, "")
     .replace(/скидка\s+\d+\s*(rub|руб|₽)/gi, "")
     .replace(/discount\s+sitewide/gi, "на весь ассортимент")
-    .replace(/на се\b/gi, "на все") // исправление частой опечатки «на се антивирусы»
+    .replace(/на се\b/gi, "на все") // исправление опечатки «на се антивирусы»
+    .replace(/для всех пользователей при.*$/i, "")
     .replace(/[,\s–—-]+$/g, "")
     .trim();
 }
@@ -135,10 +211,11 @@ function cleanConditionText(raw: string, matchedPart: string): string {
 /**
  * Добавление корректного предлога
  */
-function formatConditionPrefix(text: string): string {
-  if (!text) return "на заказ";
-  if (/^(на|при|от|в|для|\+)\s+/i.test(text)) {
-    return text;
+function formatConditionPrefix(str: string): string {
+  const trimmed = str.trim();
+  if (!trimmed) return "на заказ";
+  if (/^(на|в|при|для|от|свыше|\+)/i.test(trimmed)) {
+    return trimmed;
   }
-  return `на ${text}`;
+  return `на ${trimmed}`;
 }

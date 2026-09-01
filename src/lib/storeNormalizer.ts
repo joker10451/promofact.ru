@@ -131,6 +131,31 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
     category: "Сервисы и подписки",
     categorySlug: "servisy-i-podpiski",
   },
+  "fmart": {
+    name: "FMART",
+    category: "Цветы",
+    categorySlug: "tsvety",
+  },
+  "yandeks-puteshestviya": {
+    name: "Яндекс Путешествия",
+    category: "Путешествия и туризм",
+    categorySlug: "puteshestviya-i-turizm",
+  },
+  "yandex-travel": {
+    name: "Яндекс Путешествия",
+    category: "Путешествия и туризм",
+    categorySlug: "puteshestviya-i-turizm",
+  },
+  "sberprime": {
+    name: "СберПрайм",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+  },
+  "agni": {
+    name: "Agni",
+    category: "Все для дома",
+    categorySlug: "vse-dlya-doma",
+  },
 };
 
 /**

@@ -4,160 +4,181 @@
  */
 
 export interface BrandMeta {
-  logoUrl?: string;
+  logoUrl: string;
   emoji: string;
   bgGradient: string;
   textColor: string;
-  domain?: string;
+  domain: string;
 }
 
 export const BRAND_REGISTRY: Record<string, BrandMeta> = {
   "pyaterochka": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://5dostavka.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/5ka.ru",
     emoji: "🛒",
     bgGradient: "from-red-600 to-red-700",
     textColor: "text-white",
-    domain: "5dostavka.ru",
+    domain: "5ka.ru",
   },
   "otello": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://otello.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/otello.ru",
     emoji: "🏨",
     bgGradient: "from-blue-600 to-indigo-700",
     textColor: "text-white",
     domain: "otello.ru",
   },
   "kinopoisk": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://kinopoisk.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/kinopoisk.ru",
     emoji: "🎬",
     bgGradient: "from-amber-500 to-orange-600",
     textColor: "text-white",
     domain: "kinopoisk.ru",
   },
   "yandeks-tsvety": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://market.yandex.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/market.yandex.ru",
     emoji: "🌷",
     bgGradient: "from-pink-500 to-rose-600",
     textColor: "text-white",
     domain: "market.yandex.ru",
   },
   "yandeks-puteshestviya": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://travel.yandex.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/travel.yandex.ru",
     emoji: "✈️",
     bgGradient: "from-sky-500 to-blue-600",
     textColor: "text-white",
     domain: "travel.yandex.ru",
   },
   "yandeks-prokat-ru": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://travel.yandex.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/travel.yandex.ru",
     emoji: "🚗",
     bgGradient: "from-yellow-400 to-amber-500",
     textColor: "text-ink",
     domain: "travel.yandex.ru",
   },
   "iv-roshe": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://yves-rocher.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/yves-rocher.ru",
     emoji: "🌿",
     bgGradient: "from-emerald-700 to-green-800",
     textColor: "text-white",
     domain: "yves-rocher.ru",
   },
   "vazhnaya-ryba": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://vipfish.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/vipfish.ru",
     emoji: "🍣",
     bgGradient: "from-rose-500 to-red-600",
     textColor: "text-white",
     domain: "vipfish.ru",
   },
   "fix-price": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://fix-price.com?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/fix-price.com",
     emoji: "🏠",
     bgGradient: "from-green-500 to-emerald-600",
     textColor: "text-white",
     domain: "fix-price.com",
   },
   "netprint": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://netprint.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/netprint.ru",
     emoji: "📸",
     bgGradient: "from-rose-400 to-pink-500",
     textColor: "text-white",
     domain: "netprint.ru",
   },
   "pro32-com": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://pro32.com?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/pro32.com",
     emoji: "🛡",
     bgGradient: "from-cyan-600 to-blue-700",
     textColor: "text-white",
     domain: "pro32.com",
   },
   "itab-ru": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://itab.pro?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/itab.pro",
     emoji: "💊",
     bgGradient: "from-teal-500 to-emerald-600",
     textColor: "text-white",
     domain: "itab.pro",
   },
   "polzaru": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://polza.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/polza.ru",
     emoji: "➕",
     bgGradient: "from-blue-500 to-indigo-600",
     textColor: "text-white",
     domain: "polza.ru",
   },
   "sinergiya-angliyskiy": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://synergy.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/synergy.ru",
     emoji: "🎓",
     bgGradient: "from-red-600 to-rose-700",
     textColor: "text-white",
     domain: "synergy.ru",
   },
   "patch-and-go": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://patchandgo.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/patchandgo.ru",
     emoji: "✨",
     bgGradient: "from-amber-400 to-pink-500",
     textColor: "text-white",
     domain: "patchandgo.ru",
   },
   "plati-po-miru": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://platipomiru.com?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/platipomiru.com",
     emoji: "💳",
     bgGradient: "from-violet-600 to-purple-800",
     textColor: "text-white",
     domain: "platipomiru.com",
   },
   "irnby": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://ironbymironova.com?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/ironbymironova.com",
     emoji: "👕",
     bgGradient: "from-neutral-800 to-black",
     textColor: "text-white",
     domain: "ironbymironova.com",
   },
   "fmart-by-flowwow": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://flowwow.com?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/flowwow.com",
+    emoji: "🌸",
+    bgGradient: "from-pink-400 to-rose-500",
+    textColor: "text-white",
+    domain: "flowwow.com",
+  },
+  "fmart": {
+    logoUrl: "https://favicon.yandex.net/favicon/flowwow.com",
     emoji: "🌸",
     bgGradient: "from-pink-400 to-rose-500",
     textColor: "text-white",
     domain: "flowwow.com",
   },
   "davines": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://davines.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/davines.ru",
     emoji: "🧴",
     bgGradient: "from-stone-700 to-stone-900",
     textColor: "text-white",
     domain: "davines.ru",
   },
   "yamdiet": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://yamdiet.com?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/yamdiet.com",
     emoji: "🥗",
     bgGradient: "from-lime-500 to-green-600",
     textColor: "text-white",
     domain: "yamdiet.com",
   },
   "sberprime": {
-    logoUrl: "https://favicon.yandex.net/favicon/v2/https://sberbank.ru?size=64",
+    logoUrl: "https://favicon.yandex.net/favicon/sberbank.ru",
     emoji: "💚",
     bgGradient: "from-emerald-500 to-green-600",
     textColor: "text-white",
     domain: "sberbank.ru",
+  },
+  "yandex-travel": {
+    logoUrl: "https://favicon.yandex.net/favicon/travel.yandex.ru",
+    emoji: "✈️",
+    bgGradient: "from-sky-500 to-blue-600",
+    textColor: "text-white",
+    domain: "travel.yandex.ru",
+  },
+  "agni": {
+    logoUrl: "https://favicon.yandex.net/favicon/agnistore.ru",
+    emoji: "🕯",
+    bgGradient: "from-amber-600 to-orange-700",
+    textColor: "text-white",
+    domain: "agnistore.ru",
   },
 };
 
@@ -177,8 +198,8 @@ export function getBrandMeta(storeSlug: string, storeName: string, domain?: stri
   }
 
   const logoUrl = cleanDomain
-    ? `https://favicon.yandex.net/favicon/v2/https://${cleanDomain}?size=64`
-    : undefined;
+    ? `https://favicon.yandex.net/favicon/${cleanDomain}`
+    : "https://favicon.yandex.net/favicon/yandex.ru";
 
   // Динамический градиент на основе хэша имени
   const gradients = [

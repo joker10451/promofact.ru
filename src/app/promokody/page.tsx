@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
+import StoreLogo from "@/components/StoreLogo";
 import { getStores } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { currentMonthYear, getMaxDiscount } from "@/lib/seoArticles";
@@ -77,22 +78,19 @@ export default async function PromokodyIndexPage() {
           return (
             <Link
               key={store.slug}
-              href={`/promokody/${store.slug}`}
+              href={`/store/${store.slug}`}
               className="group flex items-start gap-4 rounded-2xl border border-line bg-white p-5 transition-all hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(11,16,43,0.08)]"
             >
-              {store.logo ? (
-                <img
-                  src={store.logo}
-                  alt={store.name}
-                  width={48}
-                  height={48}
-                  className="flex-none rounded-xl border border-line/50 object-contain"
+              <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl border border-line/50 bg-white p-1 shadow-2xs">
+                <StoreLogo
+                  slug={store.slug}
+                  name={store.name}
+                  logo={store.logo}
+                  site={store.site}
+                  size={40}
+                  className="max-h-full max-w-full object-contain"
                 />
-              ) : (
-                <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-ink/5 font-display text-lg font-extrabold text-ink/30">
-                  {store.name.charAt(0)}
-                </div>
-              )}
+              </div>
               <div className="min-w-0 flex-1">
                 <h2 className="truncate font-display text-base font-extrabold group-hover:text-red transition-colors">
                   {store.name}

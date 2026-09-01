@@ -225,7 +225,7 @@ export default function CouponGrid({
             Купоны на сегодня
           </h2>
           <p className="text-xs sm:text-sm text-ink/60 font-medium">
-            Сгруппированы по магазинам с гарантией актуальности
+            {groupedStoreList.length} магазинов · {filteredCoupons.length} проверенных промокодов и акций
           </p>
         </div>
 
@@ -314,30 +314,33 @@ export default function CouponGrid({
             }`}
           >
             <span>🏷 Все направления</span>
-            <span className={`text-[10px] font-normal ${filter === "all" ? "text-white/70" : "text-ink/40"}`}>
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${filter === "all" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>
               {coupons.length}
             </span>
           </button>
-          {cats.map(({ slug, name }) => (
-            <button
-              key={slug}
-              type="button"
-              onClick={() => setFilter(slug)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                filter === slug
-                  ? "bg-ink text-white shadow-2xs"
-                  : "text-ink/70 hover:bg-paper hover:text-ink"
-              }`}
-            >
-              <span className="flex items-center gap-2 truncate">
-                <span>{CATEGORY_ICONS[slug] || "🏷"}</span>
-                <span className="truncate">{name}</span>
-              </span>
-              <span className={`text-[10px] font-normal shrink-0 ${filter === slug ? "text-white/70" : "text-ink/40"}`}>
-                {countByCat(slug)}
-              </span>
-            </button>
-          ))}
+          {cats.map(({ slug, name }) => {
+            const count = countByCat(slug);
+            return (
+              <button
+                key={slug}
+                type="button"
+                onClick={() => setFilter(slug)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  filter === slug
+                    ? "bg-ink text-white shadow-2xs"
+                    : "text-ink/70 hover:bg-paper hover:text-ink"
+                }`}
+              >
+                <span className="flex items-center gap-2 truncate">
+                  <span>{CATEGORY_ICONS[slug] || "🏷"}</span>
+                  <span className="truncate">{name}</span>
+                </span>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${filter === slug ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </aside>
 
         {/* Правая часть: Фильтры и Masonry сетка купонов */}
@@ -429,12 +432,12 @@ export default function CouponGrid({
             </div>
           ) : (
             <>
-              <div className="columns-1 md:columns-2 gap-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 {groupedStoreList.slice(0, visibleLimit).map(({ store, primaryCoupon, otherCoupons }) => {
                   const isExpanded = !!expandedStores[store.id];
 
                   return (
-                    <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5">
+                    <div key={store.id} className="flex flex-col gap-2.5">
                       {/* Главная карточка с лучшим предложением */}
                       <CouponTicket
                         coupon={primaryCoupon}

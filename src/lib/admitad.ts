@@ -1,10 +1,15 @@
-import "server-only";
-import { translit } from "@/lib/translit";
-import { normalizeStore } from "@/lib/storeNormalizer";
-import type { Coupon, Store, Promocode, Affiliate } from "@/lib/types";
+import {
+  stripHtml,
+  normalizeAdmitadCoupon,
+  validateOffer,
+  deduplicateOffers,
+  toCoupon,
+} from "@/lib/admitadNormalizer";
+import type { RawAdmitadCoupon, NormalizedOffer } from "@/lib/admitadTypes";
+import type { Coupon } from "@/lib/types";
 
 const DEFAULT_ADMITAD_XML_URL =
-  "https://export.admitad.com/ru/webmaster/websites/2990501/coupons/export/?code=jdskmibwva&user=ilia_pisklov6ed68&region=00&format=xml&v=1";
+  "https://export.admitad.com/ru/webmaster/websites/2990501/coupons/export/?code=jdskmibwva&user=ilia_pisklov6ed68&format=xml";
 
 const ADMITAD_FEED_URL = process.env.ADMITAD_FEED_URL || DEFAULT_ADMITAD_XML_URL;
 
@@ -12,233 +17,139 @@ export function isAdmitadConfigured(): boolean {
   return Boolean(ADMITAD_FEED_URL);
 }
 
-function str(v: unknown): string {
-  return typeof v === "string" ? v : "";
-}
-
-function stripHtml(v: unknown): string {
-  return str(v)
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 /**
- * Категории Admitad маппим в понятные русские категории ПромоФакта
+ * 1. Парсинг XML выгрузки Admitad в список RAW-купонов без потерь
+ * Поддерживает как компактный формат атрибутов (<coupon id="123">), так и полный теговый (<coupon><id>123</id>)
  */
-const CATEGORY_MAP: Record<string, string> = {
-  "18": "Сервисы и подписки",
-  "62": "Маркетплейсы",
-  "64": "Одежда и обувь",
-  "65": "Бытовая техника и электроника",
-  "66": "Все для дома",
-  "67": "Косметика и парфюмерия",
-  "69": "Детские товары",
-  "72": "Цветы и подарки",
-  "85": "Спорт и отдых",
-  "89": "Хобби и канцтовары",
-  "92": "Автотовары",
-  "93": "Сервисы и подписки",
-  "96": "Маркетплейсы",
-  "98": "Онлайн-образование",
-  "102": "Продукты и доставка",
-  "122": "Сервисы и подписки",
-  "257": "Сервисы и подписки",
-  "382": "Маркетплейсы",
-};
-
-/**
- * Проверка на иностранный спам и сырые нелокализованные дампы
- */
-function isForeignJunk(name: string, terms: string, storeSlug: string): boolean {
-  const text = `${name} ${terms}`.toLowerCase();
-  if (
-    /artículo|sconti|descuento|hasta\s+\d|dernières|tendances|vendedores|varan\s+indirimler|super\s+ofertas|choice\s*-\s*3|us\s+new\s+user|us\s+warehouse|do\s+brasil|articoli\s+per|best\s+aliexpress|sitewide|timeless\s*&\s*chic|bonus\s+time/i.test(
-      text,
-    )
-  ) {
-    return true;
-  }
-
-  // Зарубежные магазины без доставки и адаптации в РФ
-  if (/applicantally|sitpack|openhagen|noon|indiwd|alibaba/i.test(storeSlug)) {
-    return true;
-  }
-
-  // Если в описании нет ни одной кириллической буквы и это не глобальный ИТ-сервис
-  const hasCyrillic = /[а-яё]/i.test(text);
-  if (!hasCyrillic && !text.includes("pro32") && !text.includes("itab")) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Парсинг XML выгрузки Admitad Coupons & Deals
- */
-export function parseAdmitadXml(xml: string): Coupon[] {
+export function parseRawAdmitadXml(xml: string): RawAdmitadCoupon[] {
   try {
-    // 1. Извлекаем рекламодателей
     const campaigns = new Map<
       string,
-      { name: string; site: string; categoryId: string }
+      {
+        id: number;
+        name: string;
+        site: string;
+        categories: string[];
+      }
     >();
-    const campRegex = /<advcampaign id="(\d+)">([\s\S]*?)<\/advcampaign>/g;
-    let match: RegExpExecArray | null;
 
-    while ((match = campRegex.exec(xml)) !== null) {
-      const id = match[1];
-      const body = match[2];
+    // Парсинг рекламодателей (поддерживает оба формата)
+    const advRegex = /<advcampaign(?:\s+id="(\d+)")?>([\s\S]*?)<\/advcampaign>/g;
+    let advMatch;
+    while ((advMatch = advRegex.exec(xml)) !== null) {
+      const body = advMatch[2];
+      const idTag = (body.match(/<id>(\d+)<\/id>/) || [])[1];
+      const campIdStr = advMatch[1] || idTag;
+      if (!campIdStr) continue;
+
+      const campId = parseInt(campIdStr, 10);
       const name = (body.match(/<name>(.*?)<\/name>/) || [])[1] || "";
       const site = (body.match(/<site>(.*?)<\/site>/) || [])[1] || "";
-      const catMatch = body.match(/<category_id>(\d+)<\/category_id>/);
-      const categoryId = catMatch ? catMatch[1] : "62";
-      campaigns.set(id, {
+
+      const cats: string[] = [];
+      const catRegex = /<category(?:\s+id="\d+")?>(.*?)<\/category>/g;
+      let cMatch;
+      while ((cMatch = catRegex.exec(body)) !== null) {
+        cats.push(cMatch[1]);
+      }
+
+      campaigns.set(campIdStr, {
+        id: campId,
         name: stripHtml(name),
         site: stripHtml(site),
-        categoryId,
+        categories: cats,
       });
     }
 
-    // 2. Извлекаем купоны
-    const coupons: Coupon[] = [];
-    const seenCodes = new Set<string>();
-    const storeCount = new Map<string, number>();
-    const coupRegex = /<coupon id="(\d+)">([\s\S]*?)<\/coupon>/g;
+    const rawCoupons: RawAdmitadCoupon[] = [];
+    const couponRegex = /<coupon(?:\s+id="(\d+)")?>([\s\S]*?)<\/coupon>/g;
+    let cMatch;
 
-    while ((match = coupRegex.exec(xml)) !== null) {
-      const id = parseInt(match[1], 10);
-      const body = match[2];
+    while ((cMatch = couponRegex.exec(xml)) !== null) {
+      const body = cMatch[2];
+      const idTag = (body.match(/<id>(\d+)<\/id>/) || [])[1];
+      const couponIdStr = cMatch[1] || idTag;
+      if (!couponIdStr) continue;
+
+      const id = parseInt(couponIdStr, 10);
+      const campIdTag = (body.match(/<campaign_id>(\d+)<\/campaign_id>/) || [])[1];
+      const advcampIdTag = (body.match(/<advcampaign_id>(\d+)<\/advcampaign_id>/) || [])[1];
+      const campId = campIdTag || advcampIdTag || "";
+      const camp = campaigns.get(campId);
+
+      const promocode = (body.match(/<promocode>(.*?)<\/promocode>/) || [])[1] || null;
       const name = (body.match(/<name>(.*?)<\/name>/) || [])[1] || "";
-      const campId =
-        (body.match(/<advcampaign_id>(.*?)<\/advcampaign_id>/) || [])[1] || "";
-      const logo = (body.match(/<logo>(.*?)<\/logo>/) || [])[1] || "";
-      const promocode =
-        (body.match(/<promocode>(.*?)<\/promocode>/) || [])[1] || "";
-      const gotolink =
-        (body.match(/<gotolink>(.*?)<\/gotolink>/) || [])[1] || "";
-      const dateEnd =
-        (body.match(/<date_end>(.*?)<\/date_end>/) || [])[1] || "";
-      const discount =
-        (body.match(/<discount>(.*?)<\/discount>/) || [])[1] || "";
-      const customerType =
-        (body.match(/<customer_type>(.*?)<\/customer_type>/) || [])[1] || "";
-      const terms =
-        (body.match(/<description>(.*?)<\/description>/) || [])[1] || "";
+      const shortDesc = (body.match(/<short_name>(.*?)<\/short_name>/) || [])[1] || "";
+      const desc = (body.match(/<description>(.*?)<\/description>/) || [])[1] || "";
+      const discount = (body.match(/<discount>(.*?)<\/discount>/) || [])[1] || null;
+      const species = (body.match(/<species>(.*?)<\/species>/) || [])[1] || "promocode";
+      const status = (body.match(/<status>(.*?)<\/status>/) || [])[1] || "active";
+      const dateStart = (body.match(/<date_start>(.*?)<\/date_start>/) || [])[1] || null;
+      const dateEnd = (body.match(/<date_end>(.*?)<\/date_end>/) || [])[1] || null;
+      const gotoLink = (body.match(/<goto_link>(.*?)<\/goto_link>/) || [])[1] || "";
+      const logo = (body.match(/<logo>(.*?)<\/logo>/) || [])[1] || null;
+      const customerType = (body.match(/<customer_type>(.*?)<\/customer_type>/) || [])[1] || "all";
 
-      const cleanPromo =
-        promocode.trim() === "Not required" ? "" : promocode.trim();
-      const cleanName = stripHtml(name);
-      const cleanTerms = stripHtml(terms);
-
-      const camp = campaigns.get(campId) || {
-        name: "Магазин",
-        site: "",
-        categoryId: "62",
-      };
-
-      const rawStoreName = camp.name || "Магазин";
-      const rawStoreSlug = translit(rawStoreName) || "magazin";
-
-      // Фильтруем иностранный мусор и нелокализованные дампы
-      if (isForeignJunk(cleanName, cleanTerms, rawStoreSlug)) {
-        continue;
-      }
-      const norm = normalizeStore(rawStoreName, rawStoreSlug, CATEGORY_MAP[camp.categoryId]);
-
-      const storeName = norm.name;
-      const storeSlug = rawStoreSlug;
-      const categoryName = norm.category;
-      const categorySlug = norm.categorySlug;
-
-      // Ограничиваем количество предложений от одного зарубежного магазина (макс 3)
-      const currentStoreCoupons = storeCount.get(storeSlug) || 0;
-      if ((storeSlug.includes("aliexpress") || storeSlug.includes("alibaba")) && currentStoreCoupons >= 2) {
-        continue;
-      }
-      storeCount.set(storeSlug, currentStoreCoupons + 1);
-
-      // Извлечение erid из gotolink
-      const eridMatch = gotolink.match(/erid=([a-zA-Z0-9_-]+)/);
-      const erid = eridMatch ? eridMatch[1] : "";
-
-      let bonusName = cleanName;
-      if (discount && !cleanName.includes(discount)) {
-        bonusName = `${cleanName} (скидка ${discount})`;
+      const cats: string[] = [];
+      const catRegex = /<category(?:\s+id="\d+")?>(.*?)<\/category>/g;
+      let catMatch;
+      while ((catMatch = catRegex.exec(body)) !== null) {
+        cats.push(catMatch[1]);
       }
 
-      // Форматирование даты окончания
-      let expires: string | null = null;
-      if (dateEnd && dateEnd !== "None") {
-        const d = dateEnd.slice(0, 10);
-        if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
-          expires = d;
-        }
-      }
-
-      const store: Store = {
-        id: 90000 + (parseInt(campId, 10) || id % 10000),
-        name: storeName,
-        slug: storeSlug,
-        logo: logo || null,
-        category: categoryName,
-        categorySlug: categorySlug,
-        about: `${storeName} — официальный магазин-партнёр. Актуальные скидки и промокоды.`,
-        conditions: "Скидка применяется при переходе по ссылке и вводе промокода.",
-        site: camp.site || gotolink,
-        activeBloggers: 500,
-      };
-
-      const affiliate: Affiliate = {
-        link: gotolink.replace(/&amp;/g, "&"),
-        landingLink: gotolink.replace(/&amp;/g, "&"),
-        ordMarker: erid,
-        ordText: erid ? `Реклама. ${storeName}, erid: ${erid}` : `Реклама. ${storeName}`,
-      };
-
-      const promoObj: Promocode = {
+      rawCoupons.push({
         id,
-        code: cleanPromo,
-        bonusName,
-        terms: cleanTerms || cleanName,
-        expires,
-        isHit: Boolean(discount && (discount.includes("50%") || discount.includes("40%") || discount.includes("30%"))),
-        isUniversal: true,
-        isFirstOrderOnly: customerType.includes("new") || /перв/i.test(cleanName),
-        region: "RU",
-        isBarcode: false,
-        barcodeImage: null,
-        group: "admitad",
-      };
-
-      const dedupeKey = `${storeSlug}-${cleanPromo || id}`;
-      if (!seenCodes.has(dedupeKey)) {
-        seenCodes.add(dedupeKey);
-        coupons.push({
-          id,
-          promocode: promoObj,
-          store,
-          affiliate,
-          extraLinks: [],
-        });
-      }
+        advcampaignId: campId,
+        name: stripHtml(name),
+        promocode: promocode ? promocode.trim() : "",
+        gotolink: gotoLink ? gotoLink.trim() : "",
+        logo: logo ? logo.trim() : "",
+        dateStart,
+        dateEnd,
+        discount: discount ? stripHtml(discount) : "",
+        customerType,
+        description: stripHtml(desc),
+        speciesId: species,
+        types: [],
+        categories: cats.length > 0 ? cats : camp?.categories || [],
+        exclusive: false,
+        isTakeadsCoupon: false,
+        trackingPromocode: false,
+        hasAffiliateLink: Boolean(gotoLink),
+        rawCampaignName: camp?.name || "Магазин",
+        rawCampaignSite: camp?.site || "",
+      });
     }
 
-    return coupons;
+    return rawCoupons;
   } catch (e) {
-    console.error("[admitad] Ошибка парсинга XML Admitad:", e);
+    console.error("[admitad] Ошибка парсинга XML:", e);
     return [];
   }
 }
 
+/**
+ * 2. Полный цикл трансформации: RAW XML -> Normalized -> Validated -> Deduped -> Coupon[]
+ */
+export function parseAdmitadXml(xml: string): Coupon[] {
+  const rawCoupons = parseRawAdmitadXml(xml);
+  const normalized: NormalizedOffer[] = [];
+
+  for (const raw of rawCoupons) {
+    const offer = normalizeAdmitadCoupon(raw);
+    if (offer && validateOffer(offer)) {
+      normalized.push(offer);
+    }
+  }
+
+  const deduped = deduplicateOffers(normalized);
+  return deduped.map(toCoupon);
+}
+
 let admitadCache: Coupon[] | null = null;
 let lastFetchTime = 0;
-const CACHE_TTL_MS = 15 * 60 * 1000; // 15 минут
+let pendingFetch: Promise<Coupon[]> | null = null;
+const CACHE_TTL_MS = 2 * 60 * 1000; // 2 минуты для быстрого появления новых промокодов
 
 export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
   if (!isAdmitadConfigured()) return [];
@@ -248,29 +159,39 @@ export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
     return admitadCache;
   }
 
-  try {
-    const res = await fetch(ADMITAD_FEED_URL, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-        Accept: "application/xml,text/xml,*/*",
-      },
-      next: { revalidate: 1800 },
-    });
-
-    if (!res.ok) {
-      console.warn(`[admitad] Не удалось загрузить фид: ${res.status} ${res.statusText}`);
-      return admitadCache || [];
-    }
-
-    const text = await res.text();
-    const list = parseAdmitadXml(text);
-    console.log(`[admitad] Успешно загружено купонов после фильтрации качества: ${list.length}`);
-    admitadCache = list;
-    lastFetchTime = now;
-    return list;
-  } catch (e) {
-    console.error("[admitad] Ошибка запроса к фиду Admitad:", e);
-    return admitadCache || [];
+  if (pendingFetch) {
+    return pendingFetch;
   }
+
+  pendingFetch = (async () => {
+    try {
+      const res = await fetch(ADMITAD_FEED_URL, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+          Accept: "application/xml,text/xml,*/*",
+        },
+        next: { revalidate: 300 },
+      });
+
+      if (!res.ok) {
+        console.warn(`[admitad] Не удалось загрузить фид: ${res.status} ${res.statusText}`);
+        return admitadCache || [];
+      }
+
+      const text = await res.text();
+      const list = parseAdmitadXml(text);
+      console.log(`[admitad] Успешно загружено купонов после нормализации и валидации: ${list.length}`);
+      admitadCache = list;
+      lastFetchTime = Date.now();
+      return list;
+    } catch (e) {
+      console.error("[admitad] Ошибка запроса к фиду Admitad:", e);
+      return admitadCache || [];
+    } finally {
+      pendingFetch = null;
+    }
+  })();
+
+  return pendingFetch;
 }

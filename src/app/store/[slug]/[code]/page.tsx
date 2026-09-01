@@ -41,10 +41,11 @@ export async function generateMetadata({
   const title = `Промокод ${code} — ${store.name}: ${offer}`;
   const description = `Промокод ${code} для ${store.name}: ${offer}.${p.terms ? " " + p.terms : ""} Копируй и применяй при оплате.`;
   const pageUrl = `${SITE_URL}/store/${slug}/${code}`;
+  const parentStoreUrl = `${SITE_URL}/store/${slug}`;
   return {
     title,
     description: description.slice(0, 160),
-    alternates: { canonical: pageUrl },
+    alternates: { canonical: parentStoreUrl },
     openGraph: {
       title,
       description: description.slice(0, 160),

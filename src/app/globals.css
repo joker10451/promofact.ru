@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+:root {
+  --font-unbounded: "Unbounded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-golos: "Golos Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
 @theme {
   --color-ink: #0b102b;
   --color-ink-soft: #1c2345;

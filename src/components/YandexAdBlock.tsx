@@ -27,19 +27,15 @@ interface YandexAdBlockProps {
 export default function YandexAdBlock({ blockId, className = "" }: YandexAdBlockProps) {
   const [mounted, setMounted] = useState(false);
 
+  const isValidBlock = Boolean(blockId && !blockId.includes("1234567") && blockId.startsWith("R-A-"));
+  const containerId = isValidBlock ? `yandex_rtb_${blockId!.replace(/-/g, "_")}` : "";
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Если блок не настроен или содержит плейсхолдер 1234567 — ничего не рендерим
-  if (!blockId || blockId.includes("1234567") || !blockId.startsWith("R-A-")) {
-    return null;
-  }
-
-  const containerId = `yandex_rtb_${blockId.replace(/-/g, "_")}`;
-
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !isValidBlock || !blockId) return;
 
     window.yaContextCb = window.yaContextCb || [];
     window.yaContextCb.push(() => {
@@ -50,7 +46,11 @@ export default function YandexAdBlock({ blockId, className = "" }: YandexAdBlock
         });
       }
     });
-  }, [mounted, blockId, containerId]);
+  }, [mounted, isValidBlock, blockId, containerId]);
+
+  if (!isValidBlock) {
+    return null;
+  }
 
   return (
     <div className={`my-4 flex w-full items-center justify-center overflow-hidden text-center transition-all ${className}`}>

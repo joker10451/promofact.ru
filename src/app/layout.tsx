@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Golos_Text, Unbounded } from "next/font/google";
 import "./globals.css";
 import YandexMetrika from "@/components/YandexMetrika";
 import ChatHelper from "@/components/ChatHelper";
@@ -16,20 +15,6 @@ export const viewport: Viewport = {
   themeColor: "#FFE600",
   colorScheme: "light",
 };
-
-const unbounded = Unbounded({
-  variable: "--font-unbounded",
-  subsets: ["cyrillic", "latin"],
-  weight: "variable",
-  display: "swap",
-});
-
-const golos = Golos_Text({
-  variable: "--font-golos",
-  subsets: ["cyrillic", "latin"],
-  weight: "variable",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -75,12 +60,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="ru"
-      className={`${unbounded.variable} ${golos.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
+    <html lang="ru" className="h-full antialiased font-sans" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=Unbounded:wght@400;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
         <link rel="preconnect" href="https://mc.yandex.ru" />
         <link rel="dns-prefetch" href="https://mc.yandex.ru" />
         <link rel="preconnect" href="https://widget.perfluence.net" crossOrigin="anonymous" />
@@ -105,7 +92,7 @@ export default function RootLayout({
           content="65f662ae-8b60-472f-bb3c-d5c04488f5ce"
         />
         <script src="https://telegram.org/js/telegram-web-app.js" async defer />
-        <script>window.yaContextCb=window.yaContextCb||[]</script>
+        <script dangerouslySetInnerHTML={{ __html: "window.yaContextCb=window.yaContextCb||[]" }} />
         <script src="https://yandex.ru/ads/system/context.js" async defer />
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans pb-14 md:pb-0">

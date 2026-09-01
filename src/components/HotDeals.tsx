@@ -4,30 +4,38 @@ import { useEffect, useState } from "react";
 import CouponTicket from "@/components/CouponTicket";
 import type { Coupon } from "@/lib/types";
 
+function getCountdownTime(): { hours: string; minutes: string; seconds: string } | null {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  let diff = midnight.getTime() - now.getTime();
+  if (diff <= 0) {
+    midnight.setDate(midnight.getDate() + 1);
+    diff = midnight.getTime() - now.getTime();
+  }
+  if (diff <= 0) return null;
+
+  const h = Math.floor(diff / (1000 * 60 * 60));
+  const m = Math.floor((diff / (1000 * 60)) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+
+  return {
+    hours: String(h).padStart(2, "0"),
+    minutes: String(m).padStart(2, "0"),
+    seconds: String(s).padStart(2, "0"),
+  };
+}
+
 export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
-  const [timeLeft, setTimeLeft] = useState<{ hours: string; minutes: string; seconds: string }>({
-    hours: "00",
-    minutes: "00",
-    seconds: "00",
-  });
+  const [timeLeft, setTimeLeft] = useState<{ hours: string; minutes: string; seconds: string } | null>(
+    () => getCountdownTime()
+  );
 
   // Честный таймер до ночного обновления базы купонов
   useEffect(() => {
     const updateCountdown = () => {
-      const now = new Date();
-      const midnight = new Date();
-      midnight.setHours(24, 0, 0, 0);
-      const diff = Math.max(0, midnight.getTime() - now.getTime());
-
-      const h = Math.floor(diff / (1000 * 60 * 60));
-      const m = Math.floor((diff / (1000 * 60)) % 60);
-      const s = Math.floor((diff / 1000) % 60);
-
-      setTimeLeft({
-        hours: String(h).padStart(2, "0"),
-        minutes: String(m).padStart(2, "0"),
-        seconds: String(s).padStart(2, "0"),
-      });
+      const remaining = getCountdownTime();
+      setTimeLeft(remaining);
     };
 
     updateCountdown();
@@ -55,6 +63,9 @@ export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
 
   if (hotCoupons.length === 0) return null;
 
+  const isInvalidCountdown =
+    !timeLeft || (timeLeft.hours === "00" && timeLeft.minutes === "00" && timeLeft.seconds === "00");
+
   return (
     <section id="hot" className="scroll-mt-20 py-8 sm:py-12 border-b border-line bg-gradient-to-b from-white to-paper/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -74,13 +85,17 @@ export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
             </div>
           </div>
 
-          {/* Индикатор ежедневной синхронизации */}
+          {/* Индикатор ежедневной синхронизации (никогда не показывает 00:00:00) */}
           <div className="flex items-center gap-2 self-start sm:self-auto rounded-xl border border-line bg-white px-3.5 py-1.5 text-xs font-bold text-ink shadow-2xs">
             <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
-            <span className="text-ink/60 font-medium">Синхронизация через:</span>
-            <span className="font-mono text-sm font-black text-ink">
-              {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
-            </span>
+            <span className="text-ink/60 font-medium">Синхронизация:</span>
+            {isInvalidCountdown ? (
+              <span className="font-mono text-xs font-bold text-ink">сегодня в 00:00</span>
+            ) : (
+              <span className="font-mono text-sm font-black text-ink">
+                {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
+              </span>
+            )}
           </div>
         </div>
 

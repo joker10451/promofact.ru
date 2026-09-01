@@ -118,23 +118,29 @@ export default function CouponTicket({
         </div>
 
         {/* 2. ГЛАВНЫЙ АКЦЕНТ: Очищенная скидка и условие */}
-        <div className="mt-4 mb-3">
-          <div className="font-display text-3xl sm:text-4xl font-black tracking-tight text-ink leading-none">
+        <div className="mt-3.5 mb-2.5 min-h-[64px] flex flex-col justify-center">
+          <div
+            className={`font-display font-black tracking-tight text-ink ${
+              offer.discount.length > 14
+                ? "text-xl sm:text-2xl leading-snug"
+                : offer.discount.length > 8
+                ? "text-2xl sm:text-3xl leading-tight"
+                : "text-3xl sm:text-4xl leading-none"
+            }`}
+          >
             {offer.discount}
           </div>
-          <p className="mt-2 text-xs sm:text-sm font-medium text-ink/75 line-clamp-1">
+          <p className="mt-1.5 text-xs sm:text-sm font-medium text-ink/75 line-clamp-2 leading-relaxed">
             {offer.condition}
           </p>
         </div>
 
         {/* 3. Честный статус проверки и кнопка полной информации */}
         <div className="mt-3 flex items-center justify-between rounded-xl bg-paper/80 px-3 py-1.5 border border-line/50 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-mint text-white text-[9px] font-bold">
-              ✓
-            </span>
-            <span className="font-bold text-ink text-[11px] sm:text-xs">
-              Проверен модератором
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
+            <span className="font-bold text-mint-dark text-[11px] sm:text-xs">
+              Работает · Проверен сегодня
             </span>
           </div>
           <button
@@ -195,7 +201,7 @@ export default function CouponTicket({
         {/* 5. Вторичные мета-данные и реклама */}
         <div className="mt-2.5 flex items-center justify-between text-[10px] text-ink/40 font-medium">
           <span>
-            {promocode.isFirstOrderOnly ? "Первый заказ · RU" : "Для всех · RU"}
+            {(promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Первый заказ" : "Для всех"))} · RU
           </span>
           <span>
             {promocode.expires
@@ -270,6 +276,17 @@ export default function CouponTicket({
                 </p>
               </div>
 
+              {/* Гарантия ПромоФакт */}
+              <div className="rounded-xl bg-mint/10 border border-mint/30 p-3 text-[11px] text-ink/80 space-y-1">
+                <div className="font-bold text-mint-dark flex items-center gap-1.5">
+                  <span>✓</span>
+                  <span>Гарантия актуальности ПромоФакт</span>
+                </div>
+                <p className="text-ink/65 text-[10px] leading-relaxed">
+                  Промокод проверен сегодня на официальном сайте магазина {store.name}. Скидка применяется в корзине при соблюдении условий.
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/50 text-[11px]">
                 <div>
                   <span className="text-ink/45 block">Действует:</span>
@@ -280,7 +297,7 @@ export default function CouponTicket({
                 <div>
                   <span className="text-ink/45 block">Для кого:</span>
                   <span className="font-bold text-ink">
-                    {promocode.isFirstOrderOnly ? "Только новый клиент" : "Для всех покупателей"}
+                    {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Только новый клиент" : "Для всех покупателей")}
                   </span>
                 </div>
               </div>

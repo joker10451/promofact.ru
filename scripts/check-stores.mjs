@@ -1,7 +1,14 @@
-import fs from "fs";
+import { getStores, getCoupons } from "./src/lib/perfluence.js";
 
-const content = fs.readFileSync("src/lib/customCoupons.ts", "utf8");
-const names = [...content.matchAll(/name:\s*"([^"]+)"/g)].map((m) => m[1]);
-const unique = [...new Set(names)];
-console.log("Found stores in customCoupons.ts (" + unique.length + "):");
-console.log(unique.join(", "));
+async function main() {
+  const coupons = await getCoupons();
+  console.log("Total coupons from getCoupons():", coupons.length);
+  const stores = await getStores();
+  console.log("Total stores from getStores():", stores.length);
+  console.log(
+    "Store slugs:",
+    stores.map((s) => s.slug),
+  );
+}
+
+main().catch(console.error);

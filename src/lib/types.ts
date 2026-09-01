@@ -7,6 +7,8 @@ export interface Promocode {
   isHit: boolean;
   isUniversal: boolean;
   isFirstOrderOnly: boolean;
+  customerTypeLabel?: string | null;
+  minimumOrder?: { value: number; currency: string } | null;
   region: string | null;
   isBarcode: boolean;
   barcodeImage: string | null;

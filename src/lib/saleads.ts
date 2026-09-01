@@ -45,7 +45,7 @@ export function parseSaleadsPayload(jsonText: string): Coupon[] {
       if (!promoCode) continue;
 
       const rawStoreName = str(item.campaign_name || item.shop_name || item.name || item.store).trim() || "Магазин";
-      let rawSlug = translit(rawStoreName) || "magazin";
+      const rawSlug = translit(rawStoreName) || "magazin";
       const norm = normalizeStore(rawStoreName, rawSlug, str(item.category || item.category_name));
 
       const storeName = norm.name;

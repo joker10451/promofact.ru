@@ -194,53 +194,58 @@ async function devMockFallback(reason: string): Promise<Coupon[]> {
   return (await import("@/lib/mockCoupons")).DEV_MOCK_COUPONS;
 }
 
+let pendingPromise: Promise<Coupon[]> | null = null;
+
 async function fetchData(): Promise<Coupon[]> {
-  if (!isPerfluenceConfigured())
-    return devMockFallback("PERFLUENCE_WIDGET_URL не задан");
+  if (cache && !cacheFailed) return cache;
+  if (pendingPromise) return pendingPromise;
 
-  try {
-    const res = await fetch(WIDGET_URL, {
-      headers: { Accept: "application/json" },
-      next: { revalidate: REVALIDATE_SECONDS },
-    });
-    const text = await res.text();
-    if (!res.ok)
-      throw new Error(`Perfluence widget-json: ${res.status} ${res.statusText}`);
+  pendingPromise = (async () => {
+    if (!isPerfluenceConfigured())
+      return devMockFallback("PERFLUENCE_WIDGET_URL не задан");
 
-    const top = topLevelCount(text);
-    const coupons = parsePayload(text);
-    console.log(
-      "[perfluence] status:",
-      res.status,
-      "| верхний уровень элементов:",
-      top,
-      "| купонов после трансформации:",
-      coupons.length,
-    );
+    try {
+      const res = await fetch(WIDGET_URL, {
+        headers: { Accept: "application/json" },
+        next: { revalidate: REVALIDATE_SECONDS },
+      });
+      const text = await res.text();
+      if (!res.ok)
+        throw new Error(`Perfluence widget-json: ${res.status} ${res.statusText}`);
 
-    if (top > 0 && coupons.length === 0) {
+      const top = topLevelCount(text);
+      const coupons = parsePayload(text);
       console.log(
-        "[perfluence] первый элемент ответа:",
-        JSON.stringify(
-          (JSON.parse(text) as { data?: unknown[] }).data?.[0],
-        ).slice(0, 1200),
+        "[perfluence] status:",
+        res.status,
+        "| верхний уровень элементов:",
+        top,
+        "| купонов после трансформации:",
+        coupons.length,
       );
-      return devMockFallback("элементы есть, но трансформация дала 0");
+
+      if (top > 0 && coupons.length === 0) {
+        return devMockFallback("элементы есть, но трансформация дала 0");
+      }
+
+      if (coupons.length === 0)
+        return devMockFallback("API вернул пустой список купонов");
+
+      cache = coupons;
+      cacheFailed = false;
+      console.log(`[perfluence] реальные данные: ${coupons.length}`);
+      return cache;
+    } catch (e) {
+      console.error("[perfluence] fetch failed, отдаём кэш:", e);
+      cacheFailed = true;
+      if (cache) return cache;
+      return devMockFallback("запрос упал: " + (e as Error).message);
+    } finally {
+      pendingPromise = null;
     }
+  })();
 
-    if (coupons.length === 0)
-      return devMockFallback("API вернул пустой список купонов");
-
-    cache = coupons;
-    cacheFailed = false;
-    console.log(`[perfluence] реальные данные: ${coupons.length}`);
-    return cache;
-  } catch (e) {
-    console.error("[perfluence] fetch failed, отдаём кэш:", e);
-    cacheFailed = true;
-    if (cache) return cache;
-    return devMockFallback("запрос упал: " + (e as Error).message);
-  }
+  return pendingPromise;
 }
 
 function isActive(c: Coupon): boolean {
@@ -280,7 +285,13 @@ function byScore(a: Coupon, b: Coupon): number {
 
 /* ---------- публичное API ---------- */
 
-export async function getCoupons(): Promise<Coupon[]> {
+/**
+ * Полный, объединённый стек купонов из всех источников БЕЗ фильтра isActive.
+ * Используется для построения полного каталога магазинов (включая те, у которых
+ * сейчас нет активных купонов) — чтобы индексировать «промокод {магазин}» для
+ * магазинов, чей код временно истёк.
+ */
+async function fetchMergedCoupons(): Promise<Coupon[]> {
   const [perfluenceCoupons, admitadCoupons, saleadsCoupons, supabaseCoupons] = await Promise.all([
     fetchData(),
     (await import("@/lib/admitad")).fetchAdmitadCoupons(),
@@ -293,8 +304,11 @@ export async function getCoupons(): Promise<Coupon[]> {
   const customCodes = new Set([...customCoupons, ...supabaseCoupons].map((c) => c.promocode.code).filter(Boolean));
   const filteredPerfluence = perfluenceCoupons.filter((c) => !customCodes.has(c.promocode.code));
 
-  const all = [...filteredPerfluence, ...admitadCoupons, ...saleadsCoupons, ...customCoupons, ...supabaseCoupons];
-  return all.filter(isActive).sort(byScore);
+  return [...filteredPerfluence, ...admitadCoupons, ...saleadsCoupons, ...customCoupons, ...supabaseCoupons];
+}
+
+export async function getCoupons(): Promise<Coupon[]> {
+  return (await fetchMergedCoupons()).filter(isActive).sort(byScore);
 }
 
 export interface CategoryInfo {
@@ -357,6 +371,40 @@ export async function getStores(): Promise<StoreInfo[]> {
     }
   }
   for (const s of map.values()) s.coupons.sort(byScore);
+  return [...map.values()];
+}
+
+/**
+ * Полный каталог магазинов из всех источников, включая магазины, у которых
+ * сейчас нет активных купонов (их код временно истёк). Нужно, чтобы страницы
+ * «промокод {магазин}» индексировались даже когда промокод не действует в этот
+ * момент. Каждый магазин несёт свои активные купоны (возможно, пустой список).
+ */
+export async function getAllStores(): Promise<StoreInfo[]> {
+  const list = await fetchMergedCoupons();
+  const map = new Map<string, StoreInfo>();
+  for (const c of list) {
+    const key = c.store.slug;
+    const cur = map.get(key);
+    if (cur) {
+      cur.coupons.push(c);
+    } else {
+      map.set(key, {
+        id: c.store.id,
+        slug: c.store.slug,
+        name: c.store.name,
+        logo: c.store.logo,
+        category: c.store.category,
+        categorySlug: c.store.categorySlug,
+        about: c.store.about,
+        conditions: c.store.conditions,
+        site: c.store.site,
+        activeBloggers: c.store.activeBloggers,
+        coupons: [c],
+      });
+    }
+  }
+  for (const s of map.values()) s.coupons = s.coupons.filter(isActive).sort(byScore);
   return [...map.values()];
 }
 

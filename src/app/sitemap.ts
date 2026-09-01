@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getCategories, getCoupons, getStores } from "@/lib/perfluence";
+import { getCategories, getCoupons, getAllStores } from "@/lib/perfluence";
 import { ARTICLES } from "@/lib/articles";
 import { ACTIONS } from "@/lib/actions";
 import { CITIES_SEO } from "@/lib/citiesSeo";
@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [coupons, categories, stores] = await Promise.all([
     getCoupons(),
     getCategories(),
-    getStores(),
+    getAllStores(),
   ]);
   const today = new Date();
   const lastModified = coupons.reduce((max, c) => {
@@ -91,12 +91,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.7,
     },
-    ...stores.map((store) => ({
-      url: `${SITE_URL}/promokody/${store.slug}`,
-      lastModified: today,
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    })),
   ];
 
   return [...home, ...citiesMap, ...categoryMap, ...storeMap, ...couponMap, ...promokodyMap, ...tipsMap, ...actionsMap, ...miscMap];
