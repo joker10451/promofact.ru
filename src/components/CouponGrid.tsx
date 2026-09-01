@@ -157,7 +157,25 @@ export default function CouponGrid({
       storeMap.set(c.store.id, list);
     }
 
-    return Array.from(storeMap.values()).map((storeCoupons) => {
+    const PRIORITY_SLUGS = [
+      "pyaterochka",
+      "otello",
+      "kinopoisk",
+      "yandeks-tsvety",
+      "iv-roshe",
+      "vazhnaya-ryba",
+      "fix-price",
+      "netprint",
+      "pro32-com",
+      "itab-ru",
+      "sinergiya-angliyskiy",
+      "patch-and-go",
+      "polzaru",
+      "plati-po-miru",
+      "irnby",
+    ];
+
+    const result = Array.from(storeMap.values()).map((storeCoupons) => {
       const sorted = [...storeCoupons].sort((a, b) => {
         if (a.promocode.isHit && !b.promocode.isHit) return -1;
         if (!a.promocode.isHit && b.promocode.isHit) return 1;
@@ -170,7 +188,19 @@ export default function CouponGrid({
         otherCoupons: sorted.slice(1),
       };
     });
-  }, [filteredCoupons]);
+
+    if (sortBy === "hits") {
+      result.sort((a, b) => {
+        const aPri = PRIORITY_SLUGS.indexOf(a.store.slug);
+        const bPri = PRIORITY_SLUGS.indexOf(b.store.slug);
+        const aRank = aPri === -1 ? 999 : aPri;
+        const bRank = bPri === -1 ? 999 : bPri;
+        return aRank - bRank;
+      });
+    }
+
+    return result;
+  }, [filteredCoupons, sortBy]);
 
   const toggleExpand = (storeId: number) => {
     setExpandedStores((prev) => ({

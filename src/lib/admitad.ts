@@ -16,15 +16,6 @@ function str(v: unknown): string {
   return typeof v === "string" ? v : "";
 }
 
-function num(v: unknown): number {
-  if (typeof v === "number") return v;
-  if (typeof v === "string") {
-    const n = Number(v);
-    return Number.isFinite(n) ? n : 0;
-  }
-  return 0;
-}
-
 function stripHtml(v: unknown): string {
   return str(v)
     .replace(/<[^>]*>/g, " ")
@@ -61,6 +52,26 @@ const CATEGORY_MAP: Record<string, string> = {
 };
 
 /**
+ * Проверка на иностранный спам (испанский, итальянский, турецкий, португальский и пустые дампы)
+ */
+function isForeignJunk(name: string, terms: string): boolean {
+  const text = `${name} ${terms}`.toLowerCase();
+  if (
+    /artículo|sconti|descuento|hasta\s+\d|dernières|tendances|vendedores|varan\s+indirimler|super\s+ofertas|choice\s*-\s*3|us\s+new\s+user|us\s+warehouse|do\s+brasil|articoli\s+per|best\s+aliexpress/i.test(
+      text,
+    )
+  ) {
+    return true;
+  }
+  // Если в названии вообще нет ни одной русской буквы и нет конкретного промокода
+  const hasCyrillic = /[а-яё]/i.test(text);
+  const isEnglishOnly = !hasCyrillic;
+  if (isEnglishOnly && text.length < 15) return true;
+
+  return false;
+}
+
+/**
  * Парсинг XML выгрузки Admitad Coupons & Deals
  */
 export function parseAdmitadXml(xml: string): Coupon[] {
@@ -90,6 +101,7 @@ export function parseAdmitadXml(xml: string): Coupon[] {
     // 2. Извлекаем купоны
     const coupons: Coupon[] = [];
     const seenCodes = new Set<string>();
+    const storeCount = new Map<string, number>();
     const coupRegex = /<coupon id="(\d+)">([\s\S]*?)<\/coupon>/g;
 
     while ((match = coupRegex.exec(xml)) !== null) {
@@ -114,6 +126,14 @@ export function parseAdmitadXml(xml: string): Coupon[] {
 
       const cleanPromo =
         promocode.trim() === "Not required" ? "" : promocode.trim();
+      const cleanName = stripHtml(name);
+      const cleanTerms = stripHtml(terms);
+
+      // Фильтруем иностранный мусор и дампы без промокода
+      if (isForeignJunk(cleanName, cleanTerms)) {
+        continue;
+      }
+
       const camp = campaigns.get(campId) || {
         name: "Магазин",
         site: "",
@@ -129,11 +149,17 @@ export function parseAdmitadXml(xml: string): Coupon[] {
       const categoryName = norm.category;
       const categorySlug = norm.categorySlug;
 
+      // Ограничиваем количество предложений от одного зарубежного магазина (макс 3)
+      const currentStoreCoupons = storeCount.get(storeSlug) || 0;
+      if ((storeSlug.includes("aliexpress") || storeSlug.includes("alibaba")) && currentStoreCoupons >= 2) {
+        continue;
+      }
+      storeCount.set(storeSlug, currentStoreCoupons + 1);
+
       // Извлечение erid из gotolink
       const eridMatch = gotolink.match(/erid=([a-zA-Z0-9_-]+)/);
       const erid = eridMatch ? eridMatch[1] : "";
 
-      const cleanName = stripHtml(name);
       let bonusName = cleanName;
       if (discount && !cleanName.includes(discount)) {
         bonusName = `${cleanName} (скидка ${discount})`;
@@ -172,7 +198,7 @@ export function parseAdmitadXml(xml: string): Coupon[] {
         id,
         code: cleanPromo,
         bonusName,
-        terms: stripHtml(terms) || cleanName,
+        terms: cleanTerms || cleanName,
         expires,
         isHit: Boolean(discount && (discount.includes("50%") || discount.includes("40%") || discount.includes("30%"))),
         isUniversal: true,
@@ -183,7 +209,6 @@ export function parseAdmitadXml(xml: string): Coupon[] {
         group: "admitad",
       };
 
-      // Предотвращаем дубликаты одинаковых кодов внутри одного магазина
       const dedupeKey = `${storeSlug}-${cleanPromo || id}`;
       if (!seenCodes.has(dedupeKey)) {
         seenCodes.add(dedupeKey);
@@ -233,7 +258,7 @@ export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
 
     const text = await res.text();
     const list = parseAdmitadXml(text);
-    console.log(`[admitad] Успешно загружено купонов из фида: ${list.length}`);
+    console.log(`[admitad] Успешно загружено купонов после фильтрации качества: ${list.length}`);
     admitadCache = list;
     lastFetchTime = now;
     return list;

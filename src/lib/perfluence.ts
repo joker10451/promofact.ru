@@ -247,11 +247,35 @@ function isActive(c: Coupon): boolean {
   return dateTs(c.promocode.expires) >= Date.now();
 }
 
+const PRIORITY_STORES = [
+  "pyaterochka",
+  "otello",
+  "kinopoisk",
+  "yandeks-tsvety",
+  "iv-roshe",
+  "vazhnaya-ryba",
+  "fix-price",
+  "netprint",
+  "pro32-com",
+  "itab-ru",
+  "sinergiya-angliyskiy",
+  "patch-and-go",
+  "polzaru",
+  "plati-po-miru",
+  "irnby",
+];
+
 function byScore(a: Coupon, b: Coupon): number {
+  const aPri = PRIORITY_STORES.indexOf(a.store.slug);
+  const bPri = PRIORITY_STORES.indexOf(b.store.slug);
+  const aRank = aPri === -1 ? 999 : aPri;
+  const bRank = bPri === -1 ? 999 : bPri;
+  if (aRank !== bRank) return aRank - bRank;
+
   const ah = a.promocode.isHit ? 1 : 0;
   const bh = b.promocode.isHit ? 1 : 0;
-  if (ah !== bh) return ah - bh;
-  return dateTs(a.promocode.expires) - dateTs(b.promocode.expires);
+  if (ah !== bh) return bh - ah;
+  return (b.promocode.code ? 1 : 0) - (a.promocode.code ? 1 : 0);
 }
 
 /* ---------- публичное API ---------- */
