@@ -7,6 +7,7 @@ import {
 } from "@/lib/admitadNormalizer";
 import type { RawAdmitadCoupon, NormalizedOffer } from "@/lib/admitadTypes";
 import type { Coupon } from "@/lib/types";
+import { fetchAdmitadCouponsCached } from "@/lib/admitadSupabase";
 
 const DEFAULT_ADMITAD_XML_URL =
   "https://export.admitad.com/ru/webmaster/websites/2990501/coupons/export/?code=jdskmibwva&user=ilia_pisklov6ed68&format=xml";
@@ -154,6 +155,28 @@ let pendingFetch: Promise<Coupon[]> | null = null;
 // admitadCache. TTL 15 мин: фид меняется разы в день, а докачка 65 МБ дорогая.
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
+/** Фетч сырого фида Admitad + парсинг. Без Next-кэша: фид 65МБ не кэшируется (>2МБ), а модульный admitadCache — реальный кэш. */
+export async function fetchAndParseAdmitadFeed(): Promise<Coupon[]> {
+  // next.revalidate (а не no-store): держит статический пререндер /store, /category.
+  // Даже если Next не закэширует 65МБ (>2МБ), роут остаётся SSG+ISR.
+  const res = await fetch(ADMITAD_FEED_URL, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+      Accept: "application/xml,text/xml,*/*",
+    },
+    next: { revalidate: 900 },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Admitad feed ${res.status} ${res.statusText}`);
+  }
+
+  const list = parseAdmitadXml(await res.text());
+  console.log(`[admitad] Загружено купонов после нормализации: ${list.length}`);
+  return list;
+}
+
 export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
   if (!isAdmitadConfigured()) return [];
 
@@ -168,28 +191,21 @@ export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
 
   pendingFetch = (async () => {
     try {
-      const res = await fetch(ADMITAD_FEED_URL, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-          Accept: "application/xml,text/xml,*/*",
-        },
-        next: { revalidate: 300 },
-      });
-
-      if (!res.ok) {
-        console.warn(`[admitad] Не удалось загрузить фид: ${res.status} ${res.statusText}`);
-        return admitadCache || [];
+      // Сначала маленький РУ-кэш из Supabase — холодный старт не качает 65МБ.
+      const cached = await fetchAdmitadCouponsCached();
+      if (cached.length > 0) {
+        console.log(`[admitad] Используем Supabase-кэш (${cached.length} купонов)`);
+        admitadCache = cached;
+        lastFetchTime = Date.now();
+        return cached;
       }
 
-      const text = await res.text();
-      const list = parseAdmitadXml(text);
-      console.log(`[admitad] Успешно загружено купонов после нормализации и валидации: ${list.length}`);
+      const list = await fetchAndParseAdmitadFeed();
       admitadCache = list;
       lastFetchTime = Date.now();
       return list;
     } catch (e) {
-      console.error("[admitad] Ошибка запроса к фиду Admitad:", e);
+      console.error("[admitad] Ошибка загрузки фида/кэша:", e);
       return admitadCache || [];
     } finally {
       pendingFetch = null;

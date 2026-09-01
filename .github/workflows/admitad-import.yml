@@ -1,0 +1,23 @@
+name: Admitad Feed Import
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # каждые 6 часов: фид Admitad меняется разы в день
+  workflow_dispatch: # ручной запуск
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Admitad import API
+        run: |
+          HTTP_STATUS=$(curl -s -o /tmp/admitad-import.json -w "%{http_code}" -X POST \
+            "https://promofact.ru/api/admin/admitad-import" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+          cat /tmp/admitad-import.json
+          echo "HTTP: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "::error::Admitad import failed with status $HTTP_STATUS"
+            exit 1
+          fi
