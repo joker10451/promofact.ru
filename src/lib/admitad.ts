@@ -52,21 +52,28 @@ const CATEGORY_MAP: Record<string, string> = {
 };
 
 /**
- * Проверка на иностранный спам (испанский, итальянский, турецкий, португальский и пустые дампы)
+ * Проверка на иностранный спам и сырые нелокализованные дампы
  */
-function isForeignJunk(name: string, terms: string): boolean {
+function isForeignJunk(name: string, terms: string, storeSlug: string): boolean {
   const text = `${name} ${terms}`.toLowerCase();
   if (
-    /artículo|sconti|descuento|hasta\s+\d|dernières|tendances|vendedores|varan\s+indirimler|super\s+ofertas|choice\s*-\s*3|us\s+new\s+user|us\s+warehouse|do\s+brasil|articoli\s+per|best\s+aliexpress/i.test(
+    /artículo|sconti|descuento|hasta\s+\d|dernières|tendances|vendedores|varan\s+indirimler|super\s+ofertas|choice\s*-\s*3|us\s+new\s+user|us\s+warehouse|do\s+brasil|articoli\s+per|best\s+aliexpress|sitewide|timeless\s*&\s*chic|bonus\s+time/i.test(
       text,
     )
   ) {
     return true;
   }
-  // Если в названии вообще нет ни одной русской буквы и нет конкретного промокода
+
+  // Зарубежные магазины без доставки и адаптации в РФ
+  if (/applicantally|sitpack|openhagen|noon|indiwd|alibaba/i.test(storeSlug)) {
+    return true;
+  }
+
+  // Если в описании нет ни одной кириллической буквы и это не глобальный ИТ-сервис
   const hasCyrillic = /[а-яё]/i.test(text);
-  const isEnglishOnly = !hasCyrillic;
-  if (isEnglishOnly && text.length < 15) return true;
+  if (!hasCyrillic && !text.includes("pro32") && !text.includes("itab")) {
+    return true;
+  }
 
   return false;
 }
@@ -129,11 +136,6 @@ export function parseAdmitadXml(xml: string): Coupon[] {
       const cleanName = stripHtml(name);
       const cleanTerms = stripHtml(terms);
 
-      // Фильтруем иностранный мусор и дампы без промокода
-      if (isForeignJunk(cleanName, cleanTerms)) {
-        continue;
-      }
-
       const camp = campaigns.get(campId) || {
         name: "Магазин",
         site: "",
@@ -142,6 +144,11 @@ export function parseAdmitadXml(xml: string): Coupon[] {
 
       const rawStoreName = camp.name || "Магазин";
       const rawStoreSlug = translit(rawStoreName) || "magazin";
+
+      // Фильтруем иностранный мусор и нелокализованные дампы
+      if (isForeignJunk(cleanName, cleanTerms, rawStoreSlug)) {
+        continue;
+      }
       const norm = normalizeStore(rawStoreName, rawStoreSlug, CATEGORY_MAP[camp.categoryId]);
 
       const storeName = norm.name;
