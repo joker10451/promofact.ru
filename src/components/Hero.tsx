@@ -201,19 +201,19 @@ export default function Hero({ stores = [], coupons = [] }: HeroProps) {
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
               ✓
             </span>
-            <span>Проверяем промокоды</span>
+            <span>Проверяем каждый день</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow/40 text-ink text-[11px]">
               ⚡
             </span>
-            <span>{coupons.length > 0 ? coupons.length : 23} активных акции</span>
+            <span>{coupons.length > 0 ? coupons.length : 23} активных акций</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
-              96%
+              🛡
             </span>
-            <span>Работают у пользователей</span>
+            <span>Ручная модерация</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red/15 text-red text-[11px]">

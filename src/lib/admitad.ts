@@ -1,5 +1,6 @@
 import "server-only";
 import { translit } from "@/lib/translit";
+import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Coupon, Store, Promocode, Affiliate } from "@/lib/types";
 
 const DEFAULT_ADMITAD_XML_URL =
@@ -119,9 +120,14 @@ export function parseAdmitadXml(xml: string): Coupon[] {
         categoryId: "62",
       };
 
-      const storeName = camp.name || "Магазин";
-      const storeSlug = translit(storeName) || "magazin";
-      const categoryName = CATEGORY_MAP[camp.categoryId] || "Маркетплейсы";
+      const rawStoreName = camp.name || "Магазин";
+      const rawStoreSlug = translit(rawStoreName) || "magazin";
+      const norm = normalizeStore(rawStoreName, rawStoreSlug, CATEGORY_MAP[camp.categoryId]);
+
+      const storeName = norm.name;
+      const storeSlug = rawStoreSlug;
+      const categoryName = norm.category;
+      const categorySlug = norm.categorySlug;
 
       // Извлечение erid из gotolink
       const eridMatch = gotolink.match(/erid=([a-zA-Z0-9_-]+)/);
@@ -148,7 +154,7 @@ export function parseAdmitadXml(xml: string): Coupon[] {
         slug: storeSlug,
         logo: logo || null,
         category: categoryName,
-        categorySlug: translit(categoryName),
+        categorySlug: categorySlug,
         about: `${storeName} — официальный магазин-партнёр. Актуальные скидки и промокоды.`,
         conditions: "Скидка применяется при переходе по ссылке и вводе промокода.",
         site: camp.site || gotolink,

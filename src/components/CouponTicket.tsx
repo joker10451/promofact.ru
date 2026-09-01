@@ -22,9 +22,6 @@ export default function CouponTicket({
   const [imgError, setImgError] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const trustPercent = 95 + (coupon.id % 5);
-  const checkCount = 110 + (coupon.id % 45);
-
   const copyAndOpen = (code: string, url: string) => {
     // 1. Синхронное открытие ссылки магазина
     if (typeof window !== "undefined" && url && url !== "#") {
@@ -221,18 +218,18 @@ export default function CouponTicket({
           </p>
         </div>
 
-        {/* 3. Фирменный Trust-виджет надежности */}
+        {/* 3. Честный статус проверки и актуальности */}
         <div className="mt-3 flex items-center justify-between rounded-xl bg-paper/80 px-3 py-1.5 border border-line/50 text-xs">
           <div className="flex items-center gap-2">
             <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-mint text-white text-[9px] font-bold">
               ✓
             </span>
             <span className="font-bold text-ink text-[11px] sm:text-xs">
-              {trustPercent}% подтвердили работу
+              Проверен модератором
             </span>
           </div>
-          <span className="text-[10px] sm:text-[11px] font-medium text-ink/45">
-            {checkCount} проверок
+          <span className="text-[10px] sm:text-[11px] font-medium text-ink/50">
+            {promocode.expires ? `до ${formatExpires(promocode.expires)}` : "актуален сегодня"}
           </span>
         </div>
       </div>

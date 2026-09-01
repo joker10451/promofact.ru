@@ -32,6 +32,12 @@ export default function CouponGrid({
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>({});
+  const [visibleLimit, setVisibleLimit] = useState(12);
+
+  // Сброс лимита при изменении фильтров
+  useEffect(() => {
+    setVisibleLimit(12);
+  }, [filter, quickFilter, query, selectedRegion, sortBy]);
 
   useEffect(() => {
     const savedCity = localStorage.getItem("promofact_selected_city");
@@ -392,60 +398,86 @@ export default function CouponGrid({
               </button>
             </div>
           ) : (
-            <div className="columns-1 md:columns-2 gap-6 space-y-6">
-              {groupedStoreList.map(({ store, primaryCoupon, otherCoupons }) => {
-                const isExpanded = !!expandedStores[store.id];
+            <>
+              <div className="columns-1 md:columns-2 gap-6 space-y-6">
+                {groupedStoreList.slice(0, visibleLimit).map(({ store, primaryCoupon, otherCoupons }) => {
+                  const isExpanded = !!expandedStores[store.id];
 
-                return (
-                  <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5">
-                    {/* Главная карточка с лучшим предложением */}
-                    <CouponTicket
-                      coupon={primaryCoupon}
-                      proofCount={proofsByCode?.[primaryCoupon.promocode.code] ?? 0}
-                      storeProofCount={proofsByStore?.[store.id] ?? 0}
-                    />
+                  return (
+                    <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5">
+                      {/* Главная карточка с лучшим предложением */}
+                      <CouponTicket
+                        coupon={primaryCoupon}
+                        proofCount={proofsByCode?.[primaryCoupon.promocode.code] ?? 0}
+                        storeProofCount={proofsByStore?.[store.id] ?? 0}
+                      />
 
-                    {/* Дополнительные промокоды магазина аккуратно под карточкой */}
-                    {otherCoupons.length > 0 && (
-                      <div className="rounded-2xl border border-line/70 bg-paper/60 p-2.5 shadow-2xs">
-                        <button
-                          type="button"
-                          onClick={() => toggleExpand(store.id)}
-                          className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-white border border-line/50 hover:border-ink/20 text-xs font-bold text-ink transition-all cursor-pointer shadow-2xs"
-                        >
-                          <span className="flex items-center gap-1.5">
-                            <span>🏷</span>
-                            <span>
-                              {isExpanded
-                                ? `Скрыть другие промокоды (${otherCoupons.length})`
-                                : `Ещё ${otherCoupons.length} ${
-                                    otherCoupons.length === 1 ? "промокод" : "промокода"
-                                  } ${store.name}`}
+                      {/* Дополнительные промокоды магазина аккуратно под карточкой */}
+                      {otherCoupons.length > 0 && (
+                        <div className="rounded-2xl border border-line/70 bg-paper/60 p-2.5 shadow-2xs">
+                          <button
+                            type="button"
+                            onClick={() => toggleExpand(store.id)}
+                            className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-white border border-line/50 hover:border-ink/20 text-xs font-bold text-ink transition-all cursor-pointer shadow-2xs"
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <span>🏷</span>
+                              <span>
+                                {isExpanded
+                                  ? `Скрыть другие промокоды (${otherCoupons.length})`
+                                  : `Ещё ${otherCoupons.length} ${
+                                      otherCoupons.length === 1 ? "промокод" : "промокода"
+                                    } ${store.name}`}
+                              </span>
                             </span>
-                          </span>
-                          <span className="text-red font-black text-xs">
-                            {isExpanded ? "▲" : "▼"}
-                          </span>
-                        </button>
+                            <span className="text-red font-black text-xs">
+                              {isExpanded ? "▲" : "▼"}
+                            </span>
+                          </button>
 
-                        {isExpanded && (
-                          <div className="mt-2.5 space-y-2.5 pt-2 border-t border-line/40">
-                            {otherCoupons.map((c) => (
-                              <CouponTicket
-                                key={`${c.id}-${c.promocode.code}`}
-                                coupon={c}
-                                proofCount={proofsByCode?.[c.promocode.code] ?? 0}
-                                storeProofCount={proofsByStore?.[store.id] ?? 0}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                          {isExpanded && (
+                            <div className="mt-2.5 space-y-2.5 pt-2 border-t border-line/40">
+                              {otherCoupons.map((c) => (
+                                <CouponTicket
+                                  key={`${c.id}-${c.promocode.code}`}
+                                  coupon={c}
+                                  proofCount={proofsByCode?.[c.promocode.code] ?? 0}
+                                  storeProofCount={proofsByStore?.[store.id] ?? 0}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Кнопки пагинации / Показать ещё */}
+              {groupedStoreList.length > visibleLimit && (
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleLimit((prev) => prev + 12)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-ink px-6 py-3.5 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                  >
+                    <span>Показать ещё 12 предложений</span>
+                    <span className="text-xs text-white/60 font-normal">
+                      (осталось {groupedStoreList.length - visibleLimit})
+                    </span>
+                    <span>↓</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVisibleLimit(groupedStoreList.length)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center rounded-2xl border border-line bg-white px-5 py-3.5 text-xs sm:text-sm font-bold text-ink/70 hover:text-ink hover:border-ink/40 transition-colors cursor-pointer"
+                  >
+                    Показать все ({groupedStoreList.length})
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

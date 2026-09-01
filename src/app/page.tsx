@@ -106,7 +106,7 @@ export default async function Home() {
         </Reveal>
 
         {/* 5. Купоны на сегодня — сгруппированный каталог (лучший промокод + аккордеон) */}
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
           <Reveal>
             <CouponGrid
               coupons={coupons}
@@ -116,46 +116,48 @@ export default async function Home() {
           </Reveal>
         </div>
 
-        {/* 6. 💰 Сколько вы сэкономите? — компактный калькулятор выгоды */}
-        <Reveal>
-          <SavingsCalculator />
-        </Reveal>
-
-        {/* 7. Как это работает — 4 понятных шага */}
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* 6. Как это работает — 4 понятных шага применения */}
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
           <Reveal>
             <HowItWorks />
           </Reveal>
         </div>
 
-        {/* 8. Скидки по категориям — плитки с эмодзи */}
+        {/* 7. 💰 Калькулятор выгоды */}
+        <Reveal>
+          <SavingsCalculator />
+        </Reveal>
+
+        {/* 8. Скидки по категориям — быстрый переход */}
         <Reveal>
           <VisualCategoryTiles />
         </Reveal>
 
-        {/* 9. Почему ПромоФакт? — элементы доверия и прозрачности */}
+        {/* 9. Почему ПромоФакт? — гарантия и прозрачность */}
         <Reveal>
           <WhyUs />
         </Reveal>
 
-        {/* 10. Полезные статьи и советы */}
-        <Reveal>
-          <LatestTips limit={3} />
-        </Reveal>
-
-        {/* 11. Частые вопросы (FAQ Accordion) */}
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* 10. FAQ — частые вопросы */}
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
           <Reveal>
             <Faq />
           </Reveal>
         </div>
 
-        {/* 11. О сервисе ПромоФакт — SEO-блок под аккуратным спойлером */}
+        {/* 11. База знаний и полезные советы */}
         <Reveal>
-          <SeoArticle />
+          <LatestTips />
         </Reveal>
 
-        {/* 12. Подписка на еженедельные лучшие скидки */}
+        {/* 12. SEO-статья под спойлером */}
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+          <Reveal>
+            <SeoArticle />
+          </Reveal>
+        </div>
+
+        {/* 13. Подписка на Telegram */}
         <Reveal>
           <Subscribe />
         </Reveal>

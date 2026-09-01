@@ -1,5 +1,6 @@
 import "server-only";
 import { translit } from "@/lib/translit";
+import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Coupon, Store, Promocode, Affiliate } from "@/lib/types";
 
 const SALEADS_FEED_URL = process.env.SALEADS_FEED_URL ?? "";
@@ -43,16 +44,21 @@ export function parseSaleadsPayload(jsonText: string): Coupon[] {
       const promoCode = str(item.promocode || item.code || item.voucher).trim();
       if (!promoCode) continue;
 
-      const storeName = str(item.campaign_name || item.shop_name || item.name || item.store).trim() || "Магазин";
-      let slug = translit(storeName) || "magazin";
+      const rawStoreName = str(item.campaign_name || item.shop_name || item.name || item.store).trim() || "Магазин";
+      let rawSlug = translit(rawStoreName) || "magazin";
+      const norm = normalizeStore(rawStoreName, rawSlug, str(item.category || item.category_name));
+
+      const storeName = norm.name;
+      let slug = norm.categorySlug ? translit(storeName) || rawSlug : rawSlug;
       let n = 1;
       while (seenSlugs.has(slug)) {
         n += 1;
-        slug = `${translit(storeName) || "magazin"}-${n}`;
+        slug = `${rawSlug}-${n}`;
       }
       seenSlugs.add(slug);
 
-      const categoryName = str(item.category || item.category_name).trim() || "Маркетплейсы";
+      const categoryName = norm.category;
+      const categorySlug = norm.categorySlug;
       const logo = str(item.logo || item.logo_url || item.image);
       const site = str(item.site || item.url || item.link);
 
@@ -62,7 +68,7 @@ export function parseSaleadsPayload(jsonText: string): Coupon[] {
         slug,
         logo: logo || null,
         category: categoryName,
-        categorySlug: translit(categoryName),
+        categorySlug: categorySlug,
         about: stripHtml(item.description || item.about) || null,
         conditions: stripHtml(item.conditions || item.terms) || null,
         site,
