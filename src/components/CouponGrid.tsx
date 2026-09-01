@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import CouponTicket from "@/components/CouponTicket";
 import type { Coupon } from "@/lib/types";
 
@@ -32,14 +32,6 @@ export default function CouponGrid({
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>({});
-  const gridRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = gridRef.current;
-    if (!el) return;
-    const t = setTimeout(() => el.classList.add("is-visible"), 60);
-    return () => clearTimeout(t);
-  }, []);
 
   useEffect(() => {
     const savedCity = localStorage.getItem("promofact_selected_city");
@@ -185,7 +177,7 @@ export default function CouponGrid({
     `rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
       active
         ? "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red"
-        : "bg-white border border-line text-ink/80 hover:border-ink/40 shadow-xs"
+        : "bg-white border border-line text-ink/80 hover:border-ink/40 shadow-2xs"
     }`;
 
   return (
@@ -209,7 +201,7 @@ export default function CouponGrid({
               <select
                 value={selectedRegion}
                 onChange={(e) => handleCityChange(e.target.value)}
-                className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-xs outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
+                className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-2xs outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
                 aria-label="Фильтр по городу"
               >
                 <option value="all">Вся Россия</option>
@@ -228,7 +220,7 @@ export default function CouponGrid({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-xs outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
+              className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-2xs outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
               aria-label="Сортировка промокодов"
             >
               <option value="hits">По популярности (Хиты)</option>
@@ -269,10 +261,10 @@ export default function CouponGrid({
         ))}
       </div>
 
-      {/* Основной макет: Левый сайдбар категорий + Правая 2-колоночная сетка */}
+      {/* Основной макет: Левый сайдбар категорий + Правая Masonry колоночная сетка */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Левая колонка: Категории (Desktop sticky) */}
-        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 space-y-1.5 bg-white border border-line rounded-2xl p-3 shadow-xs">
+        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 space-y-1.5 bg-white border border-line rounded-2xl p-3 shadow-2xs">
           <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">
             Категории
           </div>
@@ -281,7 +273,7 @@ export default function CouponGrid({
             onClick={() => setFilter("all")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               filter === "all"
-                ? "bg-ink text-white shadow-sm"
+                ? "bg-ink text-white shadow-2xs"
                 : "text-ink/70 hover:bg-paper hover:text-ink"
             }`}
           >
@@ -297,7 +289,7 @@ export default function CouponGrid({
               onClick={() => setFilter(slug)}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 filter === slug
-                  ? "bg-ink text-white shadow-sm"
+                  ? "bg-ink text-white shadow-2xs"
                   : "text-ink/70 hover:bg-paper hover:text-ink"
               }`}
             >
@@ -312,7 +304,7 @@ export default function CouponGrid({
           ))}
         </aside>
 
-        {/* Правая часть: Фильтры и Сетка купонов */}
+        {/* Правая часть: Фильтры и Masonry сетка купонов */}
         <div className="flex-1 min-w-0">
           {/* Статус поиска */}
           {query && (
@@ -335,19 +327,19 @@ export default function CouponGrid({
           <div className="flex flex-wrap items-center gap-2 mb-6">
             <button
               type="button"
-              onClick={() => setQuickFilter("hit")}
-              className={quickChipCls(quickFilter === "hit")}
-            >
-              <span>🔥</span>
-              <span>Лучшие сегодня</span>
-            </button>
-            <button
-              type="button"
               onClick={() => setQuickFilter("all")}
               className={quickChipCls(quickFilter === "all")}
             >
               <span>✨</span>
               <span>Все купоны</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setQuickFilter("hit")}
+              className={quickChipCls(quickFilter === "hit")}
+            >
+              <span>🔥</span>
+              <span>Хиты</span>
             </button>
             <button
               type="button"
@@ -363,7 +355,7 @@ export default function CouponGrid({
               className={quickChipCls(quickFilter === "repeat")}
             >
               <span>🔄</span>
-              <span>Для всех (повторные)</span>
+              <span>Для всех</span>
             </button>
             <button
               type="button"
@@ -375,7 +367,7 @@ export default function CouponGrid({
             </button>
           </div>
 
-          {/* Сетка купонов (2 колонки) */}
+          {/* Бесшовный Masonry-каталог купонов без пустот и перекосов */}
           {groupedStoreList.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
               <div className="font-display text-5xl font-extrabold text-ink/15">
@@ -400,28 +392,26 @@ export default function CouponGrid({
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="columns-1 md:columns-2 gap-6 space-y-6">
               {groupedStoreList.map(({ store, primaryCoupon, otherCoupons }) => {
                 const isExpanded = !!expandedStores[store.id];
 
                 return (
-                  <div key={store.id} className="flex flex-col gap-3">
+                  <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5">
                     {/* Главная карточка с лучшим предложением */}
-                    <div className="relative">
-                      <CouponTicket
-                        coupon={primaryCoupon}
-                        proofCount={proofsByCode?.[primaryCoupon.promocode.code] ?? 0}
-                        storeProofCount={proofsByStore?.[store.id] ?? 0}
-                      />
-                    </div>
+                    <CouponTicket
+                      coupon={primaryCoupon}
+                      proofCount={proofsByCode?.[primaryCoupon.promocode.code] ?? 0}
+                      storeProofCount={proofsByStore?.[store.id] ?? 0}
+                    />
 
-                    {/* Дополнительные промокоды магазина под спойлером */}
+                    {/* Дополнительные промокоды магазина аккуратно под карточкой */}
                     {otherCoupons.length > 0 && (
-                      <div className="rounded-2xl border border-line/70 bg-white/70 p-3 shadow-xs">
+                      <div className="rounded-2xl border border-line/70 bg-paper/60 p-2.5 shadow-2xs">
                         <button
                           type="button"
                           onClick={() => toggleExpand(store.id)}
-                          className="w-full flex items-center justify-between py-2 px-3.5 rounded-xl bg-paper hover:bg-paper/80 text-xs font-bold text-ink transition-colors cursor-pointer"
+                          className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-white border border-line/50 hover:border-ink/20 text-xs font-bold text-ink transition-all cursor-pointer shadow-2xs"
                         >
                           <span className="flex items-center gap-1.5">
                             <span>🏷</span>
@@ -433,13 +423,13 @@ export default function CouponGrid({
                                   } ${store.name}`}
                             </span>
                           </span>
-                          <span className="text-red font-black">
+                          <span className="text-red font-black text-xs">
                             {isExpanded ? "▲" : "▼"}
                           </span>
                         </button>
 
                         {isExpanded && (
-                          <div className="mt-3 space-y-3 pt-2 border-t border-line/40">
+                          <div className="mt-2.5 space-y-2.5 pt-2 border-t border-line/40">
                             {otherCoupons.map((c) => (
                               <CouponTicket
                                 key={`${c.id}-${c.promocode.code}`}

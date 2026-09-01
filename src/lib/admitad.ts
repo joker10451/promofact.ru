@@ -128,9 +128,10 @@ export function parseAdmitadXml(xml: string): Coupon[] {
       const erid = eridMatch ? eridMatch[1] : "";
 
       const cleanName = stripHtml(name);
-      const bonusName = discount
-        ? `Скидка ${discount} — ${cleanName}`
-        : cleanName;
+      let bonusName = cleanName;
+      if (discount && !cleanName.includes(discount)) {
+        bonusName = `${cleanName} (скидка ${discount})`;
+      }
 
       // Форматирование даты окончания
       let expires: string | null = null;
