@@ -2,7 +2,10 @@ import "server-only";
 import { translit } from "@/lib/translit";
 import type { Coupon, Store, Promocode, Affiliate } from "@/lib/types";
 
-const ADMITAD_FEED_URL = process.env.ADMITAD_FEED_URL ?? "";
+const DEFAULT_ADMITAD_XML_URL =
+  "https://export.admitad.com/ru/webmaster/websites/2990501/coupons/export/?code=jdskmibwva&user=ilia_pisklov6ed68&region=00&format=xml&v=1";
+
+const ADMITAD_FEED_URL = process.env.ADMITAD_FEED_URL || DEFAULT_ADMITAD_XML_URL;
 
 export function isAdmitadConfigured(): boolean {
   return Boolean(ADMITAD_FEED_URL);
@@ -24,118 +27,211 @@ function num(v: unknown): number {
 function stripHtml(v: unknown): string {
   return str(v)
     .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 /**
- * Парсинг выгрузки Admitad Coupons & Deals (JSON / Export Feed)
+ * Категории Admitad маппим в понятные русские категории ПромоФакта
  */
-export function parseAdmitadPayload(jsonText: string): Coupon[] {
+const CATEGORY_MAP: Record<string, string> = {
+  "18": "Сервисы и подписки",
+  "62": "Маркетплейсы",
+  "64": "Одежда и обувь",
+  "65": "Бытовая техника и электроника",
+  "66": "Все для дома",
+  "67": "Косметика и парфюмерия",
+  "69": "Детские товары",
+  "72": "Цветы и подарки",
+  "85": "Спорт и отдых",
+  "89": "Хобби и канцтовары",
+  "92": "Автотовары",
+  "93": "Сервисы и подписки",
+  "96": "Маркетплейсы",
+  "98": "Онлайн-образование",
+  "102": "Продукты и доставка",
+  "122": "Сервисы и подписки",
+  "257": "Сервисы и подписки",
+  "382": "Маркетплейсы",
+};
+
+/**
+ * Парсинг XML выгрузки Admitad Coupons & Deals
+ */
+export function parseAdmitadXml(xml: string): Coupon[] {
   try {
-    const data = JSON.parse(jsonText);
-    const results = Array.isArray(data) ? data : Array.isArray(data.results) ? data.results : Array.isArray(data.coupons) ? data.coupons : [];
+    // 1. Извлекаем рекламодателей
+    const campaigns = new Map<
+      string,
+      { name: string; site: string; categoryId: string }
+    >();
+    const campRegex = /<advcampaign id="(\d+)">([\s\S]*?)<\/advcampaign>/g;
+    let match: RegExpExecArray | null;
 
+    while ((match = campRegex.exec(xml)) !== null) {
+      const id = match[1];
+      const body = match[2];
+      const name = (body.match(/<name>(.*?)<\/name>/) || [])[1] || "";
+      const site = (body.match(/<site>(.*?)<\/site>/) || [])[1] || "";
+      const catMatch = body.match(/<category_id>(\d+)<\/category_id>/);
+      const categoryId = catMatch ? catMatch[1] : "62";
+      campaigns.set(id, {
+        name: stripHtml(name),
+        site: stripHtml(site),
+        categoryId,
+      });
+    }
+
+    // 2. Извлекаем купоны
     const coupons: Coupon[] = [];
-    const seenSlugs = new Set<string>();
+    const seenCodes = new Set<string>();
+    const coupRegex = /<coupon id="(\d+)">([\s\S]*?)<\/coupon>/g;
 
-    for (const item of results) {
-      const promoCode = str(item.promocode || item.code).trim();
-      // Берём только офферы с конкретным промокодом
-      if (!promoCode) continue;
+    while ((match = coupRegex.exec(xml)) !== null) {
+      const id = parseInt(match[1], 10);
+      const body = match[2];
+      const name = (body.match(/<name>(.*?)<\/name>/) || [])[1] || "";
+      const campId =
+        (body.match(/<advcampaign_id>(.*?)<\/advcampaign_id>/) || [])[1] || "";
+      const logo = (body.match(/<logo>(.*?)<\/logo>/) || [])[1] || "";
+      const promocode =
+        (body.match(/<promocode>(.*?)<\/promocode>/) || [])[1] || "";
+      const gotolink =
+        (body.match(/<gotolink>(.*?)<\/gotolink>/) || [])[1] || "";
+      const dateEnd =
+        (body.match(/<date_end>(.*?)<\/date_end>/) || [])[1] || "";
+      const discount =
+        (body.match(/<discount>(.*?)<\/discount>/) || [])[1] || "";
+      const customerType =
+        (body.match(/<customer_type>(.*?)<\/customer_type>/) || [])[1] || "";
+      const terms =
+        (body.match(/<description>(.*?)<\/description>/) || [])[1] || "";
 
-      const storeName = str(item.advcampaign_name || item.campaign_name || item.shop_name || item.name).trim() || "Магазин";
-      let slug = translit(storeName) || "magazin";
-      let n = 1;
-      while (seenSlugs.has(slug)) {
-        n += 1;
-        slug = `${translit(storeName) || "magazin"}-${n}`;
+      const cleanPromo =
+        promocode.trim() === "Not required" ? "" : promocode.trim();
+      const camp = campaigns.get(campId) || {
+        name: "Магазин",
+        site: "",
+        categoryId: "62",
+      };
+
+      const storeName = camp.name || "Магазин";
+      const storeSlug = translit(storeName) || "magazin";
+      const categoryName = CATEGORY_MAP[camp.categoryId] || "Маркетплейсы";
+
+      // Извлечение erid из gotolink
+      const eridMatch = gotolink.match(/erid=([a-zA-Z0-9_-]+)/);
+      const erid = eridMatch ? eridMatch[1] : "";
+
+      const cleanName = stripHtml(name);
+      const bonusName = discount
+        ? `Скидка ${discount} — ${cleanName}`
+        : cleanName;
+
+      // Форматирование даты окончания
+      let expires: string | null = null;
+      if (dateEnd && dateEnd !== "None") {
+        const d = dateEnd.slice(0, 10);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+          expires = d;
+        }
       }
-      seenSlugs.add(slug);
-
-      const categoryName = str(item.category_name || (Array.isArray(item.categories) ? item.categories[0]?.name : "")).trim() || "Маркетплейсы";
-      const logo = str(item.logo || item.image || item.advcampaign_logo);
-      const site = str(item.site || item.site_url || item.goto_link);
 
       const store: Store = {
-        id: num(item.advcampaign_id || item.campaign_id || item.id || 90000),
+        id: 90000 + (parseInt(campId, 10) || id % 10000),
         name: storeName,
-        slug,
+        slug: storeSlug,
         logo: logo || null,
         category: categoryName,
         categorySlug: translit(categoryName),
-        about: stripHtml(item.advcampaign_description || item.description) || null,
-        conditions: stripHtml(item.terms || item.limitations) || null,
-        site,
-        activeBloggers: 100,
+        about: `${storeName} — официальный магазин-партнёр. Актуальные скидки и промокоды.`,
+        conditions: "Скидка применяется при переходе по ссылке и вводе промокода.",
+        site: camp.site || gotolink,
+        activeBloggers: 500,
       };
-
-      const promoId = num(item.id || item.coupon_id) || Math.floor(Math.random() * 1000000);
-      const bonusName = str(item.short_name || item.name || item.discount).trim();
-      const terms = stripHtml(item.description || item.terms || item.limitations);
-      const rawDate = str(item.date_end || item.expires || item.end_date);
-      const expires = rawDate ? rawDate.slice(0, 10) : null;
-
-      const affiliateLink = str(item.goto_link || item.url || item.link);
-      const ordMarker = str(item.erid || item.ord_marker || item.token);
-      const ordText = str(item.advcampaign_name ? `Реклама. ${item.advcampaign_name}` : "Реклама.");
 
       const affiliate: Affiliate = {
-        link: affiliateLink || site,
-        landingLink: affiliateLink || site,
-        ordMarker,
-        ordText,
+        link: gotolink.replace(/&amp;/g, "&"),
+        landingLink: gotolink.replace(/&amp;/g, "&"),
+        ordMarker: erid,
+        ordText: erid ? `Реклама. ${storeName}, erid: ${erid}` : `Реклама. ${storeName}`,
       };
 
-      const promocode: Promocode = {
-        id: promoId,
-        code: promoCode,
-        bonusName: bonusName || null,
-        terms: terms || null,
+      const promoObj: Promocode = {
+        id,
+        code: cleanPromo,
+        bonusName,
+        terms: stripHtml(terms) || cleanName,
         expires,
-        isHit: Boolean(item.is_hit || item.promoted),
+        isHit: Boolean(discount && (discount.includes("50%") || discount.includes("40%") || discount.includes("30%"))),
         isUniversal: true,
-        isFirstOrderOnly: /перв/i.test(bonusName) || /перв/i.test(terms),
-        region: str(item.regions || item.region) || null,
+        isFirstOrderOnly: customerType.includes("new") || /перв/i.test(cleanName),
+        region: "RU",
         isBarcode: false,
         barcodeImage: null,
-        group: null,
+        group: "admitad",
       };
 
-      coupons.push({
-        id: promoId,
-        promocode,
-        store,
-        affiliate,
-        extraLinks: [],
-      });
+      // Предотвращаем дубликаты одинаковых кодов внутри одного магазина
+      const dedupeKey = `${storeSlug}-${cleanPromo || id}`;
+      if (!seenCodes.has(dedupeKey)) {
+        seenCodes.add(dedupeKey);
+        coupons.push({
+          id,
+          promocode: promoObj,
+          store,
+          affiliate,
+          extraLinks: [],
+        });
+      }
     }
 
     return coupons;
   } catch (e) {
-    console.error("[admitad] Ошибка парсинга фида Admitad:", e);
+    console.error("[admitad] Ошибка парсинга XML Admitad:", e);
     return [];
   }
 }
 
+let admitadCache: Coupon[] | null = null;
+let lastFetchTime = 0;
+const CACHE_TTL_MS = 15 * 60 * 1000; // 15 минут
+
 export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
   if (!isAdmitadConfigured()) return [];
 
+  const now = Date.now();
+  if (admitadCache && now - lastFetchTime < CACHE_TTL_MS) {
+    return admitadCache;
+  }
+
   try {
     const res = await fetch(ADMITAD_FEED_URL, {
-      headers: { Accept: "application/json" },
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        Accept: "application/xml,text/xml,*/*",
+      },
       next: { revalidate: 1800 },
     });
+
     if (!res.ok) {
       console.warn(`[admitad] Не удалось загрузить фид: ${res.status} ${res.statusText}`);
-      return [];
+      return admitadCache || [];
     }
+
     const text = await res.text();
-    const list = parseAdmitadPayload(text);
-    console.log(`[admitad] Загружено купонов: ${list.length}`);
+    const list = parseAdmitadXml(text);
+    console.log(`[admitad] Успешно загружено купонов из фида: ${list.length}`);
+    admitadCache = list;
+    lastFetchTime = now;
     return list;
   } catch (e) {
     console.error("[admitad] Ошибка запроса к фиду Admitad:", e);
-    return [];
+    return admitadCache || [];
   }
 }
