@@ -175,7 +175,17 @@ export function resolveCustomerType(
 /**
  * Проверка на иностранный спам и нелокализованные дампы
  */
-export function isForeignJunk(name: string, terms: string, storeSlug: string): boolean {
+/** .ru / .рф домен = магазин обслуживает РФ (даже если название латиницей). */
+function isRuSite(site: string): boolean {
+  return /\.(ru|рф)\b/i.test(site || "");
+}
+
+export function isForeignJunk(
+  name: string,
+  terms: string,
+  storeSlug: string,
+  site?: string
+): boolean {
   const text = `${name} ${terms}`.toLowerCase();
   if (
     /artículo|sconti|descuento|hasta\s+\d|dernières|tendances|vendedores|varan\s+indirimler|super\s+ofertas|choice\s*-\s*3|us\s+new\s+user|us\s+warehouse|do\s+brasil|articoli\s+per|best\s+aliexpress|sitewide|timeless\s*&\s*chic|bonus\s+time/i.test(
@@ -190,9 +200,11 @@ export function isForeignJunk(name: string, terms: string, storeSlug: string): b
     return true;
   }
 
-  // Если в описании нет ни одной кириллической буквы и это не глобальный ИТ-сервис
+  // Если в описании нет ни одной кириллической буквы и это не глобальный ИТ-сервис.
+  // Офферы РУ-магазинов с латинским названием не отсекаем: у них домен .ru/.рф
+  // (site мог быть не передан — тогда ведём себя как раньше, полагаясь на pro32/itab).
   const hasCyrillic = /[а-яё]/i.test(text);
-  if (!hasCyrillic && !text.includes("pro32") && !text.includes("itab")) {
+  if (!hasCyrillic && !isRuSite(site || "") && !text.includes("pro32") && !text.includes("itab")) {
     return true;
   }
 
@@ -429,8 +441,8 @@ export function normalizeAdmitadCoupon(raw: RawAdmitadCoupon): NormalizedOffer |
   const rawStoreName = raw.rawCampaignName || "Магазин";
   const rawStoreSlug = translit(rawStoreName) || "magazin";
 
-  // Фильтр иностранного мусора
-  if (isForeignJunk(raw.name, raw.description, rawStoreSlug)) {
+  // Фильтр иностранного мусора (site пробрасываем, чтобы РУ-магазины с латинским названием не отсекались)
+  if (isForeignJunk(raw.name, raw.description, rawStoreSlug, raw.rawCampaignSite)) {
     return null;
   }
 
