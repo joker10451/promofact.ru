@@ -8,8 +8,18 @@ import { getBrandMeta } from "@/lib/brandLogos";
 import { refineOffer } from "@/lib/offerRefiner";
 import type { Coupon } from "@/lib/types";
 
+/** Склонение «заказ/заказа/заказов» по числу. */
+function pluralOrders(n: number): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return "заказ";
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "заказа";
+  return "заказов";
+}
+
 export default function CouponTicket({
   coupon,
+  proofCount = 0,
   isDetailPage = false,
 }: {
   coupon: Coupon;
@@ -140,7 +150,9 @@ export default function CouponTicket({
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
             <span className="font-bold text-mint-dark text-[11px] sm:text-xs">
-              Работает · Проверен сегодня
+              {proofCount > 0
+                ? `${proofCount} ${pluralOrders(proofCount)} подтверждено`
+                : "Работает · Проверен сегодня"}
             </span>
           </div>
           <button
@@ -285,6 +297,11 @@ export default function CouponTicket({
                 <p className="text-ink/65 text-[10px] leading-relaxed">
                   Промокод проверен сегодня на официальном сайте магазина {store.name}. Скидка применяется в корзине при соблюдении условий.
                 </p>
+                {proofCount > 0 && (
+                  <p className="text-ink/65 text-[10px] leading-relaxed font-semibold">
+                    По этому коду уже подтверждено {proofCount} {pluralOrders(proofCount)}.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/50 text-[11px]">
