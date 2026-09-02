@@ -1,7 +1,16 @@
 import https from "https";
 
-const url =
-  "https://export.admitad.com/ru/webmaster/websites/2990501/coupons/export/?code=jdskmibwva&user=ilia_pisklov6ed68&region=00&format=xml&v=1";
+// Адрес выгрузки берём из окружения: он содержит код доступа к фиду,
+// а репозиторий публичный.
+const url = process.env.ADMITAD_FEED_URL;
+
+if (!url) {
+  console.error(
+    "Не задан ADMITAD_FEED_URL.\n" +
+      "Запуск: ADMITAD_FEED_URL='<ссылка на выгрузку из кабинета Admitad>' node scripts/test-admitad-feed.mjs",
+  );
+  process.exit(1);
+}
 
 const options = {
   headers: {
