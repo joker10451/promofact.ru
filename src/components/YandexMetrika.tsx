@@ -1,11 +1,23 @@
 "use client";
 
 import Script from "next/script";
+import { useSyncExternalStore } from "react";
+import { getConsent, onConsentChange } from "@/lib/cookieConsent";
 
 const YM_ID = Number(process.env.NEXT_PUBLIC_YM_ID ?? "111247117");
 
 export default function YandexMetrika() {
-  if (!YM_ID) return null;
+  // Счётчик грузится только после явного согласия: до этого кнопка баннера
+  // ни на что не влияла, хотя обещала выбор.
+  // useSyncExternalStore — согласие живёт вне React (localStorage + событие),
+  // и на сервере снимок всегда «не разрешено», поэтому гидратация совпадает.
+  const allowed = useSyncExternalStore(
+    (notify) => onConsentChange(() => notify()),
+    () => getConsent() === "accepted",
+    () => false,
+  );
+
+  if (!YM_ID || !allowed) return null;
   return (
     <>
       <Script id="yandex-metrika" strategy="afterInteractive">
