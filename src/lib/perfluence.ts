@@ -300,11 +300,28 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
   ]);
 
   const customCoupons = (await import("@/lib/customCoupons")).CUSTOM_COUPONS;
-  // Дубль Кинопоиска: кастомная версия с обновлённой ссылкой kp45.prfl.me имеет приоритет — глушим Perfluence-дубль с тем же кодом
-  const customCodes = new Set([...customCoupons, ...supabaseCoupons].map((c) => c.promocode.code).filter(Boolean));
-  const filteredPerfluence = perfluenceCoupons.filter((c) => !customCodes.has(c.promocode.code));
+  const { dedupeCoupons } = await import("@/lib/dedupe");
 
-  return [...filteredPerfluence, ...admitadCoupons, ...saleadsCoupons, ...customCoupons, ...supabaseCoupons];
+  // Дедуп по приоритету источника: ручные купоны (в т.ч. дубль Кинопоиска
+  // с обновлённой ссылкой kp45.prfl.me) перебивают фиды, Perfluence
+  // перебивает сети. Между сетями один и тот же оффер (магазин + код)
+  // больше не двоится — раньше склеивались только custom-коды с Perfluence.
+  const { coupons, stats } = dedupeCoupons([
+    { source: "custom", coupons: customCoupons },
+    { source: "supabase", coupons: supabaseCoupons },
+    { source: "perfluence", coupons: perfluenceCoupons },
+    { source: "admitad", coupons: admitadCoupons },
+    { source: "saleads", coupons: saleadsCoupons },
+  ]);
+
+  if (stats.dropped > 0) {
+    console.log(
+      `[dedupe] купонов: ${stats.total}, оставлено: ${stats.kept}, дублей отброшено: ${stats.dropped}`,
+      stats.droppedBySource,
+    );
+  }
+
+  return coupons;
 }
 
 export async function getCoupons(): Promise<Coupon[]> {
