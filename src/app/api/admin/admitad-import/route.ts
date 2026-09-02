@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchAndParseAdmitadFeed } from "@/lib/admitad";
 import { upsertAdmitadCoupons } from "@/lib/admitadSupabase";
+import { isBearerAuthorized } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,21 +10,15 @@ export const dynamic = "force-dynamic";
  * Фид ~65МБ и Next.js его не кэширует, поэтому runtime читает маленький РУ-список
  * из Supabase, а сюда (редко, фоново) пишется свежий снимок.
  *
- * Авторизация та же, что у /api/telegram/post: Bearer <CRON_SECRET|STATS_PASSWORD|TELEGRAM_POSTING_SECRET>,
- * либо без заголовка, если задан CRON_SECRET (Vercel Cron подставляет его сам).
+ * Требуется явный Bearer <CRON_SECRET> или <TELEGRAM_POSTING_SECRET>. GitHub
+ * workflow шлёт заголовок сам; запрос без заголовка больше не проходит
+ * (раньше он открывал импорт кому угодно).
  */
 async function handle(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET;
-  const statsPassword = process.env.STATS_PASSWORD;
-  const postingSecret = process.env.TELEGRAM_POSTING_SECRET;
-  const authHeader = req.headers.get("authorization");
-
-  const isAuthorized =
-    (cronSecret && authHeader === `Bearer ${cronSecret}`) ||
-    (statsPassword && authHeader === `Bearer ${statsPassword}`) ||
-    (postingSecret && authHeader === `Bearer ${postingSecret}`) ||
-    // Vercel Cron автоматически добавляет Authorization: Bearer <CRON_SECRET>
-    (cronSecret && !authHeader);
+  const isAuthorized = isBearerAuthorized(req.headers.get("authorization"), [
+    process.env.CRON_SECRET,
+    process.env.TELEGRAM_POSTING_SECRET,
+  ]);
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -45,10 +40,8 @@ async function handle(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
-  return handle(req);
-}
-
+// Только POST: импорт — операция с записью в БД, GET-ссылку легко дёрнуть
+// случайно. Workflow вызывает именно POST.
 export async function POST(req: NextRequest) {
   return handle(req);
 }

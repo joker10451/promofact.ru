@@ -21,7 +21,13 @@ export async function proxy(request: NextRequest) {
   if (pathname === "/stats" || pathname.startsWith("/stats/")) {
     if (pathname === "/stats/login") return NextResponse.next();
 
-    const expected = await sha256Hex(process.env.STATS_PASSWORD ?? "");
+    // Если пароль не задан — доступа нет ни у кого. Раньше здесь считался
+    // sha256("") (общеизвестная константа), и /stats открывался по ней.
+    const password = process.env.STATS_PASSWORD;
+    if (!password) {
+      return NextResponse.redirect(new URL("/stats/login", request.url));
+    }
+    const expected = await sha256Hex(password);
     if (request.cookies.get(STATS_COOKIE)?.value !== expected) {
       return NextResponse.redirect(new URL("/stats/login", request.url));
     }
