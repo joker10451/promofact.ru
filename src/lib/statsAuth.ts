@@ -10,6 +10,16 @@ export async function sha256Hex(input: string): Promise<string> {
     .join("");
 }
 
-export async function statsCookieValue(): Promise<string> {
-  return sha256Hex(process.env.STATS_PASSWORD ?? "");
+/**
+ * Ожидаемое значение cookie-верификатора или null, если STATS_PASSWORD не задан.
+ *
+ * Раньше при пустом пароле возвращался sha256("") — общеизвестная константа
+ * e3b0c442…, и любой мог зайти в /stats и админку, подставив её в cookie.
+ * Теперь при незаданном пароле доступа нет ни у кого: все вызывающие
+ * трактуют null как отказ (`!expected` / `expected && …`).
+ */
+export async function statsCookieValue(): Promise<string | null> {
+  const password = process.env.STATS_PASSWORD;
+  if (!password) return null;
+  return sha256Hex(password);
 }
