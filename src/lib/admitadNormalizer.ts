@@ -446,8 +446,18 @@ export function normalizeAdmitadCoupon(raw: RawAdmitadCoupon): NormalizedOffer |
     return null;
   }
 
+  // Категория: числовой маппинг (если фид дал id) ПЛЮС имена категорий из фида.
+  // Раньше сюда шёл только categoryFromId, который всегда undefined
+  // (rawCategoryId нигде не заполняется), а raw.categories — реальные имена
+  // категорий из выгрузки — в инференс не попадали. Из-за этого всё, что не
+  // угадывалось по имени магазина, падало в «Маркетплейсы» (78% каталога).
+  // Имена категорий стабильны на уровне магазина, поэтому не дробят его по
+  // разным /category-страницам.
   const categoryFromId = raw.rawCategoryId ? CATEGORY_MAP[raw.rawCategoryId] : undefined;
-  const norm = normalizeStore(rawStoreName, rawStoreSlug, categoryFromId);
+  const categoryHint = [categoryFromId, ...(raw.categories || [])]
+    .filter(Boolean)
+    .join(" ");
+  const norm = normalizeStore(rawStoreName, rawStoreSlug, categoryHint);
 
   // Определение типа клиента с защитой от конфликтов
   const customerResolution = resolveCustomerType(raw.customerType, raw.name, raw.description);
