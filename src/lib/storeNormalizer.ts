@@ -164,40 +164,55 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
 export function inferCategory(text: string): { name: string; slug: string } {
   const t = text.toLowerCase();
 
-  if (/аптек|витамин|бад|здоров|таблетк|лекарств|farm|zdorov/i.test(t)) {
-    return { name: "Аптека и здоровье", slug: "zdorove-i-vitaminy" };
-  }
-  if (/косметик|парфюм|крем|уход|волос|макияж|beauty|skin|care|davines|patch/i.test(t)) {
+  // Порядок важен: специфичное раньше общего. «Красота и здоровье» должна
+  // уйти в косметику, а не в аптеку (обе содержат «здоров»), поэтому красота
+  // проверяется до аптеки.
+  if (/косметик|парфюм|крем|уход|волос|макияж|красот|космет|beauty|skin|care|davines|patch/i.test(t)) {
     return { name: "Косметика и парфюмерия", slug: "kosmetika-i-parfyumeriya" };
   }
-  if (/урок|курс|английск|образован|обучен|школ|репетитор|study|english|synergy/i.test(t)) {
+  if (/аптек|витамин|\bбад\b|здоров|таблетк|лекарств|аптеч|farm|pharm|zdorov/i.test(t)) {
+    return { name: "Аптека и здоровье", slug: "zdorove-i-vitaminy" };
+  }
+  if (/урок|курс|английск|образован|обучен|школ|репетитор|вебинар|тренинг|study|english|course|synergy/i.test(t)) {
     return { name: "Онлайн-образование", slug: "onlayn-obrazovanie" };
   }
-  if (/ресторан|ролл|пицц|суши|бургер|еда|блюд|вкусн|рыб/i.test(t)) {
+  if (/ресторан|ролл|пицц|суши|бургер|блюд|вкусн|доставка\s+еды|food/i.test(t)) {
     return { name: "Доставка из ресторанов", slug: "dostavka-iz-restoranov" };
   }
-  if (/продукт|супермаркет|пятёрочк|перекресток|магнит|лент|диет|diet/i.test(t)) {
+  if (/продукт|супермаркет|пятёрочк|перекрест|магнит|\bлент|диет|бакалея|grocery|diet/i.test(t)) {
     return { name: "Доставка продуктов", slug: "dostavka-produktov" };
   }
-  if (/одел|одежд|обув|вещ|мод|плать|кроссовк|fashion|wear|clothes|irnby/i.test(t)) {
+  if (/дет(ск|и)|игрушк|малыш|коляск|памперс|подгузник|baby|kids/i.test(t)) {
+    return { name: "Детские товары", slug: "detskie-tovary" };
+  }
+  if (/одежд|обув|вещ|мод(а|н)|плать|кроссовк|бель[её]|аксессуар|fashion|wear|clothes|shoes|irnby/i.test(t)) {
     return { name: "Одежда и обувь", slug: "odezhda-i-obuv" };
   }
-  if (/отел|гостиниц|билет|тур|поездк|прокат|аренд|travel|hotel|otello/i.test(t)) {
+  if (/книг|литератур|учебник|book/i.test(t)) {
+    return { name: "Книги", slug: "knigi" };
+  }
+  if (/электрон|техник|гаджет|смартфон|ноутбук|телефон|компьютер|бытов|electronics|tech|gadget/i.test(t)) {
+    return { name: "Электроника и техника", slug: "elektronika-i-tehnika" };
+  }
+  if (/авто(мобил|товар|запчаст|\b)|шин[аы]|запчаст|моторное|auto|\bcar\b/i.test(t)) {
+    return { name: "Автотовары", slug: "avtotovary" };
+  }
+  if (/отел|гостиниц|билет|\bтур(изм|ы|\b)|поездк|путешеств|прокат|аренд|авиа|travel|hotel|otello/i.test(t)) {
     return { name: "Путешествия и туризм", slug: "puteshestviya-i-turizm" };
   }
-  if (/фильм|сериал|кино|кинопоиск|подписк|cinema|movie/i.test(t)) {
+  if (/фильм|сериал|кино|кинопоиск|cinema|movie/i.test(t)) {
     return { name: "Онлайн-кинотеатры", slug: "onlayn-kinoteatry" };
   }
-  if (/цвет|букет|флорист|подар|flowers/i.test(t)) {
+  if (/цвет(ы|очн)|букет|флорист|flowers/i.test(t)) {
     return { name: "Цветы", slug: "tsvety" };
   }
-  if (/дом|мебел|уют|посуд|ремонт|интерьер|home|fix/i.test(t)) {
+  if (/мебел|уют|посуд|ремонт|интерьер|товары\s+для\s+дома|для\s+дома|home\s+goods|furniture/i.test(t)) {
     return { name: "Все для дома", slug: "vse-dlya-doma" };
   }
-  if (/спорт|фитнес|тренировк|sport/i.test(t)) {
+  if (/спорт|фитнес|тренировк|велосипед|sport|fitness/i.test(t)) {
     return { name: "Спорт и отдых", slug: "sport-i-otdyh" };
   }
-  if (/впн|vpn|антивирус|софт|карт|подписк|сервис|pro32/i.test(t)) {
+  if (/впн|vpn|антивирус|\bсофт|подписк|стриминг|финанс|банк|кредит|страхов|сервис|pro32|service/i.test(t)) {
     return { name: "Сервисы и подписки", slug: "servisy-i-podpiski" };
   }
 
