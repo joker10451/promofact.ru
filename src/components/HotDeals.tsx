@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CouponTicket from "@/components/CouponTicket";
+import { pickHotDeals } from "@/lib/hotDeals";
 import type { Coupon } from "@/lib/types";
 
 function getCountdownTime(): { hours: string; minutes: string; seconds: string } | null {
@@ -43,23 +44,8 @@ export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
     return () => clearInterval(interval);
   }, []);
 
-  // 3 лучших горящих промокода от 3 РАЗНЫХ магазинов (исключаем повтор одного бренда)
-  const hotCoupons = (() => {
-    const seenStores = new Set<number>();
-    const res: Coupon[] = [];
-    const sorted = [...coupons]
-      .filter((c) => c.promocode.code)
-      .sort((a, b) => (b.promocode.isHit ? 1 : 0) - (a.promocode.isHit ? 1 : 0));
-
-    for (const c of sorted) {
-      if (!seenStores.has(c.store.id)) {
-        seenStores.add(c.store.id);
-        res.push(c);
-        if (res.length === 3) break;
-      }
-    }
-    return res;
-  })();
+  // Тот же выбор, что использует главная для исключения этих купонов из ленты.
+  const hotCoupons = pickHotDeals(coupons, 3);
 
   if (hotCoupons.length === 0) return null;
 
