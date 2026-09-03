@@ -18,14 +18,27 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export default function CouponGrid({
-  coupons,
+  coupons: allCoupons,
   proofsByCode,
   proofsByStore,
+  excludeOfferKeys,
 }: {
   coupons: Coupon[];
   proofsByCode?: Record<string, number>;
   proofsByStore?: Record<number, number>;
+  excludeOfferKeys?: string[];
 }) {
+  // Исключаем купоны из «Спецпредложений дня» — они уже показаны выше, а иначе
+  // дублировались бы первыми карточками ленты. Ключ «магазин + код» убирает и
+  // дубли того же оффера с другим id. Один раз здесь — и все счётчики,
+  // фильтры и группировка ниже работают с уже очищенным списком.
+  const coupons = useMemo(() => {
+    if (!excludeOfferKeys || excludeOfferKeys.length === 0) return allCoupons;
+    const excluded = new Set(excludeOfferKeys);
+    return allCoupons.filter(
+      (c) => !excluded.has(`${c.store.slug}::${(c.promocode.code || "").trim().toUpperCase()}`),
+    );
+  }, [allCoupons, excludeOfferKeys]);
   const [filter, setFilter] = useState<string>("all");
   const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20">("all");
   const [sortBy, setSortBy] = useState<"hits" | "discount" | "expiring">("hits");

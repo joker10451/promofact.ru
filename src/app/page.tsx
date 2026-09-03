@@ -15,6 +15,7 @@ import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import Reveal from "@/components/Reveal";
 import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
+import { pickHotDeals, offerKey } from "@/lib/hotDeals";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const revalidate = 1800;
@@ -65,6 +66,11 @@ export default async function Home() {
   const proofsByStore = Object.fromEntries(uses.usesByStore);
   const proofTotal = Object.values(proofsByCode).reduce((a, b) => a + b, 0);
 
+  // Купоны из блока «Спецпредложения дня» исключаем из ленты каталога ниже,
+  // чтобы топ-3 не повторялись первыми тремя карточками. Ключ «магазин + код»,
+  // а не id: убирает и дубли того же оффера с другим id (разные источники).
+  const hotDealKeys = pickHotDeals(coupons, 3).map(offerKey);
+
   return (
     <>
       <JsonLd
@@ -113,6 +119,7 @@ export default async function Home() {
               coupons={coupons}
               proofsByCode={proofsByCode}
               proofsByStore={proofsByStore}
+              excludeOfferKeys={hotDealKeys}
             />
           </Reveal>
         </div>
