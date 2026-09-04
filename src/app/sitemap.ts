@@ -5,6 +5,15 @@ import { ACTIONS } from "@/lib/actions";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { SITE_URL } from "@/lib/site";
 
+// sitemap.ts — special Route Handler, который Next кэширует НАВСЕГДА до
+// следующего деплоя, если не задан сегментный конфиг (см. docs: «cached by
+// default unless it uses a dynamic config option»). fetch-revalidate внутри
+// getCoupons сам роут не размораживает. Без этой строки прод отдавал снимок
+// на момент сборки: магазины и коды, выпавшие из фида, оставались в sitemap
+// (мёртвые URL для Яндекса и Google), пока страницы с revalidate=1800 уже
+// 404-или. Тот же такт, что у /store и /store/[code], держит их согласованными.
+export const revalidate = 1800;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [coupons, categories, stores] = await Promise.all([
     getCoupons(),

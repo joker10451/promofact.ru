@@ -1,6 +1,8 @@
 import "server-only";
 import { translit } from "@/lib/translit";
 import { normalizeStore } from "@/lib/storeNormalizer";
+import { normalizeCode } from "@/lib/dedupe";
+import { ID_BANDS, bandedId } from "@/lib/stableId";
 import type { Coupon, Store, Promocode, Affiliate } from "@/lib/types";
 
 const SALEADS_FEED_URL = process.env.SALEADS_FEED_URL ?? "";
@@ -38,7 +40,6 @@ export function parseSaleadsPayload(jsonText: string): Coupon[] {
     const items = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : Array.isArray(data.coupons) ? data.coupons : [];
 
     const coupons: Coupon[] = [];
-    const seenSlugs = new Set<string>();
 
     for (const item of items) {
       const promoCode = str(item.promocode || item.code || item.voucher).trim();
@@ -49,13 +50,11 @@ export function parseSaleadsPayload(jsonText: string): Coupon[] {
       const norm = normalizeStore(rawStoreName, rawSlug, str(item.category || item.category_name));
 
       const storeName = norm.name;
-      let slug = norm.categorySlug ? translit(storeName) || rawSlug : rawSlug;
-      let n = 1;
-      while (seenSlugs.has(slug)) {
-        n += 1;
-        slug = `${rawSlug}-${n}`;
-      }
-      seenSlugs.add(slug);
+      // Слаг зависит только от имени магазина: все купоны одного магазина
+      // должны попасть на одну страницу /store/[slug]. Раньше здесь был
+      // счётчик уникальности, который дробил магазин на ozon, ozon-2, ozon-3
+      // (по одному на каждый купон) и разносил их по разным страницам.
+      const slug = norm.categorySlug ? translit(storeName) || rawSlug : rawSlug;
 
       const categoryName = norm.category;
       const categorySlug = norm.categorySlug;
@@ -63,7 +62,10 @@ export function parseSaleadsPayload(jsonText: string): Coupon[] {
       const site = str(item.site || item.url || item.link);
 
       const store: Store = {
-        id: num(item.campaign_id || item.id || 80000),
+        // id детерминирован слагом: стабилен между рендерами и одинаков для
+        // всех купонов магазина (по нему CouponGrid группирует карточки).
+        // Раньше здесь была константа 80000 — все безымянные схлопывались в один.
+        id: bandedId(ID_BANDS.saleadsStore, slug),
         name: storeName,
         slug,
         logo: logo || null,
@@ -75,7 +77,14 @@ export function parseSaleadsPayload(jsonText: string): Coupon[] {
         activeBloggers: 150,
       };
 
-      const promoId = num(item.id || item.promo_id) || Math.floor(Math.random() * 1000000);
+      // Детерминированный id: раньше Math.random() менял его на каждом рендере
+      // (React key прыгал, статистика по купону не сходилась).
+      const promoId = bandedId(
+        ID_BANDS.saleadsCoupon,
+        slug,
+        normalizeCode(promoCode),
+        num(item.id || item.promo_id),
+      );
       const bonusName = str(item.title || item.name || item.discount || item.bonus).trim();
       const terms = stripHtml(item.terms || item.description || item.limitations);
       const rawDate = str(item.date_end || item.expires || item.expire_date);

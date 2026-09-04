@@ -1,21 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCoupons } from "@/lib/perfluence";
 import { sendCouponToTelegram } from "@/lib/telegram";
+import { isBearerAuthorized } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 
 async function handlePost(req: NextRequest) {
-  const secret = process.env.TELEGRAM_POSTING_SECRET;
-  const statsPassword = process.env.STATS_PASSWORD;
-  const cronSecret = process.env.CRON_SECRET;
-  const authHeader = req.headers.get("authorization");
-
-  const isAuthorized =
-    (secret && authHeader === `Bearer ${secret}`) ||
-    (statsPassword && authHeader === `Bearer ${statsPassword}`) ||
-    (cronSecret && authHeader === `Bearer ${cronSecret}`) ||
-    // Vercel Cron автоматически добавляет Authorization: Bearer <CRON_SECRET>
-    (cronSecret && !authHeader);
+  // Только явный Bearer с одним из служебных секретов. Пароль дашборда
+  // (STATS_PASSWORD) больше не принимается: это разные зоны доступа.
+  const isAuthorized = isBearerAuthorized(req.headers.get("authorization"), [
+    process.env.TELEGRAM_POSTING_SECRET,
+    process.env.CRON_SECRET,
+  ]);
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -104,11 +100,9 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-// Vercel Cron шлёт GET-запросы — обрабатываем их тем же кодом, что и POST.
-export async function GET(req: NextRequest) {
-  return handlePost(req);
-}
-
+// GET намеренно не экспортируется: публикация — действие с побочным эффектом,
+// а GET-ссылку может дёрнуть превью в мессенджере или краулер. Крон отключён,
+// workflow ходит методом POST с явным Bearer.
 export async function POST(req: NextRequest) {
   return handlePost(req);
 }

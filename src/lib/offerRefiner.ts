@@ -114,9 +114,11 @@ export function refineOffer(
   // 4. Процентные скидки
   if (pctMatch) {
     const val = parseInt(pctMatch[1], 10);
-    let cleaned = cleanConditionText(title, pctMatch[1]);
+    // Передаём pctMatch[0] («15%»), а не pctMatch[1] («15»): иначе «Скидка 15»
+    // вырезается, а «%» остаётся сиротой → «на % на бронирование…».
+    let cleaned = cleanConditionText(title, pctMatch[0]);
     if (!cleaned || cleaned.length < 3) {
-      cleaned = cleanConditionText(terms, pctMatch[1]);
+      cleaned = cleanConditionText(terms, pctMatch[0]);
     }
 
     if (minOrder) {
@@ -208,6 +210,7 @@ function cleanConditionText(raw: string, matchedPart?: string): string {
   }
   return text
     .replace(/^(на|в|от|при)\s+\d+[\s\d]*(%|₽|р|руб)/gi, "")
+    .replace(/^[-−%\s]+/g, "") // сироты «%», тире и пробелы в начале
     .replace(/^(скидка|минус|до|на|в|от|[,\s–—-])+/gi, "")
     .replace(/\(\s*\)/g, "") // удаление пустых скобок ()
     .replace(/не суммируется с другими акциями.*$/i, "")

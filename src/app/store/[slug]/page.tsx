@@ -272,18 +272,14 @@ export default async function StorePage({
     ],
   };
 
-  const ratingCount = Math.max(storeProofCount, 12);
+  // Организация без aggregateRating: сайт не собирает оценки, а разметка
+  // рейтинга «от себя» — прямое нарушение правил структурированных данных
+  // (основание для ручных санкций поисковиков на весь домен).
   const ratingJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: store.name,
     url: pageUrl,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      bestRating: "5",
-      ratingCount: ratingCount,
-    },
   };
 
   const itemListJsonLd: Record<string, unknown> = {
@@ -366,33 +362,14 @@ export default async function StorePage({
                     : "рабочих промокодов"}
                 . Коды проверены сегодня, срок действия указан в карточке.
               </p>
-              <div
-                className="mt-2 flex items-center gap-2 text-sm font-bold text-ink/70"
-                aria-label={`Рейтинг ${store.name} 4.8 из 5 на основе ${ratingCount} оценок`}
-              >
-                <span className="text-red" aria-hidden="true">
-                  ★★★★★
-                </span>
-                <span>4.8</span>
-                <span className="text-ink/45 font-normal">
-                  · {ratingCount} оценок
-                </span>
-              </div>
+              {/* Звёзды «4.8 · N оценок» и «N блогеров рекомендуют» убраны:
+                  оценок не существует (значение было константой), а число
+                  блогеров — тоже выдуманное. Оставляем проверяемые факты:
+                  дату обновления и реальное число заказов через нас. */}
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="rounded-full bg-mint/10 border border-mint/30 px-3 py-1.5 text-xs font-bold text-ink/70">
                   Обновлено {todayRu}
                 </span>
-                {store.activeBloggers > 0 && (
-                  <span className="rounded-full bg-yellow/20 border border-yellow/50 px-3 py-1.5 text-xs font-bold text-ink/70">
-                    {store.activeBloggers}{" "}
-                    {store.activeBloggers === 1
-                      ? "блогер"
-                      : store.activeBloggers >= 2 && store.activeBloggers <= 4
-                        ? "блогера"
-                        : "блогеров"}{" "}
-                    рекомендуют {store.name}
-                  </span>
-                )}
                 {storeProofCount > 0 && (
                   <span className="rounded-full bg-red/10 border border-red/30 px-3 py-1.5 text-xs font-bold text-ink/70">
                     по промокодам {store.name} оформлено {storeProofCount}{" "}
