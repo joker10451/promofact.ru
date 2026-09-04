@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import StoreLogo from "@/components/StoreLogo";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import { CheckIcon } from "@/components/CheckIcon";
 
@@ -113,8 +114,14 @@ export default function SavingsCalculator() {
       savings,
     });
 
-    if (typeof window !== "undefined") {
-      window.location.href = currentStore.affiliateUrl;
+    try {
+      if (typeof window !== "undefined" && window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+      }
+    } catch {}
+
+    if (typeof window !== "undefined" && currentStore.affiliateUrl) {
+      window.open(currentStore.affiliateUrl, "_blank", "noopener,noreferrer");
     }
 
     setTimeout(() => setCopied(false), 5000);
@@ -157,7 +164,9 @@ export default function SavingsCalculator() {
                       : "border-line bg-white/60 text-ink/70 hover:bg-white hover:border-ink/20"
                   }`}
                 >
-                  <span className="text-base">{s.emoji}</span>
+                  <div className="h-7 w-7 shrink-0 flex items-center justify-center rounded-xl bg-white p-1 border border-line/60 shadow-2xs">
+                    <StoreLogo slug={s.slug} name={s.name} size={22} />
+                  </div>
                   <div className="truncate">
                     <span className="truncate block">{s.name}</span>
                     <span className="text-[10px] text-red font-extrabold">{s.discountLabel}</span>

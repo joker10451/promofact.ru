@@ -5,7 +5,10 @@ import { extractMinimumOrder } from "@/lib/admitadNormalizer";
  * Превращает сырые обрывки и опечатки из CPA-фидов в понятный, красивый русский текст.
  */
 
+export type OfferType = "percent" | "rub" | "gift" | "subscription" | "default";
+
 export interface RefinedOffer {
+  type: OfferType;
   discount: string;
   condition: string;
   fullTerms: string;
@@ -30,6 +33,7 @@ export function refineOffer(
   if (/60\s*дней|подписк\w*\s+(плюс|кинопоиск|яндекс|сбер)/i.test(title) && !/(\d+)\s*%/.test(title)) {
     const isSber = /сбер/i.test(title) || /сбер/i.test(terms) || /сбер/i.test(storeName);
     return {
+      type: "subscription",
       discount: "60 дней за 1 ₽",
       condition: isSber
         ? "подписка СберПрайм для новых пользователей"
@@ -62,6 +66,7 @@ export function refineOffer(
       }
     }
     return {
+      type: "percent",
       discount: `−${val}%`,
       condition: condition.startsWith("+") || condition.startsWith("на") || condition.startsWith("при") ? condition : `+ ${condition}`,
       fullTerms: terms || `Скидка ${val}% и подарок при оформлении заказа.`,
@@ -96,6 +101,7 @@ export function refineOffer(
       : "по промокоду при оформлении заказа";
 
     return {
+      type: "gift",
       discount: giftTitle,
       condition,
       fullTerms:
@@ -120,6 +126,7 @@ export function refineOffer(
     }
 
     return {
+      type: "percent",
       discount: `−${val}%`,
       condition: formatConditionPrefix(cleaned),
       fullTerms: terms || `Скидка ${val}% применяется в корзине при оформлении заказа.`,
@@ -149,6 +156,7 @@ export function refineOffer(
     }
 
     return {
+      type: "rub",
       discount: `−${formattedRub}`,
       condition: formatConditionPrefix(cleaned),
       fullTerms: terms || `Скидка ${formattedRub} активируется при оформлении заказа в ${storeName}.`,
@@ -161,6 +169,7 @@ export function refineOffer(
   if (bonusMatch) {
     const val = parseInt(bonusMatch[1].replace(/\s/g, ""), 10);
     return {
+      type: "default",
       discount: `+${val} бонусов`,
       condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : "на оплату заказов",
       fullTerms: terms || `Начисление ${val} бонусов при оформлении заказа в ${storeName}.`,
@@ -171,6 +180,7 @@ export function refineOffer(
   // 7. Дефолтный переход по ссылке без кода
   if (isNoCode) {
     return {
+      type: "default",
       discount: title.length > 28 ? title.slice(0, 28) + "…" : title || "Скидка",
       condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : "акция действует по ссылке без ввода кода",
       fullTerms: terms || "Перейдите в магазин по кнопке, скидка применится автоматически в корзине.",
@@ -179,6 +189,7 @@ export function refineOffer(
   }
 
   return {
+    type: "default",
     discount: title.length > 24 ? title.slice(0, 24) + "…" : title || "Скидка",
     condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : isFirstOrder ? "на первый заказ" : "по промокоду",
     fullTerms: terms || `Промокод ${code} действует в интернет-магазине ${storeName}.`,
