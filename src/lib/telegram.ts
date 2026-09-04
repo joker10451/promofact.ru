@@ -68,53 +68,41 @@ export function formatTelegramPost(coupon: Coupon): {
   text: string;
   buttons: TelegramButton[][];
 } {
-  const storeName = escapeHtml(coupon.store.name.toUpperCase());
+  const storeName = escapeHtml(coupon.store.name);
   const bonus = escapeHtml(stripHtml(coupon.promocode.bonusName) || "Скидка по промокоду");
   const code = escapeHtml(coupon.promocode.code);
-  const terms = escapeHtml(stripHtml(coupon.promocode.terms));
-  const region = escapeHtml(coupon.promocode.region);
   const expires = formatDate(coupon.promocode.expires);
+  const region = escapeHtml(coupon.promocode.region);
 
   const lines: string[] = [];
 
-  // 1. Интригующий заголовок с акцентом на выгоду
-  if (coupon.promocode.isHit) {
-    lines.push(`🔥 <b>Секретная скидка в ${storeName}!</b>\n`);
-  } else {
-    lines.push(`✨ <b>Лайфхак для заказа в ${storeName}</b>\n`);
+  // 1. Заголовок — коротко и по делу
+  const hitEmoji = coupon.promocode.isHit ? "🔥 " : "";
+  lines.push(`${hitEmoji}<b>${escapeHtml(coupon.store.name)} — ${bonus}</b>\n`);
+
+  // 2. Промокод для копирования в 1 клик (если есть)
+  if (code) {
+    lines.push(`Промокод: <code>${code}</code>`);
+    lines.push(`<i>Нажмите на код — он скопируется автоматически</i>\n`);
   }
 
-  // 2. Выгода крупно
-  lines.push(`🎁 <b>${bonus}</b>\n`);
-
-  // 3. Инструкция по экономии
-  lines.push(`📋 <b>Как применить выгоду:</b>`);
-  lines.push(`1. Перейдите по кнопке ниже`);
-  lines.push(`2. Соберите заказ в корзину`);
-  lines.push(`3. Введите промокод в поле заказа:\n`);
-
-  // 4. Промокод для копирования в 1 клик
-  lines.push(`🎟 Код: <code>${code}</code>`);
-  lines.push(`<i>(нажмите на промокод, чтобы скопировать 👆)</i>\n`);
-
-  // 5. Условия
+  // 3. Условия одной строкой
+  const conditions: string[] = [];
   if (coupon.promocode.isFirstOrderOnly) {
-    lines.push(`⚡️ <i>Работает на первый заказ</i>`);
+    conditions.push("только на первый заказ");
   } else if (coupon.promocode.isUniversal) {
-    lines.push(`✨ <i>Работает для всех (и на повторные заказы!)</i>`);
+    conditions.push("для всех покупателей");
   }
+  if (region && region !== "RU") conditions.push(`город: ${region}`);
+  conditions.push(`действует до ${expires}`);
 
-  if (region && region !== "RU") {
-    lines.push(`📍 <i>Город: ${region}</i>`);
-  }
+  lines.push(`<i>${conditions.join(" · ")}</i>`);
 
-  lines.push(`⏳ <i>Актуально до ${expires}</i>`);
-
-  // 5. Маркировка ОРД (Закон о рекламе)
+  // 4. Маркировка ОРД (Закон о рекламе)
   const ordText = escapeHtml(coupon.affiliate.ordText);
   const ordMarker = escapeHtml(coupon.affiliate.ordMarker);
 
-  lines.push("\n────────────────────");
+  lines.push("\n<i>Реклама.</i>");
   if (ordText || ordMarker) {
     const markerStr = ordMarker ? ` erid: ${ordMarker}` : "";
     lines.push(`<i>${ordText}${markerStr}</i>`);
@@ -122,13 +110,13 @@ export function formatTelegramPost(coupon: Coupon): {
     lines.push(`<i>Реклама.</i>`);
   }
 
-  // 6. Широкие интерактивные кнопки
+  // Кнопки: одна главная + одна на страницу магазина (все промокоды)
   const affiliateUrl = coupon.affiliate.link || coupon.affiliate.landingLink;
   const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
 
   const buttons: TelegramButton[][] = [
-    [{ text: `🛒 Перейти в ${coupon.store.name} и применить →`, url: affiliateUrl }],
-    [{ text: `🌐 Больше скидок на Promofact.ru`, url: storeUrl }],
+    [{ text: `Получить скидку в ${coupon.store.name} →`, url: affiliateUrl }],
+    [{ text: `Все промокоды ${coupon.store.name}`, url: storeUrl }],
   ];
 
   return {
