@@ -432,12 +432,12 @@ export default function CouponGrid({
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <div className="columns-1 md:columns-2 gap-6">
                 {groupedStoreList.slice(0, visibleLimit).map(({ store, primaryCoupon, otherCoupons }) => {
                   const isExpanded = !!expandedStores[store.id];
 
                   return (
-                    <div key={store.id} className="flex flex-col gap-2.5">
+                    <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5 mb-6">
                       {/* Главная карточка с лучшим предложением */}
                       <CouponTicket
                         coupon={primaryCoupon}
