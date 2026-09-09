@@ -23,30 +23,90 @@ export function isVkConfigured(): boolean {
   return Boolean(process.env.VK_ACCESS_TOKEN && process.env.VK_OWNER_ID);
 }
 
+const CATEGORY_EMOJIS: Record<string, string> = {
+  "eda-i-dostavka": "🛒",
+  "dostavka-produktov": "🥦",
+  "dostavka-iz-restoranov": "🍕",
+  "marketpleysy": "📦",
+  "onlayn-kinoteatry": "🎬",
+  "servisy-i-podpiski": "✨",
+  "odezhda-i-obuv": "👗",
+  "kosmetika-i-parfyumeriya": "💄",
+  "elektronika": "📱",
+  "vse-dlya-doma": "🛋",
+  "puteshestviya-i-turizm": "✈️",
+  "zdorove-i-vitaminy": "💊",
+  "onlayn-obrazovanie": "🎓",
+  "sport-i-otdyh": "⚽",
+  "detskie-tovary": "🧸",
+  "tsvety": "💐",
+};
+
 /**
  * Форматирует привлекательный текст поста для стены ВКонтакте
  */
 export function formatVkPost(coupon: Coupon): string {
   const code = coupon.promocode.code;
   const storeName = coupon.store.name;
-  const bonus = coupon.promocode.bonusName || `Скидка по промокоду ${code}`;
-  const terms = coupon.promocode.terms ? `\n📌 Условия: ${coupon.promocode.terms}` : "";
-  const siteUrl = `${SITE_URL}/store/${coupon.store.slug}/${encodeURIComponent(code)}`;
+  const emoji = CATEGORY_EMOJIS[coupon.store.categorySlug] || (coupon.promocode.isHit ? "🔥" : "🏷");
+  const categoryTitle = (coupon.store.category || "Скидки и акции").toUpperCase();
+  const bonus = coupon.promocode.bonusName || "Скидка по промокоду";
+  const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
+  const directLink = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site || storeUrl;
 
-  const lines = [
-    `🔥 Свежий промокод: ${storeName}!`,
+  const lines: string[] = [
+    `${emoji} ${categoryTitle}`,
     ``,
-    `🎁 ${bonus}`,
-    terms,
+    `🔥 ${storeName} — ${bonus}`,
     ``,
     `🎟 Промокод: ${code}`,
     ``,
-    `👉 Скопировать и применить: ${siteUrl}`,
-    ``,
-    `#скидки #${coupon.store.categorySlug.replace(/-/g, "_")} #промокод #${coupon.store.slug.replace(/-/g, "_")} #промофакт`,
   ];
 
-  return lines.filter((l) => l !== undefined).join("\n");
+  lines.push("📌 Условия:");
+  if (coupon.promocode.isFirstOrderOnly) {
+    lines.push("• Только для новых клиентов (первый заказ)");
+  } else if (coupon.promocode.isUniversal) {
+    lines.push("• Для всех клиентов (включая повторные заказы)");
+  }
+  if (coupon.promocode.minimumOrder) {
+    lines.push(`• При заказе от ${coupon.promocode.minimumOrder.value.toLocaleString("ru-RU")} ₽`);
+  }
+  if (coupon.promocode.terms) {
+    lines.push(`• ${coupon.promocode.terms}`);
+  }
+  if (coupon.promocode.expires) {
+    const d = new Date(coupon.promocode.expires);
+    if (!Number.isNaN(d.getTime())) {
+      const expFormatted = d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+      lines.push(`• Срок действия: до ${expFormatted}`);
+    }
+  }
+
+  lines.push(``);
+  lines.push(`🛍 В магазин: ${directLink}`);
+  lines.push(`🌐 Все купоны магазина: ${storeUrl}`);
+
+  // Обязательная маркировка рекламы (ОРД) по закону РФ
+  const ordText = coupon.affiliate.ordText;
+  const ordMarker = coupon.affiliate.ordMarker;
+  lines.push(``);
+  if (ordText) {
+    const markerStr = ordMarker && !ordText.includes(ordMarker) ? ` erid: ${ordMarker}` : "";
+    lines.push(`${ordText}${markerStr}`);
+  } else if (ordMarker) {
+    lines.push(`Реклама. erid: ${ordMarker}`);
+  } else {
+    lines.push(`Реклама. ${storeName}`);
+  }
+
+  // Хэштеги
+  const catTag = coupon.store.categorySlug ? `#${coupon.store.categorySlug.replace(/-/g, "_")}` : "";
+  const storeTag = `#${coupon.store.slug.replace(/-/g, "_")}`;
+  lines.push(``);
+  lines.push(`#скидки #промокод ${storeTag} ${catTag} #промофакт`.replace(/\s+/g, " ").trim());
+
+  return lines.join("\n");
 }
 
 /**
@@ -65,7 +125,7 @@ export async function sendCouponToVk(coupon: Coupon): Promise<VkPostResult> {
   }
 
   const message = formatVkPost(coupon);
-  const postUrl = `${SITE_URL}/store/${coupon.store.slug}/${encodeURIComponent(coupon.promocode.code)}`;
+  const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
 
   try {
     const params = new URLSearchParams({
@@ -74,6 +134,7 @@ export async function sendCouponToVk(coupon: Coupon): Promise<VkPostResult> {
       owner_id: ownerId,
       from_group: "1",
       message,
+      attachments: storeUrl,
     });
 
     const res = await fetch(`https://api.vk.com/method/wall.post`, {

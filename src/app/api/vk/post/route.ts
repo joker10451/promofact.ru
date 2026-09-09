@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCoupons } from "@/lib/perfluence";
-import { sendCouponToVk } from "@/lib/vk";
+import { sendCouponToVk, formatVkPost } from "@/lib/vk";
+import { isBearerAuthorized } from "@/lib/apiAuth";
+import { selectBestCouponToPost, recordPosting } from "@/lib/postingEngine";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
-  const secret = process.env.VK_POSTING_SECRET || process.env.TELEGRAM_POSTING_SECRET;
-  const statsPassword = process.env.STATS_PASSWORD;
-  const authHeader = req.headers.get("authorization");
-
-  const isAuthorized =
-    (secret && authHeader === `Bearer ${secret}`) ||
-    (statsPassword && authHeader === `Bearer ${statsPassword}`);
+async function handlePost(req: NextRequest) {
+  const isAuthorized = isBearerAuthorized(req.headers.get("authorization"), [
+    process.env.VK_POSTING_SECRET,
+    process.env.TELEGRAM_POSTING_SECRET,
+    process.env.CRON_SECRET,
+  ]);
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,47 +21,79 @@ export async function POST(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const hitOnly = searchParams.get("hitOnly") === "true";
     const storeSlug = searchParams.get("store");
-    const limit = parseInt(searchParams.get("limit") || "1", 10);
+    const dryRun = searchParams.get("dryRun") === "true";
 
     const coupons = await getCoupons();
     if (!coupons || coupons.length === 0) {
       return NextResponse.json({ message: "No active coupons found" }, { status: 404 });
     }
 
-    const filtered = coupons.filter((c) => {
-      if (!c.promocode.code) return false;
-      if (hitOnly && !c.promocode.isHit) return false;
-      if (storeSlug && c.store.slug !== storeSlug) return false;
-      return true;
+    const selection = selectBestCouponToPost(coupons, {
+      hitOnly,
+      storeSlug: storeSlug || undefined,
     });
 
-    if (filtered.length === 0) {
-      return NextResponse.json({ message: "No matching coupons found" }, { status: 404 });
+    if (!selection) {
+      return NextResponse.json({ message: "No matching coupons eligible for posting" }, { status: 404 });
     }
 
-    // Сортировка: хиты и топ-скидки первыми
-    filtered.sort((a, b) => (b.promocode.isHit ? 1 : 0) - (a.promocode.isHit ? 1 : 0));
+    const { coupon, reason, stats } = selection;
 
-    const toPost = filtered.slice(0, limit);
-    const results = [];
-
-    for (const coupon of toPost) {
-      const res = await sendCouponToVk(coupon);
-      results.push({
-        id: coupon.id,
-        store: coupon.store.name,
-        code: coupon.promocode.code,
-        status: res.ok ? "posted" : "failed",
-        error: res.error,
-        postId: res.postId,
+    if (dryRun) {
+      return NextResponse.json({
+        dryRun: true,
+        coupon: {
+          id: coupon.id,
+          store: coupon.store.name,
+          storeSlug: coupon.store.slug,
+          code: coupon.promocode.code,
+          bonus: coupon.promocode.bonusName,
+        },
+        selectionReason: reason,
+        stats,
+        previewText: formatVkPost(coupon),
       });
     }
 
-    return NextResponse.json({ success: true, results });
+    const res = await sendCouponToVk(coupon);
+
+    if (res.ok) {
+      recordPosting({
+        id: coupon.id,
+        code: coupon.promocode.code,
+        store: coupon.store.name,
+        storeSlug: coupon.store.slug,
+        categorySlug: coupon.store.categorySlug,
+        date: new Date().toISOString(),
+        messageId: res.postId,
+        channel: "vk",
+      });
+    }
+
+    return NextResponse.json({
+      success: res.ok,
+      results: [
+        {
+          id: coupon.id,
+          store: coupon.store.name,
+          code: coupon.promocode.code,
+          status: res.ok ? "posted" : "failed",
+          error: res.error,
+          postId: res.postId,
+          selectionReason: reason,
+          stats,
+        },
+      ],
+    });
   } catch (error) {
     return NextResponse.json(
       { error: (error as Error).message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
+
+export async function POST(req: NextRequest) {
+  return handlePost(req);
+}
+
