@@ -179,3 +179,19 @@ export function calculateCouponReliability(
     isHighReliability: bayesianRate >= 95,
   };
 }
+
+/** Детерминистичный счётчик «использовано сегодня» для social proof (12–99). */
+export function generateUsageToday(
+  code: string,
+  storeSlug: string,
+  proofCount: number = 0
+): number {
+  const hash = hashStringToNumber((code || "no-code") + storeSlug);
+  const base = 12 + (hash % 50); // 12–61
+  return Math.min(99, base + Math.min(proofCount, 30));
+}
+
+/** Склонение «раз» по числу (всегда «раз» в русском). */
+export function pluralUses(n: number): string {
+  return "раз";
+}

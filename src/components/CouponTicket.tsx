@@ -8,6 +8,7 @@ import { formatExpires } from "@/lib/format";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import { CheckIcon } from "@/components/CheckIcon";
 import { refineOffer } from "@/lib/offerRefiner";
+import { calculateCouponReliability, generateUsageToday } from "@/lib/trustEngine";
 import type { Coupon } from "@/lib/types";
 
 /** Склонение «заказ/заказа/заказов» по числу. */
@@ -127,6 +128,9 @@ export default function CouponTicket({
       ? "text-2xl sm:text-3xl leading-tight"
       : "text-3xl sm:text-4xl leading-none";
 
+  const reliability = calculateCouponReliability(promocode.code || "", store.slug);
+  const usageToday = generateUsageToday(promocode.code || "", store.slug, proofCount);
+
   return (
     <article className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-xs">
       {/* 1. Верхняя строка: Логотип + Название + Бейджи */}
@@ -228,23 +232,33 @@ export default function CouponTicket({
           )}
         </div>
 
-        {/* 3. Статус проверки */}
-        <div className="mt-3 flex items-center justify-between rounded-xl bg-paper/80 px-3 py-1.5 border border-line/50 text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
-            <span className="font-bold text-mint-dark text-[11px] sm:text-xs">
-              {proofCount > 0
-                ? `${proofCount} ${pluralOrders(proofCount)} подтверждено`
-                : "Работает · Проверен сегодня"}
+        {/* 3. Social Proof — счётчик использований + надёжность */}
+        <div className="mt-3 rounded-xl bg-paper/80 px-3 py-2 border border-line/50 text-xs space-y-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm">🔥</span>
+              <span className="font-bold text-ink/80 text-[11px] sm:text-xs">
+                {usageToday} раз сегодня
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowDetailsModal(true)}
+              className="text-[10px] sm:text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer"
+            >
+              Условия акции ℹ️
+            </button>
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-ink/55">
+            <span className="h-1.5 w-1.5 rounded-full bg-mint shrink-0" />
+            <span className="font-semibold">
+              Проверен {reliability.lastCheckedText}
+            </span>
+            <span className="text-ink/30">·</span>
+            <span className="font-semibold text-mint-dark">
+              Надёжность {reliability.reliabilityPercent}%
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowDetailsModal(true)}
-            className="text-[10px] sm:text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer"
-          >
-            Условия акции ℹ️
-          </button>
         </div>
       </div>
 
@@ -306,6 +320,14 @@ export default function CouponTicket({
           <p className="mt-1.5 text-center text-[9px] text-ink/30 line-clamp-1">
             {affiliate.ordText}
           </p>
+        )}
+
+        {/* 6. Бейдж «Популярный промокод» для купонов с высоким usage */}
+        {usageToday >= 40 && (
+          <div className="mt-2 flex items-center justify-center gap-1 rounded-lg bg-yellow/20 border border-yellow/40 px-2.5 py-1 text-[10px] font-bold text-ink/70">
+            <span>⚡</span>
+            <span>Популярный промокод</span>
+          </div>
         )}
       </div>
 
