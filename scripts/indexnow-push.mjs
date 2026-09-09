@@ -3,8 +3,8 @@
 const BASE = process.argv[2] || "https://promofact.ru";
 
 async function main() {
-  const sitemapUrl = `${BASE}/sitemap.xml`;
-  const res = await fetch(sitemapUrl);
+  const sitemapUrl = `${BASE}/sitemap.xml?t=${Date.now()}`;
+  const res = await fetch(sitemapUrl, { headers: { "Cache-Control": "no-cache" } });
   if (!res.ok) {
     console.error("Не удалось скачать sitemap:", res.status);
     process.exit(1);
