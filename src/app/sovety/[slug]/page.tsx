@@ -40,6 +40,20 @@ export async function generateMetadata({
   };
 }
 
+function renderParagraph(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={i} className="font-bold text-ink">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 export default async function ArticlePage({
   params,
 }: {
@@ -131,13 +145,43 @@ export default async function ArticlePage({
               {article.description}
             </p>
 
+            {article.image && (
+              <div className="mt-6 overflow-hidden rounded-3xl border border-line bg-paper/30 shadow-xs">
+                <img
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-auto object-cover max-h-[480px]"
+                />
+              </div>
+            )}
+
             <div className="mt-6 space-y-4 text-base leading-relaxed text-ink/80">
               {article.body.map((p, i) => (
                 <p key={i} className="leading-relaxed">
-                  {p}
+                  {renderParagraph(p)}
                 </p>
               ))}
             </div>
+
+            {article.ctaButton && (
+              <div className="mt-8 rounded-2xl bg-mint/10 border border-mint/40 p-5 sm:flex sm:items-center sm:justify-between gap-4">
+                <div className="min-w-0">
+                  <a
+                    href={article.ctaButton.href}
+                    target="_blank"
+                    rel="noopener nofollow sponsored"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red hover:bg-red/90 text-white px-6 py-3.5 font-display text-sm sm:text-base font-extrabold shadow-offset transition-transform active:translate-x-0.5 active:translate-y-0.5"
+                  >
+                    <span>{article.ctaButton.text}</span>
+                  </a>
+                  {article.ctaButton.disclaimer && (
+                    <div className="text-[11px] text-ink/40 mt-2.5 font-mono">
+                      {article.ctaButton.disclaimer}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* SEO Воронка: Встроенные рабочие промокоды по теме статьи */}
             {relevantCoupons.length > 0 && (
