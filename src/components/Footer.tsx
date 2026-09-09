@@ -87,6 +87,30 @@ export default async function Footer() {
                 Эксклюзивные промокоды
               </Link>
             </li>
+            <li>
+              <Link href="/collections/vecher-kino" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                Кино, сериалы и подписки
+              </Link>
+            </li>
+            <li>
+              <Link href="/collections/krasota-i-parfyum" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                Косметика и парфюмерия
+              </Link>
+            </li>
+            <li>
+              <Link href="/collections/vygodnye-oteli" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                Отели и путешествия
+              </Link>
+            </li>
+            <li>
+              <Link href="/collections/marketpleysy" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                Маркетплейсы и гипермаркеты
+              </Link>
+            </li>
           </ul>
         </nav>
 

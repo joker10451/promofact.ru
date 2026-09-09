@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ymReachGoal } from "@/components/YandexMetrika";
+import RecentActivityPulse from "@/components/RecentActivityPulse";
 import type { Coupon, Store } from "@/lib/types";
 
 interface HeroProps {
@@ -23,14 +24,14 @@ function pluralOrders(n: number): string {
 
 // Реальные актуальные магазины нашего сайта
 const REAL_POPULAR_TAGS = [
-  "Отелло",
-  "Ив Роше",
-  "Яндекс Цветы",
   "Пятёрочка",
-  "Важная Рыба",
+  "Самокат",
+  "Отелло",
   "Кинопоиск",
+  "Яндекс Маркет",
+  "Ив Роше",
+  "Магнит",
   "Fix Price",
-  "FMART",
 ];
 
 export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: HeroProps) {
@@ -96,6 +97,11 @@ export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: Hero
       />
 
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 relative z-10">
+        {/* Живой пульс активности */}
+        <div className="flex justify-center">
+          <RecentActivityPulse />
+        </div>
+
         {/* Заголовок */}
         <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-ink sm:leading-[1.1]">
           Найдите скидку. <br />

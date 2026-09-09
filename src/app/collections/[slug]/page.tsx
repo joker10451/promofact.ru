@@ -17,15 +17,15 @@ export const revalidate = 1800;
 
 export async function generateStaticParams() {
   try {
-    const categories = await getCollections();
-    if (categories.length > 0)
-      return categories.map((col) => ({ slug: col.slug }));
+    const collections = await getCollections();
+    if (collections.length > 0)
+      return collections.map((col) => ({ slug: col.slug }));
     console.error(
-      "[build] fetchCoupons пуст — /store и /category не сгенерированы; проверь PERFLUENCE_WIDGET_URL в build-окружении",
+      "[build] getCollections пуст — /collections не сгенерированы",
     );
   } catch (e) {
     console.error(
-      "[build] ошибка fetchCoupons при генерации /category; проверь PERFLUENCE_WIDGET_URL в build-окружении",
+      "[build] ошибка getCollections при генерации /collections",
       e,
     );
   }
@@ -49,7 +49,7 @@ export async function generateMetadata({
   const [collections, all] = await Promise.all([getCollections(), getCoupons()]);
   const col = collections.find((c) => c.slug === slug);
   if (!col) return {};
-  const count = all.filter((c) => c.store.categorySlug === slug).length;
+  const count = all.filter(col.filter).length;
   const pageUrl = `${SITE_URL}/collections/${slug}`;
   const og = {
     title: `Промокоды и купоны: ${col.name} — скидки ${MONTH_YEAR}`,
@@ -84,7 +84,7 @@ function seoText(
       ? storeNames.slice(0, 5).join(", ")
       : "скидки на популярные бренды";
   return [
-    `Подборка рабочих промокодов для подборке «${colName}»: сейчас в ней ${couponCount} ${plural(
+    `Подборка рабочих промокодов «${colName}»: сейчас в ней ${couponCount} ${plural(
       couponCount,
       "актуальный купон",
       "актуальных купона",
@@ -102,7 +102,7 @@ function seoText(
   ];
 }
 
-export default async function CategoryPage({
+export default async function CollectionPage({
   params,
 }: {
   params: Promise<{ slug: string }>;

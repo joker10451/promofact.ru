@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCategories, getCoupons } from "@/lib/perfluence";
+import { COLLECTIONS } from "@/lib/collections";
 
 const CATEGORY_ICONS: Record<string, string> = {
   "dostavka-iz-restoranov": "🍔",
@@ -60,6 +61,31 @@ export default async function VisualCategoryTiles() {
               </Link>
             );
           })}
+        </div>
+
+        {/* Популярные тематические подборки */}
+        <div className="mt-12 pt-8 border-t border-line/70">
+          <div className="mb-4">
+            <h3 className="font-display text-lg sm:text-xl font-extrabold text-ink">
+              Популярные подборки
+            </h3>
+            <p className="mt-0.5 text-xs sm:text-sm text-ink/60 font-medium">
+              Готовые коллекции проверенных промокодов под разные поводы
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            {COLLECTIONS.map((col) => (
+              <Link
+                key={col.slug}
+                href={`/collections/${col.slug}`}
+                className="group inline-flex items-center gap-2 rounded-xl border border-line bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-ink shadow-2xs hover:border-red hover:text-red hover:shadow-xs transition-all"
+              >
+                <span>{col.emoji}</span>
+                <span>{col.name}</span>
+                <span className="text-ink/35 group-hover:text-red transition-colors text-xs">→</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>
