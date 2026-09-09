@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import StoreLogo from "@/components/StoreLogo";
 import { formatExpires } from "@/lib/format";
@@ -61,7 +62,29 @@ export default function CouponTicket({
   const [copied, setCopied] = useState(false);
   const [toast, setToast] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Блокировка скролла страницы и закрытие по Escape при открытой модалке
+  useEffect(() => {
+    if (!showDetailsModal) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowDetailsModal(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showDetailsModal]);
 
   const copyAndOpen = (code: string, url: string) => {
     if (typeof window !== "undefined" && url && url !== "#") {
@@ -286,141 +309,151 @@ export default function CouponTicket({
         )}
       </div>
 
-      {/* Модальное окно */}
-      {showDetailsModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-xs p-4 animate-fade-in"
-          onClick={() => setShowDetailsModal(false)}
-        >
+      {/* Модальное окно через Portal (вынесено в body, чтобы hover карточки не вызывал рябь) */}
+      {mounted &&
+        typeof document !== "undefined" &&
+        showDetailsModal &&
+        createPortal(
           <div
-            className="relative w-full max-w-md rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-line animate-scale-up"
-            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/70 backdrop-blur-xs p-4"
+            onClick={() => setShowDetailsModal(false)}
           >
-            <button
-              type="button"
-              onClick={() => setShowDetailsModal(false)}
-              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-paper text-ink/60 hover:bg-paper/80 hover:text-ink transition-colors cursor-pointer"
+            <div
+              className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-line"
+              onClick={(e) => e.stopPropagation()}
             >
-              ✕
-            </button>
+              <button
+                type="button"
+                onClick={() => setShowDetailsModal(false)}
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-paper text-ink/60 hover:bg-paper/80 hover:text-ink transition-colors cursor-pointer"
+                aria-label="Закрыть"
+              >
+                ✕
+              </button>
 
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line/60 bg-white p-1 shadow-2xs">
-                <StoreLogo
-                  slug={store.slug}
-                  name={store.name}
-                  logo={store.logo}
-                  site={store.site}
-                  size={40}
-                />
-              </div>
-              <div>
-                <h4 className="font-display text-lg font-extrabold text-ink">{store.name}</h4>
-                <p className="text-xs text-ink/50 font-medium">{store.category}</p>
-              </div>
-            </div>
-
-            <div className="mt-5 rounded-2xl bg-paper/60 p-4 border border-line/60">
-              <div className="font-display text-2xl font-black text-ink">{offer.discount}</div>
-              <div className="mt-1 text-sm font-semibold text-ink/80">{offer.condition}</div>
-            </div>
-
-            <div className="mt-5 space-y-3 text-xs leading-relaxed text-ink/80">
-              <div>
-                <span className="font-bold text-ink block mb-1">📋 Полные условия акции:</span>
-                <p className="rounded-xl bg-slate-50 p-3 text-ink/70 border border-line/40">
-                  {offer.fullTerms}
-                </p>
-              </div>
-
-              <div className="rounded-xl bg-mint/10 border border-mint/30 p-3 text-[11px] text-ink/80 space-y-1">
-                <div className="font-bold text-mint-dark flex items-center gap-1.5">
-                  <span>✓</span>
-                  <span>Гарантия актуальности ПромоФакт</span>
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line/60 bg-white p-1 shadow-2xs">
+                  <StoreLogo
+                    slug={store.slug}
+                    name={store.name}
+                    logo={store.logo}
+                    site={store.site}
+                    size={40}
+                  />
                 </div>
-                <p className="text-ink/65 text-[10px] leading-relaxed">
-                  Промокод проверен сегодня на официальном сайте магазина {store.name}. Скидка применяется в корзине при соблюдении условий.
-                </p>
-                {proofCount > 0 && (
-                  <p className="text-ink/65 text-[10px] leading-relaxed font-semibold">
-                    По этому коду уже подтверждено {proofCount} {pluralOrders(proofCount)}.
+                <div>
+                  <h4 className="font-display text-lg font-extrabold text-ink">{store.name}</h4>
+                  <p className="text-xs text-ink/50 font-medium">{store.category}</p>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl bg-paper/60 p-4 border border-line/60">
+                <div className="font-display text-2xl font-black text-ink">{offer.discount}</div>
+                <div className="mt-1 text-sm font-semibold text-ink/80">{offer.condition}</div>
+              </div>
+
+              <div className="mt-5 space-y-3 text-xs leading-relaxed text-ink/80">
+                <div>
+                  <span className="font-bold text-ink block mb-1">📋 Полные условия акции:</span>
+                  <p className="rounded-xl bg-slate-50 p-3 text-ink/70 border border-line/40 whitespace-pre-line">
+                    {offer.fullTerms}
                   </p>
+                </div>
+
+                <div className="rounded-xl bg-mint/10 border border-mint/30 p-3 text-[11px] text-ink/80 space-y-1">
+                  <div className="font-bold text-mint-dark flex items-center gap-1.5">
+                    <span>✓</span>
+                    <span>Гарантия актуальности ПромоФакт</span>
+                  </div>
+                  <p className="text-ink/65 text-[10px] leading-relaxed">
+                    Промокод проверен сегодня на официальном сайте магазина {store.name}. Скидка применяется в корзине при соблюдении условий.
+                  </p>
+                  {proofCount > 0 && (
+                    <p className="text-ink/65 text-[10px] leading-relaxed font-semibold">
+                      По этому коду уже подтверждено {proofCount} {pluralOrders(proofCount)}.
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/50 text-[11px]">
+                  <div>
+                    <span className="text-ink/45 block">Действует:</span>
+                    <span className="font-bold text-ink">
+                      {promocode.expires ? `до ${formatExpires(promocode.expires)}` : "Бессрочно"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-ink/45 block">Для кого:</span>
+                    <span className="font-bold text-ink">
+                      {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Только новый клиент" : "Для всех покупателей")}
+                    </span>
+                  </div>
+                </div>
+
+                {affiliate.ordText && (
+                  <div className="pt-2 text-[10px] text-ink/40 border-t border-line/40">
+                    {affiliate.ordText}
+                  </div>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/50 text-[11px]">
+              <div className="mt-6 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    copyAndOpen(promocode.code, targetUrl);
+                  }}
+                  className="w-full rounded-2xl bg-gradient-to-r from-red to-red-dark py-3.5 px-4 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                >
+                  {promocode.code ? `Скопировать ${promocode.code} и перейти →` : `Перейти в магазин →`}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* Toast через Portal */}
+      {mounted &&
+        typeof document !== "undefined" &&
+        toast &&
+        createPortal(
+          <div
+            role="status"
+            className="fixed bottom-5 left-4 right-4 z-[9999] mx-auto max-w-md rounded-2xl border-2 border-yellow bg-ink p-4 text-white shadow-xl sm:left-auto sm:right-6 sm:bottom-6 sm:w-[380px]"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mint text-sm font-black text-ink">
+                  ✓
+                </span>
                 <div>
-                  <span className="text-ink/45 block">Действует:</span>
-                  <span className="font-bold text-ink">
-                    {promocode.expires ? `до ${formatExpires(promocode.expires)}` : "Бессрочно"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-ink/45 block">Для кого:</span>
-                  <span className="font-bold text-ink">
-                    {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Только новый клиент" : "Для всех покупателей")}
-                  </span>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-mint">
+                    Код скопирован! Магазин открыт
+                  </div>
+                  <div className="font-display text-base font-extrabold text-white">
+                    {promocode.code || store.name}
+                  </div>
                 </div>
               </div>
-
-              {affiliate.ordText && (
-                <div className="pt-2 text-[10px] text-ink/40 border-t border-line/40">
-                  {affiliate.ordText}
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 flex gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  setShowDetailsModal(false);
-                  copyAndOpen(promocode.code, targetUrl);
-                }}
-                className="w-full rounded-2xl bg-gradient-to-r from-red to-red-dark py-3.5 px-4 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                onClick={() => setToast(false)}
+                className="text-xs font-bold text-white/40 hover:text-white p-1"
+                aria-label="Закрыть уведомление"
               >
-                {promocode.code ? `Скопировать ${promocode.code} и перейти →` : `Перейти в магазин →`}
+                ✕
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast */}
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-5 left-4 right-4 z-50 mx-auto max-w-md rounded-2xl border-2 border-yellow bg-ink p-4 text-white shadow-xl sm:left-auto sm:right-6 sm:bottom-6 sm:w-[380px]"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mint text-sm font-black text-ink">
-                ✓
-              </span>
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-mint">
-                  Код скопирован! Магазин открыт
-                </div>
-                <div className="font-display text-base font-extrabold text-white">
-                  {promocode.code || store.name}
-                </div>
-              </div>
+            <div className="mt-2.5 border-t border-white/10 pt-2 text-xs text-white/80">
+              💡 Вставьте промокод в поле купона при оплате в <span className="font-bold text-white">{store.name}</span>.
             </div>
-            <button
-              type="button"
-              onClick={() => setToast(false)}
-              className="text-xs font-bold text-white/40 hover:text-white p-1"
-            >
-              ✕
-            </button>
-          </div>
-          <div className="mt-2.5 border-t border-white/10 pt-2 text-xs text-white/80">
-            💡 Вставьте промокод в поле купона при оплате в <span className="font-bold text-white">{store.name}</span>.
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </article>
   );
 }
