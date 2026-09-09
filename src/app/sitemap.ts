@@ -30,12 +30,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const storeMap: MetadataRoute.Sitemap = stores.map((store) => ({
-    url: `${SITE_URL}/store/${store.slug}`,
-    lastModified: today,
-    changeFrequency: "daily" as const,
-    priority: 0.9,
-  }));
+  const storeMap: MetadataRoute.Sitemap = stores.flatMap((store) => [
+    {
+      url: `${SITE_URL}/store/${store.slug}`,
+      lastModified: today,
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/store/${store.slug}/first-order`,
+      lastModified: today,
+      changeFrequency: "daily" as const,
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/store/${store.slug}/repeat-order`,
+      lastModified: today,
+      changeFrequency: "daily" as const,
+      priority: 0.85,
+    },
+  ]);
 
   const categoryMap: MetadataRoute.Sitemap = categories.map((cat) => ({
     url: `${SITE_URL}/category/${cat.slug}`,

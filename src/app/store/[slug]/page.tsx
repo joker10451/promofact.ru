@@ -9,6 +9,7 @@ import OtherCategories from "@/components/OtherCategories";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import StoreLogo from "@/components/StoreLogo";
 import StoreRatingWidget from "@/components/StoreRatingWidget";
+import StoreIntentTabs from "@/components/StoreIntentTabs";
 import { calculateStoreTrust } from "@/lib/trustEngine";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { buildStoreArticle, buildStoreDescription, type StoreArticleInput } from "@/lib/storeSeoContent";
@@ -163,6 +164,15 @@ export default async function StorePage({
 
   const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
   const repeatOrderPromo = store.coupons.find((c) => !c.promocode.isFirstOrderOnly);
+  const firstOrderCoupons = store.coupons.filter(
+    (c) =>
+      c.promocode.isFirstOrderOnly ||
+      /перв|1[-‑–—]?[ыое]?й/i.test(c.promocode.bonusName || "") ||
+      /перв|1[-‑–—]?[ыое]?й/i.test(c.promocode.terms || "")
+  );
+  const repeatOrderCoupons = store.coupons.filter(
+    (c) => !c.promocode.isFirstOrderOnly
+  );
 
   // Уникальный SEO-текст: собирается из реальных фактов магазина, а не шаблона.
   const storeArticle = buildStoreArticle(
@@ -447,6 +457,14 @@ export default async function StorePage({
 
         {/* 1. ГЛАВНЫЙ БЛОК: АКТИВНЫЕ КУПОНЫ И ПРОМОКОДЫ (СРАЗУ НА 1-М ЭКРАНЕ) */}
         <div className="mt-6">
+          <StoreIntentTabs
+            storeSlug={store.slug}
+            activeTab="all"
+            allCount={store.coupons.length}
+            firstCount={firstOrderCoupons.length}
+            repeatCount={repeatOrderCoupons.length}
+          />
+
           <div className="flex items-center justify-between mb-3.5">
             <h2 className="font-display text-base sm:text-lg font-extrabold text-ink">
               Рабочие промокоды и акции {store.name}
