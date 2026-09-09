@@ -10,7 +10,7 @@ import { ARTICLES, getArticle } from "@/lib/articles";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
-export const revalidate = 1800;
+export const revalidate = 43200;
 
 export async function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));

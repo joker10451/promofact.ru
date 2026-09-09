@@ -4,7 +4,7 @@ import Image from "next/image";
 import JsonLd from "@/components/JsonLd";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 
-export const revalidate = 600;
+export const revalidate = 43200;
 
 const PARTNER_URL = "https://ntprnt.prfl.me/sites/ntif0y?erid=2RanymGhNJ7";
 const ERID = "2RanymGhNJ7";

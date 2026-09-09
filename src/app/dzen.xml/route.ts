@@ -2,7 +2,7 @@ import { ARTICLES } from "@/lib/articles";
 import { getCoupons } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL, SITE_TAGLINE } from "@/lib/site";
 
-export const revalidate = 1800; // 30 минут
+export const revalidate = 43200; // 12 часов
 
 function escapeXml(s: string): string {
   if (!s) return "";

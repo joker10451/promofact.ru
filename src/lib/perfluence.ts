@@ -2,7 +2,7 @@ import "server-only";
 import { translit } from "@/lib/translit";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 
-const REVALIDATE_SECONDS = 10 * 60; // 600 — ISR: свежие купоны подтягиваются за 10 мин
+const REVALIDATE_SECONDS = 12 * 60 * 60; // 43200 — ISR: 12 часов для защиты лимита ISR Writes на Vercel
 
 const WIDGET_URL = process.env.PERFLUENCE_WIDGET_URL ?? "";
 const RESULTS_URL = process.env.PERFLUENCE_RESULTS_URL ?? "";
@@ -606,7 +606,7 @@ export interface Result {
   project: { id: number; name: string; logo: string | null };
 }
 
-const RESULTS_REVALIDATE = 5 * 60; // 300 — ISR
+const RESULTS_REVALIDATE = 12 * 60 * 60; // 43200 — ISR: 12 часов для защиты лимитов Vercel
 
 function feeNum(v: unknown): number {
   if (typeof v === "number" && Number.isFinite(v)) return v;

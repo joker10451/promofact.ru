@@ -138,7 +138,7 @@ export async function fetchSaleadsCoupons(): Promise<Coupon[]> {
   try {
     const res = await fetch(SALEADS_FEED_URL, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 1800 },
+      next: { revalidate: 43200 },
     });
     if (!res.ok) {
       console.warn(`[saleads] Не удалось загрузить фид: ${res.status} ${res.statusText}`);

@@ -11,7 +11,7 @@ import { SITE_URL } from "@/lib/site";
 // Подстраницы купонов (/store/[slug]/[code]) исключены, так как их canonical
 // указывает на родительский магазин /store/[slug] — включение неканонических
 // URL в Sitemap признаётся поисковиками ошибкой и размывает краулинговый бюджет.
-export const revalidate = 1800;
+export const revalidate = 43200;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, stores] = await Promise.all([

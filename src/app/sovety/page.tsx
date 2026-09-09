@@ -5,7 +5,7 @@ import { SITE_URL } from "@/lib/site";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-export const revalidate = 1800;
+export const revalidate = 43200;
 
 export const metadata: Metadata = {
   title: `Советы по экономии и гиды по промокодам (${ARTICLES.length} статей) — ПромоФакт`,

@@ -10,7 +10,7 @@ import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const revalidate = 1800;
+export const revalidate = 43200;
 
 export async function generateStaticParams() {
   return CITIES_SEO.map((c) => ({ slug: c.slug }));

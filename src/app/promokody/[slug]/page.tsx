@@ -2,7 +2,7 @@ import { permanentRedirect } from "next/navigation";
 import { getStores } from "@/lib/perfluence";
 
 export const dynamicParams = true;
-export const revalidate = 1800;
+export const revalidate = 43200;
 
 export async function generateStaticParams() {
   try {

@@ -18,7 +18,7 @@ import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickHotDeals, offerKey } from "@/lib/hotDeals";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const revalidate = 1800;
+export const revalidate = 43200; // 12 часов — защита лимита ISR Writes на Vercel
 
 const FAQ_JSONLD = [
   {

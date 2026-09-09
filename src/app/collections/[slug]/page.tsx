@@ -13,7 +13,7 @@ const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
 });
 
 export const dynamicParams = true;
-export const revalidate = 1800;
+export const revalidate = 43200;
 
 export async function generateStaticParams() {
   try {

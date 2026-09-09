@@ -1,2 +1,9 @@
-﻿coupon-video/
+coupon-video/
 out/
+scripts/
+.claude/
+.agents/
+docs/
+*.mjs
+*.log
+*.mp4

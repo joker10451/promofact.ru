@@ -1,7 +1,7 @@
 import { ARTICLES } from "@/lib/articles";
 import { SITE_NAME, SITE_URL, SITE_TAGLINE } from "@/lib/site";
 
-export const revalidate = 3600;
+export const revalidate = 43200;
 
 function escapeXml(s: string): string {
   if (!s) return "";

@@ -19,7 +19,7 @@ import { ARTICLES } from "@/lib/articles";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = true;
-export const revalidate = 1800;
+export const revalidate = 43200;
 
 export async function generateStaticParams() {
   try {

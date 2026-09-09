@@ -15,7 +15,7 @@ const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
 });
 
 export const dynamicParams = true;
-export const revalidate = 1800;
+export const revalidate = 43200;
 
 const plural = (n: number, one: string, few: string, many: string): string => {
   const mod10 = n % 10;

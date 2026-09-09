@@ -4,7 +4,7 @@ import { getStores, getCategories } from "@/lib/perfluence";
 import { ARTICLES } from "@/lib/articles";
 import { SITE_NAME } from "@/lib/site";
 
-export const revalidate = 600;
+export const revalidate = 43200;
 
 export const metadata: Metadata = {
   title: `Карта сайта — ${SITE_NAME}`,

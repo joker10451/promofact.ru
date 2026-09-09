@@ -6,7 +6,7 @@ import { getStores } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { currentMonthYear, getMaxDiscount } from "@/lib/seoArticles";
 
-export const revalidate = 1800;
+export const revalidate = 43200;
 
 const monthYear = currentMonthYear();
 

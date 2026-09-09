@@ -3,7 +3,7 @@ import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 
-export const revalidate = 600;
+export const revalidate = 43200;
 
 const PARTNER_URL = "https://yookassa.prfl.me/sites/5iqj3x?erid=2RanymXWEfm";
 const ERID = "2RanymXWEfm";
