@@ -374,7 +374,11 @@ export default async function StoreRepeatOrderPage({
         />
 
         <div className="mt-10">
-          <OtherStores current={store.slug} category={store.categorySlug} />
+          <OtherStores
+            current={store.slug}
+            category={store.categorySlug}
+            storeName={store.name}
+          />
         </div>
       </div>
     </main>

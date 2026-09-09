@@ -664,7 +664,11 @@ export default async function StorePage({
           </Link>
         </section>
 
-        <OtherStores current={store.slug} category={store.categorySlug} />
+        <OtherStores
+          current={store.slug}
+          category={store.categorySlug}
+          storeName={store.name}
+        />
 
         {/* Ссылки на статьи блога по теме магазина (Двунаправленный граф перелинковки) */}
         {(() => {

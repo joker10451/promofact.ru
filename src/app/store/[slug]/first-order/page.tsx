@@ -402,7 +402,11 @@ export default async function StoreFirstOrderPage({
         />
 
         <div className="mt-10">
-          <OtherStores current={store.slug} category={store.categorySlug} />
+          <OtherStores
+            current={store.slug}
+            category={store.categorySlug}
+            storeName={store.name}
+          />
         </div>
       </div>
     </main>
