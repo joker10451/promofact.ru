@@ -163,9 +163,9 @@ export default async function CollectionPage({
       position: i + 1,
       item: {
         "@type": "Offer",
-        name: `Промокод ${c.promocode.code}`,
+        name: c.promocode.code ? `Промокод ${c.promocode.code}` : `Акция ${c.store.name}`,
         description: c.promocode.bonusName || c.store.name,
-        url: c.affiliate.link,
+        url: c.affiliate.link || pageUrl,
         priceValidUntil: c.promocode.expires,
         priceCurrency: "RUB",
         price: 0,
@@ -175,9 +175,20 @@ export default async function CollectionPage({
     })),
   };
 
+  const collectionJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `Промокоды и купоны: ${col.name}`,
+    description: col.description,
+    url: pageUrl,
+    inLanguage: "ru-RU",
+    mainEntity: listing,
+  };
+
   return (
     <main>
       <JsonLd data={breadcrumb} />
+      <JsonLd data={collectionJsonLd} />
       <JsonLd data={faqJsonLd} />
       <JsonLd data={listing} />
 

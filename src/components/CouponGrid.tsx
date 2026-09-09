@@ -172,6 +172,10 @@ export default function CouponGrid({
 
     const PRIORITY_SLUGS = [
       "pyaterochka",
+      "samokat",
+      "magnit-dostavka",
+      "yandex-market",
+      "zolotoe-yabloko",
       "otello",
       "kinopoisk",
       "yandeks-tsvety",
@@ -279,6 +283,50 @@ export default function CouponGrid({
             <span className="absolute right-2.5 text-[10px] pointer-events-none text-ink/40">▼</span>
           </div>
         </div>
+      </div>
+
+      {/* Быстрые интерактивные фильтры */}
+      <div className="flex flex-wrap items-center gap-2 mb-5">
+        <button
+          type="button"
+          onClick={() => setQuickFilter("all")}
+          className={quickChipCls(quickFilter === "all")}
+        >
+          <span>🔥</span>
+          <span>Все предложения</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickFilter("hit")}
+          className={quickChipCls(quickFilter === "hit")}
+        >
+          <span>⭐</span>
+          <span>Хиты</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickFilter("first")}
+          className={quickChipCls(quickFilter === "first")}
+        >
+          <span>🎁</span>
+          <span>На первый заказ</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickFilter("repeat")}
+          className={quickChipCls(quickFilter === "repeat")}
+        >
+          <span>🔁</span>
+          <span>Повторные заказы</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickFilter("discount_20")}
+          className={quickChipCls(quickFilter === "discount_20")}
+        >
+          <span>⚡</span>
+          <span>Скидки от 20% / 500 ₽</span>
+        </button>
       </div>
 
       {/* Мобильная полоса категорий */}
