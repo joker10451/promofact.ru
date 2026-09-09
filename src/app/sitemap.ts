@@ -1,30 +1,25 @@
 import type { MetadataRoute } from "next";
-import { getCategories, getCoupons, getAllStores } from "@/lib/perfluence";
+import { getCategories, getAllStores } from "@/lib/perfluence";
 import { ARTICLES } from "@/lib/articles";
 import { ACTIONS } from "@/lib/actions";
 import { CITIES_SEO } from "@/lib/citiesSeo";
+import { COLLECTIONS } from "@/lib/collections";
 import { SITE_URL } from "@/lib/site";
 
-// sitemap.ts — special Route Handler, который Next кэширует НАВСЕГДА до
-// следующего деплоя, если не задан сегментный конфиг (см. docs: «cached by
-// default unless it uses a dynamic config option»). fetch-revalidate внутри
-// getCoupons сам роут не размораживает. Без этой строки прод отдавал снимок
-// на момент сборки: магазины и коды, выпавшие из фида, оставались в sitemap
-// (мёртвые URL для Яндекса и Google), пока страницы с revalidate=1800 уже
-// 404-или. Тот же такт, что у /store и /store/[code], держит их согласованными.
+// sitemap.ts — Dynamic Route Handler
+// Содержит ТОЛЬКО 100% канонические, индексируемые страницы (Quality Gate).
+// Подстраницы купонов (/store/[slug]/[code]) исключены, так как их canonical
+// указывает на родительский магазин /store/[slug] — включение неканонических
+// URL в Sitemap признаётся поисковиками ошибкой и размывает краулинговый бюджет.
 export const revalidate = 1800;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [coupons, categories, stores] = await Promise.all([
-    getCoupons(),
+  const [categories, stores] = await Promise.all([
     getCategories(),
     getAllStores(),
   ]);
+
   const today = new Date();
-  const lastModified = coupons.reduce((max, c) => {
-    const t = new Date(c.promocode.expires ?? "");
-    return Number.isNaN(t.getTime()) ? max : t > max ? t : max;
-  }, today);
 
   const home: MetadataRoute.Sitemap = [
     {
@@ -34,29 +29,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
   ];
+
+  const storeMap: MetadataRoute.Sitemap = stores.map((store) => ({
+    url: `${SITE_URL}/store/${store.slug}`,
+    lastModified: today,
+    changeFrequency: "daily" as const,
+    priority: 0.9,
+  }));
+
   const categoryMap: MetadataRoute.Sitemap = categories.map((cat) => ({
     url: `${SITE_URL}/category/${cat.slug}`,
     lastModified: today,
     changeFrequency: "daily",
-    priority: 0.7,
+    priority: 0.8,
   }));
-  const storeMap: MetadataRoute.Sitemap = stores.flatMap((store) => [
-    {
-      url: `${SITE_URL}/store/${store.slug}`,
-      lastModified,
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    },
-  ]);
 
-  const couponMap: MetadataRoute.Sitemap = coupons
-    .filter((c) => c.promocode?.code && c.store?.slug)
-    .map((c) => ({
-      url: `${SITE_URL}/store/${c.store.slug}/${c.promocode.code}`,
-      lastModified,
-      changeFrequency: "daily" as const,
-      priority: 0.6,
-    }));
+  const collectionsMap: MetadataRoute.Sitemap = COLLECTIONS.map((col) => ({
+    url: `${SITE_URL}/collections/${col.slug}`,
+    lastModified: today,
+    changeFrequency: "daily" as const,
+    priority: 0.8,
+  }));
 
   const citiesMap: MetadataRoute.Sitemap = CITIES_SEO.map((city) => ({
     url: `${SITE_URL}/gorod/${city.slug}`,
@@ -70,13 +63,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/sovety`,
       lastModified: today,
       changeFrequency: "weekly",
-      priority: 0.6,
+      priority: 0.7,
     },
     ...ARTICLES.map((a) => ({
       url: `${SITE_URL}/sovety/${a.slug}`,
       lastModified: today,
       changeFrequency: "monthly" as const,
-      priority: 0.5,
+      priority: 0.6,
     })),
   ];
 
@@ -84,7 +77,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${SITE_URL}/actions/${a.slug}`,
     lastModified: today,
     changeFrequency: "monthly" as const,
-    priority: 0.55,
+    priority: 0.6,
   }));
 
   const miscMap: MetadataRoute.Sitemap = [
@@ -98,9 +91,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/promokody`,
       lastModified: today,
       changeFrequency: "daily" as const,
-      priority: 0.7,
+      priority: 0.75,
     },
   ];
 
-  return [...home, ...citiesMap, ...categoryMap, ...storeMap, ...couponMap, ...promokodyMap, ...tipsMap, ...actionsMap, ...miscMap];
+  return [
+    ...home,
+    ...storeMap,
+    ...categoryMap,
+    ...collectionsMap,
+    ...citiesMap,
+    ...promokodyMap,
+    ...tipsMap,
+    ...actionsMap,
+    ...miscMap,
+  ];
 }

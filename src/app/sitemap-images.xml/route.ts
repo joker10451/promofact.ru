@@ -1,4 +1,4 @@
-import { getStores } from "@/lib/perfluence";
+import { getAllStores } from "@/lib/perfluence";
 import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 600;
@@ -14,7 +14,7 @@ function xmlEscape(str: string | null | undefined): string {
 }
 
 export async function GET() {
-  const stores = await getStores();
+  const stores = await getAllStores();
 
   const urlEntries = stores
     .filter((s) => s.logo && s.logo.startsWith("http"))

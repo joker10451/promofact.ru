@@ -77,6 +77,17 @@ async function verifyDeployment(maxAttempts = 25, delayMs = 6000) {
         );
       });
       console.log("────────────────────────────────────────────\n");
+
+      if (process.argv.includes("--indexnow") || process.env.AUTO_INDEXNOW === "true") {
+        console.log("📡 Запуск мгновенного пинга поисковиков (IndexNow)...");
+        try {
+          const { execSync } = await import("child_process");
+          execSync(`node scripts/indexnow-push.mjs ${BASE_URL}`, { stdio: "inherit" });
+        } catch (err) {
+          console.warn("⚠️ Не удалось отправить IndexNow:", err.message);
+        }
+      }
+
       return true;
     }
 

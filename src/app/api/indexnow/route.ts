@@ -19,15 +19,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "bad json" }, { status: 400 });
   }
 
-  if (!urls.length) {
-    return NextResponse.json({ ok: false, error: "empty urlList" }, { status: 400 });
+  // Фильтруем URL: разрешены только канонические страницы с нашего домена
+  const cleanUrls = urls
+    .map((u) => (typeof u === "string" ? u.trim() : ""))
+    .filter((u) => u.startsWith(`https://${HOST}`) || u.startsWith(`https://www.${HOST}`));
+
+  if (!cleanUrls.length) {
+    return NextResponse.json({ ok: false, error: "no valid URLs for host " + HOST }, { status: 400 });
   }
 
   const payload = {
     host: HOST,
     key: INDEXNOW_KEY,
     keyLocation: `https://${HOST}/${INDEXNOW_KEY}.txt`,
-    urlList: urls,
+    urlList: cleanUrls,
   };
 
   const results = await Promise.allSettled(
