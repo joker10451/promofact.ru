@@ -73,6 +73,7 @@ export default function CouponTicket({
     setCopied(true);
     setToast(true);
     try {
+      localStorage.setItem("has_copied_coupon", "true");
       if (typeof window !== "undefined" && window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
       }

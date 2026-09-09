@@ -34,9 +34,22 @@ export default function PwaInstallBanner() {
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(isIosDevice);
 
+    const checkAndShow = () => {
+      try {
+        const consent = localStorage.getItem("cookie_consent");
+        // Не показываем PWA, пока висит плашка куки
+        if (!consent) return false;
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
     if (isIosDevice) {
-      // Показываем плашку для iOS через 3 секунды
-      const timer = setTimeout(() => setShowBanner(true), 3000);
+      // На iOS показываем только после 35 секунд активного изучения сайта или если купон уже скопирован
+      const timer = setTimeout(() => {
+        if (checkAndShow()) setShowBanner(true);
+      }, 35000);
       return () => clearTimeout(timer);
     }
 
@@ -44,7 +57,11 @@ export default function PwaInstallBanner() {
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setShowBanner(true);
+      // Показываем через задержку 30 секунд или если купон уже скопирован
+      const timer = setTimeout(() => {
+        if (checkAndShow()) setShowBanner(true);
+      }, 30000);
+      return () => clearTimeout(timer);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);

@@ -339,9 +339,9 @@ export default async function StorePage({
           <span aria-current="page">{store.name}</span>
         </nav>
 
-        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-1 shadow-2xs">
+        <div className="mt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+            <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-1 shadow-2xs">
               <StoreLogo
                 slug={store.slug}
                 name={store.name}
@@ -351,11 +351,11 @@ export default async function StorePage({
                 className="max-h-full max-w-full object-contain"
               />
             </div>
-            <div>
-              <h1 className="max-w-3xl font-display text-2xl font-extrabold leading-tight sm:text-3xl">
+            <div className="min-w-0 flex-1">
+              <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">
                 Промокоды {store.name} на {monthYear} — скидки {maxDisc}
               </h1>
-              <p className="mt-3 max-w-2xl text-ink/60">
+              <p className="mt-2 text-xs sm:text-sm text-ink/60">
                 {store.coupons.length}{" "}
                 {store.coupons.length === 1
                   ? "рабочий промокод"
@@ -364,77 +364,116 @@ export default async function StorePage({
                     : "рабочих промокодов"}
                 . Коды проверены сегодня, срок действия указан в карточке.
               </p>
-              {/* Звёзды «4.8 · N оценок» и «N блогеров рекомендуют» убраны:
-                  оценок не существует (значение было константой), а число
-                  блогеров — тоже выдуманное. Оставляем проверяемые факты:
-                  дату обновления и реальное число заказов через нас. */}
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-mint/10 border border-mint/30 px-3 py-1.5 text-xs font-bold text-ink/70">
+              <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/40 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-mint-dark">
+                  <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
+                  Проверено сегодня · Trust {trust.score}/100
+                </span>
+                <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
                   Обновлено {todayRu}
                 </span>
                 {storeProofCount > 0 && (
-                  <span className="rounded-full bg-red/10 border border-red/30 px-3 py-1.5 text-xs font-bold text-ink/70">
-                    по промокодам {store.name} оформлено {storeProofCount}{" "}
+                  <span className="rounded-full bg-red/10 border border-red/30 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/70">
+                    {storeProofCount}{" "}
                     {storeProofCount === 1
-                      ? "заказ"
+                      ? "заказ оформлен"
                       : storeProofCount >= 2 && storeProofCount <= 4
-                        ? "заказа"
-                        : "заказов"}{" "}
+                        ? "заказа оформлено"
+                        : "заказов оформлено"}{" "}
                     через нас
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <a
               href="https://t.me/smart_zakupka"
               target="_blank"
               rel="noopener nofollow"
-              className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-xs font-bold text-ink shadow-[0_2px_0_rgba(11,16,43,0.06)] hover:border-ink transition-all"
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-bold text-ink shadow-[0_2px_0_rgba(11,16,43,0.06)] hover:border-ink transition-all"
             >
               <svg viewBox="0 0 24 24" width="14" height="14" fill="#0088cc" aria-hidden="true">
                 <path d="M21.94 4.4a1.5 1.5 0 0 0-2.05-.93L3.4 10.6c-.9.36-.85 1.67.07 1.96l4.14 1.3 1.72 5.29c.34 1.05 1.68 1.25 2.34.35l2.06-2.82a.5.5 0 0 1 .6-.13l4.66 2.16c.86.4 1.87-.2 1.88-1.1l.55-14.08a1 1 0 0 0-.44-.8Z" />
               </svg>
-              <span>Скидки {store.name} в Telegram</span>
+              <span>Скидки в Telegram</span>
             </a>
-            <div className="rounded-full bg-mint/10 border border-mint/30 px-3.5 py-2 text-xs font-bold text-ink/70">
-              Проверено сегодня ✓
-            </div>
           </div>
         </div>
 
-        {/* Быстрая сводка (Quick Facts) для SEO и сниппетов */}
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-2xl border border-line bg-white p-4 text-center">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/45">Купонов сегодня</div>
-            <div className="mt-1 font-display text-xl font-extrabold text-ink">{store.coupons.length}</div>
+        {/* 1. ГЛАВНЫЙ БЛОК: АКТИВНЫЕ КУПОНЫ И ПРОМОКОДЫ (СРАЗУ НА 1-М ЭКРАНЕ) */}
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3.5">
+            <h2 className="font-display text-base sm:text-lg font-extrabold text-ink">
+              Рабочие промокоды и акции {store.name}
+            </h2>
+            <span className="text-xs font-bold text-ink/50 bg-paper px-2.5 py-1 rounded-full border border-line">
+              {store.coupons.length}{" "}
+              {store.coupons.length === 1
+                ? "купон"
+                : store.coupons.length >= 2 && store.coupons.length <= 4
+                  ? "купона"
+                  : "купонов"}
+            </span>
           </div>
-          <div className="rounded-2xl border border-line bg-white p-4 text-center">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/45">Макс. выгода</div>
-            <div className="mt-1 font-display text-xl font-extrabold text-red">{maxDisc}</div>
+
+          {store.coupons.length === 0 ? (
+            <div className="rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
+              <div className="font-display text-4xl font-extrabold text-ink/15">
+                Скоро
+              </div>
+              <p className="mt-3 font-bold text-ink/70">
+                Здесь появится купон {store.name}
+              </p>
+              <p className="mt-1 text-sm text-ink/50">
+                Партнёрские акции ещё не запущены — вернись позже.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {store.coupons.map((coupon) => (
+                <CouponTicket
+                  key={`${coupon.id}-${coupon.promocode.code}`}
+                  coupon={coupon}
+                  proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
+                  storeProofCount={storeProofCount}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 2. Быстрая сводка (Quick Facts) для SEO и сниппетов */}
+        <div className="mt-8 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
+          <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Купонов сегодня</div>
+            <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-ink">{store.coupons.length}</div>
           </div>
-          <div className="rounded-2xl border border-line bg-white p-4 text-center">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/45">Первый заказ</div>
-            <div className="mt-1 font-display text-base font-extrabold text-mint">
+          <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Макс. выгода</div>
+            <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-red">{maxDisc}</div>
+          </div>
+          <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Первый заказ</div>
+            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-mint">
               {firstOrderPromo ? "Скидка есть" : "Для всех"}
             </div>
           </div>
-          <div className="rounded-2xl border border-line bg-white p-4 text-center">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/45">Проверка</div>
-            <div className="mt-1 font-display text-base font-extrabold text-ink">Ежедневно</div>
+          <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Проверка</div>
+            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">Ежедневно</div>
           </div>
         </div>
 
-        {/* First-Party Trust & Verification History Block */}
+        {/* 3. First-Party Trust & Verification History Block */}
         <div className="mt-6 rounded-2xl border border-mint/30 bg-mint/5 p-4 sm:p-5 shadow-2xs">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-mint text-white font-bold text-lg shadow-2xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-mint text-white font-bold text-base sm:text-lg shadow-2xs">
                 ✓
               </div>
-              <div>
-                <div className="flex items-center gap-2">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="font-display text-sm sm:text-base font-extrabold text-ink">
                     PromoFact Trust Score: {trust.score}/100
                   </span>
@@ -443,7 +482,7 @@ export default async function StorePage({
                     {trust.successRate}% успешных проверок
                   </span>
                 </div>
-                <p className="text-xs text-ink/65 font-medium mt-0.5">
+                <p className="text-xs text-ink/65 font-medium mt-0.5 truncate">
                   Последняя ручная проверка: {trust.lastCheckedRu} · Всего {trust.totalChecks} {trust.totalChecks === 1 ? "проверка" : "проверки"} ({trust.successCount} успешно)
                 </p>
               </div>
@@ -473,31 +512,6 @@ export default async function StorePage({
             </div>
           </div>
         </div>
-
-        {store.coupons.length === 0 ? (
-          <div className="mt-8 rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
-            <div className="font-display text-4xl font-extrabold text-ink/15">
-              Скоро
-            </div>
-            <p className="mt-3 font-bold text-ink/70">
-              Здесь появится купон {store.name}
-            </p>
-            <p className="mt-1 text-sm text-ink/50">
-              Партнёрские акции ещё не запущены — вернись позже.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {store.coupons.map((coupon) => (
-              <CouponTicket
-                key={`${coupon.id}-${coupon.promocode.code}`}
-                coupon={coupon}
-                proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
-                storeProofCount={storeProofCount}
-              />
-            ))}
-          </div>
-        )}
 
         <YandexAdBlock
           blockId={process.env.NEXT_PUBLIC_YANDEX_STORE_AD_ID || "R-A-1234567-4"}

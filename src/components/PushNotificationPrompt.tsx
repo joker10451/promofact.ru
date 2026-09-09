@@ -25,12 +25,18 @@ export default function PushNotificationPrompt() {
       // Регистрируем service worker
       navigator.serviceWorker.register("/sw.js").catch(() => {});
 
-      // Показываем предложение подписаться только через 12 секунд активного пребывания на сайте
+      // Показываем предложение подписаться только если пользователь уже изучает сайт (от 45 сек)
+      // и плашка cookie уже не висит на экране.
       if (Notification.permission === "default") {
         try {
           const dismissedAt = localStorage.getItem("push_prompt_dismissed");
           if (!dismissedAt || Date.now() - Number(dismissedAt) > 7 * 24 * 60 * 60 * 1000) {
-            const timer = setTimeout(() => setIsVisible(true), 12000);
+            const timer = setTimeout(() => {
+              const consent = localStorage.getItem("cookie_consent");
+              if (consent) {
+                setIsVisible(true);
+              }
+            }, 45000);
             return () => clearTimeout(timer);
           }
         } catch {}
@@ -99,7 +105,7 @@ export default function PushNotificationPrompt() {
     <div
       role="dialog"
       aria-label="Подписка на уведомления"
-      className="fixed bottom-5 left-4 z-50 max-w-sm rounded-2xl border-2 border-ink bg-white p-4 shadow-[0_8px_0_rgba(11,16,43,0.18)] transition-all animate-bounce-short sm:left-6"
+      className="fixed bottom-[72px] inset-x-3 z-50 mx-auto max-w-sm rounded-2xl border-2 border-ink bg-white p-4 shadow-[0_8px_0_rgba(11,16,43,0.18)] transition-all sm:inset-x-auto sm:bottom-6 sm:left-6"
     >
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow text-xl">
