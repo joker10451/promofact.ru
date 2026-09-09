@@ -45,17 +45,21 @@ function cleanConditionText(raw, matchedPart) {
     text = text.replace(new RegExp(`(?:скидка\\s+)?(?:до\\s+)?[-−]?\\s*${escaped}[.,:;!?]?`, "gi"), "");
   }
   return text
+    // Превращаем машинные обозначения «1 заказ», «1-й заказ», «1ый заказ» в человеческие «первый заказ»
     .replace(/(^|[\s,.:;!?-])1(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1первый $2")
     .replace(/(^|[\s,.:;!?-])2(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1повторный $2")
     .replace(/(^|[\s,.:;!?-])3(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1третий $2")
+    // Исправление опечатки аффилиатных фидов «на се ...» / «се ...» -> «на все ...» / «все ...» (кириллически безопасно)
+    .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
+    .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все")
     .replace(/^(на|в|от|при)\s+\d+[\s\d]*(%|₽|р|руб)/gi, "")
+    // Убираем остаточные знаки препинания, точки и тире в начале строки
     .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
-    .replace(/^(скидка|минус|до|на|в|от|[.,:;!?\s–—-])+/gi, "")
+    .replace(/^(?:скидка|минус|до)(?:[\s,.:;!?-]|$)/gi, "")
     .replace(/\(\s*\)/g, "")
     .replace(/не суммируется с другими акциями.*$/i, "")
     .replace(/скидка\s+\d+\s*(rub|руб|₽)/gi, "")
     .replace(/discount\s+sitewide/gi, "на весь ассортимент")
-    .replace(/на се\b/gi, "на все")
     .replace(/[.,:;!?\s–—-]+$/g, "")
     .trim();
 }
@@ -126,8 +130,12 @@ function resolveCustomerType(rawCustomerType, name, description) {
 }
 
 function resolveOfferDetails(name, description, rawDiscount, code, isFirstOrder, storeName) {
-  const cleanName = stripHtml(name);
-  const cleanDesc = stripHtml(description);
+  const cleanName = stripHtml(name)
+    .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
+    .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
+  const cleanDesc = stripHtml(description)
+    .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
+    .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
   const fullDescription = cleanDesc || cleanName || `Скидка по акции в магазине ${storeName}.`;
   const hasCode = Boolean(code && code.trim() !== "");
   const combinedText = `${cleanName} ${cleanDesc}`;
@@ -259,10 +267,10 @@ function resolveOfferDetails(name, description, rawDiscount, code, isFirstOrder,
       condition = condition
         .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
         .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
-        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)\b/gi, "$2")
+        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)(?=[\s,.:;!?-]|$)/gi, "$2")
         .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
         .trim();
-      if (!/^(на|при|от|в|для|\+)\s+/i.test(condition)) {
+      if (!/^(?:на|в|во|при|для|от|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(condition)) {
         condition = `на ${condition}`;
       }
     }
@@ -301,10 +309,10 @@ function resolveOfferDetails(name, description, rawDiscount, code, isFirstOrder,
       condition = condition
         .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
         .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
-        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)\b/gi, "$2")
+        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)(?=[\s,.:;!?-]|$)/gi, "$2")
         .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
         .trim();
-      if (!/^(на|при|от|в|для|\+)\s+/i.test(condition)) {
+      if (!/^(?:на|в|во|при|для|от|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(condition)) {
         condition = `на ${condition}`;
       }
     }
@@ -766,4 +774,26 @@ let passed = 0;
   passed++;
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/22 ТЕСТОВ УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// Test 23: Cyrillic typo 'на се' -> 'на все' and safe prepositions for antivirus
+{
+  const res = normalizeAdmitadCoupon({
+    id: 23,
+    name: "Скидка 20% на се антивирусы для дома на любой срок действия и количество устройств",
+    description: "Промокод предоставляет скидку 20% на се антивирусы для дома на любой срок действия и количество устройств",
+    discount: "20%",
+    promocode: "ANTIVIRUS20",
+    customerType: "all_customers",
+    rawCampaignName: "PRO32",
+  });
+  assert.strictEqual(res.title, "−20%", "Test 23 failed: title");
+  assert.strictEqual(
+    res.shortDescription,
+    "на все антивирусы для дома на любой срок действия и количество устройств",
+    "Test 23 failed: shortDescription must be 'на все антивирусы...'"
+  );
+  assert.ok(!res.shortDescription.includes("на се"), "Test 23 failed: must not contain 'на се'");
+  console.log("✓ Test 23: Feed typo 'на се антивирусы...' -> 'на все антивирусы...' (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/23 ТЕСТОВ УСПЕШНО ПРОЙДЕНЫ! (PASS)`);

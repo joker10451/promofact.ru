@@ -91,15 +91,17 @@ export function cleanConditionText(raw: string, matchedPart?: string): string {
     .replace(/(^|[\s,.:;!?-])1(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1первый $2")
     .replace(/(^|[\s,.:;!?-])2(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1повторный $2")
     .replace(/(^|[\s,.:;!?-])3(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1третий $2")
+    // Исправление опечатки аффилиатных фидов «на се ...» / «се ...» -> «на все ...» / «все ...» (кириллически безопасно)
+    .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
+    .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все")
     .replace(/^(на|в|от|при)\s+\d+[\s\d]*(%|₽|р|руб)/gi, "")
     // Убираем остаточные знаки препинания, точки и тире в начале строки
     .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
-    .replace(/^(скидка|минус|до|на|в|от|[.,:;!?\s–—-])+/gi, "")
+    .replace(/^(?:скидка|минус|до)(?:[\s,.:;!?-]|$)/gi, "")
     .replace(/\(\s*\)/g, "") // удаление пустых скобок ()
     .replace(/не суммируется с другими акциями.*$/i, "")
     .replace(/скидка\s+\d+\s*(rub|руб|₽)/gi, "")
     .replace(/discount\s+sitewide/gi, "на весь ассортимент")
-    .replace(/на се\b/gi, "на все") // опечатка «на се антивирусы»
     .replace(/[.,:;!?\s–—-]+$/g, "")
     .trim();
 }
@@ -238,8 +240,12 @@ export function resolveOfferDetails(
   fullDescription: string;
   ctaText: string;
 } {
-  const cleanName = stripHtml(name);
-  const cleanDesc = stripHtml(description);
+  const cleanName = stripHtml(name)
+    .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
+    .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
+  const cleanDesc = stripHtml(description)
+    .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
+    .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
   const fullDescription = cleanDesc || cleanName || `Скидка по акции в магазине ${storeName}.`;
   const hasCode = Boolean(code && code.trim() !== "");
   const combinedText = `${cleanName} ${cleanDesc}`;
@@ -371,10 +377,10 @@ export function resolveOfferDetails(
       condition = condition
         .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
         .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
-        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)\b/gi, "$2")
+        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)(?=[\s,.:;!?-]|$)/gi, "$2")
         .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
         .trim();
-      if (!/^(на|при|от|в|для|\+)\s+/i.test(condition)) {
+      if (!/^(?:на|в|во|при|для|от|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(condition)) {
         condition = `на ${condition}`;
       }
     }
@@ -413,10 +419,10 @@ export function resolveOfferDetails(
       condition = condition
         .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
         .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
-        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)\b/gi, "$2")
+        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)(?=[\s,.:;!?-]|$)/gi, "$2")
         .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
         .trim();
-      if (!/^(на|при|от|в|для|\+)\s+/i.test(condition)) {
+      if (!/^(?:на|в|во|при|для|от|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(condition)) {
         condition = `на ${condition}`;
       }
     }
