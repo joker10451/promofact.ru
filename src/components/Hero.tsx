@@ -97,21 +97,21 @@ export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: Hero
 
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 relative z-10">
         {/* Заголовок */}
-        <h1 className="font-display text-4xl font-extrabold tracking-tight text-ink sm:text-6xl sm:leading-[1.1]">
+        <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-ink sm:leading-[1.1]">
           Найдите скидку. <br />
           <span className="text-red">Заплатите меньше.</span>
         </h1>
 
         {/* Подзаголовок */}
-        <p className="mx-auto mt-4 max-w-2xl text-base text-ink/70 sm:text-lg">
+        <p className="mx-auto mt-3.5 max-w-2xl text-sm sm:text-base md:text-lg text-ink/70">
           Проверенные промокоды магазинов и сервисов. Регулярно проверяем каждый код и удаляем неработающие.
         </p>
 
         {/* Главная поисковая строка */}
-        <div ref={containerRef} className="relative mx-auto mt-8 max-w-2xl">
+        <div ref={containerRef} className="relative mx-auto mt-6 sm:mt-8 max-w-2xl">
           <form onSubmit={handleSubmit} className="relative flex items-center">
             <div className="relative w-full">
-              <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-xl text-ink/40">
+              <span className="pointer-events-none absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-lg sm:text-xl text-ink/40">
                 🔍
               </span>
               <input
@@ -122,12 +122,12 @@ export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: Hero
                   setQ(e.target.value);
                   setIsOpen(true);
                 }}
-                placeholder="Найти магазин или промокод (Отелло, Ив Роше, Пятёрочка...)"
-                className="h-16 w-full rounded-2xl border-2 border-ink/15 bg-white pl-14 pr-32 text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
+                placeholder="Поиск магазина или промокода..."
+                className="h-14 sm:h-16 w-full rounded-2xl border-2 border-ink/15 bg-white pl-12 sm:pl-14 pr-24 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
               />
               <button
                 type="submit"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-xl bg-gradient-to-r from-red to-red-dark px-5 py-3 text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-xl bg-gradient-to-r from-red to-red-dark px-3.5 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
               >
                 <span>Найти</span>
                 <span>→</span>
