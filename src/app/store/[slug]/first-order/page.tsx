@@ -8,6 +8,7 @@ import OtherStores from "@/components/OtherStores";
 import StoreLogo from "@/components/StoreLogo";
 import StoreRatingWidget from "@/components/StoreRatingWidget";
 import StoreIntentTabs from "@/components/StoreIntentTabs";
+import StoreSummaryTable from "@/components/StoreSummaryTable";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import { calculateStoreTrust } from "@/lib/trustEngine";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
@@ -339,6 +340,15 @@ export default async function StoreFirstOrderPage({
         <div className="mt-8">
           <HowToApply />
         </div>
+
+        {/* Сводная таблица скидок на первый заказ */}
+        <StoreSummaryTable
+          coupons={displayCoupons}
+          storeName={store.name}
+          storeSlug={store.slug}
+          title={`Сводная таблица промокодов ${store.name} на первый заказ`}
+          subtitle={`Все актуальные промокоды для новых клиентов собраны в единой сравнительной таблице.`}
+        />
 
         {/* SEO статья: Первый заказ */}
         <article className="mt-10 max-w-3xl rounded-3xl border border-line bg-white p-6 sm:p-8">

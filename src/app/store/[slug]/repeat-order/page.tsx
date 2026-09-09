@@ -8,6 +8,7 @@ import OtherStores from "@/components/OtherStores";
 import StoreLogo from "@/components/StoreLogo";
 import StoreRatingWidget from "@/components/StoreRatingWidget";
 import StoreIntentTabs from "@/components/StoreIntentTabs";
+import StoreSummaryTable from "@/components/StoreSummaryTable";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import { calculateStoreTrust } from "@/lib/trustEngine";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
@@ -311,6 +312,15 @@ export default async function StoreRepeatOrderPage({
         <div className="mt-8">
           <HowToApply />
         </div>
+
+        {/* Сводная таблица скидок на повторные заказы */}
+        <StoreSummaryTable
+          coupons={displayCoupons}
+          storeName={store.name}
+          storeSlug={store.slug}
+          title={`Сводная таблица промокодов ${store.name} на повторный заказ`}
+          subtitle={`Все актуальные предложения для постоянных покупателей собраны в единой сравнительной таблице.`}
+        />
 
         {/* SEO статья: Повторные заказы */}
         <article className="mt-10 max-w-3xl rounded-3xl border border-line bg-white p-6 sm:p-8">
