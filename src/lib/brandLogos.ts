@@ -47,6 +47,27 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     textColor: "text-white",
     domain: "goldapple.ru",
   },
+  "litres": {
+    logoUrl: "https://favicon.yandex.net/favicon/litres.ru",
+    emoji: "📚",
+    bgGradient: "from-orange-500 to-amber-600",
+    textColor: "text-white",
+    domain: "litres.ru",
+  },
+  "tehnopark": {
+    logoUrl: "https://favicon.yandex.net/favicon/tehnopark.ru",
+    emoji: "⚡",
+    bgGradient: "from-cyan-600 to-blue-800",
+    textColor: "text-white",
+    domain: "tehnopark.ru",
+  },
+  "librederm": {
+    logoUrl: "https://favicon.yandex.net/favicon/librederm.ru",
+    emoji: "🧴",
+    bgGradient: "from-sky-600 to-indigo-700",
+    textColor: "text-white",
+    domain: "librederm.ru",
+  },
   "otello": {
     logoUrl: "https://favicon.yandex.net/favicon/otello.ru",
     emoji: "🏨",
