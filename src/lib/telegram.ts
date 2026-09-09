@@ -68,6 +68,18 @@ export function formatTelegramPost(coupon: Coupon): {
   text: string;
   buttons: TelegramButton[][];
 } {
+  const categoryEmojis: Record<string, string> = {
+    "eda-i-dostavka": "🛒",
+    "krasota-i-uhod": "💄",
+    "odezhda-i-obuv": "👗",
+    "elektronika": "📱",
+    "servisy-i-podpiski": "🎬",
+    "tsvety": "💐",
+    "travel": "✈️",
+    "zdorove-i-apteki": "💊",
+  };
+
+  const catIcon = categoryEmojis[coupon.store.categorySlug] || (coupon.promocode.isHit ? "🔥" : "🏷");
   const storeName = escapeHtml(coupon.store.name);
   const bonus = escapeHtml(stripHtml(coupon.promocode.bonusName) || "Скидка по промокоду");
   const code = escapeHtml(coupon.promocode.code);
@@ -76,47 +88,54 @@ export function formatTelegramPost(coupon: Coupon): {
 
   const lines: string[] = [];
 
-  // 1. Заголовок — коротко и по делу
-  const hitEmoji = coupon.promocode.isHit ? "🔥 " : "";
-  lines.push(`${hitEmoji}<b>${escapeHtml(coupon.store.name)} — ${bonus}</b>\n`);
+  // 1. Заголовок
+  lines.push(`${catIcon} <b>${storeName} — ${bonus}</b>\n`);
 
-  // 2. Промокод для копирования в 1 клик (если есть)
+  // 2. Промокод для копирования в 1 клик
   if (code) {
-    lines.push(`Промокод: <code>${code}</code>`);
-    lines.push(`<i>Нажмите на код — он скопируется автоматически</i>\n`);
+    lines.push(`🎟 Промокод: <code>${code}</code>`);
+    lines.push(`<i>(нажмите на код — он скопируется в буфер)</i>\n`);
   }
 
-  // 3. Условия одной строкой
+  // 3. Условия акции аккуратным списком
   const conditions: string[] = [];
   if (coupon.promocode.isFirstOrderOnly) {
-    conditions.push("только на первый заказ");
+    conditions.push("Только для новых клиентов (первый заказ)");
   } else if (coupon.promocode.isUniversal) {
-    conditions.push("для всех покупателей");
+    conditions.push("Для всех покупателей (включая повторные)");
   }
-  if (region && region !== "RU") conditions.push(`город: ${region}`);
-  conditions.push(`действует до ${expires}`);
+  if (coupon.promocode.minimumOrder) {
+    conditions.push(`При заказе от ${coupon.promocode.minimumOrder.value.toLocaleString("ru-RU")} ₽`);
+  }
+  if (region && region !== "RU") {
+    conditions.push(`Город: ${region}`);
+  }
+  conditions.push(`Действует до ${expires}`);
 
-  lines.push(`<i>${conditions.join(" · ")}</i>`);
+  lines.push("📌 <b>Условия:</b>");
+  conditions.forEach((c) => lines.push(`• ${c}`));
 
-  // 4. Маркировка ОРД (Закон о рекламе)
+  // 4. Аккуратная маркировка ОРД (Закон о рекламе) одной строкой
   const ordText = escapeHtml(coupon.affiliate.ordText);
   const ordMarker = escapeHtml(coupon.affiliate.ordMarker);
 
-  lines.push("\n<i>Реклама.</i>");
-  if (ordText || ordMarker) {
-    const markerStr = ordMarker ? ` erid: ${ordMarker}` : "";
+  lines.push("");
+  if (ordText) {
+    const markerStr = ordMarker && !ordText.includes(ordMarker) ? ` erid: ${ordMarker}` : "";
     lines.push(`<i>${ordText}${markerStr}</i>`);
+  } else if (ordMarker) {
+    lines.push(`<i>Реклама. erid: ${ordMarker}</i>`);
   } else {
-    lines.push(`<i>Реклама.</i>`);
+    lines.push(`<i>Реклама. ${storeName}</i>`);
   }
 
-  // Кнопки: одна главная + одна на страницу магазина (все промокоды)
-  const affiliateUrl = coupon.affiliate.link || coupon.affiliate.landingLink;
+  // Кнопки: переход в магазин (CPA) + каталог на сайте
+  const affiliateUrl = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site;
   const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
 
   const buttons: TelegramButton[][] = [
-    [{ text: `Получить скидку в ${coupon.store.name} →`, url: affiliateUrl }],
-    [{ text: `Все промокоды ${coupon.store.name}`, url: storeUrl }],
+    [{ text: `🛍 В магазин ${coupon.store.name} →`, url: affiliateUrl }],
+    [{ text: `🌐 Все купоны ${coupon.store.name} на сайте`, url: storeUrl }],
   ];
 
   return {

@@ -189,7 +189,7 @@ function topLevelCount(payload: string): number {
 }
 
 async function devMockFallback(reason: string): Promise<Coupon[]> {
-  if (process.env.NODE_ENV === "production") return [];
+  if (process.env.NODE_ENV === "production" && !process.env.CI && isPerfluenceConfigured()) return [];
   console.warn(`[perfluence] ${reason} — отдаю DEV-мок`);
   return (await import("@/lib/mockCoupons")).DEV_MOCK_COUPONS;
 }
@@ -573,7 +573,7 @@ export function parseResults(payloadJson: string): Result[] {
 }
 
 async function devMockResultsFallback(reason: string): Promise<Result[]> {
-  if (process.env.NODE_ENV === "production") return [];
+  if (process.env.NODE_ENV === "production" && !process.env.CI && isResultsConfigured()) return [];
   console.warn(`[perfluence/results] ${reason} — отдаю DEV-мок`);
   return (await import("@/lib/mockCoupons")).DEV_MOCK_RESULTS;
 }

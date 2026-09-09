@@ -1,16 +1,21 @@
-name: Auto Post to Telegram (Dzen Crosspost)
+name: Auto Post to Telegram (@smart_zakupka)
 
 on:
-  # schedule:
-  #   - cron: '0 11 * * *'   # Отключен — постим вручную
+  schedule:
+    # 2 раза в день в пиковое время активности покупателей:
+    # 07:30 UTC = 10:30 МСК (утренний слот: доставка, еда, утренние заказы)
+    # 15:30 UTC = 18:30 МСК (вечерний слот: рестораны, кино, развлечения, одежда)
+    - cron: '30 7,15 * * *'
   workflow_dispatch:
     inputs:
-      limit:
-        description: 'Number of posts'
+      dry_run:
+        description: 'Dry Run (тестовый прогон без отправки в канал)'
+        type: boolean
         required: false
-        default: '1'
+        default: false
       store:
-        description: 'Store slug (optional)'
+        description: 'Slug магазина (опционально, например pyaterochka, kinopoisk)'
+        type: string
         required: false
 
 jobs:
@@ -19,22 +24,36 @@ jobs:
     steps:
       - name: Trigger Telegram Posting API
         run: |
-          LIMIT="${{ github.event.inputs.limit || '1' }}"
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
           STORE="${{ github.event.inputs.store || '' }}"
           
-          URL="https://promofact.ru/api/telegram/post?hitOnly=true&limit=$LIMIT"
-          if [ -n "$STORE" ]; then
-            URL="$URL&store=$STORE"
+          URL="https://promofact.ru/api/telegram/post"
+          PARAMS="?"
+          
+          if [ "$DRY_RUN" = "true" ]; then
+            PARAMS="${PARAMS}dryRun=true&"
           fi
           
-          echo "Sending request to $URL"
+          if [ -n "$STORE" ]; then
+            PARAMS="${PARAMS}store=${STORE}&"
+          fi
           
-          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$URL" \
+          # Убираем завершающий ? или &
+          PARAMS="${PARAMS%&}"
+          PARAMS="${PARAMS%\?}"
+          
+          TARGET_URL="${URL}${PARAMS}"
+          echo "Sending request to $TARGET_URL (dry_run=$DRY_RUN, store=$STORE)"
+          
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$TARGET_URL" \
             -H "Authorization: Bearer ${{ secrets.TELEGRAM_POSTING_SECRET }}")
           
+          echo "Response HTTP Status: $HTTP_STATUS"
           cat response.json
+          echo ""
           
           if [ "$HTTP_STATUS" -ne 200 ]; then
             echo "::error::API request failed with status $HTTP_STATUS"
             exit 1
           fi
+
