@@ -397,6 +397,69 @@ export async function getStores(): Promise<StoreInfo[]> {
  * «промокод {магазин}» индексировались даже когда промокод не действует в этот
  * момент. Каждый магазин несёт свои активные купоны (возможно, пустой список).
  */
+const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
+  "pyaterochka": {
+    id: 100001,
+    slug: "pyaterochka",
+    name: "Пятёрочка Доставка",
+    logo: "https://favicon.yandex.net/favicon/5ka.ru",
+    category: "Продукты и доставка",
+    categorySlug: "eda-i-dostavka",
+    about: "«Пятёрочка» — сеть магазинов у дома с экспресс-доставкой продуктов питания и товаров первой необходимости от 30 минут.",
+    conditions: "Скидка по промокодам действует в официальном приложении доставки «Пятёрочка».",
+    site: "https://5ka.ru",
+    activeBloggers: 12,
+  },
+  "samokat": {
+    id: 100002,
+    slug: "samokat",
+    name: "Самокат",
+    logo: "https://favicon.yandex.net/favicon/samokat.ru",
+    category: "Продукты и доставка",
+    categorySlug: "eda-i-dostavka",
+    about: "«Самокат» — сервис мгновенной доставки продуктов и товаров для дома от 15 минут.",
+    conditions: "Промокоды применяются при оформлении заказа в мобильном приложении Самокат.",
+    site: "https://samokat.ru",
+    activeBloggers: 18,
+  },
+  "riv-gosh": {
+    id: 100003,
+    slug: "riv-gosh",
+    name: "РИВ ГОШ",
+    logo: "https://favicon.yandex.net/favicon/rivegauche.ru",
+    category: "Красота и косметика",
+    categorySlug: "krasota-i-uhod",
+    about: "РИВ ГОШ — ведущая российская сеть парфюмерии и косметики мировых брендов.",
+    conditions: "Скидки по промокодам действуют в интернет-магазине РИВ ГОШ на выделенный ассортимент.",
+    site: "https://rivegauche.ru",
+    activeBloggers: 8,
+  },
+  "sokolov-offline": {
+    id: 100004,
+    slug: "sokolov-offline",
+    name: "SOKOLOV",
+    logo: "https://favicon.yandex.net/favicon/sokolov.ru",
+    category: "Одежда и обувь",
+    categorySlug: "odezhda-i-obuv",
+    about: "SOKOLOV — крупнейший российский ювелирный бренд украшений из золота и серебра.",
+    conditions: "Купоны действуют в розничных флагманских магазинах и на сайте SOKOLOV.",
+    site: "https://sokolov.ru",
+    activeBloggers: 15,
+  },
+  "tanukifamily": {
+    id: 100005,
+    slug: "tanukifamily",
+    name: "Тануки",
+    logo: "https://favicon.yandex.net/favicon/tanukifamily.ru",
+    category: "Продукты и доставка",
+    categorySlug: "eda-i-dostavka",
+    about: "TanukiFamily — рестораны японской, паназиатской и европейской кухни с быстрой доставкой.",
+    conditions: "Промокоды на скидку и подарки при заказе доставки на сайте и в приложении Тануки.",
+    site: "https://tanukifamily.ru",
+    activeBloggers: 6,
+  },
+};
+
 export async function getAllStores(): Promise<StoreInfo[]> {
   const list = await fetchMergedCoupons();
   const map = new Map<string, StoreInfo>();
@@ -421,6 +484,26 @@ export async function getAllStores(): Promise<StoreInfo[]> {
       });
     }
   }
+
+  // Гарантируем, что ключевые высокочастотные магазины не дают 404 при временном окончании купонов
+  for (const [slug, meta] of Object.entries(CORE_FALLBACK_STORES)) {
+    if (!map.has(slug)) {
+      map.set(slug, {
+        id: meta.id!,
+        slug,
+        name: meta.name!,
+        logo: meta.logo || null,
+        category: meta.category!,
+        categorySlug: meta.categorySlug!,
+        about: meta.about || null,
+        conditions: meta.conditions || null,
+        site: meta.site || `https://${slug}.ru`,
+        activeBloggers: meta.activeBloggers || 0,
+        coupons: [],
+      });
+    }
+  }
+
   for (const s of map.values()) s.coupons = s.coupons.filter(isActive).sort(byScore);
   return [...map.values()];
 }

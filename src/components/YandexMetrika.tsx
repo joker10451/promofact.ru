@@ -7,17 +7,15 @@ import { getConsent, onConsentChange } from "@/lib/cookieConsent";
 const YM_ID = Number(process.env.NEXT_PUBLIC_YM_ID ?? "111247117");
 
 export default function YandexMetrika() {
-  // Счётчик грузится только после явного согласия: до этого кнопка баннера
-  // ни на что не влияла, хотя обещала выбор.
-  // useSyncExternalStore — согласие живёт вне React (localStorage + событие),
-  // и на сервере снимок всегда «не разрешено», поэтому гидратация совпадает.
-  const allowed = useSyncExternalStore(
+  // Счётчик Яндекс.Метрики загружается по умолчанию для корректного сбора
+  // статистики посещений и вебвизора, отключается только при явном отказе (declined)
+  const isDeclined = useSyncExternalStore(
     (notify) => onConsentChange(() => notify()),
-    () => getConsent() === "accepted",
+    () => getConsent() === "declined",
     () => false,
   );
 
-  if (!YM_ID || !allowed) return null;
+  if (!YM_ID || isDeclined) return null;
   return (
     <>
       <Script id="yandex-metrika" strategy="afterInteractive">

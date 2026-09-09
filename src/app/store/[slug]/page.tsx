@@ -92,9 +92,10 @@ export async function generateMetadata({
     n === 1 ? "проверенный промокод" : n >= 2 && n <= 4 ? "проверенных промокода" : "проверенных промокодов";
   const maxDisc = getMaxDiscount(store.coupons);
   const monthYear = getCapitalizedMonthYear();
-  const monthRu = getMonthRuPrep();
-
-  const title = `Промокоды ${store.name} на ${monthYear} — ${maxDisc} (${n} ${countWord}) | ${SITE_NAME}`;
+  const title =
+    n > 0
+      ? `Промокоды ${store.name} на ${monthYear} — ${maxDisc} (${n} ${countWord}) | ${SITE_NAME}`
+      : `Скидки и акции ${store.name} на ${monthYear} | ${SITE_NAME}`;
   const description = buildStoreDescription({
     name: store.name,
     category: store.category,
