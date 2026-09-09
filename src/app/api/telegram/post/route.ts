@@ -29,7 +29,7 @@ async function handlePost(req: NextRequest) {
       return NextResponse.json({ message: "No active coupons found" }, { status: 404 });
     }
 
-    const selection = selectBestCouponToPost(coupons, { hitOnly, storeSlug });
+    const selection = selectBestCouponToPost(coupons, { hitOnly, storeSlug: storeSlug || undefined });
     if (!selection) {
       return NextResponse.json({ message: "No matching coupons eligible for posting" }, { status: 404 });
     }

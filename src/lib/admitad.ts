@@ -151,23 +151,21 @@ export function parseAdmitadXml(xml: string): Coupon[] {
   return deduped.map(toCoupon);
 }
 
-import fs from "fs";
-import path from "path";
-
 let admitadCache: Coupon[] | null = null;
 let lastFetchTime = 0;
 let pendingFetch: Promise<Coupon[]> | null = null;
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 час
-const DISK_CACHE_DIR = path.join(process.cwd(), ".next", "cache");
-const DISK_CACHE_FILE = path.join(DISK_CACHE_DIR, "admitad_coupons.json");
 
-function readDiskCache(): Coupon[] | null {
+async function readDiskCache(): Promise<Coupon[] | null> {
+  if (typeof process === "undefined" || !process.versions?.node) return null;
   try {
-    if (fs.existsSync(DISK_CACHE_FILE)) {
-      const stat = fs.statSync(DISK_CACHE_FILE);
-      // При билде переиспользуем кэш между воркерами без повторной докачки 160МБ
+    const fs = await import("fs");
+    const path = await import("path");
+    const cacheFile = path.join(process.cwd(), ".next", "cache", "admitad_coupons.json");
+    if (fs.existsSync(cacheFile)) {
+      const stat = fs.statSync(cacheFile);
       if (Date.now() - stat.mtimeMs < CACHE_TTL_MS || process.env.NEXT_PHASE === "phase-production-build") {
-        const data = JSON.parse(fs.readFileSync(DISK_CACHE_FILE, "utf-8"));
+        const data = JSON.parse(fs.readFileSync(cacheFile, "utf-8"));
         if (Array.isArray(data) && data.length > 0) return data;
       }
     }
@@ -175,16 +173,20 @@ function readDiskCache(): Coupon[] | null {
   return null;
 }
 
-function writeDiskCache(coupons: Coupon[]) {
+async function writeDiskCache(coupons: Coupon[]) {
+  if (typeof process === "undefined" || !process.versions?.node) return;
   try {
-    if (!fs.existsSync(DISK_CACHE_DIR)) fs.mkdirSync(DISK_CACHE_DIR, { recursive: true });
-    fs.writeFileSync(DISK_CACHE_FILE, JSON.stringify(coupons), "utf-8");
+    const fs = await import("fs");
+    const path = await import("path");
+    const dir = path.join(process.cwd(), ".next", "cache");
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, "admitad_coupons.json"), JSON.stringify(coupons), "utf-8");
   } catch {}
 }
 
 /** Фетч сырого фида Admitad + парсинг. */
 export async function fetchAndParseAdmitadFeed(): Promise<Coupon[]> {
-  const disk = readDiskCache();
+  const disk = await readDiskCache();
   if (disk && disk.length > 0) return disk;
 
   const controller = new AbortController();
@@ -206,7 +208,7 @@ export async function fetchAndParseAdmitadFeed(): Promise<Coupon[]> {
 
     const list = parseAdmitadXml(await res.text());
     console.log(`[admitad] Загружено купонов после нормализации: ${list.length}`);
-    if (list.length > 0) writeDiskCache(list);
+    if (list.length > 0) await writeDiskCache(list);
     return list;
   } finally {
     clearTimeout(timeoutId);
@@ -226,7 +228,7 @@ export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
     return admitadCache;
   }
 
-  const disk = readDiskCache();
+  const disk = await readDiskCache();
   if (disk && disk.length > 0) {
     admitadCache = disk;
     lastFetchTime = now;
@@ -245,7 +247,7 @@ export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
         console.log(`[admitad] Используем Supabase-кэш (${cached.length} купонов)`);
         admitadCache = cached;
         lastFetchTime = Date.now();
-        writeDiskCache(cached);
+        await writeDiskCache(cached);
         return cached;
       }
 
@@ -255,7 +257,7 @@ export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
       return list;
     } catch (e) {
       console.error("[admitad] Ошибка загрузки фида/кэша:", e);
-      return readDiskCache() || admitadCache || [];
+      return (await readDiskCache()) || admitadCache || [];
     } finally {
       pendingFetch = null;
     }

@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getStores } from "@/lib/perfluence";
 
-export const runtime = "edge";
 export const alt = "Промокод";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
