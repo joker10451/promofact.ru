@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import CouponTicket from "@/components/CouponTicket";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { ARTICLES, getArticle } from "@/lib/articles";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
@@ -105,26 +106,14 @@ export default async function ArticlePage({
         <JsonLd data={breadcrumbJsonLd} />
 
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <nav
-            aria-label="Хлебные крошки"
-            className="text-xs font-semibold text-ink/45"
-          >
-            <Link href="/" className="hover:text-ink transition-colors">
-              Главная
-            </Link>
-            <span className="mx-2" aria-hidden="true">
-              /
-            </span>
-            <Link href="/sovety" className="hover:text-ink transition-colors">
-              Советы
-            </Link>
-            <span className="mx-2" aria-hidden="true">
-              /
-            </span>
-            <span aria-current="page" className="truncate">
-              {article.title}
-            </span>
-          </nav>
+          <Breadcrumbs
+            items={[
+              { label: "Главная", href: "/" },
+              { label: "Советы", href: "/sovety" },
+              { label: article.title },
+            ]}
+            className="mb-2"
+          />
 
           <article className="mt-6 rounded-3xl border border-line bg-white p-6 sm:p-10 shadow-xs">
             <div className="flex items-center gap-2 text-[11px] font-bold text-ink/40 mb-3">

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
 import OtherCategories from "@/components/OtherCategories";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import { getCategories, getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
@@ -183,18 +184,13 @@ export default async function CategoryPage({
       <JsonLd data={listing} />
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-        <nav
-          aria-label="Хлебные крошки"
-          className="text-xs font-semibold text-ink/45"
-        >
-          <Link href="/" className="hover:text-ink transition-colors">
-            Главная
-          </Link>
-          <span className="mx-2" aria-hidden="true">
-            /
-          </span>
-          <span aria-current="page">{cat.name}</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: "Главная", href: "/" },
+            { label: cat.name },
+          ]}
+          className="mb-2"
+        />
 
         <h1 className="mt-6 max-w-3xl font-display text-2xl font-extrabold leading-tight sm:text-3xl">
           Промокоды и купоны: {cat.name}

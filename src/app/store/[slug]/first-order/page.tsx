@@ -9,6 +9,7 @@ import StoreLogo from "@/components/StoreLogo";
 import StoreRatingWidget from "@/components/StoreRatingWidget";
 import StoreIntentTabs from "@/components/StoreIntentTabs";
 import StoreSummaryTable from "@/components/StoreSummaryTable";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import { calculateStoreTrust } from "@/lib/trustEngine";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
@@ -233,15 +234,15 @@ export default async function StoreFirstOrderPage({
       <JsonLd data={organizationJsonLd} />
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-        <nav aria-label="Хлебные крошки" className="text-xs font-semibold text-ink/45">
-          <Link href="/" className="hover:text-ink transition-colors">Главная</Link>
-          <span className="mx-2" aria-hidden="true">/</span>
-          <Link href={`/category/${store.categorySlug}`} className="hover:text-ink transition-colors">{store.category}</Link>
-          <span className="mx-2" aria-hidden="true">/</span>
-          <Link href={parentStoreUrl} className="hover:text-ink transition-colors">{store.name}</Link>
-          <span className="mx-2" aria-hidden="true">/</span>
-          <span aria-current="page" className="text-red font-bold">На первый заказ</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: "Главная", href: "/" },
+            { label: store.category, href: `/category/${store.categorySlug}` },
+            { label: store.name, href: parentStoreUrl },
+            { label: "На первый заказ" },
+          ]}
+          className="mb-2"
+        />
 
         <div className="mt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">

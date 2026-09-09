@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CouponTicket from "@/components/CouponTicket";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import JsonLd from "@/components/JsonLd";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { CITIES_SEO } from "@/lib/citiesSeo";
@@ -130,13 +131,14 @@ export default async function CityPage({
         {/* Хлебные крошки и Hero */}
         <div className="border-b border-line bg-gradient-to-b from-white to-paper px-4 py-8 sm:px-6 sm:py-12">
           <div className="mx-auto max-w-7xl">
-            <nav className="mb-4 flex items-center gap-2 text-xs font-semibold text-ink/50">
-              <Link href="/" className="hover:text-ink">Главная</Link>
-              <span>/</span>
-              <span className="text-ink font-bold">Города</span>
-              <span>/</span>
-              <span className="text-red font-bold">{city.name}</span>
-            </nav>
+            <Breadcrumbs
+              items={[
+                { label: "Главная", href: "/" },
+                { label: "Города", href: "/" },
+                { label: city.name },
+              ]}
+              className="mb-4"
+            />
 
             <div className="inline-flex items-center gap-2 rounded-full bg-red/10 px-3 py-1 text-xs font-bold text-red mb-3">
               📍 Локальные предложения на {dateStr}
