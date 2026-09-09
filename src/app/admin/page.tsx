@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { STATS_COOKIE, statsCookieValue } from "@/lib/statsAuth";
@@ -30,12 +31,12 @@ export default async function AdminPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <a href="/stats" className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-bold hover:border-ink">
+          <Link href="/stats" className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-bold hover:border-ink">
             Статистика
-          </a>
-          <a href="/" className="rounded-xl bg-yellow px-4 py-2 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition">
+          </Link>
+          <Link href="/" className="rounded-xl bg-yellow px-4 py-2 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition">
             На сайт →
-          </a>
+          </Link>
         </div>
       </header>
 

@@ -51,7 +51,7 @@ async function checkUrl(url) {
   });
 }
 
-async function verifyDeployment(maxAttempts = 8, delayMs = 6000) {
+async function verifyDeployment(maxAttempts = 25, delayMs = 6000) {
   console.log(`\n🔍 Проверка статуса деплоя на Vercel (${BASE_URL})...`);
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {

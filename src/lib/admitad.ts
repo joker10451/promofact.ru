@@ -151,40 +151,70 @@ export function parseAdmitadXml(xml: string): Coupon[] {
   return deduped.map(toCoupon);
 }
 
+import fs from "fs";
+import path from "path";
+
 let admitadCache: Coupon[] | null = null;
 let lastFetchTime = 0;
 let pendingFetch: Promise<Coupon[]> | null = null;
-// Фид Admitad ~65 МБ (52k купонов). Next.js Data Cache не хранит элементы >2 МБ,
-// поэтому next.revalidate фактически не работает — реальный кэш это модульный
-// admitadCache. TTL 15 мин: фид меняется разы в день, а докачка 65 МБ дорогая.
-const CACHE_TTL_MS = 15 * 60 * 1000;
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 час
+const DISK_CACHE_DIR = path.join(process.cwd(), ".next", "cache");
+const DISK_CACHE_FILE = path.join(DISK_CACHE_DIR, "admitad_coupons.json");
 
-/** Фетч сырого фида Admitad + парсинг. Без Next-кэша: фид 65МБ не кэшируется (>2МБ), а модульный admitadCache — реальный кэш. */
+function readDiskCache(): Coupon[] | null {
+  try {
+    if (fs.existsSync(DISK_CACHE_FILE)) {
+      const stat = fs.statSync(DISK_CACHE_FILE);
+      // При билде переиспользуем кэш между воркерами без повторной докачки 160МБ
+      if (Date.now() - stat.mtimeMs < CACHE_TTL_MS || process.env.NEXT_PHASE === "phase-production-build") {
+        const data = JSON.parse(fs.readFileSync(DISK_CACHE_FILE, "utf-8"));
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
+    }
+  } catch {}
+  return null;
+}
+
+function writeDiskCache(coupons: Coupon[]) {
+  try {
+    if (!fs.existsSync(DISK_CACHE_DIR)) fs.mkdirSync(DISK_CACHE_DIR, { recursive: true });
+    fs.writeFileSync(DISK_CACHE_FILE, JSON.stringify(coupons), "utf-8");
+  } catch {}
+}
+
+/** Фетч сырого фида Admitad + парсинг. */
 export async function fetchAndParseAdmitadFeed(): Promise<Coupon[]> {
-  // next.revalidate (а не no-store): держит статический пререндер /store, /category.
-  // Даже если Next не закэширует 65МБ (>2МБ), роут остаётся SSG+ISR.
-  const res = await fetch(ADMITAD_FEED_URL, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-      Accept: "application/xml,text/xml,*/*",
-    },
-    next: { revalidate: 900 },
-  });
+  const disk = readDiskCache();
+  if (disk && disk.length > 0) return disk;
 
-  if (!res.ok) {
-    throw new Error(`Admitad feed ${res.status} ${res.statusText}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s таймаут
+
+  try {
+    const res = await fetch(ADMITAD_FEED_URL, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        Accept: "application/xml,text/xml,*/*",
+      },
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Admitad feed ${res.status} ${res.statusText}`);
+    }
+
+    const list = parseAdmitadXml(await res.text());
+    console.log(`[admitad] Загружено купонов после нормализации: ${list.length}`);
+    if (list.length > 0) writeDiskCache(list);
+    return list;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  const list = parseAdmitadXml(await res.text());
-  console.log(`[admitad] Загружено купонов после нормализации: ${list.length}`);
-  return list;
 }
 
 export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
   if (!isAdmitadConfigured()) {
-    // Громко, а не молча: без переменной купоны Admitad пропадут с витрины,
-    // и по тихому пустому массиву причину не найти.
     console.warn(
       "[admitad] ADMITAD_FEED_URL не задан — источник отключён, купоны Admitad не загружаются",
     );
@@ -194,6 +224,13 @@ export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
   const now = Date.now();
   if (admitadCache && now - lastFetchTime < CACHE_TTL_MS) {
     return admitadCache;
+  }
+
+  const disk = readDiskCache();
+  if (disk && disk.length > 0) {
+    admitadCache = disk;
+    lastFetchTime = now;
+    return disk;
   }
 
   if (pendingFetch) {
@@ -208,6 +245,7 @@ export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
         console.log(`[admitad] Используем Supabase-кэш (${cached.length} купонов)`);
         admitadCache = cached;
         lastFetchTime = Date.now();
+        writeDiskCache(cached);
         return cached;
       }
 
@@ -217,7 +255,7 @@ export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
       return list;
     } catch (e) {
       console.error("[admitad] Ошибка загрузки фида/кэша:", e);
-      return admitadCache || [];
+      return readDiskCache() || admitadCache || [];
     } finally {
       pendingFetch = null;
     }

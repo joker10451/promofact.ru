@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "No active coupons found" }, { status: 404 });
     }
 
-    let filtered = coupons.filter((c) => {
+    const filtered = coupons.filter((c) => {
       if (!c.promocode.code) return false;
       if (hitOnly && !c.promocode.isHit) return false;
       if (storeSlug && c.store.slug !== storeSlug) return false;
