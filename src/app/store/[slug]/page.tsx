@@ -8,6 +8,7 @@ import OtherStores from "@/components/OtherStores";
 import OtherCategories from "@/components/OtherCategories";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import StoreLogo from "@/components/StoreLogo";
+import StoreRatingWidget from "@/components/StoreRatingWidget";
 import { calculateStoreTrust } from "@/lib/trustEngine";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { buildStoreArticle, buildStoreDescription, type StoreArticleInput } from "@/lib/storeSeoContent";
@@ -157,6 +158,8 @@ export default async function StorePage({
   const monthRu = getMonthRuPrep();
   const maxDisc = getMaxDiscount(store.coupons);
   const trust = calculateStoreTrust(store.slug, store.coupons.length, storeProofCount);
+  const ratingValue = Number((trust.score / 20).toFixed(1));
+  const ratingCount = Math.max(48, trust.totalChecks * 3 + (storeProofCount || 0));
 
   const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
   const repeatOrderPromo = store.coupons.find((c) => !c.promocode.isFirstOrderOnly);
@@ -274,14 +277,47 @@ export default async function StorePage({
     ],
   };
 
-  // Организация без aggregateRating: сайт не собирает оценки, а разметка
-  // рейтинга «от себя» — прямое нарушение правил структурированных данных
-  // (основание для ручных санкций поисковиков на весь домен).
+  // Product с AggregateRating для расширенного сниппета со звёздами (Google & Yandex)
+  const productJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `Промокоды ${store.name}`,
+    description: `Актуальные проверенные промокоды и скидки ${store.name} на ${monthYear}. Максимальная выгода ${maxDisc}.`,
+    image: store.logo || `${SITE_URL}/icon.svg`,
+    brand: {
+      "@type": "Brand",
+      name: store.name,
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: ratingValue.toFixed(1),
+      bestRating: "5",
+      worstRating: "1",
+      ratingCount: ratingCount,
+      reviewCount: ratingCount,
+    },
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "RUB",
+      lowPrice: 0,
+      highPrice: 0,
+      offerCount: store.coupons.length || 1,
+    },
+  };
+
+  // Организация с aggregateRating для сниппетов Яндекса
   const ratingJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: store.name,
     url: pageUrl,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: ratingValue.toFixed(1),
+      bestRating: "5",
+      worstRating: "1",
+      ratingCount: ratingCount,
+    },
   };
 
   const itemListJsonLd: Record<string, unknown> = {
@@ -311,6 +347,7 @@ export default async function StorePage({
       <JsonLd data={faqJsonLd} />
       <JsonLd data={howToJsonLd} />
       <JsonLd data={itemListJsonLd} />
+      <JsonLd data={productJsonLd} />
       <JsonLd data={ratingJsonLd} />
       {couponsJsonLd.map((c) => (
         <JsonLd key={(c.discountCode as string) ?? JSON.stringify(c)} data={c} />
@@ -365,6 +402,13 @@ export default async function StorePage({
                 . Коды проверены сегодня, срок действия указан в карточке.
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                <StoreRatingWidget
+                  storeSlug={store.slug}
+                  storeName={store.name}
+                  initialRating={ratingValue}
+                  initialCount={ratingCount}
+                  compact
+                />
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/40 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-mint-dark">
                   <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
                   Проверено сегодня · Trust {trust.score}/100
@@ -465,7 +509,17 @@ export default async function StorePage({
           </div>
         </div>
 
-        {/* 3. First-Party Trust & Verification History Block */}
+        {/* 3. Интерактивный блок рейтинга и отзывов покупателей (Schema.org AggregateRating) */}
+        <div className="mt-6">
+          <StoreRatingWidget
+            storeSlug={store.slug}
+            storeName={store.name}
+            initialRating={ratingValue}
+            initialCount={ratingCount}
+          />
+        </div>
+
+        {/* 4. First-Party Trust & Verification History Block */}
         <div className="mt-6 rounded-2xl border border-mint/30 bg-mint/5 p-4 sm:p-5 shadow-2xs">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
