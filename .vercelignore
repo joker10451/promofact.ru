@@ -4,6 +4,5 @@ scripts/
 .claude/
 .agents/
 docs/
-*.mjs
 *.log
 *.mp4
