@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ymReachGoal } from "@/components/YandexMetrika";
 
@@ -19,73 +20,74 @@ interface WheelPrize {
 const PRIZES: WheelPrize[] = [
   {
     id: 1,
-    label: "🍣 Тануки −20%",
-    storeName: "Тануки Family",
-    storeSlug: "tanukifamily",
-    code: "20AV1474",
-    bonus: "Скидка 20% от 1 090 ₽ на первый заказ",
-    link: "/store/tanukifamily",
+    label: "🛴 Самокат −300₽",
+    storeName: "Самокат",
+    storeSlug: "samokat",
+    code: "SMK300",
+    bonus: "Скидка 300 ₽ на первый заказ от 900 ₽",
+    link: "/store/samokat",
     color: "#ff3355",
     textColor: "#ffffff",
   },
   {
     id: 2,
-    label: "🛒 Пятёрочка −55%",
+    label: "🛒 Пятёрочка −25%",
     storeName: "Пятёрочка Доставка",
-    storeSlug: "pyaterochka-dostavka",
+    storeSlug: "pyaterochka",
     code: "a5w5yh74pr5",
-    bonus: "Скидка 55% на первый заказ от 700 ₽",
-    link: "/store/pyaterochka-dostavka",
+    bonus: "Скидка 25% на первый заказ от 1 500 ₽",
+    link: "/store/pyaterochka",
     color: "#10b981",
     textColor: "#ffffff",
   },
   {
     id: 3,
-    label: "🐟 Важная Рыба −15%",
-    storeName: "Важная Рыба",
-    storeSlug: "vazhnaya-ryba",
-    code: "SPTB1068",
-    bonus: "Скидка 15% на заказ от 3 999 ₽ по СПб",
-    link: "/store/vazhnaya-ryba",
+    label: "🏨 Отелло −15%",
+    storeName: "Отелло",
+    storeSlug: "otello",
+    code: "JAR2-YR4A",
+    bonus: "Скидка 15% на бронирование отелей",
+    link: "/store/otello",
     color: "#0284c7",
     textColor: "#ffffff",
   },
   {
     id: 4,
-    label: "💳 Карта −500₽",
-    storeName: "Плати по миру",
-    storeSlug: "plati-po-miru",
-    code: "SALEADS2026",
-    bonus: "Скидка 500 ₽ на международную карту",
-    link: "/store/plati-po-miru",
-    color: "#1877f2",
-    textColor: "#ffffff",
+    label: "📦 Маркет −500₽",
+    storeName: "Яндекс Маркет",
+    storeSlug: "yandex-market",
+    code: "MARKET500",
+    bonus: "Скидка 500 ₽ от 2 500 ₽ на первый заказ",
+    link: "/store/yandex-market",
+    color: "#ffd02f",
+    textColor: "#0b102b",
   },
   {
     id: 5,
-    label: "🎭 Афиша −100%",
-    storeName: "Яндекс Афиша",
-    storeSlug: "yandeks-afisha",
-    code: "FW494632",
-    bonus: "Скидка 100% на сервисный сбор",
-    link: "/store/yandeks-afisha",
+    label: "🎬 Кинопоиск 60дн",
+    storeName: "Кинопоиск",
+    storeSlug: "kinopoisk",
+    code: "6ZJP6PZFQH",
+    bonus: "60 дней подписки бесплатно + 50% скидка",
+    link: "/store/kinopoisk",
     color: "#8b5cf6",
     textColor: "#ffffff",
   },
   {
     id: 6,
-    label: "👗 IRNBY −1000₽",
-    storeName: "IRNBY",
-    storeSlug: "irnby",
-    code: "saleads",
-    bonus: "Скидка 1 000 ₽ от 3 000 ₽ на одежду",
-    link: "/store/irnby",
-    color: "#f59e0b",
-    textColor: "#0b102b",
+    label: "🍏 Яблоко −10%",
+    storeName: "Золотое Яблоко",
+    storeSlug: "zolotoe-yabloko",
+    code: "GOLD10",
+    bonus: "Скидка 10% на парфюмерию и косметику",
+    link: "/store/zolotoe-yabloko",
+    color: "#14b8a6",
+    textColor: "#ffffff",
   },
 ];
 
 export default function DiscountWheel() {
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -94,6 +96,7 @@ export default function DiscountWheel() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Проверяем, крутил ли уже пользователь
     const savedPrize = localStorage.getItem("promofact_wheel_prize");
     if (savedPrize) {
@@ -103,6 +106,20 @@ export default function DiscountWheel() {
       } catch {}
     }
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen]);
 
   const spinWheel = () => {
     if (isSpinning) return;
@@ -152,8 +169,8 @@ export default function DiscountWheel() {
       </button>
 
       {/* Модальное окно с колесом */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      {isOpen && mounted && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-6 sm:p-8 text-white shadow-2xl">
             {/* Кнопка закрытия */}
             <button
@@ -275,7 +292,8 @@ export default function DiscountWheel() {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
