@@ -122,7 +122,10 @@ export function refineOffer(
     }
 
     if (minOrder) {
-      cleaned = `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+      const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(title) || /перв|1[-‑–—]?[ыое]?й/i.test(terms);
+      cleaned = isFirst
+        ? `на первый заказ от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
+        : `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
     } else if (!cleaned || cleaned === "!" || cleaned.length < 3) {
       cleaned = isFirstOrder ? "на первый заказ" : "на весь ассортимент";
     }
@@ -138,10 +141,10 @@ export function refineOffer(
 
   // 5. Фиксированные скидки в рублях
   const rubMatch =
-    title.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб)/i) ||
-    title.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб)/i) ||
-    terms.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб)/i) ||
-    terms.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб)/i);
+    title.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
+    title.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
+    terms.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
+    terms.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i);
 
   if (rubMatch) {
     const rubVal = parseInt(rubMatch[1].replace(/\s/g, ""), 10);
@@ -152,7 +155,10 @@ export function refineOffer(
     }
 
     if (minOrder && minOrder.value !== rubVal) {
-      cleaned = `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+      const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(title) || /перв|1[-‑–—]?[ыое]?й/i.test(terms);
+      cleaned = isFirst
+        ? `на первый заказ от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
+        : `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
     } else if (!cleaned || cleaned === "!" || cleaned.length < 3) {
       cleaned = isFirstOrder ? "на первый заказ" : "на заказ по акции";
     }
@@ -206,28 +212,45 @@ function cleanConditionText(raw: string, matchedPart?: string): string {
   if (!raw) return "";
   let text = raw;
   if (matchedPart) {
-    text = text.replace(new RegExp(`(скидка\\s+)?(до\\s+)?[-−]?\\s*${matchedPart}`, "gi"), "");
+    const escaped = matchedPart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    text = text.replace(new RegExp(`(?:скидка\\s+)?(?:до\\s+)?[-−]?\\s*${escaped}[.,:;!?]?`, "gi"), "");
   }
   return text
+    // Превращаем машинные обозначения «1 заказ», «1-й заказ», «1ый заказ» в человеческие «первый заказ»
+    .replace(/(^|[\s,.:;!?-])1(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1первый $2")
+    .replace(/(^|[\s,.:;!?-])2(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1повторный $2")
+    .replace(/(^|[\s,.:;!?-])3(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1третий $2")
     .replace(/^(на|в|от|при)\s+\d+[\s\d]*(%|₽|р|руб)/gi, "")
-    .replace(/^[-−%\s]+/g, "") // сироты «%», тире и пробелы в начале
-    .replace(/^(скидка|минус|до|на|в|от|[,\s–—-])+/gi, "")
+    // Убираем остаточные знаки препинания, точки и тире в начале строки
+    .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
+    .replace(/^(скидка|минус|до|на|в|от|[.,:;!?\s–—-])+/gi, "")
     .replace(/\(\s*\)/g, "") // удаление пустых скобок ()
     .replace(/не суммируется с другими акциями.*$/i, "")
     .replace(/скидка\s+\d+\s*(rub|руб|₽)/gi, "")
     .replace(/discount\s+sitewide/gi, "на весь ассортимент")
     .replace(/на се\b/gi, "на все") // исправление опечатки «на се антивирусы»
     .replace(/для всех пользователей при.*$/i, "")
-    .replace(/[,\s–—-]+$/g, "")
+    .replace(/[.,:;!?\s–—-]+$/g, "")
     .trim();
 }
 
 /**
- * Добавление корректного предлога
+ * Добавление корректного предлога с защитой от дублирования («на . на», «на на»)
  */
 function formatConditionPrefix(str: string): string {
-  const trimmed = str.trim();
+  let trimmed = str
+    .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
+    .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
+    .trim();
+
   if (!trimmed) return "на заказ";
+
+  // Убираем случайные дублированные предлоги и разделители вроде «на . на», «на на», «при на»
+  trimmed = trimmed
+    .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)\b/gi, "$2")
+    .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
+    .trim();
+
   if (/^(на|в|при|для|от|свыше|\+)/i.test(trimmed)) {
     return trimmed;
   }

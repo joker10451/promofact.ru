@@ -41,17 +41,22 @@ function extractMinimumOrder(text) {
 function cleanConditionText(raw, matchedPart) {
   let text = stripHtml(raw);
   if (matchedPart) {
-    text = text.replace(new RegExp(`(скидка\\s+)?(до\\s+)?[-−]?\\s*${matchedPart}`, "gi"), "");
+    const escaped = matchedPart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    text = text.replace(new RegExp(`(?:скидка\\s+)?(?:до\\s+)?[-−]?\\s*${escaped}[.,:;!?]?`, "gi"), "");
   }
   return text
+    .replace(/(^|[\s,.:;!?-])1(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1первый $2")
+    .replace(/(^|[\s,.:;!?-])2(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1повторный $2")
+    .replace(/(^|[\s,.:;!?-])3(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1третий $2")
     .replace(/^(на|в|от|при)\s+\d+[\s\d]*(%|₽|р|руб)/gi, "")
-    .replace(/^(скидка|минус|до|на|в|от|[,\s–—-])+/gi, "")
+    .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
+    .replace(/^(скидка|минус|до|на|в|от|[.,:;!?\s–—-])+/gi, "")
     .replace(/\(\s*\)/g, "")
     .replace(/не суммируется с другими акциями.*$/i, "")
     .replace(/скидка\s+\d+\s*(rub|руб|₽)/gi, "")
     .replace(/discount\s+sitewide/gi, "на весь ассортимент")
     .replace(/на се\b/gi, "на все")
-    .replace(/[,\s–—-]+$/g, "")
+    .replace(/[.,:;!?\s–—-]+$/g, "")
     .trim();
 }
 
@@ -244,11 +249,22 @@ function resolveOfferDetails(name, description, rawDiscount, code, isFirstOrder,
     const val = parseInt(pctMatch[1], 10);
     let condition = cleanConditionText(cleanName, pctMatch[0]);
     if (minOrder) {
-      condition = `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+      const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(cleanName) || /перв|1[-‑–—]?[ыое]?й/i.test(description);
+      condition = isFirst
+        ? `на первый заказ от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
+        : `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
     } else if (!condition || condition === "!" || condition.length < 3) {
       condition = isFirstOrder ? "на первый заказ" : "на весь ассортимент";
-    } else if (!/^(на|при|от|в|для|\+)\s+/i.test(condition)) {
-      condition = `на ${condition}`;
+    } else {
+      condition = condition
+        .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
+        .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
+        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)\b/gi, "$2")
+        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
+        .trim();
+      if (!/^(на|при|от|в|для|\+)\s+/i.test(condition)) {
+        condition = `на ${condition}`;
+      }
     }
 
     return {
@@ -275,11 +291,22 @@ function resolveOfferDetails(name, description, rawDiscount, code, isFirstOrder,
     let condition = cleanConditionText(cleanName, rubMatch[0]);
 
     if (minOrder && minOrder.value !== val) {
-      condition = `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+      const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(cleanName) || /перв|1[-‑–—]?[ыое]?й/i.test(description);
+      condition = isFirst
+        ? `на первый заказ от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
+        : `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
     } else if (!condition || condition === "!" || condition.length < 3) {
       condition = isFirstOrder ? "на первый заказ" : "на заказ по акции";
-    } else if (!/^(на|при|от|в|для|\+)\s+/i.test(condition)) {
-      condition = `на ${condition}`;
+    } else {
+      condition = condition
+        .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
+        .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
+        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)\b/gi, "$2")
+        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
+        .trim();
+      if (!/^(на|при|от|в|для|\+)\s+/i.test(condition)) {
+        condition = `на ${condition}`;
+      }
     }
 
     return {
@@ -705,4 +732,38 @@ let passed = 0;
   passed++;
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/20 ТЕСТОВ УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// Test 21: Dirty punctuation & '1 заказ' normalization -> 'на первый заказ'
+{
+  const res = normalizeAdmitadCoupon({
+    id: 21,
+    name: "Скидка 300 руб. на 1 заказ",
+    description: "Скидка 300 руб. на 1 заказ",
+    discount: "300 руб.",
+    promocode: "PROMO300",
+    customerType: "new_customers",
+    rawCampaignName: "Самокат",
+  });
+  assert.strictEqual(res.title, "−300 ₽", "Test 21 failed: title");
+  assert.strictEqual(res.shortDescription, "на первый заказ", "Test 21 failed: shortDescription must be 'на первый заказ'");
+  console.log("✓ Test 21: Dirty '300 руб. на 1 заказ' -> title: '−300 ₽', condition: 'на первый заказ' (PASS)");
+  passed++;
+}
+
+// Test 22: Stray dots, broken duplicate prepositions & minOrder -> 'на первый заказ от 1 000 ₽'
+{
+  const res = normalizeAdmitadCoupon({
+    id: 22,
+    name: "−300 ₽ на . на 1 заказ от 1 000 руб.",
+    description: "Скидка 300 руб на 1-й заказ при заказе от 1000 руб",
+    discount: "300 руб",
+    promocode: "PROMO1000",
+    customerType: "new_customers",
+    rawCampaignName: "Самокат",
+  });
+  assert.strictEqual(res.title, "−300 ₽", "Test 22 failed: title");
+  assert.strictEqual(res.shortDescription, "на первый заказ от 1 000 ₽", "Test 22 failed: shortDescription must be 'на первый заказ от 1 000 ₽'");
+  console.log("✓ Test 22: Stray 'на . на 1 заказ от 1000 руб' -> 'на первый заказ от 1 000 ₽' (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/22 ТЕСТОВ УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
