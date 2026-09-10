@@ -1,0 +1,52 @@
+name: 🤖 100% Autonomous Perfluence & Telegram Pipeline
+
+on:
+  schedule:
+    # 2 раза в день по расписанию:
+    # 07:30 UTC = 10:30 МСК (утренний пик)
+    # 15:30 UTC = 18:30 МСК (вечерний пик)
+    - cron: '30 7,15 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Тестовый прогон (без отправки в канал)'
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  run-autonomous-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Клонирование репозитория
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Установка Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Установка зависимостей
+        run: npm ci
+
+      - name: 🎭 Установка Chromium для Playwright
+        run: npx playwright install chromium --with-deps
+
+      - name: 🚀 Запуск полного автономного конвейера
+        env:
+          PERFLUENCE_WIDGET_URL: ${{ secrets.PERFLUENCE_WIDGET_URL }}
+          PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID || '@smart_zakupka' }}
+          TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+        run: |
+          mkdir -p data
+          # Восстановление сессии Perfluence из секретов GitHub (если задана)
+          if [ -n "$PERFLUENCE_SESSION_B64" ]; then
+            echo "$PERFLUENCE_SESSION_B64" | base64 -d > data/perfluence_session.json
+            echo "✓ Сессия Perfluence восстановлена в data/perfluence_session.json"
+          fi
+          
+          # Запуск оркестратора
+          node scripts/pipeline-orchestrator.mjs
