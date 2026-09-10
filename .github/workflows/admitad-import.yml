@@ -13,7 +13,7 @@ jobs:
         run: |
           HTTP_STATUS=$(curl -s -o /tmp/admitad-import.json -w "%{http_code}" -X POST \
             "https://promofact.ru/api/admin/admitad-import" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \\
             -H "Content-Type: application/json")
           cat /tmp/admitad-import.json
           echo "HTTP: $HTTP_STATUS"
