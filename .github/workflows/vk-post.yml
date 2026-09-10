@@ -41,7 +41,7 @@ jobs:
           echo "Sending request to $TARGET_URL (dry_run=$DRY_RUN, store=$STORE)"
           
           HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$TARGET_URL" \
-            -H "Authorization: Bearer ${{ secrets.VK_POSTING_SECRET || secrets.TELEGRAM_POSTING_SECRET }}"
+            -H "Authorization: Bearer ${{ secrets.VK_POSTING_SECRET || secrets.TELEGRAM_POSTING_SECRET }}")
           
           echo "Response HTTP Status: $HTTP_STATUS"
           cat response.json
