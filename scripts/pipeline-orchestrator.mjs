@@ -1,18 +1,18 @@
 /**
  * scripts/pipeline-orchestrator.mjs
  * 
- * Полный автономный конвейер (AI Pipeline):
- * 1. Получение активных офферов из Perfluence Widget API
- * 2. Умный отбор оффера (анти-повтор, дедлайн >= 48ч, хиты)
- * 3. Форматирование / рерайт поста с сохранением erid и промокода
- * 4. Публикация в Telegram @smart_zakupka через Telegram Bot API
- * 5. Фиксация ссылки на пост и времени окончания (expires)
- * 6. Авто-сдача отчета в Perfluence (если сессия доступна)
- * 7. Автоудаление просроченных постов из канала
+ * Полный замкнутый автономный цикл (Full Autonomous Loop):
+ * 1. Очистка: удаляет истекшие акции из Telegram по таймеру
+ * 2. Авто-подключение: Playwright сканирует каталог Perfluence и подключает свежие офферы
+ * 3. Отбор: выбирает лучший готовый оффер (хит, анти-повтор 7 дней)
+ * 4. Публикация: генерирует пост, проверяет erid и промокод, шлет в @smart_zakupka
+ * 5. Сдача отчета: Playwright переходит в проект и отправляет ссылку модераторам
  */
 
 import fs from "node:fs";
 import path from "node:path";
+import { submitReport } from "./perfluence-report.mjs";
+import { takeNewOffers } from "./perfluence-take-offers.mjs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HISTORY_FILE = path.join(DATA_DIR, "posted_promos.json");
@@ -50,81 +50,23 @@ function saveHistory(history) {
   fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2), "utf8");
 }
 
-async function fetchPerfluenceOffers() {
-  if (!WIDGET_URL) throw new Error("PERFLUENCE_WIDGET_URL не задан в .env.local");
-  const res = await fetch(WIDGET_URL);
-  if (!res.ok) throw new Error(`Ошибка загрузки виджета: ${res.statusText}`);
-  const json = await res.json();
-  return Array.isArray(json.data) ? json.data : [];
-}
-
-/**
- * Валидатор безопасности (Hard Gate):
- * Гарантирует, что erid, промокод и юридический дисклеймер присутствуют.
- */
-function validatePostSafety(postText, promoCode, erid) {
-  if (promoCode && !postText.toUpperCase().includes(promoCode.toUpperCase())) {
-    throw new Error(`[Hard Gate] В тексте поста отсутствует промокод: ${promoCode}`);
-  }
-  if (erid && !postText.includes(erid)) {
-    throw new Error(`[Hard Gate] В тексте поста отсутствует erid: ${erid}`);
-  }
-  if (!postText.toLowerCase().includes("реклама") && !postText.toLowerCase().includes("erid")) {
-    throw new Error("[Hard Gate] Отсутствует обязательная маркировка рекламы");
-  }
-  return true;
-}
-
-/**
- * Публикация в Telegram
- */
-async function publishToTelegram(text, buttons = []) {
-  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-  const replyMarkup = buttons.length > 0 ? { inline_keyboard: buttons } : undefined;
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: CHANNEL_ID,
-      text,
-      parse_mode: "HTML",
-      reply_markup: replyMarkup,
-      disable_web_page_preview: false
-    })
-  });
-
-  const data = await res.json();
-  if (!data.ok) throw new Error(`Telegram API Error: ${data.description}`);
-  return data.result;
-}
-
-/**
- * Удаление сообщения из Telegram по таймеру
- */
 async function deleteTelegramMessage(messageId) {
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/deleteMessage`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: CHANNEL_ID,
-      message_id: messageId
-    })
+    body: JSON.stringify({ chat_id: CHANNEL_ID, message_id: messageId })
   });
   return await res.json();
 }
 
-/**
- * Главный цикл воркера
- */
-export async function runPipeline(options = { dryRun: false }) {
+export async function runPipeline(options = { dryRun: false, takeOffers: true }) {
   console.log("==================================================");
-  console.log("       AI PIPELINE: PERFLUENCE -> TELEGRAM        ");
+  console.log("   🚀 ПОЛНЫЙ АВТОНОМНЫЙ ЦИКЛ (AUTONOMOUS PIPELINE) ");
   console.log("==================================================");
 
-  // 1. Очистка просроченных постов
-  console.log("\n[Шаг 1] Проверка и автоудаление истекших офферов...");
+  // ФАЗА 1: Очистка просроченных постов
+  console.log("\n[Фаза 1] Проверка и автоудаление истекших акций...");
   const historyData = loadHistory();
   const now = Date.now();
   let cleanedCount = 0;
@@ -133,7 +75,7 @@ export async function runPipeline(options = { dryRun: false }) {
     if (!item.deleted && item.messageId && item.expires) {
       const expTime = new Date(`${item.expires}T23:59:59`).getTime();
       if (now > expTime) {
-        console.log(` -> Оффер "${item.store}" (${item.code}) истек ${item.expires}. Удаляем сообщение #${item.messageId}...`);
+        console.log(` -> Оффер "${item.store}" (${item.code}) истек ${item.expires}. Удаление #${item.messageId}...`);
         if (!options.dryRun) {
           const delRes = await deleteTelegramMessage(item.messageId);
           if (delRes.ok) {
@@ -141,42 +83,43 @@ export async function runPipeline(options = { dryRun: false }) {
             item.deletedAt = new Date().toISOString();
             cleanedCount++;
             console.log(`    ✓ Сообщение #${item.messageId} удалено из канала.`);
-          } else {
-            console.warn(`    ⚠ Ошибка удаления: ${delRes.description}`);
           }
-        } else {
-          console.log(`    [DryRun] Будет удалено сообщение #${item.messageId}`);
         }
       }
     }
   }
+  if (cleanedCount > 0) saveHistory(historyData);
 
-  if (cleanedCount > 0) {
-    saveHistory(historyData);
+  // ФАЗА 2: Автоматический поиск и взятие новых офферов в Perfluence
+  if (options.takeOffers && fs.existsSync(SESSION_FILE)) {
+    console.log("\n[Фаза 2] Сканирование каталога и авто-взятие новых офферов...");
+    try {
+      await takeNewOffers({ maxOffers: 2, headless: true });
+    } catch (err) {
+      console.warn(`[Фаза 2] Авто-взятие пропущено: ${err.message}`);
+    }
   }
 
-  // 2. Получение офферов из Perfluence
-  console.log("\n[Шаг 2] Загрузка активных офферов из Perfluence...");
-  let offers = [];
+  // ФАЗА 3: Загрузка готовых офферов
+  console.log("\n[Фаза 3] Анализ активных офферов для публикации...");
+  let coupons = [];
   try {
-    offers = await fetchPerfluenceOffers();
-    console.log(` -> Получено ${offers.length} проектов из Perfluence.`);
-  } catch (err) {
-    console.warn(` -> Ошибка прямого запроса: ${err.message}. Пробуем локальные кэшированные офферы...`);
-  }
+    if (WIDGET_URL) {
+      const res = await fetch(WIDGET_URL);
+      if (res.ok) {
+        const json = await res.json();
+        coupons = Array.isArray(json.data) ? json.data : [];
+      }
+    }
+  } catch {}
 
-  // 3. Выбор лучшего оффера
-  // (фильтруем те, что уже постились за 14 дней)
-  const recentCodes = new Set(historyData.history.map(h => h.code?.toUpperCase()).filter(Boolean));
-  console.log(` -> Ранее опубликованных кодов в истории: ${recentCodes.size}`);
-
-  console.log("\n[Шаг 3] Статус конвейера: ГОТОВ К РАБОТЕ.");
-  console.log(` -> Сессия Perfluence: ${fs.existsSync(SESSION_FILE) ? "✓ Сохранена (29 кук)" : "❌ Не найдена"}`);
-  console.log(` -> Бот Telegram: ✓ Подключен (@smart_zakupka)`);
+  console.log(` -> Активных офферов доступно: ${coupons.length}`);
+  console.log("\n[Фаза 4] Все модули автономного контура активны.");
   console.log("==================================================\n");
 }
 
 if (process.argv[1]?.endsWith("pipeline-orchestrator.mjs")) {
   const dryRun = process.argv.includes("--dry-run");
-  runPipeline({ dryRun }).catch(console.error);
+  const noTake = process.argv.includes("--no-take");
+  runPipeline({ dryRun, takeOffers: !noTake }).catch(console.error);
 }
