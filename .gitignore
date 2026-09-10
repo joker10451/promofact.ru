@@ -46,3 +46,7 @@ dev.log
 
 # remotion video project (separate, 875 MB) — not part of the site repo
 coupon-video/
+
+# sensitive perfluence session data & debug screenshots
+data/perfluence_session.json
+data/debug/
