@@ -33,10 +33,17 @@ export async function takeNewOffers(options = { maxOffers: 3, headless: true }) 
 
   const browser = await chromium.launch({
     headless: options.headless,
-  });
+    channel: "chrome",
+    args: ["--disable-blink-features=AutomationControlled"]
+  }).catch(() => chromium.launch({
+    headless: options.headless,
+    args: ["--disable-blink-features=AutomationControlled"]
+  }));
 
   const context = await browser.newContext({
     storageState: SESSION_FILE,
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    viewport: { width: 1440, height: 900 }
   });
 
   const page = await context.newPage();
@@ -45,10 +52,20 @@ export async function takeNewOffers(options = { maxOffers: 3, headless: true }) 
   const catalogUrl = "https://dash.perfluence.net/projects/index";
   console.log(`[AutoTake] Открытие каталога проектов: ${catalogUrl}`);
 
-  try {
-    await page.goto(catalogUrl, { waitUntil: "domcontentloaded", timeout: 45_000 });
-  } catch (err) {
-    console.warn(`[AutoTake] Предупреждение при переходе: ${err.message}`);
+  let loaded = false;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(` -> Попытка ${attempt}/3 перехода в каталог...`);
+      await page.goto(catalogUrl, { waitUntil: "domcontentloaded", timeout: 25_000 });
+      loaded = true;
+      break;
+    } catch (err) {
+      console.warn(`    ⚠ Попытка ${attempt} не удалась: ${err.message}`);
+      await page.waitForTimeout(2000);
+    }
+  }
+  if (!loaded) {
+    console.warn("[AutoTake] Не удалось загрузить каталог проектов по сети.");
   }
 
   console.log(`[AutoTake] Текущий URL: ${page.url()}`);
