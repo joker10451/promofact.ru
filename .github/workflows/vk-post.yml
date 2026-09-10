@@ -2,19 +2,16 @@ name: Auto Post to VKontakte Group
 
 on:
   schedule:
-    # 1 раз в день в дневной пик активности VK (12:00 МСК = 09:00 UTC)
     - cron: '0 9 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry Run (тестовый прогон без отправки на стену)'
+        description: 'Dry Run (test without sending)'
         type: boolean
-        required: false
         default: false
       store:
         description: 'Slug магазина (опционально, например pyaterochka, kinopoisk)'
         type: string
-        required: false
 
 jobs:
   post:
@@ -26,7 +23,7 @@ jobs:
           STORE="${{ github.event.inputs.store || '' }}"
           
           URL="https://promofact.ru/api/vk/post"
-          PARAMS="?"
+          PARAMS=""
           
           if [ "$DRY_RUN" = "true" ]; then
             PARAMS="${PARAMS}dryRun=true&"
@@ -36,6 +33,7 @@ jobs:
             PARAMS="${PARAMS}store=${STORE}&"
           fi
           
+          # Remove trailing ? or &
           PARAMS="${PARAMS%&}"
           PARAMS="${PARAMS%\?}"
           
@@ -43,14 +41,12 @@ jobs:
           echo "Sending request to $TARGET_URL (dry_run=$DRY_RUN, store=$STORE)"
           
           HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$TARGET_URL" \
-            -H "Authorization: Bearer ${{ secrets.VK_POSTING_SECRET || secrets.TELEGRAM_POSTING_SECRET }}")
+            -H "Authorization: Bearer ${{ secrets.VK_POSTING_SECRET || secrets.TELEGRAM_POSTING_SECRET }}"
           
           echo "Response HTTP Status: $HTTP_STATUS"
           cat response.json
-          echo ""
           
           if [ "$HTTP_STATUS" -ne 200 ]; then
             echo "::error::API request failed with status $HTTP_STATUS"
             exit 1
           fi
-

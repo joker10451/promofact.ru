@@ -2,21 +2,16 @@ name: Auto Post to Telegram (@smart_zakupka)
 
 on:
   schedule:
-    # 2 раза в день в пиковое время активности покупателей:
-    # 07:30 UTC = 10:30 МСК (утренний слот: доставка, еда, утренние заказы)
-    # 15:30 UTC = 18:30 МСК (вечерний слот: рестораны, кино, развлечения, одежда)
     - cron: '30 7,15 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry Run (тестовый прогон без отправки в канал)'
+        description: 'Dry Run (test without sending)'
         type: boolean
-        required: false
         default: false
       store:
         description: 'Slug магазина (опционально, например pyaterochka, kinopoisk)'
         type: string
-        required: false
 
 jobs:
   post:
@@ -28,7 +23,7 @@ jobs:
           STORE="${{ github.event.inputs.store || '' }}"
           
           URL="https://promofact.ru/api/telegram/post"
-          PARAMS="?"
+          PARAMS=""
           
           if [ "$DRY_RUN" = "true" ]; then
             PARAMS="${PARAMS}dryRun=true&"
@@ -38,7 +33,7 @@ jobs:
             PARAMS="${PARAMS}store=${STORE}&"
           fi
           
-          # Убираем завершающий ? или &
+          # Remove trailing ? or &
           PARAMS="${PARAMS%&}"
           PARAMS="${PARAMS%\?}"
           
@@ -46,14 +41,12 @@ jobs:
           echo "Sending request to $TARGET_URL (dry_run=$DRY_RUN, store=$STORE)"
           
           HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$TARGET_URL" \
-            -H "Authorization: Bearer ${{ secrets.TELEGRAM_POSTING_SECRET }}")
+            -H "Authorization: Bearer ${{ secrets.TELEGRAM_POSTING_SECRET }}"
           
           echo "Response HTTP Status: $HTTP_STATUS"
           cat response.json
-          echo ""
           
           if [ "$HTTP_STATUS" -ne 200 ]; then
             echo "::error::API request failed with status $HTTP_STATUS"
             exit 1
           fi
-
