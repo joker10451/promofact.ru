@@ -1,15 +1,12 @@
 import { ImageResponse } from "next/og";
+import { loadOgFont } from "@/lib/ogFont";
 
 export const alt = "ПромоФакт — промокоды и купоны на скидку";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const FONT_URL =
-  "https://fonts.gstatic.com/s/golos_text/v12/Yq6G-LxfJEXuk6bgIxKvKnF_8qU.woff";
-
 export default async function OpengraphImage() {
-  const fontRes = await fetch(FONT_URL);
-  const fontData = await fontRes.arrayBuffer();
+  const fonts = await loadOgFont();
 
   return new ImageResponse(
     (
@@ -111,14 +108,7 @@ export default async function OpengraphImage() {
     ),
     {
       ...size,
-      fonts: [
-        {
-          name: "Golos",
-          data: fontData,
-          weight: 400,
-          style: "normal",
-        },
-      ],
+      ...(fonts ? { fonts } : {}),
     }
   );
 }

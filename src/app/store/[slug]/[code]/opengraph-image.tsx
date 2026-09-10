@@ -1,12 +1,11 @@
 import { ImageResponse } from "next/og";
+import { loadOgFont } from "@/lib/ogFont";
 import { getStores } from "@/lib/perfluence";
 
 export const alt = "Промокод";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const FONT_URL =
-  "https://fonts.gstatic.com/s/golos_text/v12/Yq6G-LxfJEXuk6bgIxKvKnF_8qU.woff";
 
 export default async function Image({
   params,
@@ -20,9 +19,7 @@ export default async function Image({
   const coupon = store?.coupons.find(
     (c) => c.promocode.code === decodedCode || c.promocode.code.toLowerCase() === decodedCode.toLowerCase()
   ) || store?.coupons[0];
-
-  const fontRes = await fetch(FONT_URL);
-  const fontData = await fontRes.arrayBuffer();
+  const fonts = await loadOgFont();
 
   const storeName = store?.name || "Магазин";
   const bonus = coupon?.promocode.bonusName || `Скидка по промокоду ${decodedCode}`;
@@ -166,14 +163,7 @@ export default async function Image({
     ),
     {
       ...size,
-      fonts: [
-        {
-          name: "Golos",
-          data: fontData,
-          weight: 400,
-          style: "normal",
-        },
-      ],
+      ...(fonts ? { fonts } : {}),
     }
   );
 }
