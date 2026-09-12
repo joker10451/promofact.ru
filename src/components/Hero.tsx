@@ -5,12 +5,19 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import RecentActivityPulse from "@/components/RecentActivityPulse";
-import type { Coupon, Store } from "@/lib/types";
+import type { Coupon } from "@/lib/types";
+import type { SearchIndex } from "@/lib/searchIndex";
 
 interface HeroProps {
   featured?: Coupon;
-  stores?: Array<Store & { coupons?: Coupon[] }>;
-  coupons?: Coupon[];
+  /**
+   * Лёгкий индекс вместо полных массивов: всё, что попадает в клиентский
+   * компонент, сериализуется в RSC-поток и уезжает внутри HTML. Поиску
+   * достаточно четырёх коротких полей на запись.
+   */
+  search?: SearchIndex;
+  /** Число активных акций приходит готовым: сам массив здесь не нужен. */
+  couponCount?: number;
   proofTotal?: number;
 }
 
@@ -35,7 +42,9 @@ const REAL_POPULAR_TAGS = [
   "Fix Price",
 ];
 
-export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: HeroProps) {
+export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroProps) {
+  const stores = search?.stores ?? [];
+  const coupons = search?.coupons ?? [];
   const [q, setQ] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,9 +61,9 @@ export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: Hero
     ? coupons
         .filter(
           (c) =>
-            c.promocode.code.toLowerCase().includes(query) ||
-            c.store.name.toLowerCase().includes(query) ||
-            (c.promocode.bonusName && c.promocode.bonusName.toLowerCase().includes(query))
+            c.code.toLowerCase().includes(query) ||
+            c.store.toLowerCase().includes(query) ||
+            (c.bonus && c.bonus.toLowerCase().includes(query))
         )
         .slice(0, 4)
     : [];
@@ -181,14 +190,14 @@ export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: Hero
                   {matchedCoupons.map((c) => (
                     <div
                       key={c.id}
-                      onClick={() => submitSearch(c.store.name)}
+                      onClick={() => submitSearch(c.store)}
                       className="flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-ink hover:bg-paper transition-colors"
                     >
                       <div className="min-w-0 pr-2">
-                        <span className="font-bold text-ink">{c.store.name}: </span>
-                        <span className="text-ink/80 truncate">{c.promocode.bonusName || c.promocode.code}</span>
+                        <span className="font-bold text-ink">{c.store}: </span>
+                        <span className="text-ink/80 truncate">{c.bonus || c.code}</span>
                       </div>
-                      <span className="shrink-0 font-mono text-xs font-bold text-red">{c.promocode.code}</span>
+                      <span className="shrink-0 font-mono text-xs font-bold text-red">{c.code}</span>
                     </div>
                   ))}
                 </div>
@@ -228,7 +237,7 @@ export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: Hero
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow/40 text-ink text-[11px]">
               <Icon name="sparkle" size={14} />
             </span>
-            <span>{coupons.length > 0 ? coupons.length : 23} активных акций</span>
+            <span>{couponCount > 0 ? couponCount : 23} активных акций</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
