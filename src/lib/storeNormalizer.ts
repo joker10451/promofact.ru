@@ -1,3 +1,8 @@
+import {
+  categoryForStore,
+  getCategoryDef,
+  canonicalCategorySlug,
+} from "@/lib/categoryTaxonomy";
 /**
  * Модуль нормализации магазинов и категоризации
  * Превращает сырые технические данные сетей (Admitad, Saleads, Perfluence)
@@ -216,7 +221,10 @@ export function inferCategory(text: string): { name: string; slug: string } {
     return { name: "Сервисы и подписки", slug: "servisy-i-podpiski" };
   }
 
-  return { name: "Маркетплейсы", slug: "marketpleysy" };
+  // Раньше здесь возвращались «Маркетплейсы», и туда падало всё неопознанное —
+  // две трети каталога. Настоящие площадки теперь перечислены в BRAND_CATEGORY,
+  // а дефолтом служит честная нейтральная корзина.
+  return { name: "Разное", slug: "raznoe" };
 }
 
 /**
@@ -225,7 +233,15 @@ export function inferCategory(text: string): { name: string; slug: string } {
 export function normalizeStore(rawName: string, rawSlug: string, rawCat?: string): NormalizedStoreMeta {
   const slug = rawSlug.toLowerCase().trim();
   if (STORE_OVERRIDES[slug]) {
-    return STORE_OVERRIDES[slug];
+    // Ручные переопределения тоже приводим к каноническому слагу, иначе
+    // исторические дубли категорий продолжат жить отдельными разделами.
+    const o = STORE_OVERRIDES[slug];
+    const canonical = canonicalCategorySlug(o.categorySlug);
+    return {
+      ...o,
+      categorySlug: canonical,
+      category: getCategoryDef(canonical)?.label ?? o.category,
+    };
   }
 
   // Очистка названия магазина от мусора (.com, RU, WW, etc.)
@@ -244,9 +260,15 @@ export function normalizeStore(rawName: string, rawSlug: string, rawCat?: string
 
   const inferred = inferCategory(`${cleanName} ${rawCat || ""}`);
 
+  // Ключевые слова бессильны против брендовых имён: «Befree», «SUNLIGHT»,
+  // «Foxford» не содержат ни одной зацепки, поэтому такие магазины годами
+  // падали в дефолт. Сначала спрашиваем явный справочник брендов и лишь
+  // затем опираемся на результат по ключевым словам.
+  const categorySlug = categoryForStore(cleanName, inferred.slug);
+
   return {
     name: cleanName || rawName,
-    category: inferred.name,
-    categorySlug: inferred.slug,
+    category: getCategoryDef(categorySlug)?.label ?? inferred.name,
+    categorySlug,
   };
 }
