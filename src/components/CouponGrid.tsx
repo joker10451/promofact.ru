@@ -4,7 +4,7 @@ import Icon from "@/components/Icon";
 
 import { useMemo, useState, useEffect } from "react";
 import CouponTicket from "@/components/CouponTicket";
-import type { Coupon } from "@/lib/types";
+import type { CatalogCoupon } from "@/lib/catalogCoupon";
 
 export default function CouponGrid({
   coupons: allCoupons,
@@ -12,7 +12,7 @@ export default function CouponGrid({
   proofsByStore,
   excludeOfferKeys,
 }: {
-  coupons: Coupon[];
+  coupons: CatalogCoupon[];
   proofsByCode?: Record<string, number>;
   proofsByStore?: Record<number, number>;
   excludeOfferKeys?: string[];
@@ -152,7 +152,7 @@ export default function CouponGrid({
 
   // Группировка по магазинам: 1 лучший промокод магазина + аккордеон остальных
   const groupedStoreList = useMemo(() => {
-    const storeMap = new Map<number, Coupon[]>();
+    const storeMap = new Map<number, CatalogCoupon[]>();
     for (const c of filteredCoupons) {
       const list = storeMap.get(c.store.id) || [];
       list.push(c);
