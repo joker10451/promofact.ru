@@ -151,7 +151,7 @@ function codesSentence(input: StoreArticleInput): string {
       : active.length >= 2 && active.length <= 4
         ? "промокода"
         : "промокодов";
-  return `Сейчас у ${input.name} действует ${active.length} ${countWord}${tops ? `: ${tops}` : ""}. Все коды проверены и приводятся в карточке купона с условиями применения.`;
+  return `Сейчас у ${input.name} действует ${active.length} ${countWord}${tops ? `: ${tops}` : ""}.`;
 }
 
 function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
@@ -175,9 +175,11 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
         : "рабочих промокодов";
 
   // 1. Лид — уникальный за счёт числа скидок, месяца и максимальной выгоды.
+  // Про проверку кодов здесь намеренно не пишем: та же мысль звучала в трёх
+  // абзацах подряд и в шапке страницы. Содержательная версия — в абзаце 5.
   let lead: string;
   if (input.couponCount > 0) {
-    lead = `На странице «Промокоды ${input.name}» собраны актуальные и проверенные купоны на ${monthRu}. Скидка на ${input.category} сегодня достигает ${input.maxDiscount}, всего действует ${input.couponCount} ${countWord}. Коды проверены командой ПромоФакт, срок действия указан в карточке каждого купона.`;
+    lead = `На странице «Промокоды ${input.name}» собраны актуальные и проверенные купоны на ${monthRu}. Скидка на ${input.category} сегодня достигает ${input.maxDiscount}, всего действует ${input.couponCount} ${countWord}.`;
   } else {
     lead = `Страница «Промокоды ${input.name}» по категории «${input.category}». Сейчас действующих купонов нет, но подборку обновляем по мере старта партнёрских акций — новые коды появляются в день запуска.`;
   }
@@ -185,7 +187,8 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
   // 2. Категорийный угол (выбирается по хэшу слоуга — два магазина одной категории различаются).
   const angle = fill(pickAngle(input.categorySlug, slug), f);
 
-  // 3. Коды / бонусы — реальные данные конкретного магазина.
+  // 3. Коды / бонусы — реальные данные конкретного магазина. Абзац сознательно
+  // оставлен голыми данными: пояснение про условия дублировало абзац 4.
   const codes = codesSentence(input);
 
   // 4. Первый заказ / условия.
