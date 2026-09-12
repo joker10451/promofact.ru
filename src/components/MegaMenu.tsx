@@ -8,7 +8,6 @@ import Icon from "@/components/Icon";
 export interface MegaMenuCategory {
   slug: string;
   label: string;
-  icon: string;
   blurb: string;
   count: number;
 }
@@ -16,7 +15,6 @@ export interface MegaMenuCategory {
 export interface MegaMenuGroup {
   id: string;
   label: string;
-  icon: string;
   categories: MegaMenuCategory[];
   total: number;
 }

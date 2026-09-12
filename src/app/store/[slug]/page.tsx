@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -505,7 +506,7 @@ export default async function StorePage({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-mint text-white font-bold text-base sm:text-lg shadow-2xs">
-                ✓
+                <Icon name="check" size={19} />
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
@@ -523,9 +524,9 @@ export default async function StorePage({
               </div>
             </div>
             <div className="flex items-center gap-2 text-[11px] font-bold text-ink/50 self-end sm:self-auto shrink-0 bg-white px-3 py-1.5 rounded-xl border border-line shadow-2xs">
-              <span>🟢 Сегодня: активен</span>
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-mint" />Сегодня: активен</span>
               <span>·</span>
-              <span>🟢 Вчера: проверен</span>
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-mint" />Вчера: проверен</span>
             </div>
           </div>
 
@@ -541,7 +542,7 @@ export default async function StorePage({
                   <span className="h-2 w-2 rounded-full bg-mint shrink-0" />
                   <span className="font-mono font-bold text-[11px] text-ink/60">{h.date}</span>
                   <span className="text-[11px] font-semibold text-ink truncate">{h.verifier}</span>
-                  <span className="ml-auto text-[10px] font-bold text-mint-dark">✓ OK</span>
+                  <span className="ml-auto flex items-center gap-1 text-[10px] font-bold text-mint-dark"><Icon name="check" size={10} />OK</span>
                 </div>
               ))}
             </div>
@@ -626,7 +627,7 @@ export default async function StorePage({
           >
             <div>
               <div className="font-display font-extrabold group-hover:text-red transition-colors">
-                🏷 Все промокоды в категории «{store.category}»
+                <Icon name="tag" size={14} className="inline" /> Все промокоды в категории «{store.category}»
               </div>
               <p className="mt-1 text-sm text-ink/55">
                 Смотреть скидки других магазинов в этой же категории
@@ -659,7 +660,7 @@ export default async function StorePage({
           return (
             <section className="mt-10 max-w-3xl rounded-3xl border border-line bg-white p-6 shadow-xs">
               <h3 className="font-display text-base font-extrabold text-ink mb-3 flex items-center gap-2">
-                <span>📚</span>
+                <Icon name="clipboard" size={16} />
                 <span>Полезные гиды и советы по покупкам в {store.name}</span>
               </h3>
               <div className="grid gap-2 sm:grid-cols-2">

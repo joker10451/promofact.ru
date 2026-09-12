@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -245,7 +246,7 @@ export default async function StoreFirstOrderPage({
             </div>
             <div className="min-w-0 flex-1">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-red/10 border border-red/30 px-2.5 py-0.5 text-[11px] font-bold text-red mb-2">
-                <span>🎁</span>
+                <Icon name="gift" size={14} />
                 <span>Спецпредложения для новых клиентов</span>
               </div>
               <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">

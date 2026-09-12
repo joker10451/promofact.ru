@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import Link from "next/link";
 import { getStores } from "@/lib/perfluence";
 import StoreLogo from "@/components/StoreLogo";
@@ -70,7 +71,7 @@ export default async function OtherStores({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
             <div>
               <h2 className="font-display text-lg sm:text-xl font-extrabold text-ink flex items-center gap-2">
-                <span>🔄</span>
+                <Icon name="repeat" size={14} />
                 <span>
                   {storeName
                     ? `Похожие на ${storeName} магазины`
@@ -147,7 +148,7 @@ export default async function OtherStores({
       <section aria-label="Популярные промокоды в других магазинах">
         <div className="mb-4">
           <h2 className="font-display text-lg sm:text-xl font-extrabold text-ink flex items-center gap-2">
-            <span>⭐</span>
+            <Icon name="star" size={14} />
             <span>
               {sameCategory.length > 0
                 ? "Популярные магазины в других категориях"

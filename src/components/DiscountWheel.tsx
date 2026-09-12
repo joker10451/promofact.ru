@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -20,7 +21,7 @@ interface WheelPrize {
 const PRIZES: WheelPrize[] = [
   {
     id: 1,
-    label: "🛴 Самокат −300₽",
+    label: "Самокат −300₽",
     storeName: "Самокат",
     storeSlug: "samokat",
     code: "SMK300",
@@ -31,7 +32,7 @@ const PRIZES: WheelPrize[] = [
   },
   {
     id: 2,
-    label: "🛒 Пятёрочка −25%",
+    label: "Пятёрочка −25%",
     storeName: "Пятёрочка Доставка",
     storeSlug: "pyaterochka",
     code: "a5w5yh74pr5",
@@ -42,7 +43,7 @@ const PRIZES: WheelPrize[] = [
   },
   {
     id: 3,
-    label: "🏨 Отелло −15%",
+    label: "Отелло −15%",
     storeName: "Отелло",
     storeSlug: "otello",
     code: "JAR2-YR4A",
@@ -53,7 +54,7 @@ const PRIZES: WheelPrize[] = [
   },
   {
     id: 4,
-    label: "📦 Маркет −500₽",
+    label: "Маркет −500₽",
     storeName: "Яндекс Маркет",
     storeSlug: "yandex-market",
     code: "MARKET500",
@@ -64,7 +65,7 @@ const PRIZES: WheelPrize[] = [
   },
   {
     id: 5,
-    label: "🎬 Кинопоиск 60дн",
+    label: "Кинопоиск 60дн",
     storeName: "Кинопоиск",
     storeSlug: "kinopoisk",
     code: "6ZJP6PZFQH",
@@ -75,7 +76,7 @@ const PRIZES: WheelPrize[] = [
   },
   {
     id: 6,
-    label: "🍏 Яблоко −10%",
+    label: "Яблоко −10%",
     storeName: "Золотое Яблоко",
     storeSlug: "zolotoe-yabloko",
     code: "GOLD10",
@@ -164,7 +165,7 @@ export default function DiscountWheel() {
         className="hidden sm:flex fixed bottom-5 left-5 z-40 items-center gap-2 rounded-full border border-line bg-white/95 backdrop-blur px-3.5 py-2 text-xs font-extrabold text-ink shadow-[0_4px_16px_rgba(11,16,43,0.12)] transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
         aria-label="Колесо скидок"
       >
-        <span className="text-base">🎰</span>
+        <Icon name="wheel" size={15} />
         <span className="font-bold">Колесо скидок</span>
       </button>
 
@@ -178,12 +179,12 @@ export default function DiscountWheel() {
               className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-colors"
               aria-label="Закрыть"
             >
-              ✕
+              <Icon name="close" size={13} />
             </button>
 
             <div className="text-center">
               <span className="inline-block rounded-full bg-amber-500/20 px-3 py-1 text-xs font-bold text-amber-400 border border-amber-500/30">
-                🎁 Беспроигрышная рулетка
+                <Icon name="gift" size={14} className="inline" /> Беспроигрышная рулетка
               </span>
               <h3 className="mt-2 font-display text-2xl sm:text-3xl font-black text-white">
                 Колесо Скидок
@@ -244,7 +245,7 @@ export default function DiscountWheel() {
             {/* Результат выигрыша */}
             {wonPrize && !isSpinning ? (
               <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/40 p-4 text-center animate-fade-in">
-                <div className="text-2xl">🎉</div>
+                <Icon name="sparkle" size={24} className="mx-auto text-red" />
                 <div className="font-display font-extrabold text-lg text-emerald-400">
                   Поздравляем! Ваш приз:
                 </div>
@@ -260,7 +261,7 @@ export default function DiscountWheel() {
                     onClick={() => copyCode(wonPrize.code)}
                     className="rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 px-4 py-2 text-sm font-bold transition-all shadow-md active:scale-95"
                   >
-                    {copied ? "✓ Скопировано" : "Скопировать"}
+                    {copied ? "Скопировано" : "Скопировать"}
                   </button>
                 </div>
 
@@ -287,7 +288,7 @@ export default function DiscountWheel() {
                   disabled={isSpinning}
                   className="w-full sm:w-auto min-w-[200px] rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 py-3.5 px-8 font-display text-base sm:text-lg font-black text-slate-950 shadow-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-60 disabled:pointer-events-none"
                 >
-                  {isSpinning ? "Колесо вращается..." : "ИСПЫТАТЬ УДАЧУ 🎲"}
+                  {isSpinning ? "Колесо вращается..." : "ИСПЫТАТЬ УДАЧУ"}
                 </button>
               </div>
             )}

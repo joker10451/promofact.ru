@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -172,7 +173,7 @@ export default function SberCardPage() {
         {/* HERO */}
         <section className="mt-6 relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-white to-mint/20 p-6 shadow-[0_4px_0_rgba(11,16,43,0.06)] sm:p-10">
           <span className="inline-flex items-center gap-2 rounded-full bg-red/10 px-3 py-1 text-xs font-bold text-red">
-            🔥 Финансовый запас на каждый день
+            <Icon name="flame" size={15} className="inline" /> Финансовый запас на каждый день
           </span>
           <h1 className="mt-4 font-display text-3xl font-black leading-tight text-ink sm:text-4xl lg:text-5xl">
             Кредитная СберКарта

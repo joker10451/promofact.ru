@@ -34,7 +34,7 @@ async function buildGroups(): Promise<MegaMenuGroup[]> {
         const def = getCategoryDef(slug);
         const count = counts.get(slug) ?? 0;
         return def && count > 0
-          ? { slug, label: def.label, icon: def.icon, blurb: def.blurb, count }
+          ? { slug, label: def.label, blurb: def.blurb, count }
           : null;
       })
       .filter((c): c is NonNullable<typeof c> => c !== null)
@@ -42,8 +42,7 @@ async function buildGroups(): Promise<MegaMenuGroup[]> {
 
     return {
       id: g.id,
-      label: g.label,
-      icon: g.icon,
+      label: g.label,
       categories: cats,
       total: cats.reduce((s, c) => s + c.count, 0),
     };

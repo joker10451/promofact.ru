@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useEffect, useState } from "react";
 import { ymReachGoal } from "@/components/YandexMetrika";
 
@@ -34,7 +35,7 @@ export default function SberStickyCta({ affiliateUrl }: SberStickyCtaProps) {
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-xs font-bold text-ink/70 sm:text-sm">
-            💳 Кредитная СберКарта — доставка уже сегодня
+            <Icon name="card" size={15} className="inline" /> Кредитная СберКарта — доставка уже сегодня
           </p>
           <p className="text-[11px] text-ink/45 sm:text-xs">
             до 120 дней без процентов

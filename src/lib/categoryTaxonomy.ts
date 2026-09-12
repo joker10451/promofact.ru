@@ -21,50 +21,48 @@
 export interface CategoryDef {
   slug: string;
   /** Название в единственном числе, как заголовок раздела */
-  label: string;
-  icon: string;
+  label: string;
   /** Короткое описание для страницы категории и подсказки в меню */
   blurb: string;
 }
 
 export interface CategoryGroup {
   id: string;
-  label: string;
-  icon: string;
+  label: string;
   categorySlugs: string[];
 }
 
 /** Все категории каталога. Порядок внутри группы — как показывать в меню. */
 export const CATEGORIES: CategoryDef[] = [
   // Еда и продукты
-  { slug: "dostavka-produktov", label: "Доставка продуктов", icon: "🛒", blurb: "Супермаркеты и сервисы доставки продуктов на дом" },
-  { slug: "dostavka-iz-restoranov", label: "Доставка из ресторанов", icon: "🍔", blurb: "Рестораны, суши, пицца и готовая еда" },
-  { slug: "produkty-i-napitki", label: "Продукты и напитки", icon: "☕", blurb: "Кофе, чай, деликатесы и фермерские продукты" },
+  { slug: "dostavka-produktov", label: "Доставка продуктов", blurb: "Супермаркеты и сервисы доставки продуктов на дом" },
+  { slug: "dostavka-iz-restoranov", label: "Доставка из ресторанов", blurb: "Рестораны, суши, пицца и готовая еда" },
+  { slug: "produkty-i-napitki", label: "Продукты и напитки", blurb: "Кофе, чай, деликатесы и фермерские продукты" },
 
   // Красота и здоровье
-  { slug: "kosmetika-i-parfyumeriya", label: "Косметика и парфюмерия", icon: "💄", blurb: "Уход, макияж, парфюмерия и средства для волос" },
-  { slug: "zdorove-i-vitaminy", label: "Аптека и здоровье", icon: "💊", blurb: "Аптеки, витамины, БАДы и оптика" },
+  { slug: "kosmetika-i-parfyumeriya", label: "Косметика и парфюмерия", blurb: "Уход, макияж, парфюмерия и средства для волос" },
+  { slug: "zdorove-i-vitaminy", label: "Аптека и здоровье", blurb: "Аптеки, витамины, БАДы и оптика" },
 
   // Одежда и дом
-  { slug: "odezhda-i-obuv", label: "Одежда и обувь", icon: "👕", blurb: "Одежда, обувь и аксессуары для всей семьи" },
-  { slug: "detskie-tovary", label: "Детские товары", icon: "🧸", blurb: "Игрушки, одежда и товары для малышей" },
-  { slug: "vse-dlya-doma", label: "Всё для дома", icon: "🏠", blurb: "Мебель, посуда, текстиль и товары для уюта" },
-  { slug: "elektronika-i-tehnika", label: "Электроника и техника", icon: "📱", blurb: "Гаджеты, бытовая техника и комплектующие" },
-  { slug: "ukrasheniya", label: "Украшения и часы", icon: "💍", blurb: "Ювелирные изделия, бижутерия и часы" },
+  { slug: "odezhda-i-obuv", label: "Одежда и обувь", blurb: "Одежда, обувь и аксессуары для всей семьи" },
+  { slug: "detskie-tovary", label: "Детские товары", blurb: "Игрушки, одежда и товары для малышей" },
+  { slug: "vse-dlya-doma", label: "Всё для дома", blurb: "Мебель, посуда, текстиль и товары для уюта" },
+  { slug: "elektronika-i-tehnika", label: "Электроника и техника", blurb: "Гаджеты, бытовая техника и комплектующие" },
+  { slug: "ukrasheniya", label: "Украшения и часы", blurb: "Ювелирные изделия, бижутерия и часы" },
 
   // Развлечения и сервисы
-  { slug: "onlayn-kinoteatry", label: "Онлайн-кинотеатры", icon: "🎬", blurb: "Подписки на фильмы, сериалы и ТВ" },
-  { slug: "servisy-i-podpiski", label: "Сервисы и подписки", icon: "⚡", blurb: "Антивирусы, VPN, облака и цифровые подписки" },
-  { slug: "onlayn-obrazovanie", label: "Онлайн-образование", icon: "🎓", blurb: "Курсы, школы, репетиторы и профессии" },
-  { slug: "razvlecheniya", label: "Развлечения и события", icon: "🎭", blurb: "Билеты в кино, театры, концерты и парки" },
-  { slug: "svyaz-i-internet", label: "Связь и интернет", icon: "📶", blurb: "Мобильные операторы, тарифы и домашний интернет" },
+  { slug: "onlayn-kinoteatry", label: "Онлайн-кинотеатры", blurb: "Подписки на фильмы, сериалы и ТВ" },
+  { slug: "servisy-i-podpiski", label: "Сервисы и подписки", blurb: "Антивирусы, VPN, облака и цифровые подписки" },
+  { slug: "onlayn-obrazovanie", label: "Онлайн-образование", blurb: "Курсы, школы, репетиторы и профессии" },
+  { slug: "razvlecheniya", label: "Развлечения и события", blurb: "Билеты в кино, театры, концерты и парки" },
+  { slug: "svyaz-i-internet", label: "Связь и интернет", blurb: "Мобильные операторы, тарифы и домашний интернет" },
 
   // Путешествия и прочее
-  { slug: "puteshestviya-i-turizm", label: "Путешествия и туризм", icon: "✈️", blurb: "Отели, авиабилеты, туры и аренда жилья" },
-  { slug: "sport-i-otdyh", label: "Спорт и отдых", icon: "🚴", blurb: "Спортивные товары, велосипеды и снаряжение" },
-  { slug: "tsvety", label: "Цветы и подарки", icon: "🌷", blurb: "Букеты, доставка цветов и подарочные наборы" },
-  { slug: "marketpleysy", label: "Маркетплейсы", icon: "📦", blurb: "Крупные торговые площадки с товарами всех категорий" },
-  { slug: "raznoe", label: "Разное", icon: "🏷", blurb: "Предложения, не вошедшие в другие разделы" },
+  { slug: "puteshestviya-i-turizm", label: "Путешествия и туризм", blurb: "Отели, авиабилеты, туры и аренда жилья" },
+  { slug: "sport-i-otdyh", label: "Спорт и отдых", blurb: "Спортивные товары, велосипеды и снаряжение" },
+  { slug: "tsvety", label: "Цветы и подарки", blurb: "Букеты, доставка цветов и подарочные наборы" },
+  { slug: "marketpleysy", label: "Маркетплейсы", blurb: "Крупные торговые площадки с товарами всех категорий" },
+  { slug: "raznoe", label: "Разное", blurb: "Предложения, не вошедшие в другие разделы" },
 ];
 
 /** Разделы верхнего уровня для многоколоночного меню в шапке. */
@@ -72,31 +70,31 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     id: "eda",
     label: "Еда и продукты",
-    icon: "🍽",
+   
     categorySlugs: ["dostavka-produktov", "dostavka-iz-restoranov", "produkty-i-napitki"],
   },
   {
     id: "krasota",
     label: "Красота и здоровье",
-    icon: "💅",
+   
     categorySlugs: ["kosmetika-i-parfyumeriya", "zdorove-i-vitaminy", "sport-i-otdyh"],
   },
   {
     id: "dom",
     label: "Дом, одежда, техника",
-    icon: "🏡",
+   
     categorySlugs: ["odezhda-i-obuv", "detskie-tovary", "vse-dlya-doma", "elektronika-i-tehnika", "ukrasheniya"],
   },
   {
     id: "servisy",
     label: "Сервисы и развлечения",
-    icon: "🎬",
+   
     categorySlugs: ["onlayn-kinoteatry", "servisy-i-podpiski", "onlayn-obrazovanie", "razvlecheniya", "svyaz-i-internet"],
   },
   {
     id: "puteshestviya",
     label: "Путешествия и подарки",
-    icon: "✈️",
+   
     categorySlugs: ["puteshestviya-i-turizm", "tsvety", "marketpleysy", "raznoe"],
   },
 ];
@@ -105,10 +103,6 @@ const BY_SLUG = new Map(CATEGORIES.map((c) => [c.slug, c]));
 
 export function getCategoryDef(slug: string): CategoryDef | undefined {
   return BY_SLUG.get(slug);
-}
-
-export function categoryIcon(slug: string): string {
-  return BY_SLUG.get(slug)?.icon ?? "🏷";
 }
 
 /**

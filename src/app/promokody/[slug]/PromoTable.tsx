@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/components/Icon";
+
 import { useState } from "react";
 import type { PromoTableRow } from "@/lib/seoArticles";
 
@@ -33,7 +35,7 @@ function CopyButton({ code }: { code: string }) {
           : "bg-yellow text-ink hover:translate-y-[-1px] hover:shadow-sm"
       }`}
     >
-      {copied ? "Скопирован ✓" : "Копировать"}
+      {copied ? "Скопирован" : "Копировать"}
     </button>
   );
 }

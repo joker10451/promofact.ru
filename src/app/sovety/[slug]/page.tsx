@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -135,7 +136,7 @@ export default async function ArticlePage({
               <span>•</span>
               <span>⏱ 3–4 мин чтения</span>
               <span>•</span>
-              <span className="text-mint-dark">✓ Проверено</span>
+              <span className="text-mint-dark"><Icon name="check" size={11} className="inline" /> Проверено</span>
             </div>
 
             <h1 className="font-display text-2xl sm:text-4xl font-extrabold leading-tight text-ink">
@@ -188,7 +189,7 @@ export default async function ArticlePage({
               <div className="mt-10 pt-8 border-t border-line">
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">🔥</span>
+                    <Icon name="flame" size={16} />
                     <h2 className="font-display text-lg sm:text-xl font-bold text-ink">
                       Рабочие промокоды по теме статьи
                     </h2>
@@ -214,7 +215,7 @@ export default async function ArticlePage({
             {article.related.length > 0 && (
               <div className="mt-8 rounded-2xl bg-yellow/15 border border-yellow/50 p-5">
                 <div className="font-display text-sm font-bold text-ink mb-3 flex items-center gap-2">
-                  <span>🏷</span>
+                  <Icon name="tag" size={14} />
                   <span>Смотрите также скидки по магазинам:</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
