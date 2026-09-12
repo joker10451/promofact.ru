@@ -1,13 +1,57 @@
 import Link from "next/link";
 
+import MegaMenu, { type MegaMenuGroup } from "@/components/MegaMenu";
+import { getCategories } from "@/lib/perfluence";
+import {
+  CATEGORY_GROUPS,
+  getCategoryDef,
+  canonicalCategorySlug,
+} from "@/lib/categoryTaxonomy";
+
+// Прямые ссылки, которым не место в каталоге категорий.
 const NAV = [
   { href: "/promokody", label: "Магазины" },
-  { href: "/#catalog", label: "Категории" },
-  { href: "/#hot", label: "🔥 Горящие" },
   { href: "/sovety", label: "Советы" },
 ];
 
-export default function Header() {
+/**
+ * Счётчики берём из реальной выдачи, а не из справочника: показывать раздел
+ * с нулём предложений — обманывать пользователя, поэтому пустые категории
+ * и пустые разделы в меню не выводятся вовсе.
+ */
+async function buildGroups(): Promise<MegaMenuGroup[]> {
+  const categories = await getCategories();
+  const counts = new Map<string, number>();
+  for (const c of categories) {
+    const slug = canonicalCategorySlug(c.slug);
+    counts.set(slug, (counts.get(slug) ?? 0) + c.count);
+  }
+
+  return CATEGORY_GROUPS.map((g) => {
+    const cats = g.categorySlugs
+      .map((slug) => {
+        const def = getCategoryDef(slug);
+        const count = counts.get(slug) ?? 0;
+        return def && count > 0
+          ? { slug, label: def.label, icon: def.icon, blurb: def.blurb, count }
+          : null;
+      })
+      .filter((c): c is NonNullable<typeof c> => c !== null)
+      .sort((a, b) => b.count - a.count);
+
+    return {
+      id: g.id,
+      label: g.label,
+      icon: g.icon,
+      categories: cats,
+      total: cats.reduce((s, c) => s + c.count, 0),
+    };
+  }).filter((g) => g.categories.length > 0);
+}
+
+export default async function Header() {
+  const groups = await buildGroups();
+
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-line shadow-xs">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
@@ -32,15 +76,17 @@ export default function Header() {
           </Link>
 
           {/* Навигация */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-bold text-ink/70">
+          <MegaMenu groups={groups} />
+
+          <nav className="hidden lg:flex items-center gap-5 text-sm font-bold text-ink/70">
             {NAV.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className="relative hover:text-ink transition-colors whitespace-nowrap py-1 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:rounded-full after:bg-red after:transition-all hover:after:w-full"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
