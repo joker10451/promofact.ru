@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
 import OtherCategories from "@/components/OtherCategories";
@@ -9,6 +9,8 @@ import StoreLogo from "@/components/StoreLogo";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import { getCategories, getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { plural } from "@/lib/format";
+import { canonicalCategorySlug, getCategoryDef } from "@/lib/categoryTaxonomy";
 
 const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
   month: "long",
@@ -35,14 +37,6 @@ export async function generateStaticParams() {
   return [];
 }
 
-const plural = (n: number, one: string, few: string, many: string): string => {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return one;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
-  return many;
-};
-
 export async function generateMetadata({
   params,
 }: {
@@ -52,11 +46,12 @@ export async function generateMetadata({
   const [categories, all] = await Promise.all([getCategories(), getCoupons()]);
   const cat = categories.find((c) => c.slug === slug);
   if (!cat) return {};
+  const catName = getCategoryDef(slug)?.label ?? cat.name;
   const count = all.filter((c) => c.store.categorySlug === slug).length;
   const pageUrl = `${SITE_URL}/category/${slug}`;
   const og = {
-    title: `Промокоды и купоны: ${cat.name} — скидки ${MONTH_YEAR}`,
-    description: `Проверенные промокоды на скидки в категории «${cat.name}»: ${count} актуальных предложений от магазинов-партнёров. Копируй код и экономь уже сегодня.`,
+    title: `Промокоды и купоны: ${catName} — скидки ${MONTH_YEAR}`,
+    description: `Проверенные промокоды на скидки в категории «${catName}»: ${count} актуальных предложений от магазинов-партнёров. Копируй код и экономь уже сегодня.`,
     url: pageUrl,
     type: "website" as const,
     locale: "ru_RU",
@@ -116,12 +111,24 @@ export default async function CategoryPage({
     getCoupons(),
     getUsesStats(),
   ]);
+  // Исторические слаги («Красота и косметика», «Продукты и доставка») схлопнуты
+  // в канонические разделы. Такие адреса уже проиндексированы, поэтому отдаём
+  // 308 на канонический URL, а не 404: иначе теряется накопленный поисковый вес.
+  const canonical = canonicalCategorySlug(slug);
+  if (canonical !== slug) permanentRedirect(`/category/${canonical}`);
+
   const cat = categories.find((c) => c.slug === slug);
   if (!cat) notFound();
 
+  // Подпись и описание берём из справочника: он задаёт единую формулировку
+  // для раздела во всём интерфейсе, тогда как имя из фида может отличаться
+  // от источника к источнику.
+  const def = getCategoryDef(slug);
+  const catName = def?.label ?? cat.name;
+
   const list = all.filter((c) => c.store.categorySlug === slug);
   const storeNames = [...new Set(list.map((c) => c.store.name))];
-  const paragraphs = seoText(cat.name, storeNames, storeNames.length, list.length);
+  const paragraphs = seoText(catName, storeNames, storeNames.length, list.length);
   const pageUrl = `${SITE_URL}/category/${slug}`;
 
   // Уникальные магазины в категории с подсчётом купонов
@@ -156,11 +163,11 @@ export default async function CategoryPage({
 
   const faqItems = [
     {
-      q: `Где искать рабочие промокоды в категории «${cat.name}»?`,
-      a: `Все проверенные купоны и скидки в категории «${cat.name}» собраны на этой странице. Мы обновляем базу ежедневно, тестируем актуальность кодов и удаляем недействительные акции.`,
+      q: `Где искать рабочие промокоды в категории «${catName}»?`,
+      a: `Все проверенные купоны и скидки в категории «${catName}» собраны на этой странице. Мы обновляем базу ежедневно, тестируем актуальность кодов и удаляем недействительные акции.`,
     },
     {
-      q: `Есть ли скидки на первый заказ в магазинах категории «${cat.name}»?`,
+      q: `Есть ли скидки на первый заказ в магазинах категории «${catName}»?`,
       a: `Да! Большинство популярных магазинов категории (например, ${storeNames.slice(0, 3).join(", ") || "партнёры сети"}) предлагают специальную скидку на первый заказ. Ищите в каталоге купоны с отметкой «Новым» или переходите на страницу интересующего магазина.`,
     },
     {
@@ -168,7 +175,7 @@ export default async function CategoryPage({
       a: `Условия зависят от правил конкретного магазина: часть промокодов действует на товары со скидками и распродажи, а часть активируется только при полной стоимости позиций. Точные условия указаны в карточке каждого предложения.`,
     },
     {
-      q: `Как получить бесплатную доставку заказов в категории «${cat.name}»?`,
+      q: `Как получить бесплатную доставку заказов в категории «${catName}»?`,
       a: `Бесплатная доставка предоставляется при выполнении условий минимальной суммы заказа либо по специальному промокоду. Выбирайте предложения со значком «Бесплатная доставка» в каталоге выше.`,
     },
     {
@@ -182,7 +189,7 @@ export default async function CategoryPage({
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Главная", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: cat.name, item: pageUrl },
+      { "@type": "ListItem", position: 2, name: catName, item: pageUrl },
     ],
   };
 
@@ -202,7 +209,7 @@ export default async function CategoryPage({
   const listing: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `Промокоды и купоны: ${cat.name}`,
+    name: `Промокоды и купоны: ${catName}`,
     numberOfItems: list.length,
     itemListElement: list.map((c, i) => ({
       "@type": "ListItem",
@@ -231,15 +238,18 @@ export default async function CategoryPage({
         <Breadcrumbs
           items={[
             { label: "Главная", href: "/" },
-            { label: cat.name },
+            { label: catName },
           ]}
           className="mb-2"
         />
 
         <div className="mt-6">
           <h1 className="font-display text-2xl font-extrabold leading-tight text-ink sm:text-3xl md:text-4xl">
-            Промокоды и купоны: {cat.name} — скидки {maxDisc}
+            Промокоды и купоны: {catName} — скидки {maxDisc}
           </h1>
+          {def?.blurb ? (
+            <p className="mt-2 text-sm font-medium text-ink/75 max-w-3xl">{def.blurb}</p>
+          ) : null}
           <p className="mt-2 text-xs sm:text-sm text-ink/65 max-w-3xl">
             Собрали проверенные скидки на {MONTH_YEAR}: {list.length}{" "}
             {plural(list.length, "активный промокод", "активных промокода", "активных промокодов")} от {categoryStores.length}{" "}
@@ -264,7 +274,7 @@ export default async function CategoryPage({
             <div className="mt-6 pt-5 border-t border-line/60">
               <div className="text-xs font-extrabold uppercase tracking-wider text-ink/45 mb-2.5 flex items-center gap-1.5">
                 <span>🏪</span>
-                <span>Магазины в категории «{cat.name}»:</span>
+                <span>Магазины в категории «{catName}»:</span>
               </div>
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
                 {categoryStores.map(({ store, count }) => (
@@ -313,7 +323,7 @@ export default async function CategoryPage({
 
         <article className="mt-14 max-w-3xl rounded-3xl border border-line bg-white p-6 sm:p-8">
           <h2 className="font-display text-xl font-extrabold text-ink">
-            Купоны на {cat.name.toLowerCase()} — что учесть перед покупкой
+            Купоны на {catName.toLowerCase()} — что учесть перед покупкой
           </h2>
           <div className="mt-4 space-y-3 text-sm text-ink/70 leading-relaxed">
             {paragraphs.map((p, i) => (
@@ -327,7 +337,7 @@ export default async function CategoryPage({
         {/* Интерактивный FAQ с разметкой Schema.org FAQPage */}
         <section className="mt-12 max-w-3xl" aria-label="Частые вопросы">
           <h2 className="font-display text-xl font-extrabold text-ink">
-            Частые вопросы про скидки и купоны {cat.name.toLowerCase()}
+            Частые вопросы про скидки и купоны {catName.toLowerCase()}
           </h2>
           <div className="mt-5 space-y-3">
             {faqItems.map((item) => (

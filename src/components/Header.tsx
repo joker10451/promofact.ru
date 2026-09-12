@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import MegaMenu, { type MegaMenuGroup } from "@/components/MegaMenu";
+import MobileCatalogMenu from "@/components/MobileCatalogMenu";
 import { getCategories } from "@/lib/perfluence";
 import {
   CATEGORY_GROUPS,
@@ -77,6 +78,7 @@ export default async function Header() {
 
           {/* Навигация */}
           <MegaMenu groups={groups} />
+          <MobileCatalogMenu groups={groups} />
 
           <nav className="hidden lg:flex items-center gap-5 text-sm font-bold text-ink/70">
             {NAV.map((item) => (
