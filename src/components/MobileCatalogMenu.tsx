@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { MegaMenuGroup } from "@/components/MegaMenu";
 import { plural } from "@/lib/format";
+import CategoryIcon from "@/components/CategoryIcon";
 
 /**
  * Каталог категорий для мобильных.
@@ -97,7 +98,7 @@ export default function MobileCatalogMenu({ groups }: { groups: MegaMenuGroup[] 
                       className="flex w-full items-center justify-between gap-3 px-2 py-3.5 text-left"
                     >
                       <span className="flex items-center gap-2.5">
-                        <span className="text-lg" aria-hidden>{g.icon}</span>
+                        <CategoryIcon name={g.id} size={19} className="text-ink/45" />
                         <span className="text-sm font-bold text-ink">{g.label}</span>
                       </span>
                       <span className="flex items-center gap-2">
@@ -123,8 +124,8 @@ export default function MobileCatalogMenu({ groups }: { groups: MegaMenuGroup[] 
                             onClick={() => setOpen(false)}
                             className="flex items-center gap-3 rounded-xl px-2 py-2.5 active:bg-paper"
                           >
-                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-paper text-base" aria-hidden>
-                              {c.icon}
+                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-paper text-ink/55">
+                              <CategoryIcon name={c.slug} size={17} />
                             </span>
                             <span className="min-w-0 flex-1">
                               <span className="block truncate text-sm font-semibold text-ink">{c.label}</span>
