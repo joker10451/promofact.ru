@@ -1,3 +1,4 @@
+import ArticleCover from "@/components/ArticleCover";
 import Icon from "@/components/Icon";
 import Link from "next/link";
 import { ARTICLES } from "@/lib/articles";
@@ -37,6 +38,7 @@ export default function LatestTips({ limit = 3 }: { limit?: number }) {
               className="group flex flex-col justify-between rounded-2xl border border-line bg-white p-6 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-ink/25 hover:shadow-md"
             >
               <div>
+                <ArticleCover slug={a.slug} title={a.title} className="mb-4 h-24 w-full" />
                 <div className="flex items-center justify-between gap-2 text-[11px] font-bold text-ink/40 mb-3">
                   <span className="uppercase tracking-wider">Гайд по экономии</span>
                   <span>⏱ 3 мин чтения</span>
