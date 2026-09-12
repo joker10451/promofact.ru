@@ -3,7 +3,6 @@
 import Icon from "@/components/Icon";
 import { useEffect, useState } from "react";
 import CouponTicket from "@/components/CouponTicket";
-import { pickHotDeals } from "@/lib/hotDeals";
 import type { Coupon } from "@/lib/types";
 
 function getCountdownTime(): { hours: string; minutes: string; seconds: string } | null {
@@ -28,6 +27,12 @@ function getCountdownTime(): { hours: string; minutes: string; seconds: string }
   };
 }
 
+/**
+ * Купоны приходят уже отобранными: выбор делает сервер, который тем же
+ * списком исключает их из ленты каталога ниже. Передавать сюда весь массив
+ * было бы расточительно — компонент клиентский, и всё, что в него попадает,
+ * сериализуется в RSC-поток и уезжает к пользователю внутри HTML.
+ */
 export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
   const [timeLeft, setTimeLeft] = useState<{ hours: string; minutes: string; seconds: string } | null>(
     () => getCountdownTime()
@@ -45,8 +50,7 @@ export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Тот же выбор, что использует главная для исключения этих купонов из ленты.
-  const hotCoupons = pickHotDeals(coupons, 3);
+  const hotCoupons = coupons;
 
   if (hotCoupons.length === 0) return null;
 

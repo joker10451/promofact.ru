@@ -16,6 +16,7 @@ import JsonLd from "@/components/JsonLd";
 import Reveal from "@/components/Reveal";
 import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickHotDeals, offerKey } from "@/lib/hotDeals";
+import { buildSearchIndex } from "@/lib/searchIndex";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const revalidate = 43200; // 12 часов — защита лимита ISR Writes на Vercel
@@ -69,7 +70,13 @@ export default async function Home() {
   // Купоны из блока «Спецпредложения дня» исключаем из ленты каталога ниже,
   // чтобы топ-3 не повторялись первыми тремя карточками. Ключ «магазин + код»,
   // а не id: убирает и дубли того же оффера с другим id (разные источники).
-  const hotDealKeys = pickHotDeals(coupons, 3).map(offerKey);
+  const hotDeals = pickHotDeals(coupons, 3);
+  const hotDealKeys = hotDeals.map(offerKey);
+
+  // Поиск в шапке работает на клиенте, поэтому получает лёгкий индекс, а не
+  // полные объекты купонов и магазинов: иначе весь каталог уезжает в RSC-поток
+  // и скачивается вместе с HTML каждым посетителем и каждым роботом.
+  const searchIndex = buildSearchIndex(stores, coupons);
 
   return (
     <>
@@ -100,11 +107,11 @@ export default async function Home() {
 
       <main className="min-h-screen">
         {/* 2. Hero + ЕДИНСТВЕННЫЙ крупный поиск + Trust bar */}
-        <Hero stores={stores} coupons={coupons} proofTotal={proofTotal} />
+        <Hero search={searchIndex} couponCount={coupons.length} proofTotal={proofTotal} />
 
         {/* 3. 🔥 Горит сегодня — Топ-3 супер-скидки с FOMO-таймером */}
         <Reveal>
-          <HotDeals coupons={coupons} />
+          <HotDeals coupons={hotDeals} />
         </Reveal>
 
         {/* 4. Популярные магазины — быстрый вход по брендам перед каталогом */}
