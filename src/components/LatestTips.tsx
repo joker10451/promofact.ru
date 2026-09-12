@@ -5,7 +5,7 @@ export default function LatestTips({ limit = 3 }: { limit?: number }) {
   const items = [...ARTICLES].reverse().slice(0, limit);
 
   return (
-    <section className="py-12 sm:py-16 border-b border-line bg-paper/30">
+    <section className="py-10 sm:py-14 border-b border-line bg-paper/30">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>

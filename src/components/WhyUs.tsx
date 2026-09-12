@@ -21,7 +21,7 @@ export default function WhyUs() {
   ];
 
   return (
-    <section className="py-12 sm:py-16 border-t border-line">
+    <section className="py-10 sm:py-14 border-t border-line">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="text-center max-w-xl mx-auto mb-10">
           <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">

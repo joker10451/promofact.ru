@@ -15,7 +15,7 @@ export default function Subscribe() {
   };
 
   return (
-    <section id="subscribe" className="scroll-mt-24 relative overflow-hidden bg-red py-16 sm:py-20">
+    <section id="subscribe" className="scroll-mt-24 relative overflow-hidden bg-red py-12 sm:py-16">
       <span className="watermark" aria-hidden="true">
         %
       </span>

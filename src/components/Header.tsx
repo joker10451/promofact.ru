@@ -99,7 +99,7 @@ export default async function Header() {
             href="https://t.me/smart_zakupka"
             target="_blank"
             rel="noopener nofollow"
-            className="hidden sm:flex items-center gap-2 rounded-full bg-paper border border-line px-3.5 py-2 text-xs font-bold text-ink/80 hover:text-ink hover:border-ink/40 transition-all"
+            className="hidden lg:flex items-center gap-2 rounded-full bg-paper border border-line px-3.5 py-2 text-xs font-bold text-ink/80 hover:text-ink hover:border-ink/40 transition-all"
           >
             <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" className="text-[#2AABEE]">
               <path d="M21.94 4.4a1.5 1.5 0 0 0-2.05-.93L3.4 10.6c-.9.36-.85 1.67.07 1.96l4.14 1.3 1.72 5.29c.34 1.05 1.68 1.25 2.34.35l2.06-2.82a.5.5 0 0 1 .6-.13l4.66 2.16c.86.4 1.87-.2 1.88-1.1l.55-14.08a1 1 0 0 0-.44-.8Z" />
@@ -109,7 +109,7 @@ export default async function Header() {
 
           <Link
             href="/#catalog"
-            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-red to-red-dark px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
+            className="hidden sm:flex items-center gap-1.5 rounded-full bg-gradient-to-r from-red to-red-dark px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
           >
             <span>Все купоны →</span>
           </Link>
