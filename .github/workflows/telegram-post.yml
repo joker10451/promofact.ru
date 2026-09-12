@@ -1,8 +1,8 @@
-name: Auto Post to Telegram (@smart_zakupka)
+name: Post to Telegram (@smart_zakupka) — ручной запуск
 
 on:
-  schedule:
-    - cron: '30 7,15 * * *'
+  # Публикация по расписанию отключена намеренно: посты уходят только вручную,
+  # через «Run workflow» в GitHub Actions, с явным выбором магазина.
   workflow_dispatch:
     inputs:
       dry_run:

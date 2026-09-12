@@ -1,8 +1,8 @@
-name: Auto Post to VKontakte Group
+name: Post to VKontakte Group — ручной запуск
 
 on:
-  schedule:
-    - cron: '0 9 * * *'
+  # Публикация по расписанию отключена намеренно: посты уходят только вручную,
+  # через «Run workflow» в GitHub Actions, с явным выбором магазина.
   workflow_dispatch:
     inputs:
       dry_run:
