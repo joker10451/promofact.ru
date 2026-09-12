@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -141,7 +142,7 @@ export default async function CityPage({
             />
 
             <div className="inline-flex items-center gap-2 rounded-full bg-red/10 px-3 py-1 text-xs font-bold text-red mb-3">
-              📍 Локальные предложения на {dateStr}
+              <Icon name="pin" size={14} className="inline" /> Локальные предложения на {dateStr}
             </div>
 
             <h1 className="font-display text-3xl font-black tracking-tight text-ink sm:text-4xl lg:text-5xl">

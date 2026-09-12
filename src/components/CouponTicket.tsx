@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -170,7 +171,7 @@ export default function CouponTicket({
           <div className="flex items-center gap-1.5 shrink-0">
             {promocode.isHit && (
               <span className="rounded-full bg-red/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-red">
-                🔥 Хит
+                <Icon name="flame" size={11} /> Хит
               </span>
             )}
             {promocode.customerTypeLabel ? (
@@ -191,14 +192,14 @@ export default function CouponTicket({
 
         {/* 2. Главный акцент — визуально разный для каждого типа */}
         <div className="mt-3.5 mb-2.5 min-h-[68px] flex flex-col justify-center">
-          {/* Тип: subscription — синяя плашка, «✨ Промокод не требуется» */}
+          {/* Тип: subscription — синяя плашка, «<Icon name="sparkle" size={11} /> Промокод не требуется» */}
           {offer.type === "subscription" ? (
             <div className="rounded-xl bg-blue-50 border border-blue-200 px-3 py-2.5">
               <div className={`font-display ${discountSizeClass} text-[#1a56db] font-black`}>
                 {offer.discount}
               </div>
               <p className="mt-1 text-xs font-semibold text-[#1a56db]/70">
-                ✨ Промокод не требуется
+                <Icon name="sparkle" size={11} /> Промокод не требуется
               </p>
             </div>
           ) : offer.type === "gift" ? (
@@ -236,7 +237,7 @@ export default function CouponTicket({
         <div className="mt-3 rounded-xl bg-paper/80 px-3 py-2 border border-line/50 text-xs space-y-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm">🔥</span>
+              <Icon name="flame" size={13} />
               <span className="font-bold text-ink/80 text-[11px] sm:text-xs">
                 {usageToday} раз сегодня
               </span>
@@ -325,7 +326,7 @@ export default function CouponTicket({
         {/* 6. Бейдж «Популярный промокод» для купонов с высоким usage */}
         {usageToday >= 40 && (
           <div className="mt-2 flex items-center justify-center gap-1 rounded-lg bg-yellow/20 border border-yellow/40 px-2.5 py-1 text-[10px] font-bold text-ink/70">
-            <span>⚡</span>
+            <Icon name="sparkle" size={12} />
             <span>Популярный промокод</span>
           </div>
         )}
@@ -352,7 +353,7 @@ export default function CouponTicket({
                 className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-paper text-ink/60 hover:bg-paper/80 hover:text-ink transition-colors cursor-pointer"
                 aria-label="Закрыть"
               >
-                ✕
+                <Icon name="close" size={13} />
               </button>
 
               <div className="flex items-center gap-3">
@@ -378,7 +379,7 @@ export default function CouponTicket({
 
               <div className="mt-5 space-y-3 text-xs leading-relaxed text-ink/80">
                 <div>
-                  <span className="font-bold text-ink block mb-1">📋 Полные условия акции:</span>
+                  <span className="font-bold text-ink block mb-1"><Icon name="clipboard" size={12} /> Полные условия акции:</span>
                   <p className="rounded-xl bg-slate-50 p-3 text-ink/70 border border-line/40 whitespace-pre-line">
                     {offer.fullTerms}
                   </p>
@@ -386,7 +387,7 @@ export default function CouponTicket({
 
                 <div className="rounded-xl bg-mint/10 border border-mint/30 p-3 text-[11px] text-ink/80 space-y-1">
                   <div className="font-bold text-mint-dark flex items-center gap-1.5">
-                    <span>✓</span>
+                    <Icon name="check" size={12} />
                     <span>Гарантия актуальности ПромоФакт</span>
                   </div>
                   <p className="text-ink/65 text-[10px] leading-relaxed">
@@ -450,7 +451,7 @@ export default function CouponTicket({
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mint text-sm font-black text-ink">
-                  ✓
+                  <Icon name="check" size={13} />
                 </span>
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-mint">
@@ -467,11 +468,11 @@ export default function CouponTicket({
                 className="text-xs font-bold text-white/40 hover:text-white p-1"
                 aria-label="Закрыть уведомление"
               >
-                ✕
+                <Icon name="close" size={13} />
               </button>
             </div>
             <div className="mt-2.5 border-t border-white/10 pt-2 text-xs text-white/80">
-              💡 Вставьте промокод в поле купона при оплате в <span className="font-bold text-white">{store.name}</span>.
+              <Icon name="bulb" size={12} /> Вставьте промокод в поле купона при оплате в <span className="font-bold text-white">{store.name}</span>.
             </div>
           </div>,
           document.body

@@ -1,21 +1,10 @@
 "use client";
 
+import Icon from "@/components/Icon";
+
 import { useMemo, useState, useEffect } from "react";
 import CouponTicket from "@/components/CouponTicket";
 import type { Coupon } from "@/lib/types";
-
-const CATEGORY_ICONS: Record<string, string> = {
-  "dostavka-iz-restoranov": "🍔",
-  "dostavka-produktov": "🛒",
-  "kosmetika-i-parfyumeriya": "💄",
-  "odezhda-i-obuv": "👕",
-  "puteshestviya-i-turizm": "✈️",
-  "vse-dlya-doma": "🏠",
-  "onlayn-kinoteatry": "🎬",
-  "tsvety": "🌷",
-  "servisy-i-podpiski": "⚡",
-  "marketpleysy": "📦",
-};
 
 export default function CouponGrid({
   coupons: allCoupons,
@@ -250,7 +239,7 @@ export default function CouponGrid({
         <div className="flex flex-wrap items-center gap-2">
           {regionsList.length > 0 && (
             <div className="relative flex items-center">
-              <span className="absolute left-3 text-xs pointer-events-none">📍</span>
+              <Icon name="pin" size={13} className="absolute left-3 text-ink/45 pointer-events-none" />
               <select
                 value={selectedRegion}
                 onChange={(e) => handleCityChange(e.target.value)}
@@ -269,7 +258,7 @@ export default function CouponGrid({
           )}
 
           <div className="relative flex items-center">
-            <span className="absolute left-3 text-xs pointer-events-none">⚡</span>
+            <Icon name="sort" size={13} className="absolute left-3 text-ink/45 pointer-events-none" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
@@ -292,7 +281,7 @@ export default function CouponGrid({
           onClick={() => setQuickFilter("all")}
           className={quickChipCls(quickFilter === "all")}
         >
-          <span>🔥</span>
+          <Icon name="flame" size={14} />
           <span>Все предложения</span>
         </button>
         <button
@@ -300,7 +289,7 @@ export default function CouponGrid({
           onClick={() => setQuickFilter("hit")}
           className={quickChipCls(quickFilter === "hit")}
         >
-          <span>⭐</span>
+          <Icon name="star" size={14} />
           <span>Хиты</span>
         </button>
         <button
@@ -308,7 +297,7 @@ export default function CouponGrid({
           onClick={() => setQuickFilter("first")}
           className={quickChipCls(quickFilter === "first")}
         >
-          <span>🎁</span>
+          <Icon name="gift" size={14} />
           <span>На первый заказ</span>
         </button>
         <button
@@ -316,7 +305,7 @@ export default function CouponGrid({
           onClick={() => setQuickFilter("repeat")}
           className={quickChipCls(quickFilter === "repeat")}
         >
-          <span>🔁</span>
+          <Icon name="repeat" size={14} />
           <span>Повторные заказы</span>
         </button>
         <button
@@ -324,7 +313,7 @@ export default function CouponGrid({
           onClick={() => setQuickFilter("discount_20")}
           className={quickChipCls(quickFilter === "discount_20")}
         >
-          <span>⚡</span>
+          <Icon name="sparkle" size={14} />
           <span>Скидки от 20% / 500 ₽</span>
         </button>
       </div>
@@ -353,7 +342,8 @@ export default function CouponGrid({
                 : "bg-white border border-line text-ink/70"
             }`}
           >
-            {CATEGORY_ICONS[slug] || "🏷"} {name} · {countByCat(slug)}
+            <Icon name={slug} size={14} className="shrink-0" />
+            <span>{name} · {countByCat(slug)}</span>
           </button>
         ))}
       </div>
@@ -374,7 +364,7 @@ export default function CouponGrid({
                 : "text-ink/70 hover:bg-paper hover:text-ink"
             }`}
           >
-            <span>🏷 Все направления</span>
+            <span className="flex items-center gap-1.5"><Icon name="tag" size={13} />Все направления</span>
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${filter === "all" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>
               {coupons.length}
             </span>
@@ -393,7 +383,7 @@ export default function CouponGrid({
                 }`}
               >
                 <span className="flex items-center gap-2 truncate">
-                  <span>{CATEGORY_ICONS[slug] || "🏷"}</span>
+                  <Icon name={slug} size={15} className="shrink-0 text-ink/50" />
                   <span className="truncate">{name}</span>
                 </span>
                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${filter === slug ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>
@@ -410,7 +400,7 @@ export default function CouponGrid({
           {query && (
             <div className="mb-4 flex items-center justify-between rounded-2xl bg-yellow/25 border border-yellow px-4 py-2.5 text-xs font-bold text-ink">
               <div className="flex items-center gap-2">
-                <span>🔍 Результаты по запросу:</span>
+                <span className="flex items-center gap-1.5"><Icon name="search" size={13} />Результаты по запросу:</span>
                 <span className="font-mono text-sm font-extrabold text-red">«{query}»</span>
               </div>
               <button
@@ -418,7 +408,7 @@ export default function CouponGrid({
                 onClick={() => setQuery("")}
                 className="rounded-lg bg-ink px-2.5 py-1 text-[11px] text-white hover:bg-ink/80 transition-colors"
               >
-                Сбросить ✕
+                Сбросить <Icon name="close" size={11} />
               </button>
             </div>
           )}
@@ -430,7 +420,7 @@ export default function CouponGrid({
               onClick={() => setQuickFilter("all")}
               className={quickChipCls(quickFilter === "all")}
             >
-              <span>✨</span>
+              <Icon name="sparkle" size={14} />
               <span>Все купоны</span>
             </button>
             <button
@@ -438,7 +428,7 @@ export default function CouponGrid({
               onClick={() => setQuickFilter("hit")}
               className={quickChipCls(quickFilter === "hit")}
             >
-              <span>🔥</span>
+              <Icon name="flame" size={14} />
               <span>Хиты</span>
             </button>
             <button
@@ -446,7 +436,7 @@ export default function CouponGrid({
               onClick={() => setQuickFilter("first")}
               className={quickChipCls(quickFilter === "first")}
             >
-              <span>⚡️</span>
+              <Icon name="sparkle" size={14} />
               <span>На первый заказ</span>
             </button>
             <button
@@ -454,7 +444,7 @@ export default function CouponGrid({
               onClick={() => setQuickFilter("repeat")}
               className={quickChipCls(quickFilter === "repeat")}
             >
-              <span>🔄</span>
+              <Icon name="repeat" size={14} />
               <span>Для всех</span>
             </button>
             <button
@@ -462,7 +452,7 @@ export default function CouponGrid({
               onClick={() => setQuickFilter("discount_20")}
               className={quickChipCls(quickFilter === "discount_20")}
             >
-              <span>💰</span>
+              <Icon name="coins" size={14} />
               <span>Скидки от 20%</span>
             </button>
           </div>
@@ -515,7 +505,7 @@ export default function CouponGrid({
                             className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-white border border-line/50 hover:border-ink/20 text-xs font-bold text-ink transition-all cursor-pointer shadow-2xs"
                           >
                             <span className="flex items-center gap-1.5">
-                              <span>🏷</span>
+                              <Icon name="tag" size={14} className="text-ink/45" />
                               <span>
                                 {isExpanded
                                   ? `Скрыть другие промокоды (${otherCoupons.length})`
@@ -525,7 +515,7 @@ export default function CouponGrid({
                               </span>
                             </span>
                             <span className="text-red font-black text-xs">
-                              {isExpanded ? "▲" : "▼"}
+                              <Icon name="chevron" size={13} className={`transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                             </span>
                           </button>
 

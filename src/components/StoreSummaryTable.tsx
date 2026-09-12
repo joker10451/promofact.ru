@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useState } from "react";
 import type { Coupon } from "@/lib/types";
 import { refineOffer } from "@/lib/offerRefiner";
@@ -54,7 +55,7 @@ function TableCopyButton({ code }: { code: string }) {
             : "bg-paper border border-line text-ink/70 hover:bg-ink hover:text-white"
         }`}
       >
-        {copied ? "✓" : "Копировать"}
+        {copied ? <Icon name="check" size={13} /> : "Копировать"}
       </button>
     </div>
   );
@@ -103,7 +104,7 @@ export default function StoreSummaryTable({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="font-display text-sm sm:text-base font-extrabold text-ink flex items-center gap-2">
-              <span>📊</span>
+              <Icon name="chart" size={16} />
               <span>{headingText}</span>
             </h2>
             <p className="mt-0.5 text-xs text-ink/60">
@@ -178,17 +179,17 @@ export default function StoreSummaryTable({
                   <td className="px-4 sm:px-5 py-3.5 whitespace-nowrap">
                     {isOnlyNew ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-mint/15 border border-mint/40 px-2 py-0.5 text-[11px] font-bold text-mint-dark">
-                        <span>🎁</span>
+                        <Icon name="gift" size={14} />
                         <span>Новым</span>
                       </span>
                     ) : isRepeat ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-[11px] font-bold text-blue-800">
-                        <span>🔄</span>
+                        <Icon name="repeat" size={14} />
                         <span>Повторным</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full bg-paper border border-line px-2 py-0.5 text-[11px] font-bold text-ink/65">
-                        <span>✓</span>
+                        <Icon name="check" size={14} />
                         <span>Для всех</span>
                       </span>
                     )}

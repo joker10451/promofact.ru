@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -273,7 +274,7 @@ export default async function CategoryPage({
           {categoryStores.length > 0 && (
             <div className="mt-6 pt-5 border-t border-line/60">
               <div className="text-xs font-extrabold uppercase tracking-wider text-ink/45 mb-2.5 flex items-center gap-1.5">
-                <span>🏪</span>
+                <Icon name="store" size={16} />
                 <span>Магазины в категории «{catName}»:</span>
               </div>
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">

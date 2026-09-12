@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ymReachGoal } from "@/components/YandexMetrika";
@@ -116,7 +117,7 @@ export default function HeaderSearch() {
             }}
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-ink/40 hover:text-ink"
           >
-            ✕
+            <Icon name="close" size={12} />
           </button>
         )}
       </div>

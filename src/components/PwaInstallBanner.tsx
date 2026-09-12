@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useEffect, useState } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -106,7 +107,7 @@ export default function PwaInstallBanner() {
           className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-paper text-xs font-bold text-ink/60 hover:text-ink transition-colors"
           aria-label="Закрыть"
         >
-          ✕
+          <Icon name="close" size={13} />
         </button>
 
         <div className="flex items-start gap-3.5 pr-6">
@@ -138,7 +139,7 @@ export default function PwaInstallBanner() {
               onClick={handleInstallClick}
               className="flex-1 rounded-xl bg-gradient-to-r from-red to-red-dark py-2 text-center text-xs font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
             >
-              📱 Добавить на экран
+              <Icon name="elektronika-i-tehnika" size={14} className="inline" /> Добавить на экран
             </button>
             <button
               type="button"

@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import Icon from "@/components/Icon";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
@@ -8,7 +10,7 @@ interface ActivityEvent {
   slug: string;
   saving: string;
   timeAgo: string;
-  emoji: string;
+  icon: string;
 }
 
 const DEFAULT_EVENTS: ActivityEvent[] = [
@@ -17,56 +19,56 @@ const DEFAULT_EVENTS: ActivityEvent[] = [
     slug: "pyaterochka",
     saving: "Сэкономили 450 ₽ на заказе продуктов",
     timeAgo: "2 мин назад",
-    emoji: "🛒",
+    icon: "dostavka-produktov",
   },
   {
     store: "Отелло",
     slug: "otello",
     saving: "Применили скидку 15% на отель",
     timeAgo: "4 мин назад",
-    emoji: "🏨",
+    icon: "puteshestviya-i-turizm",
   },
   {
     store: "Самокат",
     slug: "samokat",
     saving: "Сэкономили 300 ₽ на первом заказе",
     timeAgo: "6 мин назад",
-    emoji: "🛴",
+    icon: "dostavka-produktov",
   },
   {
     store: "Кинопоиск",
     slug: "kinopoisk",
     saving: "Активировали 60 дней подписки за 0 ₽",
     timeAgo: "8 мин назад",
-    emoji: "🎬",
+    icon: "onlayn-kinoteatry",
   },
   {
     store: "Яндекс Маркет",
     slug: "yandex-market",
     saving: "Сэкономили 500 ₽ на покупке техники",
     timeAgo: "11 мин назад",
-    emoji: "📦",
+    icon: "marketpleysy",
   },
   {
     store: "Магнит Доставка",
     slug: "magnit-dostavka",
     saving: "Сэкономили 25% на экспресс-доставке",
     timeAgo: "15 мин назад",
-    emoji: "🛍️",
+    icon: "dostavka-produktov",
   },
   {
     store: "Золотое Яблоко",
     slug: "zolotoe-yabloko",
     saving: "Применили скидку 10% на косметику",
     timeAgo: "18 мин назад",
-    emoji: "🍏",
+    icon: "kosmetika-i-parfyumeriya",
   },
   {
     store: "СберПрайм",
     slug: "sberprime",
     saving: "Оформили 60 дней за 1 ₽",
     timeAgo: "21 мин назад",
-    emoji: "💚",
+    icon: "servisy-i-podpiski",
   },
 ];
 
@@ -112,7 +114,7 @@ export default function RecentActivityPulse() {
           visible ? "opacity-100" : "opacity-0"
         }`}
       >
-        <span className="shrink-0">{current.emoji}</span>
+        <span className="shrink-0"><Icon name={current.icon} size={14} /></span>
         <span className="font-extrabold text-ink hover:text-red transition-colors shrink-0">
           {current.store}:
         </span>

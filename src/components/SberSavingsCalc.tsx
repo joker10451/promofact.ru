@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useState, useMemo } from "react";
 import { ymReachGoal } from "@/components/YandexMetrika";
 
@@ -31,7 +32,7 @@ export default function SberSavingsCalc({ affiliateUrl }: SberSavingsCalcProps) 
       <div className="mx-auto max-w-4xl">
         <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-mint/30 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-ink">
-            🧮 Насчитайте свою выгоду
+            <Icon name="chart" size={16} className="inline" /> Насчитайте свою выгоду
           </div>
           <h2 className="mt-3 font-display text-2xl font-black tracking-tight text-ink sm:text-3xl lg:text-4xl">
             Сколько сэкономит СберКарта?

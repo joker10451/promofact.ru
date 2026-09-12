@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useState } from "react";
 import StoreLogo from "@/components/StoreLogo";
 import { ymReachGoal } from "@/components/YandexMetrika";
@@ -8,7 +9,6 @@ import { CheckIcon } from "@/components/CheckIcon";
 interface StoreOption {
   slug: string;
   name: string;
-  emoji: string;
   discountType: "percent" | "fixed";
   discountValue: number;
   discountLabel: string;
@@ -21,7 +21,6 @@ const FEATURED_CALC_STORES: StoreOption[] = [
   {
     slug: "pyaterochka",
     name: "Пятёрочка Доставка",
-    emoji: "🛒",
     discountType: "percent",
     discountValue: 25,
     discountLabel: "−25%",
@@ -32,7 +31,6 @@ const FEATURED_CALC_STORES: StoreOption[] = [
   {
     slug: "otello",
     name: "Отелло",
-    emoji: "🏨",
     discountType: "percent",
     discountValue: 15,
     discountLabel: "−15%",
@@ -43,7 +41,6 @@ const FEATURED_CALC_STORES: StoreOption[] = [
   {
     slug: "kinopoisk",
     name: "Кинопоиск",
-    emoji: "🎬",
     discountType: "percent",
     discountValue: 50,
     discountLabel: "−50%",
@@ -54,7 +51,6 @@ const FEATURED_CALC_STORES: StoreOption[] = [
   {
     slug: "iv-roshe",
     name: "Ив Роше",
-    emoji: "🌿",
     discountType: "fixed",
     discountValue: 500,
     discountLabel: "−500 ₽",
@@ -65,7 +61,6 @@ const FEATURED_CALC_STORES: StoreOption[] = [
   {
     slug: "irnby",
     name: "IRNBY",
-    emoji: "👕",
     discountType: "fixed",
     discountValue: 1000,
     discountLabel: "−1 000 ₽",
@@ -76,7 +71,6 @@ const FEATURED_CALC_STORES: StoreOption[] = [
   {
     slug: "pro32-com",
     name: "PRO32",
-    emoji: "🛡",
     discountType: "percent",
     discountValue: 20,
     discountLabel: "−20%",
@@ -132,7 +126,7 @@ export default function SavingsCalculator() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
         <div className="rounded-3xl border-2 border-line bg-gradient-to-br from-white via-paper to-yellow/15 p-6 sm:p-12 shadow-[0_12px_40px_rgba(11,16,43,0.06)] text-center">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow/40 border border-yellow/60 px-3.5 py-1 text-xs font-bold text-ink">
-            <span>💰</span>
+            <Icon name="coins" size={16} />
             <span>Интерактивный калькулятор скидок</span>
           </div>
 

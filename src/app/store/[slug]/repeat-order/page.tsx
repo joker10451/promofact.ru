@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -229,7 +230,7 @@ export default async function StoreRepeatOrderPage({
             </div>
             <div className="min-w-0 flex-1">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/40 px-2.5 py-0.5 text-[11px] font-bold text-mint-dark mb-2">
-                <span>🔁</span>
+                <Icon name="repeat" size={14} />
                 <span>Для постоянных покупателей и всех заказов</span>
               </div>
               <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">

@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useEffect, useState } from "react";
 import { ymReachGoal } from "@/components/YandexMetrika";
 
@@ -109,7 +110,7 @@ export default function PushNotificationPrompt() {
     >
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow text-xl">
-          🔔
+          <Icon name="bell" size={16} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="font-display text-sm font-extrabold text-ink">
@@ -139,7 +140,7 @@ export default function PushNotificationPrompt() {
           className="text-ink/40 hover:text-ink text-sm font-bold leading-none"
           aria-label="Закрыть"
         >
-          ✕
+          <Icon name="close" size={13} />
         </button>
       </div>
     </div>

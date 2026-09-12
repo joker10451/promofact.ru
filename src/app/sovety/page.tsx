@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ARTICLES } from "@/lib/articles";
@@ -51,7 +52,7 @@ export default function SovetyPage() {
           <div className="mt-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-line">
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow/40 px-3 py-1 text-[11px] font-bold text-ink mb-2">
-                <span>📚</span>
+                <Icon name="clipboard" size={17} />
                 <span>База знаний ПромоФакта</span>
               </div>
               <h1 className="font-display text-3xl sm:text-4xl font-black leading-tight text-ink">
@@ -64,7 +65,7 @@ export default function SovetyPage() {
 
             <div className="flex items-center gap-2 text-xs font-bold text-ink/70">
               <span className="rounded-full bg-mint/20 px-3 py-1 text-mint-dark">
-                ✓ Обновлено в 2026
+                <Icon name="check" size={11} className="inline" /> Обновлено в 2026
               </span>
             </div>
           </div>
@@ -95,7 +96,7 @@ export default function SovetyPage() {
                     Читать статью →
                   </span>
                   <span className="text-[11px] font-semibold text-mint-dark">
-                    ✓ Проверено
+                    <Icon name="check" size={11} className="inline" /> Проверено
                   </span>
                 </div>
               </Link>

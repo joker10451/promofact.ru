@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import Link from "next/link";
 
 interface StoreIntentTabsProps {
@@ -29,7 +30,7 @@ export default function StoreIntentTabs({
             : "border border-line bg-white text-ink/70 hover:border-ink hover:text-ink"
         }`}
       >
-        <span>🔥</span>
+        <Icon name="flame" size={14} />
         <span>Все акции</span>
         <span
           className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
@@ -49,7 +50,7 @@ export default function StoreIntentTabs({
             : "border border-line bg-white text-ink/70 hover:border-red hover:text-red"
         }`}
       >
-        <span>🎁</span>
+        <Icon name="gift" size={14} />
         <span>На первый заказ</span>
         <span
           className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
@@ -69,7 +70,7 @@ export default function StoreIntentTabs({
             : "border border-line bg-white text-ink/70 hover:border-mint-dark hover:text-mint-dark"
         }`}
       >
-        <span>🔁</span>
+        <Icon name="repeat" size={14} />
         <span>Повторные заказы</span>
         <span
           className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
