@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import Link from "next/link";
 import { getStores } from "@/lib/perfluence";
 import StoreLogo from "@/components/StoreLogo";
@@ -45,7 +46,7 @@ export default async function PopularStores() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🏪</span>
+            <Icon name="store" size={19} className="text-ink/50" />
             <div>
               <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
                 Популярные магазины

@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import Link from "next/link";
 import { ARTICLES } from "@/lib/articles";
 
@@ -10,7 +11,7 @@ export default function LatestTips({ limit = 3 }: { limit?: number }) {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow/40 px-3 py-1 text-[11px] font-bold text-ink mb-2">
-              <span>📚</span>
+              <Icon name="clipboard" size={18} />
               <span>Блог и советы</span>
             </div>
             <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
@@ -52,7 +53,7 @@ export default function LatestTips({ limit = 3 }: { limit?: number }) {
                 <span className="text-xs font-bold text-red group-hover:underline">
                   Читать инструкцию →
                 </span>
-                <span className="text-xs text-ink/40">✓ Проверено</span>
+                <span className="text-xs text-ink/40"><Icon name="check" size={11} className="inline" /> Проверено</span>
               </div>
             </Link>
           ))}

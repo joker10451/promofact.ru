@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ymReachGoal } from "@/components/YandexMetrika";
@@ -118,7 +119,7 @@ export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: Hero
           <form onSubmit={handleSubmit} className="relative flex items-center">
             <div className="relative w-full">
               <span className="pointer-events-none absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-lg sm:text-xl text-ink/40">
-                🔍
+                <Icon name="search" size={16} className="text-ink/40" />
               </span>
               <input
                 type="search"
@@ -215,7 +216,7 @@ export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: Hero
         <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-6 border-t border-line/60">
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
-              ✓
+              <Icon name="check" size={14} />
             </span>
             <span>
               {proofTotal > 0
@@ -225,13 +226,13 @@ export default function Hero({ stores = [], coupons = [], proofTotal = 0 }: Hero
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow/40 text-ink text-[11px]">
-              ⚡
+              <Icon name="sparkle" size={14} />
             </span>
             <span>{coupons.length > 0 ? coupons.length : 23} активных акций</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
-              🛡
+              <Icon name="shield" size={14} />
             </span>
             <span>Ручная модерация</span>
           </div>

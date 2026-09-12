@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getCategories } from "@/lib/perfluence";
 import { COLLECTIONS } from "@/lib/collections";
 import { plural } from "@/lib/format";
-import CategoryIcon from "@/components/CategoryIcon";
+import Icon from "@/components/Icon";
 import {
   CATEGORY_GROUPS,
   getCategoryDef,
@@ -66,7 +66,7 @@ export default async function VisualCategoryTiles() {
           {groups.map((g) => (
             <div key={g.id}>
               <h3 className="mb-2.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-ink/45">
-                <CategoryIcon name={g.id} size={15} className="text-ink/40" />
+                <Icon name={g.id} size={15} className="text-ink/40" />
                 <span>{g.label}</span>
               </h3>
 
@@ -78,7 +78,7 @@ export default async function VisualCategoryTiles() {
                       className="group flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-colors hover:bg-paper"
                     >
                       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-paper text-ink/55 transition-colors group-hover:bg-white group-hover:text-red">
-                        <CategoryIcon name={c.slug} size={17} />
+                        <Icon name={c.slug} size={17} />
                       </span>
                       <span className="min-w-0 flex-1 truncate text-sm font-bold text-ink transition-colors group-hover:text-red">
                         {c.label}
@@ -116,7 +116,7 @@ export default async function VisualCategoryTiles() {
                 href={`/collections/${col.slug}`}
                 className="group inline-flex items-center gap-2 rounded-xl border border-line bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-ink shadow-2xs transition-all hover:border-red hover:text-red hover:shadow-xs"
               >
-                <CategoryIcon name={col.slug} size={15} className="text-ink/45 transition-colors group-hover:text-red" />
+                <Icon name={col.slug} size={15} className="text-ink/45 transition-colors group-hover:text-red" />
                 <span>{col.name}</span>
                 <span className="text-xs text-ink/35 transition-colors group-hover:text-red" aria-hidden>→</span>
               </Link>

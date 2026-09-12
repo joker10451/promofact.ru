@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useEffect, useState } from "react";
 import CouponTicket from "@/components/CouponTicket";
 import { pickHotDeals } from "@/lib/hotDeals";
@@ -59,7 +60,7 @@ export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red/10 text-lg">
-              🔥
+              <Icon name="flame" size={17} />
             </span>
             <div>
               <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">

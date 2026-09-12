@@ -1,19 +1,20 @@
+import Icon from "@/components/Icon";
 export default function WhyUs() {
   const items = [
     {
-      icon: "✓",
+      icon: "check",
       title: "Проверяем каждый день",
       desc: "Вручную и автоматически тестируем промокоды, сразу убирая неработающие.",
       color: "bg-mint/15 text-mint-dark",
     },
     {
-      icon: "⚡",
+      icon: "sparkle",
       title: "Обновляем без задержек",
       desc: "Свежие акции и секретные промокоды появляются в каталоге в день запуска.",
       color: "bg-yellow/30 text-ink",
     },
     {
-      icon: "💰",
+      icon: "coins",
       title: "Экономим ваши деньги",
       desc: "Сервис полностью бесплатный — мы не требуем регистраций и платных подписок.",
       color: "bg-red/10 text-red",
@@ -39,7 +40,7 @@ export default function WhyUs() {
               className="rounded-2xl border border-line bg-white p-6 shadow-xs transition-all hover:-translate-y-1 hover:shadow-md"
             >
               <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl text-lg font-black ${item.color}`}>
-                {item.icon}
+                <Icon name={item.icon} size={20} />
               </span>
               <h3 className="mt-4 font-display text-lg font-bold text-ink">
                 {item.title}

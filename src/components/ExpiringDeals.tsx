@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useEffect, useState, useMemo } from "react";
 import { CheckIcon } from "@/components/CheckIcon";
 import { ymReachGoal } from "@/components/YandexMetrika";
@@ -71,7 +72,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
             Сгорающие предложения
           </div>
           <h2 className="mt-2 font-display text-2xl font-black tracking-tight text-ink sm:text-3xl">
-            🔥 Спецпредложения дня
+            <Icon name="flame" size={16} /> Спецпредложения дня
           </h2>
           <p className="mt-1 text-sm font-medium text-ink/60">
             Ограниченный пул промокодов. Успейте применить до сброса таймера:
@@ -158,7 +159,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                         : "bg-yellow text-ink hover:bg-yellow/80"
                     }`}
                   >
-                    {isCopied ? "✓" : "Копия"}
+                    {isCopied ? <Icon name="check" size={12} /> : "Копия"}
                   </button>
                 </div>
 

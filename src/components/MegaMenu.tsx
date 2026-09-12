@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { plural } from "@/lib/format";
-import CategoryIcon from "@/components/CategoryIcon";
+import Icon from "@/components/Icon";
 
 export interface MegaMenuCategory {
   slug: string;
@@ -113,7 +113,7 @@ export default function MegaMenu({ groups }: { groups: MegaMenuGroup[] }) {
             {groups.map((g) => (
               <div key={g.id}>
                 <p className="mb-2 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wide text-ink/45">
-                  <CategoryIcon name={g.id} size={14} className="shrink-0 text-ink/40" />
+                  <Icon name={g.id} size={14} className="shrink-0 text-ink/40" />
                   <span className="truncate">{g.label}</span>
                 </p>
 
@@ -125,7 +125,7 @@ export default function MegaMenu({ groups }: { groups: MegaMenuGroup[] }) {
                         onClick={() => setOpen(false)}
                         className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-paper"
                       >
-                        <CategoryIcon name={c.slug} size={16} className="shrink-0 text-ink/45 transition-colors group-hover:text-red" />
+                        <Icon name={c.slug} size={16} className="shrink-0 text-ink/45 transition-colors group-hover:text-red" />
                         <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink transition-colors group-hover:text-red">
                           {c.label}
                         </span>

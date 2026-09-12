@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import Link from "next/link";
 import { getCategories, getStores } from "@/lib/perfluence";
 import { SITE_NAME } from "@/lib/site";
@@ -161,7 +162,7 @@ export default async function Footer() {
                 className="group flex items-center gap-3 rounded-xl border border-white/15 bg-gradient-to-r from-yellow/20 via-red/20 to-mint/20 px-4 py-3 transition-transform hover:scale-[1.02]"
               >
                 <span className="text-xl" aria-hidden="true">
-                  💳
+                  <Icon name="coins" size={15} />
                 </span>
                 <span className="flex flex-col">
                   <span className="font-bold text-white">ЮKassa для бизнеса</span>

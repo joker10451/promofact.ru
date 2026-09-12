@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon";
 import { useState } from "react";
 
 type Msg =
@@ -288,7 +289,7 @@ export default function ChatHelper() {
         aria-label="Открыть помощника"
         className="fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-red text-2xl text-white shadow-lg transition-transform hover:scale-105"
       >
-        {open ? "×" : "💬"}
+        {open ? <Icon name="close" size={18} /> : <Icon name="bulb" size={18} />}
       </button>
 
       {open && (
@@ -350,7 +351,7 @@ export default function ChatHelper() {
               }}
               className="rounded-full bg-red px-4 py-2 text-sm font-bold text-white"
             >
-              ➤
+              <Icon name="send" size={15} />
             </button>
           </div>
           <a
