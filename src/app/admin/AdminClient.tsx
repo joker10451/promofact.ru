@@ -22,7 +22,7 @@ export default function AdminClient({ supabaseReady }: { supabaseReady: boolean 
     affiliateLink: "https://kp45.prfl.me/sites/b42qv0?erid=2Ranyk7g9Y7",
     ordMarker: "2Ranyk7g9Y7",
     ordText: "Реклама. ООО «ЯНДЕКС», ИНН 7736207543",
-    logo: "https://www.google.com/s2/favicons?domain=kinopoisk.ru&sz=128",
+    logo: "https://favicon.yandex.net/favicon/v2/kinopoisk.ru?size=120",
     site: "https://www.kinopoisk.ru",
     isHit: true,
     isFirstOrderOnly: true,

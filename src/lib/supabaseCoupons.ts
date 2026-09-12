@@ -63,7 +63,7 @@ export async function fetchSupabaseCoupons(): Promise<Coupon[]> {
           id: Number(row.id) || 90000,
           name: storeName,
           slug: storeSlug,
-          logo: str(row.logo) || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(str(row.site) || "example.com")}&sz=128`,
+          logo: str(row.logo) || `https://favicon.yandex.net/favicon/v2/${encodeURIComponent(str(row.site) || "example.com")}?size=120`,
           category: str(row.category) || "Другое",
           categorySlug: str(row.category_slug) ? translit(str(row.category_slug)) : translit(str(row.category) || "Другое") || "drugoe",
           about: str(row.about) || null,
