@@ -1,3 +1,4 @@
+import ArticleCover from "@/components/ArticleCover";
 import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -79,6 +80,7 @@ export default function SovetyPage() {
                 className="group flex flex-col justify-between rounded-2xl border border-line bg-white p-6 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-ink/25 hover:shadow-md"
               >
                 <div>
+                  <ArticleCover slug={a.slug} title={a.title} className="mb-4 h-24 w-full" />
                   <div className="flex items-center justify-between text-[11px] font-bold text-ink/40 mb-3">
                     <span className="uppercase tracking-wider">Инструкция</span>
                     <span>⏱ 3–4 мин</span>

@@ -1,3 +1,4 @@
+import ArticleCover from "@/components/ArticleCover";
 import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -146,7 +147,7 @@ export default async function ArticlePage({
               {article.description}
             </p>
 
-            {article.image && (
+            {article.image ? (
               <div className="mt-6 overflow-hidden rounded-3xl border border-line bg-paper/30 shadow-xs">
                 <img
                   src={article.image}
@@ -154,6 +155,15 @@ export default async function ArticlePage({
                   className="w-full h-auto object-cover max-h-[480px]"
                 />
               </div>
+            ) : (
+              /* Своей иллюстрации у статьи нет — вместо пустоты ставим
+                 обложку, собранную из её темы. */
+              <ArticleCover
+                slug={article.slug}
+                title={article.title}
+                iconSize={64}
+                className="mt-6 h-40 w-full rounded-3xl border border-line sm:h-52"
+              />
             )}
 
             <div className="mt-6 space-y-4 text-base leading-relaxed text-ink/80">
