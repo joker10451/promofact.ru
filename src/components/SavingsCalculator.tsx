@@ -136,7 +136,7 @@ export default function SavingsCalculator() {
             <span>Интерактивный калькулятор скидок</span>
           </div>
 
-          <h2 className="mt-3 font-display text-2xl sm:text-4xl font-extrabold text-ink">
+          <h2 className="mt-3 font-display text-2xl sm:text-3xl font-extrabold text-ink">
             Рассчитайте точную экономию
           </h2>
           <p className="mt-2 text-sm text-ink/60 max-w-lg mx-auto font-medium">

@@ -47,7 +47,7 @@ export default async function PopularStores() {
           <div className="flex items-center gap-2">
             <span className="text-xl">🏪</span>
             <div>
-              <h2 className="font-display text-xl sm:text-2xl font-extrabold text-ink">
+              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
                 Популярные магазины
               </h2>
               <p className="text-xs text-ink/60 font-medium">
