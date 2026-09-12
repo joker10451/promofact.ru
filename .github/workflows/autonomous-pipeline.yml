@@ -1,11 +1,8 @@
-name: 🤖 100% Autonomous Perfluence & Telegram Pipeline
+name: Perfluence & Telegram Pipeline — ручной запуск
 
 on:
-  schedule:
-    # 2 раза в день по расписанию:
-    # 07:30 UTC = 10:30 МСК (утренний пик)
-    # 15:30 UTC = 18:30 МСК (вечерний пик)
-    - cron: '30 7,15 * * *'
+  # Автономная публикация по расписанию отключена намеренно:
+  # конвейер запускается только вручную, через «Run workflow».
   workflow_dispatch:
     inputs:
       dry_run:
