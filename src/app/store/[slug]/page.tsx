@@ -8,7 +8,6 @@ import OtherStores from "@/components/OtherStores";
 import OtherCategories from "@/components/OtherCategories";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import StoreLogo from "@/components/StoreLogo";
-import StoreRatingWidget from "@/components/StoreRatingWidget";
 import StoreIntentTabs from "@/components/StoreIntentTabs";
 import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -97,10 +96,15 @@ export async function generateMetadata({
   const maxDisc = getMaxDiscount(store.coupons);
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
+  // Бренд к заголовку добавляет шаблон в layout («%s — ПромоФакт»), поэтому
+  // сам заголовок его не содержит — иначе в выдаче получалось «… | ПромоФакт
+  // — ПромоФакт». А вот в OpenGraph и Twitter шаблон не применяется, туда
+  // бренд подставляем явно.
   const title =
     n > 0
-      ? `Промокоды ${store.name} на ${monthYear} — ${maxDisc} (${n} ${countWord}) | ${SITE_NAME}`
-      : `Скидки и акции ${store.name} на ${monthYear} | ${SITE_NAME}`;
+      ? `Промокоды ${store.name} на ${monthYear} — ${maxDisc} (${n} ${countWord})`
+      : `Скидки и акции ${store.name} на ${monthYear}`;
+  const titleWithBrand = `${title} | ${SITE_NAME}`;
   const description = buildStoreDescription({
     name: store.name,
     category: store.category,
@@ -118,7 +122,7 @@ export async function generateMetadata({
   });
 
   const og = {
-    title,
+    title: titleWithBrand,
     description: description.slice(0, 160),
     url: pageUrl,
     type: "website" as const,
@@ -135,7 +139,7 @@ export async function generateMetadata({
     openGraph: og,
     twitter: {
       card: store.logo ? "summary_large_image" : "summary",
-      title,
+      title: titleWithBrand,
       description: og.description,
       images: store.logo ? [store.logo] : undefined,
     },
@@ -161,8 +165,6 @@ export default async function StorePage({
   const monthRu = getMonthRuPrep();
   const maxDisc = getMaxDiscount(store.coupons);
   const trust = calculateStoreTrust(store.slug, store.coupons.length, storeProofCount);
-  const ratingValue = Number((trust.score / 20).toFixed(1));
-  const ratingCount = Math.max(48, trust.totalChecks * 3 + (storeProofCount || 0));
 
   const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
   const repeatOrderPromo = store.coupons.find((c) => !c.promocode.isFirstOrderOnly);
@@ -300,14 +302,6 @@ export default async function StorePage({
       "@type": "Brand",
       name: store.name,
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: ratingValue.toFixed(1),
-      bestRating: "5",
-      worstRating: "1",
-      ratingCount: ratingCount,
-      reviewCount: ratingCount,
-    },
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "RUB",
@@ -317,19 +311,12 @@ export default async function StorePage({
     },
   };
 
-  // Организация с aggregateRating для сниппетов Яндекса
+  // Организация магазина для сниппетов Яндекса
   const ratingJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: store.name,
     url: pageUrl,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: ratingValue.toFixed(1),
-      bestRating: "5",
-      worstRating: "1",
-      ratingCount: ratingCount,
-    },
   };
 
   const itemListJsonLd: Record<string, unknown> = {
@@ -401,13 +388,6 @@ export default async function StorePage({
                 . Коды проверены сегодня, срок действия указан в карточке.
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <StoreRatingWidget
-                  storeSlug={store.slug}
-                  storeName={store.name}
-                  initialRating={ratingValue}
-                  initialCount={ratingCount}
-                  compact
-                />
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/40 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-mint-dark">
                   <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
                   Проверено сегодня · Trust {trust.score}/100
@@ -518,12 +498,6 @@ export default async function StorePage({
 
         {/* 3. Интерактивный блок рейтинга и отзывов покупателей (Schema.org AggregateRating) */}
         <div className="mt-6">
-          <StoreRatingWidget
-            storeSlug={store.slug}
-            storeName={store.name}
-            initialRating={ratingValue}
-            initialCount={ratingCount}
-          />
         </div>
 
         {/* 4. First-Party Trust & Verification History Block */}

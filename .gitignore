@@ -50,3 +50,10 @@ coupon-video/
 # sensitive perfluence session data & debug screenshots
 data/perfluence_session.json
 data/debug/
+
+# Материалы внутреннего аудита: описывают незакрытые уязвимости,
+# а репозиторий публичный. Держим только локально.
+/AUDIT.md
+/audit/
+# Локальная конфигурация запуска дев-сервера
+/.claude/

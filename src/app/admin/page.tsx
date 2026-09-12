@@ -9,7 +9,7 @@ import AdminClient from "./AdminClient";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: `Админ — ${SITE_NAME}`,
+  title: `Админ`,
   robots: { index: false, follow: false },
 };
 
