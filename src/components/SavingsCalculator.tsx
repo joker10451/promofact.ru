@@ -128,7 +128,7 @@ export default function SavingsCalculator() {
   };
 
   return (
-    <section className="py-12 sm:py-16">
+    <section className="py-10 sm:py-14">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
         <div className="rounded-3xl border-2 border-line bg-gradient-to-br from-white via-paper to-yellow/15 p-6 sm:p-12 shadow-[0_12px_40px_rgba(11,16,43,0.06)] text-center">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow/40 border border-yellow/60 px-3.5 py-1 text-xs font-bold text-ink">

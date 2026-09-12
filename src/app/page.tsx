@@ -113,7 +113,7 @@ export default async function Home() {
         </Reveal>
 
         {/* 5. Купоны на сегодня — сгруппированный каталог (лучший промокод + аккордеон) */}
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <CouponGrid
               coupons={coupons}
@@ -125,7 +125,7 @@ export default async function Home() {
         </div>
 
         {/* 6. Как это работает — 4 понятных шага применения */}
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <HowItWorks />
           </Reveal>
@@ -147,7 +147,7 @@ export default async function Home() {
         </Reveal>
 
         {/* 10. FAQ — частые вопросы */}
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <Faq />
           </Reveal>
@@ -159,7 +159,7 @@ export default async function Home() {
         </Reveal>
 
         {/* 12. SEO-статья под спойлером */}
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <SeoArticle />
           </Reveal>

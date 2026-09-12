@@ -53,7 +53,7 @@ export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
     !timeLeft || (timeLeft.hours === "00" && timeLeft.minutes === "00" && timeLeft.seconds === "00");
 
   return (
-    <section id="hot" className="scroll-mt-20 py-8 sm:py-12 border-b border-line bg-gradient-to-b from-white to-paper/40">
+    <section id="hot" className="scroll-mt-20 py-10 sm:py-14 border-b border-line bg-gradient-to-b from-white to-paper/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Заголовок события с честным таймером ночного обновления */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">

@@ -6,7 +6,7 @@ export default function SeoArticle() {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <section className="py-10 border-t border-line">
+    <section className="border-t border-line">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
         <div className="rounded-2xl border border-line bg-white p-6 shadow-xs">
           <div className="flex items-center justify-between gap-4">

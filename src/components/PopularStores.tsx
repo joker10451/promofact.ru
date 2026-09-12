@@ -41,7 +41,7 @@ export default async function PopularStores() {
   }
 
   return (
-    <section aria-label="Популярные магазины" className="py-10 sm:py-12 border-b border-line bg-white">
+    <section aria-label="Популярные магазины" className="py-10 sm:py-14 border-b border-line bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
