@@ -10,14 +10,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Admitad import API
+        env:
+          # Секрет передаём через env, а не подстановкой в строку команды:
+          # при незаданном секрете подстановка молча давала пустой заголовок
+          # «Authorization: Bearer », запрос уходил без авторизации и падал
+          # невнятной ошибкой. Через env его хотя бы можно проверить.
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::Секрет CRON_SECRET не задан: Settings → Secrets and variables → Actions. Значение должно совпадать с переменной CRON_SECRET в Vercel."
+            exit 1
+          fi
+
           HTTP_STATUS=$(curl -s -o /tmp/admitad-import.json -w "%{http_code}" -X POST \
             "https://promofact.ru/api/admin/admitad-import" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \\
+            -H "Authorization: Bearer $CRON_SECRET" \
             -H "Content-Type: application/json")
+
           cat /tmp/admitad-import.json
           echo "HTTP: $HTTP_STATUS"
+
           if [ "$HTTP_STATUS" != "200" ]; then
-            echo "::error::Admitad import failed with status $HTTP_STATUS"
+            echo "::error::Импорт Admitad завершился со статусом $HTTP_STATUS"
             exit 1
           fi
