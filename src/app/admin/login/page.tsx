@@ -5,7 +5,7 @@ import { STATS_COOKIE, sha256Hex, statsCookieValue } from "@/lib/statsAuth";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `Админ — ${SITE_NAME}`,
+  title: `Админ`,
   robots: { index: false, follow: false },
 };
 

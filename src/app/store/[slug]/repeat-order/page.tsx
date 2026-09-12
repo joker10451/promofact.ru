@@ -6,7 +6,6 @@ import HowToApply from "@/components/HowToApply";
 import JsonLd from "@/components/JsonLd";
 import OtherStores from "@/components/OtherStores";
 import StoreLogo from "@/components/StoreLogo";
-import StoreRatingWidget from "@/components/StoreRatingWidget";
 import StoreIntentTabs from "@/components/StoreIntentTabs";
 import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -76,7 +75,12 @@ export async function generateMetadata({
   const repeatCoupons = store.coupons.filter((c) => !c.promocode.isFirstOrderOnly);
   const maxDisc = getMaxDiscount(repeatCoupons.length > 0 ? repeatCoupons : store.coupons);
 
-  const title = `Промокоды ${store.name} на повторный заказ на ${monthYear} — скидки для постоянных клиентов | ${SITE_NAME}`;
+  // Бренд к заголовку добавляет шаблон в layout («%s — ПромоФакт»), поэтому
+  // сам заголовок его не содержит — иначе в выдаче получалось «… | ПромоФакт
+  // — ПромоФакт». А вот в OpenGraph и Twitter шаблон не применяется, туда
+  // бренд подставляем явно.
+  const title = `Промокоды ${store.name} на повторный заказ на ${monthYear} — скидки для постоянных клиентов`;
+  const titleWithBrand = `${title} | ${SITE_NAME}`;
   const description = `Рабочие промокоды и скидки ${store.name} на повторные заказы на ${monthYear}. Специальные предложения ${maxDisc} для постоянных покупателей: экономьте на каждом заказе!`;
 
   return {
@@ -84,7 +88,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical: pageUrl },
     openGraph: {
-      title,
+      title: titleWithBrand,
       description,
       url: pageUrl,
       type: "website",
@@ -94,7 +98,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: store.logo ? "summary_large_image" : "summary",
-      title,
+      title: titleWithBrand,
       description,
       images: store.logo ? [store.logo] : undefined,
     },
@@ -116,8 +120,6 @@ export default async function StoreRepeatOrderPage({
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const monthYear = getCapitalizedMonthYear();
   const trust = calculateStoreTrust(store.slug, store.coupons.length, storeProofCount);
-  const ratingValue = Number((trust.score / 20).toFixed(1));
-  const ratingCount = Math.max(48, trust.totalChecks * 3 + (storeProofCount || 0));
 
   // Фильтруем купоны: оставляем только купоны для постоянных и всех клиентов (исключаем strictly first-order)
   const repeatCoupons = store.coupons.filter((c) => !c.promocode.isFirstOrderOnly);
@@ -154,14 +156,6 @@ export default async function StoreRepeatOrderPage({
     description: `Рабочие промокоды и скидки ${store.name} для постоянных покупателей на ${monthYear}. Скидки ${maxDisc}.`,
     image: store.logo || `${SITE_URL}/icon.svg`,
     brand: { "@type": "Brand", name: store.name },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: ratingValue.toFixed(1),
-      bestRating: "5",
-      worstRating: "1",
-      ratingCount: ratingCount,
-      reviewCount: ratingCount,
-    },
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "RUB",
@@ -176,13 +170,6 @@ export default async function StoreRepeatOrderPage({
     "@type": "Organization",
     name: store.name,
     url: parentStoreUrl,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: ratingValue.toFixed(1),
-      bestRating: "5",
-      worstRating: "1",
-      ratingCount: ratingCount,
-    },
   };
 
   const faqItems = [
@@ -252,13 +239,6 @@ export default async function StoreRepeatOrderPage({
                 Собрали действующие купоны {store.name} без ограничений первого заказа. Скидки {maxDisc} для каждого покупателя.
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <StoreRatingWidget
-                  storeSlug={store.slug}
-                  storeName={store.name}
-                  initialRating={ratingValue}
-                  initialCount={ratingCount}
-                  compact
-                />
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/40 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-mint-dark">
                   <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
                   Проверено сегодня · Trust {trust.score}/100
@@ -299,15 +279,6 @@ export default async function StoreRepeatOrderPage({
           </div>
         </div>
 
-        {/* Интерактивный виджет оценки */}
-        <div className="mt-8">
-          <StoreRatingWidget
-            storeSlug={store.slug}
-            storeName={store.name}
-            initialRating={ratingValue}
-            initialCount={ratingCount}
-          />
-        </div>
 
         {/* Пошаговая инструкция применения */}
         <div className="mt-8">

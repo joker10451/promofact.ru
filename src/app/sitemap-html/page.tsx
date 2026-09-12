@@ -7,7 +7,7 @@ import { SITE_NAME } from "@/lib/site";
 export const revalidate = 43200;
 
 export const metadata: Metadata = {
-  title: `Карта сайта — ${SITE_NAME}`,
+  title: `Карта сайта`,
   description:
     "Все магазины, категории и советы по экономии на одной странице. Удобная навигация по промокодам.",
   alternates: { canonical: "https://promofact.ru/sitemap-html" },

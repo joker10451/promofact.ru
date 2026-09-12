@@ -5,7 +5,7 @@ import { SITE_NAME } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: `Статистика — ${SITE_NAME}`,
+  title: `Статистика`,
   robots: { index: false, follow: false },
 };
 

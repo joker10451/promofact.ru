@@ -8,7 +8,8 @@ import Footer from "@/components/Footer";
 export const revalidate = 43200;
 
 export const metadata: Metadata = {
-  title: `Советы по экономии и гиды по промокодам (${ARTICLES.length} статей) — ПромоФакт`,
+  // Бренд добавит шаблон в layout — здесь его быть не должно.
+  title: `Советы по экономии и гиды по промокодам (${ARTICLES.length} статей)`,
   description:
     "Практические советы и инструкции: как экономить на доставке продуктов, бронировании отелей, косметике, цветах и подписках. Рабочие промокоды и секреты шопинга.",
   alternates: { canonical: `${SITE_URL}/sovety` },

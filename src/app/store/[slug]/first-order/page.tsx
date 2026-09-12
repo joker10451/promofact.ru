@@ -6,7 +6,6 @@ import HowToApply from "@/components/HowToApply";
 import JsonLd from "@/components/JsonLd";
 import OtherStores from "@/components/OtherStores";
 import StoreLogo from "@/components/StoreLogo";
-import StoreRatingWidget from "@/components/StoreRatingWidget";
 import StoreIntentTabs from "@/components/StoreIntentTabs";
 import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -85,7 +84,12 @@ export async function generateMetadata({
   const monthYear = getCapitalizedMonthYear();
   const maxDisc = getMaxDiscount(store.coupons);
 
-  const title = `Промокоды ${store.name} на первый заказ на ${monthYear} — скидки ${maxDisc} | ${SITE_NAME}`;
+  // Бренд к заголовку добавляет шаблон в layout («%s — ПромоФакт»), поэтому
+  // сам заголовок его не содержит — иначе в выдаче получалось «… | ПромоФакт
+  // — ПромоФакт». А вот в OpenGraph и Twitter шаблон не применяется, туда
+  // бренд подставляем явно.
+  const title = `Промокоды ${store.name} на первый заказ на ${monthYear} — скидки ${maxDisc}`;
+  const titleWithBrand = `${title} | ${SITE_NAME}`;
   const description = `Все рабочие промокоды и скидки ${store.name} на первый заказ на ${monthYear}. Специальные предложения ${maxDisc} для новых клиентов: скопируйте промокод и экономьте!`;
 
   return {
@@ -93,7 +97,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical: pageUrl },
     openGraph: {
-      title,
+      title: titleWithBrand,
       description,
       url: pageUrl,
       type: "website",
@@ -103,7 +107,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: store.logo ? "summary_large_image" : "summary",
-      title,
+      title: titleWithBrand,
       description,
       images: store.logo ? [store.logo] : undefined,
     },
@@ -127,8 +131,6 @@ export default async function StoreFirstOrderPage({
   const monthRu = getMonthRuPrep();
   const maxDisc = getMaxDiscount(store.coupons);
   const trust = calculateStoreTrust(store.slug, store.coupons.length, storeProofCount);
-  const ratingValue = Number((trust.score / 20).toFixed(1));
-  const ratingCount = Math.max(48, trust.totalChecks * 3 + (storeProofCount || 0));
 
   // Купоны на первый заказ имеют абсолютный приоритет
   const strictFirstOrder = store.coupons.filter(
@@ -170,14 +172,6 @@ export default async function StoreFirstOrderPage({
     description: `Рабочие промокоды и скидки ${store.name} для новых клиентов на ${monthYear}. Скидки ${maxDisc}.`,
     image: store.logo || `${SITE_URL}/icon.svg`,
     brand: { "@type": "Brand", name: store.name },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: ratingValue.toFixed(1),
-      bestRating: "5",
-      worstRating: "1",
-      ratingCount: ratingCount,
-      reviewCount: ratingCount,
-    },
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "RUB",
@@ -192,13 +186,6 @@ export default async function StoreFirstOrderPage({
     "@type": "Organization",
     name: store.name,
     url: parentStoreUrl,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: ratingValue.toFixed(1),
-      bestRating: "5",
-      worstRating: "1",
-      ratingCount: ratingCount,
-    },
   };
 
   const faqItems = [
@@ -268,13 +255,6 @@ export default async function StoreFirstOrderPage({
                 Собрали все промокоды и скидки {maxDisc} для новых пользователей {store.name}. Проверено на сегодня.
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <StoreRatingWidget
-                  storeSlug={store.slug}
-                  storeName={store.name}
-                  initialRating={ratingValue}
-                  initialCount={ratingCount}
-                  compact
-                />
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/40 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-mint-dark">
                   <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
                   Проверено сегодня · Trust {trust.score}/100
@@ -327,15 +307,6 @@ export default async function StoreFirstOrderPage({
           )}
         </div>
 
-        {/* Интерактивный виджет оценки */}
-        <div className="mt-8">
-          <StoreRatingWidget
-            storeSlug={store.slug}
-            storeName={store.name}
-            initialRating={ratingValue}
-            initialCount={ratingCount}
-          />
-        </div>
 
         {/* Пошаговая инструкция применения первого промокода */}
         <div className="mt-8">

@@ -11,7 +11,8 @@ export const revalidate = 43200;
 const monthYear = currentMonthYear();
 
 export const metadata: Metadata = {
-  title: `Промокоды всех магазинов на ${monthYear} — ${SITE_NAME}`,
+  // Бренд добавит шаблон в layout — здесь его быть не должно.
+  title: `Промокоды всех магазинов на ${monthYear}`,
   description: `Рабочие промокоды и купоны на ${monthYear}. Полный список магазинов с проверенными кодами скидок. Обновляется ежедневно.`,
   alternates: { canonical: `${SITE_URL}/promokody` },
   openGraph: {
