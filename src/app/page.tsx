@@ -17,6 +17,7 @@ import Reveal from "@/components/Reveal";
 import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickHotDeals, offerKey } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
+import { toCatalogCoupon } from "@/lib/catalogCoupon";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const revalidate = 43200; // 12 часов — защита лимита ISR Writes на Vercel
@@ -78,6 +79,11 @@ export default async function Home() {
   // и скачивается вместе с HTML каждым посетителем и каждым роботом.
   const searchIndex = buildSearchIndex(stores, coupons);
 
+  // Каталог тоже клиентский: отдаём ему купоны без полей, которых он не
+  // показывает. Объект магазина повторяется в каждом купоне, поэтому описания
+  // и условия дублировались столько раз, сколько у магазина промокодов.
+  const catalogCoupons = coupons.map(toCatalogCoupon);
+
   return (
     <>
       <JsonLd
@@ -111,7 +117,7 @@ export default async function Home() {
 
         {/* 3. 🔥 Горит сегодня — Топ-3 супер-скидки с FOMO-таймером */}
         <Reveal>
-          <HotDeals coupons={hotDeals} />
+          <HotDeals coupons={hotDeals.map(toCatalogCoupon)} />
         </Reveal>
 
         {/* 4. Популярные магазины — быстрый вход по брендам перед каталогом */}
@@ -123,7 +129,7 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <CouponGrid
-              coupons={coupons}
+              coupons={catalogCoupons}
               proofsByCode={proofsByCode}
               proofsByStore={proofsByStore}
               excludeOfferKeys={hotDealKeys}

@@ -3,7 +3,7 @@
 import Icon from "@/components/Icon";
 import { useEffect, useState } from "react";
 import CouponTicket from "@/components/CouponTicket";
-import type { Coupon } from "@/lib/types";
+import type { CatalogCoupon } from "@/lib/catalogCoupon";
 
 function getCountdownTime(): { hours: string; minutes: string; seconds: string } | null {
   const now = new Date();
@@ -33,7 +33,7 @@ function getCountdownTime(): { hours: string; minutes: string; seconds: string }
  * было бы расточительно — компонент клиентский, и всё, что в него попадает,
  * сериализуется в RSC-поток и уезжает к пользователю внутри HTML.
  */
-export default function HotDeals({ coupons }: { coupons: Coupon[] }) {
+export default function HotDeals({ coupons }: { coupons: CatalogCoupon[] }) {
   const [timeLeft, setTimeLeft] = useState<{ hours: string; minutes: string; seconds: string } | null>(
     () => getCountdownTime()
   );

@@ -10,7 +10,7 @@ import { ymReachGoal } from "@/components/YandexMetrika";
 import { CheckIcon } from "@/components/CheckIcon";
 import { refineOffer } from "@/lib/offerRefiner";
 import { calculateCouponReliability, generateUsageToday } from "@/lib/trustEngine";
-import type { Coupon } from "@/lib/types";
+import type { CatalogCoupon } from "@/lib/catalogCoupon";
 
 /** Склонение «заказ/заказа/заказов» по числу. */
 function pluralOrders(n: number): string {
@@ -54,7 +54,7 @@ export default function CouponTicket({
   proofCount = 0,
   isDetailPage = false,
 }: {
-  coupon: Coupon;
+  coupon: CatalogCoupon;
   proofCount?: number;
   storeProofCount?: number;
   isDetailPage?: boolean;
