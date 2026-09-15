@@ -165,7 +165,7 @@ export default async function ArticlePage({
                 <img
                   src={article.image}
                   alt={article.title}
-                  className="w-full h-auto object-cover max-h-[480px]"
+                  className="w-full h-auto object-contain max-h-[480px]"
                 />
               </div>
             ) : (

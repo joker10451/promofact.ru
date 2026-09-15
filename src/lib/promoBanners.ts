@@ -19,6 +19,9 @@ export interface PromoBanner {
   /** Картинка в /public; без неё баннер рисуется только текстом. */
   image?: string;
   imageAlt?: string;
+  /** Исходные размеры картинки — без них браузер не зарезервирует место. */
+  imageWidth?: number;
+  imageHeight?: number;
   ordText: string;
   /** Включительно, по Москве. */
   startsAt: string;
@@ -36,6 +39,10 @@ export const PROMO_BANNERS: PromoBanner[] = [
     note: "Для новых пользователей. Сроки акции: с 10.09.2026 по 10.10.2026",
     cta: "Забрать СберПрайм за 1 ₽",
     link: "https://sberbank1.prfl.me/sites/dgaeim?erid=2RanymxNatT",
+    image: "/images/sberprime-rozygrysh.jpg",
+    imageAlt: "СберПрайм: подключите подписку на 60 дней за 1 ₽ и участвуйте в розыгрыше 150 000 ₽",
+    imageWidth: 1280,
+    imageHeight: 914,
     ordText: "Реклама. Рекламодатель — АО «ЦПЛ» (ОГРН: 1117746689840, г. Москва). erid: 2RanymxNatT",
     startsAt: "2026-09-10",
     endsAt: "2026-10-10",
