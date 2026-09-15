@@ -26,7 +26,7 @@ export async function GET() {
       <h1>${escapeXml(a.title)}</h1>
     </header>`;
     
-    const bodyText = a.body?.map(p => `<p>${escapeXml(p)}</p>`).join("") || "";
+    const bodyText = a.body?.map(p => p.startsWith("## ") ? `<h2>${escapeXml(p.slice(3))}</h2>` : `<p>${escapeXml(p.replace(/\*\*/g, ""))}</p>`).join("") || "";
     const content = `${header}${bodyText}`;
 
     return `    <item turbo="true">

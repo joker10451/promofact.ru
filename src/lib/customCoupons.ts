@@ -5,6 +5,42 @@ import type { Coupon } from "@/lib/types";
  */
 export const CUSTOM_COUPONS: Coupon[] = [
   {
+    id: 50031,
+    promocode: {
+      id: 50031,
+      code: "", // Скидка по ссылке
+      bonusName: "СберПрайм 60 дней за 1 ₽ + розыгрыш 150 000 ₽",
+      terms: "Оформите подписку СберПрайм на 60 дней за 1 ₽ по ссылке и автоматически участвуйте в розыгрыше денег и сертификатов. Главный приз — 150 000 ₽, общий призовой фонд — более 400 000 ₽. Для новых пользователей. Сроки акции: с 10.09.2026 по 10.10.2026.",
+      expires: "2026-10-10",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: true,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: "/images/sberprime.png",
+      group: "perfluence",
+    },
+    store: {
+      id: 5030,
+      name: "СберПрайм",
+      slug: "sberprime",
+      logo: "https://favicon.yandex.net/favicon/v2/sberbank.ru?size=120",
+      category: "Сервисы и подписки",
+      categorySlug: "servisy-i-podpiski",
+      about: "СберПрайм — единая подписка на сервисы: фильмы в Okko, музыка в Звуке, бесплатная доставка и повышенный кэшбэк бонусами Спасибо на покупки и игры на GamersHub.",
+      conditions: "Промокод не требуется. Перейдите по ссылке и оформите подписку. Открывать через российские браузеры.",
+      site: "https://sberbank1.prfl.me/sites/dgaeim?erid=2RanymxNatT",
+      activeBloggers: 15400,
+    },
+    affiliate: {
+      link: "https://sberbank1.prfl.me/sites/dgaeim?erid=2RanymxNatT",
+      landingLink: "https://sberbank1.prfl.me/sites/dgaeim?erid=2RanymxNatT",
+      ordMarker: "2RanymxNatT",
+      ordText: "Реклама. Рекламодатель — АО «ЦПЛ» (ОГРН: 1117746689840, г. Москва). erid: 2RanymxNatT",
+    },
+    extraLinks: [],
+  },
+  {
     id: 50005,
     promocode: {
       id: 50005,

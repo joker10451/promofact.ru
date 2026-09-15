@@ -91,8 +91,8 @@ export default async function ArticlePage({
     "@type": "Article",
     headline: article.title,
     description: article.description,
-    datePublished: new Date().toISOString(),
-    dateModified: new Date().toISOString(),
+    datePublished: article.published ?? new Date().toISOString(),
+    dateModified: article.published ?? new Date().toISOString(),
     author: { "@type": "Organization", name: SITE_NAME },
     publisher: { "@type": "Organization", name: SITE_NAME },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
@@ -120,6 +120,19 @@ export default async function ArticlePage({
       <main className="min-h-screen bg-paper/30 py-10 sm:py-14 border-b border-line">
         <JsonLd data={articleJsonLd} />
         <JsonLd data={breadcrumbJsonLd} />
+        {article.faq && article.faq.length > 0 && (
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: article.faq.map((item) => ({
+                "@type": "Question",
+                name: item.q,
+                acceptedAnswer: { "@type": "Answer", text: item.a },
+              })),
+            }}
+          />
+        )}
 
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <Breadcrumbs
@@ -152,7 +165,7 @@ export default async function ArticlePage({
                 <img
                   src={article.image}
                   alt={article.title}
-                  className="w-full h-auto object-cover max-h-[480px]"
+                  className="w-full h-auto object-contain max-h-[480px]"
                 />
               </div>
             ) : (
@@ -167,11 +180,20 @@ export default async function ArticlePage({
             )}
 
             <div className="mt-6 space-y-4 text-base leading-relaxed text-ink/80">
-              {article.body.map((p, i) => (
-                <p key={i} className="leading-relaxed">
-                  {renderParagraph(p)}
-                </p>
-              ))}
+              {article.body.map((p, i) =>
+                p.startsWith("## ") ? (
+                  <h2
+                    key={i}
+                    className="!mt-8 font-display text-xl sm:text-2xl font-extrabold text-ink"
+                  >
+                    {p.slice(3)}
+                  </h2>
+                ) : (
+                  <p key={i} className="leading-relaxed">
+                    {renderParagraph(p)}
+                  </p>
+                )
+              )}
             </div>
 
             {article.ctaButton && (
@@ -192,6 +214,28 @@ export default async function ArticlePage({
                   )}
                 </div>
               </div>
+            )}
+
+            {article.faq && article.faq.length > 0 && (
+              <section className="mt-10 pt-8 border-t border-line" aria-label="Частые вопросы">
+                <h2 className="font-display text-lg sm:text-xl font-bold text-ink mb-4">
+                  Частые вопросы
+                </h2>
+                <div className="space-y-3">
+                  {article.faq.map((item) => (
+                    <details
+                      key={item.q}
+                      className="group rounded-2xl border border-line bg-white p-4 open:shadow-xs"
+                    >
+                      <summary className="cursor-pointer list-none font-bold text-ink flex items-center justify-between gap-3">
+                        <span>{item.q}</span>
+                        <span className="text-ink/40 transition-transform group-open:rotate-45">+</span>
+                      </summary>
+                      <p className="mt-2 text-sm leading-relaxed text-ink/75">{item.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
             )}
 
             {/* SEO Воронка: Встроенные рабочие промокоды по теме статьи */}

@@ -57,7 +57,7 @@ export async function GET() {
     const fullArticleHtml = `
       <h2>${escapeXml(a.title)}</h2>
       <p><em>${escapeXml(a.description)}</em></p>
-      ${a.body.map((p) => `<p>${escapeXml(p.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"))}</p>`).join("\n")}
+      ${a.body.map((p) => p.startsWith("## ") ? `<h3>${escapeXml(p.slice(3))}</h3>` : `<p>${escapeXml(p.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"))}</p>`).join("\n")}
       <p>Больше проверенных промокодов и актуальных скидок читайте на сайте <a href="${SITE_URL}">ПромоФакт</a>.</p>
     `;
 

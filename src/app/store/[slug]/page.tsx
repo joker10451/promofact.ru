@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
+import PromoBanner from "@/components/PromoBanner";
+import { getActivePromoBanners } from "@/lib/promoBanners";
 import HowToApply from "@/components/HowToApply";
 import JsonLd from "@/components/JsonLd";
 import OtherStores from "@/components/OtherStores";
@@ -434,6 +436,12 @@ export default async function StorePage({
             firstCount={firstOrderCoupons.length}
             repeatCount={repeatOrderCoupons.length}
           />
+
+          {getActivePromoBanners({ storeSlug: store.slug }).map((banner) => (
+            <div key={banner.id} className="mb-6">
+              <PromoBanner banner={banner} />
+            </div>
+          ))}
 
           <div className="flex items-center justify-between mb-3.5">
             <h2 className="font-display text-base sm:text-lg font-extrabold text-ink">
