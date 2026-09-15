@@ -12,6 +12,15 @@ const WWW_HOST = "www.promofact.ru";
 const CANONICAL_ORIGIN = "https://promofact.ru";
 
 const nextConfig: NextConfig = {
+  // Логотипы Admitad через свой домен — см. src/lib/logoProxy.ts.
+  async rewrites() {
+    return [
+      {
+        source: "/media/l/:path*",
+        destination: "https://cdn.admitad.com/campaign/images/:path*",
+      },
+    ];
+  },
   async redirects() {
     return [
       {

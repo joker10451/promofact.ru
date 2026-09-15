@@ -221,8 +221,11 @@ export default function CouponTicket({
           ) : offer.type === "gift" ? (
             /* Тип: gift — жёлтая плашка */
             <div className="rounded-xl bg-yellow/15 border border-yellow/40 px-3 py-2.5">
-              <div className={`font-display ${discountSizeClass} text-ink font-bold`}>
-                {offer.discount}
+              <div className="flex items-start gap-2 font-display text-xl sm:text-2xl leading-tight text-ink font-bold">
+                <span className="mt-0.5 shrink-0 text-red">
+                  <Icon name="gift" size={22} />
+                </span>
+                <span>{offer.discount}</span>
               </div>
               <p className="mt-1 text-xs sm:text-sm font-medium text-ink/70 line-clamp-2 leading-relaxed">
                 {offer.condition}

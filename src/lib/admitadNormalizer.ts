@@ -1,4 +1,5 @@
 import { translit } from "@/lib/translit";
+import { proxiedLogo } from "@/lib/logoProxy";
 import { normalizeStore } from "@/lib/storeNormalizer";
 import type {
   RawAdmitadCoupon,
@@ -305,24 +306,24 @@ export function resolveOfferDetails(
 
   // 3. Чистый Подарок к заказу (Gift) — КРИТИЧЕСКИЙ РАЗРЫВ №1: discount = null!
   if (isGiftInText) {
-    let giftTitle = "🎁 Подарок к заказу";
+    let giftTitle = "Подарок к заказу";
     let giftName = "Подарок к заказу";
 
     if (/фреш\s*ролл/i.test(cleanName) || /ролл\s+с\s+креветкой/i.test(cleanName)) {
       giftName = "Фреш ролл с креветкой и авокадо";
-      giftTitle = "🎁 Ролл с креветкой и авокадо в подарок";
+      giftTitle = "Ролл с креветкой и авокадо в подарок";
     } else if (/ролл/i.test(cleanName) || /ролл/i.test(cleanDesc)) {
       giftName = "Ролл";
-      giftTitle = "🎁 Ролл в подарок";
+      giftTitle = "Ролл в подарок";
     } else if (/фото/i.test(cleanName) || /фото/i.test(cleanDesc)) {
       giftName = "50 фото";
-      giftTitle = "🎁 50 фото в подарок";
+      giftTitle = "50 фото в подарок";
     } else if (/подвеск/i.test(cleanName) || /подвеск/i.test(cleanDesc)) {
       giftName = "Подвеска";
-      giftTitle = "🎁 Подвеска в подарок";
+      giftTitle = "Подвеска в подарок";
     } else if (/пицц/i.test(cleanName) || /пицц/i.test(cleanDesc)) {
       giftName = "Пицца";
-      giftTitle = "🎁 Пицца в подарок";
+      giftTitle = "Пицца в подарок";
     }
 
     const shortDescription = minOrder
@@ -604,7 +605,7 @@ export function toCoupon(offer: NormalizedOffer): Coupon {
     id: offer.store.id,
     name: offer.store.name,
     slug: offer.store.slug,
-    logo: offer.store.logo,
+    logo: proxiedLogo(offer.store.logo),
     category: offer.store.category,
     categorySlug: offer.store.categorySlug,
     about: `${offer.store.name} — официальный магазин-партнёр. Актуальные скидки и промокоды.`,
