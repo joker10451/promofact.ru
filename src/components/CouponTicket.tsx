@@ -7,6 +7,7 @@ import Link from "next/link";
 import StoreLogo from "@/components/StoreLogo";
 import { formatExpires } from "@/lib/format";
 import { ymReachGoal } from "@/components/YandexMetrika";
+import { CHANNELS } from "@/lib/site";
 import { CheckIcon } from "@/components/CheckIcon";
 import { refineOffer } from "@/lib/offerRefiner";
 import { calculateCouponReliability, generateUsageToday } from "@/lib/trustEngine";
@@ -106,10 +107,25 @@ export default function CouponTicket({
     if (code) ymReachGoal("copy_code", { code, store: store.name });
     ymReachGoal("click_store", { code: code || "no-code", store: store.name });
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      setCopied(false);
-      setToast(false);
-    }, 6000);
+    const hide = () => {
+      timer.current = setTimeout(() => {
+        setCopied(false);
+        setToast(false);
+      }, 12000);
+    };
+    // Магазин открылся в новой вкладке — наша ушла в фон. Отсчёт скрытия
+    // начинаем, когда человек вернулся, иначе он не увидит подсказку
+    // и предложение подписаться.
+    if (typeof document !== "undefined" && document.hidden) {
+      const onReturn = () => {
+        if (document.hidden) return;
+        document.removeEventListener("visibilitychange", onReturn);
+        hide();
+      };
+      document.addEventListener("visibilitychange", onReturn);
+    } else {
+      hide();
+    }
   };
 
   const targetUrl = affiliate.link || affiliate.landingLink || store.site || "#";
@@ -474,6 +490,25 @@ export default function CouponTicket({
             <div className="mt-2.5 border-t border-white/10 pt-2 text-xs text-white/80">
               <Icon name="bulb" size={12} /> Вставьте промокод в поле купона при оплате в <span className="font-bold text-white">{store.name}</span>.
             </div>
+            <a
+              href={CHANNELS.telegram}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                ymReachGoal("tg_subscribe_click", { source: "copy_toast", store: store.name });
+                setToast(false);
+              }}
+              className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-xs transition-colors hover:bg-white/15"
+            >
+              <span className="flex items-center gap-2">
+                <Icon name="send" size={14} />
+                <span>
+                  <span className="block font-bold text-white">Новые коды {store.name} — в Telegram</span>
+                  <span className="block text-white/60">Подборки промокодов и скидок</span>
+                </span>
+              </span>
+              <span className="shrink-0 rounded-lg bg-yellow px-2.5 py-1 font-bold text-ink">Подписаться</span>
+            </a>
           </div>,
           document.body
         )}
