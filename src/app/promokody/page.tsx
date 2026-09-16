@@ -13,11 +13,11 @@ const monthYear = currentMonthYear();
 export const metadata: Metadata = {
   // Бренд добавит шаблон в layout — здесь его быть не должно.
   title: `Промокоды всех магазинов на ${monthYear}`,
-  description: `Рабочие промокоды и купоны на ${monthYear}. Полный список магазинов с проверенными кодами скидок. Обновляется ежедневно.`,
+  description: `Рабочие промокоды и купоны на ${monthYear}. Полный список магазинов с актуальными кодами скидок. Обновляется ежедневно.`,
   alternates: { canonical: `${SITE_URL}/promokody` },
   openGraph: {
     title: `Промокоды всех магазинов на ${monthYear}`,
-    description: `Полный список магазинов с проверенными промокодами на ${monthYear}.`,
+    description: `Полный список магазинов с актуальными промокодами на ${monthYear}.`,
     url: `${SITE_URL}/promokody`,
     type: "website",
     locale: "ru_RU",
@@ -67,7 +67,7 @@ export default async function PromokodyIndexPage() {
         Промокоды всех магазинов на {monthYear}
       </h1>
       <p className="mt-3 max-w-2xl text-ink/60">
-        {sorted.length} магазинов с проверенными промокодами. Выберите магазин
+        {sorted.length} магазинов с актуальными промокодами. Выберите магазин
         — внутри таблица кодов, инструкция и FAQ.
       </p>
 

@@ -106,7 +106,7 @@ export default async function VisualCategoryTiles() {
               Популярные подборки
             </h3>
             <p className="mt-0.5 text-xs sm:text-sm text-ink/60 font-medium">
-              Готовые коллекции проверенных промокодов под разные поводы
+              Готовые коллекции актуальных промокодов под разные поводы
             </p>
           </div>
           <div className="flex flex-wrap gap-2.5">

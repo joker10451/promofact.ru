@@ -55,7 +55,7 @@ export default function LatestTips({ limit = 3 }: { limit?: number }) {
                 <span className="text-xs font-bold text-red group-hover:underline">
                   Читать инструкцию →
                 </span>
-                <span className="text-xs text-ink/40"><Icon name="check" size={11} className="inline" /> Проверено</span>
+                <span className="text-xs text-ink/40"><Icon name="check" size={11} className="inline" /> Актуально</span>
               </div>
             </Link>
           ))}

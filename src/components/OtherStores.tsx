@@ -156,7 +156,7 @@ export default async function OtherStores({
             </span>
           </h2>
           <p className="text-xs text-ink/60 mt-0.5">
-            Самые выгодные предложения и проверенные купоны от наших партнёров
+            Самые выгодные предложения и актуальные купоны от наших партнёров
           </p>
         </div>
 
