@@ -98,7 +98,7 @@ export default function PwaInstallBanner() {
   return (
     <aside
       aria-label="Установка приложения"
-      className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md animate-bounce-short"
+      className="fixed bottom-[72px] left-4 right-4 z-50 mx-auto max-w-md animate-bounce-short md:bottom-4"
     >
       <div className="relative overflow-hidden rounded-2xl border-2 border-ink bg-white p-4 shadow-[0_10px_25px_rgba(11,16,43,0.25)] sm:p-5">
         <button

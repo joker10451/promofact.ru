@@ -395,7 +395,7 @@ export default function CouponGrid({
         </aside>
 
         {/* Правая часть: Фильтры и Masonry сетка купонов */}
-        <div className="flex-1 min-w-0">
+        <div className="w-full flex-1 min-w-0">
           {/* Статус поиска */}
           {query && (
             <div className="mb-4 flex items-center justify-between rounded-2xl bg-yellow/25 border border-yellow px-4 py-2.5 text-xs font-bold text-ink">

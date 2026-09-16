@@ -149,7 +149,9 @@ export default function CouponTicket({
   const usageToday = generateUsageToday(promocode.code || "", store.slug, proofCount);
 
   return (
-    <article className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-xs">
+    // min-w-0: карточка — элемент сетки, и без него длинное название магазина
+    // растягивало её шире экрана телефона (горизонтальный скролл страницы).
+    <article className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-xs">
       {/* 1. Верхняя строка: Логотип + Название + Бейджи */}
       <div>
         <div className="flex items-center justify-between gap-3">
@@ -221,8 +223,11 @@ export default function CouponTicket({
           ) : offer.type === "gift" ? (
             /* Тип: gift — жёлтая плашка */
             <div className="rounded-xl bg-yellow/15 border border-yellow/40 px-3 py-2.5">
-              <div className={`font-display ${discountSizeClass} text-ink font-bold`}>
-                {offer.discount}
+              <div className="flex items-start gap-2 font-display text-xl sm:text-2xl leading-tight text-ink font-bold">
+                <span className="mt-0.5 shrink-0 text-red">
+                  <Icon name="gift" size={22} />
+                </span>
+                <span>{offer.discount}</span>
               </div>
               <p className="mt-1 text-xs sm:text-sm font-medium text-ink/70 line-clamp-2 leading-relaxed">
                 {offer.condition}

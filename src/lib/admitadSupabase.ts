@@ -1,6 +1,7 @@
 import "server-only";
 import type { Coupon } from "@/lib/types";
 import { translit } from "@/lib/translit";
+import { proxiedLogo } from "@/lib/logoProxy";
 import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 
 /**
@@ -42,7 +43,8 @@ function isNotExpired(expires: string | null): boolean {
 
 function rowToCoupon(row: Record<string, unknown>): Coupon | null {
   const code = str(row.code);
-  const storeName = str(row.store) || "Магазин";
+  // В фиде встречаются невидимые символы нулевой ширины в конце названий.
+  const storeName = str(row.store).replace(/[​-‍﻿]/g, "").trim() || "Магазин";
   const storeSlug = str(row.store_slug) ? translit(str(row.store_slug)) : translit(storeName) || "magazin";
   const category = str(row.category) || "Другое";
   const categorySlug = str(row.category_slug) ? translit(str(row.category_slug)) : translit(category) || "drugoe";
@@ -74,7 +76,7 @@ function rowToCoupon(row: Record<string, unknown>): Coupon | null {
       id: num(row.id) || 90000,
       name: storeName,
       slug: storeSlug,
-      logo: str(row.logo) || null,
+      logo: proxiedLogo(str(row.logo)),
       category,
       categorySlug,
       about: str(row.about) || null,

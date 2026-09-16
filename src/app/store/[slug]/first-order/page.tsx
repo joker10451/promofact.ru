@@ -172,21 +172,9 @@ export default async function StoreFirstOrderPage({
     ],
   };
 
-  const productJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: `Промокоды ${store.name} на первый заказ`,
-    description: `Рабочие промокоды и скидки ${store.name} для новых клиентов на ${monthYear}. Скидки ${maxDisc}.`,
-    image: store.logo || `${SITE_URL}/icon.svg`,
-    brand: { "@type": "Brand", name: store.name },
-    offers: {
-      "@type": "AggregateOffer",
-      priceCurrency: "RUB",
-      lowPrice: 0,
-      highPrice: 0,
-      offerCount: displayCoupons.length || 1,
-    },
-  };
+  // Разметку Product здесь не отдаём: промокод — не товар, а без настоящих
+  // отзывов и рейтинга Google помечал её ошибками («нет review/aggregateRating»).
+  // Подставлять выдуманный рейтинг нельзя — его уже убирали по аудиту.
 
   const organizationJsonLd = {
     "@context": "https://schema.org",
@@ -224,7 +212,6 @@ export default async function StoreFirstOrderPage({
     <main>
       <JsonLd data={breadcrumb} />
       <JsonLd data={faqJsonLd} />
-      <JsonLd data={productJsonLd} />
       <JsonLd data={organizationJsonLd} />
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">

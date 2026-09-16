@@ -294,25 +294,9 @@ export default async function StorePage({
     ],
   };
 
-  // Product с AggregateRating для расширенного сниппета со звёздами (Google & Yandex)
-  const productJsonLd: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: `Промокоды ${store.name}`,
-    description: `Актуальные проверенные промокоды и скидки ${store.name} на ${monthYear}. Максимальная выгода ${maxDisc}.`,
-    image: store.logo || `${SITE_URL}/icon.svg`,
-    brand: {
-      "@type": "Brand",
-      name: store.name,
-    },
-    offers: {
-      "@type": "AggregateOffer",
-      priceCurrency: "RUB",
-      lowPrice: 0,
-      highPrice: 0,
-      offerCount: store.coupons.length || 1,
-    },
-  };
+  // Разметку Product здесь не отдаём: промокод — не товар, а без настоящих
+  // отзывов и рейтинга Google помечал её ошибками («нет review/aggregateRating»).
+  // Подставлять выдуманный рейтинг нельзя — его уже убирали по аудиту.
 
   // Организация магазина для сниппетов Яндекса
   const ratingJsonLd: Record<string, unknown> = {
@@ -349,7 +333,6 @@ export default async function StorePage({
       <JsonLd data={faqJsonLd} />
       <JsonLd data={howToJsonLd} />
       <JsonLd data={itemListJsonLd} />
-      <JsonLd data={productJsonLd} />
       <JsonLd data={ratingJsonLd} />
       {couponsJsonLd.map((c) => (
         <JsonLd key={(c.discountCode as string) ?? JSON.stringify(c)} data={c} />
@@ -512,7 +495,7 @@ export default async function StorePage({
         {/* 4. First-Party Trust & Verification History Block */}
         <div className="mt-6 rounded-2xl border border-mint/30 bg-mint/5 p-4 sm:p-5 shadow-2xs">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex w-full items-center gap-3 min-w-0 sm:w-auto">
               <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-mint text-white font-bold text-base sm:text-lg shadow-2xs">
                 <Icon name="check" size={19} />
               </div>
