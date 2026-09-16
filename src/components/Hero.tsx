@@ -31,7 +31,6 @@ function pluralOrders(n: number): string {
 
 // Реальные актуальные магазины нашего сайта
 const REAL_POPULAR_TAGS = [
-  "Пятёрочка",
   "Додо Пицца",
   "СберПрайм",
   "Кинопоиск",
