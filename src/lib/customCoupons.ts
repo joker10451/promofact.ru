@@ -5,6 +5,44 @@ import type { Coupon } from "@/lib/types";
  */
 export const CUSTOM_COUPONS: Coupon[] = [
   {
+    id: 50032,
+    promocode: {
+      id: 50032,
+      code: "PERFCITY107",
+      bonusName: "−500 ₽ на первую поездку + сертификат 700 ₽ в OZON",
+      terms:
+        "Перейдите по ссылке, введите кодовое слово PERFCITY107 и получите скидку 500 ₽ на первую поездку в Ситидрайве. В подарок — сертификат на 700 ₽ в OZON: его отправят в течение 60 дней, если вы оставили номер телефона на сайте акции и совершили первую поездку не позднее 30.09.2026. Для тех, кто раньше не пользовался Ситидрайвом, 18+, граждане и резиденты РФ.",
+      expires: "2026-09-30",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      id: 5032,
+      name: "Ситидрайв",
+      slug: "citydrive",
+      logo: "https://favicon.yandex.net/favicon/v2/citydrive.ru?size=120",
+      category: "Сервисы и подписки",
+      categorySlug: "servisy-i-podpiski",
+      about: "Ситидрайв — сервис аренды автомобилей: берите машину на нужное время прямо в приложении.",
+      conditions: "Скидка 500 ₽ по кодовому слову на первую поездку и сертификат 700 ₽ в OZON. Акция действует с 15.09.2026 по 30.09.2026.",
+      site: "https://citydrive.prfl.me/sites/dpcvsl?erid=2RanymKkRSb",
+      activeBloggers: 0,
+    },
+    affiliate: {
+      link: "https://citydrive.prfl.me/sites/dpcvsl?erid=2RanymKkRSb",
+      landingLink: "https://citydrive.prfl.me/sites/dpcvsl?erid=2RanymKkRSb",
+      ordMarker: "2RanymKkRSb",
+      ordText:
+        "Реклама. Рекламодатель: ООО «НТС», Москва, вн. тер. г. м. о. Филевский парк, пр-д Береговой, д. 5А, к. 1, помещ. 1/13, ИНН 7704314221, ОГРН 1157746368999, citydrive.ru — «Ситидрайв» сервис аренды автомобилей. 0+ erid: 2RanymKkRSb",
+    },
+    extraLinks: [],
+  },
+  {
     id: 50031,
     promocode: {
       id: 50031,
@@ -706,3 +744,18 @@ export const CUSTOM_COUPONS: Coupon[] = [
     extraLinks: [],
   },
 ];
+
+/**
+ * Время публикации для купонов с согласованной датой выхода (по Москве).
+ * До этого момента купон не попадает на сайт.
+ */
+const PUBLISH_FROM: Record<number, string> = {
+  50032: "2026-09-17T12:00:00+03:00", // Ситидрайв — размещение согласовано в Perfluence
+};
+
+export function getCustomCoupons(now = Date.now()): Coupon[] {
+  return CUSTOM_COUPONS.filter((c) => {
+    const from = PUBLISH_FROM[c.id];
+    return !from || now >= new Date(from).getTime();
+  });
+}
