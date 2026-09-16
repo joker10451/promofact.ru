@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Golos_Text, Unbounded } from "next/font/google";
 import "./globals.css";
 import YandexMetrika from "@/components/YandexMetrika";
 import YandexAds from "@/components/YandexAds";
@@ -11,6 +12,24 @@ import DiscountWheel from "@/components/DiscountWheel";
 import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
+
+// Шрифты раздаём со своего домена через next/font. Раньше они шли <link> с
+// Google Fonts и display=swap: сначала текст рисовался системным шрифтом,
+// затем подменялся более широким Unbounded, заголовки переносились на лишнюю
+// строку, и страница прыгала (CLS до 0.38). next/font подбирает запасной шрифт
+// с теми же метриками, так что подмена почти не сдвигает вёрстку.
+const unbounded = Unbounded({
+  subsets: ["cyrillic", "latin"],
+  weight: "variable",
+  display: "swap",
+  variable: "--font-unbounded-src",
+});
+const golos = Golos_Text({
+  subsets: ["cyrillic", "latin"],
+  weight: "variable",
+  display: "swap",
+  variable: "--font-golos-src",
+});
 
 export const viewport: Viewport = {
   themeColor: "#FFE600",
@@ -61,14 +80,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className="h-full antialiased font-sans" suppressHydrationWarning>
+    <html
+      lang="ru"
+      className={`${unbounded.variable} ${golos.variable} h-full antialiased font-sans`}
+      suppressHydrationWarning
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=Unbounded:wght@400;600;700;800;900&display=swap"
-          rel="stylesheet"
-        />
         <link rel="preconnect" href="https://mc.yandex.ru" />
         <link rel="dns-prefetch" href="https://mc.yandex.ru" />
         <link rel="preconnect" href="https://widget.perfluence.net" crossOrigin="anonymous" />

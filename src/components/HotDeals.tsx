@@ -34,9 +34,9 @@ function getCountdownTime(): { hours: string; minutes: string; seconds: string }
  * сериализуется в RSC-поток и уезжает к пользователю внутри HTML.
  */
 export default function HotDeals({ coupons }: { coupons: CatalogCoupon[] }) {
-  const [timeLeft, setTimeLeft] = useState<{ hours: string; minutes: string; seconds: string } | null>(
-    () => getCountdownTime()
-  );
+  // Стартуем с null: сервер отрисовал бы время сборки страницы, клиент — своё,
+  // и React падал бы с ошибкой гидрации #418. Время ставит эффект ниже.
+  const [timeLeft, setTimeLeft] = useState<{ hours: string; minutes: string; seconds: string } | null>(null);
 
   // Честный таймер до ночного обновления базы купонов
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function HotDeals({ coupons }: { coupons: CatalogCoupon[] }) {
   if (hotCoupons.length === 0) return null;
 
   const isInvalidCountdown =
-    !timeLeft || (timeLeft.hours === "00" && timeLeft.minutes === "00" && timeLeft.seconds === "00");
+    !!timeLeft && timeLeft.hours === "00" && timeLeft.minutes === "00" && timeLeft.seconds === "00";
 
   return (
     <section id="hot" className="scroll-mt-20 py-10 sm:py-14 border-b border-line bg-gradient-to-b from-white to-paper/40">
@@ -82,6 +82,8 @@ export default function HotDeals({ coupons }: { coupons: CatalogCoupon[] }) {
             <span className="text-ink/60 font-medium">Свежие скидки, обновление через:</span>
             {isInvalidCountdown ? (
               <span className="font-mono text-xs font-bold text-ink">уже сегодня</span>
+            ) : !timeLeft ? (
+              <span className="font-mono text-sm font-black text-ink/30">--:--:--</span>
             ) : (
               <span className="font-mono text-sm font-black text-ink">
                 {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}

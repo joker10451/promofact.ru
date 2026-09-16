@@ -1,15 +1,22 @@
 /**
- * Логотипы из CDN Admitad отдаём через свой домен.
+ * Логотипы партнёрских сетей отдаём через свой домен.
  *
- * Встроенные блокировщики рекламы (в Яндекс Браузере — по умолчанию) режут
- * всё с `cdn.admitad.com`: в карточках оставались пустые квадраты. Путь
- * `/media/l/…` проксируется в next.config.ts и не похож на рекламный.
+ * - `cdn.admitad.com` режут встроенные блокировщики рекламы (в Яндекс
+ *   Браузере — по умолчанию): в карточках оставались пустые квадраты.
+ * - `s3sc.perfluence.net` из России часто не отвечает (обрыв соединения),
+ *   картинка висела по 5+ секунд и страница долго «грузилась».
+ *
+ * Пути `/media/*` проксируются в next.config.ts (LOGO_PROXIES).
  */
-const ADMITAD_CDN = "https://cdn.admitad.com/campaign/images/";
-export const LOGO_PROXY_PREFIX = "/media/l/";
+export const LOGO_PROXIES = [
+  { prefix: "/media/l/", origin: "https://cdn.admitad.com/campaign/images/" },
+  { prefix: "/media/p/", origin: "https://s3sc.perfluence.net/logos/" },
+] as const;
 
 export function proxiedLogo(url: string | null | undefined): string | null {
   if (!url) return null;
-  if (url.startsWith(ADMITAD_CDN)) return LOGO_PROXY_PREFIX + url.slice(ADMITAD_CDN.length);
+  for (const { prefix, origin } of LOGO_PROXIES) {
+    if (url.startsWith(origin)) return prefix + url.slice(origin.length);
+  }
   return url;
 }
