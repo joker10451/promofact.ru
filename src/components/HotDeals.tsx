@@ -1,31 +1,8 @@
 "use client";
 
 import Icon from "@/components/Icon";
-import { useEffect, useState } from "react";
 import CouponTicket from "@/components/CouponTicket";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
-
-function getCountdownTime(): { hours: string; minutes: string; seconds: string } | null {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  let diff = midnight.getTime() - now.getTime();
-  if (diff <= 0) {
-    midnight.setDate(midnight.getDate() + 1);
-    diff = midnight.getTime() - now.getTime();
-  }
-  if (diff <= 0) return null;
-
-  const h = Math.floor(diff / (1000 * 60 * 60));
-  const m = Math.floor((diff / (1000 * 60)) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-
-  return {
-    hours: String(h).padStart(2, "0"),
-    minutes: String(m).padStart(2, "0"),
-    seconds: String(s).padStart(2, "0"),
-  };
-}
 
 /**
  * Купоны приходят уже отобранными: выбор делает сервер, который тем же
@@ -34,33 +11,13 @@ function getCountdownTime(): { hours: string; minutes: string; seconds: string }
  * сериализуется в RSC-поток и уезжает к пользователю внутри HTML.
  */
 export default function HotDeals({ coupons }: { coupons: CatalogCoupon[] }) {
-  // Стартуем с null: сервер отрисовал бы время сборки страницы, клиент — своё,
-  // и React падал бы с ошибкой гидрации #418. Время ставит эффект ниже.
-  const [timeLeft, setTimeLeft] = useState<{ hours: string; minutes: string; seconds: string } | null>(null);
-
-  // Честный таймер до ночного обновления базы купонов
-  useEffect(() => {
-    const updateCountdown = () => {
-      const remaining = getCountdownTime();
-      setTimeLeft(remaining);
-    };
-
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   const hotCoupons = coupons;
 
   if (hotCoupons.length === 0) return null;
 
-  const isInvalidCountdown =
-    !!timeLeft && timeLeft.hours === "00" && timeLeft.minutes === "00" && timeLeft.seconds === "00";
-
   return (
     <section id="hot" className="scroll-mt-20 py-10 sm:py-14 border-b border-line bg-gradient-to-b from-white to-paper/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        {/* Заголовок события с честным таймером ночного обновления */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red/10 text-lg">
@@ -71,24 +28,9 @@ export default function HotDeals({ coupons }: { coupons: CatalogCoupon[] }) {
                 Спецпредложения дня
               </h2>
               <p className="text-xs sm:text-sm text-ink/60 font-medium">
-                Топ-3 проверенные скидки от разных брендов
+                Топ-3 скидки от разных брендов
               </p>
             </div>
-          </div>
-
-          {/* Индикатор свежести подборки (не показываем 00:00:00) */}
-          <div className="flex items-center gap-2 self-start sm:self-auto rounded-xl border border-line bg-white px-3.5 py-1.5 text-xs font-bold text-ink shadow-2xs">
-            <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
-            <span className="text-ink/60 font-medium">Свежие скидки, обновление через:</span>
-            {isInvalidCountdown ? (
-              <span className="font-mono text-xs font-bold text-ink">уже сегодня</span>
-            ) : !timeLeft ? (
-              <span className="font-mono text-sm font-black text-ink/30">--:--:--</span>
-            ) : (
-              <span className="font-mono text-sm font-black text-ink">
-                {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
-              </span>
-            )}
           </div>
         </div>
 

@@ -322,7 +322,13 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
     );
   }
 
-  return coupons;
+  // Логотипы проксируем здесь, на выходе всех источников: часть купонов
+  // Admitad приходит путями, где адрес CDN не переписывался, и на проде
+  // оставались прямые ссылки на cdn.admitad.com (их режет блокировщик).
+  return coupons.map((c) => {
+    const logo = proxiedLogo(c.store.logo);
+    return logo === c.store.logo ? c : { ...c, store: { ...c.store, logo } };
+  });
 }
 
 export async function getCoupons(): Promise<Coupon[]> {

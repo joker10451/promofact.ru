@@ -101,7 +101,7 @@ export default async function Image({
               fontWeight: 700,
             }}
           >
-            ● Проверено сегодня
+            ● Действующий промокод
           </div>
         </div>
 
