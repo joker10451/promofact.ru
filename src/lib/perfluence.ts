@@ -1,5 +1,6 @@
 import "server-only";
 import { translit } from "@/lib/translit";
+import { proxiedLogo } from "@/lib/logoProxy";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 
 const REVALIDATE_SECONDS = 12 * 60 * 60; // 43200 — ISR: 12 часов для защиты лимита ISR Writes на Vercel
@@ -110,7 +111,7 @@ export function parsePayload(payloadJson: string): Coupon[] {
       id: num(project.id ?? project.project_id),
       name,
       slug,
-      logo: str(project.logo || project.logo_url) || null,
+      logo: proxiedLogo(str(project.logo || project.logo_url)),
       category: categoryName,
       categorySlug: translit(categoryName),
       about: stripHtml(project.product_info) || null,

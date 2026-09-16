@@ -246,6 +246,8 @@ export function normalizeStore(rawName: string, rawSlug: string, rawCat?: string
 
   // Очистка названия магазина от мусора (.com, RU, WW, etc.)
   let cleanName = rawName
+    .replace(/[​-‍﻿]/g, "")
+    .trim()
     .replace(/\s+(WW|RU|BY|KZ|AE|SA|EG|offline\s+codes)$/i, "")
     .replace(/\.(com|ru|io|by|net)$/i, "")
     .replace(/^fmart\s+by\s+flowwow$/i, "FMART")

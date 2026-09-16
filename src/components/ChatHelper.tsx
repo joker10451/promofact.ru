@@ -287,13 +287,13 @@ export default function ChatHelper() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Открыть помощника"
-        className="fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-red text-2xl text-white shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-[84px] right-4 z-50 flex h-12 w-12 md:bottom-4 items-center justify-center rounded-full bg-red text-2xl text-white shadow-lg transition-transform hover:scale-105"
       >
         {open ? <Icon name="close" size={18} /> : <Icon name="bulb" size={18} />}
       </button>
 
       {open && (
-        <div className="fixed bottom-20 right-4 z-50 flex max-h-[70vh] w-[min(92vw,360px)] flex-col rounded-2xl border border-line bg-white shadow-xl">
+        <div className="fixed bottom-[144px] right-4 z-50 flex max-h-[60vh] md:bottom-20 md:max-h-[70vh] w-[min(92vw,360px)] flex-col rounded-2xl border border-line bg-white shadow-xl">
           <div className="rounded-t-2xl bg-ink px-4 py-3 text-sm font-bold text-white">
             Помощник ПромоФакт
           </div>

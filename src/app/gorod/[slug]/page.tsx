@@ -10,8 +10,11 @@ import JsonLd from "@/components/JsonLd";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { toCatalogCoupon } from "@/lib/catalogCoupon";
 
 export const revalidate = 43200;
+
+const CITY_COUPON_LIMIT = 24;
 
 export async function generateStaticParams() {
   return CITIES_SEO.map((c) => ({ slug: c.slug }));
@@ -177,16 +180,30 @@ export default async function CityPage({
             </h2>
           </div>
 
+          {/* Раньше здесь рендерились все ~170 карточек: страница на телефоне
+              тянулась на 70 000 px и ~7 000 DOM-узлов. Показываем лучшие,
+              остальное — в каталоге. */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cityCoupons.map((coupon) => (
+            {cityCoupons.slice(0, CITY_COUPON_LIMIT).map((coupon) => (
               <CouponTicket
                 key={`${coupon.id}-${coupon.promocode.code}`}
-                coupon={coupon}
+                coupon={toCatalogCoupon(coupon)}
                 proofCount={proofsByCode[coupon.promocode.code] ?? 0}
                 storeProofCount={proofsByStore[coupon.store.id] ?? 0}
               />
             ))}
           </div>
+
+          {cityCoupons.length > CITY_COUPON_LIMIT && (
+            <div className="mt-8 flex justify-center">
+              <Link
+                href="/promokody"
+                className="inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-3.5 text-sm font-bold text-white shadow-offset transition-transform hover:-translate-y-0.5"
+              >
+                Все {cityCoupons.length} акций в каталоге →
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* SEO статья и FAQ */}

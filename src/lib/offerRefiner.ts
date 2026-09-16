@@ -22,7 +22,10 @@ export function refineOffer(
   storeName: string,
   isFirstOrder: boolean
 ): RefinedOffer {
+  // Эмодзи в начале приходят из старых импортов («🎁 Подарок к заказу»):
+  // в интерфейсе вместо них иконки.
   const title = (rawTitle || "").trim()
+    .replace(/^[\p{Extended_Pictographic}️\s]+/u, "")
     .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
     .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
   const terms = (rawTerms || "").trim()
@@ -80,22 +83,20 @@ export function refineOffer(
 
   // 3. Подарки к заказу (Gift) — срабатывает если нет процентной скидки
   if (isGiftInText) {
-    let giftTitle = "🎁 Подарок к заказу";
+    let giftTitle = "Подарок к заказу";
 
     if (/фреш\s*ролл/i.test(title) || /ролл\s+с\s+креветкой/i.test(title) || /ролл\s+с\s+креветкой/i.test(terms)) {
-      giftTitle = "🎁 Ролл с креветкой и авокадо в подарок";
+      giftTitle = "Ролл с креветкой и авокадо в подарок";
     } else if (/ролл/i.test(title) || /ролл/i.test(terms)) {
-      giftTitle = "🎁 Ролл в подарок";
+      giftTitle = "Ролл в подарок";
     } else if (/50\s*фото/i.test(title) || /50\s*фото/i.test(terms)) {
-      giftTitle = "🎁 50 фото в подарок";
+      giftTitle = "50 фото в подарок";
     } else if (/фото/i.test(title) || /фото/i.test(terms)) {
-      giftTitle = "🎁 50 фото в подарок";
+      giftTitle = "50 фото в подарок";
     } else if (/подвеск/i.test(title) || /подвеск/i.test(terms)) {
-      giftTitle = "🎁 Подвеска в подарок";
+      giftTitle = "Подвеска в подарок";
     } else if (/пицц/i.test(title) || /пицц/i.test(terms)) {
-      giftTitle = "🎁 Пицца в подарок";
-    } else if (title.startsWith("🎁")) {
-      giftTitle = title;
+      giftTitle = "Пицца в подарок";
     }
 
     const condition = minOrder
@@ -118,6 +119,20 @@ export function refineOffer(
   // 4. Процентные скидки
   if (pctMatch) {
     const val = parseInt(pctMatch[1], 10);
+
+    // Кэшбэк — не скидка: «−5%» с подписью «на Кэшбек на каждую покупку»
+    // обещал бы то, чего нет.
+    if (/кэшб[еэ]к/i.test(combined)) {
+      const rest = cleanConditionText(title, pctMatch[0]) || cleanConditionText(terms, pctMatch[0]);
+      const condition = rest.replace(/(^|\s)(?:на\s+)?кэшб[еэ]к[а-яё]*/gi, " ").trim();
+      return {
+        type: "percent",
+        discount: `${val}% кэшбэк`,
+        condition: condition.length >= 3 ? formatConditionPrefix(condition) : "на каждую покупку",
+        fullTerms: terms || `Кэшбэк ${val}% за покупки в ${storeName}.`,
+        isNoCode,
+      };
+    }
     // Передаём pctMatch[0] («15%»), а не pctMatch[1] («15»): иначе «Скидка 15»
     // вырезается, а «%» остаётся сиротой → «на % на бронирование…».
     let cleaned = cleanConditionText(title, pctMatch[0]);
@@ -227,7 +242,15 @@ function cleanConditionText(raw: string, matchedPart?: string): string {
     // Исправление опечатки «на се ...» / «се ...» -> «на все ...» / «все ...» (кириллически безопасно)
     .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
     .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все")
-    .replace(/^(на|в|от|при)\s+\d+[\s\d]*(%|₽|р|руб)/gi, "")
+    // Длинные формы раньше коротких: иначе из «на 1000 руб» вырезалось
+    // «на 1000 р» и оставалось «уб на первый заказ».
+    .replace(/^(?:на|в|от|при)\s+\d+[\s\d]*(?:%|₽|рублей|рубля|руб\.?|р\.?)(?![а-яё])/gi, "")
+    .replace(
+      /от\s+чека\s+(\d[\d\s]*)\s*(?:₽|рублей|рубля|руб\.?|р\.?)(?![а-яё])/gi,
+      (_m, n: string) => `при заказе от ${Number(n.replace(/\s/g, "")).toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`,
+    )
+    .replace(/\(\s*доп\.?\s*промо\s*\)/gi, "")
+    .replace(/^(?:на\s+)?спеццен[аы](?![а-яё])/i, "на товары по спеццене")
     // Убираем остаточные знаки препинания, точки и тире в начале строки
     .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
     .replace(/^(?:скидка|минус|до)(?:[\s,.:;!?-]|$)/gi, "")
@@ -253,12 +276,12 @@ function formatConditionPrefix(str: string): string {
 
   // Убираем случайные дублированные предлоги и разделители вроде «на . на», «на на», «при на»
   trimmed = trimmed
-    .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)(?=[\s,.:;!?-]|$)/gi, "$2")
+    .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от|по|за|до)(?=[\s,.:;!?-]|$)/gi, "$2")
     .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
     .trim();
 
   // Проверяем, начинается ли строка с полноценного предлога как отдельного слова
-  if (/^(?:на|в|во|при|для|от|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(trimmed)) {
+  if (/^(?:на|в|во|при|для|от|по|за|до|с|со|к|ко|без|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(trimmed)) {
     return trimmed;
   }
   return `на ${trimmed}`;
