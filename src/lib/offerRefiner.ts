@@ -145,6 +145,9 @@ export function refineOffer(
       cleaned = isFirst
         ? `на первый заказ от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
         : `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+      // Способ получения — существенное условие: без него «−25% от 1 399 ₽»
+      // выглядит как скидка на доставку, хотя действует только на самовывоз.
+      if (/самовывоз/i.test(title) && !/доставк/i.test(title)) cleaned += " на самовывоз";
     } else if (!cleaned || cleaned === "!" || cleaned.length < 3) {
       cleaned = isFirstOrder ? "на первый заказ" : "на весь ассортимент";
     }
