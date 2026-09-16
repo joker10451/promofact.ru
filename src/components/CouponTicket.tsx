@@ -253,14 +253,18 @@ export default function CouponTicket({
         {/* 3. Подтверждённые заказы (реальные данные партнёрской сети) и условия.
             Раньше здесь были сгенерированные «N раз сегодня», «Проверен 4 часа
             назад» и «Надёжность 98%» — за ними не стояло никаких данных. */}
-        <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-paper/80 px-3 py-2 border border-line/50 text-xs">
-          {proofCount > 0 ? (
+        <div
+          className={`mt-3 flex items-center gap-2 text-xs ${
+            proofCount > 0
+              ? "justify-between rounded-xl bg-paper/80 px-3 py-2 border border-line/50"
+              : "justify-end"
+          }`}
+        >
+          {proofCount > 0 && (
             <span className="flex items-center gap-1.5 font-bold text-ink/80 text-[11px] sm:text-xs">
               <Icon name="check" size={13} className="text-mint-dark" />
               {proofCount} {pluralOrders(proofCount)} по коду
             </span>
-          ) : (
-            <span aria-hidden="true" />
           )}
           <button
             type="button"
@@ -322,7 +326,7 @@ export default function CouponTicket({
           <span>
             {promocode.expires
               ? `до ${formatExpires(promocode.expires)}`
-              : "бессрочно"}
+              : "срок не указан"}
           </span>
         </div>
 
@@ -413,7 +417,7 @@ export default function CouponTicket({
                   <div>
                     <span className="text-ink/45 block">Действует:</span>
                     <span className="font-bold text-ink">
-                      {promocode.expires ? `до ${formatExpires(promocode.expires)}` : "Бессрочно"}
+                      {promocode.expires ? `до ${formatExpires(promocode.expires)}` : "Срок не указан"}
                     </span>
                   </div>
                   <div>
