@@ -4,7 +4,6 @@ import Icon from "@/components/Icon";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ymReachGoal } from "@/components/YandexMetrika";
-import RecentActivityPulse from "@/components/RecentActivityPulse";
 import type { Coupon } from "@/lib/types";
 import type { SearchIndex } from "@/lib/searchIndex";
 
@@ -107,11 +106,6 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
       />
 
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 relative z-10">
-        {/* Живой пульс активности */}
-        <div className="flex justify-center">
-          <RecentActivityPulse />
-        </div>
-
         {/* Заголовок */}
         <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-ink sm:leading-[1.1]">
           Найдите скидку. <br />
@@ -120,7 +114,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
 
         {/* Подзаголовок */}
         <p className="mx-auto mt-3.5 max-w-2xl text-sm sm:text-base md:text-lg text-ink/70">
-          Проверенные промокоды магазинов и сервисов. Регулярно проверяем каждый код и удаляем неработающие.
+          Промокоды и акции магазинов и сервисов в одном месте. Показываем только коды с действующим сроком — истёкшие уходят сами.
         </p>
 
         {/* Главная поисковая строка */}
@@ -230,20 +224,20 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
             <span>
               {proofTotal > 0
                 ? `${proofTotal} ${pluralOrders(proofTotal)} подтверждено`
-                : "Проверяем каждый день"}
+                : "Срок действия у каждого кода"}
             </span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow/40 text-ink text-[11px]">
               <Icon name="sparkle" size={14} />
             </span>
-            <span>{couponCount > 0 ? couponCount : 23} активных акций</span>
+            <span>{couponCount} активных акций</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
               <Icon name="shield" size={14} />
             </span>
-            <span>Ручная модерация</span>
+            <span>Коды из партнёрских программ магазинов</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red/15 text-red text-[11px]">

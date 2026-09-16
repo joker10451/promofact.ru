@@ -258,10 +258,6 @@ export default async function CategoryPage({
           </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/40 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-mint-dark">
-              <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
-              Проверено сегодня
-            </span>
             <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
               Скидки {maxDisc}
             </span>

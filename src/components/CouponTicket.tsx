@@ -10,7 +10,6 @@ import { ymReachGoal } from "@/components/YandexMetrika";
 import { CHANNELS } from "@/lib/site";
 import { CheckIcon } from "@/components/CheckIcon";
 import { refineOffer } from "@/lib/offerRefiner";
-import { calculateCouponReliability, generateUsageToday } from "@/lib/trustEngine";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
 
 /** Склонение «заказ/заказа/заказов» по числу. */
@@ -145,9 +144,6 @@ export default function CouponTicket({
       ? "text-2xl sm:text-3xl leading-tight"
       : "text-3xl sm:text-4xl leading-none";
 
-  const reliability = calculateCouponReliability(promocode.code || "", store.slug);
-  const usageToday = generateUsageToday(promocode.code || "", store.slug, proofCount);
-
   return (
     // min-w-0: карточка — элемент сетки, и без него длинное название магазина
     // растягивало её шире экрана телефона (горизонтальный скролл страницы).
@@ -254,33 +250,25 @@ export default function CouponTicket({
           )}
         </div>
 
-        {/* 3. Social Proof — счётчик использований + надёжность */}
-        <div className="mt-3 rounded-xl bg-paper/80 px-3 py-2 border border-line/50 text-xs space-y-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Icon name="flame" size={13} />
-              <span className="font-bold text-ink/80 text-[11px] sm:text-xs">
-                {usageToday} раз сегодня
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowDetailsModal(true)}
-              className="text-[10px] sm:text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer"
-            >
-              Условия акции ℹ️
-            </button>
-          </div>
-          <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-ink/55">
-            <span className="h-1.5 w-1.5 rounded-full bg-mint shrink-0" />
-            <span className="font-semibold">
-              Проверен {reliability.lastCheckedText}
+        {/* 3. Подтверждённые заказы (реальные данные партнёрской сети) и условия.
+            Раньше здесь были сгенерированные «N раз сегодня», «Проверен 4 часа
+            назад» и «Надёжность 98%» — за ними не стояло никаких данных. */}
+        <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-paper/80 px-3 py-2 border border-line/50 text-xs">
+          {proofCount > 0 ? (
+            <span className="flex items-center gap-1.5 font-bold text-ink/80 text-[11px] sm:text-xs">
+              <Icon name="check" size={13} className="text-mint-dark" />
+              {proofCount} {pluralOrders(proofCount)} по коду
             </span>
-            <span className="text-ink/30">·</span>
-            <span className="font-semibold text-mint-dark">
-              Надёжность {reliability.reliabilityPercent}%
-            </span>
-          </div>
+          ) : (
+            <span aria-hidden="true" />
+          )}
+          <button
+            type="button"
+            onClick={() => setShowDetailsModal(true)}
+            className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer"
+          >
+            Условия акции
+          </button>
         </div>
       </div>
 
@@ -334,7 +322,7 @@ export default function CouponTicket({
           <span>
             {promocode.expires
               ? `до ${formatExpires(promocode.expires)}`
-              : "проверен сегодня"}
+              : "бессрочно"}
           </span>
         </div>
 
@@ -344,8 +332,8 @@ export default function CouponTicket({
           </p>
         )}
 
-        {/* 6. Бейдж «Популярный промокод» для купонов с высоким usage */}
-        {usageToday >= 40 && (
+        {/* 6. Бейдж «Популярный промокод» — только по подтверждённым заказам */}
+        {proofCount >= 10 && (
           <div className="mt-2 flex items-center justify-center gap-1 rounded-lg bg-yellow/20 border border-yellow/40 px-2.5 py-1 text-[10px] font-bold text-ink/70">
             <Icon name="sparkle" size={12} />
             <span>Популярный промокод</span>
@@ -412,7 +400,7 @@ export default function CouponTicket({
                     <span>Гарантия актуальности ПромоФакт</span>
                   </div>
                   <p className="text-ink/65 text-[10px] leading-relaxed">
-                    Промокод проверен сегодня на официальном сайте магазина {store.name}. Скидка применяется в корзине при соблюдении условий.
+                    Скидка применяется в корзине {store.name} при соблюдении условий акции.
                   </p>
                   {proofCount > 0 && (
                     <p className="text-ink/65 text-[10px] leading-relaxed font-semibold">

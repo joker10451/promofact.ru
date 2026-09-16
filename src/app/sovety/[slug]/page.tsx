@@ -249,7 +249,7 @@ export default async function ArticlePage({
                     </h2>
                   </div>
                   <span className="text-xs font-bold text-mint-dark bg-mint/10 px-2.5 py-1 rounded-full">
-                    Проверены сегодня
+                    Действующие
                   </span>
                 </div>
                 <div className="grid grid-cols-1 gap-4">

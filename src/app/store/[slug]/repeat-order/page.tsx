@@ -11,7 +11,6 @@ import StoreIntentTabs from "@/components/StoreIntentTabs";
 import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import YandexAdBlock from "@/components/YandexAdBlock";
-import { calculateStoreTrust } from "@/lib/trustEngine";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -126,7 +125,6 @@ export default async function StoreRepeatOrderPage({
   const parentStoreUrl = `${SITE_URL}/store/${slug}`;
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const monthYear = getCapitalizedMonthYear();
-  const trust = calculateStoreTrust(store.slug, store.coupons.length, storeProofCount);
 
   // Фильтруем купоны: оставляем только купоны для постоянных и всех клиентов (исключаем strictly first-order)
   const repeatCoupons = store.coupons.filter((c) => !c.promocode.isFirstOrderOnly);
@@ -233,10 +231,6 @@ export default async function StoreRepeatOrderPage({
                 Собрали действующие купоны {store.name} без ограничений первого заказа. Скидки {maxDisc} для каждого покупателя.
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/40 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-mint-dark">
-                  <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
-                  Проверено сегодня · Trust {trust.score}/100
-                </span>
                 <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
                   Обновлено {TODAY_RU}
                 </span>

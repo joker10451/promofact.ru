@@ -203,7 +203,7 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
   const bloggers = input.activeBloggers
     ? ` Подборку рекомендуют ${input.activeBloggers} блогеров.`
     : "";
-  const trust = `Все коды мы проверяем вручную раз в 1–2 дня: истёкшие убираем сразу, а рабочие оставляем.${bloggers} ПромоФакт зарабатывает на партнёрских комиссиях, поэтому для вас купоны полностью бесплатны.`;
+  const trust = `Мы показываем только коды с действующим сроком: истёкшие исчезают со страницы автоматически.${bloggers} ПромоФакт зарабатывает на партнёрских комиссиях, поэтому для вас купоны полностью бесплатны.`;
 
   return [lead, angle, codes, order, trust];
 }

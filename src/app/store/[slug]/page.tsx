@@ -14,7 +14,6 @@ import StoreLogo from "@/components/StoreLogo";
 import StoreIntentTabs from "@/components/StoreIntentTabs";
 import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { calculateStoreTrust } from "@/lib/trustEngine";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { buildStoreArticle, buildStoreDescription, type StoreArticleInput } from "@/lib/storeSeoContent";
 import { ARTICLES } from "@/lib/articles";
@@ -167,7 +166,6 @@ export default async function StorePage({
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
   const maxDisc = getMaxDiscount(store.coupons);
-  const trust = calculateStoreTrust(store.slug, store.coupons.length, storeProofCount);
 
   const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
   const repeatOrderPromo = store.coupons.find((c) => !c.promocode.isFirstOrderOnly);
@@ -371,13 +369,9 @@ export default async function StorePage({
                   : store.coupons.length >= 2 && store.coupons.length <= 4
                     ? "рабочих промокода"
                     : "рабочих промокодов"}
-                . Коды проверены сегодня, срок действия указан в карточке.
+                . Срок действия указан в карточке.
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/40 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-mint-dark">
-                  <span className="h-2 w-2 rounded-full bg-mint animate-pulse" />
-                  Проверено сегодня · Trust {trust.score}/100
-                </span>
                 <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
                   Обновлено {todayRu}
                 </span>
@@ -483,60 +477,8 @@ export default async function StorePage({
             </div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Проверка</div>
-            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">Ежедневно</div>
-          </div>
-        </div>
-
-        {/* 3. Интерактивный блок рейтинга и отзывов покупателей (Schema.org AggregateRating) */}
-        <div className="mt-6">
-        </div>
-
-        {/* 4. First-Party Trust & Verification History Block */}
-        <div className="mt-6 rounded-2xl border border-mint/30 bg-mint/5 p-4 sm:p-5 shadow-2xs">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex w-full items-center gap-3 min-w-0 sm:w-auto">
-              <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-mint text-white font-bold text-base sm:text-lg shadow-2xs">
-                <Icon name="check" size={19} />
-              </div>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-display text-sm sm:text-base font-extrabold text-ink">
-                    PromoFact Trust Score: {trust.score}/100
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-mint/20 px-2 py-0.5 text-[10px] font-bold text-mint-dark">
-                    <span className="h-1.5 w-1.5 rounded-full bg-mint animate-pulse" />
-                    {trust.successRate}% успешных проверок
-                  </span>
-                </div>
-                <p className="text-xs text-ink/65 font-medium mt-0.5 truncate">
-                  Последняя ручная проверка: {trust.lastCheckedRu} · Всего {trust.totalChecks} {trust.totalChecks === 1 ? "проверка" : "проверки"} ({trust.successCount} успешно)
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-[11px] font-bold text-ink/50 self-end sm:self-auto shrink-0 bg-white px-3 py-1.5 rounded-xl border border-line shadow-2xs">
-              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-mint" />Сегодня: активен</span>
-              <span>·</span>
-              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-mint" />Вчера: проверен</span>
-            </div>
-          </div>
-
-          {/* Журнал последних проверок промокодов */}
-          <div className="mt-4 pt-3 border-t border-mint/20">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/50 mb-2 flex items-center justify-between">
-              <span>История верификации купонов {store.name}:</span>
-              <span className="text-[10px] font-medium text-ink/40">Расчёт: 50% применение + 20% свежесть + 15% объём</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {trust.history.map((h, i) => (
-                <div key={i} className="flex items-center gap-2 rounded-xl bg-white/80 p-2 text-xs border border-line/50">
-                  <span className="h-2 w-2 rounded-full bg-mint shrink-0" />
-                  <span className="font-mono font-bold text-[11px] text-ink/60">{h.date}</span>
-                  <span className="text-[11px] font-semibold text-ink truncate">{h.verifier}</span>
-                  <span className="ml-auto flex items-center gap-1 text-[10px] font-bold text-mint-dark"><Icon name="check" size={10} />OK</span>
-                </div>
-              ))}
-            </div>
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Регистрация</div>
+            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">Не нужна</div>
           </div>
         </div>
 
