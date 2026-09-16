@@ -60,7 +60,7 @@ export default function SovetyPage() {
                 Советы по экономии и шопингу
               </h1>
               <p className="mt-2 max-w-2xl text-sm sm:text-base text-ink/65 font-medium">
-                {ARTICLES.length} проверенных инструкций: как выжимать максимум выгоды из промокодов, кэшбэка и акций любимых брендов.
+                {ARTICLES.length} практических инструкций: как выжимать максимум выгоды из промокодов, кэшбэка и акций любимых брендов.
               </p>
             </div>
 
@@ -98,7 +98,7 @@ export default function SovetyPage() {
                     Читать статью →
                   </span>
                   <span className="text-[11px] font-semibold text-mint-dark">
-                    <Icon name="check" size={11} className="inline" /> Проверено
+                    <Icon name="check" size={11} className="inline" /> Актуально
                   </span>
                 </div>
               </Link>

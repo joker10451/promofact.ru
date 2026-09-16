@@ -231,7 +231,7 @@ export default function CouponGrid({
             Купоны на сегодня
           </h2>
           <p className="text-xs sm:text-sm text-ink/60 font-medium">
-            {groupedStoreList.length} магазинов · {filteredCoupons.length} проверенных промокодов и акций
+            {groupedStoreList.length} магазинов · {filteredCoupons.length} актуальных промокодов и акций
           </p>
         </div>
 

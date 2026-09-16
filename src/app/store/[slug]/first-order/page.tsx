@@ -244,7 +244,7 @@ export default async function StoreFirstOrderPage({
                 Промокоды {store.name} на первый заказ ({monthYear})
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
-                Собрали все промокоды и скидки {maxDisc} для новых пользователей {store.name}. Проверено на сегодня.
+                Собрали все промокоды и скидки {maxDisc} для новых пользователей {store.name}. Только действующие по сроку.
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">

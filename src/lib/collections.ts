@@ -31,7 +31,7 @@ export const COLLECTIONS: Collection[] = [
     slug: "exclusive",
     name: "Эксклюзивные промокоды",
     emoji: "⭐",
-    description: "Промокоды, которые работают у всех и дают гарантированную скидку. Проверены вручную нашей редакцией.",
+    description: "Хиты и универсальные промокоды: самые заметные скидки и коды, которые подходят большинству покупателей.",
     filter: (c) => c.promocode.isUniversal === true || c.promocode.isHit === true,
   },
   {

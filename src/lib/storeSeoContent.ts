@@ -179,7 +179,7 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
   // абзацах подряд и в шапке страницы. Содержательная версия — в абзаце 5.
   let lead: string;
   if (input.couponCount > 0) {
-    lead = `На странице «Промокоды ${input.name}» собраны актуальные и проверенные купоны на ${monthRu}. Скидка на ${input.category} сегодня достигает ${input.maxDiscount}, всего действует ${input.couponCount} ${countWord}.`;
+    lead = `На странице «Промокоды ${input.name}» собраны актуальные купоны на ${monthRu}. Скидка на ${input.category} сегодня достигает ${input.maxDiscount}, всего действует ${input.couponCount} ${countWord}.`;
   } else {
     lead = `Страница «Промокоды ${input.name}» по категории «${input.category}». Сейчас действующих купонов нет, но подборку обновляем по мере старта партнёрских акций — новые коды появляются в день запуска.`;
   }

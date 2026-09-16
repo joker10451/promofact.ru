@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
       // Приветствие / Старт
       if (text === "начать" || text === "start" || text === "привет" || text === "меню") {
-        const welcomeText = `👋 Привет! Я умный бот сервиса ПромоФакт (promofact.ru).\n\nЯ помогу найти проверенный промокод и сэкономить на покупках!\n\n👇 Выберите категорию на кнопках ниже или просто напишите название магазина (например, «Тануки», «Рив Гош», «Литрес»):`;
+        const welcomeText = `👋 Привет! Я умный бот сервиса ПромоФакт (promofact.ru).\n\nЯ помогу найти актуальный промокод и сэкономить на покупках!\n\n👇 Выберите категорию на кнопках ниже или просто напишите название магазина (например, «Тануки», «Рив Гош», «Литрес»):`;
         await sendVkBotMessage(userId, welcomeText, getVkBotKeyboard());
         return new Response("ok", { headers: { "Content-Type": "text/plain" } });
       }

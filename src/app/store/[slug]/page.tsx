@@ -94,7 +94,7 @@ export async function generateMetadata({
   const pageUrl = `${SITE_URL}/store/${slug}`;
   const n = store.coupons.length;
   const countWord =
-    n === 1 ? "проверенный промокод" : n >= 2 && n <= 4 ? "проверенных промокода" : "проверенных промокодов";
+    n === 1 ? "актуальный промокод" : n >= 2 && n <= 4 ? "актуальных промокода" : "актуальных промокодов";
   const maxDisc = getMaxDiscount(store.coupons);
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();

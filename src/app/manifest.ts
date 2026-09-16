@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: `${SITE_NAME} — ${SITE_TAGLINE}`,
     short_name: SITE_NAME,
-    description: "Актуальные промокоды, купоны и скидки в проверенных интернет-магазинах и сервисах.",
+    description: "Актуальные промокоды, купоны и скидки в популярных интернет-магазинах и сервисах.",
     start_url: "/",
     display: "standalone",
     background_color: "#0b102b",

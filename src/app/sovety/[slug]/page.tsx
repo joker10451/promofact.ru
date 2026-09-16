@@ -78,7 +78,7 @@ export default async function ArticlePage({
 
     if (matches.length >= 2) return matches.slice(0, 3);
 
-    // Если точных совпадений мало, дополняем топовыми проверенными хитами
+    // Если точных совпадений мало, дополняем хитами
     const hits = allCoupons.filter((c) => c.promocode.isHit && !matches.some((m) => m.id === c.id));
     return [...matches, ...hits].slice(0, 3);
   })();
@@ -150,7 +150,7 @@ export default async function ArticlePage({
               <span>•</span>
               <span>⏱ 3–4 мин чтения</span>
               <span>•</span>
-              <span className="text-mint-dark"><Icon name="check" size={11} className="inline" /> Проверено</span>
+              <span className="text-mint-dark"><Icon name="check" size={11} className="inline" /> Актуально</span>
             </div>
 
             <h1 className="font-display text-2xl sm:text-4xl font-extrabold leading-tight text-ink">

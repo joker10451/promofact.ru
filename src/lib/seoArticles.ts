@@ -184,7 +184,7 @@ export function generateSEOMeta(store: StoreInfo) {
 
   const title = `Все промокоды ${store.name} на ${monthYear} — ${disc} (${n} ${cw})`;
   const description =
-    `Рабочие промокоды и купоны ${store.name} на ${monthGen}: ${n} проверенных ${cw} со скидкой ${disc}. ` +
+    `Рабочие промокоды и купоны ${store.name} на ${monthGen}: ${n} актуальных ${cw} со скидкой ${disc}. ` +
     `Таблица кодов, инструкция и FAQ. Обновлено сегодня.`;
 
   return { title, description };
