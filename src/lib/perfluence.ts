@@ -325,10 +325,27 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
   // Логотипы проксируем здесь, на выходе всех источников: часть купонов
   // Admitad приходит путями, где адрес CDN не переписывался, и на проде
   // оставались прямые ссылки на cdn.admitad.com (их режет блокировщик).
+  //
+  // Там же дописываем erid в текст маркировки: карточка, лента Дзена и посты
+  // выводят только ordText, а у Perfluence erid лежит отдельно в ordMarker —
+  // на сайте маркировка показывалась без токена.
   return coupons.map((c) => {
     const logo = proxiedLogo(c.store.logo);
-    return logo === c.store.logo ? c : { ...c, store: { ...c.store, logo } };
+    const ordText = withErid(c.affiliate.ordText, c.affiliate.ordMarker);
+    if (logo === c.store.logo && ordText === c.affiliate.ordText) return c;
+    return {
+      ...c,
+      store: logo === c.store.logo ? c.store : { ...c.store, logo },
+      affiliate: ordText === c.affiliate.ordText ? c.affiliate : { ...c.affiliate, ordText },
+    };
   });
+}
+
+function withErid(ordText: string, ordMarker: string): string {
+  const marker = ordMarker.trim();
+  if (!marker || /erid/i.test(ordText)) return ordText;
+  const base = ordText.trim().replace(/[.\s]+$/, "") || "Реклама";
+  return `${base}. erid: ${marker}`;
 }
 
 export async function getCoupons(): Promise<Coupon[]> {

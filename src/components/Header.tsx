@@ -92,7 +92,7 @@ export default async function Header() {
           </nav>
         </div>
 
-        {/* Правая часть: Колесо скидок + Telegram */}
+        {/* Правая часть: Telegram */}
         <div className="flex items-center gap-2.5 shrink-0">
           <a
             href="https://t.me/smart_zakupka"
