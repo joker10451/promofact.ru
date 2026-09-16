@@ -1,8 +1,16 @@
-import { ARTICLES } from "@/lib/articles";
-import { getCoupons } from "@/lib/perfluence";
-import { SITE_NAME, SITE_URL, SITE_TAGLINE } from "@/lib/site";
+import { ARTICLES, type Article } from "@/lib/articles";
+import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 export const revalidate = 43200; // 12 часов
+
+/**
+ * Лента для импорта в Дзен (Студия → Импорт RSS).
+ * Требования: https://dzen.ru/help/ru/website/rss-modify.html
+ *
+ * В ленте только статьи. Карточки промокодов сюда больше не попадают: это
+ * были короткие рекламные заметки с иконкой 120 px вместо обложки (Дзен
+ * требует от 700 px) и без полного текста — такие материалы площадка режет.
+ */
 
 function escapeXml(s: string): string {
   if (!s) return "";
@@ -14,79 +22,91 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
+/** Жирный из разметки статьи → <b>; остальной текст экранируется. */
+function inline(text: string): string {
+  return text
+    .split(/(\*\*.*?\*\*)/g)
+    .map((part) =>
+      part.startsWith("**") && part.endsWith("**") ? `<b>${escapeXml(part.slice(2, -2))}</b>` : escapeXml(part),
+    )
+    .join("");
+}
+
+/** У старых статей нет даты публикации — даём стабильную, чтобы она не «молодела» при каждой пересборке. */
+const FALLBACK_DATE = Date.parse("2026-08-01T10:00:00+03:00");
+const DAY = 24 * 60 * 60 * 1000;
+
+function pubDate(a: Article, index: number): string {
+  const ts = a.published ? Date.parse(`${a.published}T10:00:00+03:00`) : FALLBACK_DATE - index * DAY;
+  return new Date(ts).toUTCString();
+}
+
+function cover(a: Article): { url: string; type: string } {
+  // Обложка от 700 px. Своя картинка статьи — если есть, иначе общая OG-картинка сайта (1200×630).
+  if (a.image) {
+    const url = `${SITE_URL}${a.image}`;
+    return { url, type: a.image.endsWith(".png") ? "image/png" : "image/jpeg" };
+  }
+  return { url: `${SITE_URL}/opengraph-image`, type: "image/png" };
+}
+
+function contentHtml(a: Article, url: string): string {
+  const img = cover(a);
+  const parts: string[] = [
+    `<figure><img src="${escapeXml(img.url)}" alt="${escapeXml(a.title)}"/></figure>`,
+    `<p>${inline(a.description)}</p>`,
+  ];
+  for (const p of a.body) {
+    parts.push(p.startsWith("## ") ? `<h2>${escapeXml(p.slice(3))}</h2>` : `<p>${inline(p)}</p>`);
+  }
+  if (a.faq?.length) {
+    parts.push("<h2>Частые вопросы</h2>");
+    for (const item of a.faq) parts.push(`<p><b>${escapeXml(item.q)}</b></p><p>${escapeXml(item.a)}</p>`);
+  }
+  if (a.ctaButton) {
+    parts.push(`<p><a href="${escapeXml(a.ctaButton.href)}">${escapeXml(a.ctaButton.text)}</a></p>`);
+    if (a.ctaButton.disclaimer) parts.push(`<p>${escapeXml(a.ctaButton.disclaimer)}</p>`);
+  }
+  parts.push(
+    `<p>Все действующие промокоды и подробные условия — <a href="${escapeXml(url)}">на сайте ${escapeXml(SITE_NAME)}</a>.</p>`,
+  );
+  return parts.join("\n");
+}
+
 export async function GET() {
-  const coupons = await getCoupons();
-  const now = Date.now();
-  const dayMs = 24 * 60 * 60 * 1000;
-
-  // 1. Формируем посты из свежих промокодов
-  const couponItems = coupons.slice(0, 20).map((c, i) => {
-    const url = `${SITE_URL}/store/${c.store.slug}/${encodeURIComponent(c.promocode.code)}`;
-    const pubDate = new Date(now - i * 3600 * 1000).toUTCString();
-    
-    const bodyHtml = `
-      <p>🔥 Свежий промокод и скидка в <strong>${escapeXml(c.store.name)}</strong>!</p>
-      <p><strong>Условия:</strong> ${escapeXml(c.promocode.bonusName || "Скидка по промокоду")}</p>
-      ${c.promocode.terms ? `<p>${escapeXml(c.promocode.terms)}</p>` : ""}
-      <p>🎟 Промокод: <code><strong>${escapeXml(c.promocode.code)}</strong></code></p>
-      <p>👉 <a href="${escapeXml(url)}">Скопировать промокод и перейти к покупкам на ПромоФакт</a></p>
-      ${c.affiliate.ordText ? `<p style="font-size: 11px; color: #888;">${escapeXml(c.affiliate.ordText)}</p>` : ""}
-    `;
-
-    const enclosureTag = c.store.logo
-      ? `\n      <enclosure url="${escapeXml(c.store.logo)}" type="image/png" />`
-      : "";
-
-    return `    <item>
-      <title>${escapeXml(c.store.name)}: промокод ${escapeXml(c.promocode.code)} — ${escapeXml(c.promocode.bonusName || "Скидка")}</title>
-      <link>${escapeXml(url)}</link>
-      <pdalink>${escapeXml(url)}</pdalink>
-      <guid isPermaLink="true">${escapeXml(url)}</guid>
-      <pubDate>${pubDate}</pubDate>
-      <category>${escapeXml(c.store.category)}</category>${enclosureTag}
-      <description><![CDATA[${bodyHtml}]]></description>
-      <content:encoded><![CDATA[${bodyHtml}]]></content:encoded>
-    </item>`;
-  });
-
-  // 2. Формируем полнотекстовые полезные статьи из раздела /sovety
-  const articleItems = ARTICLES.slice(0, 10).map((a, i) => {
+  const items = ARTICLES.map((a, i) => {
     const url = `${SITE_URL}/sovety/${a.slug}`;
-    const pubDate = new Date(now - (i + 1) * dayMs).toUTCString();
-    
-    const fullArticleHtml = `
-      <h2>${escapeXml(a.title)}</h2>
-      <p><em>${escapeXml(a.description)}</em></p>
-      ${a.body.map((p) => p.startsWith("## ") ? `<h3>${escapeXml(p.slice(3))}</h3>` : `<p>${escapeXml(p.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"))}</p>`).join("\n")}
-      <p>Больше актуальных промокодов и скидок читайте на сайте <a href="${SITE_URL}">ПромоФакт</a>.</p>
-    `;
-
+    const img = cover(a);
     return `    <item>
       <title>${escapeXml(a.title)}</title>
       <link>${escapeXml(url)}</link>
       <pdalink>${escapeXml(url)}</pdalink>
-      <guid isPermaLink="true">${escapeXml(url)}</guid>
-      <pubDate>${pubDate}</pubDate>
-      <category>Полезные советы и экономия</category>
-      <description><![CDATA[${escapeXml(a.description)}]]></description>
-      <content:encoded><![CDATA[${fullArticleHtml}]]></content:encoded>
+      <guid isPermaLink="false">${escapeXml(a.slug)}</guid>
+      <pubDate>${pubDate(a, i)}</pubDate>
+      <media:rating scheme="urn:simple">nonadult</media:rating>
+      <category>format-article</category>
+      <category>index</category>
+      <category>comment-all</category>
+      <enclosure url="${escapeXml(img.url)}" type="${img.type}"/>
+      <description><![CDATA[${a.description}]]></description>
+      <content:encoded><![CDATA[${contentHtml(a, url)}]]></content:encoded>
     </item>`;
-  });
-
-  const allItems = [...couponItems, ...articleItems].join("\n");
+  }).join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" 
-  xmlns:content="http://purl.org/rss/1.0/modules/content/" 
-  xmlns:dc="http://purl.org/dc/elements/1.1/" 
-  xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:media="http://search.yahoo.com/mrss/"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:georss="http://www.georss.org/georss">
   <channel>
-    <title>${escapeXml(SITE_NAME)} — Промокоды, скидки и статьи</title>
+    <title>${escapeXml(SITE_NAME)} — промокоды и советы по экономии</title>
     <link>${SITE_URL}</link>
     <description>${escapeXml(SITE_TAGLINE)}</description>
     <language>ru</language>
-    <atom:link href="${SITE_URL}/dzen.xml" rel="self" type="application/rss+xml" />
-${allItems}
+    <atom:link href="${SITE_URL}/dzen.xml" rel="self" type="application/rss+xml"/>
+${items}
   </channel>
 </rss>`;
 
