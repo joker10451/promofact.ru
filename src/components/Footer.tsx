@@ -243,6 +243,12 @@ export default async function Footer() {
             <p className="text-xs text-white/30">
               © {new Date().getFullYear()} {SITE_NAME}. Все права защищены.
             </p>
+            <nav aria-label="Служебные страницы" className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/45">
+              <Link href="/about" className="hover:text-white">О проекте</Link>
+              <Link href="/contacts" className="hover:text-white">Контакты</Link>
+              <Link href="/privacy" className="hover:text-white">Политика конфиденциальности</Link>
+              <Link href="/cookie" className="hover:text-white">Cookie</Link>
+            </nav>
           </div>
         </div>
       </div>
