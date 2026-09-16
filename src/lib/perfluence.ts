@@ -300,7 +300,7 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
     (await import("@/lib/supabaseCoupons")).fetchSupabaseCoupons(),
   ]);
 
-  const customCoupons = (await import("@/lib/customCoupons")).CUSTOM_COUPONS;
+  const customCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
   const { dedupeCoupons } = await import("@/lib/dedupe");
 
   // Дедуп по приоритету источника: ручные купоны (в т.ч. дубль Кинопоиска
