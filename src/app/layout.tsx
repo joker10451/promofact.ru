@@ -8,8 +8,6 @@ import PwaInstallBanner from "@/components/PwaInstallBanner";
 import TelegramWebAppInit from "@/components/TelegramWebAppInit";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollProgress from "@/components/ScrollProgress";
-import DiscountWheel from "@/components/DiscountWheel";
-import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
@@ -120,8 +118,6 @@ export default function RootLayout({
         <YandexMetrika />
         <YandexAds />
         <ChatHelper />
-        <DiscountWheel />
-        <PushNotificationPrompt />
         {children}
         <CookieBanner />
         <PwaInstallBanner />

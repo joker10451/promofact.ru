@@ -32,13 +32,13 @@ function pluralOrders(n: number): string {
 // Реальные актуальные магазины нашего сайта
 const REAL_POPULAR_TAGS = [
   "Пятёрочка",
-  "Самокат",
-  "Отелло",
+  "Додо Пицца",
+  "СберПрайм",
   "Кинопоиск",
-  "Яндекс Маркет",
-  "Ив Роше",
-  "Магнит",
+  "Отелло",
+  "Яндекс Путешествия",
   "Fix Price",
+  "Яндекс Цветы",
 ];
 
 export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroProps) {
