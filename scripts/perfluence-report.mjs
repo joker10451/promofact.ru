@@ -62,30 +62,65 @@ export async function findPostForProject(projectId, accountId = TG_ACCOUNT_ID) {
 
     if (postMatch && String(tileProjectId) === String(projectId)) {
       if (!accountId || String(tileAccountId) === String(accountId)) {
-        return {
-          postId: postMatch[1],
-          projectId: tileProjectId,
-          accountId: tileAccountId,
-          status
-        };
+        // Приоритет запланированным постам, ожидающим отчета
+        if (status.includes("Запланирован") || status.includes("правки") || !status.includes("Опубликован")) {
+          return {
+            postId: postMatch[1],
+            projectId: tileProjectId,
+            accountId: tileAccountId,
+            status
+          };
+        }
       }
     }
   }
 
-  // Если точного совпадения по аккаунту нет, возвращаем любой пост проекта
+  // Если нашли только опубликованный, сохраняем как запасной
+  let fallbackPost = null;
   for (const tile of tiles.slice(1)) {
     const postMatch = tile.match(/href="\/posts\/update\/(\d+)"/i);
     const projMatch = tile.match(/href="\/project\/(\d+)[^"]*"/i);
-    if (postMatch && projMatch && String(projMatch[1]) === String(projectId)) {
-      return {
-        postId: postMatch[1],
-        projectId: projMatch[1],
-        status: "matched_by_project"
-      };
+    const accountMatch = tile.match(/href="\/profile\/update-account-new\/(\d+)"/i);
+    const statusMatch = tile.match(/<div class="card-post-status">([\s\S]*?)<\/div>/i);
+
+    if (postMatch && String(projMatch?.[1]) === String(projectId)) {
+      if (!accountId || String(accountMatch?.[1]) === String(accountId)) {
+        fallbackPost = {
+          postId: postMatch[1],
+          projectId: projMatch[1],
+          accountId: accountMatch?.[1],
+          status: statusMatch?.[1]?.trim() || ""
+        };
+        break;
+      }
     }
   }
 
-  return null;
+  return fallbackPost;
+}
+
+/**
+ * Автоматически нажимает «Повторить публикацию» в Perfluence, создавая новый слот
+ */
+export async function createOrRepeatPublication(projectId, accountId = TG_ACCOUNT_ID) {
+  const { cookieHeader } = getSessionCookies();
+  const url = `https://dash.perfluence.net/blogger/posts/create-publication?return-back=1&projectId=${projectId}&accountId=${accountId}`;
+  console.log(`[Report] Запуск «Повторить публикацию» для проекта #${projectId}...`);
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "Cookie": cookieHeader,
+        "User-Agent": "Mozilla/5.0",
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    });
+    const text = await res.text();
+    console.log(`[Report] Результат «Повторить публикацию»: HTTP ${res.status}, ответ: ${text.slice(0, 120)}`);
+    return true;
+  } catch (err) {
+    console.warn(`[Report] Ошибка нажатия «Повторить публикацию»: ${err.message}`);
+    return false;
+  }
 }
 
 /**
@@ -207,7 +242,16 @@ export async function submitReport(projectIdOrPostId, postUrl, options = { headl
     postId = projectIdOrPostId;
   } else {
     console.log(`[Report] Поиск активной публикации для проекта #${projectIdOrPostId}...`);
-    const found = await findPostForProject(projectIdOrPostId, TG_ACCOUNT_ID);
+    let found = await findPostForProject(projectIdOrPostId, TG_ACCOUNT_ID);
+
+    // Если пост уже был опубликован или не найден — нажимаем «Повторить публикацию», чтобы открыть новый слот
+    if (!found || found.status.includes("Опубликован")) {
+      console.log(`[Report] Пост уже опубликован либо не найден. Нажимаем кнопку «Повторить публикацию»...`);
+      await createOrRepeatPublication(projectIdOrPostId, TG_ACCOUNT_ID);
+      const updated = await findPostForProject(projectIdOrPostId, TG_ACCOUNT_ID);
+      if (updated) found = updated;
+    }
+
     if (found) {
       postId = found.postId;
       console.log(`[Report] Найдена публикация #${postId} (статус: ${found.status})`);
