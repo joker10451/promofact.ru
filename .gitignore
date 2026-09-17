@@ -50,6 +50,7 @@ coupon-video/
 # sensitive perfluence session data & debug screenshots
 data/perfluence_session.json
 data/debug/
+data/banners/
 
 # Материалы внутреннего аудита: описывают незакрытые уязвимости,
 # а репозиторий публичный. Держим только локально.

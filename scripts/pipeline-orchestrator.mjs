@@ -13,6 +13,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { submitReport } from "./perfluence-report.mjs";
 import { takeNewOffers } from "./perfluence-take-offers.mjs";
+import { generatePromoBanner } from "./banner-generator.mjs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HISTORY_FILE = path.join(DATA_DIR, "posted_promos.json");
@@ -64,21 +65,34 @@ async function deleteTelegramMessage(messageId) {
 async function sendTelegramPost(text, buttons = [], imageUrl = null) {
   const replyMarkup = buttons.length > 0 ? { inline_keyboard: buttons } : undefined;
 
-  // Если есть ссылка на баннер/макет — шлем как фото с подписью
+  // Если есть локальный файл или ссылка на баннер — шлем как фото с подписью
   if (imageUrl) {
     const photoUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
     try {
-      const photoRes = await fetch(photoUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: CHANNEL_ID,
-          photo: imageUrl,
-          caption: text.slice(0, 1024),
-          parse_mode: "HTML",
-          reply_markup: replyMarkup
-        })
-      });
+      let photoRes;
+      if (fs.existsSync(imageUrl)) {
+        const fileBuffer = fs.readFileSync(imageUrl);
+        const formData = new FormData();
+        formData.append("chat_id", CHANNEL_ID);
+        formData.append("photo", new Blob([fileBuffer], { type: "image/png" }), "banner.png");
+        formData.append("caption", text.slice(0, 1024));
+        formData.append("parse_mode", "HTML");
+        if (replyMarkup) formData.append("reply_markup", JSON.stringify(replyMarkup));
+
+        photoRes = await fetch(photoUrl, { method: "POST", body: formData });
+      } else {
+        photoRes = await fetch(photoUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: CHANNEL_ID,
+            photo: imageUrl,
+            caption: text.slice(0, 1024),
+            parse_mode: "HTML",
+            reply_markup: replyMarkup
+          })
+        });
+      }
       const photoData = await photoRes.json();
       if (photoData.ok) return photoData;
       console.warn("⚠ sendPhoto не сработал, переключаемся на текст:", photoData.description);
@@ -426,21 +440,32 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     [{ text: "🌐 Все промокоды на PromoFact", url: "https://promofact.ru" }]
   ];
 
-  // Ищем промо-макет (баннер) проекта для яркого визуала в Telegram
-  selected.imageUrl = await fetchProjectTemplateImage(selected.storeId);
-  if (selected.imageUrl) {
-    console.log(` -> 🖼 Прикреплен официальный промо-баннер: ${selected.imageUrl}`);
+  // 1. Ищем официальный промо-макет проекта в Perfluence
+  const bgTemplateUrl = await fetchProjectTemplateImage(selected.storeId);
+  
+  // 2. Генерируем брендовый баннер с ВПЕЧАТАННЫМ персональным промокодом!
+  try {
+    selected.bannerPath = await generatePromoBanner({
+      storeName: selected.storeName,
+      code: selected.code,
+      bonus: selected.bonus,
+      bgImageUrl: bgTemplateUrl
+    });
+    console.log(` -> 🎨 Сгенерирован баннер с вашим промокодом [${selected.code}]: ${selected.bannerPath}`);
+  } catch (genErr) {
+    console.warn("⚠ Не удалось сгенерировать баннер, отправляем с исходным макетом:", genErr.message);
+    selected.bannerPath = bgTemplateUrl;
   }
 
   if (options.dryRun) {
-    console.log("\n[DRY RUN] Баннер: " + (selected.imageUrl || "нет (текстовый)"));
+    console.log("\n[DRY RUN] Баннер: " + (selected.bannerPath || "нет (текстовый)"));
     console.log("[DRY RUN] Текст поста:\n" + postText);
     return;
   }
 
-  // Публикуем в Telegram (с баннером, если найден)
+  // Публикуем в Telegram (с баннером, где напечатан промокод)
   console.log(` -> Отправка поста в канал ${CHANNEL_ID}...`);
-  const postRes = await sendTelegramPost(postText, buttons, selected.imageUrl);
+  const postRes = await sendTelegramPost(postText, buttons, selected.bannerPath);
 
   if (!postRes.ok) {
     console.error("❌ Ошибка отправки в Telegram:", postRes.description);
