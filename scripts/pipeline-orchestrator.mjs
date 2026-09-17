@@ -184,16 +184,61 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     }
   }
 
-  console.log(` -> Отобрано свежих кандидатов для публикации: ${candidates.length}`);
+  // Умный алгоритм скоринга и анти-повторов:
+  // 1. Анти-повтор магазинов: штрафуем магазины, выходившие за последние 30 дней
+  // 2. Чередование категорий: не постить одну категорию подряд
+  // 3. Бонус высокодоходным брендам с повышенными ставками (Start.ru, Додо, ВкусВилл, Яндекс Лавка)
+  const HIGH_PRIORITY_BRANDS = ["Start.ru", "Яндекс Лавка", "ВкусВилл Доставка", "Додо пицца Юг", "Перекрёсток Доставка", "Яндекс Цветы"];
+  const lastPost = historyData.history[0];
+  const lastStore = lastPost?.store?.toLowerCase();
 
-  if (candidates.length === 0) {
-    console.log("Все доступные промокоды уже публиковались в последнее время. Анти-повтор сработал штатно.");
-    return;
+  // Рассчитываем давность каждого магазина
+  const storeLastPostTime = new Map();
+  for (const h of historyData.history) {
+    if (h.store && !storeLastPostTime.has(h.store.toLowerCase())) {
+      storeLastPostTime.set(h.store.toLowerCase(), new Date(h.date || 0).getTime());
+    }
   }
 
-  // Выбираем лучший (приоритет хитам)
-  const selected = candidates.find(c => c.isHit) || candidates[0];
-  console.log(`\n[Фаза 4] Выбран лучший оффер: "${selected.storeName}" (код: ${selected.code}, бонус: ${selected.bonus})`);
+  const scored = candidates.map(c => {
+    let score = 100;
+    const storeLower = c.storeName.toLowerCase();
+
+    // Штраф, если магазин уже публиковался недавно
+    if (storeLastPostTime.has(storeLower)) {
+      const daysSince = Math.floor((now - storeLastPostTime.get(storeLower)) / (24 * 60 * 60 * 1000));
+      if (daysSince < 30) {
+        score -= (30 - daysSince) * 10; // Чем свежее был пост, тем жестче штраф
+      } else {
+        score += 20;
+      }
+    } else {
+      score += 50; // Бонус новым магазинам, которых еще не было в канале!
+    }
+
+    // Жесткий запрет на публикацию того же магазина подряд
+    if (lastStore && storeLower === lastStore) {
+      score -= 500;
+    }
+
+    // Бонус проектам с повышенными ставками / высокой конверсией
+    if (HIGH_PRIORITY_BRANDS.some(b => c.storeName.includes(b))) {
+      score += 40;
+    }
+
+    // Бонус за скидку в рублях или высокий процент
+    if (c.bonus.includes("%") || c.bonus.includes("₽") || c.isHit) {
+      score += 15;
+    }
+
+    return { ...c, score };
+  });
+
+  // Сортируем по итоговому баллу
+  scored.sort((a, b) => b.score - a.score);
+
+  const selected = scored[0];
+  console.log(`\n[Фаза 4] Выбран лучший оффер: "${selected.storeName}" (балл: ${selected.score}, код: ${selected.code}, бонус: ${selected.bonus})`);
 
   // Формируем красивый пост
   const postLines = [
