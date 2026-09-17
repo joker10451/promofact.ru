@@ -61,10 +61,34 @@ async function deleteTelegramMessage(messageId) {
   return await res.json();
 }
 
-async function sendTelegramPost(text, buttons = []) {
-  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+async function sendTelegramPost(text, buttons = [], imageUrl = null) {
   const replyMarkup = buttons.length > 0 ? { inline_keyboard: buttons } : undefined;
 
+  // Если есть ссылка на баннер/макет — шлем как фото с подписью
+  if (imageUrl) {
+    const photoUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
+    try {
+      const photoRes = await fetch(photoUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: CHANNEL_ID,
+          photo: imageUrl,
+          caption: text.slice(0, 1024),
+          parse_mode: "HTML",
+          reply_markup: replyMarkup
+        })
+      });
+      const photoData = await photoRes.json();
+      if (photoData.ok) return photoData;
+      console.warn("⚠ sendPhoto не сработал, переключаемся на текст:", photoData.description);
+    } catch (photoErr) {
+      console.warn("⚠ Ошибка отправки фото:", photoErr.message);
+    }
+  }
+
+  // Текстовая отправка (fallback)
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -126,6 +150,50 @@ async function fetchChannelSpecificOffer(projectId, targetAccount = "smart_zakup
       ordText,
       promos
     };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchProjectTemplateImage(projectId) {
+  if (!fs.existsSync(SESSION_FILE) || !projectId) return null;
+  const url = `https://dash.perfluence.net/project/${projectId}/templates`;
+  try {
+    const session = JSON.parse(fs.readFileSync(SESSION_FILE, "utf8"));
+    const cookies = session.cookies.map(c => `${c.name}=${c.value}`).join("; ");
+    const res = await fetch(url, {
+      headers: { "Cookie": cookies, "User-Agent": "Mozilla/5.0" }
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    const itemRegex = /<div[^>]+data-template-size-type="([^"]*)"[^>]*data-template-post-type="([^"]*)"[\s\S]*?<img[^>]+src="(https:\/\/s3sc\.perfluence\.net\/screens\/[^"]+)"/gi;
+    let m;
+    const templates = [];
+    while ((m = itemRegex.exec(html)) !== null) {
+      templates.push({
+        sizeType: m[1],
+        postType: m[2],
+        url: m[3]
+      });
+    }
+
+    if (templates.length === 0) {
+      const fallbackMatch = html.match(/src="(https:\/\/s3sc\.perfluence\.net\/screens\/[^"]+)"/i);
+      return fallbackMatch ? fallbackMatch[1] : null;
+    }
+
+    // Приоритет: square или landscape для постов (post)
+    const postSquare = templates.find(t => t.postType === "post" && t.sizeType === "square");
+    if (postSquare) return postSquare.url;
+
+    const postLandscape = templates.find(t => t.postType === "post" && t.sizeType === "landscape");
+    if (postLandscape) return postLandscape.url;
+
+    const anyPost = templates.find(t => t.postType === "post");
+    if (anyPost) return anyPost.url;
+
+    return templates[0].url;
   } catch {
     return null;
   }
@@ -358,14 +426,21 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     [{ text: "🌐 Все промокоды на PromoFact", url: "https://promofact.ru" }]
   ];
 
+  // Ищем промо-макет (баннер) проекта для яркого визуала в Telegram
+  selected.imageUrl = await fetchProjectTemplateImage(selected.storeId);
+  if (selected.imageUrl) {
+    console.log(` -> 🖼 Прикреплен официальный промо-баннер: ${selected.imageUrl}`);
+  }
+
   if (options.dryRun) {
-    console.log("\n[DRY RUN] Текст поста:\n" + postText);
+    console.log("\n[DRY RUN] Баннер: " + (selected.imageUrl || "нет (текстовый)"));
+    console.log("[DRY RUN] Текст поста:\n" + postText);
     return;
   }
 
-  // Публикуем в Telegram
+  // Публикуем в Telegram (с баннером, если найден)
   console.log(` -> Отправка поста в канал ${CHANNEL_ID}...`);
-  const postRes = await sendTelegramPost(postText, buttons);
+  const postRes = await sendTelegramPost(postText, buttons, selected.imageUrl);
 
   if (!postRes.ok) {
     console.error("❌ Ошибка отправки в Telegram:", postRes.description);
