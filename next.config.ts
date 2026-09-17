@@ -12,6 +12,13 @@ import { LOGO_PROXIES } from "./src/lib/logoProxy";
 const WWW_HOST = "www.promofact.ru";
 const CANONICAL_ORIGIN = "https://promofact.ru";
 
+const SHORT_LINKS: Record<string, string> = {
+  dodo: "/store/dodo-pizza",
+  sber: "/store/sberprime",
+  city: "/store/citydrive",
+  beth: "/store/bethowen",
+};
+
 const nextConfig: NextConfig = {
   // Логотипы партнёрских сетей через свой домен — см. src/lib/logoProxy.ts.
   async rewrites() {
@@ -28,6 +35,14 @@ const nextConfig: NextConfig = {
         destination: `${CANONICAL_ORIGIN}/:path*`,
         permanent: true,
       },
+      // Короткие адреса для роликов (Дзен, YouTube Shorts): ссылки в описаниях
+      // там часто не кликаются, адрес набирают вручную с экрана. Временный
+      // редирект — страницу назначения можно поменять под новую акцию.
+      ...Object.entries(SHORT_LINKS).map(([from, to]) => ({
+        source: `/${from}`,
+        destination: to,
+        permanent: false,
+      })),
     ];
   },
 };
