@@ -15,6 +15,7 @@ import { submitReport } from "./perfluence-report.mjs";
 import { takeNewOffers } from "./perfluence-take-offers.mjs";
 import { generatePromoBanner } from "./banner-generator.mjs";
 import { getFlashDeals, autoActivateFlashProjects } from "./perfluence-flash-deals.mjs";
+import { postToVk } from "./vk-crossposter.mjs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HISTORY_FILE = path.join(DATA_DIR, "posted_promos.json");
@@ -560,6 +561,26 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     date: new Date().toISOString()
   });
   saveHistory(historyData);
+
+  // ФАЗА 4.1: Автоматический кросспостинг во ВКонтакте (сообщество vk.com/promofact)
+  try {
+    const vkResult = await postToVk({
+      storeName: selected.storeName,
+      code: selected.code,
+      bonus: selected.bonus,
+      terms: selected.terms,
+      affUrl: selected.affUrl,
+      ordMarker: selected.ordMarker,
+      ordText: selected.ordText,
+      bannerPath: selected.bannerPath,
+      flashDeal: selected.flashDeal
+    });
+    if (vkResult.ok) {
+      console.log(` -> 🌐 Кросспостинг в VK: успешно опубликован (${vkResult.postUrl})`);
+    }
+  } catch (vkErr) {
+    console.warn(" -> ⚠ Ошибка кросспостинга во ВКонтакте:", vkErr.message);
+  }
 
   // ФАЗА 5: Авто-сдача отчета в Perfluence (если сессия есть)
   if (fs.existsSync(SESSION_FILE) && selected.storeId) {

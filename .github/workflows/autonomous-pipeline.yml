@@ -43,6 +43,9 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID || '@smart_zakupka' }}
           TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+          VK_ACCESS_TOKEN: ${{ secrets.VK_ACCESS_TOKEN }}
+          VK_OWNER_ID: ${{ secrets.VK_OWNER_ID || '-240879299' }}
+          VK_GROUP_ID: ${{ secrets.VK_GROUP_ID || '240879299' }}
         run: |
           mkdir -p data
           # Восстановление сессии Perfluence из секретов GitHub (если задана)
