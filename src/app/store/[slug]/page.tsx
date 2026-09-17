@@ -130,9 +130,14 @@ export async function generateMetadata({
     type: "website" as const,
     locale: "ru_RU",
     siteName: SITE_NAME,
-    images: store.logo
-      ? [{ url: store.logo, alt: `Промокоды ${store.name}` }]
-      : undefined,
+    images: [
+      {
+        url: `${SITE_URL}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: `Промокоды ${store.name} — ${SITE_NAME}`,
+      },
+    ],
   };
   return {
     title,

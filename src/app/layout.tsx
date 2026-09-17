@@ -63,12 +63,21 @@ export const metadata: Metadata = {
     title: `${SITE_TAGLINE} — ${SITE_NAME}`,
     description:
       "Рабочие промокоды и купоны на скидку в популярных магазинах: РИВ ГОШ, Отелло, Пятёрочка, Тануки, Start.ru и другие.",
+    images: [
+      {
+        url: `${SITE_URL}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — ${SITE_TAGLINE}`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE_TAGLINE} — ${SITE_NAME}`,
     description:
       "Рабочие промокоды и купоны на скидку в популярных магазинах: РИВ ГОШ, Отелло, Пятёрочка, Тануки, Start.ru и другие.",
+    images: [`${SITE_URL}/og-image.png`],
   },
 };
 
