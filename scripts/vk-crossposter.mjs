@@ -17,23 +17,32 @@ import path from "node:path";
 // Чтение переменных окружения
 function getVkEnv() {
   let token = process.env.VK_ACCESS_TOKEN;
+  let userToken = process.env.VK_USER_TOKEN;
   let ownerId = process.env.VK_OWNER_ID;
   let groupId = process.env.VK_GROUP_ID;
 
-  if (!token && fs.existsSync(".env.local")) {
+  if (fs.existsSync(".env.local")) {
     const envContent = fs.readFileSync(".env.local", "utf8");
-    const mToken = envContent.match(/VK_ACCESS_TOKEN\s*=\s*["']?([^"'\r\n]+)/);
-    const mOwner = envContent.match(/VK_OWNER_ID\s*=\s*["']?([^"'\r\n]+)/);
-    const mGroup = envContent.match(/VK_GROUP_ID\s*=\s*["']?([^"'\r\n]+)/);
-    if (mToken) token = mToken[1].trim();
-    if (mOwner) ownerId = mOwner[1].trim();
-    if (mGroup) groupId = mGroup[1].trim();
+    for (const line of envContent.split(/\r?\n/)) {
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (match) {
+        let val = (match[2] || "").trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1).trim();
+        }
+        if (match[1] === "VK_ACCESS_TOKEN" && !token) token = val;
+        if (match[1] === "VK_USER_TOKEN" && !userToken) userToken = val;
+        if (match[1] === "VK_OWNER_ID" && !ownerId) ownerId = val;
+        if (match[1] === "VK_GROUP_ID" && !groupId) groupId = val;
+      }
+    }
   }
 
   return {
-    token,
-    ownerId: ownerId || "-240879299",
-    groupId: groupId || "240879299"
+    token: (token || "").replace(/["']/g, "").trim(),
+    userToken: (userToken || "").replace(/["']/g, "").trim(),
+    ownerId: (ownerId || "-240879299").replace(/["']/g, "").trim(),
+    groupId: (groupId || "240879299").replace(/["']/g, "").trim()
   };
 }
 
@@ -44,12 +53,16 @@ async function uploadVkWallPhoto(filePath, token, groupId) {
   if (!fs.existsSync(filePath)) return null;
 
   try {
-    // 1. Получаем upload_url
+    // 1. Получаем upload_url через photos.getWallUploadServer
     const serverUrl = `https://api.vk.com/method/photos.getWallUploadServer?v=5.199&access_token=${token}&group_id=${groupId}`;
     const serverRes = await fetch(serverUrl);
     const serverData = await serverRes.json();
     if (!serverData.response?.upload_url) {
-      console.warn("[VK] Ошибка получения upload_url:", serverData.error?.error_msg || serverData);
+      if (serverData.error?.error_code === 27) {
+        console.warn(" -> ℹ [VK] Для прикрепления фотобаннеров нужен VK_USER_TOKEN (токен админа с правами photos,wall). Пост публикуется текстом.");
+      } else {
+        console.warn("[VK] Ошибка получения upload_url:", serverData.error?.error_msg || serverData);
+      }
       return null;
     }
 
@@ -149,8 +162,8 @@ export function formatVkPostText({
  * Публикует пост на стену ВКонтакте
  */
 export async function postToVk(offerData) {
-  const { token, ownerId, groupId } = getVkEnv();
-  if (!token) {
+  const { token, userToken, ownerId, groupId } = getVkEnv();
+  if (!token && !userToken) {
     console.warn("[VK] VK_ACCESS_TOKEN не задан, кросспостинг во ВКонтакте пропущен.");
     return { ok: false, skipped: true };
   }
@@ -161,7 +174,7 @@ export async function postToVk(offerData) {
   let attachment = null;
   if (offerData.bannerPath && fs.existsSync(offerData.bannerPath)) {
     console.log(` -> 📸 Загрузка баннера [${offerData.bannerPath}] в VK...`);
-    attachment = await uploadVkWallPhoto(offerData.bannerPath, token, groupId);
+    attachment = await uploadVkWallPhoto(offerData.bannerPath, userToken || token, groupId);
     if (attachment) {
       console.log(` -> ✓ Баннер прикреплен: ${attachment}`);
     }
