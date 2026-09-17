@@ -4,7 +4,70 @@ import type { Coupon } from "@/lib/types";
  * Ручные купоны от рекламодателей и партнёрских сетей.
  * Каждый — с партнёрской ссылкой и маркировкой (erid).
  */
+const BETHOWEN_STORE: Coupon["store"] = {
+  id: 5037,
+  name: "Бетховен",
+  slug: "bethowen",
+  logo: "https://favicon.yandex.net/favicon/v2/bethowen.ru?size=120",
+  category: "Всё для дома",
+  categorySlug: "vse-dlya-doma",
+  about: "Бетховен — сеть зоомагазинов: корма, лакомства, наполнители, ветаптека и товары для питомцев.",
+  conditions:
+    "Скидки по промокодам не суммируются с другими акциями и не распространяются на бренды: CESAR, FELIX, FRISKIES, CHAPPI, KITEKAT, NATURE'S TABLE, PURINA ONE, PEDIGREE, PERFECT FIT, SHEBA, WHISKAS, MAGNET AND STEEL, CATSAN, БАРСИК, ЗООНИК, ГУРМЭ, Pro Plan, Grandorf, Grandorf Fresh, Grandorf Vet, Royal Canin.",
+  site: "https://bethowenru.prfl.me/smart_zakupka/13mzw2?erid=2Ranyn3G5LF",
+  activeBloggers: 0,
+};
+
+const BETHOWEN_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://bethowenru.prfl.me/smart_zakupka/13mzw2?erid=2Ranyn3G5LF",
+  landingLink: "https://bethowenru.prfl.me/smart_zakupka/13mzw2?erid=2Ranyn3G5LF",
+  ordMarker: "2Ranyn3G5LF",
+  ordText: "Реклама. ООО «Пет Ритейл», ИНН 7726650932. erid: 2Ranyn3G5LF",
+};
+
 export const CUSTOM_COUPONS: Coupon[] = [
+  {
+    id: 50037,
+    promocode: {
+      id: 50037,
+      code: "DPFZBEEDM5Z",
+      bonusName: "Скидка 15% на заказ от 1500 ₽",
+      terms:
+        "Скидка 15% на первый и все повторные онлайн-заказы от 1500 руб. Не суммируется с другими акциями, действуют исключения по брендам — см. условия магазина.",
+      expires: null, // срок в материалах рекламодателя не указан
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: BETHOWEN_STORE,
+    affiliate: BETHOWEN_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 50038,
+    promocode: {
+      id: 50038,
+      code: "CPFM1D18TLK",
+      bonusName: "Скидка 20% на собственные марки от 1500 ₽",
+      terms:
+        "Скидка 20% на первый и все повторные онлайн-заказы товаров собственных торговых марок от 1500 руб.: Duke's Farm, MORE, Royal Farm, TUNDRA, Pro Cat, Pro Dog, Счастливый Гурман, HAPPY FRIEND, ОБЖОРКА, CHOMPER, Foxie, Хорошка, Catsby. Не суммируется с другими акциями.",
+      expires: null,
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: BETHOWEN_STORE,
+    affiliate: BETHOWEN_AFFILIATE,
+    extraLinks: [],
+  },
   {
     id: 50033,
     promocode: {
