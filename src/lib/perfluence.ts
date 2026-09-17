@@ -678,35 +678,48 @@ function isResultsConfigured(): boolean {
   return Boolean(RESULTS_URL);
 }
 
+let resultsCache: Result[] | null = null;
+let pendingResultsPromise: Promise<Result[]> | null = null;
+
 export async function fetchResults(): Promise<Result[]> {
+  if (resultsCache) return resultsCache;
+  if (pendingResultsPromise) return pendingResultsPromise;
+
   if (!isResultsConfigured())
     return devMockResultsFallback("PERFLUENCE_RESULTS_URL не задан");
 
-  try {
-    const res = await fetch(RESULTS_URL, {
-      headers: { Accept: "application/json" },
-      next: { revalidate: RESULTS_REVALIDATE },
-    });
-    const text = await res.text();
-    if (!res.ok)
-      throw new Error(`Perfluence API /results: ${res.status} ${res.statusText}`);
+  pendingResultsPromise = (async () => {
+    try {
+      const res = await fetch(RESULTS_URL, {
+        headers: { Accept: "application/json" },
+        next: { revalidate: RESULTS_REVALIDATE },
+      });
+      const text = await res.text();
+      if (!res.ok)
+        throw new Error(`Perfluence API /results: ${res.status} ${res.statusText}`);
 
-    const results = parseResults(text);
-    console.log(
-      "[perfluence/results] status:",
-      res.status,
-      "| результатов:",
-      results.length,
-    );
+      const results = parseResults(text);
+      console.log(
+        "[perfluence/results] status:",
+        res.status,
+        "| результатов:",
+        results.length,
+      );
 
-    if (results.length === 0)
-      return devMockResultsFallback("API вернул пустой список заказов");
+      if (results.length === 0)
+        return devMockResultsFallback("API вернул пустой список заказов");
 
-    return results;
-  } catch (e) {
-    console.error("[perfluence/results] fetch failed:", e);
-    return devMockResultsFallback("запрос упал: " + (e as Error).message);
-  }
+      resultsCache = results;
+      return results;
+    } catch (e) {
+      console.error("[perfluence/results] fetch failed:", e);
+      return devMockResultsFallback("запрос упал: " + (e as Error).message);
+    } finally {
+      pendingResultsPromise = null;
+    }
+  })();
+
+  return pendingResultsPromise;
 }
 
 /* ---------- статистика сработавших промокодов (доказательства) ---------- */
