@@ -12,7 +12,8 @@ export async function generatePromoBanner({
   code,
   bonus,
   bgImageUrl,
-  outputPath
+  outputPath,
+  badgeText = "🔥 ТОП СКИДКА"
 }) {
   if (!fs.existsSync(BANNERS_DIR)) {
     fs.mkdirSync(BANNERS_DIR, { recursive: true });
@@ -166,7 +167,7 @@ export async function generatePromoBanner({
   <div class="content">
     <div class="top-row">
       <div class="brand-pill">🛍 ${storeName}</div>
-      <div class="badge-deal">🔥 ТОП СКИДКА</div>
+      <div class="badge-deal">${badgeText}</div>
     </div>
     <div class="bonus-title">${bonus}</div>
     <div class="ticket-card">

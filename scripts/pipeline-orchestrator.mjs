@@ -14,6 +14,7 @@ import path from "node:path";
 import { submitReport } from "./perfluence-report.mjs";
 import { takeNewOffers } from "./perfluence-take-offers.mjs";
 import { generatePromoBanner } from "./banner-generator.mjs";
+import { getFlashDeals } from "./perfluence-flash-deals.mjs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HISTORY_FILE = path.join(DATA_DIR, "posted_promos.json");
@@ -338,6 +339,26 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     "СберПрайм"
   ];
 
+  // [Фаза 3.1] Мониторинг «Флеш-акций» и повышенных ставок в новостях Perfluence
+  console.log("\n[Фаза 3.1] Мониторинг «Флеш-акций» и повышенных ставок рекламодателей...");
+  let flashDeals = [];
+  const flashMap = new Map();
+  try {
+    flashDeals = await getFlashDeals();
+    for (const d of flashDeals) {
+      if (d.projectId) flashMap.set(String(d.projectId), d);
+      if (d.projectName) flashMap.set(d.projectName.toLowerCase(), d);
+    }
+    if (flashDeals.length > 0) {
+      console.log(` -> Обнаружено активных спецпредложений/флеш-акций: ${flashDeals.length}`);
+      flashDeals.forEach(f => console.log(`    ⚡ [${f.badge}] #${f.projectId} "${f.projectName}": ${f.title}`));
+    } else {
+      console.log(" -> В новостях нет активных флеш-акций на сегодня.");
+    }
+  } catch (err) {
+    console.warn(" -> Ошибка мониторинга флеш-акций:", err.message);
+  }
+
   const recentStoresList = historyData.history.slice(0, 10).map(h => (h.store || "").toLowerCase());
   const lastStore = historyData.history[0]?.store?.toLowerCase();
 
@@ -349,13 +370,27 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     }
   }
 
-  // Сначала пытаемся отобрать кандидатов, которых гарантированно не было в последних 10 постах
-  const freshCandidates = candidates.filter(c => !recentStoresList.includes(c.storeName.toLowerCase()));
+  // Сначала пытаемся отобрать кандидатов, которых гарантированно не было в последних 10 постах,
+  // ЛИБО у которых прямо сейчас идет горячая флеш-акция (пропуск вне очереди!)
+  const freshCandidates = candidates.filter(c => {
+    const isFlash = flashMap.has(String(c.storeId)) || flashMap.has(c.storeName.toLowerCase());
+    if (isFlash && (!lastStore || c.storeName.toLowerCase() !== lastStore)) {
+      return true; // Пропускаем вне очереди горячие флеш-акции!
+    }
+    return !recentStoresList.includes(c.storeName.toLowerCase());
+  });
   const candidatePool = freshCandidates.length > 0 ? freshCandidates : candidates;
 
   const scored = candidatePool.map(c => {
     let score = 100;
     const storeLower = c.storeName.toLowerCase();
+    const flashDeal = flashMap.get(String(c.storeId)) || flashMap.get(storeLower);
+
+    // ПРИОРИТЕТ ВНЕ ОЧЕРЕДИ: Флеш-акции и повышенные ставки от рекламодателей
+    if (flashDeal) {
+      score += flashDeal.priorityScore || 220;
+      c.flashDeal = flashDeal;
+    }
 
     // Штраф, если магазин уже публиковался когда-либо
     if (storeLastPostTime.has(storeLower)) {
@@ -413,14 +448,17 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     }
   }
 
-  console.log(`\n[Фаза 4] Выбран лучший оффер: "${selected.storeName}" (балл: ${selected.score}, код: ${selected.code}, бонус: ${selected.bonus})`);
+  console.log(`\n[Фаза 4] Выбран лучший оффер: "${selected.storeName}" (балл: ${selected.score}, код: ${selected.code}, бонус: ${selected.bonus})${selected.flashDeal ? ` [${selected.flashDeal.badge}]` : ""}`);
 
   // Формируем красивый пост
-  const postLines = [
-    `🔥 <b>${selected.storeName} — ${selected.bonus}</b>\n`,
-    `🎟 Промокод: <code>${selected.code}</code>`,
-    `<i>(нажмите на код — он скопируется в буфер)</i>\n`
-  ];
+  const postLines = [];
+  if (selected.flashDeal) {
+    postLines.push(`${selected.flashDeal.badge}`);
+    postLines.push(`📢 <b>${selected.flashDeal.title}</b> — <i>${selected.flashDeal.desc}</i>\n`);
+  }
+  postLines.push(`🔥 <b>${selected.storeName} — ${selected.bonus}</b>\n`);
+  postLines.push(`🎟 Промокод: <code>${selected.code}</code>`);
+  postLines.push(`<i>(нажмите на код — он скопируется в буфер)</i>\n`);
 
   if (selected.terms) {
     const cleanTerms = selected.terms.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 180);
@@ -449,7 +487,8 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
       storeName: selected.storeName,
       code: selected.code,
       bonus: selected.bonus,
-      bgImageUrl: bgTemplateUrl
+      bgImageUrl: bgTemplateUrl,
+      badgeText: selected.flashDeal?.badge || "🔥 ТОП СКИДКА"
     });
     console.log(` -> 🎨 Сгенерирован баннер с вашим промокодом [${selected.code}]: ${selected.bannerPath}`);
   } catch (genErr) {

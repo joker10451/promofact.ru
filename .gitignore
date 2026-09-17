@@ -51,6 +51,7 @@ coupon-video/
 data/perfluence_session.json
 data/debug/
 data/banners/
+data/flash_deals.json
 
 # Материалы внутреннего аудита: описывают незакрытые уязвимости,
 # а репозиторий публичный. Держим только локально.
