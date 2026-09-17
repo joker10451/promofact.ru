@@ -56,17 +56,22 @@ function parseEntriesHtml(html) {
     const isNewBonus = /новый бонус|увеличенный бонус|спецуслови/i.test(fullText);
 
     if (isFlash || isRateHike || isNewBonus) {
-      let badge = "⚡ ФЛЕШ-АКЦИЯ";
+      let badge = "🔥 ТОП СКИДКА";
       let priorityScore = 200;
+      let isInternalOnly = false;
+      let audienceDesc = desc;
 
-      if (isRateHike) {
-        badge = "📈 ПОВЫШЕННАЯ СТАВКА";
+      // Если в описании упоминаются ставки/выплаты/вознаграждения — скрываем от подписчиков!
+      if (isRateHike || /ставка|выплат|доход|вознагражден|cpa|cpc|руб за|рублей за/i.test(fullText)) {
+        isInternalOnly = true;
         priorityScore = 250;
+        badge = "🔥 ВЫБОР РЕДАКЦИИ";
+        audienceDesc = null; // Подписчикам знать о ставках не нужно
       } else if (isFlash) {
         badge = "⚡ ФЛЕШ-АКЦИЯ";
         priorityScore = 220;
       } else if (isNewBonus) {
-        badge = "🔥 НОВЫЙ БОНУС";
+        badge = "🎁 НОВЫЙ БОНУС";
         priorityScore = 180;
       }
 
@@ -76,6 +81,8 @@ function parseEntriesHtml(html) {
         projectName,
         title,
         desc,
+        audienceDesc,
+        isInternalOnly,
         date,
         badge,
         priorityScore,

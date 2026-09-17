@@ -486,9 +486,9 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
 
   // Формируем красивый пост
   const postLines = [];
-  if (selected.flashDeal) {
+  if (selected.flashDeal && !selected.flashDeal.isInternalOnly && selected.flashDeal.audienceDesc) {
     postLines.push(`${selected.flashDeal.badge}`);
-    postLines.push(`📢 <b>${selected.flashDeal.title}</b> — <i>${selected.flashDeal.desc}</i>\n`);
+    postLines.push(`📢 <b>${selected.flashDeal.title}</b> — <i>${selected.flashDeal.audienceDesc}</i>\n`);
   }
   postLines.push(`🔥 <b>${selected.storeName} — ${selected.bonus}</b>\n`);
   postLines.push(`🎟 Промокод: <code>${selected.code}</code>`);

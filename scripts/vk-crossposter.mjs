@@ -110,9 +110,9 @@ export function formatVkPostText({
 }) {
   const lines = [];
 
-  if (flashDeal) {
+  if (flashDeal && !flashDeal.isInternalOnly && flashDeal.audienceDesc) {
     lines.push(`⚡ ${flashDeal.badge}: ${flashDeal.title.toUpperCase()}!`);
-    if (flashDeal.desc) lines.push(`📢 ${flashDeal.desc}\n`);
+    if (flashDeal.audienceDesc) lines.push(`📢 ${flashDeal.audienceDesc}\n`);
   }
 
   lines.push(`🔥 ${storeName} — ${bonus}\n`);
