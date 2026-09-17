@@ -17,6 +17,7 @@ import { generatePromoBanner } from "./banner-generator.mjs";
 import { getFlashDeals, autoActivateFlashProjects } from "./perfluence-flash-deals.mjs";
 import { postToVk } from "./vk-crossposter.mjs";
 import { checkNewEarnings } from "./perfluence-earnings-monitor.mjs";
+import { pingIndexNow } from "./indexnow-ping.mjs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HISTORY_FILE = path.join(DATA_DIR, "posted_promos.json");
@@ -597,6 +598,29 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     }
   } catch (vkErr) {
     console.warn(" -> ⚠ Ошибка кросспостинга во ВКонтакте:", vkErr.message);
+  }
+
+  // ФАЗА 4.2: Мгновенное SEO-оповещение поисковых систем (IndexNow: Яндекс, Bing)
+  console.log("\n[Фаза 4.2] Мгновенное оповещение Яндекс и Bing (IndexNow)...");
+  try {
+    const cleanStoreSlug = selected.storeName
+      .toLowerCase()
+      .replace(/[^a-zа-я0-9]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    const pingUrls = [
+      `https://promofact.ru/store/${cleanStoreSlug}`,
+      "https://promofact.ru",
+      "https://promofact.ru/promokody"
+    ];
+
+    const idxRes = await pingIndexNow(pingUrls);
+    if (idxRes.ok) {
+      console.log(` -> ✓ IndexNow: поисковики мгновенно уведомлены о скидках "${selected.storeName}" (${idxRes.sentUrls.length} URL).`);
+    }
+  } catch (idxErr) {
+    console.warn(" -> ⚠ Ошибка отправки IndexNow:", idxErr.message);
   }
 
   // ФАЗА 5: Авто-сдача отчета в Perfluence (если сессия есть)
