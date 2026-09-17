@@ -142,16 +142,151 @@ export async function getFlashDeals(forceRefresh = false) {
   }
 }
 
+/**
+ * ⚡ Активация оффера в 1 клик для заданной площадки (по умолчанию @smart_zakupka, ID: 3066585)
+ * 
+ * Если проект одобрен, но еще не получена публикация/промокод — робот автоматически
+ * вызывает create-publication по AJAX (0.2 сек) и моментально активирует оффер.
+ */
+export async function activateProjectForChannel(projectId, accountId = "3066585") {
+  const cookieHeader = getSessionCookies();
+  if (!cookieHeader) {
+    return { success: false, error: "Сессия Perfluence отсутствует" };
+  }
+
+  const accountsUrl = `https://dash.perfluence.net/project/${projectId}/accounts`;
+  try {
+    const res = await fetch(accountsUrl, {
+      headers: {
+        Cookie: cookieHeader,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0"
+      }
+    });
+
+    if (!res.ok) {
+      return { success: false, error: `HTTP ${res.status}` };
+    }
+
+    const html = await res.text();
+    const accountSubstr = `accountId=${accountId}`;
+    const tileSubstr = `id="pb-tile-${accountId}"`;
+
+    const hasAccount = html.includes(accountSubstr) || html.includes(tileSubstr);
+    if (!hasAccount) {
+      return { success: false, error: `Площадка #${accountId} не привязана к проекту #${projectId}` };
+    }
+
+    // Проверяем, есть ли ссылка "Получить промокод" / create-publication
+    const createLinks = [...html.matchAll(/href="(\/blogger\/posts\/create-publication\?[^"]*accountId=(\d+)[^"]*)"/gi)]
+      .map(m => m[1].replace(/&amp;/g, "&"))
+      .filter(l => l.includes(`accountId=${accountId}`));
+
+    if (createLinks.length === 0) {
+      // Возможно, оффер уже активирован
+      const isAlreadyActive = html.includes(".prfl.me/") || html.includes("erid:");
+      if (isAlreadyActive) {
+        return { success: true, alreadyActive: true, message: "Оффер уже активен для площадки" };
+      }
+      return { success: false, error: "Кнопка активации (create-publication) не найдена" };
+    }
+
+    // Вызываем первый доступный лендинг create-publication через AJAX
+    const targetLink = createLinks[0];
+    const triggerUrl = `https://dash.perfluence.net${targetLink}`;
+    console.log(`[FlashActivate] Активация проекта #${projectId} для площадки ${accountId} -> ${triggerUrl}`);
+
+    const actRes = await fetch(triggerUrl, {
+      headers: {
+        Cookie: cookieHeader,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0",
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    });
+
+    if (!actRes.ok) {
+      return { success: false, error: `Ошибка вызова create-publication: HTTP ${actRes.status}` };
+    }
+
+    // Повторно проверяем страницу, чтобы извлечь выданные данные
+    const verifyRes = await fetch(accountsUrl, {
+      headers: {
+        Cookie: cookieHeader,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      }
+    });
+    const verifyHtml = await verifyRes.text();
+
+    const idx = verifyHtml.indexOf(tileSubstr) !== -1 ? verifyHtml.indexOf(tileSubstr) : verifyHtml.indexOf(accountSubstr);
+    const tileChunk = idx !== -1 ? verifyHtml.slice(idx, idx + 4000) : "";
+
+    const linkMatch = tileChunk.match(/https:\/\/[a-z0-9.]+\.prfl\.me\/[^\s"'<>]+/i);
+    const eridMatch = tileChunk.match(/erid:\s*([A-Za-z0-9_-]+)/i);
+    const codeMatch = tileChunk.match(/data-clipboard-text="([^"]+)"/i);
+
+    return {
+      success: true,
+      activated: true,
+      projectId,
+      affUrl: linkMatch ? linkMatch[0] : null,
+      ordMarker: eridMatch ? eridMatch[1] : null,
+      code: codeMatch && !codeMatch[1].startsWith("http") && !codeMatch[1].startsWith("Реклама") ? codeMatch[1] : null
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * ⚡ Автоматически находит все свежие флеш-акции и активирует их для @smart_zakupka в 1 клик
+ */
+export async function autoActivateFlashProjects(accountId = "3066585") {
+  console.log("==================================================");
+  console.log("   ⚡ АВТО-АКТИВАЦИЯ ПРОЕКТОВ С ФЛЕШ-АКЦИЯМИ      ");
+  console.log("==================================================");
+
+  const deals = await getFlashDeals();
+  const results = [];
+
+  for (const deal of deals) {
+    if (!deal.projectId) continue;
+    console.log(`\n-> Проверка флеш-акции: "${deal.projectName}" (#${deal.projectId})...`);
+    const actResult = await activateProjectForChannel(deal.projectId, accountId);
+    
+    if (actResult.alreadyActive) {
+      console.log(`   ✓ Уже активирован ранее и готов к публикации!`);
+    } else if (actResult.activated) {
+      console.log(`   🎉 УСПЕШНО АКТИВИРОВАН В 1 КЛИК!`);
+      if (actResult.code) console.log(`      Промокод: ${actResult.code}`);
+      if (actResult.affUrl) console.log(`      Ссылка: ${actResult.affUrl}`);
+      if (actResult.ordMarker) console.log(`      Erid: ${actResult.ordMarker}`);
+    } else {
+      console.log(`   ⚠ Пропущен: ${actResult.error || "не удалось активировать"}`);
+    }
+
+    results.push({
+      ...deal,
+      activation: actResult
+    });
+  }
+
+  return results;
+}
+
 // Прямой запуск для тестирования
 if (process.argv[1]?.includes("perfluence-flash-deals.mjs")) {
-  getFlashDeals(true).then(deals => {
-    console.log(`\n⚡ Найдено ${deals.length} активных спецпредложений/флеш-акций:`);
-    deals.forEach(d => {
-      console.log(`\n[${d.badge}] Проект #${d.projectId} (${d.projectName})`);
-      console.log(`  Заголовок: ${d.title}`);
-      console.log(`  Суть: ${d.desc}`);
-      console.log(`  Дата: ${d.date}`);
-      console.log(`  Приоритет: +${d.priorityScore} очков`);
+  const isActivate = process.argv.includes("--activate");
+  if (isActivate) {
+    autoActivateFlashProjects().then(() => console.log("\nАктивация завершена."));
+  } else {
+    getFlashDeals(true).then(deals => {
+      console.log(`\n⚡ Найдено ${deals.length} активных спецпредложений/флеш-акций:`);
+      deals.forEach(d => {
+        console.log(`\n[${d.badge}] Проект #${d.projectId} (${d.projectName})`);
+        console.log(`  Заголовок: ${d.title}`);
+        console.log(`  Суть: ${d.desc}`);
+        console.log(`  Дата: ${d.date}`);
+        console.log(`  Приоритет: +${d.priorityScore} очков`);
+      });
     });
-  });
+  }
 }

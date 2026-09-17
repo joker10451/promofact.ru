@@ -14,7 +14,7 @@ import path from "node:path";
 import { submitReport } from "./perfluence-report.mjs";
 import { takeNewOffers } from "./perfluence-take-offers.mjs";
 import { generatePromoBanner } from "./banner-generator.mjs";
-import { getFlashDeals } from "./perfluence-flash-deals.mjs";
+import { getFlashDeals, autoActivateFlashProjects } from "./perfluence-flash-deals.mjs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HISTORY_FILE = path.join(DATA_DIR, "posted_promos.json");
@@ -339,11 +339,16 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     "СберПрайм"
   ];
 
-  // [Фаза 3.1] Мониторинг «Флеш-акций» и повышенных ставок в новостях Perfluence
-  console.log("\n[Фаза 3.1] Мониторинг «Флеш-акций» и повышенных ставок рекламодателей...");
+  // [Фаза 3.1] Мониторинг и авто-активация «Флеш-акций» и повышенных ставок
+  console.log("\n[Фаза 3.1] Мониторинг и авто-активация «Флеш-акций» рекламодателей...");
   let flashDeals = [];
   const flashMap = new Map();
   try {
+    // 1. Авто-активация проектов с флеш-акциями в 1 клик
+    if (options.takeOffers !== false) {
+      await autoActivateFlashProjects();
+    }
+
     flashDeals = await getFlashDeals();
     for (const d of flashDeals) {
       if (d.projectId) flashMap.set(String(d.projectId), d);
@@ -354,6 +359,34 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
       flashDeals.forEach(f => console.log(`    ⚡ [${f.badge}] #${f.projectId} "${f.projectName}": ${f.title}`));
     } else {
       console.log(" -> В новостях нет активных флеш-акций на сегодня.");
+    }
+
+    // 2. Добавляем активированные флеш-офферы в пул кандидатов, если их еще не было
+    for (const deal of flashDeals) {
+      if (!deal.projectId) continue;
+      const exists = candidates.some(c => String(c.storeId) === String(deal.projectId) || c.storeName.toLowerCase() === deal.projectName.toLowerCase());
+      if (!exists) {
+        const channelData = await fetchChannelSpecificOffer(deal.projectId, "smart_zakupka");
+        if (channelData && channelData.promos && channelData.promos.length > 0) {
+          for (const p of channelData.promos) {
+            if (!p.code || recentCodes.has(p.code.toUpperCase())) continue;
+            candidates.push({
+              storeId: deal.projectId,
+              storeName: deal.projectName,
+              code: p.code,
+              bonus: p.bonus || deal.title,
+              terms: deal.desc || "",
+              expires: p.expires || null,
+              affUrl: channelData.affUrl,
+              ordMarker: channelData.ordMarker,
+              ordText: channelData.ordText || `Реклама. ${deal.projectName}`,
+              isHit: true,
+              flashDeal: deal
+            });
+            console.log(` -> ⚡ Флеш-оффер "${deal.projectName}" (#${deal.projectId}) добавлен в пул кандидатов с промокодом [${p.code}]!`);
+          }
+        }
+      }
     }
   } catch (err) {
     console.warn(" -> Ошибка мониторинга флеш-акций:", err.message);
