@@ -1,8 +1,12 @@
-name: Perfluence & Telegram Pipeline — ручной запуск
+name: Perfluence & Telegram Pipeline — Автономный конвейер
 
 on:
-  # Автономная публикация по расписанию отключена намеренно:
-  # конвейер запускается только вручную, через «Run workflow».
+  schedule:
+    # 3 раза в день по Московскому времени (UTC+3):
+    # 10:15 МСК (07:15 UTC) — утренний просмотр, начало рабочего дня
+    # 14:15 МСК (11:15 UTC) — обеденный перерыв, заказ еды и рестораны
+    # 18:45 МСК (15:45 UTC) — вечер, шопинг, онлайн-кинотеатры и досуг
+    - cron: '15 7,11,15 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -11,12 +15,17 @@ on:
         required: false
         default: false
 
+permissions:
+  contents: write
+
 jobs:
   run-autonomous-pipeline:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Клонирование репозитория
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: ⚙️ Установка Node.js
         uses: actions/setup-node@v4
@@ -26,9 +35,6 @@ jobs:
 
       - name: 📦 Установка зависимостей
         run: npm ci
-
-      - name: 🎭 Установка Chromium для Playwright
-        run: npx playwright install chromium --with-deps
 
       - name: 🚀 Запуск полного автономного конвейера
         env:
@@ -46,4 +52,16 @@ jobs:
           fi
           
           # Запуск оркестратора
-          node scripts/pipeline-orchestrator.mjs
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            node scripts/pipeline-orchestrator.mjs --dry-run
+          else
+            node scripts/pipeline-orchestrator.mjs --no-take
+          fi
+
+      - name: 💾 Сохранение истории публикаций
+        if: success()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/posted_promos.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(history): auto-update posted promos history [skip ci]" && git push)

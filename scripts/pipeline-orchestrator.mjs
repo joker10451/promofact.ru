@@ -79,6 +79,58 @@ async function sendTelegramPost(text, buttons = []) {
   return await res.json();
 }
 
+async function fetchChannelSpecificOffer(projectId, targetAccount = "smart_zakupka") {
+  if (!fs.existsSync(SESSION_FILE) || !projectId) return null;
+  try {
+    const session = JSON.parse(fs.readFileSync(SESSION_FILE, "utf8"));
+    const cookies = session.cookies.map(c => `${c.name}=${c.value}`).join("; ");
+    const url = `https://dash.perfluence.net/project/${projectId}/accounts`;
+    const res = await fetch(url, {
+      headers: { "Cookie": cookies, "User-Agent": "Mozilla/5.0" }
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const idx = html.indexOf(targetAccount);
+    if (idx === -1) return null;
+
+    const sub = html.slice(idx, idx + 8000);
+    const linkMatch = sub.match(/https:\/\/[a-z0-9.]+\.prfl\.me\/[^\s"'<>]+/i);
+    const eridMatch = sub.match(/erid:\s*([A-Za-z0-9_-]+)/i);
+    const ordTextMatch = sub.match(/Маркер и токен[\s\S]*?<div[^>]*>([\s\S]*?)<\/div>/i) || sub.match(/Реклама\.[\s\S]*?(?=<\/div>|<div)/i);
+
+    const blocks = sub.split('<div class="modal-collapsing-block-details">');
+    const promos = [];
+    for (const b of blocks.slice(1)) {
+      const codeMatch = b.match(/data-clipboard-text="([^"]+)"/i);
+      const rubMatch = b.match(/на\s+RUB[^\d]*(\d+)/i) || b.match(/на\s+(\d+)\s*₽/i) || b.match(/на\s+(\d+%)/i);
+      const dateMatch = b.match(/до\s*(\d{2}\.\d{2}\.\d{4})/i);
+      const descMatch = b.match(/class="modal-collapsing-block-content">([\s\S]*?)<\/div>/i);
+      if (codeMatch && !codeMatch[1].startsWith("http") && !codeMatch[1].startsWith("Реклама")) {
+        promos.push({
+          code: codeMatch[1].trim(),
+          discountNum: rubMatch ? parseInt(rubMatch[1], 10) : 0,
+          bonus: descMatch ? descMatch[1].trim() : (rubMatch ? `Скидка ${rubMatch[0]}` : "Скидка"),
+          expires: dateMatch ? dateMatch[1] : null
+        });
+      }
+    }
+
+    let ordText = ordTextMatch ? ordTextMatch[0].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() : null;
+    if (ordText && ordText.startsWith("Маркер и токен")) {
+      ordText = ordText.replace(/^Маркер и токен\s*/, "");
+    }
+
+    return {
+      affUrl: linkMatch ? linkMatch[0] : null,
+      ordMarker: eridMatch ? eridMatch[1] : null,
+      ordText,
+      promos
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function runPipeline(options = { dryRun: false, takeOffers: true }) {
   console.log("==================================================");
   console.log("   🚀 ПОЛНЫЙ АВТОНОМНЫЙ ЦИКЛ (AUTONOMOUS PIPELINE) ");
@@ -184,13 +236,28 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     }
   }
 
-  // Умный алгоритм скоринга и анти-повторов:
-  // 1. Анти-повтор магазинов: штрафуем магазины, выходившие за последние 30 дней
-  // 2. Чередование категорий: не постить одну категорию подряд
-  // 3. Бонус высокодоходным брендам с повышенными ставками (Start.ru, Додо, ВкусВилл, Яндекс Лавка)
-  const HIGH_PRIORITY_BRANDS = ["Start.ru", "Яндекс Лавка", "ВкусВилл Доставка", "Додо пицца Юг", "Перекрёсток Доставка", "Яндекс Цветы"];
-  const lastPost = historyData.history[0];
-  const lastStore = lastPost?.store?.toLowerCase();
+  // Умный алгоритм скоринга и жестких анти-повторов:
+  // 1. Никогда не повторять промокоды (уже отфильтровано в recentCodes)
+  // 2. Жесткий запрет на выход магазина из последних 10 постов
+  // 3. Ротация категорий и брендов
+  const HIGH_PRIORITY_BRANDS = [
+    "Start.ru",
+    "Яндекс Лавка",
+    "ВкусВилл Доставка",
+    "Додо пицца Юг",
+    "Перекрёсток Доставка",
+    "Яндекс Цветы",
+    "Отелло",
+    "Ситидрайв",
+    "FARFOR",
+    "Ив Роше",
+    "Librederm",
+    "Netprint",
+    "СберПрайм"
+  ];
+
+  const recentStoresList = historyData.history.slice(0, 10).map(h => (h.store || "").toLowerCase());
+  const lastStore = historyData.history[0]?.store?.toLowerCase();
 
   // Рассчитываем давность каждого магазина
   const storeLastPostTime = new Map();
@@ -200,15 +267,19 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
     }
   }
 
-  const scored = candidates.map(c => {
+  // Сначала пытаемся отобрать кандидатов, которых гарантированно не было в последних 10 постах
+  const freshCandidates = candidates.filter(c => !recentStoresList.includes(c.storeName.toLowerCase()));
+  const candidatePool = freshCandidates.length > 0 ? freshCandidates : candidates;
+
+  const scored = candidatePool.map(c => {
     let score = 100;
     const storeLower = c.storeName.toLowerCase();
 
-    // Штраф, если магазин уже публиковался недавно
+    // Штраф, если магазин уже публиковался когда-либо
     if (storeLastPostTime.has(storeLower)) {
       const daysSince = Math.floor((now - storeLastPostTime.get(storeLower)) / (24 * 60 * 60 * 1000));
       if (daysSince < 30) {
-        score -= (30 - daysSince) * 10; // Чем свежее был пост, тем жестче штраф
+        score -= (30 - daysSince) * 10;
       } else {
         score += 20;
       }
@@ -216,9 +287,9 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
       score += 50; // Бонус новым магазинам, которых еще не было в канале!
     }
 
-    // Жесткий запрет на публикацию того же магазина подряд
+    // Жесткий запрет на повтор последнего магазина
     if (lastStore && storeLower === lastStore) {
-      score -= 500;
+      score -= 1000;
     }
 
     // Бонус проектам с повышенными ставками / высокой конверсией
@@ -238,6 +309,28 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   scored.sort((a, b) => b.score - a.score);
 
   const selected = scored[0];
+
+  // Обогащаем оффер персональной ссылкой, erid и самым выгодным промокодом конкретно для канала @smart_zakupka
+  if (selected.storeId) {
+    const channelData = await fetchChannelSpecificOffer(selected.storeId, "smart_zakupka");
+    if (channelData) {
+      if (channelData.affUrl) selected.affUrl = channelData.affUrl;
+      if (channelData.ordMarker) selected.ordMarker = channelData.ordMarker;
+      if (channelData.ordText) selected.ordText = channelData.ordText;
+
+      // Выбираем промокод с максимальной скидкой, которого еще не было в канале
+      const validPromos = (channelData.promos || [])
+        .filter(p => p.code && !recentCodes.has(p.code.toUpperCase()))
+        .sort((a, b) => b.discountNum - a.discountNum);
+
+      if (validPromos.length > 0) {
+        selected.code = validPromos[0].code;
+        selected.bonus = validPromos[0].bonus;
+        if (validPromos[0].expires) selected.expires = validPromos[0].expires;
+      }
+    }
+  }
+
   console.log(`\n[Фаза 4] Выбран лучший оффер: "${selected.storeName}" (балл: ${selected.score}, код: ${selected.code}, бонус: ${selected.bonus})`);
 
   // Формируем красивый пост
