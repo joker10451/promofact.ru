@@ -39,6 +39,7 @@ jobs:
       - name: 🚀 Запуск полного автономного конвейера
         env:
           PERFLUENCE_WIDGET_URL: ${{ secrets.PERFLUENCE_WIDGET_URL }}
+          PERFLUENCE_RESULTS_URL: ${{ secrets.PERFLUENCE_RESULTS_URL }}
           PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID || '@smart_zakupka' }}

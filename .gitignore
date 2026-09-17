@@ -52,6 +52,7 @@ data/perfluence_session.json
 data/debug/
 data/banners/
 data/flash_deals.json
+data/notified_orders.json
 
 # Материалы внутреннего аудита: описывают незакрытые уязвимости,
 # а репозиторий публичный. Держим только локально.

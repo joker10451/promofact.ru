@@ -16,6 +16,7 @@ import { takeNewOffers } from "./perfluence-take-offers.mjs";
 import { generatePromoBanner } from "./banner-generator.mjs";
 import { getFlashDeals, autoActivateFlashProjects } from "./perfluence-flash-deals.mjs";
 import { postToVk } from "./vk-crossposter.mjs";
+import { checkNewEarnings } from "./perfluence-earnings-monitor.mjs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HISTORY_FILE = path.join(DATA_DIR, "posted_promos.json");
@@ -219,6 +220,19 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   console.log("==================================================");
   console.log("   🚀 ПОЛНЫЙ АВТОНОМНЫЙ ЦИКЛ (AUTONOMOUS PIPELINE) ");
   console.log("==================================================");
+
+  // ФАЗА 0: Мониторинг новых заказов, конверсий и заработка
+  console.log("\n[Фаза 0] Мониторинг новых заказов и начислений...");
+  try {
+    const earningsRes = await checkNewEarnings({ notify: !options.dryRun });
+    if (earningsRes.newOrders.length > 0) {
+      console.log(` -> 🎉 Зафиксировано ${earningsRes.newOrders.length} новых начислений! Уведомления отправлены админу.`);
+    } else {
+      console.log(` -> Все начисления актуальны (всего: ${earningsRes.totalRub?.toLocaleString("ru-RU")} ₽).`);
+    }
+  } catch (eErr) {
+    console.warn(" -> ⚠ Ошибка проверки начислений:", eErr.message);
+  }
 
   // ФАЗА 1: Очистка просроченных постов
   console.log("\n[Фаза 1] Проверка и автоудаление истекших акций...");
