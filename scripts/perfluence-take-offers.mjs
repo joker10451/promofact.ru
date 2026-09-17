@@ -49,7 +49,7 @@ export async function takeNewOffers(options = { maxOffers: 3, headless: true }) 
   const page = await context.newPage();
 
   // Каталог проектов Perfluence
-  const catalogUrl = "https://dash.perfluence.net/projects/index";
+  const catalogUrl = "https://dash.perfluence.net/projects";
   console.log(`[AutoTake] Открытие каталога проектов: ${catalogUrl}`);
 
   let loaded = false;
