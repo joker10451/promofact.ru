@@ -71,36 +71,39 @@ async function sendTelegramPost(text, buttons = [], imageUrl = null) {
   // Если есть локальный файл или ссылка на баннер — шлем как фото с подписью
   if (imageUrl) {
     const photoUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
-    try {
-      let photoRes;
-      if (fs.existsSync(imageUrl)) {
-        const fileBuffer = fs.readFileSync(imageUrl);
-        const formData = new FormData();
-        formData.append("chat_id", CHANNEL_ID);
-        formData.append("photo", new Blob([fileBuffer], { type: "image/png" }), "banner.png");
-        formData.append("caption", text.slice(0, 1024));
-        formData.append("parse_mode", "HTML");
-        if (replyMarkup) formData.append("reply_markup", JSON.stringify(replyMarkup));
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        let photoRes;
+        if (fs.existsSync(imageUrl)) {
+          const fileBuffer = fs.readFileSync(imageUrl);
+          const formData = new FormData();
+          formData.append("chat_id", CHANNEL_ID);
+          formData.append("photo", new Blob([fileBuffer], { type: "image/png" }), "banner.png");
+          formData.append("caption", text.slice(0, 1024));
+          formData.append("parse_mode", "HTML");
+          if (replyMarkup) formData.append("reply_markup", JSON.stringify(replyMarkup));
 
-        photoRes = await fetch(photoUrl, { method: "POST", body: formData });
-      } else {
-        photoRes = await fetch(photoUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: CHANNEL_ID,
-            photo: imageUrl,
-            caption: text.slice(0, 1024),
-            parse_mode: "HTML",
-            reply_markup: replyMarkup
-          })
-        });
+          photoRes = await fetch(photoUrl, { method: "POST", body: formData });
+        } else {
+          photoRes = await fetch(photoUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: CHANNEL_ID,
+              photo: imageUrl,
+              caption: text.slice(0, 1024),
+              parse_mode: "HTML",
+              reply_markup: replyMarkup
+            })
+          });
+        }
+        const photoData = await photoRes.json();
+        if (photoData.ok) return photoData;
+        console.warn(`⚠ sendPhoto попытка ${attempt} не удалась:`, photoData.description);
+      } catch (photoErr) {
+        console.warn(`⚠ sendPhoto попытка ${attempt} ошибка:`, photoErr.message);
+        if (attempt < 2) await new Promise(r => setTimeout(r, 1000));
       }
-      const photoData = await photoRes.json();
-      if (photoData.ok) return photoData;
-      console.warn("⚠ sendPhoto не сработал, переключаемся на текст:", photoData.description);
-    } catch (photoErr) {
-      console.warn("⚠ Ошибка отправки фото:", photoErr.message);
     }
   }
 
