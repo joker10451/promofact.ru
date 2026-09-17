@@ -25,21 +25,21 @@ const SESSION_FILE = path.join(DATA_DIR, "perfluence_session.json");
 // Чтение переменных окружения: сначала process.env (для GitHub Actions), затем fallback на .env.local
 const envContent = fs.existsSync(".env.local") ? fs.readFileSync(".env.local", "utf8") : "";
 const fileEnv = {};
-for (const line of envContent.split("\n")) {
+for (const line of envContent.split(/\r?\n/)) {
   const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
   if (match) {
-    let val = match[2] || "";
+    let val = (match[2] || "").trim();
     if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-      val = val.slice(1, -1);
+      val = val.slice(1, -1).trim();
     }
     fileEnv[match[1]] = val;
   }
 }
 
-const WIDGET_URL = process.env.PERFLUENCE_WIDGET_URL || fileEnv.PERFLUENCE_WIDGET_URL;
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || fileEnv.TELEGRAM_BOT_TOKEN;
-const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || fileEnv.TELEGRAM_CHANNEL_ID || "@smart_zakupka";
-const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || fileEnv.TELEGRAM_ADMIN_CHAT_ID;
+const WIDGET_URL = (process.env.PERFLUENCE_WIDGET_URL || fileEnv.PERFLUENCE_WIDGET_URL || "").replace(/["']/g, "").trim();
+const BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || fileEnv.TELEGRAM_BOT_TOKEN || "").replace(/["']/g, "").trim();
+const CHANNEL_ID = (process.env.TELEGRAM_CHANNEL_ID || fileEnv.TELEGRAM_CHANNEL_ID || "@smart_zakupka").replace(/["']/g, "").trim();
+const ADMIN_CHAT_ID = (process.env.TELEGRAM_ADMIN_CHAT_ID || fileEnv.TELEGRAM_ADMIN_CHAT_ID || "6141363106").replace(/["']/g, "").trim();
 
 function loadHistory() {
   try {
