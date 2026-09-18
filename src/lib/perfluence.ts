@@ -129,6 +129,11 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   3641: { slug: "cozy-home", name: "Cozy Home" },
   3807: { slug: "librederm", name: "Librederm" },
   1977: { slug: "vazhnaya-ryba", name: "Важная Рыба" },
+  4447: { slug: "carte-blanche", name: "Carte Blanche" },
+  4579: { slug: "fmart", name: "FMART" },
+  3611: { slug: "megamarket", name: "Мегамаркет" },
+  602: { slug: "tanukifamily", name: "Тануки" },
+  2582: { slug: "magnit-dostavka", name: "Магнит Доставка" },
 };
 
 export function parsePayload(payloadJson: string): Coupon[] {
