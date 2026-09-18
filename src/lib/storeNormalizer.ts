@@ -156,6 +156,44 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
     category: "Сервисы и подписки",
     categorySlug: "servisy-i-podpiski",
   },
+  // Магазины Perfluence, которые по названию не распознаются и падали
+  // в «Разное»: у «Т-Мобайл», «Ситидрайв», «Бетховен» и Cozy Home нет ни
+  // одного ключевого слова рубрикатора.
+  "t-mobayl": {
+    name: "Т-Мобайл",
+    category: "Связь и интернет",
+    categorySlug: "svyaz-i-internet",
+  },
+  "citydrive": {
+    name: "Ситидрайв",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+  },
+  "bethowen": {
+    name: "Бетховен",
+    category: "Всё для дома",
+    categorySlug: "vse-dlya-doma",
+  },
+  "cozy-home": {
+    name: "Cozy Home",
+    category: "Всё для дома",
+    categorySlug: "vse-dlya-doma",
+  },
+  "yandeks-afisha": {
+    name: "Яндекс Афиша",
+    category: "Развлечения и события",
+    categorySlug: "razvlecheniya",
+  },
+  "kassir-ru": {
+    name: "KASSIR.RU",
+    category: "Развлечения и события",
+    categorySlug: "razvlecheniya",
+  },
+  "kreditnaya-sberkarta": {
+    name: "Кредитная СберКарта",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+  },
   "agni": {
     name: "Agni",
     category: "Все для дома",
