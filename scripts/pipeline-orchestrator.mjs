@@ -37,6 +37,66 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || fileEnv.TELEGRAM_BOT_TOKEN;
 const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || fileEnv.TELEGRAM_CHANNEL_ID || "@smart_zakupka";
 const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || fileEnv.TELEGRAM_ADMIN_CHAT_ID;
 
+/**
+ * Адреса страниц магазинов на сайте. Те же, что в src/lib/perfluence.ts:
+ * названия проектов в кабинете («Додо пицца Юг») в адрес не годятся.
+ */
+const STORE_SLUGS = {
+  1653: "dodo-pizza",
+  900: "bethowen",
+  1483: "citydrive",
+  2576: "sberprime",
+  2548: "m-kosmetik",
+  3641: "cozy-home",
+  3807: "librederm",
+  1977: "vazhnaya-ryba",
+};
+
+const TRANSLIT = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i",
+  й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t",
+  у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y",
+  ь: "", э: "e", ю: "yu", я: "ya",
+};
+
+function storeSlugOf(storeId, storeName) {
+  if (STORE_SLUGS[storeId]) return STORE_SLUGS[storeId];
+  return String(storeName)
+    .toLowerCase()
+    .split("")
+    .map((ch) => (ch in TRANSLIT ? TRANSLIT[ch] : ch))
+    .join("")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "magazin";
+}
+
+const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня",
+  "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+
+function formatExpires(value) {
+  const ru = String(value).match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+  if (ru) return `${Number(ru[1])} ${MONTHS[Number(ru[2]) - 1] ?? ru[2]}`;
+  const iso = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${Number(iso[3])} ${MONTHS[Number(iso[2]) - 1] ?? iso[2]}`;
+  return String(value);
+}
+
+function plural(n, one, few, many) {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+  return many;
+}
+
+function cleanText(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function loadHistory() {
   try {
     if (fs.existsSync(HISTORY_FILE)) {
@@ -171,10 +231,18 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
         candidates.push({
           storeId,
           storeName,
+          storeSlug: storeSlugOf(storeId, storeName),
           code,
-          bonus: p.bonus_name || p.name || "Скидка по промокоду",
-          terms: p.terms || project.subscribers_condition || "",
-          expires: p.expires || null,
+          bonus: p.bonus_name || p.name || p.comment || "Скидка по промокоду",
+          // p.terms у Perfluence почти всегда пустой, поэтому пост выходил
+          // из одного заголовка. Берём описание бонуса и условия проекта.
+          terms: p.promo_terms || p.terms || "",
+          about: project.subscribers_condition || project.product_info || "",
+          // Виджет отдаёт срок в поле date («30.09.2026»), не expires.
+          expires: p.date || p.expires || null,
+          region: Array.isArray(p.region_promo) ? p.region_promo.join(", ") : p.region_promo || "",
+          repeatOrder: Boolean(p.repeat_order),
+          codesInStore: promos.length,
           affUrl,
           ordMarker,
           ordText,
@@ -195,17 +263,29 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   const selected = candidates.find(c => c.isHit) || candidates[0];
   console.log(`\n[Фаза 4] Выбран лучший оффер: "${selected.storeName}" (код: ${selected.code}, бонус: ${selected.bonus})`);
 
-  // Формируем красивый пост
+  // Формируем пост
   const postLines = [
-    `🔥 <b>${selected.storeName} — ${selected.bonus}</b>\n`,
+    `${selected.isHit ? "🔥" : "🏷"} <b>${selected.storeName} — ${selected.bonus}</b>\n`,
     `🎟 Промокод: <code>${selected.code}</code>`,
     `<i>(нажмите на код — он скопируется в буфер)</i>\n`
   ];
 
-  if (selected.terms) {
-    const cleanTerms = selected.terms.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 180);
-    postLines.push(`📌 <b>Условия:</b>\n• ${cleanTerms}`);
+  // Блок условий: раньше он был единственным и появлялся, только если
+  // рекламодатель заполнил terms. Теперь собираем строки из полей, которые
+  // виджет отдаёт всегда, — пост перестал быть «кодом в пустоте».
+  const facts = [];
+  facts.push(selected.repeatOrder ? "Первый и повторные заказы" : "Только первый заказ");
+  if (selected.region && selected.region !== "RU") facts.push(`Города: ${selected.region}`);
+  if (selected.expires) facts.push(`Действует до ${formatExpires(selected.expires)}`);
+  if (selected.codesInStore > 1) {
+    facts.push(`Ещё ${selected.codesInStore - 1} ${plural(selected.codesInStore - 1, "код", "кода", "кодов")} этого магазина — на сайте`);
   }
+
+  postLines.push("📌 <b>Условия:</b>");
+  facts.forEach((f) => postLines.push(`• ${f}`));
+
+  const details = cleanText(selected.terms) || cleanText(selected.about);
+  if (details) postLines.push(`\nℹ️ ${details.slice(0, 220)}`);
 
   postLines.push("");
   if (selected.ordMarker && !selected.ordText.includes(selected.ordMarker)) {
@@ -217,7 +297,9 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   const postText = postLines.join("\n");
   const buttons = [
     [{ text: `🛍 В магазин ${selected.storeName} →`, url: selected.affUrl }],
-    [{ text: "🌐 Все промокоды на PromoFact", url: "https://promofact.ru" }]
+    // Раньше вторая кнопка вела на главную. Ведём на страницу магазина:
+    // там все его коды, условия и маркировка.
+    [{ text: `🌐 Все промокоды ${selected.storeName}`, url: `https://promofact.ru/store/${selected.storeSlug}` }]
   ];
 
   if (options.dryRun) {

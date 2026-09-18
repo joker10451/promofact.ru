@@ -1,6 +1,7 @@
 import "server-only";
 import { translit } from "@/lib/translit";
 import { proxiedLogo } from "@/lib/logoProxy";
+import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 
 const REVALIDATE_SECONDS = 12 * 60 * 60; // 43200 — ISR: 12 часов для защиты лимита ISR Writes на Vercel
@@ -69,6 +70,12 @@ function regionStr(v: unknown): string | null {
 /**
  * Собирает пары (промокод, группа) из ответа.
  * widget-json: data[].groups[].promocodes; legacy /json: data[].promocodes.
+ *
+ * Группа без промокодов — это акция по ссылке (СберПрайм, Отелло, Т-Мобайл,
+ * Кредитная СберКарта). Раньше такие проекты терялись целиком: цикл шёл только
+ * по promocodes, а там пусто. Именно за них платят больше всего (420–2230 ₽ за
+ * действие), поэтому для них собираем купон с пустым кодом — карточка с одной
+ * кнопкой «Перейти», как у ручных купонов СберПрайма.
  */
 function collectPromos(item: Rec): { promo: Rec; group: Rec }[] {
   const out: { promo: Rec; group: Rec }[] = [];
@@ -77,10 +84,52 @@ function collectPromos(item: Rec): { promo: Rec; group: Rec }[] {
     const promos = Array.isArray(group.promocodes)
       ? (group.promocodes as Rec[])
       : [];
-    for (const promo of promos) out.push({ promo, group });
+    if (promos.length) {
+      for (const promo of promos) out.push({ promo, group });
+      continue;
+    }
+    const landing = asRec(
+      Array.isArray(group.landing) ? (group.landing as Rec[])[0] : group.landing,
+    );
+    const links = Array.isArray(group.links_for_subscribers)
+      ? (group.links_for_subscribers as Rec[])
+      : [];
+    if (!str(landing.link) && !str(links[0]?.link)) continue;
+    out.push({
+      promo: {
+        code: "",
+        name: str(landing.name) || str(links[0]?.title),
+        post_id: landing.post_id,
+        repeat_order: true,
+        is_universal: true,
+      },
+      group,
+    });
   }
   return out;
 }
+
+/**
+ * Псевдонимы магазинов Perfluence: адрес страницы и человеческое название.
+ *
+ * В кабинете проекты названы так, как их завёл рекламодатель («Додо пицца Юг»,
+ * «М.Косметик - Новое приложение»). Транслит такого названия даёт и кривой
+ * заголовок, и адрес вида /store/dodo-pitstsa-yug. Ключ — id проекта: он не
+ * меняется, когда рекламодатель переименовывает кампанию.
+ *
+ * Адреса совпадают с теми, что уже стоят в статьях, коротких ссылках
+ * (next.config.ts) и баннерах, поэтому страницы не разъезжаются.
+ */
+const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
+  1653: { slug: "dodo-pizza", name: "Додо Пицца" },
+  900: { slug: "bethowen", name: "Бетховен" },
+  1483: { slug: "citydrive", name: "Ситидрайв" },
+  2576: { slug: "sberprime", name: "СберПрайм" },
+  2548: { slug: "m-kosmetik", name: "М.Косметик" },
+  3641: { slug: "cozy-home", name: "Cozy Home" },
+  3807: { slug: "librederm", name: "Librederm" },
+  1977: { slug: "vazhnaya-ryba", name: "Важная Рыба" },
+};
 
 export function parsePayload(payloadJson: string): Coupon[] {
   const body: { data?: unknown } = JSON.parse(payloadJson);
@@ -94,12 +143,16 @@ export function parsePayload(payloadJson: string): Coupon[] {
     const item = asRec(raw);
     const project = asRec(item.project ?? item.shop ?? item);
 
-    const name = str(project.name || project.store_name).trim() || "Магазин";
-    let slug = translit(name) || "magazin";
+    const projectId = num(project.id ?? project.project_id);
+    const alias = STORE_ALIASES[projectId];
+    const name =
+      alias?.name || str(project.name || project.store_name).trim() || "Магазин";
+    const baseSlug = alias?.slug || translit(name) || "magazin";
+    let slug = baseSlug;
     let n = 1;
     while (seenSlugs.has(slug)) {
       n += 1;
-      slug = `${translit(name) || "magazin"}-${n}`;
+      slug = `${baseSlug}-${n}`;
     }
     seenSlugs.add(slug);
 
@@ -107,13 +160,18 @@ export function parsePayload(payloadJson: string): Coupon[] {
       str(project.category_name || project.category).trim() || "Другое";
     const site = str(project.site || project.url);
 
+    // Категории Perfluence («Подписка на скидки», «Прочее») не совпадают с
+    // рубрикатором сайта и плодили разделы из одного магазина. Прогоняем их
+    // через общий нормализатор — тот же, что у Admitad и Saleads.
+    const norm = normalizeStore(name, slug, categoryName);
+
     const store: Store = {
-      id: num(project.id ?? project.project_id),
+      id: projectId,
       name,
       slug,
       logo: proxiedLogo(str(project.logo || project.logo_url)),
-      category: categoryName,
-      categorySlug: translit(categoryName),
+      category: norm.category,
+      categorySlug: norm.categorySlug,
       about: stripHtml(project.product_info) || null,
       conditions: stripHtml(project.subscribers_condition) || null,
       site,
