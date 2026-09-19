@@ -198,7 +198,27 @@ async function fetchChannelSpecificOffer(projectId, targetAccount = "smart_zakup
     const idx = html.indexOf(targetAccount);
     if (idx === -1) return null;
 
-    const sub = html.slice(idx, idx + 8000);
+    // Карточки аккаунтов идут подряд, поэтому «8000 символов после имени
+    // канала» захватывало соседнюю карточку — чаще всего «Сайт». Из-за этого
+    // бот брал ссылку и erid сайта и постил их в Telegram даже там, где заявка
+    // канала отклонена (так вышло с Librederm). Режем строго по своей карточке.
+    const STATUS = /Аккаунт одобрен|Заявка отклонена|Аккаунт на проверке|Аккаунт не подходит|Заявка на рассмотрении/g;
+    const bounds = [];
+    let m;
+    while ((m = STATUS.exec(html)) !== null) bounds.push({ at: m.index, text: m[0] });
+
+    const start = [...bounds].reverse().find((b) => b.at < idx);
+    const end = bounds.find((b) => b.at > idx);
+    if (!start) return null;
+    if (start.text !== "Аккаунт одобрен") {
+      console.log(` -> аккаунт «${targetAccount}»: ${start.text} — публиковать нельзя`);
+      return null;
+    }
+
+    const sub = html.slice(start.at, end ? end.at : Math.min(html.length, idx + 8000));
+    // Имя канала должно остаться внутри своей карточки — иначе разметка
+    // изменилась и резать по статусам больше нельзя.
+    if (!sub.includes(targetAccount)) return null;
     const linkMatch = sub.match(/https:\/\/[a-z0-9.]+\.prfl\.me\/[^\s"'<>]+/i);
     const eridMatch = sub.match(/erid:\s*([A-Za-z0-9_-]+)/i);
     const ordTextMatch = sub.match(/Маркер и токен[\s\S]*?<div[^>]*>([\s\S]*?)<\/div>/i) || sub.match(/Реклама\.[\s\S]*?(?=<\/div>|<div)/i);
