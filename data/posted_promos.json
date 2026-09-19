@@ -8,6 +8,15 @@
   ],
   "history": [
     {
+      "id": 1789840942751,
+      "code": "PERFCITY107",
+      "store": "Ситидрайв",
+      "messageId": 68,
+      "postUrl": "https://t.me/smart_zakupka/68",
+      "expires": null,
+      "date": "2026-09-19T18:02:22.751Z"
+    },
+    {
       "id": 1789818983845,
       "code": "ALL30_6P3BRXJY",
       "store": "Netprint",
