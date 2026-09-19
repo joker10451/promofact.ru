@@ -50,7 +50,19 @@ function descriptionFor(slug) {
   return [main, url ? `Все коды и условия: ${url}` : "", tags].filter(Boolean).join("\n");
 }
 
-async function uploadClip(token, groupId, slug, dryRun) {
+/**
+ * Трек из каталога ВК. Клипы с музыкой попадают в ленты по звуку, без неё
+ * ролик живёт только на странице сообщества. Идентификатор берётся из ссылки
+ * на аудиозапись: vk.com/audio-2001234567_123456789 → «-2001234567_123456789».
+ */
+function parseAudio(value) {
+  if (!value) return null;
+  const m = String(value).match(/(-?\d+)_(\d+)/);
+  if (!m) throw new Error(`не разобрал трек «${value}», нужен вид -2001234567_123456789`);
+  return { audio_owner_id: m[1], audio_id: m[2] };
+}
+
+async function uploadClip(token, groupId, slug, dryRun, audio) {
   const video = path.join(OUT_DIR, `${slug}-site-final.mp4`);
   if (!fs.existsSync(video)) throw new Error("нет файла ролика");
   const description = descriptionFor(slug);
@@ -59,14 +71,29 @@ async function uploadClip(token, groupId, slug, dryRun) {
   if (dryRun) {
     console.log(`\n[${slug}] ${(fs.statSync(video).size / 1024 / 1024).toFixed(1)} МБ`);
     console.log(description);
+    if (audio) console.log(`трек: ${audio.audio_owner_id}_${audio.audio_id}`);
     return "dry-run";
   }
 
   // shortVideo.create отдаёт адрес для загрузки файла клипа
-  const created = await api("shortVideo.create", token, {
+  const params = {
     group_id: String(groupId).replace("-", ""),
     description,
-  });
+    ...(audio || {}),
+  };
+  let created;
+  try {
+    created = await api("shortVideo.create", token, params);
+  } catch (e) {
+    // Параметры аудио у метода недокументированы и могут не приниматься —
+    // тогда клип публикуется без музыки, а не падает целиком.
+    if (!audio) throw e;
+    console.log(`  трек не принят (${e.message}), публикую без музыки`);
+    created = await api("shortVideo.create", token, {
+      group_id: String(groupId).replace("-", ""),
+      description,
+    });
+  }
   const uploadUrl = created.upload_url;
 
   const form = new FormData();
@@ -80,6 +107,7 @@ async function uploadClip(token, groupId, slug, dryRun) {
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
+const audioArg = args.find((a) => a.startsWith("--audio="))?.split("=")[1];
 const slugs = args.filter((a) => !a.startsWith("--"));
 if (!slugs.length) {
   console.error("укажи slug роликов, например: yandeks-lavka tutu");
@@ -101,10 +129,12 @@ if (!groupId) {
   process.exit(1);
 }
 
+const audio = parseAudio(audioArg || env.VK_CLIP_AUDIO);
+
 let ok = 0;
 for (const slug of slugs) {
   try {
-    const id = await uploadClip(token, groupId, slug, dryRun);
+    const id = await uploadClip(token, groupId, slug, dryRun, audio);
     ok += 1;
     console.log(`готово: ${slug} → ${id}`);
   } catch (e) {

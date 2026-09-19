@@ -625,6 +625,28 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
         " Зайдите в кабинет Perfluence и нажмите «Получить промокод» для канала," +
         " либо проверьте, жива ли сессия в data/perfluence_session.json.",
     );
+
+    // ВК при этом не остаётся без записей: сообщество без ленты не получает
+    // показов в клипах, а анонс со ссылкой на страницу сайта партнёрской
+    // рекламой не является — маркировка стоит на самой странице.
+    const announce = scored[0];
+    if (announce && !options.dryRun) {
+      try {
+        const vkResult = await postToVk({
+          storeName: announce.storeName,
+          storeSlug: announce.storeSlug,
+          code: announce.code,
+          bonus: announce.bonus,
+          terms: announce.terms,
+          siteMode: true,
+        });
+        if (vkResult.ok) console.log(` -> 🌐 ВК: анонс опубликован (${vkResult.postUrl})`);
+      } catch (e) {
+        console.warn(" -> ⚠ ВК: анонс не опубликован:", e.message);
+      }
+    } else if (announce) {
+      console.log(` -> [DRY RUN] ВК получил бы анонс «${announce.storeName}» со ссылкой на сайт`);
+    }
     return;
   }
 
@@ -735,6 +757,7 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   try {
     const vkResult = await postToVk({
       storeName: selected.storeName,
+      storeSlug: selected.storeSlug,
       code: selected.code,
       bonus: selected.bonus,
       terms: selected.terms,
@@ -742,7 +765,9 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
       ordMarker: selected.ordMarker,
       ordText: selected.ordText,
       bannerPath: selected.bannerPath,
-      flashDeal: selected.flashDeal
+      flashDeal: selected.flashDeal,
+      // erid выдан под Telegram, поэтому в ВК идёт анонс со ссылкой на сайт.
+      siteMode: true
     });
     if (vkResult.ok) {
       console.log(` -> 🌐 Кросспостинг в VK: успешно опубликован (${vkResult.postUrl})`);
