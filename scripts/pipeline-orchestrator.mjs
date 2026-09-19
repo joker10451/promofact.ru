@@ -397,6 +397,16 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
           region: Array.isArray(p.region_promo) ? p.region_promo.join(", ") : p.region_promo || "",
           repeatOrder: Boolean(p.repeat_order),
           codesInStore: promos.length,
+          // Остальные коды этого же магазина: раньше в пост уходил один код,
+          // хотя у проекта их бывает три-четыре, и подписчик не видел,
+          // что есть вариант выгоднее под его сумму заказа.
+          otherPromos: promos
+            .filter((x) => (x.code || "").trim() && (x.code || "").trim() !== code)
+            .map((x) => ({
+              code: (x.code || "").trim(),
+              bonus: x.bonus_name || x.name || x.comment || "",
+              expires: x.date || x.expires || null,
+            })),
           affUrl,
           ordMarker,
           ordText,
@@ -545,27 +555,57 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   // Сортируем по итоговому баллу
   scored.sort((a, b) => b.score - a.score);
 
-  const selected = scored[0];
-
-  // Обогащаем оффер персональной ссылкой, erid и самым выгодным промокодом конкретно для канала @smart_zakupka
-  if (selected.storeId) {
-    const channelData = await fetchChannelSpecificOffer(selected.storeId, "smart_zakupka");
-    if (channelData) {
-      if (channelData.affUrl) selected.affUrl = channelData.affUrl;
-      if (channelData.ordMarker) selected.ordMarker = channelData.ordMarker;
-      if (channelData.ordText) selected.ordText = channelData.ordText;
-
-      // Выбираем промокод с максимальной скидкой, которого еще не было в канале
-      const validPromos = (channelData.promos || [])
-        .filter(p => p.code && !recentCodes.has(p.code.toUpperCase()))
-        .sort((a, b) => b.discountNum - a.discountNum);
-
-      if (validPromos.length > 0) {
-        selected.code = validPromos[0].code;
-        selected.bonus = validPromos[0].bonus;
-        if (validPromos[0].expires) selected.expires = validPromos[0].expires;
-      }
+  // Ссылка и erid должны принадлежать публикации канала @smart_zakupka.
+  // В виджете лежит ссылка последней публикации — она может быть от аккаунта
+  // «Сайт», и тогда заказы из канала засчитаются сайту, а пост в Telegram
+  // окажется с чужим erid. Поэтому идём по кандидатам сверху вниз и берём
+  // первого, у кого в кабинете есть публикация для канала.
+  let selected = null;
+  for (const candidate of scored.slice(0, 8)) {
+    if (!candidate.storeId) continue;
+    const channelData = await fetchChannelSpecificOffer(candidate.storeId, "smart_zakupka");
+    if (!channelData || !channelData.affUrl || !channelData.ordMarker) {
+      console.log(
+        ` -> «${candidate.storeName}»: для канала нет публикации с ссылкой и erid, пропускаем`,
+      );
+      continue;
     }
+
+    candidate.affUrl = channelData.affUrl;
+    candidate.ordMarker = channelData.ordMarker;
+    if (channelData.ordText) candidate.ordText = channelData.ordText;
+
+    // Самый выгодный код канала, которого ещё не было в постах
+    const validPromos = (channelData.promos || [])
+      .filter((p) => p.code && !recentCodes.has(p.code.toUpperCase()))
+      .sort((a, b) => b.discountNum - a.discountNum);
+
+    if (validPromos.length > 0) {
+      candidate.code = validPromos[0].code;
+      candidate.bonus = validPromos[0].bonus;
+      if (validPromos[0].expires) candidate.expires = validPromos[0].expires;
+      candidate.otherPromos = validPromos.slice(1).map((p) => ({
+        code: p.code,
+        bonus: p.bonus,
+        expires: p.expires,
+      }));
+    } else if (!channelData.promos?.some((p) => p.code === candidate.code)) {
+      // Кода из виджета нет среди кодов канала — значит он не наш.
+      console.log(` -> «${candidate.storeName}»: код ${candidate.code} не выдан каналу, пропускаем`);
+      continue;
+    }
+
+    selected = candidate;
+    break;
+  }
+
+  if (!selected) {
+    console.log(
+      "\n❌ Ни по одному офферу нет публикации для канала @smart_zakupka." +
+        " Зайдите в кабинет Perfluence и нажмите «Получить промокод» для канала," +
+        " либо проверьте, жива ли сессия в data/perfluence_session.json.",
+    );
+    return;
   }
 
   console.log(`\n[Фаза 4] Выбран лучший оффер: "${selected.storeName}" (балл: ${selected.score}, код: ${selected.code}, бонус: ${selected.bonus})${selected.flashDeal ? ` [${selected.flashDeal.badge}]` : ""}`);
@@ -587,12 +627,21 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   facts.push(selected.repeatOrder ? "Первый и повторные заказы" : "Только первый заказ");
   if (selected.region && selected.region !== "RU") facts.push(`Города: ${selected.region}`);
   if (selected.expires) facts.push(`Действует до ${formatExpires(selected.expires)}`);
-  if (selected.codesInStore > 1) {
-    facts.push(`Ещё ${selected.codesInStore - 1} ${plural(selected.codesInStore - 1, "код", "кода", "кодов")} этого магазина — на сайте`);
-  }
 
   postLines.push("📌 <b>Условия:</b>");
   facts.forEach((f) => postLines.push(`• ${f}`));
+
+  // Остальные коды магазина — прямо в посте. Подписчик сам выберет тот, что
+  // подходит под его сумму заказа, вместо того чтобы уходить искать на сайт.
+  const others = (selected.otherPromos || []).slice(0, 3);
+  if (others.length) {
+    postLines.push(`\n🎁 <b>Ещё коды ${selected.storeName}:</b>`);
+    for (const o of others) {
+      const until = o.expires ? ` (до ${formatExpires(o.expires)})` : "";
+      const what = cleanText(o.bonus).slice(0, 80);
+      postLines.push(`• <code>${o.code}</code> — ${what}${until}`);
+    }
+  }
 
   const details = cleanText(selected.terms) || cleanText(selected.about);
   if (details) postLines.push(`\nℹ️ ${details.slice(0, 220)}`);
