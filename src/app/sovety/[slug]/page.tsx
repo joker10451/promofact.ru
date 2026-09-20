@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import ArticleCover from "@/components/ArticleCover";
 import Icon from "@/components/Icon";
 import type { Metadata } from "next";
@@ -8,6 +9,7 @@ import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import CouponTicket from "@/components/CouponTicket";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import YandexAdBlock from "@/components/YandexAdBlock";
 import { ARTICLES, getArticle } from "@/lib/articles";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
@@ -180,20 +182,27 @@ export default async function ArticlePage({
             )}
 
             <div className="mt-6 space-y-4 text-base leading-relaxed text-ink/80">
-              {article.body.map((p, i) =>
-                p.startsWith("## ") ? (
-                  <h2
-                    key={i}
-                    className="!mt-8 font-display text-xl sm:text-2xl font-extrabold text-ink"
-                  >
-                    {p.slice(3)}
-                  </h2>
-                ) : (
-                  <p key={i} className="leading-relaxed">
-                    {renderParagraph(p)}
-                  </p>
-                )
-              )}
+              {article.body.map((p, i) => (
+                <Fragment key={i}>
+                  {p.startsWith("## ") ? (
+                    <h2
+                      className="!mt-8 font-display text-xl sm:text-2xl font-extrabold text-ink"
+                    >
+                      {p.slice(3)}
+                    </h2>
+                  ) : (
+                    <p className="leading-relaxed">
+                      {renderParagraph(p)}
+                    </p>
+                  )}
+                  {i === Math.max(2, Math.floor(article.body.length / 2)) && (
+                    <YandexAdBlock
+                      blockId={process.env.NEXT_PUBLIC_YANDEX_ARTICLE_AD_ID || "R-A-1234567-5"}
+                      className="my-6"
+                    />
+                  )}
+                </Fragment>
+              ))}
             </div>
 
             {article.ctaButton && (
@@ -287,6 +296,16 @@ export default async function ArticlePage({
               </div>
             )}
           </article>
+ 
+          {/* Рекламный блок РСЯ под статьей */}
+          <YandexAdBlock
+            blockId={
+              process.env.NEXT_PUBLIC_YANDEX_ARTICLE_BOTTOM_AD_ID ||
+              process.env.NEXT_PUBLIC_YANDEX_ARTICLE_AD_ID ||
+              "R-A-1234567-6"
+            }
+            className="my-8"
+          />
 
           {/* Читайте также */}
           <section className="mt-8 rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-xs">

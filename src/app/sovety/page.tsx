@@ -6,6 +6,7 @@ import { ARTICLES } from "@/lib/articles";
 import { SITE_URL } from "@/lib/site";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import YandexAdBlock from "@/components/YandexAdBlock";
 
 export const revalidate = 43200;
 
@@ -104,6 +105,12 @@ export default function SovetyPage() {
               </Link>
             ))}
           </div>
+
+          {/* Рекламный блок РСЯ */}
+          <YandexAdBlock
+            blockId={process.env.NEXT_PUBLIC_YANDEX_CATEGORY_AD_ID || "R-A-1234567-3"}
+            className="my-10"
+          />
         </div>
       </main>
 
