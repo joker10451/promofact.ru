@@ -4,6 +4,7 @@ import { getStores } from "@/lib/perfluence";
 import StoreLogo from "@/components/StoreLogo";
 
 const POPULAR_SLUGS = [
+  "sunlight-ru",
   "pyaterochka",
   "otello",
   "kinopoisk",
@@ -12,6 +13,9 @@ const POPULAR_SLUGS = [
   "vazhnaya-ryba",
   "fix-price",
   "netprint",
+  "samokat",
+  "magnit-dostavka",
+  "yandex-market",
 ];
 
 export default async function PopularStores() {
@@ -24,7 +28,7 @@ export default async function PopularStores() {
 
   if (stores.length === 0) return null;
 
-  // Отбираем 8 ключевых популярных российских брендов
+  // Отбираем популярные российские бренды (до 12 штук)
   const storeMap = new Map(stores.map((s) => [s.slug, s]));
   const top: typeof stores = [];
 
@@ -35,7 +39,7 @@ export default async function PopularStores() {
 
   // Если каких-то нет, добираем из оставшихся
   for (const s of stores) {
-    if (top.length >= 8) break;
+    if (top.length >= 12) break;
     if (!top.some((t) => t.slug === s.slug)) {
       top.push(s);
     }
@@ -64,29 +68,29 @@ export default async function PopularStores() {
           </Link>
         </div>
 
-        {/* Сетка 8 ключевых брендов с гарантированными логотипами */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        {/* Сетка популярных брендов в стиле Pikabu (круглые иконки, бейджи акций) */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-12 gap-3 sm:gap-4">
           {top.map((s) => (
             <Link
               key={s.slug}
               href={`/store/${s.slug}`}
-              className="group flex flex-col items-center justify-center rounded-2xl border border-line bg-paper/50 p-3.5 text-center shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:bg-white hover:shadow-xs"
+              className="group flex flex-col items-center justify-center rounded-2xl border border-line bg-paper/30 p-3 text-center shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-ink/25 hover:bg-white hover:shadow-xs"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white p-1.5 border border-line/60 shadow-2xs group-hover:scale-105 transition-transform">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-white p-2 border border-line shadow-2xs group-hover:scale-105 group-hover:border-red/40 transition-transform">
                 <StoreLogo
                   slug={s.slug}
                   name={s.name}
                   logo={s.logo}
                   site={s.site}
-                  size={36}
+                  size={40}
                   className="max-h-full max-w-full object-contain"
                 />
               </div>
               <span className="mt-2.5 block font-display text-xs font-bold text-ink group-hover:text-red transition-colors truncate max-w-full">
                 {s.name}
               </span>
-              <span className="text-[10px] font-semibold text-mint-dark">
-                {s.coupons.length} {s.coupons.length === 1 ? "код" : s.coupons.length < 5 ? "кода" : "кодов"}
+              <span className="mt-1 inline-block rounded-full bg-mint/10 px-2 py-0.5 text-[10px] font-bold text-mint-dark">
+                {s.coupons.length} {s.coupons.length === 1 ? "акция" : s.coupons.length < 5 ? "акции" : "акций"}
               </span>
             </Link>
           ))}

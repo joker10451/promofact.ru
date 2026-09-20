@@ -2,6 +2,8 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import HotDeals from "@/components/HotDeals";
 import PopularStores from "@/components/PopularStores";
+import ExpiringDeals from "@/components/ExpiringDeals";
+import TeamBanner from "@/components/TeamBanner";
 import CouponGrid from "@/components/CouponGrid";
 import SavingsCalculator from "@/components/SavingsCalculator";
 import HowItWorks from "@/components/HowItWorks";
@@ -117,23 +119,39 @@ export default async function Home() {
         {/* 2. Hero + ЕДИНСТВЕННЫЙ крупный поиск + Trust bar */}
         <Hero search={searchIndex} couponCount={coupons.length} proofTotal={proofTotal} />
 
-        {getActivePromoBanners().map((banner) => (
-          <div key={banner.id} className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 sm:pt-14">
-            <PromoBanner banner={banner} />
-          </div>
-        ))}
+        {/* 3. Популярные магазины в стиле Пикабу — быстрый вход по круглым брендам */}
+        <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+          <Reveal>
+            <PopularStores />
+          </Reveal>
+        </div>
 
-        {/* 3. 🔥 Горит сегодня — Топ-3 супер-скидки с FOMO-таймером */}
+        {/* 4. Эксклюзивный баннер от команды (в стиле Пикабу) */}
+        <div className="pt-6">
+          <Reveal>
+            <TeamBanner />
+          </Reveal>
+        </div>
+
+        {/* 5. ⏳ Скоро истекают — горящие предложения с FOMO-таймером в стиле Пикабу */}
+        <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+          <Reveal>
+            <ExpiringDeals coupons={coupons} />
+          </Reveal>
+        </div>
+
+        {/* 6. 🔥 Горит сегодня — Топ-3 супер-скидки */}
         <Reveal>
           <HotDeals coupons={hotDeals.map(toCatalogCoupon)} />
         </Reveal>
 
-        {/* 4. Популярные магазины — быстрый вход по брендам перед каталогом */}
-        <Reveal>
-          <PopularStores />
-        </Reveal>
+        {getActivePromoBanners().map((banner) => (
+          <div key={banner.id} className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+            <PromoBanner banner={banner} />
+          </div>
+        ))}
 
-        {/* 5. Купоны на сегодня — сгруппированный каталог (лучший промокод + аккордеон) */}
+        {/* 7. Купоны на сегодня — сгруппированный каталог (лучший промокод + аккордеон) */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
           <Reveal>
             <CouponGrid

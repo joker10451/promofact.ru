@@ -3,6 +3,7 @@
 import Icon from "@/components/Icon";
 import { useEffect, useState, useMemo } from "react";
 import { CheckIcon } from "@/components/CheckIcon";
+import StoreLogo from "@/components/StoreLogo";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import type { Coupon } from "@/lib/types";
 
@@ -20,9 +21,9 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
 
   // Выбираем топ-4 самых сочных акций с промокодами
   const expiringList = useMemo(() => {
-    return coupons
-      .filter((c) => c.promocode.code && (c.promocode.isHit || c.promocode.bonusName))
-      .slice(0, 4);
+    const withCode = coupons.filter((c) => Boolean(c.promocode?.code));
+    const hits = withCode.filter((c) => c.promocode?.isHit || c.promocode?.bonusName);
+    return (hits.length >= 4 ? hits : withCode).slice(0, 4);
   }, [coupons]);
 
   useEffect(() => {
@@ -115,19 +116,13 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    {coupon.store.logo ? (
-                      <img
-                        src={coupon.store.logo}
-                        alt={coupon.store.name}
-                        width={28}
-                        height={28}
-                        className="h-7 w-7 shrink-0 rounded-md object-contain border border-line p-0.5"
-                      />
-                    ) : (
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-yellow text-xs font-bold text-ink">
-                        {coupon.store.name.slice(0, 1)}
-                      </span>
-                    )}
+                    <StoreLogo
+                      slug={coupon.store.slug}
+                      name={coupon.store.name}
+                      logo={coupon.store.logo}
+                      size={28}
+                      className="h-7 w-7 shrink-0 rounded-md object-contain border border-line p-0.5"
+                    />
                     <span className="truncate text-xs font-extrabold text-ink/70">
                       {coupon.store.name}
                     </span>

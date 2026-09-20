@@ -29,15 +29,16 @@ function pluralOrders(n: number): string {
   return "заказов";
 }
 
-// Реальные актуальные магазины нашего сайта
+// Реальные актуальные магазины нашего сайта (в стиле топ-категорий Пикабу)
 const REAL_POPULAR_TAGS = [
-  "Додо Пицца",
-  "СберПрайм",
-  "Кинопоиск",
-  "Отелло",
-  "Яндекс Путешествия",
-  "Fix Price",
+  "SUNLIGHT",
+  "Пятёрочка",
   "Яндекс Цветы",
+  "Отелло",
+  "Кинопоиск",
+  "Ив Роше",
+  "Важная Рыба",
+  "Fix Price",
 ];
 
 export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroProps) {
