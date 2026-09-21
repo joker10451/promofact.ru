@@ -5,7 +5,7 @@ import JsonLd from "@/components/JsonLd";
 import { ACTIONS, getAction } from "@/lib/actions";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 export const revalidate = 43200;
 
 export async function generateStaticParams() {
@@ -20,7 +20,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const action = getAction(slug);
   if (!action) return {};
-  const pageUrl = `${SITE_URL}/actions/${slug}`;
+  const pageUrl = `${SITE_URL}/akcii/${slug}`;
   return {
     title: action.title,
     description: action.description.slice(0, 160),
@@ -50,7 +50,7 @@ export default async function ActionPage({
   const action = getAction(slug);
   if (!action) notFound();
 
-  const pageUrl = `${SITE_URL}/actions/${slug}`;
+  const pageUrl = `${SITE_URL}/akcii/${slug}`;
   const todayIso = new Date().toISOString();
 
   const breadcrumb: Record<string, unknown> = {

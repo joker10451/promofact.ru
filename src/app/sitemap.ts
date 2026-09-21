@@ -80,7 +80,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const actionsMap: MetadataRoute.Sitemap = ACTIONS.map((a) => ({
-    url: `${SITE_URL}/actions/${a.slug}`,
+    url: `${SITE_URL}/akcii/${a.slug}`,
     lastModified: today,
     changeFrequency: "monthly" as const,
     priority: 0.6,

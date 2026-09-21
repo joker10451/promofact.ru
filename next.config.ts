@@ -43,6 +43,11 @@ const nextConfig: NextConfig = {
         destination: to,
         permanent: false,
       })),
+      {
+        source: "/actions/:slug",
+        destination: "/akcii/:slug",
+        permanent: true,
+      },
     ];
   },
 };
