@@ -113,15 +113,24 @@ async function uploadVkWallPhoto(filePath, token, groupId) {
  */
 export function formatVkPostText({
   storeName,
+  storeSlug,
   code,
   bonus,
   terms,
   affUrl,
   ordMarker,
   ordText,
-  flashDeal
+  flashDeal,
+  // Анонс вместо рекламы: без партнёрской ссылки и без erid, со ссылкой на
+  // страницу магазина. Сообщество ВК не подключено к Perfluence как площадка,
+  // поэтому свой erid на него не выдают, а чужой ставить нельзя. Реклама с
+  // маркировкой живёт на сайте, куда ведёт ссылка.
+  siteMode = true
 }) {
   const lines = [];
+  const sitePage = storeSlug
+    ? `https://promofact.ru/store/${storeSlug}`
+    : "https://promofact.ru";
 
   if (flashDeal && !flashDeal.isInternalOnly && flashDeal.audienceDesc) {
     lines.push(`⚡ ${flashDeal.badge}: ${flashDeal.title.toUpperCase()}!`);
@@ -137,22 +146,25 @@ export function formatVkPostText({
     lines.push(`📌 Условия: ${cleanTerms}\n`);
   }
 
-  if (affUrl) {
+  if (!siteMode && affUrl) {
     lines.push(`👉 Активировать скидку: ${affUrl}`);
   }
-  lines.push(`🌐 Все промокоды на сайте: https://promofact.ru\n`);
+  lines.push(`🌐 Все коды и условия: ${sitePage}\n`);
 
   // Хештеги
   const cleanTag = storeName.replace(/[^a-zA-Z0-9а-яА-Я]/g, "").toLowerCase();
-  lines.push(`#скидки #промокод #${cleanTag} #акции #промофакт\n`);
+  lines.push(`#скидки #промокод #${cleanTag} #акции #промофакт`);
 
-  // Маркировка
-  if (ordMarker && ordText && !ordText.includes(ordMarker)) {
-    lines.push(`${ordText} erid: ${ordMarker}`);
-  } else if (ordText) {
-    lines.push(ordText);
-  } else if (ordMarker) {
-    lines.push(`Реклама. erid: ${ordMarker}`);
+  // Маркировка нужна только там, где стоит партнёрская ссылка
+  if (!siteMode) {
+    lines.push("");
+    if (ordMarker && ordText && !ordText.includes(ordMarker)) {
+      lines.push(`${ordText} erid: ${ordMarker}`);
+    } else if (ordText) {
+      lines.push(ordText);
+    } else if (ordMarker) {
+      lines.push(`Реклама. erid: ${ordMarker}`);
+    }
   }
 
   return lines.join("\n");
@@ -184,9 +196,12 @@ export async function postToVk(offerData) {
   const postText = formatVkPostText(offerData);
 
   // 3. Публикуем на стену
+  // Публикуем тем же токеном, которым грузили баннер: раньше здесь стоял
+  // только VK_ACCESS_TOKEN, и при заполненном VK_USER_TOKEN запрос уходил
+  // с пустым ключом — пост молча не появлялся.
   const postParams = new URLSearchParams({
     v: "5.199",
-    access_token: token,
+    access_token: userToken || token,
     owner_id: ownerId,
     from_group: "1",
     message: postText

@@ -17,6 +17,26 @@ const SHORT_LINKS: Record<string, string> = {
   sber: "/store/sberprime",
   city: "/store/citydrive",
   beth: "/store/bethowen",
+  // Адреса для новой серии роликов. Их набирают вручную с экрана, поэтому
+  // держим их короткими и без дефисов.
+  lavka: "/store/yandeks-lavka",
+  perekrestok: "/store/perekrestok-dostavka",
+  vkusvill: "/store/vkusvill-dostavka",
+  tutu: "/store/tutu",
+  travel: "/store/yandeks-puteshestviya",
+  afisha: "/store/yandeks-afisha",
+  flowers: "/store/yandeks-tsvety",
+  ivroshe: "/store/iv-roshe",
+  letual: "/store/letual",
+  randewoo: "/store/randewoo",
+  mkosmetik: "/store/m-kosmetik",
+  librederm: "/store/librederm",
+  netprint: "/store/netprint",
+  farfor: "/store/farfor",
+  ryba: "/store/vazhnaya-ryba",
+  kinopoisk: "/store/kinopoisk",
+  start: "/store/start-ru",
+  cozy: "/store/cozy-home",
 };
 
 const nextConfig: NextConfig = {
@@ -46,6 +66,14 @@ const nextConfig: NextConfig = {
       {
         source: "/actions/:slug",
         destination: "/akcii/:slug",
+        permanent: true,
+      },
+      // Статья держалась на одном промокоде, который Пятёрочка сняла, а
+      // аккаунт сайта в этом проекте не одобрен — рекламировать нечего.
+      // Постоянный редирект сохраняет вес адреса в поиске.
+      {
+        source: "/sovety/pyaterochka-dostavka-55",
+        destination: "/store/pyaterochka",
         permanent: true,
       },
     ];

@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import HotDeals from "@/components/HotDeals";
 import PopularStores from "@/components/PopularStores";
 import ExpiringDeals from "@/components/ExpiringDeals";
 import TeamBanner from "@/components/TeamBanner";
@@ -19,7 +18,7 @@ import Reveal from "@/components/Reveal";
 import PromoBanner from "@/components/PromoBanner";
 import { getActivePromoBanners } from "@/lib/promoBanners";
 import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
-import { pickHotDeals, offerKey } from "@/lib/hotDeals";
+import { pickExpiringDeals, offerKey } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
 import { toCatalogCoupon } from "@/lib/catalogCoupon";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
@@ -75,7 +74,7 @@ export default async function Home() {
   // Купоны из блока «Спецпредложения дня» исключаем из ленты каталога ниже,
   // чтобы топ-3 не повторялись первыми тремя карточками. Ключ «магазин + код»,
   // а не id: убирает и дубли того же оффера с другим id (разные источники).
-  const hotDeals = pickHotDeals(coupons, 3);
+  const hotDeals = pickExpiringDeals(coupons, 4);
   const hotDealKeys = hotDeals.map(offerKey);
 
   // Поиск в шапке работает на клиенте, поэтому получает лёгкий индекс, а не
@@ -133,17 +132,13 @@ export default async function Home() {
           </Reveal>
         </div>
 
-        {/* 5. ⏳ Скоро истекают — горящие предложения с FOMO-таймером в стиле Пикабу */}
+        {/* 5. Скоро заканчиваются — коды с ближайшим реальным сроком, по одному от магазина.
+            Раньше здесь было два блока «Спецпредложения дня» подряд. */}
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
           <Reveal>
-            <ExpiringDeals coupons={coupons} />
+            <ExpiringDeals coupons={hotDeals} />
           </Reveal>
         </div>
-
-        {/* 6. 🔥 Горит сегодня — Топ-3 супер-скидки */}
-        <Reveal>
-          <HotDeals coupons={hotDeals.map(toCatalogCoupon)} />
-        </Reveal>
 
         {getActivePromoBanners().map((banner) => (
           <div key={banner.id} className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
