@@ -63,6 +63,14 @@ const nextConfig: NextConfig = {
         destination: to,
         permanent: false,
       })),
+      // Статья держалась на одном промокоде, который Пятёрочка сняла, а
+      // аккаунт сайта в этом проекте не одобрен — рекламировать нечего.
+      // Постоянный редирект сохраняет вес адреса в поиске.
+      {
+        source: "/sovety/pyaterochka-dostavka-55",
+        destination: "/store/pyaterochka",
+        permanent: true,
+      },
     ];
   },
 };

@@ -63,23 +63,47 @@ function loadArticles() {
  * Чистые числа (суммы, годы, ИНН) кодами не считаем: иначе отчёт тонет
  * в «2026» и «1500 ₽».
  */
-const CODE_LIKE = /\b[A-Za-zА-Яа-яЁё0-9_-]{5,24}\b/g;
+// \b в JS понимает только латиницу, поэтому границы слова — через lookaround
+const CODE_LIKE = /(?<![\p{L}\p{N}_-])[\p{L}\p{N}_-]{3,24}(?![\p{L}\p{N}_-])/gu;
 const hasLetter = (s) => /[A-Za-zА-Яа-яЁё]/.test(s);
 const hasDigit = (s) => /\d/.test(s);
 /** Год, сумма или телефонный хвост — не код. */
-const looksLikeNumber = (s) => /^\d+$/.test(s) || /^(19|20)\d{2}$/.test(s);
+const looksLikeNumber = (s) =>
+  /^\d+$/.test(s) ||
+  /^(19|20)\d{2}$/.test(s) ||
+  /^2Ran[A-Za-z0-9]+$/.test(s) || // erid из маркировки, а не промокод
+  /^\d+-\p{L}+$/u.test(s) || // «4-кратная», «30-летний»
+  /^\d\p{Script=Cyrillic}+$/u.test(s); // «2ГИС»
 const IGNORE = new Set(["ERID", "PROMOFACT", "SMART_ZAKUPKA"]);
 
+/**
+ * Ручные купоны из Perfluence: они показываются на сайте карточками, и если
+ * рекламодатель снял код, карточка продолжает его рекламировать. Купоны
+ * других сетей (Saleads) по кабинету Perfluence не проверяются.
+ */
+function loadCustomCoupons() {
+  const jiti = createJiti(ROOT + "/", { alias: { "@": path.join(ROOT, "src") } });
+  const { CUSTOM_COUPONS } = jiti("./src/lib/customCoupons.ts");
+  return CUSTOM_COUPONS.filter((c) => c.promocode.group === "perfluence" && c.promocode.code).map((c) => ({
+    slug: `купон ${c.id} (${c.store.name})`,
+    text: c.promocode.code,
+  }));
+}
+
 const actual = await loadActualCodes();
-const articles = loadArticles();
+const articles = [...loadArticles(), ...loadCustomCoupons()];
 const now = Date.now();
 
 const rows = [];
 for (const article of articles) {
   const seen = new Set();
   for (const match of article.text.matchAll(CODE_LIKE)) {
-    const code = match[0].toUpperCase();
+    const raw = match[0];
+    const code = raw.toUpperCase();
     if (seen.has(code) || IGNORE.has(code)) continue;
+    // Известный код из кабинета проверяем всегда, даже если он похож на слово
+    // («СЕНТЯБРЬ», «ВАУ» у ЛЭТУАЛЬ). Незнакомый — только если похож на код.
+    if (!actual.has(code) && (!hasLetter(raw) || !hasDigit(raw) || looksLikeNumber(raw))) continue;
     seen.add(code);
     const info = actual.get(code);
     if (!info) {
