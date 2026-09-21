@@ -16,7 +16,7 @@ import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { buildStoreArticle, buildStoreDescription, type StoreArticleInput } from "@/lib/storeSeoContent";
-import { ARTICLES } from "@/lib/articles";
+import { getArticles } from "@/lib/articles";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = true;
@@ -585,7 +585,7 @@ export default async function StorePage({
 
         {/* Ссылки на статьи блога по теме магазина (Двунаправленный граф перелинковки) */}
         {(() => {
-          const storeArticles = ARTICLES.filter(
+          const storeArticles = getArticles().filter(
             (a) =>
               a.title.toLowerCase().includes(store.name.toLowerCase()) ||
               a.description.toLowerCase().includes(store.name.toLowerCase()) ||
@@ -593,7 +593,7 @@ export default async function StorePage({
               a.description.toLowerCase().includes(store.category.toLowerCase())
           ).slice(0, 2);
 
-          const list = storeArticles.length > 0 ? storeArticles : ARTICLES.slice(0, 2);
+          const list = storeArticles.length > 0 ? storeArticles : getArticles().slice(0, 2);
 
           return (
             <section className="mt-10 max-w-3xl rounded-3xl border border-line bg-white p-6 shadow-xs">

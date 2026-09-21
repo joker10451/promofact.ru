@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getStores, getCategories } from "@/lib/perfluence";
-import { ARTICLES } from "@/lib/articles";
+import { getArticles } from "@/lib/articles";
 import { SITE_NAME } from "@/lib/site";
 
 export const revalidate = 43200;
@@ -62,7 +62,7 @@ export default async function HtmlSitemap() {
       <section className="mt-8">
         <h2 className="font-display text-lg font-extrabold">Советы по экономии</h2>
         <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {ARTICLES.map((a) => (
+          {getArticles().map((a) => (
             <li key={a.slug}>
               <Link
                 href={`/sovety/${a.slug}`}

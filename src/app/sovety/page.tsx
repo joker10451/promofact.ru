@@ -2,16 +2,18 @@ import ArticleCover from "@/components/ArticleCover";
 import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ARTICLES } from "@/lib/articles";
+import { getArticles } from "@/lib/articles";
 import { SITE_URL } from "@/lib/site";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-export const revalidate = 43200;
+// Раз в час, а не в 12: рекламные статьи выходят по времени (publishAt),
+// и с 12-часовым кэшем статья попадала в ленту Дзена с опозданием на полдня.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   // Бренд добавит шаблон в layout — здесь его быть не должно.
-  title: `Советы по экономии и гиды по промокодам (${ARTICLES.length} статей)`,
+  title: `Советы по экономии и гиды по промокодам (${getArticles().length} статей)`,
   description:
     "Практические советы и инструкции: как экономить на доставке продуктов, бронировании отелей, косметике, цветах и подписках. Рабочие промокоды и секреты шопинга.",
   alternates: { canonical: `${SITE_URL}/sovety` },
@@ -27,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export default function SovetyPage() {
-  const articles = [...ARTICLES].reverse();
+  const articles = [...getArticles()].reverse();
 
   return (
     <>
@@ -60,7 +62,7 @@ export default function SovetyPage() {
                 Советы по экономии и шопингу
               </h1>
               <p className="mt-2 max-w-2xl text-sm sm:text-base text-ink/65 font-medium">
-                {ARTICLES.length} практических инструкций: как выжимать максимум выгоды из промокодов, кэшбэка и акций любимых брендов.
+                {getArticles().length} практических инструкций: как выжимать максимум выгоды из промокодов, кэшбэка и акций любимых брендов.
               </p>
             </div>
 

@@ -8,14 +8,14 @@ import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import CouponTicket from "@/components/CouponTicket";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { ARTICLES, getArticle } from "@/lib/articles";
+import { getArticles, getArticle } from "@/lib/articles";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
 export const revalidate = 43200;
 
 export async function generateStaticParams() {
-  return ARTICLES.map((a) => ({ slug: a.slug }));
+  return getArticles().map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({
@@ -83,7 +83,7 @@ export default async function ArticlePage({
     return [...matches, ...hits].slice(0, 3);
   })();
 
-  const moreArticles = ARTICLES.filter((a) => a.slug !== slug).slice(0, 3);
+  const moreArticles = getArticles().filter((a) => a.slug !== slug).slice(0, 3);
 
   const url = `${SITE_URL}/sovety/${slug}`;
   const articleJsonLd: Record<string, unknown> = {

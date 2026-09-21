@@ -1,10 +1,10 @@
 import ArticleCover from "@/components/ArticleCover";
 import Icon from "@/components/Icon";
 import Link from "next/link";
-import { ARTICLES } from "@/lib/articles";
+import { getArticles } from "@/lib/articles";
 
 export default function LatestTips({ limit = 3 }: { limit?: number }) {
-  const items = [...ARTICLES].reverse().slice(0, limit);
+  const items = [...getArticles()].reverse().slice(0, limit);
 
   return (
     <section className="py-10 sm:py-14 border-b border-line bg-paper/30">
@@ -26,7 +26,7 @@ export default function LatestTips({ limit = 3 }: { limit?: number }) {
             href="/sovety"
             className="self-start sm:self-auto inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-red hover:text-red-dark transition-colors"
           >
-            Все {ARTICLES.length} статей блога →
+            Все {getArticles().length} статей блога →
           </Link>
         </div>
 

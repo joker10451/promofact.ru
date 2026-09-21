@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getCategories, getAllStores } from "@/lib/perfluence";
-import { ARTICLES } from "@/lib/articles";
+import { getArticles } from "@/lib/articles";
 import { ACTIONS } from "@/lib/actions";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { COLLECTIONS } from "@/lib/collections";
@@ -71,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.7,
     },
-    ...ARTICLES.map((a) => ({
+    ...getArticles().map((a) => ({
       url: `${SITE_URL}/sovety/${a.slug}`,
       lastModified: today,
       changeFrequency: "monthly" as const,
