@@ -42,8 +42,9 @@ export function getMaxDiscount(coupons: Coupon[]): string {
     const text = c.promocode.bonusName || "";
     const p = text.match(/(\d+)\s*%/);
     if (p && Number(p[1]) > maxPercent) maxPercent = Number(p[1]);
-    const r = text.match(/(\d[\s\d]*)\s*(?:₽|руб)/i);
-    if (r) {
+    // Сумма после «от» — порог заказа, а не скидка: «600 ₽ на заказ от 2290 ₽».
+    for (const r of text.matchAll(/(\d[\s\d]*)\s*(?:₽|руб)/gi)) {
+      if (/от\s*$/i.test(text.slice(0, r.index))) continue;
       const val = Number(r[1].replace(/\s+/g, ""));
       if (val > maxRub) maxRub = val;
     }

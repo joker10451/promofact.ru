@@ -222,12 +222,26 @@ export function buildStoreArticle(input: StoreArticleInput, slug: string): strin
   return buildParagraphs(input, slug);
 }
 
+/**
+ * Сниппет для выдачи. Раньше в нём был список кодов в скобках — с пустыми
+ * элементами у акций по ссылке («[16admitadTRD, ]») — и призыв «Копируй и
+ * экономь!», одинаковый на всех страницах. Теперь — лучшее предложение словами
+ * и дата проверки: это и отличает страницу в выдаче.
+ */
 export function buildStoreDescription(input: StoreArticleInput): string {
-  const codes = input.coupons
-    .slice(0, 3)
-    .map((c) => c.code)
-    .join(", ");
-  const base = `Проверенные промокоды ${input.name} на ${input.monthRu}: ${input.couponCount} ${input.couponCount === 1 ? "код" : input.couponCount >= 2 && input.couponCount <= 4 ? "кода" : "кодов"} со скидкой ${input.maxDiscount}`;
-  const codesPart = codes ? ` [${codes}]` : "";
-  return `${base}${codesPart}. Копируй и экономь на заказе!`;
+  const n = input.couponCount;
+  const word = n === 1 ? "код" : n >= 2 && n <= 4 ? "кода" : "кодов";
+  // Короткое «−30%» ничего не добавляет к «скидка до 30%» — берём развёрнутое.
+  const best = input.coupons
+    .map((c) => (c.bonusName || "").replace(/[.\s]+$/, ""))
+    .find((b) => b.length >= 15);
+  const discount = input.maxDiscount === "скидки" ? "" : `, скидка ${input.maxDiscount}`;
+  const head =
+    n > 0
+      ? `Промокоды ${input.name} на ${input.monthRu}: ${n} ${word}${discount}.`
+      : `Скидки и акции ${input.name} на ${input.monthRu}.`;
+  // todayRu уже оканчивается на «г.» — вторую точку не ставим.
+  const tail = ` Проверено ${input.todayRu.replace(/\.?$/, ".")}`;
+  const full = `${head}${best ? ` ${best}.` : ""}${tail}`;
+  return full.length <= 160 ? full : head + tail;
 }

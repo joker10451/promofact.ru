@@ -16,6 +16,7 @@ import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { buildStoreArticle, buildStoreDescription, type StoreArticleInput } from "@/lib/storeSeoContent";
+import { getStoreExtra } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -93,8 +94,7 @@ export async function generateMetadata({
   if (!store) return {};
   const pageUrl = `${SITE_URL}/store/${slug}`;
   const n = store.coupons.length;
-  const countWord =
-    n === 1 ? "актуальный промокод" : n >= 2 && n <= 4 ? "актуальных промокода" : "актуальных промокодов";
+  const countWord = n === 1 ? "код" : n >= 2 && n <= 4 ? "кода" : "кодов";
   const maxDisc = getMaxDiscount(store.coupons);
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
@@ -104,7 +104,8 @@ export async function generateMetadata({
   // бренд подставляем явно.
   const title =
     n > 0
-      ? `Промокоды ${store.name} на ${monthYear} — ${maxDisc} (${n} ${countWord})`
+      ? // Короче прежнего «— до 15% (4 актуальных промокода)»: хвост обрезался в выдаче.
+        `Промокоды ${store.name} на ${monthRu}: ${maxDisc === "скидки" ? "" : `${maxDisc}, `}${n} ${countWord}`
       : `Скидки и акции ${store.name} на ${monthYear}`;
   const titleWithBrand = `${title} | ${SITE_NAME}`;
   const description = buildStoreDescription({
@@ -239,7 +240,9 @@ export default async function StorePage({
     },
   }));
 
+  const storeExtra = getStoreExtra(slug);
   const faqItems = [
+    ...(storeExtra?.faq ?? []),
     {
       q: `Как применить промокод ${store.name}?`,
       a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Скидка применится автоматически до оплаты.`,
@@ -252,7 +255,7 @@ export default async function StorePage({
     },
     {
       q: `Какой максимальный размер скидки в ${store.name} сейчас?`,
-      a: `На ${monthYear} максимальная выгода по промокодам в ${store.name} составляет ${maxDisc}. Все коды проверяются каждый день и гарантированно работают при соблюдении условий акции.`,
+      a: `На ${monthYear} максимальная выгода по промокодам в ${store.name} составляет ${maxDisc}. Истёкшие коды убираются со страницы автоматически; перед заказом сверьте условия в карточке купона.`,
     },
     {
       q: `Почему промокод ${store.name} может не сработать?`,
@@ -521,6 +524,21 @@ export default async function StorePage({
             . Если купон перестал действовать — оставьте заявку, и мы обновим подборку {store.name} в ближайшее время.
           </p>
         </article>
+
+        {storeExtra?.cities && (
+          <section className="mt-8 max-w-3xl" aria-label={storeExtra.cities.heading}>
+            <h2 className="font-display text-xl font-extrabold">{storeExtra.cities.heading}</h2>
+            <p className="mt-3 leading-relaxed text-ink/70">{storeExtra.cities.text}</p>
+            <p className="mt-4 text-sm font-bold text-ink/60">Чаще всего промокоды {store.name} ищут в городах:</p>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {storeExtra.cities.list.map((city) => (
+                <li key={city} className="rounded-full border border-line bg-white px-3 py-1 text-sm text-ink/70">
+                  {city}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {store.conditions && (
           <article className="mt-8 max-w-3xl">
