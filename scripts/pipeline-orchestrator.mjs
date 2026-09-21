@@ -42,6 +42,66 @@ const BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || fileEnv.TELEGRAM_BOT_TOKEN 
 const CHANNEL_ID = (process.env.TELEGRAM_CHANNEL_ID || fileEnv.TELEGRAM_CHANNEL_ID || "@smart_zakupka").replace(/["']/g, "").trim();
 const ADMIN_CHAT_ID = (process.env.TELEGRAM_ADMIN_CHAT_ID || fileEnv.TELEGRAM_ADMIN_CHAT_ID || "6141363106").replace(/["']/g, "").trim();
 
+/**
+ * Адреса страниц магазинов на сайте. Те же, что в src/lib/perfluence.ts:
+ * названия проектов в кабинете («Додо пицца Юг») в адрес не годятся.
+ */
+const STORE_SLUGS = {
+  1653: "dodo-pizza",
+  900: "bethowen",
+  1483: "citydrive",
+  2576: "sberprime",
+  2548: "m-kosmetik",
+  3641: "cozy-home",
+  3807: "librederm",
+  1977: "vazhnaya-ryba",
+};
+
+const TRANSLIT = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i",
+  й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t",
+  у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y",
+  ь: "", э: "e", ю: "yu", я: "ya",
+};
+
+function storeSlugOf(storeId, storeName) {
+  if (STORE_SLUGS[storeId]) return STORE_SLUGS[storeId];
+  return String(storeName)
+    .toLowerCase()
+    .split("")
+    .map((ch) => (ch in TRANSLIT ? TRANSLIT[ch] : ch))
+    .join("")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "magazin";
+}
+
+const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня",
+  "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+
+function formatExpires(value) {
+  const ru = String(value).match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+  if (ru) return `${Number(ru[1])} ${MONTHS[Number(ru[2]) - 1] ?? ru[2]}`;
+  const iso = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${Number(iso[3])} ${MONTHS[Number(iso[2]) - 1] ?? iso[2]}`;
+  return String(value);
+}
+
+function plural(n, one, few, many) {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+  return many;
+}
+
+function cleanText(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function loadHistory() {
   try {
     if (fs.existsSync(HISTORY_FILE)) {
@@ -138,7 +198,27 @@ async function fetchChannelSpecificOffer(projectId, targetAccount = "smart_zakup
     const idx = html.indexOf(targetAccount);
     if (idx === -1) return null;
 
-    const sub = html.slice(idx, idx + 8000);
+    // Карточки аккаунтов идут подряд, поэтому «8000 символов после имени
+    // канала» захватывало соседнюю карточку — чаще всего «Сайт». Из-за этого
+    // бот брал ссылку и erid сайта и постил их в Telegram даже там, где заявка
+    // канала отклонена (так вышло с Librederm). Режем строго по своей карточке.
+    const STATUS = /Аккаунт одобрен|Заявка отклонена|Аккаунт на проверке|Аккаунт не подходит|Заявка на рассмотрении/g;
+    const bounds = [];
+    let m;
+    while ((m = STATUS.exec(html)) !== null) bounds.push({ at: m.index, text: m[0] });
+
+    const start = [...bounds].reverse().find((b) => b.at < idx);
+    const end = bounds.find((b) => b.at > idx);
+    if (!start) return null;
+    if (start.text !== "Аккаунт одобрен") {
+      console.log(` -> аккаунт «${targetAccount}»: ${start.text} — публиковать нельзя`);
+      return null;
+    }
+
+    const sub = html.slice(start.at, end ? end.at : Math.min(html.length, idx + 8000));
+    // Имя канала должно остаться внутри своей карточки — иначе разметка
+    // изменилась и резать по статусам больше нельзя.
+    if (!sub.includes(targetAccount)) return null;
     const linkMatch = sub.match(/https:\/\/[a-z0-9.]+\.prfl\.me\/[^\s"'<>]+/i);
     const eridMatch = sub.match(/erid:\s*([A-Za-z0-9_-]+)/i);
     const ordTextMatch = sub.match(/Маркер и токен[\s\S]*?<div[^>]*>([\s\S]*?)<\/div>/i) || sub.match(/Реклама\.[\s\S]*?(?=<\/div>|<div)/i);
@@ -325,10 +405,28 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
         candidates.push({
           storeId,
           storeName,
+          storeSlug: storeSlugOf(storeId, storeName),
           code,
-          bonus: p.bonus_name || p.name || "Скидка по промокоду",
-          terms: p.terms || project.subscribers_condition || "",
-          expires: p.expires || null,
+          bonus: p.bonus_name || p.name || p.comment || "Скидка по промокоду",
+          // p.terms у Perfluence почти всегда пустой, поэтому пост выходил
+          // из одного заголовка. Берём описание бонуса и условия проекта.
+          terms: p.promo_terms || p.terms || "",
+          about: project.subscribers_condition || project.product_info || "",
+          // Виджет отдаёт срок в поле date («30.09.2026»), не expires.
+          expires: p.date || p.expires || null,
+          region: Array.isArray(p.region_promo) ? p.region_promo.join(", ") : p.region_promo || "",
+          repeatOrder: Boolean(p.repeat_order),
+          codesInStore: promos.length,
+          // Остальные коды этого же магазина: раньше в пост уходил один код,
+          // хотя у проекта их бывает три-четыре, и подписчик не видел,
+          // что есть вариант выгоднее под его сумму заказа.
+          otherPromos: promos
+            .filter((x) => (x.code || "").trim() && (x.code || "").trim() !== code)
+            .map((x) => ({
+              code: (x.code || "").trim(),
+              bonus: x.bonus_name || x.name || x.comment || "",
+              expires: x.date || x.expires || null,
+            })),
           affUrl,
           ordMarker,
           ordText,
@@ -477,45 +575,118 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   // Сортируем по итоговому баллу
   scored.sort((a, b) => b.score - a.score);
 
-  const selected = scored[0];
-
-  // Обогащаем оффер персональной ссылкой, erid и самым выгодным промокодом конкретно для канала @smart_zakupka
-  if (selected.storeId) {
-    const channelData = await fetchChannelSpecificOffer(selected.storeId, "smart_zakupka");
-    if (channelData) {
-      if (channelData.affUrl) selected.affUrl = channelData.affUrl;
-      if (channelData.ordMarker) selected.ordMarker = channelData.ordMarker;
-      if (channelData.ordText) selected.ordText = channelData.ordText;
-
-      // Выбираем промокод с максимальной скидкой, которого еще не было в канале
-      const validPromos = (channelData.promos || [])
-        .filter(p => p.code && !recentCodes.has(p.code.toUpperCase()))
-        .sort((a, b) => b.discountNum - a.discountNum);
-
-      if (validPromos.length > 0) {
-        selected.code = validPromos[0].code;
-        selected.bonus = validPromos[0].bonus;
-        if (validPromos[0].expires) selected.expires = validPromos[0].expires;
-      }
+  // Ссылка и erid должны принадлежать публикации канала @smart_zakupka.
+  // В виджете лежит ссылка последней публикации — она может быть от аккаунта
+  // «Сайт», и тогда заказы из канала засчитаются сайту, а пост в Telegram
+  // окажется с чужим erid. Поэтому идём по кандидатам сверху вниз и берём
+  // первого, у кого в кабинете есть публикация для канала.
+  let selected = null;
+  for (const candidate of scored.slice(0, 8)) {
+    if (!candidate.storeId) continue;
+    const channelData = await fetchChannelSpecificOffer(candidate.storeId, "smart_zakupka");
+    if (!channelData || !channelData.affUrl || !channelData.ordMarker) {
+      console.log(
+        ` -> «${candidate.storeName}»: для канала нет публикации с ссылкой и erid, пропускаем`,
+      );
+      continue;
     }
+
+    candidate.affUrl = channelData.affUrl;
+    candidate.ordMarker = channelData.ordMarker;
+    if (channelData.ordText) candidate.ordText = channelData.ordText;
+
+    // Самый выгодный код канала, которого ещё не было в постах
+    const validPromos = (channelData.promos || [])
+      .filter((p) => p.code && !recentCodes.has(p.code.toUpperCase()))
+      .sort((a, b) => b.discountNum - a.discountNum);
+
+    if (validPromos.length > 0) {
+      candidate.code = validPromos[0].code;
+      candidate.bonus = validPromos[0].bonus;
+      if (validPromos[0].expires) candidate.expires = validPromos[0].expires;
+      candidate.otherPromos = validPromos.slice(1).map((p) => ({
+        code: p.code,
+        bonus: p.bonus,
+        expires: p.expires,
+      }));
+    } else if (!channelData.promos?.some((p) => p.code === candidate.code)) {
+      // Кода из виджета нет среди кодов канала — значит он не наш.
+      console.log(` -> «${candidate.storeName}»: код ${candidate.code} не выдан каналу, пропускаем`);
+      continue;
+    }
+
+    selected = candidate;
+    break;
+  }
+
+  if (!selected) {
+    console.log(
+      "\n❌ Ни по одному офферу нет публикации для канала @smart_zakupka." +
+        " Зайдите в кабинет Perfluence и нажмите «Получить промокод» для канала," +
+        " либо проверьте, жива ли сессия в data/perfluence_session.json.",
+    );
+
+    // ВК при этом не остаётся без записей: сообщество без ленты не получает
+    // показов в клипах, а анонс со ссылкой на страницу сайта партнёрской
+    // рекламой не является — маркировка стоит на самой странице.
+    const announce = scored[0];
+    if (announce && !options.dryRun) {
+      try {
+        const vkResult = await postToVk({
+          storeName: announce.storeName,
+          storeSlug: announce.storeSlug,
+          code: announce.code,
+          bonus: announce.bonus,
+          terms: announce.terms,
+          siteMode: true,
+        });
+        if (vkResult.ok) console.log(` -> 🌐 ВК: анонс опубликован (${vkResult.postUrl})`);
+      } catch (e) {
+        console.warn(" -> ⚠ ВК: анонс не опубликован:", e.message);
+      }
+    } else if (announce) {
+      console.log(` -> [DRY RUN] ВК получил бы анонс «${announce.storeName}» со ссылкой на сайт`);
+    }
+    return;
   }
 
   console.log(`\n[Фаза 4] Выбран лучший оффер: "${selected.storeName}" (балл: ${selected.score}, код: ${selected.code}, бонус: ${selected.bonus})${selected.flashDeal ? ` [${selected.flashDeal.badge}]` : ""}`);
 
-  // Формируем красивый пост
+  // Формируем пост
   const postLines = [];
   if (selected.flashDeal && !selected.flashDeal.isInternalOnly && selected.flashDeal.audienceDesc) {
     postLines.push(`${selected.flashDeal.badge}`);
     postLines.push(`📢 <b>${selected.flashDeal.title}</b> — <i>${selected.flashDeal.audienceDesc}</i>\n`);
   }
-  postLines.push(`🔥 <b>${selected.storeName} — ${selected.bonus}</b>\n`);
+  postLines.push(`${selected.isHit ? "🔥" : "🏷"} <b>${selected.storeName} — ${selected.bonus}</b>\n`);
   postLines.push(`🎟 Промокод: <code>${selected.code}</code>`);
   postLines.push(`<i>(нажмите на код — он скопируется в буфер)</i>\n`);
 
-  if (selected.terms) {
-    const cleanTerms = selected.terms.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 180);
-    postLines.push(`📌 <b>Условия:</b>\n• ${cleanTerms}`);
+  // Блок условий: раньше он был единственным и появлялся, только если
+  // рекламодатель заполнил terms. Теперь собираем строки из полей, которые
+  // виджет отдаёт всегда, — пост перестал быть «кодом в пустоте».
+  const facts = [];
+  facts.push(selected.repeatOrder ? "Первый и повторные заказы" : "Только первый заказ");
+  if (selected.region && selected.region !== "RU") facts.push(`Города: ${selected.region}`);
+  if (selected.expires) facts.push(`Действует до ${formatExpires(selected.expires)}`);
+
+  postLines.push("📌 <b>Условия:</b>");
+  facts.forEach((f) => postLines.push(`• ${f}`));
+
+  // Остальные коды магазина — прямо в посте. Подписчик сам выберет тот, что
+  // подходит под его сумму заказа, вместо того чтобы уходить искать на сайт.
+  const others = (selected.otherPromos || []).slice(0, 3);
+  if (others.length) {
+    postLines.push(`\n🎁 <b>Ещё коды ${selected.storeName}:</b>`);
+    for (const o of others) {
+      const until = o.expires ? ` (до ${formatExpires(o.expires)})` : "";
+      const what = cleanText(o.bonus).slice(0, 80);
+      postLines.push(`• <code>${o.code}</code> — ${what}${until}`);
+    }
   }
+
+  const details = cleanText(selected.terms) || cleanText(selected.about);
+  if (details) postLines.push(`\nℹ️ ${details.slice(0, 220)}`);
 
   postLines.push("");
   if (selected.ordMarker && !selected.ordText.includes(selected.ordMarker)) {
@@ -527,7 +698,9 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   const postText = postLines.join("\n");
   const buttons = [
     [{ text: `🛍 В магазин ${selected.storeName} →`, url: selected.affUrl }],
-    [{ text: "🌐 Все промокоды на PromoFact", url: "https://promofact.ru" }]
+    // Раньше вторая кнопка вела на главную. Ведём на страницу магазина:
+    // там все его коды, условия и маркировка.
+    [{ text: `🌐 Все промокоды ${selected.storeName}`, url: `https://promofact.ru/store/${selected.storeSlug}` }]
   ];
 
   // 1. Ищем официальный промо-макет проекта в Perfluence
@@ -584,6 +757,7 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   try {
     const vkResult = await postToVk({
       storeName: selected.storeName,
+      storeSlug: selected.storeSlug,
       code: selected.code,
       bonus: selected.bonus,
       terms: selected.terms,
@@ -591,7 +765,9 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
       ordMarker: selected.ordMarker,
       ordText: selected.ordText,
       bannerPath: selected.bannerPath,
-      flashDeal: selected.flashDeal
+      flashDeal: selected.flashDeal,
+      // erid выдан под Telegram, поэтому в ВК идёт анонс со ссылкой на сайт.
+      siteMode: true
     });
     if (vkResult.ok) {
       console.log(` -> 🌐 Кросспостинг в VK: успешно опубликован (${vkResult.postUrl})`);

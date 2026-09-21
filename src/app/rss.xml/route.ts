@@ -1,4 +1,4 @@
-import { ARTICLES } from "@/lib/articles";
+import { getArticles } from "@/lib/articles";
 import { SITE_NAME, SITE_URL, SITE_TAGLINE } from "@/lib/site";
 
 export const revalidate = 43200;
@@ -15,10 +15,10 @@ function escapeXml(s: string): string {
 export async function GET() {
   const now = Date.now();
   const dayMs = 24 * 60 * 60 * 1000;
-  const items = ARTICLES.map((a, i) => {
+  const items = getArticles().map((a, i) => {
     const url = `${SITE_URL}/sovety/${a.slug}`;
     const desc = a.description ?? a.title;
-    const pub = new Date(now - (ARTICLES.length - i) * dayMs).toUTCString();
+    const pub = new Date(now - (getArticles().length - i) * dayMs).toUTCString();
     const body = a.body?.join("\n\n") ?? desc;
     return `    <item>
       <title>${escapeXml(a.title)}</title>

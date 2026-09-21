@@ -60,3 +60,4 @@ data/notified_orders.json
 /audit/
 # Локальная конфигурация запуска дев-сервера
 /.claude/
+.youtube-token.json

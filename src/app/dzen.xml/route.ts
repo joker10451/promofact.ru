@@ -1,7 +1,9 @@
-import { ARTICLES, type Article } from "@/lib/articles";
+import { getArticles, type Article } from "@/lib/articles";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
-export const revalidate = 43200; // 12 часов
+// Раз в час, а не в 12: рекламные статьи выходят по времени (publishAt),
+// и с 12-часовым кэшем статья попадала в ленту Дзена с опозданием на полдня.
+export const revalidate = 3600;
 
 /**
  * Лента для импорта в Дзен (Студия → Импорт RSS).
@@ -74,7 +76,7 @@ function contentHtml(a: Article, url: string): string {
 }
 
 export async function GET() {
-  const items = ARTICLES.map((a, i) => {
+  const items = getArticles().map((a, i) => {
     const url = `${SITE_URL}/sovety/${a.slug}`;
     const img = cover(a);
     return `    <item>
