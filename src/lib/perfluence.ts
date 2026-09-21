@@ -253,16 +253,57 @@ function topLevelCount(payload: string): number {
 }
 
 async function devMockFallback(reason: string): Promise<Coupon[]> {
-  if (process.env.NODE_ENV === "production" && !process.env.CI && isPerfluenceConfigured()) return [];
+  // Мок — только когда ключа нет совсем (локально и в GitHub CI). Раньше
+  // условие было «production и не CI», а Vercel во время сборки выставляет
+  // CI=1: при недоступном API в прод-сборку попадали выдуманные купоны.
+  if (isPerfluenceConfigured()) return [];
   console.warn(`[perfluence] ${reason} — отдаю DEV-мок`);
   return (await import("@/lib/mockCoupons")).DEV_MOCK_COUPONS;
 }
 
 let pendingPromise: Promise<Coupon[]> | null = null;
+/** Время последней неудачи: пока не прошла пауза, в API повторно не ходим. */
+let failedAt = 0;
+const FETCH_TIMEOUT_MS = 15_000;
+const RETRY_AFTER_MS = 10 * 60 * 1000;
+
+/**
+ * Запасной источник на время сборки. Vercel собирает сайт в США, а API
+ * Perfluence оттуда временами не отвечает (Connect Timeout). Без запасного
+ * источника каждая из ~600 страниц ждала таймаута, упиралась в лимит 60 с на
+ * страницу, и деплой падал целиком. Работающий прод отдаёт последние успешно
+ * полученные купоны — их и берём.
+ */
+async function fetchSnapshot(): Promise<Coupon[]> {
+  if (!process.env.VERCEL) return [];
+  try {
+    const { SITE_URL } = await import("@/lib/site");
+    const res = await fetch(`${SITE_URL}/api/perfluence-snapshot`, {
+      // no-store сделал бы статические страницы динамическими — ошибка сборки.
+      next: { revalidate: REVALIDATE_SECONDS },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const coupons = (await res.json()) as unknown;
+    if (!Array.isArray(coupons)) return [];
+    console.log(`[perfluence] снимок с прода: ${coupons.length}`);
+    return coupons as Coupon[];
+  } catch (e) {
+    console.error("[perfluence] снимок с прода недоступен:", (e as Error).message);
+    return [];
+  }
+}
+
+/** Только купоны Perfluence, без Admitad и прочих фидов — для /api/perfluence-snapshot. */
+export async function getPerfluenceCoupons(): Promise<Coupon[]> {
+  return fetchData();
+}
 
 async function fetchData(): Promise<Coupon[]> {
   if (cache && !cacheFailed) return cache;
   if (pendingPromise) return pendingPromise;
+  // Недавно упали: не заставляем каждую страницу ждать таймаута заново.
+  if (failedAt && Date.now() - failedAt < RETRY_AFTER_MS) return cache ?? [];
 
   pendingPromise = (async () => {
     if (!isPerfluenceConfigured())
@@ -272,6 +313,7 @@ async function fetchData(): Promise<Coupon[]> {
       const res = await fetch(WIDGET_URL, {
         headers: { Accept: "application/json" },
         next: { revalidate: REVALIDATE_SECONDS },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       });
       const text = await res.text();
       if (!res.ok)
@@ -302,7 +344,13 @@ async function fetchData(): Promise<Coupon[]> {
     } catch (e) {
       console.error("[perfluence] fetch failed, отдаём кэш:", e);
       cacheFailed = true;
+      failedAt = Date.now();
       if (cache) return cache;
+      const snapshot = await fetchSnapshot();
+      if (snapshot.length > 0) {
+        cache = snapshot;
+        return cache;
+      }
       return devMockFallback("запрос упал: " + (e as Error).message);
     } finally {
       pendingPromise = null;
@@ -732,7 +780,7 @@ export function parseResults(payloadJson: string): Result[] {
 }
 
 async function devMockResultsFallback(reason: string): Promise<Result[]> {
-  if (process.env.NODE_ENV === "production" && !process.env.CI && isResultsConfigured()) return [];
+  if (isResultsConfigured()) return [];
   console.warn(`[perfluence/results] ${reason} — отдаю DEV-мок`);
   return (await import("@/lib/mockCoupons")).DEV_MOCK_RESULTS;
 }

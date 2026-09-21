@@ -71,6 +71,18 @@ const nextConfig: NextConfig = {
       // Статья держалась на одном промокоде, который Пятёрочка сняла, а
       // аккаунт сайта в этом проекте не одобрен — рекламировать нечего.
       // Постоянный редирект сохраняет вес адреса в поиске.
+      // Страница магазина исчезает, когда у него не остаётся купонов, и Google
+      // видит 404. Эти две приносили клики из поиска — ведём на ближайшую живую.
+      {
+        source: "/store/m-kosmetik-novoe-prilozhenie/:path*",
+        destination: "/store/m-kosmetik",
+        permanent: true,
+      },
+      {
+        source: "/store/kassir-ru/:path*",
+        destination: "/category/razvlecheniya",
+        permanent: false,
+      },
       {
         source: "/sovety/pyaterochka-dostavka-55",
         destination: "/store/pyaterochka",
