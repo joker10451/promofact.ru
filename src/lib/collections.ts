@@ -74,6 +74,39 @@ export const COLLECTIONS: Collection[] = [
       c.store.categorySlug === "vse-dlya-doma" ||
       ["yandex-market", "fix-price"].includes(c.store.slug),
   },
+  {
+    slug: "besplatnaya-dostavka",
+    name: "Бесплатная доставка",
+    emoji: "🚚",
+    description: "Магазины и сервисы с бесплатной доставкой покупок или специальными промокодами на доставку за 0 ₽.",
+    filter: (c) =>
+      Boolean(
+        (c.promocode.bonusName && c.promocode.bonusName.toLowerCase().includes("бесплатн")) ||
+          (c.promocode.terms && c.promocode.terms.toLowerCase().includes("бесплатн")) ||
+          (c.store.conditions && c.store.conditions.toLowerCase().includes("бесплатн")) ||
+          (c.store.categorySlug && c.store.categorySlug.includes("dostavka"))
+      ),
+  },
+  {
+    slug: "apteki-i-zdorove",
+    name: "Аптека и здоровье",
+    emoji: "💊",
+    description: "Промокоды на лекарства, витамины, медицинские товары и оптику в крупнейших интернет-аптеках и сервисах здоровья.",
+    filter: (c) =>
+      c.store.categorySlug === "zdorove-i-vitaminy" ||
+      ["eapteka", "zdravcity", "rigla", "polza-ru", "bud-zdorov", "zdorove"].includes(c.store.slug),
+  },
+  {
+    slug: "tsvety-i-podarki",
+    name: "Цветы и подарки",
+    emoji: "💐",
+    description: "Скидки на доставку свежих букетов, авторских композиций и подарков: Яндекс Цветы, Flowwow, Flor2u и AMF.",
+    filter: (c) =>
+      c.store.categorySlug === "tsvety" ||
+      ["yandex-tsvety", "flowwow", "flor2u", "amf", "fmart"].includes(c.store.slug) ||
+      c.store.name.toLowerCase().includes("цвет") ||
+      c.store.name.toLowerCase().includes("букет"),
+  },
 ];
 
 export async function getCollections(): Promise<Collection[]> {

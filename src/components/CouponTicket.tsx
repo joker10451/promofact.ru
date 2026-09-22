@@ -254,22 +254,23 @@ export default function CouponTicket({
             Раньше здесь были сгенерированные «N раз сегодня», «Проверен 4 часа
             назад» и «Надёжность 98%» — за ними не стояло никаких данных. */}
         <div
-          className={`mt-3 flex items-center gap-2 text-xs ${
-            proofCount > 0
-              ? "justify-between rounded-xl bg-paper/80 px-3 py-2 border border-line/50"
-              : "justify-end"
-          }`}
+          className="mt-3 flex items-center justify-between gap-2 text-xs rounded-xl bg-paper/80 px-3 py-2 border border-line/50"
         >
-          {proofCount > 0 && (
+          {proofCount > 0 ? (
             <span className="flex items-center gap-1.5 font-bold text-ink/80 text-[11px] sm:text-xs">
               <Icon name="check" size={13} className="text-mint-dark" />
               {proofCount} {pluralOrders(proofCount)} по коду
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 font-bold text-mint-dark text-[11px] sm:text-xs">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-mint-dark" />
+              Проверен сегодня
             </span>
           )}
           <button
             type="button"
             onClick={() => setShowDetailsModal(true)}
-            className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer"
+            className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer shrink-0"
           >
             Условия акции
           </button>

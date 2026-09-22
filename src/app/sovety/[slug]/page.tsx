@@ -195,7 +195,25 @@ export default async function ArticlePage({
                       {renderParagraph(p)}
                     </p>
                   )}
-                  {i === Math.max(2, Math.floor(article.body.length / 2)) && (
+                  {i === 1 && relevantCoupons[0] && (
+                    <div className="my-6 rounded-2xl bg-paper/90 border border-line p-4 sm:p-5 shadow-xs">
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-ink">
+                          <Icon name="flame" size={15} />
+                          <span>Горячий промокод к статье</span>
+                        </div>
+                        <span className="text-[11px] font-bold text-mint-dark bg-mint/10 px-2 py-0.5 rounded-full">
+                          Проверено сегодня
+                        </span>
+                      </div>
+                      <CouponTicket
+                        coupon={relevantCoupons[0]}
+                        proofCount={uses.usesByCode.get(relevantCoupons[0].promocode.code) ?? 0}
+                        storeProofCount={uses.usesByStore.get(relevantCoupons[0].store.id) ?? 0}
+                      />
+                    </div>
+                  )}
+                  {i === Math.max(3, Math.floor(article.body.length / 2)) && (
                     <YandexAdBlock
                       blockId={process.env.NEXT_PUBLIC_YANDEX_ARTICLE_AD_ID || "R-A-1234567-5"}
                       className="my-6"
