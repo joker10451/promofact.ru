@@ -138,6 +138,17 @@
       "postUrl": "https://t.me/smart_zakupka/49",
       "date": "2026-08-31T16:00:18.248Z",
       "messageId": 49
+    },
+    {
+      "id": 1790074293689,
+      "store": "Подружка",
+      "storeSlug": "podryzhka",
+      "title": "Бокс с косметикой в подарок от 1500 ₽",
+      "messageId": 73,
+      "postUrl": "https://t.me/smart_zakupka/73",
+      "link": "https://podrygka.prfl.me/smart_zakupka/hopflr?erid=2RanykAX6Cs",
+      "erid": "2RanykAX6Cs",
+      "date": "2026-09-22T10:51:33.689Z"
     }
   ]
 }
