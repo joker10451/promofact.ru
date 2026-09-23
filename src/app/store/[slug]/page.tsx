@@ -104,8 +104,9 @@ export async function generateMetadata({
   // бренд подставляем явно.
   const title =
     n > 0
-      ? // Короче прежнего «— до 15% (4 актуальных промокода)»: хвост обрезался в выдаче.
-        `Промокоды ${store.name} на ${monthRu}: ${maxDisc === "скидки" ? "" : `${maxDisc}, `}${n} ${countWord}`
+      ? (maxDisc && maxDisc !== "скидки"
+          ? `Промокоды ${store.name} на ${monthRu}: ${maxDisc}, ${n} ${countWord}`
+          : `Промокоды и акции ${store.name} на ${monthRu}: ${n} ${countWord}`)
       : `Скидки и акции ${store.name} на ${monthYear}`;
   const titleWithBrand = `${title} | ${SITE_NAME}`;
   const description = buildStoreDescription({
@@ -255,7 +256,10 @@ export default async function StorePage({
     },
     {
       q: `Какой максимальный размер скидки в ${store.name} сейчас?`,
-      a: `На ${monthYear} максимальная выгода по промокодам в ${store.name} составляет ${maxDisc}. Истёкшие коды убираются со страницы автоматически; перед заказом сверьте условия в карточке купона.`,
+      a:
+        maxDisc && maxDisc !== "скидки"
+          ? `На ${monthYear} максимальная выгода по промокодам в ${store.name} составляет ${maxDisc}. Истёкшие коды убираются со страницы автоматически; перед заказом сверьте условия в карточке купона.`
+          : `На ${monthYear} для ${store.name} действуют актуальные акции и специальные предложения. Истёкшие предложения убираются со страницы автоматически; перед переходом сверьте условия в карточке купона.`,
     },
     {
       q: `Почему промокод ${store.name} может не сработать?`,
@@ -368,7 +372,9 @@ export default async function StorePage({
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">
-                Промокоды {store.name} на {monthYear} — скидки {maxDisc}
+                {maxDisc && maxDisc !== "скидки"
+                  ? `Промокоды ${store.name} на ${monthYear} — скидки ${maxDisc}`
+                  : `Промокоды и акции ${store.name} на ${monthYear}`}
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
                 {store.coupons.length}{" "}
@@ -430,7 +436,7 @@ export default async function StorePage({
 
           <div className="flex items-center justify-between mb-3.5">
             <h2 className="font-display text-base sm:text-lg font-extrabold text-ink">
-              Рабочие промокоды и акции {store.name}
+              {store.name.length > 25 ? "Рабочие промокоды и акции" : `Рабочие промокоды и акции ${store.name}`}
             </h2>
             <span className="text-xs font-bold text-ink/50 bg-paper px-2.5 py-1 rounded-full border border-line">
               {store.coupons.length}{" "}
@@ -476,7 +482,9 @@ export default async function StorePage({
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
             <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Макс. выгода</div>
-            <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-red">{maxDisc}</div>
+            <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-red">
+              {maxDisc && maxDisc !== "скидки" ? maxDisc : "Акция"}
+            </div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
             <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Первый заказ</div>

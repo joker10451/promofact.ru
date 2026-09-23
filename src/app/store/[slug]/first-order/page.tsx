@@ -88,9 +88,15 @@ export async function generateMetadata({
   // сам заголовок его не содержит — иначе в выдаче получалось «… | ПромоФакт
   // — ПромоФакт». А вот в OpenGraph и Twitter шаблон не применяется, туда
   // бренд подставляем явно.
-  const title = `Промокоды ${store.name} на первый заказ на ${monthYear} — скидки ${maxDisc}`;
+  const title =
+    maxDisc && maxDisc !== "скидки"
+      ? `Промокоды ${store.name} на первый заказ на ${monthYear} — скидки ${maxDisc}`
+      : `Промокоды и акции ${store.name} на первый заказ на ${monthYear}`;
   const titleWithBrand = `${title} | ${SITE_NAME}`;
-  const description = `Все рабочие промокоды и скидки ${store.name} на первый заказ на ${monthYear}. Специальные предложения ${maxDisc} для новых клиентов: скопируйте промокод и экономьте!`;
+  const description =
+    maxDisc && maxDisc !== "скидки"
+      ? `Все рабочие промокоды и скидки ${store.name} на первый заказ на ${monthYear}. Специальные предложения ${maxDisc} для новых клиентов: скопируйте промокод и экономьте!`
+      : `Все рабочие промокоды и акции ${store.name} на первый заказ на ${monthYear}. Специальные предложения для новых клиентов: скопируйте промокод и экономьте!`;
 
   return {
     // Эти страницы — подмножество родительской /store/[slug]: те же купоны,
@@ -244,7 +250,7 @@ export default async function StoreFirstOrderPage({
                 Промокоды {store.name} на первый заказ ({monthYear})
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
-                Собрали все промокоды и скидки {maxDisc} для новых пользователей {store.name}. Только действующие по сроку.
+                Собрали все промокоды {maxDisc && maxDisc !== "скидки" ? `и скидки ${maxDisc}` : "и выгодные акции"} для новых пользователей {store.name}. Только действующие по сроку.
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">

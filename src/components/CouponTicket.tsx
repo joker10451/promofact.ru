@@ -168,7 +168,7 @@ export default function CouponTicket({
             <div className="min-w-0">
               <Link
                 href={`/store/${store.slug}`}
-                className="truncate font-display text-base font-bold text-ink hover:text-red transition-colors block"
+                className="line-clamp-1 sm:line-clamp-2 font-display text-sm sm:text-base font-bold text-ink hover:text-red transition-colors block leading-tight"
                 title={`Все промокоды ${store.name}`}
               >
                 {store.name}
@@ -305,7 +305,9 @@ export default function CouponTicket({
                   <CheckIcon className="h-4 w-4" /> Код скопирован! Магазин открыт →
                 </span>
               ) : (
-                <span className="truncate">Скопировать и открыть {store.name} →</span>
+                <span className="truncate">
+                  {store.name.length > 20 ? "Скопировать и открыть магазин →" : `Скопировать и открыть ${store.name} →`}
+                </span>
               )}
             </button>
           </div>
@@ -315,7 +317,7 @@ export default function CouponTicket({
             onClick={() => copyAndOpen("", targetUrl)}
             className="w-full rounded-xl bg-gradient-to-r from-red to-red-dark py-3 px-4 text-center text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer truncate"
           >
-            Получить скидку в {store.name} →
+            {store.name.length > 20 ? "Перейти к акции →" : `Получить скидку в ${store.name} →`}
           </button>
         )}
 

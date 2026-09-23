@@ -209,22 +209,31 @@ export function refineOffer(
 
   // 7. Дефолтный переход по ссылке без кода
   if (isNoCode) {
+    const formattedTitle = title.length > 38 ? cleanTruncate(title, 36) : title || "Скидка";
     return {
       type: "default",
-      discount: title.length > 28 ? title.slice(0, 28) + "…" : title || "Скидка",
+      discount: formattedTitle,
       condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : "акция действует по ссылке без ввода кода",
       fullTerms: terms || "Перейдите в магазин по кнопке, скидка применится автоматически в корзине.",
       isNoCode: true,
     };
   }
 
+  const formattedTitle = title.length > 38 ? cleanTruncate(title, 36) : title || "Скидка";
   return {
     type: "default",
-    discount: title.length > 24 ? title.slice(0, 24) + "…" : title || "Скидка",
+    discount: formattedTitle,
     condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : isFirstOrder ? "на первый заказ" : "по промокоду",
     fullTerms: terms || `Промокод ${code} действует в интернет-магазине ${storeName}.`,
     isNoCode: false,
   };
+}
+
+function cleanTruncate(text: string, maxLen: number): string {
+  if (!text || text.length <= maxLen) return text;
+  const cut = text.slice(0, maxLen);
+  const spaceIdx = cut.lastIndexOf(" ");
+  return (spaceIdx > 12 ? cut.slice(0, spaceIdx) : cut).trim() + "…";
 }
 
 /**

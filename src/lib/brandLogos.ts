@@ -240,6 +240,46 @@ export function getBrandMeta(storeSlug: string, storeName: string, domain?: stri
     return BRAND_REGISTRY[slug];
   }
 
+  const lowerName = (storeName || "").toLowerCase();
+
+  // Автоматическое определение крупных экосистем
+  if (slug.includes("sber") || lowerName.includes("сбер")) {
+    return {
+      logoUrl: "https://favicon.yandex.net/favicon/v2/sberbank.ru?size=120",
+      emoji: "💚",
+      bgGradient: "from-emerald-500 to-green-600",
+      textColor: "text-white",
+      domain: "sberbank.ru",
+    };
+  }
+  if (slug.includes("yandex") || lowerName.includes("яндекс")) {
+    return {
+      logoUrl: "https://favicon.yandex.net/favicon/v2/yandex.ru?size=120",
+      emoji: "🟡",
+      bgGradient: "from-yellow-400 to-amber-500",
+      textColor: "text-ink",
+      domain: "yandex.ru",
+    };
+  }
+  if (slug.includes("tbank") || slug.includes("tinkoff") || lowerName.includes("т-банк") || lowerName.includes("тинькофф")) {
+    return {
+      logoUrl: "https://favicon.yandex.net/favicon/v2/tbank.ru?size=120",
+      emoji: "💛",
+      bgGradient: "from-yellow-400 to-yellow-500",
+      textColor: "text-ink",
+      domain: "tbank.ru",
+    };
+  }
+  if (slug.includes("alfa") || lowerName.includes("альфа")) {
+    return {
+      logoUrl: "https://favicon.yandex.net/favicon/v2/alfabank.ru?size=120",
+      emoji: "🔴",
+      bgGradient: "from-red-600 to-red-700",
+      textColor: "text-white",
+      domain: "alfabank.ru",
+    };
+  }
+
   // Если бренд не в реестре, извлекаем домен
   let cleanDomain = domain ? domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "") : "";
   if (!cleanDomain && storeName) {

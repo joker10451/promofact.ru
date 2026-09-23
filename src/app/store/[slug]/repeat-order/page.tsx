@@ -228,7 +228,7 @@ export default async function StoreRepeatOrderPage({
                 Промокоды {store.name} на повторный заказ ({monthYear})
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
-                Собрали действующие купоны {store.name} без ограничений первого заказа. Скидки {maxDisc} для каждого покупателя.
+                Собрали действующие купоны {store.name} без ограничений первого заказа. {maxDisc && maxDisc !== "скидки" ? `Скидки ${maxDisc} для каждого покупателя.` : "Выгодные условия для каждого покупателя."}
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
