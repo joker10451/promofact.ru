@@ -6,7 +6,7 @@ import { ACTIONS, getAction } from "@/lib/actions";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = false;
-export const revalidate = 43200;
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   return ACTIONS.map((a) => ({ slug: a.slug }));

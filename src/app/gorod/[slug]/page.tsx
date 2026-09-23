@@ -12,7 +12,7 @@ import { CITIES_SEO } from "@/lib/citiesSeo";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { toCatalogCoupon } from "@/lib/catalogCoupon";
 
-export const revalidate = 43200;
+export const revalidate = 86400;
 
 const CITY_COUPON_LIMIT = 24;
 

@@ -3,8 +3,9 @@ import { translit } from "@/lib/translit";
 import { proxiedLogo } from "@/lib/logoProxy";
 import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
+import bundledFeed from "@/data/perfluence-feed.json";
 
-const REVALIDATE_SECONDS = 12 * 60 * 60; // 43200 — ISR: 12 часов для защиты лимита ISR Writes на Vercel
+const REVALIDATE_SECONDS = 24 * 60 * 60; // 86400 — ISR: 24 часа для защиты лимита ISR Writes на Vercel
 
 const WIDGET_URL = process.env.PERFLUENCE_WIDGET_URL ?? "";
 const RESULTS_URL = process.env.PERFLUENCE_RESULTS_URL ?? "";
@@ -347,7 +348,23 @@ async function fetchData(): Promise<Coupon[]> {
       console.error("[perfluence] fetch failed, отдаём кэш:", e);
       cacheFailed = true;
       failedAt = Date.now();
-      if (cache) return cache;
+      if (cache && cache.length > 0) return cache;
+
+      // 1. Локальный бандл фида (гарантирует наличие офферов вроде Иви на Vercel US)
+      if (bundledFeed && typeof bundledFeed === "object" && "data" in bundledFeed) {
+        try {
+          const bundledCoupons = parsePayload(JSON.stringify(bundledFeed));
+          if (bundledCoupons.length > 0) {
+            console.log(`[perfluence] использован бандленный фид: ${bundledCoupons.length} купонов`);
+            cache = bundledCoupons;
+            return cache;
+          }
+        } catch (parseErr) {
+          console.error("[perfluence] ошибка парсинга бандленного фида:", parseErr);
+        }
+      }
+
+      // 2. Сетевой снимок с прода (если бандла нет)
       const snapshot = await fetchSnapshot();
       if (snapshot.length > 0) {
         cache = snapshot;

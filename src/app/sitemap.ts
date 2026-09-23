@@ -15,7 +15,7 @@ import { SITE_URL } from "@/lib/site";
 // родительской страницы магазина, и они составляли половину карты сайта — робот
 // выгребал их первыми, а категории с наибольшим поисковым потенциалом получали
 // остаток бюджета. В индексе они при этом не давали ничего: 0 страниц в поиске.
-export const revalidate = 43200;
+export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, stores] = await Promise.all([

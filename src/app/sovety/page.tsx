@@ -10,7 +10,7 @@ import YandexAdBlock from "@/components/YandexAdBlock";
 
 // Раз в час, а не в 12: рекламные статьи выходят по времени (publishAt),
 // и с 12-часовым кэшем статья попадала в ленту Дзена с опозданием на полдня.
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   // Бренд добавит шаблон в layout — здесь его быть не должно.
