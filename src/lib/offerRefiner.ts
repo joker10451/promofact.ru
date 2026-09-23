@@ -36,20 +36,28 @@ export function refineOffer(
 
   const minOrder = extractMinimumOrder(combined);
 
-  // 1. Фиксированные спец-предложения и подписки (СберПрайм, Яндекс Плюс)
-  if (/60\s*дней|подписк\w*\s+(плюс|кинопоиск|яндекс|сбер)/i.test(title) && !/(\d+)\s*%/.test(title)) {
-    const isSber = /сбер/i.test(title) || /сбер/i.test(terms) || /сбер/i.test(storeName);
+  // 1. Фиксированные спец-предложения и подписки (Иви, СберПрайм, Яндекс Плюс, Start.ru, Premier)
+  const daysMatch = title.match(/(\d+)\s*(?:дней|дня|день)/i);
+  if (
+    (daysMatch || /подписк\w*\s+(плюс|кинопоиск|яндекс|сбер|иви|ivi|start|premier|okko)/i.test(title)) &&
+    !/(\d+)\s*%/.test(title) &&
+    /подписк|доступ|пробн|бесплатн|кинотеатр/i.test(combined)
+  ) {
+    const isSber = /сбер/i.test(combined) || /сбер/i.test(storeName);
+    const days = daysMatch ? daysMatch[1] : isSber ? "60" : "30";
+    let disc = `${days} дней за 1 ₽`;
+    if (/бесплатн|за\s*0\s*₽/i.test(combined)) {
+      disc = `${days} дней бесплатно`;
+    }
     return {
       type: "subscription",
-      discount: "60 дней за 1 ₽",
-      condition: isSber
-        ? "подписка СберПрайм для новых пользователей"
-        : "подписка Яндекс Плюс и Кинопоиск для новых пользователей",
+      discount: disc,
+      condition: `подписка ${storeName} для новых пользователей`,
       fullTerms:
         terms ||
         (isSber
           ? "Оформите пробный период СберПрайм 60 дней за 1 ₽ при переходе по ссылке."
-          : "60 дней бесплатного доступа к сервисам Яндекс Плюс, затем стандартная цена."),
+          : `${days} дней доступа к подписке ${storeName}. Только для новых пользователей при активации промокода.`),
       isNoCode,
     };
   }

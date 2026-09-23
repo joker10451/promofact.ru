@@ -82,6 +82,20 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     textColor: "text-white",
     domain: "kinopoisk.ru",
   },
+  "ivi": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/ivi.ru?size=120",
+    emoji: "🍿",
+    bgGradient: "from-rose-600 to-pink-700",
+    textColor: "text-white",
+    domain: "ivi.ru",
+  },
+  "start-ru": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/start.ru?size=120",
+    emoji: "🎬",
+    bgGradient: "from-red-600 to-neutral-900",
+    textColor: "text-white",
+    domain: "start.ru",
+  },
   "yandeks-tsvety": {
     logoUrl: "https://favicon.yandex.net/favicon/v2/market.yandex.ru?size=120",
     emoji: "🌷",
@@ -268,6 +282,15 @@ export function getBrandMeta(storeSlug: string, storeName: string, domain?: stri
       bgGradient: "from-yellow-400 to-yellow-500",
       textColor: "text-ink",
       domain: "tbank.ru",
+    };
+  }
+  if (slug === "ivi" || lowerName.includes("иви")) {
+    return {
+      logoUrl: "https://favicon.yandex.net/favicon/v2/ivi.ru?size=120",
+      emoji: "🍿",
+      bgGradient: "from-rose-600 to-pink-700",
+      textColor: "text-white",
+      domain: "ivi.ru",
     };
   }
   if (slug.includes("alfa") || lowerName.includes("альфа")) {

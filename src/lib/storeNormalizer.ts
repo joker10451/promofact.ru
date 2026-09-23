@@ -116,6 +116,11 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
     category: "Онлайн-кинотеатры",
     categorySlug: "onlayn-kinoteatry",
   },
+  "ivi": {
+    name: "Иви",
+    category: "Онлайн-кинотеатры",
+    categorySlug: "onlayn-kinoteatry",
+  },
   "pyaterochka": {
     name: "Пятёрочка",
     category: "Доставка продуктов",

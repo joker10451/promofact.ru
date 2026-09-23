@@ -121,6 +121,8 @@ function collectPromos(item: Rec): { promo: Rec; group: Rec }[] {
  * (next.config.ts) и баннерах, поэтому страницы не разъезжаются.
  */
 const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
+  2430: { slug: "ivi", name: "Иви" },
+  1623: { slug: "start-ru", name: "Start.ru" },
   1653: { slug: "dodo-pizza", name: "Додо Пицца" },
   900: { slug: "bethowen", name: "Бетховен" },
   1483: { slug: "citydrive", name: "Ситидрайв" },
@@ -368,6 +370,8 @@ const PRIORITY_STORES = [
   "pyaterochka",
   "otello",
   "kinopoisk",
+  "ivi",
+  "start-ru",
   "yandeks-tsvety",
   "iv-roshe",
   "vazhnaya-ryba",
