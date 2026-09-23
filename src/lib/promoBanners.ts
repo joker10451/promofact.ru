@@ -10,6 +10,8 @@ export interface PromoBanner {
   id: string;
   /** Магазин, на странице которого баннер тоже показывается. */
   storeSlug: string;
+  /** Дополнительные магазины, на страницах которых показывается баннер. */
+  storeSlugs?: string[];
   /** Плашка над заголовком: «Розыгрыш», «Акция». */
   label?: string;
   title: string;
@@ -79,16 +81,17 @@ export const PROMO_BANNERS: PromoBanner[] = [
   },
   {
     id: "sber-detskiy-aksessuar-2026",
-    storeSlug: "sberbank-detskaya-karta",
-    label: "Акция",
-    title: "Детский платёжный стикер или брелок от Сбера",
+    storeSlug: "detskie-platezhnye-aksessuary-ot-sbera",
+    storeSlugs: ["detskie-platezhnye-aksessuary-ot-sbera", "sberbank-detskaya-karta", "sberprime"],
+    label: "Акция от Сбера",
+    title: "Детский платёжный аксессуар: +4 000 на счёт",
     subtitle:
-      "Яркий стикер или брелок — это стильно и удобно, а ещё надёжный инструмент для контроля детских расходов. Закажите юному моднику платёжный аксессуар по ссылке.",
-    badge: "до 4 000 бонусов Спасибо",
-    note: "Кешбэк за покупки товаров к школе всей семьёй до 30.09: до 2 000 бонусов на счёт ребёнка и до 2 000 бонусов по Совместному счёту с близкими",
+      "Выберите стильный брелок или яркий стикер от Сбера. Оплачивайте товары к школе до 30.09 по совместному счёту или детскими аксессуарами и получайте до 4 000 бонусов Спасибо на счёт.",
+    badge: "+4 000 бонусов на счёт",
+    note: "Ребёнок может получить до 2 000 бонусов и родители до 1 000 бонусов каждый. Срок акции: до 30.09.2026",
     cta: "Оформить детский аксессуар",
     link: "https://sberbank1.prfl.me/sites/zn01im?erid=2RanykEC3Sj",
-    image: "/images/sber-detskiy-aksessuar.jpg",
+    image: "/images/sber-detskiy-aksessuar.png",
     imageAlt: "Детский платёжный аксессуар от Сбера: брелок или стикер и до 4 000 бонусов Спасибо на счёт",
     imageWidth: 1400,
     imageHeight: 1000,
@@ -145,7 +148,9 @@ export function getActivePromoBanners(opts: { storeSlug?: string; now?: number }
     (b) =>
       now >= bannerStartMs(b) - PREFETCH_MS &&
       now <= mskDayEnd(b.endsAt) &&
-      (!opts.storeSlug || b.storeSlug === opts.storeSlug),
+      (!opts.storeSlug ||
+        b.storeSlug === opts.storeSlug ||
+        (Array.isArray(b.storeSlugs) && b.storeSlugs.includes(opts.storeSlug))),
   );
 }
 
