@@ -15,8 +15,6 @@ import Subscribe from "@/components/Subscribe";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import Reveal from "@/components/Reveal";
-import PromoBanner from "@/components/PromoBanner";
-import { getActivePromoBanners } from "@/lib/promoBanners";
 import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickExpiringDeals, offerKey } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
@@ -139,12 +137,6 @@ export default async function Home() {
             <ExpiringDeals coupons={hotDeals} />
           </Reveal>
         </div>
-
-        {getActivePromoBanners().map((banner) => (
-          <div key={banner.id} className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-            <PromoBanner banner={banner} />
-          </div>
-        ))}
 
         {/* 7. Купоны на сегодня — сгруппированный каталог (лучший промокод + аккордеон) */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
