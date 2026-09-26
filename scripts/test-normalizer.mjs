@@ -691,4 +691,90 @@ let passed = 0;
   }
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/30 ТЕСТОВ (23 Admitad + 7 Регрессий) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// Test 31 [Регрессия]: Игнорирование изменений только timestamp/счётчиков при проверке изменений фида
+{
+  const { extractSubstantiveCatalog } = await import("./check-feed-changes.mjs");
+  const feedA = {
+    data: [
+      {
+        project: { id: 10, name: "Store A", activeBloggers: 100 },
+        groups: [
+          {
+            promocodes: [{ code: "PROMO1", discount: 10 }],
+            links_for_subscribers: [{ id: 1, link: "https://link.com" }],
+          },
+        ],
+      },
+    ],
+  };
+
+  const feedB = {
+    data: [
+      {
+        project: { id: 10, name: "Store A", activeBloggers: 105 }, // изменился только счётчик блогеров
+        groups: [
+          {
+            promocodes: [{ code: "PROMO1", discount: 10 }],
+            links_for_subscribers: [{ id: 1, link: "https://link.com" }],
+          },
+        ],
+      },
+    ],
+  };
+
+  const catA = extractSubstantiveCatalog(feedA);
+  const catB = extractSubstantiveCatalog(feedB);
+
+  assert.strictEqual(
+    JSON.stringify(catA),
+    JSON.stringify(catB),
+    "Изменение только волатильных счетчиков или временных меток не должно считаться содержательным"
+  );
+  console.log("✓ Test 31 [Регрессия]: Игнорирование изменений только timestamp/счётчиков работает корректно (PASS)");
+  passed++;
+}
+
+// Test 32 [Регрессия]: Детекция реальных содержательных изменений предложений и ссылок
+{
+  const { extractSubstantiveCatalog } = await import("./check-feed-changes.mjs");
+  const feedA = {
+    data: [
+      {
+        project: { id: 10, name: "Store A" },
+        groups: [
+          {
+            promocodes: [{ code: "PROMO1", discount: 10 }],
+            links_for_subscribers: [{ id: 1, link: "https://link.com" }],
+          },
+        ],
+      },
+    ],
+  };
+
+  const feedChangedPromo = {
+    data: [
+      {
+        project: { id: 10, name: "Store A" },
+        groups: [
+          {
+            promocodes: [{ code: "PROMO_NEW", discount: 20 }], // новое предложение!
+            links_for_subscribers: [{ id: 1, link: "https://link.com" }],
+          },
+        ],
+      },
+    ],
+  };
+
+  const catA = extractSubstantiveCatalog(feedA);
+  const catChanged = extractSubstantiveCatalog(feedChangedPromo);
+
+  assert.notStrictEqual(
+    JSON.stringify(catA),
+    JSON.stringify(catChanged),
+    "Изменение предложений должно быть зафиксировано"
+  );
+  console.log("✓ Test 32 [Регрессия]: Содержательные изменения предложений успешно детектируются (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/32 ТЕСТОВ (23 Admitad + 9 Регрессий) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
