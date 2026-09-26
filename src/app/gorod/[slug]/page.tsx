@@ -37,7 +37,7 @@ export async function generateMetadata({
   const dateStr = `${months[now.getMonth()]} ${now.getFullYear()}`;
 
   const title = `Промокоды и скидки ${city.inCity} на ${dateStr} — ${SITE_NAME}`;
-  const description = `${city.description} Скидки до 55% на ${city.popularCategory} в ${city.name}. Проверенные промокоды на ${dateStr}.`;
+  const description = `${city.description} Каталог актуальных промокодов и скидок на ${city.popularCategory} в ${city.name} на ${dateStr}.`;
 
   return {
     title,

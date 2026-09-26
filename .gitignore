@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# reports
+audit-seo-report.json
+
 # local artifacts
 dev.log
 *.log

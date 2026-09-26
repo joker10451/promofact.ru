@@ -79,6 +79,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/sunlight/:path*",
+        destination: "/store/sunlight-ru",
+        permanent: true,
+      },
+      {
+        source: "/store/sunlight",
+        destination: "/store/sunlight-ru",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,

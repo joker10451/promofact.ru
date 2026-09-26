@@ -7,7 +7,6 @@ import {
 } from "@/lib/admitadNormalizer";
 import type { RawAdmitadCoupon, NormalizedOffer } from "@/lib/admitadTypes";
 import type { Coupon } from "@/lib/types";
-import { fetchAdmitadCouponsCached } from "@/lib/admitadSupabase";
 
 /**
  * URL выгрузки задаётся только переменной окружения.
@@ -149,117 +148,12 @@ export function parseAdmitadXml(xml: string): Coupon[] {
   return deduped.map(toCoupon);
 }
 
-let admitadCache: Coupon[] | null = null;
-let lastFetchTime = 0;
-let pendingFetch: Promise<Coupon[]> | null = null;
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 час
-
-async function readDiskCache(): Promise<Coupon[] | null> {
-  if (typeof process === "undefined" || !process.versions?.node) return null;
-  try {
-    const fs = await import("fs");
-    const path = await import("path");
-    const cacheFile = path.join(process.cwd(), ".next", "cache", "admitad_coupons.json");
-    if (fs.existsSync(cacheFile)) {
-      const stat = fs.statSync(cacheFile);
-      if (Date.now() - stat.mtimeMs < CACHE_TTL_MS || process.env.NEXT_PHASE === "phase-production-build") {
-        const data = JSON.parse(fs.readFileSync(cacheFile, "utf-8"));
-        if (Array.isArray(data) && data.length > 0) return data;
-      }
-    }
-  } catch {}
-  return null;
-}
-
-async function writeDiskCache(coupons: Coupon[]) {
-  if (typeof process === "undefined" || !process.versions?.node) return;
-  try {
-    const fs = await import("fs");
-    const path = await import("path");
-    const dir = path.join(process.cwd(), ".next", "cache");
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, "admitad_coupons.json"), JSON.stringify(coupons), "utf-8");
-  } catch {}
-}
-
-/** Фетч сырого фида Admitad + парсинг. */
 export async function fetchAndParseAdmitadFeed(): Promise<Coupon[]> {
-  const disk = await readDiskCache();
-  if (disk && disk.length > 0) return disk;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s таймаут
-
-  try {
-    const res = await fetch(ADMITAD_FEED_URL, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-        Accept: "application/xml,text/xml,*/*",
-      },
-      signal: controller.signal,
-    });
-
-    if (!res.ok) {
-      throw new Error(`Admitad feed ${res.status} ${res.statusText}`);
-    }
-
-    const list = parseAdmitadXml(await res.text());
-    console.log(`[admitad] Загружено купонов после нормализации: ${list.length}`);
-    if (list.length > 0) await writeDiskCache(list);
-    return list;
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  // Admitad отключён
+  return [];
 }
 
 export async function fetchAdmitadCoupons(): Promise<Coupon[]> {
-  if (!isAdmitadConfigured()) {
-    console.warn(
-      "[admitad] ADMITAD_FEED_URL не задан — источник отключён, купоны Admitad не загружаются",
-    );
-    return [];
-  }
-
-  const now = Date.now();
-  if (admitadCache && now - lastFetchTime < CACHE_TTL_MS) {
-    return admitadCache;
-  }
-
-  const disk = await readDiskCache();
-  if (disk && disk.length > 0) {
-    admitadCache = disk;
-    lastFetchTime = now;
-    return disk;
-  }
-
-  if (pendingFetch) {
-    return pendingFetch;
-  }
-
-  pendingFetch = (async () => {
-    try {
-      // Сначала маленький РУ-кэш из Supabase — холодный старт не качает 65МБ.
-      const cached = await fetchAdmitadCouponsCached();
-      if (cached.length > 0) {
-        console.log(`[admitad] Используем Supabase-кэш (${cached.length} купонов)`);
-        admitadCache = cached;
-        lastFetchTime = Date.now();
-        await writeDiskCache(cached);
-        return cached;
-      }
-
-      const list = await fetchAndParseAdmitadFeed();
-      admitadCache = list;
-      lastFetchTime = Date.now();
-      return list;
-    } catch (e) {
-      console.error("[admitad] Ошибка загрузки фида/кэша:", e);
-      return (await readDiskCache()) || admitadCache || [];
-    } finally {
-      pendingFetch = null;
-    }
-  })();
-
-  return pendingFetch;
+  // Источник Admitad отключён — используется только Perfluence
+  return [];
 }

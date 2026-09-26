@@ -165,8 +165,6 @@ export default async function CityCategoryPage({
         description: c.promocode.bonusName || c.store.name,
         url: c.affiliate.link,
         priceValidUntil: c.promocode.expires,
-        priceCurrency: "RUB",
-        price: 0,
         availability: "https://schema.org/InStock",
         seller: { "@type": "Organization", name: c.store.name },
       },

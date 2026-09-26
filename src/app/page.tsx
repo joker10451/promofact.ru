@@ -101,11 +101,6 @@ export default async function Home() {
           name: SITE_NAME,
           url: SITE_URL,
           inLanguage: "ru-RU",
-          potentialAction: {
-            "@type": "SearchAction",
-            target: `${SITE_URL}/?q={search_term_string}`,
-            "query-input": "required name=search_term_string",
-          },
         }}
       />
 
