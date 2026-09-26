@@ -4,9 +4,11 @@
  * 1. Загрузка окружения (.env.local, .env.production).
  * 2. Запрос свежего фида Perfluence API (с таймаутом).
  * 3. Строгая валидация и фильтрация истёкших предложений и некорректных дат.
- * 4. Атомарная запись данных (write-to-temp + rename).
- * 5. Раздельные статусы: 'success', 'fallback', 'failed'.
- * 6. Защита от подмены дат: при недоступности API lastSuccessSync НЕ обновляется.
+ * 4. Поддержка предложений без промокода (действующие акции по партнерской ссылке).
+ * 5. Защита от случайного обнуления и резкого необъяснимого сокращения каталога.
+ * 6. Атомарная запись данных (write-to-temp + rename).
+ * 7. Раздельные статусы: 'success', 'fallback', 'failed'.
+ * 8. Защита от подмены дат: при недоступности API или аномалиях lastSuccessSync НЕ обновляется.
  */
 
 import fs from "node:fs";
@@ -48,7 +50,7 @@ function atomicWriteJson(filePath, data) {
   fs.renameSync(tempPath, filePath);
 }
 
-function fetchJson(url) {
+export function fetchJson(url) {
   return new Promise((resolve, reject) => {
     const req = https.get(
       url,
@@ -85,7 +87,7 @@ function fetchJson(url) {
 }
 
 /**
- * Парсинг даты экспирации купона.
+ * Парсинг даты экспирации купона или акции.
  * Возвращает timestamp конца дня или null, если дата отсутствует/некорректна.
  */
 export function parseDateTs(dateStr) {
@@ -113,37 +115,101 @@ export function parseDateTs(dateStr) {
 
 /**
  * Очистка фида: фильтрует купоны с некорректной или истёкшей датой.
+ * Сохраняет:
+ * 1. Промокоды (активные, без истёкшей даты).
+ * 2. Предложения без промокода (действующие акции с валидной партнерской ссылкой).
+ * Поддерживает legacy-структуры (когда groups отсутствует или [item]).
  */
 export function filterExpiredOffers(data, referenceTime = Date.now()) {
   if (!data || !Array.isArray(data.data)) {
-    return { cleanData: null, totalPromos: 0, activePromos: 0, expiredPromos: 0 };
+    return {
+      cleanData: null,
+      totalPromos: 0,
+      activePromos: 0,
+      expiredPromos: 0,
+      totalLinkOffers: 0,
+      activeLinkOffers: 0,
+      expiredLinkOffers: 0,
+      totalOffers: 0,
+      activeOffers: 0,
+      expiredOffers: 0,
+    };
   }
 
   let totalPromos = 0;
   let activePromos = 0;
   let expiredPromos = 0;
 
+  let totalLinkOffers = 0;
+  let activeLinkOffers = 0;
+  let expiredLinkOffers = 0;
+
   const cleanProjects = [];
 
   for (const projectItem of data.data) {
     const cleanGroups = [];
-    if (Array.isArray(projectItem.groups)) {
-      for (const group of projectItem.groups) {
-        if (Array.isArray(group.promocodes)) {
-          const validPromos = [];
-          for (const promo of group.promocodes) {
-            totalPromos++;
-            const expTs = parseDateTs(promo.date || promo.expires);
-            // Если дата отсутствует, повреждена или в прошлом — считаем истёкшей
+    const rawGroups = Array.isArray(projectItem.groups) ? projectItem.groups : [projectItem];
+
+    for (const group of rawGroups) {
+      const promos = Array.isArray(group.promocodes) ? group.promocodes : [];
+
+      // ВАРИАНТ А: Группа с промокодами
+      if (promos.length > 0) {
+        const validPromos = [];
+        for (const promo of promos) {
+          totalPromos++;
+          const dateStr = promo.date || promo.expires || group.date_end || group.dateEnd;
+          if (dateStr) {
+            const expTs = parseDateTs(dateStr);
             if (expTs === null || expTs < referenceTime) {
               expiredPromos++;
             } else {
               activePromos++;
               validPromos.push(promo);
             }
+          } else {
+            // Бессрочный промокод без указанной даты окончания (не приписываем фиктивную дату)
+            activePromos++;
+            validPromos.push(promo);
           }
-          if (validPromos.length > 0) {
-            cleanGroups.push({ ...group, promocodes: validPromos });
+        }
+
+        if (validPromos.length > 0) {
+          cleanGroups.push({ ...group, promocodes: validPromos });
+        }
+      } else {
+        // ВАРИАНТ Б: Предложение без промокода (акция по партнерской ссылке)
+        const landing = Array.isArray(group.landing) ? group.landing[0] : group.landing;
+        const links = Array.isArray(group.links_for_subscribers) ? group.links_for_subscribers : [];
+        const partnerLink =
+          (landing && typeof landing.link === "string" ? landing.link : "") ||
+          (links[0] && typeof links[0].link === "string" ? links[0].link : "");
+
+        const isValidUrl = Boolean(
+          partnerLink &&
+            (partnerLink.startsWith("http://") || partnerLink.startsWith("https://"))
+        );
+
+        if (isValidUrl) {
+          totalLinkOffers++;
+          const dateStr =
+            group.date_end ||
+            group.dateEnd ||
+            (landing && landing.date_end) ||
+            (links[0] && links[0].date_end);
+
+          if (dateStr) {
+            const expTs = parseDateTs(dateStr);
+            if (expTs === null || expTs < referenceTime) {
+              expiredLinkOffers++;
+            } else {
+              activeLinkOffers++;
+              cleanGroups.push(group);
+            }
+          } else {
+            // Бессрочная акция по партнерской ссылке (не приписываем фиктивную дату)
+            activeLinkOffers++;
+            cleanGroups.push(group);
           }
         }
       }
@@ -154,11 +220,21 @@ export function filterExpiredOffers(data, referenceTime = Date.now()) {
     }
   }
 
+  const totalOffers = totalPromos + totalLinkOffers;
+  const activeOffers = activePromos + activeLinkOffers;
+  const expiredOffers = expiredPromos + expiredLinkOffers;
+
   return {
     cleanData: { ...data, data: cleanProjects },
     totalPromos,
     activePromos,
     expiredPromos,
+    totalLinkOffers,
+    activeLinkOffers,
+    expiredLinkOffers,
+    totalOffers,
+    activeOffers,
+    expiredOffers,
   };
 }
 
@@ -167,7 +243,7 @@ export async function runCatalogSync(options = {}) {
   console.log("=== Синхронизация партнерского каталога PromoFact ===");
 
   // Читаем текущие метаданные для сохранения исторического lastSuccessSync при сбоях
-  let existingMeta = { lastSuccessSync: null, projectCount: 0, status: "initial" };
+  let existingMeta = { lastSuccessSync: null, projectCount: 0, activeOffers: 0, status: "initial" };
   if (fs.existsSync(META_PATH)) {
     try {
       existingMeta = JSON.parse(fs.readFileSync(META_PATH, "utf-8"));
@@ -180,7 +256,11 @@ export async function runCatalogSync(options = {}) {
   let rawApiData = null;
   let syncError = null;
 
-  if (widgetUrl) {
+  if (options.rawFeed) {
+    rawApiData = options.rawFeed;
+    apiSuccess = true;
+    console.log(`✓ Тестовый фид передан напрямую: ${rawApiData.data?.length || 0} проектов.`);
+  } else if (widgetUrl) {
     console.log(`Запрос фида из Perfluence API (${widgetUrl.slice(0, 30)}...)...`);
     try {
       rawApiData = await fetchJson(widgetUrl);
@@ -202,17 +282,82 @@ export async function runCatalogSync(options = {}) {
   const now = Date.now();
   const nowIso = new Date(now).toISOString();
 
-  // СЦЕНАРИЙ 1: Успешный ответ API
+  // СЦЕНАРИЙ 1: Обработка ответа API с защитой от случайного обнуления и резкого спада
   if (apiSuccess && rawApiData) {
-    const { cleanData, totalPromos, activePromos, expiredPromos } = filterExpiredOffers(rawApiData, now);
+    const {
+      cleanData,
+      totalPromos,
+      activePromos,
+      expiredPromos,
+      totalLinkOffers,
+      activeLinkOffers,
+      expiredLinkOffers,
+      totalOffers,
+      activeOffers,
+      expiredOffers,
+    } = filterExpiredOffers(rawApiData, now);
 
-    if (activePromos === 0) {
-      console.warn("⚠️ В ответе API все предложения истёкшие или невалидные!");
+    const prevActiveOffers = existingMeta.activeOffers || existingMeta.activePromos || 0;
+    const prevProjects = existingMeta.projectCount || 0;
+    const newProjects = cleanData.data.length;
+
+    // ЗАЩИТА 1: Аномальное обнуление каталога (были офферы, а стало 0)
+    const isWipeout = newProjects === 0 || activeOffers === 0;
+    if (isWipeout && prevActiveOffers > 0 && !options.allowEmpty) {
+      const wipeoutError = `Аномальное обнуление каталога: получено 0 действующих предложений (было ${prevActiveOffers}). Обновление заблокировано.`;
+      console.error(`🚨 ${wipeoutError}`);
+
+      const meta = {
+        lastSuccessSync: existingMeta.lastSuccessSync || null, // Сохраняем честную дату!
+        lastAttemptAt: nowIso,
+        status: "fallback",
+        source: "local-bundled-feed",
+        projectCount: prevProjects,
+        totalPromos: existingMeta.totalPromos || 0,
+        activePromos: existingMeta.activePromos || 0,
+        expiredPromos: existingMeta.expiredPromos || 0,
+        totalOffers: prevActiveOffers,
+        activeOffers: prevActiveOffers,
+        expiredOffers: 0,
+        error: wipeoutError,
+        updatedAt: nowIso,
+      };
+
+      atomicWriteJson(META_PATH, meta);
+      return { status: "fallback", meta };
     }
 
-    // Атомарно сохраняем свежий фид
+    // ЗАЩИТА 2: Резкое необъяснимое сокращение каталога (>60% потери данных)
+    const isCatastrophicDrop =
+      prevProjects >= 10 &&
+      prevActiveOffers >= 20 &&
+      (newProjects < Math.floor(prevProjects * 0.4) || activeOffers < Math.floor(prevActiveOffers * 0.4));
+
+    if (isCatastrophicDrop && !options.allowDrop) {
+      const dropError = `Аномальное сокращение каталога: проектов ${newProjects} (было ${prevProjects}), предложений ${activeOffers} (было ${prevActiveOffers}). Обновление заблокировано.`;
+      console.warn(`🚨 ${dropError}`);
+
+      const meta = {
+        lastSuccessSync: existingMeta.lastSuccessSync || null,
+        lastAttemptAt: nowIso,
+        status: "fallback",
+        source: "local-bundled-feed",
+        projectCount: prevProjects,
+        totalOffers: prevActiveOffers,
+        activeOffers: prevActiveOffers,
+        error: dropError,
+        updatedAt: nowIso,
+      };
+
+      atomicWriteJson(META_PATH, meta);
+      return { status: "fallback", meta };
+    }
+
+    // Успешная валидация: атомарно сохраняем свежий фид
     atomicWriteJson(FEED_PATH, cleanData);
-    console.log(`✓ Актуальный фид сохранён в ${FEED_PATH} (активных акций: ${activePromos}, отфильтровано истёкших: ${expiredPromos})`);
+    console.log(
+      `✓ Актуальный фид сохранён в ${FEED_PATH} (проектов: ${cleanData.data.length}, акций: ${activeOffers} [кодов: ${activePromos}, ссылок: ${activeLinkOffers}], отфильтровано: ${expiredOffers})`
+    );
 
     const meta = {
       lastSuccessSync: nowIso,
@@ -223,6 +368,12 @@ export async function runCatalogSync(options = {}) {
       totalPromos,
       activePromos,
       expiredPromos,
+      totalLinkOffers,
+      activeLinkOffers,
+      expiredLinkOffers,
+      totalOffers,
+      activeOffers,
+      expiredOffers,
       updatedAt: nowIso,
     };
 
@@ -231,15 +382,27 @@ export async function runCatalogSync(options = {}) {
     return { status: "success", meta };
   }
 
-  // СЦЕНАРИЙ 2 / 3: API недоступен — проверяем наличие резервного локального фида
+  // СЦЕНАРИЙ 2: API недоступен — проверяем наличие резервного локального фида
   console.log("Переход в резервный режим (проверка локального фида)...");
   if (fs.existsSync(FEED_PATH)) {
     try {
       const localFeed = JSON.parse(fs.readFileSync(FEED_PATH, "utf-8"));
       if (Array.isArray(localFeed.data) && localFeed.data.length > 0) {
-        const { totalPromos, activePromos, expiredPromos } = filterExpiredOffers(localFeed, now);
+        const {
+          totalPromos,
+          activePromos,
+          expiredPromos,
+          totalLinkOffers,
+          activeLinkOffers,
+          expiredLinkOffers,
+          totalOffers,
+          activeOffers,
+          expiredOffers,
+        } = filterExpiredOffers(localFeed, now);
 
-        console.log(`ℹ️ Локальный фид доступен (${localFeed.data.length} проектов, активных акций: ${activePromos}).`);
+        console.log(
+          `ℹ️ Локальный фид доступен (${localFeed.data.length} проектов, активных предложений: ${activeOffers}).`
+        );
         console.log(`⚠️ ВНИМАНИЕ: lastSuccessSync НЕ обновляется, так как API был недоступен.`);
 
         const meta = {
@@ -251,6 +414,12 @@ export async function runCatalogSync(options = {}) {
           totalPromos,
           activePromos,
           expiredPromos,
+          totalLinkOffers,
+          activeLinkOffers,
+          expiredLinkOffers,
+          totalOffers,
+          activeOffers,
+          expiredOffers,
           error: syncError?.message || "Unknown error",
           updatedAt: nowIso,
         };
@@ -274,6 +443,9 @@ export async function runCatalogSync(options = {}) {
     totalPromos: 0,
     activePromos: 0,
     expiredPromos: 0,
+    totalOffers: 0,
+    activeOffers: 0,
+    expiredOffers: 0,
     error: syncError?.message || "No feed source available",
     updatedAt: nowIso,
   };

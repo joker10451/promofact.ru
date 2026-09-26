@@ -390,6 +390,7 @@ async function runAudit() {
 
     liveHttpResults = {
       probedCount: sampleUrls.length,
+      sampleScopeNote: "Сетевой аудит --live проверяет репрезентативную выборку из 25 URL, а не весь сайт целиком.",
       successCount: sampleUrls.length - httpFailures.length,
       failureCount: httpFailures.length,
       failures: httpFailures,

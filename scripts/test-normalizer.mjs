@@ -479,4 +479,116 @@ let passed = 0;
   passed++;
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/26 ТЕСТОВ (23 Admitad + 3 Регрессии) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// Test 27 [Регрессия]: Акции с кодом, без кода, с истёкшим сроком и без срока (сохранение групп)
+{
+  const testFeed = {
+    data: [
+      {
+        id: 101,
+        name: "Shop With Codes",
+        groups: [
+          {
+            id: "g1",
+            promocodes: [
+              { code: "VALID_CODE", date: "31.12.2030" },
+              { code: "EXPIRED_CODE", date: "01.01.2020" },
+              { code: "PERPETUAL_CODE" }, // без срока
+            ],
+          },
+        ],
+      },
+      {
+        id: 102,
+        name: "Shop Link Only",
+        groups: [
+          {
+            id: "g2",
+            promocodes: [],
+            landing: { link: "https://partner.link/offer1", name: "Link Promo Active" },
+          },
+          {
+            id: "g3",
+            promocodes: [],
+            date_end: "01.01.2021",
+            landing: { link: "https://partner.link/offer2", name: "Link Promo Expired" },
+          },
+          {
+            id: "g4",
+            promocodes: [],
+            landing: { name: "No Link At All" }, // без ссылки
+          },
+        ],
+      },
+      {
+        // Legacy-структура (без поля groups, группа прямо в корне элемента)
+        id: 103,
+        name: "Legacy Shop Link",
+        landing: { link: "https://partner.link/legacy-offer", name: "Legacy Promo" },
+      },
+    ],
+  };
+
+  const {
+    cleanData,
+    activePromos,
+    expiredPromos,
+    activeLinkOffers,
+    expiredLinkOffers,
+    totalOffers,
+    activeOffers,
+  } = filterExpiredOffers(testFeed);
+
+  assert.strictEqual(activePromos, 2, "Должно быть 2 активных промокода (VALID_CODE, PERPETUAL_CODE)");
+  assert.strictEqual(expiredPromos, 1, "Должен быть 1 истёкший промокод (EXPIRED_CODE)");
+  assert.strictEqual(activeLinkOffers, 2, "Должно быть 2 активных оффера по ссылке (Shop Link Only g2 + Legacy Shop)");
+  assert.strictEqual(expiredLinkOffers, 1, "Должен быть 1 истёкший оффер по ссылке (g3)");
+  assert.strictEqual(activeOffers, 4, "Всего активных предложений: 4");
+  assert.strictEqual(cleanData.data.length, 3, "Все 3 магазина должны быть сохранены");
+
+  console.log("✓ Test 27 [Регрессия]: Фильтрация акций с кодом, без кода, без срока и legacy-структур (PASS)");
+  passed++;
+}
+
+// Test 28 [Регрессия]: Защита от случайного обнуления каталога
+{
+  const { runCatalogSync } = await import("./sync-catalog.mjs");
+  // Симуляция ответа API, где после фильтрации остаётся 0 активных предложений
+  const wipeoutData = {
+    data: [
+      {
+        id: 999,
+        groups: [{ promocodes: [{ code: "OLD", date: "01.01.2020" }] }],
+      },
+    ],
+  };
+
+  const result = await runCatalogSync({ rawFeed: wipeoutData });
+
+  assert.strictEqual(result.status, "fallback", "При обнулении каталога статус должен быть fallback");
+  assert.ok(result.meta.error.includes("Аномальное обнуление"), "Должна быть зафиксирована ошибка обнуления");
+  console.log("✓ Test 28 [Регрессия]: Защита от случайного обнуления каталога блокирует повреждение данных (PASS)");
+  passed++;
+}
+
+// Test 29 [Регрессия]: Защита от резкого аномального сокращения каталога (>60% падение)
+{
+  const { runCatalogSync } = await import("./sync-catalog.mjs");
+  // Симуляция ответа, где вернулся всего 1 проект вместо 35
+  const truncatedData = {
+    data: [
+      {
+        id: 111,
+        groups: [{ promocodes: [{ code: "SINGLE", date: "31.12.2030" }] }],
+      },
+    ],
+  };
+
+  const result = await runCatalogSync({ rawFeed: truncatedData });
+
+  assert.strictEqual(result.status, "fallback", "При аномальном сокращении статус должен быть fallback");
+  assert.ok(result.meta.error.includes("Аномальное сокращение"), "Должна быть зафиксирована ошибка сокращения");
+  console.log("✓ Test 29 [Регрессия]: Защита от резкого сокращения каталога блокирует срез данных (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/29 ТЕСТОВ (23 Admitad + 6 Регрессий) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
