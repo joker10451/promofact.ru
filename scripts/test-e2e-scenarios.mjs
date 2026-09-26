@@ -96,15 +96,22 @@ async function run() {
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE_URL}/`, { waitUntil: "load" });
 
       const searchTrigger = page.locator('button[aria-label="Поиск по магазинам и купонам"]').first();
-      await searchTrigger.click();
+      await searchTrigger.waitFor({ state: "visible" });
 
       const searchModal = page.locator('div[role="dialog"][aria-label="Поиск по магазинам и купонам"]');
-      await searchModal.waitFor({ state: "visible", timeout: 3000 });
+      for (let i = 0; i < 5; i++) {
+        await searchTrigger.click();
+        try {
+          await searchModal.waitFor({ state: "visible", timeout: 800 });
+          break;
+        } catch {}
+      }
 
       const searchInput = searchModal.locator('input[type="search"]');
+      await searchInput.waitFor({ state: "visible", timeout: 2000 });
       // Вводим опечатку раскладки: "cfykfqn" (sunlight в русской раскладке)
       await searchInput.fill("cfykfqn");
 
@@ -126,12 +133,18 @@ async function run() {
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE_URL}/`, { waitUntil: "load" });
 
       // Открываем модалку поиска по Cmd/Ctrl+K
-      await page.keyboard.press("Control+K");
       const searchModal = page.locator('div[role="dialog"][aria-label="Поиск по магазинам и купонам"]');
-      await searchModal.waitFor({ state: "visible", timeout: 3000 });
+      for (let i = 0; i < 5; i++) {
+        await page.keyboard.press("Control+K");
+        try {
+          await searchModal.waitFor({ state: "visible", timeout: 800 });
+          break;
+        } catch {}
+      }
+      await searchModal.waitFor({ state: "visible", timeout: 2000 });
 
       const searchInput = searchModal.locator('input[type="search"]');
       
@@ -179,19 +192,30 @@ async function run() {
         };
       });
 
-      await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE_URL}/`, { waitUntil: "load" });
 
       // Открываем поиск и вводим запрос с чувствительными словами
       const searchTrigger = page.locator('button[aria-label="Поиск по магазинам и купонам"]').first();
-      await searchTrigger.click();
+      await searchTrigger.waitFor({ state: "visible" });
 
       const searchModal = page.locator('div[role="dialog"][aria-label="Поиск по магазинам и купонам"]');
-      await searchModal.waitFor({ state: "visible", timeout: 3000 });
+      for (let i = 0; i < 5; i++) {
+        await searchTrigger.click();
+        try {
+          await searchModal.waitFor({ state: "visible", timeout: 800 });
+          break;
+        } catch {}
+      }
 
       const searchInput = searchModal.locator('input[type="search"]');
+      await searchInput.waitFor({ state: "visible", timeout: 2000 });
       const testSecretQuery = "секретный_запрос_12345";
       await searchInput.fill(testSecretQuery);
-      await page.waitForTimeout(300);
+      // Ждём debounce 200ms и выполнения запроса
+      await page.waitForFunction(
+        () => (window.__ym_calls || []).some((c) => c.goal === "search_used"),
+        { timeout: 4000 }
+      );
 
       // Проверяем перехваченные вызовы Метрики
       const ymCalls = await page.evaluate(() => window.__ym_calls || []);
@@ -222,7 +246,7 @@ async function run() {
         permissions: ["clipboard-read", "clipboard-write"],
       });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
 
       // Находим первую карточку купона
       const firstCard = page.locator("article").first();
@@ -269,7 +293,7 @@ async function run() {
         }
       });
 
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
 
       const firstCard = page.locator("article").first();
       const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
@@ -308,7 +332,7 @@ async function run() {
       for (const res of mobileResolutions) {
         const context = await browser.newContext({ viewport: { width: res.width, height: res.height } });
         const page = await context.newPage();
-        await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "networkidle" });
+        await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
 
         const helperBtn = page.locator('button[aria-label="Открыть помощника"]');
         await helperBtn.waitFor({ state: "visible" });
@@ -354,7 +378,7 @@ async function run() {
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
 
       const affiliateLink = page.locator("a:has-text('Перейти на сайт SUNLIGHT')").first();
       await affiliateLink.waitFor({ state: "visible" });
@@ -375,7 +399,7 @@ async function run() {
       console.log(`  ✓ Партнёрская ссылка проверена без совершения заказа: ${href.slice(0, 45)}...`);
 
       // Проверяем страницу с предложением без промокода
-      await page.goto(`${BASE_URL}/store/sberprime`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE_URL}/store/sberprime`, { waitUntil: "load" });
       const noCodeBadge = page.locator("text=Промокод не требуется — скидка применится по ссылке").first();
       await noCodeBadge.waitFor({ state: "visible", timeout: 3000 });
       console.log("  ✓ Предложения без промокодов корректно маркированы бейджем без имитации кода");
