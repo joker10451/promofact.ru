@@ -8,24 +8,18 @@ import { SITE_URL } from "@/lib/site";
 import syncMeta from "@/data/sync-meta.json";
 
 // sitemap.ts — Dynamic Route Handler
-// Содержит ТОЛЬКО 100% канонические, индексируемые страницы (Quality Gate).
-// Подстраницы купонов (/store/[slug]/[code]) исключены, так как их canonical
-// указывает на родительский магазин /store/[slug].
-// lastModified вычисляется на основе реальных дат обновления контента (sync-meta, даты публикаций, статические даты),
-// а не фиктивного new Date(), что критично для доверия поисковых роботов (Яндекс/Google).
+// Содержит ТОЛЬКО канонические, индексируемые страницы.
+// Исключены неканонические подстраницы /store/[slug]/[code] (их canonical -> /store/[slug]).
+// Исключены служебные и закрытые страницы (/admin, /partner/yookassa).
+//
+// Политика lastModified:
+// - Для страниц со значимыми изменениями указываются реальные даты (статьи -> published,
+//   магазины/категории/каталог -> дата подтверждённой синхронизации каталога syncMeta.lastSuccessSync).
+// - Для страниц без достоверных дат изменения lastModified опускается согласно стандарту sitemap.org.
+// - Запрещено использовать произвольные фиктивные даты.
 export const revalidate = false;
 
-const DEFAULT_SYNC_DATE = new Date(syncMeta.lastSuccessSync || "2026-09-26T16:46:19.000Z");
-const STATIC_PAGE_DATE = new Date("2026-08-01T00:00:00.000Z");
-const CITIES_PAGE_DATE = new Date("2026-09-01T00:00:00.000Z");
-const COLLECTIONS_PAGE_DATE = new Date("2026-09-05T00:00:00.000Z");
-const FALLBACK_STORE_DATE = new Date("2026-08-15T00:00:00.000Z");
-
-const ACTION_DATES: Record<string, Date> = {
-  "pervoe-sentyabrya": new Date("2026-08-25T00:00:00.000Z"),
-  "puteshestviya": new Date("2026-08-01T00:00:00.000Z"),
-  "leto-2026": new Date("2026-06-01T00:00:00.000Z"),
-};
+const CATALOG_SYNC_DATE = syncMeta.lastSuccessSync ? new Date(syncMeta.lastSuccessSync) : undefined;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, stores] = await Promise.all([
@@ -33,92 +27,111 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getAllStores(),
   ]);
 
+  // Главная страница — витрина живых предложений
   const home: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
-      lastModified: DEFAULT_SYNC_DATE,
+      lastModified: CATALOG_SYNC_DATE,
       changeFrequency: "daily",
       priority: 1,
     },
   ];
 
+  // Магазины: для магазинов с живыми промокодами lastModified привязан к синхронизации каталога.
+  // Для магазинов без актуальных акций lastModified не выдумывается (опускается).
   const storeMap: MetadataRoute.Sitemap = stores.map((store) => {
-    const hasLiveCoupons = store.coupons && store.coupons.length > 0;
+    const hasLiveCoupons = Array.isArray(store.coupons) && store.coupons.length > 0;
     return {
       url: `${SITE_URL}/store/${store.slug}`,
-      lastModified: hasLiveCoupons ? DEFAULT_SYNC_DATE : FALLBACK_STORE_DATE,
+      ...(hasLiveCoupons && CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
       changeFrequency: hasLiveCoupons ? ("daily" as const) : ("weekly" as const),
       priority: hasLiveCoupons ? 0.9 : 0.7,
     };
   });
 
+  // Категории: дата синхронизации только если в категории есть живые промокоды
   const categoryMap: MetadataRoute.Sitemap = categories.map((cat) => {
     const hasActiveInCat = stores.some(
-      (s) => s.categorySlug === cat.slug && s.coupons && s.coupons.length > 0
+      (s) => s.categorySlug === cat.slug && Array.isArray(s.coupons) && s.coupons.length > 0
     );
     return {
       url: `${SITE_URL}/category/${cat.slug}`,
-      lastModified: hasActiveInCat ? DEFAULT_SYNC_DATE : FALLBACK_STORE_DATE,
+      ...(hasActiveInCat && CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
       changeFrequency: hasActiveInCat ? ("daily" as const) : ("weekly" as const),
       priority: 0.8,
     };
   });
 
+  // Подборки: статические агрегаторы без выдуманных дат
   const collectionsMap: MetadataRoute.Sitemap = COLLECTIONS.map((col) => ({
     url: `${SITE_URL}/collections/${col.slug}`,
-    lastModified: COLLECTIONS_PAGE_DATE,
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
+  // Города: региональные страницы без выдуманных дат
   const citiesMap: MetadataRoute.Sitemap = CITIES_SEO.map((city) => ({
     url: `${SITE_URL}/gorod/${city.slug}`,
-    lastModified: CITIES_PAGE_DATE,
     changeFrequency: "weekly" as const,
     priority: 0.85,
   }));
 
+  // База знаний / советы: реальные даты публикаций статей
   const allArticles = getArticles();
-  const latestArticleDate = allArticles.reduce((latest, a) => {
-    const d = a.published ? new Date(a.published) : FALLBACK_STORE_DATE;
-    return d > latest ? d : latest;
-  }, FALLBACK_STORE_DATE);
+  let latestArticleDate: Date | undefined;
+  for (const a of allArticles) {
+    if (a.published) {
+      const d = new Date(a.published);
+      if (!isNaN(d.getTime()) && (!latestArticleDate || d > latestArticleDate)) {
+        latestArticleDate = d;
+      }
+    }
+  }
 
   const tipsMap: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/sovety`,
-      lastModified: latestArticleDate,
+      ...(latestArticleDate ? { lastModified: latestArticleDate } : {}),
       changeFrequency: "weekly" as const,
       priority: 0.7,
     },
-    ...allArticles.map((a) => ({
-      url: `${SITE_URL}/sovety/${a.slug}`,
-      lastModified: a.published ? new Date(a.published) : FALLBACK_STORE_DATE,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    })),
+    ...allArticles.map((a) => {
+      const pubDate = a.published ? new Date(a.published) : undefined;
+      const validPubDate = pubDate && !isNaN(pubDate.getTime()) ? pubDate : undefined;
+      return {
+        url: `${SITE_URL}/sovety/${a.slug}`,
+        ...(validPubDate ? { lastModified: validPubDate } : {}),
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      };
+    }),
   ];
 
+  // Сезонные акции (без фиктивных дат)
   const actionsMap: MetadataRoute.Sitemap = ACTIONS.map((a) => ({
     url: `${SITE_URL}/akcii/${a.slug}`,
-    lastModified: ACTION_DATES[a.slug] || STATIC_PAGE_DATE,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
+  // Служебные и партнёрские страницы (исключены /admin и тестовые /partner/yookassa)
   const miscMap: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/sitemap-html`, lastModified: DEFAULT_SYNC_DATE, changeFrequency: "daily" as const, priority: 0.3 },
-    { url: `${SITE_URL}/about`, lastModified: STATIC_PAGE_DATE, changeFrequency: "monthly" as const, priority: 0.3 },
-    { url: `${SITE_URL}/contacts`, lastModified: STATIC_PAGE_DATE, changeFrequency: "monthly" as const, priority: 0.3 },
-    { url: `${SITE_URL}/privacy`, lastModified: STATIC_PAGE_DATE, changeFrequency: "monthly" as const, priority: 0.2 },
-    { url: `${SITE_URL}/partner/yookassa`, lastModified: CITIES_PAGE_DATE, changeFrequency: "monthly" as const, priority: 0.4 },
-    { url: `${SITE_URL}/partner/netprint`, lastModified: CITIES_PAGE_DATE, changeFrequency: "monthly" as const, priority: 0.4 },
+    {
+      url: `${SITE_URL}/sitemap-html`,
+      ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
+      changeFrequency: "daily" as const,
+      priority: 0.3,
+    },
+    { url: `${SITE_URL}/about`, changeFrequency: "monthly" as const, priority: 0.3 },
+    { url: `${SITE_URL}/contacts`, changeFrequency: "monthly" as const, priority: 0.3 },
+    { url: `${SITE_URL}/privacy`, changeFrequency: "monthly" as const, priority: 0.2 },
+    { url: `${SITE_URL}/partner/netprint`, changeFrequency: "monthly" as const, priority: 0.4 },
   ];
 
   const promokodyMap: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/promokody`,
-      lastModified: DEFAULT_SYNC_DATE,
+      ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
       changeFrequency: "daily" as const,
       priority: 0.75,
     },

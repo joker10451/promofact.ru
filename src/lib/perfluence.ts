@@ -5,6 +5,7 @@ import { proxiedLogo } from "@/lib/logoProxy";
 import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 import bundledFeed from "@/data/perfluence-feed.json";
+import syncMeta from "@/data/sync-meta.json";
 
 const WIDGET_URL = process.env.PERFLUENCE_WIDGET_URL ?? "";
 const RESULTS_URL = process.env.PERFLUENCE_RESULTS_URL ?? "";
@@ -50,7 +51,9 @@ function stripHtml(v: unknown): string {
 }
 
 function dateTs(date: string | null): number {
-  return date ? new Date(`${date}T23:59:59`).getTime() : Infinity;
+  if (!date) return Infinity; // бессрочные акции без явной даты экспирации
+  const ts = new Date(date.includes("T") ? date : `${date}T23:59:59`).getTime();
+  return isNaN(ts) ? 0 : ts; // некорректная дата = недействующая акция
 }
 
 /* ---------- трансформация ответа API → Coupon[] ---------- */
@@ -391,7 +394,7 @@ async function fetchData(): Promise<Coupon[]> {
     try {
       const res = await fetch(WIDGET_URL, {
         headers: { Accept: "application/json" },
-        next: { revalidate: false },
+        cache: "no-store",
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       });
       const text = await res.text();
@@ -561,7 +564,7 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
  */
 const getCachedMergedCoupons = unstable_cache(
   fetchMergedCoupons,
-  ["promofact", "merged-coupons", "v1"],
+  ["promofact", "merged-coupons", syncMeta.lastSuccessSync || "initial"],
   { revalidate: false },
 );
 

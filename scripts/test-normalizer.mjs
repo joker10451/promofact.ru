@@ -1,408 +1,34 @@
 /**
- * Автоматизированный тестовый сьют нормализатора Admitad (20 обязательных тестов).
- * Запуск: node scripts/test-normalizer.mjs
+ * scripts/test-normalizer.mjs
+ * Автоматизированный тестовый сьют нормализатора Admitad и регрессионных тестов каталога.
+ * Тестирует РЕАЛЬНЫЕ продакшен-модули проекта (src/lib/admitadNormalizer.ts, categoryTaxonomy.ts, sync-catalog.mjs).
+ * Запуск: node --experimental-strip-types scripts/test-normalizer.mjs
  */
 
 import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
+import { register } from "node:module";
+import { pathToFileURL } from "node:url";
 
-// Мок вспомогательных функций нормализатора
-function stripHtml(v) {
-  if (typeof v !== "string") return "";
-  return v
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+// Подключаем загрузчик модулей для прозрачного резолва @/lib -> src/lib в ESM/TS
+register("./scripts/ts-loader.mjs", pathToFileURL("./"));
 
-function extractMinimumOrder(text) {
-  if (!text) return null;
-  const clean = stripHtml(text);
-  const regex =
-    /(?:при\s+(?:каждом\s+)?(?:заказе|покупке|оформлении)\s+)?(?:на\s+сумму\s+)?(?:от|свыше)\s+([\d\s.,]+)\s*(?:₽|р\b|руб(?:л[ея]й)?|RUB)?/iu;
-  const match = clean.match(regex);
-  if (!match) return null;
+const {
+  stripHtml,
+  extractMinimumOrder,
+  cleanConditionText,
+  normalizeAdmitadCoupon,
+  validateOffer,
+} = await import("@/lib/admitadNormalizer");
 
-  const rawNum = match[1].replace(/\s/g, "").replace(",", ".");
-  const cleanNumStr = rawNum.replace(/\.(?=\d{3}\b)/g, "");
-  const val = parseFloat(cleanNumStr);
-  if (isNaN(val) || val <= 0) return null;
+const { canonicalCategorySlug } = await import("@/lib/categoryTaxonomy");
+const { parseDateTs, filterExpiredOffers } = await import("./sync-catalog.mjs");
 
-  return {
-    value: Math.round(val),
-    currency: "RUB",
-  };
-}
+console.log("================================================================================");
+console.log("🚀 ЗАПУСК ТЕСТОВ ПРОДАКШЕН-НОРМАЛИЗАТОРА ADMITAD И РЕГРЕССИОННОГО СЬЮТА");
+console.log("================================================================================\n");
 
-function cleanConditionText(raw, matchedPart) {
-  let text = stripHtml(raw);
-  if (matchedPart) {
-    const escaped = matchedPart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    text = text.replace(new RegExp(`(?:скидка\\s+)?(?:до\\s+)?[-−]?\\s*${escaped}[.,:;!?]?`, "gi"), "");
-  }
-  return text
-    // Превращаем машинные обозначения «1 заказ», «1-й заказ», «1ый заказ» в человеческие «первый заказ»
-    .replace(/(^|[\s,.:;!?-])1(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1первый $2")
-    .replace(/(^|[\s,.:;!?-])2(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1повторный $2")
-    .replace(/(^|[\s,.:;!?-])3(?:-?(?:ый|ой|ий|й))?\s+(заказ[а-яё]*|покупк[а-яё]*)/gi, "$1третий $2")
-    // Исправление опечатки аффилиатных фидов «на се ...» / «се ...» -> «на все ...» / «все ...» (кириллически безопасно)
-    .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
-    .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все")
-    .replace(/^(на|в|от|при)\s+\d+[\s\d]*(%|₽|р|руб)/gi, "")
-    // Убираем остаточные знаки препинания, точки и тире в начале строки
-    .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
-    .replace(/^(?:скидка|минус|до)(?:[\s,.:;!?-]|$)/gi, "")
-    .replace(/\(\s*\)/g, "")
-    .replace(/не суммируется с другими акциями.*$/i, "")
-    .replace(/скидка\s+\d+\s*(rub|руб|₽)/gi, "")
-    .replace(/discount\s+sitewide/gi, "на весь ассортимент")
-    .replace(/[.,:;!?\s–—-]+$/g, "")
-    .trim();
-}
-
-function resolveCustomerType(rawCustomerType, name, description) {
-  const cleanN = stripHtml(name).toLowerCase();
-  const cleanD = stripHtml(description).toLowerCase();
-  const combined = `${cleanN} ${cleanD}`;
-  const rawCust = (rawCustomerType || "").toLowerCase().trim();
-
-  const isExplicitBoth =
-    /первый\s+или\s+(один\s+)?повторный/i.test(combined) ||
-    /для\s+новых\s+и\s+(для\s+)?повторных/i.test(combined) ||
-    /на\s+первый\s+и\s+повторный/i.test(combined) ||
-    /как\s+для\s+новых,\s+так\s+и\s+для\s+повторных/i.test(combined);
-
-  if (isExplicitBoth) {
-    return {
-      customerType: "repeat_customers",
-      customerTypeLabel: "Первый и повторный заказ",
-    };
-  }
-
-  const isExplicitAllInText =
-    /для\s+всех\s+(пользователей|клиентов|покупателей)/i.test(combined) ||
-    /на\s+любой\s+заказ/i.test(combined) ||
-    /действует\s+для\s+всех/i.test(combined) ||
-    /для\s+всех\s+заказов/i.test(combined);
-
-  const isExplicitNewInText =
-    /только\s+(для|на)\s+нов/i.test(combined) ||
-    /только\s+на\s+первый/i.test(combined) ||
-    /на\s+первый\s+заказ/i.test(combined) ||
-    /первый\s+заказ/i.test(combined) ||
-    /первая\s+покупка/i.test(combined) ||
-    /для\s+новых\s+(пользователей|клиентов|покупателей)/i.test(combined);
-
-  const rawSaysNew = rawCust.includes("new") || rawCust.includes("first");
-  const rawSaysAll = rawCust.includes("all");
-
-  // Конфликт: raw говорит new_customers, но текст условий явно гласит «для всех пользователей»
-  if (rawSaysNew && isExplicitAllInText) {
-    return {
-      customerType: "all_customers",
-      customerTypeLabel: "Условия заказа",
-    };
-  }
-
-  // Конфликт: raw говорит all_customers, но текст гласит «только на первый заказ»
-  if (rawSaysAll && isExplicitNewInText && !isExplicitAllInText) {
-    return {
-      customerType: "new_customers",
-      customerTypeLabel: "Первый заказ",
-    };
-  }
-
-  if (rawSaysNew || isExplicitNewInText) {
-    return {
-      customerType: "new_customers",
-      customerTypeLabel: "Первый заказ",
-    };
-  }
-
-  return {
-    customerType: "all_customers",
-    customerTypeLabel: "Для всех",
-  };
-}
-
-function resolveOfferDetails(name, description, rawDiscount, code, isFirstOrder, storeName) {
-  const cleanName = stripHtml(name)
-    .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
-    .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
-  const cleanDesc = stripHtml(description)
-    .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
-    .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
-  const fullDescription = cleanDesc || cleanName || `Скидка по акции в магазине ${storeName}.`;
-  const hasCode = Boolean(code && code.trim() !== "");
-  const combinedText = `${cleanName} ${cleanDesc}`;
-
-  // Извлекаем минимальную сумму заказа
-  const minOrder = extractMinimumOrder(combinedText);
-
-  // 1. Бесплатная доставка
-  if (
-    /бесплатн[а-яё]*\s+достав|free\s*shipping/iu.test(cleanName) ||
-    /бесплатн[а-яё]*\s+достав/iu.test(cleanDesc)
-  ) {
-    const shortDescription = minOrder
-      ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
-      : isFirstOrder
-      ? "на первый заказ"
-      : "на заказ с промокодом";
-
-    return {
-      type: "free_shipping",
-      discount: { value: null, unit: "shipping", formatted: "🚚 Бесплатная доставка" },
-      minimumOrder: minOrder,
-      title: "Бесплатная доставка",
-      shortDescription,
-      fullDescription,
-      ctaText: hasCode ? "Скопировать код" : "Получить предложение",
-    };
-  }
-
-  // 2. Комбинация: Скидка (%) + Подарок (например, Кинопоиск 50% + 60 дней в подарок)
-  const pctMatch = rawDiscount.match(/(\d+)\s*%/) || cleanName.match(/(\d+)\s*%/);
-  const isGiftInText =
-    /подарок|ролл|фото|пицца|подвеск|gift|в\s+подарок/i.test(cleanName) ||
-    /подарок|ролл|фото|пицца|подвеск|в\s+подарок/i.test(cleanDesc);
-
-  if (
-    pctMatch &&
-    isGiftInText &&
-    (/(\+|\s+и\s+).*подарок/i.test(cleanName) || /60\s*дней/i.test(cleanName) || /подписк/i.test(cleanName))
-  ) {
-    const val = parseInt(pctMatch[1], 10);
-    let condition = cleanConditionText(cleanName, pctMatch[0]);
-    if (/60\s*дней|подарок/i.test(cleanName)) {
-      condition = cleanName.replace(pctMatch[0], "").replace(/^[,\s–—\-\+]+/, "").trim();
-    }
-    return {
-      type: hasCode ? "promo" : "action",
-      discount: { value: val, unit: "percent", formatted: `−${val}%` },
-      gift: "60 дней подписки в подарок",
-      minimumOrder: minOrder,
-      title: `−${val}%`,
-      shortDescription: condition || "+ 60 дней подписки в подарок",
-      fullDescription,
-      ctaText: hasCode ? "Скопировать код" : "Получить предложение",
-    };
-  }
-
-  // 3. Чистый Подарок к заказу (Gift) — discount = null!
-  if (isGiftInText) {
-    let giftTitle = "🎁 Подарок к заказу";
-    let giftName = "Подарок к заказу";
-
-    if (/фреш\s*ролл/i.test(cleanName) || /ролл\s+с\s+креветкой/i.test(cleanName)) {
-      giftName = "Фреш ролл с креветкой и авокадо";
-      giftTitle = "🎁 Ролл с креветкой и авокадо в подарок";
-    } else if (/ролл/i.test(cleanName) || /ролл/i.test(cleanDesc)) {
-      giftName = "Ролл";
-      giftTitle = "🎁 Ролл в подарок";
-    } else if (/фото/i.test(cleanName) || /фото/i.test(cleanDesc)) {
-      giftName = "50 фото";
-      giftTitle = "🎁 50 фото в подарок";
-    } else if (/подвеск/i.test(cleanName) || /подвеск/i.test(cleanDesc)) {
-      giftName = "Подвеска";
-      giftTitle = "🎁 Подвеска в подарок";
-    } else if (/пицц/i.test(cleanName) || /пицц/i.test(cleanDesc)) {
-      giftName = "Пицца";
-      giftTitle = "🎁 Пицца в подарок";
-    }
-
-    const shortDescription = minOrder
-      ? `При заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
-      : isFirstOrder
-      ? "на первый заказ"
-      : "по промокоду при оформлении";
-
-    return {
-      type: "gift",
-      discount: null, // КРИТИЧЕСКИЙ РАЗРЫВ №1: discount.value НЕ ДОЛЖЕН содержать сумму заказа!
-      gift: giftName,
-      minimumOrder: minOrder,
-      title: giftTitle,
-      shortDescription,
-      fullDescription,
-      ctaText: hasCode ? "Скопировать код" : "Получить подарок",
-    };
-  }
-
-  // 4. Подписка / пробный период (СберПрайм, Яндекс Плюс)
-  if (
-    /60\s*дней|подписк\w*\s+(плюс|кинопоиск|яндекс|сберпрайм)/i.test(cleanName) ||
-    /60\s*дней/i.test(cleanDesc)
-  ) {
-    const isSber = /сбер/i.test(cleanName) || /сбер/i.test(cleanDesc);
-    return {
-      type: "subscription",
-      discount: { value: 60, unit: "subscription", formatted: "60 дней за 1 ₽" },
-      minimumOrder: null,
-      title: "60 дней за 1 ₽",
-      shortDescription: isSber
-        ? "подписка СберПрайм для новых пользователей"
-        : "подписка Яндекс Плюс и Кинопоиск для новых пользователей",
-      fullDescription,
-      ctaText: hasCode ? "Скопировать код" : "Получить предложение",
-    };
-  }
-
-  // 5. Процентная скидка
-  if (pctMatch) {
-    const val = parseInt(pctMatch[1], 10);
-    let condition = cleanConditionText(cleanName, pctMatch[0]);
-    if (minOrder) {
-      const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(cleanName) || /перв|1[-‑–—]?[ыое]?й/i.test(description);
-      condition = isFirst
-        ? `на первый заказ от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
-        : `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
-    } else if (!condition || condition === "!" || condition.length < 3) {
-      condition = isFirstOrder ? "на первый заказ" : "на весь ассортимент";
-    } else {
-      condition = condition
-        .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
-        .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
-        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)(?=[\s,.:;!?-]|$)/gi, "$2")
-        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
-        .trim();
-      if (!/^(?:на|в|во|при|для|от|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(condition)) {
-        condition = `на ${condition}`;
-      }
-    }
-
-    return {
-      type: hasCode ? "promo" : "action",
-      discount: { value: val, unit: "percent", formatted: `−${val}%` },
-      minimumOrder: minOrder,
-      title: `−${val}%`,
-      shortDescription: condition,
-      fullDescription,
-      ctaText: hasCode ? "Скопировать код" : "Получить предложение",
-    };
-  }
-
-  // 6. Фиксированная скидка в рублях
-  const rubMatch =
-    rawDiscount.match(/(\d+[\s\d]*)\s*(rub|руб|₽)/i) ||
-    cleanName.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(rub|руб|₽)/i) ||
-    cleanName.match(/(\d+[\s\d]*)\s*(rub|руб|₽)/i);
-
-  if (rubMatch) {
-    const rawVal = rubMatch[1].replace(/\s/g, "");
-    const val = parseInt(rawVal, 10);
-    const formattedRub = val.toLocaleString("ru-RU").replace(/\s/g, " ") + " ₽";
-    let condition = cleanConditionText(cleanName, rubMatch[0]);
-
-    if (minOrder && minOrder.value !== val) {
-      const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(cleanName) || /перв|1[-‑–—]?[ыое]?й/i.test(description);
-      condition = isFirst
-        ? `на первый заказ от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
-        : `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
-    } else if (!condition || condition === "!" || condition.length < 3) {
-      condition = isFirstOrder ? "на первый заказ" : "на заказ по акции";
-    } else {
-      condition = condition
-        .replace(/^[.,:;!?\s\-–—/|•·*]+/g, "")
-        .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
-        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)(?=[\s,.:;!?-]|$)/gi, "$2")
-        .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
-        .trim();
-      if (!/^(?:на|в|во|при|для|от|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(condition)) {
-        condition = `на ${condition}`;
-      }
-    }
-
-    return {
-      type: hasCode ? "promo" : "action",
-      discount: { value: val, unit: "rub", formatted: `−${formattedRub}` },
-      minimumOrder: minOrder,
-      title: `−${formattedRub}`,
-      shortDescription: condition,
-      fullDescription,
-      ctaText: hasCode ? "Скопировать код" : "Получить предложение",
-    };
-  }
-
-  // 7. Бонусы / баллы
-  const bonusMatch = cleanName.match(/(\d+[\s\d]*)\s*(бонусов|баллов)/i);
-  if (bonusMatch) {
-    const val = parseInt(bonusMatch[1].replace(/\s/g, ""), 10);
-    return {
-      type: "cashback",
-      discount: { value: val, unit: "bonus", formatted: `+${val} бонусов` },
-      minimumOrder: minOrder,
-      title: `+${val} бонусов`,
-      shortDescription: "на оплату заказов",
-      fullDescription,
-      ctaText: hasCode ? "Скопировать код" : "Получить предложение",
-    };
-  }
-
-  // 8. Дефолтная акция
-  const shortTitle = cleanName.length > 24 ? cleanName.slice(0, 24) + "…" : cleanName || "Скидка";
-  return {
-    type: hasCode ? "promo" : "action",
-    discount: { value: null, unit: "none", formatted: shortTitle },
-    minimumOrder: minOrder,
-    title: shortTitle,
-    shortDescription: isFirstOrder ? "на первый заказ" : "по промокоду",
-    fullDescription,
-    ctaText: hasCode ? "Скопировать код" : "Получить предложение",
-  };
-}
-
-function normalizeAdmitadCoupon(raw) {
-  const cleanCode = raw.promocode && raw.promocode.trim() !== "Not required" ? raw.promocode.trim() : null;
-  const customerResolution = resolveCustomerType(raw.customerType, raw.name, raw.description);
-
-  const details = resolveOfferDetails(
-    raw.name,
-    raw.description,
-    raw.discount || "",
-    cleanCode,
-    customerResolution.customerType === "new_customers",
-    raw.rawCampaignName || "Магазин"
-  );
-
-  let status = "active";
-  if (raw.dateEnd && raw.dateEnd !== "None") {
-    const endTs = new Date(raw.dateEnd).getTime();
-    if (!isNaN(endTs) && endTs < Date.now()) {
-      status = "expired";
-    }
-  }
-
-  return {
-    id: raw.id,
-    type: details.type,
-    discount: details.discount,
-    gift: details.gift || null,
-    minimumOrder: details.minimumOrder || null,
-    title: details.title,
-    shortDescription: details.shortDescription,
-    fullDescription: details.fullDescription,
-    promoCode: cleanCode,
-    ctaText: details.ctaText,
-    customerType: customerResolution.customerType,
-    customerTypeLabel: customerResolution.customerTypeLabel,
-    status,
-  };
-}
-
-function validateOffer(offer) {
-  if (!offer.id) return false;
-  if (offer.status === "expired") return false;
-  return true;
-}
-
-// ---------------- ТЕСТОВЫЙ ЗАПУСК ----------------
-
-console.log("🚀 Запуск 20 обязательных тестов нормализатора Admitad...\n");
 let passed = 0;
 
 // Test 1: Процентная скидка
@@ -531,7 +157,7 @@ let passed = 0;
   });
   assert.strictEqual(res.type, "gift", "Test 8 failed: type must be gift");
   assert.strictEqual(res.discount, null, "Test 8 failed: discount must be null for gift");
-  assert.strictEqual(res.title, "🎁 Ролл в подарок", "Test 8 failed: title");
+  assert.strictEqual(res.title, "Ролл в подарок", "Test 8 failed: title");
   console.log("✓ Test 8: Подарок к заказу распознан корректно (type=gift, discount=null) (PASS)");
   passed++;
 }
@@ -708,7 +334,7 @@ let passed = 0;
     description: "Промокод действует для всех пользователей на бронирование от 25 000 ₽",
     discount: "2500 RUB",
     promocode: "TRAVEL2500",
-    customerType: "new_customers", // Конфликт в raw customerType
+    customerType: "new_customers",
     rawCampaignName: "Яндекс Путешествия",
   });
   assert.strictEqual(res.discount.formatted.replace(/\s+/g, " "), "−2 500 ₽", "Test 19 failed: discount formatted");
@@ -725,7 +351,7 @@ let passed = 0;
     id: 20,
     name: "Фреш ролл с креветкой и авокадо в подарок при каждом заказе от 4 299 ₽",
     description: "Условия: Фреш ролл с креветкой и авокадо в подарок при заказе от 4 299 ₽",
-    discount: "4299", // В сырых данных Admitad число 4299 в discount
+    discount: "4299",
     promocode: "VRGIFT4299",
     customerType: "all_customers",
     rawCampaignName: "Важная Рыба",
@@ -734,7 +360,7 @@ let passed = 0;
   assert.strictEqual(res.discount, null, "Test 20 failed: discount must be null");
   assert.ok(res.minimumOrder, "Test 20 failed: minimumOrder exists");
   assert.strictEqual(res.minimumOrder.value, 4299, "Test 20 failed: minimumOrder.value");
-  assert.strictEqual(res.title, "🎁 Ролл с креветкой и авокадо в подарок", "Test 20 failed: title");
+  assert.strictEqual(res.title, "Ролл с креветкой и авокадо в подарок", "Test 20 failed: title");
   assert.strictEqual(res.shortDescription, "При заказе от 4 299 ₽", "Test 20 failed: shortDescription");
   console.log("✓ Test 20: Real Vazhnaia Ryba -> gift, minOrder=4299, discount=null (PASS)");
   passed++;
@@ -796,4 +422,61 @@ let passed = 0;
   passed++;
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/23 ТЕСТОВ УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// ================= РЕГРЕССИОННЫЕ ТЕСТЫ =================
+
+// Test 24: Категории-алиасы не создают 404 и нормализуются к каноническим слагам
+{
+  assert.strictEqual(canonicalCategorySlug("krasota-i-uhod"), "kosmetika-i-parfyumeriya");
+  assert.strictEqual(canonicalCategorySlug("eda-i-dostavka"), "dostavka-produktov");
+  assert.strictEqual(canonicalCategorySlug("knigi-i-obuchenie"), "onlayn-obrazovanie");
+  assert.strictEqual(canonicalCategorySlug("kino-i-teatr"), "onlayn-kinoteatry");
+  console.log("✓ Test 24 [Регрессия]: Все устаревшие алиасы категорий нормализуются к каноническим (PASS)");
+  passed++;
+}
+
+// Test 25: Валидация и фильтрация истёкших дат в каталоге
+{
+  const pastTs = parseDateTs("01.01.2020");
+  const futureTs = parseDateTs("31.12.2030");
+  const malformedTs = parseDateTs("невалидная дата");
+
+  assert.ok(pastTs !== null && pastTs < Date.now(), "Past date must parse to past ts");
+  assert.ok(futureTs !== null && futureTs > Date.now(), "Future date must parse to future ts");
+  assert.strictEqual(malformedTs, null, "Malformed date must return null");
+
+  const mockFeed = {
+    data: [
+      {
+        id: 1,
+        groups: [
+          {
+            promocodes: [
+              { code: "VALID", date: "31.12.2030" },
+              { code: "EXPIRED", date: "01.01.2020" },
+              { code: "INVALID", date: "bad-date" },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const { cleanData, activePromos, expiredPromos } = filterExpiredOffers(mockFeed);
+  assert.strictEqual(activePromos, 1, "Only 1 promo should be active");
+  assert.strictEqual(expiredPromos, 2, "2 promos should be filtered as expired/invalid");
+  assert.strictEqual(cleanData.data[0].groups[0].promocodes[0].code, "VALID");
+  console.log("✓ Test 25 [Регрессия]: Фильтрация истёкших и повреждённых дат каталога работает корректно (PASS)");
+  passed++;
+}
+
+// Test 26: Отсутствие битых ссылок на СберКарту и удаленные магазины в базе статей
+{
+  const articlesFile = fs.readFileSync(path.resolve("src/lib/articles.ts"), "utf-8");
+  assert.ok(!articlesFile.includes("/store/kreditnaya-sberkarta"), "Must not link to /store/kreditnaya-sberkarta");
+  assert.ok(!articlesFile.includes("/store/fix-price"), "Must not link to /store/fix-price");
+  assert.ok(!articlesFile.includes("/category/yuvelirnye-izdeliya"), "Must not link to /category/yuvelirnye-izdeliya");
+  console.log("✓ Test 26 [Регрессия]: В статьях устранены ссылки на несуществующие магазины и алиасы (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/26 ТЕСТОВ (23 Admitad + 3 Регрессии) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
