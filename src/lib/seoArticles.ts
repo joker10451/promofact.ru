@@ -1,4 +1,4 @@
-import type { Coupon, Store } from "@/lib/types";
+import type { Coupon } from "@/lib/types";
 import type { StoreInfo } from "@/lib/perfluence";
 
 /* ---------- Утилиты для дат ---------- */
@@ -64,15 +64,15 @@ function couponCountWord(n: number): string {
 
 const INTRO_TEMPLATES = [
   (name: string, n: number, cw: string, disc: string, cat: string, monthGen: string) =>
-    `Ищете промокоды ${name}? На ${monthGen} мы собрали ${n} ${cw} со скидкой ${disc}. Все коды проверены вручную и работают прямо сейчас — копируйте и применяйте при оформлении заказа.`,
+    `Ищете промокоды ${name}? На ${monthGen} мы собрали ${n} ${cw} на ${cat} со скидкой ${disc}. Все коды проверены вручную и работают прямо сейчас — копируйте и применяйте при оформлении заказа.`,
 
   (name: string, n: number, cw: string, disc: string, cat: string, monthGen: string) =>
-    `${name} — популярный магазин в категории «${cat}». Мы отслеживаем актуальные акции и собираем рабочие купоны в одном месте. Сейчас доступно ${n} ${cw} с выгодой ${disc}.`,
+    `${name} — популярный магазин в категории «${cat}». На ${monthGen} мы отслеживаем актуальные акции и собираем рабочие купоны в одном месте. Сейчас доступно ${n} ${cw} с выгодой ${disc}.`,
 
-  (name: string, _n: number, _cw: string, disc: string, _cat: string, _monthGen: string) =>
-    `Чтобы не переплачивать в ${name}, используйте промокоды из таблицы ниже. Максимальная скидка сейчас — ${disc}. Коды обновляются каждые 30 минут: истёкшие убираем, новые добавляем.`,
+  (name: string, n: number, cw: string, disc: string, cat: string, monthGen: string) =>
+    `Чтобы не переплачивать в ${name}, используйте промокоды на ${cat} из таблицы ниже. На ${monthGen} доступно ${n} ${cw}, максимальная скидка — ${disc}. Коды обновляются каждые 30 минут: истёкшие убираем, новые добавляем.`,
 
-  (_name: string, _n: number, _cw: string, _disc: string, _cat: string, _monthGen: string) =>
+  () =>
     `Как применить промокод: скопируйте код из таблицы одной кнопкой, перейдите на сайт магазина по ссылке, добавьте товары в корзину и вставьте код в поле «Промокод» на этапе оплаты. Скидка применится сразу.`,
 ];
 

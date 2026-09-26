@@ -152,9 +152,6 @@ function codesSentence(input: StoreArticleInput): string {
     .slice(0, 3)
     .map((c) => `«${c.code}»${c.bonusName ? " — " + c.bonusName : ""}`)
     .join(", ");
-  const list = active
-    .map((c) => c.code)
-    .join(", ");
   const countWord =
     active.length === 1
       ? "промокод"

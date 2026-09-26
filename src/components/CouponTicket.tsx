@@ -37,26 +37,14 @@ function getDiscountStyles(type: string): string {
   }
 }
 
-/** Фоновая плашка акцента по типу */
-function getDiscountBg(type: string): string {
-  switch (type) {
-    case "gift":
-      return "bg-yellow/15 rounded-xl px-3 py-2 -mx-1";
-    case "subscription":
-      return "bg-blue-50 rounded-xl px-3 py-2 -mx-1";
-    default:
-      return "";
-  }
-}
-
 export default function CouponTicket({
   coupon,
   proofCount = 0,
-  isDetailPage = false,
 }: {
   coupon: CatalogCoupon;
   proofCount?: number;
   storeProofCount?: number;
+  /** Страницы старого маршрута передают флаг для обратной совместимости. */
   isDetailPage?: boolean;
 }) {
   const { promocode, store, affiliate } = coupon;
@@ -68,7 +56,7 @@ export default function CouponTicket({
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
   // Блокировка скролла страницы и закрытие по Escape при открытой модалке

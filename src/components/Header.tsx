@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import MegaMenu, { type MegaMenuGroup } from "@/components/MegaMenu";
 import MobileCatalogMenu from "@/components/MobileCatalogMenu";
@@ -62,7 +63,7 @@ export default async function Header() {
             className="group flex items-center gap-2.5 font-display text-lg font-extrabold tracking-tight sm:text-xl shrink-0 text-ink"
           >
             <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-red via-red-dark to-yellow shadow-[0_4px_12px_-2px_rgba(255,51,85,0.4)] transition-transform group-hover:scale-105">
-              <img
+              <Image
                 src="/icon.svg"
                 alt=""
                 width={20}

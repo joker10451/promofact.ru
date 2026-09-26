@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/components/Icon";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -33,7 +34,7 @@ export default function PwaInstallBanner() {
     // Определение iOS
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
-    setIsIOS(isIosDevice);
+    queueMicrotask(() => setIsIOS(isIosDevice));
 
     const checkAndShow = () => {
       try {
@@ -112,7 +113,7 @@ export default function PwaInstallBanner() {
 
         <div className="flex items-start gap-3.5 pr-6">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-ink bg-yellow shadow-[0_3px_0_rgba(11,16,43,0.2)]">
-            <img src="/icon.svg" alt="ПромоФакт" width={28} height={28} className="h-7 w-7" />
+            <Image src="/icon.svg" alt="ПромоФакт" width={28} height={28} className="h-7 w-7" />
           </div>
           <div className="min-w-0">
             <div className="font-display text-sm font-extrabold text-ink">

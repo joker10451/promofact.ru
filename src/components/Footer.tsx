@@ -1,11 +1,11 @@
 import Icon from "@/components/Icon";
+import Image from "next/image";
 import Link from "next/link";
-import { getCategories, getStores } from "@/lib/perfluence";
+import { getCategories } from "@/lib/perfluence";
 import { SITE_NAME } from "@/lib/site";
 
 export default async function Footer() {
   const categories = await getCategories();
-  const stores = (await getStores()).slice(0, 12);
 
   const footerLink =
     "group/fl flex items-center gap-1.5 text-white/60 transition-all hover:text-white hover:translate-x-1";
@@ -17,7 +17,7 @@ export default async function Footer() {
         <div>
           <div className="flex items-center gap-2 font-display text-xl font-extrabold">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-red via-red-dark to-yellow shadow-[0_4px_14px_-4px_rgba(255,51,85,0.7)]">
-              <img
+              <Image
                 src="/icon.svg"
                 alt=""
                 width={20}

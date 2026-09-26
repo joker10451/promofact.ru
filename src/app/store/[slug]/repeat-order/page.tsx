@@ -1,6 +1,5 @@
 import Icon from "@/components/Icon";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
 import HowToApply from "@/components/HowToApply";
@@ -14,8 +13,8 @@ import YandexAdBlock from "@/components/YandexAdBlock";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const dynamicParams = true;
-export const revalidate = 86400;
+export const dynamicParams = false;
+export const revalidate = false;
 
 export async function generateStaticParams() {
   try {

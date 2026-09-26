@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { fetchResults, type Result } from "@/lib/perfluence";
-import { SITE_NAME } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 

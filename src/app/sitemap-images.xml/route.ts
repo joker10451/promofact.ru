@@ -1,7 +1,7 @@
 import { getAllStores } from "@/lib/perfluence";
 import { SITE_URL } from "@/lib/site";
 
-export const revalidate = 86400;
+export const revalidate = false;
 
 function xmlEscape(str: string | null | undefined): string {
   if (!str) return "";

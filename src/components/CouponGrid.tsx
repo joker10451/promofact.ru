@@ -6,6 +6,8 @@ import { useMemo, useState, useEffect } from "react";
 import CouponTicket from "@/components/CouponTicket";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
 
+type SortOrder = "hits" | "discount" | "expiring";
+
 export default function CouponGrid({
   coupons: allCoupons,
   proofsByCode,
@@ -30,7 +32,7 @@ export default function CouponGrid({
   }, [allCoupons, excludeOfferKeys]);
   const [filter, setFilter] = useState<string>("all");
   const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20">("all");
-  const [sortBy, setSortBy] = useState<"hits" | "discount" | "expiring">("hits");
+  const [sortBy, setSortBy] = useState<SortOrder>("hits");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>({});
@@ -38,7 +40,7 @@ export default function CouponGrid({
 
   // Сброс лимита при изменении фильтров
   useEffect(() => {
-    setVisibleLimit(12);
+    queueMicrotask(() => setVisibleLimit(12));
   }, [filter, quickFilter, query, selectedRegion, sortBy]);
 
   useEffect(() => {
@@ -261,7 +263,7 @@ export default function CouponGrid({
             <Icon name="sort" size={13} className="absolute left-3 text-ink/45 pointer-events-none" />
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as SortOrder)}
               className="appearance-none rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-xs font-bold text-ink shadow-2xs outline-none hover:border-ink/40 focus:border-ink transition-colors cursor-pointer"
               aria-label="Сортировка промокодов"
             >

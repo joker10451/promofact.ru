@@ -23,6 +23,8 @@ export default function YandexMetrika() {
       </Script>
       <noscript>
         <div>
+          {/* Tracking pixel: next/image меняет URL и ломает вызов счётчика. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`https://mc.yandex.ru/watch/${YM_ID}`}
             style={{ position: "absolute", left: "-9999px" }}

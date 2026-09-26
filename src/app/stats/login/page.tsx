@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { STATS_COOKIE, sha256Hex, statsCookieValue } from "@/lib/statsAuth";
-import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `Вход`,

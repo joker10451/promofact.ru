@@ -6,8 +6,8 @@ import JsonLd from "@/components/JsonLd";
 import { getStores, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const dynamicParams = true;
-export const revalidate = 86400;
+export const dynamicParams = false;
+export const revalidate = false;
 
 export async function generateStaticParams() {
   try {

@@ -162,6 +162,8 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
                     >
                       <div className="flex items-center gap-2.5">
                         {s.logo ? (
+                          // Логотипы витрины приходят с динамических CDN.
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={s.logo} alt="" className="h-6 w-6 rounded-lg object-contain" />
                         ) : (
                           <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-yellow text-xs font-bold">

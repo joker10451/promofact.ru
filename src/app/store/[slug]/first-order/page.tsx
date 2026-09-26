@@ -14,8 +14,8 @@ import YandexAdBlock from "@/components/YandexAdBlock";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const dynamicParams = true;
-export const revalidate = 86400;
+export const dynamicParams = false;
+export const revalidate = false;
 
 export async function generateStaticParams() {
   try {
@@ -36,15 +36,6 @@ function getCapitalizedMonthYear(): string {
   return `${months[now.getMonth()]} ${now.getFullYear()}`;
 }
 
-function getMonthRuPrep(): string {
-  const now = new Date();
-  const monthsPrep = [
-    "январь", "февраль", "март", "апрель", "май", "июнь",
-    "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь",
-  ];
-  return `${monthsPrep[now.getMonth()]} ${now.getFullYear()}`;
-}
-
 function getMaxDiscount(coupons: { promocode: { bonusName: string | null } }[]): string {
   let maxPercent = 0;
   let maxRub = 0;
@@ -63,7 +54,6 @@ function getMaxDiscount(coupons: { promocode: { bonusName: string | null } }[]):
   return "скидки";
 }
 
-const TODAY_ISO = new Date().toISOString();
 const TODAY_RU = new Date().toLocaleDateString("ru-RU", {
   day: "numeric",
   month: "long",
@@ -140,7 +130,6 @@ export default async function StoreFirstOrderPage({
   const parentStoreUrl = `${SITE_URL}/store/${slug}`;
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const monthYear = getCapitalizedMonthYear();
-  const monthRu = getMonthRuPrep();
   const maxDisc = getMaxDiscount(store.coupons);
 
   // Купоны на первый заказ имеют абсолютный приоритет

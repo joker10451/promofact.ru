@@ -19,7 +19,7 @@ import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 const BASE_URL = "https://sberbank1.prfl.me/sites/lccq8a?erid=2RanynFCKB1";
 const AFFILIATE_URL = `${BASE_URL}&utm_source=promofact&utm_medium=landing&utm_campaign=sbercard`;
 
-export const revalidate = 86400;
+export const revalidate = false;
 
 export async function generateMetadata(): Promise<Metadata> {
   const url = `${SITE_URL}/sberkarta`;

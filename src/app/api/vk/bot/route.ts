@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getCoupons } from "@/lib/perfluence";
 import { getVkBotKeyboard, sendVkBotMessage } from "@/lib/vk";
 import { SITE_URL } from "@/lib/site";

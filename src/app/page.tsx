@@ -21,7 +21,7 @@ import { buildSearchIndex } from "@/lib/searchIndex";
 import { toCatalogCoupon } from "@/lib/catalogCoupon";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const revalidate = 86400; // 12 часов — защита лимита ISR Writes на Vercel
+export const revalidate = false; // 12 часов — защита лимита ISR Writes на Vercel
 
 const FAQ_JSONLD = [
   {

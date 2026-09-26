@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { STATS_COOKIE, statsCookieValue } from "@/lib/statsAuth";
 import { supabaseConfigured } from "@/lib/supabase";
-import { SITE_NAME } from "@/lib/site";
 import AdminClient from "./AdminClient";
 
 export const dynamic = "force-dynamic";

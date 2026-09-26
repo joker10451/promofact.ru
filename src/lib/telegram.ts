@@ -32,13 +32,13 @@ function formatDate(iso: string | null): string {
   if (!iso) return "бессрочно";
   const str = String(iso).trim();
   const ru = str.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
-  let d = "", m = "", y = "";
+  let d = "", m = "";
   if (ru) {
-    [, d, m, y] = ru;
+    [, d, m] = ru;
   } else {
     const parts = str.split("-");
     if (parts.length === 3) {
-      [y, m, d] = parts;
+      [, m, d] = parts;
     } else {
       return str;
     }

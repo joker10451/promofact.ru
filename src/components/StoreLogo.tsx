@@ -52,6 +52,9 @@ export default function StoreLogo({
   }
 
   return (
+    // Логотипы приходят от нескольких CPA-сетей с динамическими доменами;
+    // remotePatterns пришлось бы поддерживать для каждого партнёра.
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       ref={imgRef}
       src={initialUrl}

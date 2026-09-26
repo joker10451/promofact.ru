@@ -84,11 +84,9 @@ export function parseRawAdmitadXml(xml: string): RawAdmitadCoupon[] {
 
       const promocode = (body.match(/<promocode>(.*?)<\/promocode>/) || [])[1] || null;
       const name = (body.match(/<name>(.*?)<\/name>/) || [])[1] || "";
-      const shortDesc = (body.match(/<short_name>(.*?)<\/short_name>/) || [])[1] || "";
       const desc = (body.match(/<description>(.*?)<\/description>/) || [])[1] || "";
       const discount = (body.match(/<discount>(.*?)<\/discount>/) || [])[1] || null;
       const species = (body.match(/<species>(.*?)<\/species>/) || [])[1] || "promocode";
-      const status = (body.match(/<status>(.*?)<\/status>/) || [])[1] || "active";
       const dateStart = (body.match(/<date_start>(.*?)<\/date_start>/) || [])[1] || null;
       const dateEnd = (body.match(/<date_end>(.*?)<\/date_end>/) || [])[1] || null;
       const gotoLink = (body.match(/<goto_link>(.*?)<\/goto_link>/) || [])[1] || "";

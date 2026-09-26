@@ -14,8 +14,20 @@ const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
   year: "numeric",
 });
 
-export const dynamicParams = true;
-export const revalidate = 86400;
+export const dynamic = "force-static";
+export const dynamicParams = false;
+export const revalidate = false;
+
+export async function generateStaticParams() {
+  const categories = await getCategories();
+  const params: { slug: string; category: string }[] = [];
+  for (const city of CITIES_SEO) {
+    for (const cat of categories) {
+      params.push({ slug: city.slug, category: cat.slug });
+    }
+  }
+  return params;
+}
 
 const plural = (n: number, one: string, few: string, many: string): string => {
   const mod10 = n % 10;

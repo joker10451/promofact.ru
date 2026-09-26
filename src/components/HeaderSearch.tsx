@@ -54,7 +54,7 @@ export default function HeaderSearch() {
       return;
     }
 
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     const timer = setTimeout(() => {
       fetch(`/api/search?q=${encodeURIComponent(query.trim())}`)
         .then((res) => res.json())
@@ -151,6 +151,9 @@ export default function HeaderSearch() {
                   >
                     <div className="flex items-center gap-2">
                       {store.logo ? (
+                        // Логотипы партнёров приходят с динамических CDN и
+                        // должны уметь падать без ошибки всей подсказки поиска.
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={store.logo}
                           alt={store.name}

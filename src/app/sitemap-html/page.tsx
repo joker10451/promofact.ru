@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getStores, getCategories } from "@/lib/perfluence";
 import { getArticles } from "@/lib/articles";
-import { SITE_NAME } from "@/lib/site";
 
-export const revalidate = 86400;
+export const revalidate = false;
 
 export const metadata: Metadata = {
   title: `Карта сайта`,

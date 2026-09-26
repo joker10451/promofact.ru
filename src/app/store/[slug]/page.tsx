@@ -8,20 +8,19 @@ import { getActivePromoBanners } from "@/lib/promoBanners";
 import HowToApply from "@/components/HowToApply";
 import JsonLd from "@/components/JsonLd";
 import OtherStores from "@/components/OtherStores";
-import OtherCategories from "@/components/OtherCategories";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import StoreLogo from "@/components/StoreLogo";
 import StoreIntentTabs from "@/components/StoreIntentTabs";
 import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
-import { buildStoreArticle, buildStoreDescription, type StoreArticleInput } from "@/lib/storeSeoContent";
+import { buildStoreArticle, buildStoreDescription } from "@/lib/storeSeoContent";
 import { getStoreExtra } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const dynamicParams = true;
-export const revalidate = 86400;
+export const dynamicParams = false;
+export const revalidate = false;
 
 export async function generateStaticParams() {
   try {
@@ -165,7 +164,6 @@ export default async function StorePage({
   const store = stores.find((s) => s.slug === slug);
   if (!store) notFound();
 
-  const best = store.coupons[0];
   const pageUrl = `${SITE_URL}/store/${slug}`;
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const todayIso = TODAY_ISO;
@@ -175,7 +173,6 @@ export default async function StorePage({
   const maxDisc = getMaxDiscount(store.coupons);
 
   const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
-  const repeatOrderPromo = store.coupons.find((c) => !c.promocode.isFirstOrderOnly);
   const firstOrderCoupons = store.coupons.filter(
     (c) =>
       c.promocode.isFirstOrderOnly ||

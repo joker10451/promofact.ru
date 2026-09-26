@@ -11,7 +11,7 @@
  */
 
 const FONT_URL =
-  "https://fonts.gstatic.com/s/golos_text/v12/Yq6G-LxfJEXuk6bgIxKvKnF_8qU.woff";
+  "https://fonts.gstatic.com/s/golostext/v7/q5uXsoe9Lv5t7Meb31EcOR9UdVTNs822plVRRQ5c.ttf";
 
 export type OgFont = {
   name: string;

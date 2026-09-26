@@ -44,8 +44,10 @@ export default function AdminClient({ supabaseReady }: { supabaseReady: boolean 
   };
 
   useEffect(() => {
-    if (supabaseReady) load();
-    else setLoading(false);
+    queueMicrotask(() => {
+      if (supabaseReady) void load();
+      else setLoading(false);
+    });
   }, [supabaseReady]);
 
   const submit = async (e: React.FormEvent) => {

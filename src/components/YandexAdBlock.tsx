@@ -31,7 +31,7 @@ export default function YandexAdBlock({ blockId, className = "" }: YandexAdBlock
   const containerId = isValidBlock ? `yandex_rtb_${blockId!.replace(/-/g, "_")}` : "";
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
   useEffect(() => {

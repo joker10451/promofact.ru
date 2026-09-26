@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import ArticleCover from "@/components/ArticleCover";
 import Icon from "@/components/Icon";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
@@ -14,7 +15,7 @@ import { getArticles, getArticle } from "@/lib/articles";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
-export const revalidate = 86400;
+export const revalidate = false;
 
 export async function generateStaticParams() {
   return getArticles().map((a) => ({ slug: a.slug }));
@@ -164,9 +165,11 @@ export default async function ArticlePage({
 
             {article.image ? (
               <div className="mt-6 overflow-hidden rounded-3xl border border-line bg-paper/30 shadow-xs">
-                <img
+                <Image
                   src={article.image}
                   alt={article.title}
+                  width={1200}
+                  height={630}
                   className="w-full h-auto object-contain max-h-[480px]"
                 />
               </div>

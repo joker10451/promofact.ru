@@ -1,11 +1,12 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { translit } from "@/lib/translit";
 import { proxiedLogo } from "@/lib/logoProxy";
 import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 import bundledFeed from "@/data/perfluence-feed.json";
 
-const REVALIDATE_SECONDS = 24 * 60 * 60; // 86400 — ISR: 24 часа для защиты лимита ISR Writes на Vercel
+const REVALIDATE_SECONDS: false = false; // 86400 — ISR: 24 часа для защиты лимита ISR Writes на Vercel
 
 const WIDGET_URL = process.env.PERFLUENCE_WIDGET_URL ?? "";
 const RESULTS_URL = process.env.PERFLUENCE_RESULTS_URL ?? "";
@@ -283,7 +284,7 @@ async function fetchSnapshot(): Promise<Coupon[]> {
     const { SITE_URL } = await import("@/lib/site");
     const res = await fetch(`${SITE_URL}/api/perfluence-snapshot`, {
       // no-store сделал бы статические страницы динамическими — ошибка сборки.
-      next: { revalidate: REVALIDATE_SECONDS },
+      next: { revalidate: false },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -315,7 +316,7 @@ async function fetchData(): Promise<Coupon[]> {
     try {
       const res = await fetch(WIDGET_URL, {
         headers: { Accept: "application/json" },
-        next: { revalidate: REVALIDATE_SECONDS },
+        next: { revalidate: false },
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       });
       const text = await res.text();
@@ -473,6 +474,22 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
   });
 }
 
+/**
+ * Единый снимок каталога для SSG/ISR. Без него каждая из сотен статических
+ * страниц заново собирала все источники и запускала дедупликацию. Data Cache
+ * разделяется между рендерами и воркерами Next.js, поэтому за сутки фиды
+ * загружаются один раз, а все страницы получают один согласованный набор.
+ *
+ * `unstable_cache` остаётся совместимым с текущей конфигурацией Next 16 без
+ * включения Cache Components. Ключ намеренно версионирован: при изменении
+ * правил слияния достаточно сменить суффикс, чтобы не читать старый снимок.
+ */
+const getCachedMergedCoupons = unstable_cache(
+  fetchMergedCoupons,
+  ["promofact", "merged-coupons", "v1"],
+  { revalidate: false },
+);
+
 function withErid(ordText: string, ordMarker: string): string {
   const marker = ordMarker.trim();
   if (!marker || /erid/i.test(ordText)) return ordText;
@@ -481,7 +498,7 @@ function withErid(ordText: string, ordMarker: string): string {
 }
 
 export async function getCoupons(): Promise<Coupon[]> {
-  return (await fetchMergedCoupons()).filter(isActive).sort(byScore);
+  return (await getCachedMergedCoupons()).filter(isActive).sort(byScore);
 }
 
 export interface CategoryInfo {
@@ -689,7 +706,7 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
 };
 
 export async function getAllStores(): Promise<StoreInfo[]> {
-  const list = await fetchMergedCoupons();
+  const list = await getCachedMergedCoupons();
   const map = new Map<string, StoreInfo>();
   for (const c of list) {
     const key = c.store.slug;
