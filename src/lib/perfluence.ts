@@ -263,6 +263,23 @@ export function parsePayload(payloadJson: string): Coupon[] {
 
       const promoId = num(p.id ?? p.post_id ?? p.bonus_id);
       fallbackPromoId += 1;
+      let customerTypeLabel: string | null = null;
+      const combinedText = `${p.name || ""} ${p.comment || ""} ${p.promo_terms || ""}`.toLowerCase();
+      if (
+        combinedText.includes("не пользовался") ||
+        combinedText.includes("не заказывал") ||
+        combinedText.includes("более года") ||
+        combinedText.includes("больше года")
+      ) {
+        customerTypeLabel = "Не заказывали >1 года";
+      } else if (combinedText.includes("обедомани")) {
+        customerTypeLabel = "Обедомания (12–16ч)";
+      } else if (!bool(p.repeat_order)) {
+        customerTypeLabel = "1-й заказ";
+      } else {
+        customerTypeLabel = "Для всех";
+      }
+
       const promocode: Promocode = {
         id: promoId || fallbackPromoId,
         code: str(p.code).trim(),
@@ -272,6 +289,7 @@ export function parsePayload(payloadJson: string): Coupon[] {
         isHit: bool(p.is_hit),
         isUniversal: bool(p.is_universal),
         isFirstOrderOnly: !bool(p.repeat_order),
+        customerTypeLabel,
         region: regionStr(p.region_promo ?? p.region),
         isBarcode: bool(p.is_barcode),
         barcodeImage: str(p.image || p.barcode_image) || null,

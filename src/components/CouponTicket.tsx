@@ -177,7 +177,13 @@ export default function CouponTicket({
               </span>
             )}
             {promocode.customerTypeLabel ? (
-              <span className="rounded-full bg-paper border border-line px-2 py-0.5 text-[10px] font-bold text-ink/70">
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                promocode.customerTypeLabel.includes("года")
+                  ? "bg-purple-100 text-purple-800 border border-purple-200"
+                  : promocode.customerTypeLabel.includes("Обедомания")
+                  ? "bg-amber-100 text-amber-800 border border-amber-200"
+                  : "bg-paper border border-line text-ink/70"
+              }`}>
                 {promocode.customerTypeLabel}
               </span>
             ) : promocode.isFirstOrderOnly ? (

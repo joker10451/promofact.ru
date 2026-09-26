@@ -185,10 +185,23 @@ export function refineOffer(
     }
 
     if (minOrder && minOrder.value !== rubVal) {
-      const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(title) || /перв|1[-‑–—]?[ыое]?й/i.test(terms);
-      cleaned = isFirst
-        ? `на первый заказ от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
-        : `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+      const minText = `от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+      const titleLow = combined.toLowerCase();
+      if (
+        titleLow.includes("не пользовался") ||
+        titleLow.includes("не заказывал") ||
+        titleLow.includes("более года") ||
+        titleLow.includes("больше года")
+      ) {
+        cleaned = `при заказе ${minText} • для тех, кто не заказывал больше года`;
+      } else if (titleLow.includes("обедомани")) {
+        cleaned = `на первый заказ ${minText} • в разделе «Обедомания» (12:00–16:00)`;
+      } else {
+        const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(title) || /перв|1[-‑–—]?[ыое]?й/i.test(terms);
+        cleaned = isFirst
+          ? `на первый заказ ${minText}`
+          : `при заказе ${minText}`;
+      }
     } else if (!cleaned || cleaned === "!" || cleaned.length < 3) {
       cleaned = isFirstOrder ? "на первый заказ" : "на заказ по акции";
     }
