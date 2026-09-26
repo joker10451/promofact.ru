@@ -266,6 +266,24 @@ export function getBrandMeta(storeSlug: string, storeName: string, domain?: stri
       domain: "sberbank.ru",
     };
   }
+  if (slug === "yandex-knigi" || lowerName.includes("яндекс книги")) {
+    return {
+      logoUrl: "https://favicon.yandex.net/favicon/v2/books.yandex.ru?size=120",
+      emoji: "📚",
+      bgGradient: "from-amber-500 to-orange-600",
+      textColor: "text-white",
+      domain: "books.yandex.ru",
+    };
+  }
+  if (slug === "yandex-music" || lowerName.includes("яндекс музыка")) {
+    return {
+      logoUrl: "https://favicon.yandex.net/favicon/v2/music.yandex.ru?size=120",
+      emoji: "🎵",
+      bgGradient: "from-yellow-400 to-amber-500",
+      textColor: "text-ink",
+      domain: "music.yandex.ru",
+    };
+  }
   if (slug === "yandex-eda" || lowerName.includes("яндекс еда")) {
     return {
       logoUrl: "https://favicon.yandex.net/favicon/v2/eda.yandex.ru?size=120",

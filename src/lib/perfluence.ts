@@ -214,12 +214,59 @@ export function parsePayload(payloadJson: string): Coupon[] {
         .map((l) => ({ title: str(l.title) || "Ссылка", link: str(l.link) }))
         .filter((l) => l.link);
 
+      let currentStore = store;
+      const titleLower = str(links[0]?.title || p.name || p.comment).toLowerCase();
+      if (projectId === 2232) {
+        if (titleLower.includes("книг")) {
+          currentStore = {
+            id: 223201,
+            name: "Яндекс Книги",
+            slug: "yandex-knigi",
+            logo: proxiedLogo("https://favicon.yandex.net/favicon/v2/books.yandex.ru?size=120"),
+            category: "Книги",
+            categorySlug: "knigi",
+            about: "Сервис электронных и аудиокниг от Яндекса с каталогом бестселлеров, эксклюзивов и комиксов.",
+            conditions: store.conditions,
+            site: "https://books.yandex.ru",
+            activeBloggers: store.activeBloggers,
+          };
+        } else if (titleLower.includes("музык")) {
+          currentStore = {
+            id: 223202,
+            name: "Яндекс Музыка",
+            slug: "yandex-music",
+            logo: proxiedLogo("https://favicon.yandex.net/favicon/v2/music.yandex.ru?size=120"),
+            category: "Подписки и сервисы",
+            categorySlug: "podpiski-i-servisy",
+            about: "Стриминговый сервис музыки и подкастов с персональной волной рекомендаций «Моя волна».",
+            conditions: store.conditions,
+            site: "https://music.yandex.ru",
+            activeBloggers: store.activeBloggers,
+          };
+        }
+      }
+
+      const rawBonus = str(p.name || p.comment).trim();
+      let cleanBonus: string | null = rawBonus || null;
+      if (cleanBonus) {
+        cleanBonus = cleanBonus
+          .replace(/\s*\+\s*(?:Шефролл|Чизбургер|ролл|бургер)[^,.]*/gi, "")
+          .replace(/,\s*суммируется со всеми акциями/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+      if (projectId === 2232) {
+        cleanBonus = titleLower.includes("книг")
+          ? "45 дней доступа к Яндекс Книгам бесплатно"
+          : "45 дней доступа к Яндекс Музыке бесплатно";
+      }
+
       const promoId = num(p.id ?? p.post_id ?? p.bonus_id);
       fallbackPromoId += 1;
       const promocode: Promocode = {
         id: promoId || fallbackPromoId,
         code: str(p.code).trim(),
-        bonusName: str(p.name || p.comment).trim() || null,
+        bonusName: cleanBonus,
         terms: stripHtml(p.promo_terms || p.terms) || null,
         expires: isoDate(p.date || p.expires),
         isHit: bool(p.is_hit),
@@ -233,7 +280,7 @@ export function parsePayload(payloadJson: string): Coupon[] {
       coupons.push({
         id: promocode.id,
         promocode,
-        store,
+        store: currentStore,
         affiliate,
         extraLinks,
       });
