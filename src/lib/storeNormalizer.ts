@@ -106,6 +106,11 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
     category: "Цветы",
     categorySlug: "tsvety",
   },
+  "yandex-eda": {
+    name: "Яндекс Еда",
+    category: "Доставка из ресторанов",
+    categorySlug: "dostavka-iz-restoranov",
+  },
   "otello": {
     name: "Отелло",
     category: "Путешествия и туризм",

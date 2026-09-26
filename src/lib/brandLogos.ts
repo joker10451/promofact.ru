@@ -266,6 +266,15 @@ export function getBrandMeta(storeSlug: string, storeName: string, domain?: stri
       domain: "sberbank.ru",
     };
   }
+  if (slug === "yandex-eda" || lowerName.includes("яндекс еда")) {
+    return {
+      logoUrl: "https://favicon.yandex.net/favicon/v2/eda.yandex.ru?size=120",
+      emoji: "🍔",
+      bgGradient: "from-amber-400 to-yellow-500",
+      textColor: "text-ink",
+      domain: "eda.yandex.ru",
+    };
+  }
   if (slug.includes("yandex") || lowerName.includes("яндекс")) {
     return {
       logoUrl: "https://favicon.yandex.net/favicon/v2/yandex.ru?size=120",

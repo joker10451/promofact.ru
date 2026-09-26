@@ -21,14 +21,16 @@
 export interface CategoryDef {
   slug: string;
   /** Название в единственном числе, как заголовок раздела */
-  label: string;
+  label: string;
+
   /** Короткое описание для страницы категории и подсказки в меню */
   blurb: string;
 }
 
 export interface CategoryGroup {
   id: string;
-  label: string;
+  label: string;
+
   categorySlugs: string[];
 }
 
@@ -155,6 +157,8 @@ export const BRAND_CATEGORY: Record<string, string> = {
   mirsushi: "dostavka-iz-restoranov",
   "prostoeda.pro": "dostavka-iz-restoranov",
   tanukifamily: "dostavka-iz-restoranov",
+  "яндекс еда": "dostavka-iz-restoranov",
+  "yandex-eda": "dostavka-iz-restoranov",
   "post meridiem": "dostavka-iz-restoranov",
 
   // Продукты и напитки

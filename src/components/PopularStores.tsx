@@ -5,6 +5,7 @@ import StoreLogo from "@/components/StoreLogo";
 
 const POPULAR_SLUGS = [
   "sunlight-ru",
+  "yandex-eda",
   "ivi",
   "pyaterochka",
   "otello",

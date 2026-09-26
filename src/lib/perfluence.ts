@@ -138,6 +138,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   3611: { slug: "megamarket", name: "Мегамаркет" },
   602: { slug: "tanukifamily", name: "Тануки" },
   2582: { slug: "magnit-dostavka", name: "Магнит Доставка" },
+  1384: { slug: "yandex-eda", name: "Яндекс Еда" },
 };
 
 export function parsePayload(payloadJson: string): Coupon[] {
