@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import type { Coupon } from "@/lib/types";
 import type { SearchIndex } from "@/lib/searchIndex";
+import { matchStoreSearch, normalizeSearchTerm, convertKeyboardLayout } from "@/lib/searchUtils";
 
 interface HeroProps {
   featured?: Coupon;
@@ -46,28 +47,42 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
   const coupons = search?.coupons ?? [];
   const [q, setQ] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const query = q.trim().toLowerCase();
+  const query = q.trim();
+  const normQ = normalizeSearchTerm(query);
+  const convertedQ = normalizeSearchTerm(convertKeyboardLayout(query));
 
   const matchedStores = query
     ? stores
-        .filter((s) => s.name.toLowerCase().includes(query) || s.category.toLowerCase().includes(query))
-        .slice(0, 4)
+        .filter((s) => matchStoreSearch(s, query))
+        .slice(0, 5)
     : [];
 
   const matchedCoupons = query
     ? coupons
-        .filter(
-          (c) =>
-            c.code.toLowerCase().includes(query) ||
-            c.store.toLowerCase().includes(query) ||
-            (c.bonus && c.bonus.toLowerCase().includes(query))
-        )
-        .slice(0, 4)
+        .filter((c) => {
+          const code = normalizeSearchTerm(c.code);
+          const store = normalizeSearchTerm(c.store);
+          const bonus = normalizeSearchTerm(c.bonus || "");
+          return (
+            code.includes(normQ) ||
+            store.includes(normQ) ||
+            bonus.includes(normQ) ||
+            (convertedQ && (code.includes(convertedQ) || store.includes(convertedQ) || bonus.includes(convertedQ))) ||
+            matchStoreSearch({ name: c.store, slug: "" }, query)
+          );
+        })
+        .slice(0, 5)
     : [];
 
-  const hasResults = matchedStores.length > 0 || matchedCoupons.length > 0;
+  const allItems = [
+    ...matchedStores.map((s) => ({ type: "store" as const, data: s })),
+    ...matchedCoupons.map((c) => ({ type: "coupon" as const, data: c })),
+  ];
+
+  const hasResults = allItems.length > 0;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -88,6 +103,19 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
     document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (allItems.length > 0 ? (prev + 1) % allItems.length : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (allItems.length > 0 ? (prev - 1 + allItems.length) % allItems.length : 0));
+    } else if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     submitSearch(q);
@@ -95,13 +123,13 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-paper via-white to-paper pt-12 pb-14 sm:pt-18 sm:pb-20 border-b border-line">
-      {/* Декоративные световые пятна */}
+      {/* Декоративные световые пятна с ограничением по ширине */}
       <div
-        className="pointer-events-none absolute -left-20 top-10 h-72 w-72 rounded-full bg-yellow/15 blur-3xl"
+        className="pointer-events-none absolute -left-20 top-10 h-72 w-72 max-w-full rounded-full bg-yellow/15 blur-3xl"
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute -right-20 top-20 h-72 w-72 rounded-full bg-red/10 blur-3xl"
+        className="pointer-events-none absolute right-0 top-20 h-72 w-72 max-w-full rounded-full bg-red/10 blur-3xl"
         aria-hidden="true"
       />
 
@@ -128,9 +156,11 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
                 type="search"
                 value={q}
                 onFocus={() => setIsOpen(true)}
+                onKeyDown={handleKeyDown}
                 onChange={(e) => {
                   setQ(e.target.value);
                   setIsOpen(true);
+                  setSelectedIndex(0);
                 }}
                 placeholder="Поиск магазина или промокода..."
                 className="h-14 sm:h-16 w-full rounded-2xl border-2 border-ink/15 bg-white pl-12 sm:pl-14 pr-24 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
@@ -146,57 +176,84 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
           </form>
 
           {/* Подсказки автодополнения */}
-          {isOpen && query && hasResults && (
+          {isOpen && query && (
             <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-line bg-white p-3 text-left shadow-xl">
-              {matchedStores.length > 0 && (
-                <div className="mb-2">
-                  <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink/40">
-                    Магазины
-                  </div>
-                  {matchedStores.map((s) => (
-                    <Link
-                      key={s.id}
-                      href={`/store/${s.slug}`}
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-bold text-ink hover:bg-paper transition-colors"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        {s.logo ? (
-                          // Логотипы витрины приходят с динамических CDN.
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={s.logo} alt="" className="h-6 w-6 rounded-lg object-contain" />
-                        ) : (
-                          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-yellow text-xs font-bold">
-                            {s.name[0]}
-                          </span>
-                        )}
-                        <span>{s.name}</span>
-                      </div>
-                      <span className="text-xs font-medium text-ink/40">Смотреть скидки →</span>
-                    </Link>
-                  ))}
+              {!hasResults ? (
+                <div className="py-4 px-2 text-center">
+                  <p className="text-xs sm:text-sm font-medium text-ink/60">
+                    По запросу «{query}» ничего не найдено.
+                  </p>
+                  <p className="text-[11px] text-ink/40 mt-1">
+                    Попробуйте ввести другое название или воспользуйтесь каталогом.
+                  </p>
                 </div>
-              )}
-
-              {matchedCoupons.length > 0 && (
-                <div>
-                  <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink/40">
-                    Промокоды
-                  </div>
-                  {matchedCoupons.map((c) => (
-                    <div
-                      key={c.id}
-                      onClick={() => submitSearch(c.store)}
-                      className="flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-ink hover:bg-paper transition-colors"
-                    >
-                      <div className="min-w-0 pr-2">
-                        <span className="font-bold text-ink">{c.store}: </span>
-                        <span className="text-ink/80 truncate">{c.bonus || c.code}</span>
+              ) : (
+                <>
+                  {matchedStores.length > 0 && (
+                    <div className="mb-2">
+                      <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink/40">
+                        Магазины
                       </div>
-                      <span className="shrink-0 font-mono text-xs font-bold text-red">{c.code}</span>
+                      {matchedStores.map((s, idx) => {
+                        const isSelected = selectedIndex === idx;
+                        return (
+                          <Link
+                            key={s.id}
+                            href={`/store/${s.slug}`}
+                            onClick={() => {
+                              setIsOpen(false);
+                              ymReachGoal("search_store_click", { store: s.slug });
+                            }}
+                            className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm font-bold text-ink transition-colors ${
+                              isSelected ? "bg-red/10 border border-red/30" : "hover:bg-paper"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              {s.logo ? (
+                                // Логотипы витрины приходят с динамических CDN.
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={s.logo} alt="" className="h-6 w-6 rounded-lg object-contain" />
+                              ) : (
+                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-yellow text-xs font-bold">
+                                  {s.name[0]}
+                                </span>
+                              )}
+                              <span>{s.name}</span>
+                            </div>
+                            <span className="text-xs font-medium text-ink/40">Смотреть скидки →</span>
+                          </Link>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
+                  )}
+
+                  {matchedCoupons.length > 0 && (
+                    <div>
+                      <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink/40">
+                        Промокоды
+                      </div>
+                      {matchedCoupons.map((c, idx) => {
+                        const realIdx = matchedStores.length + idx;
+                        const isSelected = selectedIndex === realIdx;
+                        return (
+                          <div
+                            key={c.id}
+                            onClick={() => submitSearch(c.store)}
+                            className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-ink transition-colors ${
+                              isSelected ? "bg-red/10 border border-red/30" : "hover:bg-paper"
+                            }`}
+                          >
+                            <div className="min-w-0 pr-2">
+                              <span className="font-bold text-ink">{c.store}: </span>
+                              <span className="text-ink/80 truncate">{c.bonus || c.code}</span>
+                            </div>
+                            <span className="shrink-0 font-mono text-xs font-bold text-red">{c.code}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

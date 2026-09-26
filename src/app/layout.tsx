@@ -9,6 +9,7 @@ import TelegramWebAppInit from "@/components/TelegramWebAppInit";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollProgress from "@/components/ScrollProgress";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import GlobalSearchModal from "@/components/GlobalSearchModal";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 // Шрифты раздаём со своего домена через next/font. Раньше они шли <link> с
@@ -131,6 +132,7 @@ export default function RootLayout({
         <CookieBanner />
         <PwaInstallBanner />
         <MobileBottomNav />
+        <GlobalSearchModal />
       </body>
     </html>
   );

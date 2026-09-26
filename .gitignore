@@ -61,6 +61,7 @@ data/notified_orders.json
 # а репозиторий публичный. Держим только локально.
 /AUDIT.md
 /audit/
+/audit-screenshots/
 # Локальная конфигурация запуска дев-сервера
 /.claude/
 .youtube-token.json

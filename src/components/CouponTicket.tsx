@@ -76,10 +76,7 @@ export default function CouponTicket({
     };
   }, [showDetailsModal]);
 
-  const copyAndOpen = (code: string, url: string) => {
-    if (typeof window !== "undefined" && url && url !== "#") {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
+  const copyCode = (code: string) => {
     if (code && typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(code).catch(() => {});
     }
@@ -91,27 +88,29 @@ export default function CouponTicket({
         window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
       }
     } catch {}
-    if (code) ymReachGoal("copy_code", { code, store: store.name });
-    ymReachGoal("click_store", { code: code || "no-code", store: store.name });
+    ymReachGoal("copy_code", { store: store.slug });
+    ymReachGoal("promo_show", { store: store.slug });
     if (timer.current) clearTimeout(timer.current);
-    const hide = () => {
-      timer.current = setTimeout(() => {
-        setCopied(false);
-        setToast(false);
-      }, 12000);
-    };
-    // Магазин открылся в новой вкладке — наша ушла в фон. Отсчёт скрытия
-    // начинаем, когда человек вернулся, иначе он не увидит подсказку
-    // и предложение подписаться.
-    if (typeof document !== "undefined" && document.hidden) {
-      const onReturn = () => {
-        if (document.hidden) return;
-        document.removeEventListener("visibilitychange", onReturn);
-        hide();
-      };
-      document.addEventListener("visibilitychange", onReturn);
-    } else {
-      hide();
+    timer.current = setTimeout(() => {
+      setCopied(false);
+      setToast(false);
+    }, 10000);
+  };
+
+  const handleAffiliateClick = () => {
+    ymReachGoal("affiliate_click", {
+      store: store.slug,
+      type: offer.isNoCode ? "deal" : "promo",
+    });
+  };
+
+  const copyAndOpen = (code: string, url: string) => {
+    if (code) {
+      copyCode(code);
+    }
+    handleAffiliateClick();
+    if (typeof window !== "undefined" && url && url !== "#") {
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -256,15 +255,15 @@ export default function CouponTicket({
               {proofCount} {pluralOrders(proofCount)} по коду
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 font-bold text-mint-dark text-[11px] sm:text-xs">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-mint-dark" />
-              Проверен сегодня
+            <span className="inline-flex items-center gap-1.5 font-semibold text-ink/65 text-[11px] sm:text-xs">
+              <span className="inline-block h-2 w-2 rounded-full bg-mint" />
+              Официальное предложение
             </span>
           )}
           <button
             type="button"
             onClick={() => setShowDetailsModal(true)}
-            className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer shrink-0 py-1"
           >
             Условия акции
           </button>
@@ -273,46 +272,80 @@ export default function CouponTicket({
 
       {/* 4. Нижний блок: Код + Кнопка One-Click */}
       <div className="mt-4 pt-3.5 border-t border-line/60">
-        {!offer.isNoCode ? (
-          <div className="space-y-2">
+        {!offer.isNoCode && promocode.code ? (
+          <div className="space-y-2.5">
+            {/* Поле с промокодом: клик копирует код */}
             <div
-              onClick={() => copyAndOpen(promocode.code, targetUrl)}
-              className="flex cursor-pointer items-center justify-between rounded-xl border-2 border-dashed border-ink/20 bg-paper px-3.5 py-2 font-mono text-xs sm:text-sm font-bold tracking-wider text-ink transition-colors hover:border-red hover:bg-red/5"
-              title="Нажмите, чтобы скопировать"
+              onClick={() => copyCode(promocode.code)}
+              className="flex cursor-pointer items-center justify-between rounded-xl border-2 border-dashed border-ink/20 bg-paper px-3.5 py-2.5 font-mono text-xs sm:text-sm font-bold tracking-wider text-ink transition-all hover:border-red hover:bg-red/5 active:scale-[0.99]"
+              title="Нажмите, чтобы скопировать промокод"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  copyCode(promocode.code);
+                }
+              }}
             >
-              <span className="truncate">{promocode.code}</span>
-              <span className="font-sans text-[10px] font-bold text-ink/40">
-                {copied ? "скопировано" : "код купона"}
+              <div className="flex items-center gap-2 min-w-0">
+                <Icon name="copy" size={14} className={copied ? "text-mint-dark" : "text-ink/40"} />
+                <span className="truncate">{promocode.code}</span>
+              </div>
+              <span className={`font-sans text-[11px] font-bold shrink-0 transition-colors ${copied ? "text-mint-dark font-extrabold" : "text-ink/40"}`}>
+                {copied ? "скопировано!" : "нажмите для копирования"}
               </span>
             </div>
-            <button
-              type="button"
-              onClick={() => copyAndOpen(promocode.code, targetUrl)}
-              className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 px-4 text-center text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer ${
-                copied
-                  ? "bg-mint text-white"
-                  : "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none active:scale-[0.98]"
-              }`}
+
+            {/* Основная кнопка действия */}
+            {copied ? (
+              <a
+                href={targetUrl}
+                target="_blank"
+                rel="noopener nofollow"
+                onClick={handleAffiliateClick}
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-mint hover:bg-mint-dark text-white text-xs sm:text-sm font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer px-4"
+              >
+                <CheckIcon className="h-4 w-4" />
+                <span className="truncate">Код скопирован! Перейти в {store.name} →</span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={() => copyCode(promocode.code)}
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red to-red-dark text-white text-xs sm:text-sm font-bold shadow-offset-red hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] transition-all cursor-pointer px-4"
+              >
+                <Icon name="copy" size={16} />
+                <span className="truncate">Скопировать промокод</span>
+              </button>
+            )}
+
+            {/* Прямой переход по ссылке */}
+            <a
+              href={targetUrl}
+              target="_blank"
+              rel="noopener nofollow"
+              onClick={handleAffiliateClick}
+              className="text-[11px] sm:text-xs font-semibold text-ink/50 hover:text-red hover:underline flex items-center justify-center gap-1 py-1 transition-colors"
             >
-              {copied ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <CheckIcon className="h-4 w-4" /> Код скопирован! Магазин открыт →
-                </span>
-              ) : (
-                <span className="truncate">
-                  {store.name.length > 20 ? "Скопировать и открыть магазин →" : `Скопировать и открыть ${store.name} →`}
-                </span>
-              )}
-            </button>
+              <span>Перейти на сайт {store.name} →</span>
+            </a>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => copyAndOpen("", targetUrl)}
-            className="w-full rounded-xl bg-gradient-to-r from-red to-red-dark py-3 px-4 text-center text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer truncate"
-          >
-            {store.name.length > 20 ? "Перейти к акции →" : `Получить скидку в ${store.name} →`}
-          </button>
+          <div className="space-y-2">
+            <div className="rounded-xl bg-blue-50/60 border border-blue-100 px-3 py-1.5 text-center text-[11px] font-bold text-blue-700">
+              Промокод не требуется — скидка применится по ссылке
+            </div>
+            <a
+              href={targetUrl}
+              target="_blank"
+              rel="noopener nofollow"
+              onClick={handleAffiliateClick}
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red to-red-dark text-white text-xs sm:text-sm font-bold shadow-offset-red hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] transition-all cursor-pointer px-4"
+            >
+              <span>Перейти к предложению →</span>
+            </a>
+          </div>
         )}
 
         {/* 5. Мета-данные и реклама */}
@@ -360,7 +393,7 @@ export default function CouponTicket({
               <button
                 type="button"
                 onClick={() => setShowDetailsModal(false)}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-paper text-ink/60 hover:bg-paper/80 hover:text-ink transition-colors cursor-pointer"
+                className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-paper text-ink/60 hover:bg-paper/80 hover:text-ink transition-colors cursor-pointer"
                 aria-label="Закрыть"
               >
                 <Icon name="close" size={13} />

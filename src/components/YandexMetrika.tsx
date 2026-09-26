@@ -42,6 +42,11 @@ export function ymReachGoal(goal: string, params?: Record<string, unknown>) {
     ym?: (id: number, method: string, goal: string, params?: Record<string, unknown>) => void;
   };
   if (typeof w.ym === "function") {
-    w.ym(YM_ID, "reachGoal", goal, params);
+    // Безопасность: никогда не передаём значения секретов, паролей или сырых промокодов в параметры целей
+    const safeParams = params ? { ...params } : undefined;
+    if (safeParams && "code" in safeParams) {
+      delete safeParams.code;
+    }
+    w.ym(YM_ID, "reachGoal", goal, safeParams);
   }
 }

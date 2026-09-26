@@ -21,7 +21,7 @@ export default function SeoArticle() {
             <button
               type="button"
               onClick={() => setExpanded(!expanded)}
-              className="shrink-0 text-xs sm:text-sm font-bold text-red hover:text-red-dark transition-colors cursor-pointer"
+              className="shrink-0 min-h-[44px] inline-flex items-center px-2 py-2 text-xs sm:text-sm font-bold text-red hover:text-red-dark transition-colors cursor-pointer"
             >
               {expanded ? "Свернуть ↑" : "Читать подробнее ↓"}
             </button>

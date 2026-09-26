@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import MegaMenu, { type MegaMenuGroup } from "@/components/MegaMenu";
 import MobileCatalogMenu from "@/components/MobileCatalogMenu";
+import HeaderSearchTrigger from "@/components/HeaderSearchTrigger";
 import { getCategories } from "@/lib/perfluence";
 import {
   CATEGORY_GROUPS,
@@ -43,7 +44,8 @@ async function buildGroups(): Promise<MegaMenuGroup[]> {
 
     return {
       id: g.id,
-      label: g.label,
+      label: g.label,
+
       categories: cats,
       total: cats.reduce((s, c) => s + c.count, 0),
     };
@@ -93,8 +95,10 @@ export default async function Header() {
           </nav>
         </div>
 
-        {/* Правая часть: Telegram */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        {/* Правая часть: Search + Telegram */}
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          <HeaderSearchTrigger />
+
           <a
             href="https://t.me/smart_zakupka"
             target="_blank"

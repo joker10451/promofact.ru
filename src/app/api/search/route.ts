@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { getCoupons, getStores } from "@/lib/perfluence";
+import { matchStoreSearch, normalizeSearchTerm, convertKeyboardLayout } from "@/lib/searchUtils";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const q = (searchParams.get("q") || "").trim().toLowerCase();
+  const rawQ = (searchParams.get("q") || "").trim();
 
   const [stores, coupons] = await Promise.all([getStores(), getCoupons()]);
 
-  if (!q) {
+  if (!rawQ) {
     // Возвращаем популярные магазины по умолчанию
     const popularStores = stores.slice(0, 6).map((s) => ({
       name: s.name,
@@ -21,15 +22,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ stores: popularStores, coupons: [] });
   }
 
-  // Фильтруем магазины (имя, категория, slug — покрывает латиницу для кириллических названий)
+  const q = normalizeSearchTerm(rawQ);
+  const convertedQ = normalizeSearchTerm(convertKeyboardLayout(rawQ));
+
+  // Фильтруем магазины с учётом псевдонимов и раскладки клавиатуры
   const matchingStores = stores
-    .filter(
-      (s) =>
-        s.name.toLowerCase().includes(q) ||
-        s.category.toLowerCase().includes(q) ||
-        s.slug.toLowerCase().includes(q)
-    )
-    .slice(0, 5)
+    .filter((s) => matchStoreSearch(s, rawQ))
+    .slice(0, 6)
     .map((s) => ({
       name: s.name,
       slug: s.slug,
@@ -40,14 +39,22 @@ export async function GET(request: Request) {
 
   // Фильтруем купоны (код, описание, имя и slug магазина)
   const matchingCoupons = coupons
-    .filter(
-      (c) =>
-        c.promocode.code.toLowerCase().includes(q) ||
-        (c.promocode.bonusName ?? "").toLowerCase().includes(q) ||
-        c.store.name.toLowerCase().includes(q) ||
-        c.store.slug.toLowerCase().includes(q)
-    )
-    .slice(0, 5)
+    .filter((c) => {
+      const code = normalizeSearchTerm(c.promocode.code);
+      const bonus = normalizeSearchTerm(c.promocode.bonusName ?? "");
+      const storeName = normalizeSearchTerm(c.store.name);
+      const storeSlug = normalizeSearchTerm(c.store.slug);
+
+      return (
+        code.includes(q) ||
+        bonus.includes(q) ||
+        storeName.includes(q) ||
+        storeSlug.includes(q) ||
+        (convertedQ && (code.includes(convertedQ) || bonus.includes(convertedQ) || storeName.includes(convertedQ))) ||
+        matchStoreSearch(c.store, rawQ)
+      );
+    })
+    .slice(0, 6)
     .map((c) => ({
       id: c.id,
       code: c.promocode.code,

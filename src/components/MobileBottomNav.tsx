@@ -11,18 +11,9 @@ export default function MobileBottomNav() {
     return null;
   }
 
-  const scrollToSearch = (e: React.MouseEvent) => {
-    if (pathname === "/") {
-      e.preventDefault();
-      const el = document.getElementById("catalog") || document.querySelector('input[type="search"]');
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-        setTimeout(() => {
-          const input = document.querySelector('input[type="search"]') as HTMLInputElement;
-          input?.focus();
-        }, 400);
-      }
-    }
+  const handleSearchClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent("promo:open-search"));
   };
 
   const navItems = [
@@ -41,8 +32,8 @@ export default function MobileBottomNav() {
     },
     {
       label: "Поиск",
-      href: "/#catalog",
-      onClick: scrollToSearch,
+      href: "#search",
+      onClick: handleSearchClick,
       icon: (
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8" />
@@ -124,7 +115,7 @@ export default function MobileBottomNav() {
                 href={item.href}
                 target="_blank"
                 rel="noopener nofollow"
-                className="w-full select-none"
+                className="w-full select-none min-h-[44px] flex items-center justify-center"
               >
                 {content}
               </a>
@@ -136,7 +127,7 @@ export default function MobileBottomNav() {
               key={item.label}
               href={item.href}
               onClick={item.onClick}
-              className="w-full select-none"
+              className="w-full select-none min-h-[44px] flex items-center justify-center"
             >
               {content}
             </Link>

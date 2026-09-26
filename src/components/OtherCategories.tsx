@@ -20,7 +20,7 @@ export default async function OtherCategories({
           <Link
             key={cat.slug}
             href={`/category/${cat.slug}`}
-            className="rounded-full bg-white border border-line px-4 py-2 text-sm font-bold text-ink/70 hover:border-ink hover:text-ink transition-colors"
+            className="rounded-full bg-white border border-line px-4 min-h-[44px] inline-flex items-center text-sm font-bold text-ink/70 hover:border-ink hover:text-ink transition-colors"
           >
             {cat.name}
           </Link>

@@ -50,11 +50,11 @@ export default async function PopularStores() {
   return (
     <section aria-label="Популярные магазины" className="py-10 sm:py-14 border-b border-line bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2">
             <Icon name="store" size={19} className="text-ink/50" />
             <div>
-              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
+              <h2 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold text-ink">
                 Популярные магазины
               </h2>
               <p className="text-xs text-ink/60 font-medium">
@@ -64,7 +64,7 @@ export default async function PopularStores() {
           </div>
           <Link
             href="/promokody"
-            className="text-xs sm:text-sm font-bold text-red hover:text-red-dark transition-colors whitespace-nowrap"
+            className="text-xs sm:text-sm font-bold text-red hover:text-red-dark transition-colors shrink-0"
           >
             Все магазины ({stores.length}) →
           </Link>

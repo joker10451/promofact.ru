@@ -12,6 +12,7 @@
     "test:normalizer": "node --experimental-strip-types scripts/test-normalizer.mjs",
     "test:links": "node scripts/test-internal-graph.mjs",
     "test:seo": "node scripts/audit-seo-inventory.mjs",
+    "test:e2e": "node scripts/test-e2e-scenarios.mjs",
     "health:feeds": "node scripts/feed-healthcheck.mjs"
   },
   "dependencies": {
