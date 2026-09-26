@@ -239,14 +239,16 @@ export function filterExpiredOffers(data, referenceTime = Date.now()) {
 }
 
 export async function runCatalogSync(options = {}) {
+  const feedPath = options.feedPath || FEED_PATH;
+  const metaPath = options.metaPath || META_PATH;
   const widgetUrl = options.url !== undefined ? options.url : process.env.PERFLUENCE_WIDGET_URL;
   console.log("=== Синхронизация партнерского каталога PromoFact ===");
 
   // Читаем текущие метаданные для сохранения исторического lastSuccessSync при сбоях
   let existingMeta = { lastSuccessSync: null, projectCount: 0, activeOffers: 0, status: "initial" };
-  if (fs.existsSync(META_PATH)) {
+  if (fs.existsSync(metaPath)) {
     try {
-      existingMeta = JSON.parse(fs.readFileSync(META_PATH, "utf-8"));
+      existingMeta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
     } catch {
       // Игнорируем повреждения метаданных
     }
@@ -256,10 +258,10 @@ export async function runCatalogSync(options = {}) {
   let rawApiData = null;
   let syncError = null;
 
-  if (options.rawFeed) {
+  if (options.rawFeed !== undefined) {
     rawApiData = options.rawFeed;
     apiSuccess = true;
-    console.log(`✓ Тестовый фид передан напрямую: ${rawApiData.data?.length || 0} проектов.`);
+    console.log(`✓ Тестовый фид передан напрямую: ${rawApiData && Array.isArray(rawApiData.data) ? rawApiData.data.length : "не массив"} проектов.`);
   } else if (widgetUrl) {
     console.log(`Запрос фида из Perfluence API (${widgetUrl.slice(0, 30)}...)...`);
     try {
@@ -297,96 +299,103 @@ export async function runCatalogSync(options = {}) {
       expiredOffers,
     } = filterExpiredOffers(rawApiData, now);
 
-    const prevActiveOffers = existingMeta.activeOffers || existingMeta.activePromos || 0;
-    const prevProjects = existingMeta.projectCount || 0;
-    const newProjects = cleanData.data.length;
+    if (!cleanData || !Array.isArray(cleanData.data)) {
+      const corruptError = "Повреждённая структура фида: отсутствует валидный массив data";
+      console.warn(`⚠️ ${corruptError}`);
+      syncError = new Error(corruptError);
+      // Не завершаемся аварийно, переходим в резервный режим
+    } else {
+      const prevActiveOffers = existingMeta.activeOffers || existingMeta.activePromos || 0;
+      const prevProjects = existingMeta.projectCount || 0;
+      const newProjects = cleanData.data.length;
 
-    // ЗАЩИТА 1: Аномальное обнуление каталога (были офферы, а стало 0)
-    const isWipeout = newProjects === 0 || activeOffers === 0;
-    if (isWipeout && prevActiveOffers > 0 && !options.allowEmpty) {
-      const wipeoutError = `Аномальное обнуление каталога: получено 0 действующих предложений (было ${prevActiveOffers}). Обновление заблокировано.`;
-      console.error(`🚨 ${wipeoutError}`);
+      // ЗАЩИТА 1: Аномальное обнуление каталога (были офферы, а стало 0)
+      const isWipeout = newProjects === 0 || activeOffers === 0;
+      if (isWipeout && prevActiveOffers > 0 && !options.allowEmpty) {
+        const wipeoutError = `Аномальное обнуление каталога: получено 0 действующих предложений (было ${prevActiveOffers}). Обновление заблокировано.`;
+        console.error(`🚨 ${wipeoutError}`);
+
+        const meta = {
+          lastSuccessSync: existingMeta.lastSuccessSync || null, // Сохраняем честную дату!
+          lastAttemptAt: nowIso,
+          status: "fallback",
+          source: "local-bundled-feed",
+          projectCount: prevProjects,
+          totalPromos: existingMeta.totalPromos || 0,
+          activePromos: existingMeta.activePromos || 0,
+          expiredPromos: existingMeta.expiredPromos || 0,
+          totalOffers: prevActiveOffers,
+          activeOffers: prevActiveOffers,
+          expiredOffers: 0,
+          error: wipeoutError,
+          updatedAt: nowIso,
+        };
+
+        atomicWriteJson(metaPath, meta);
+        return { status: "fallback", meta };
+      }
+
+      // ЗАЩИТА 2: Резкое необъяснимое сокращение каталога (>60% потери данных)
+      const isCatastrophicDrop =
+        prevProjects >= 10 &&
+        prevActiveOffers >= 20 &&
+        (newProjects < Math.floor(prevProjects * 0.4) || activeOffers < Math.floor(prevActiveOffers * 0.4));
+
+      if (isCatastrophicDrop && !options.allowDrop) {
+        const dropError = `Аномальное сокращение каталога: проектов ${newProjects} (было ${prevProjects}), предложений ${activeOffers} (было ${prevActiveOffers}). Обновление заблокировано.`;
+        console.warn(`🚨 ${dropError}`);
+
+        const meta = {
+          lastSuccessSync: existingMeta.lastSuccessSync || null,
+          lastAttemptAt: nowIso,
+          status: "fallback",
+          source: "local-bundled-feed",
+          projectCount: prevProjects,
+          totalOffers: prevActiveOffers,
+          activeOffers: prevActiveOffers,
+          error: dropError,
+          updatedAt: nowIso,
+        };
+
+        atomicWriteJson(metaPath, meta);
+        return { status: "fallback", meta };
+      }
+
+      // Успешная валидация: атомарно сохраняем свежий фид
+      atomicWriteJson(feedPath, cleanData);
+      console.log(
+        `✓ Актуальный фид сохранён в ${feedPath} (проектов: ${cleanData.data.length}, акций: ${activeOffers} [кодов: ${activePromos}, ссылок: ${activeLinkOffers}], отфильтровано: ${expiredOffers})`
+      );
 
       const meta = {
-        lastSuccessSync: existingMeta.lastSuccessSync || null, // Сохраняем честную дату!
+        lastSuccessSync: nowIso,
         lastAttemptAt: nowIso,
-        status: "fallback",
-        source: "local-bundled-feed",
-        projectCount: prevProjects,
-        totalPromos: existingMeta.totalPromos || 0,
-        activePromos: existingMeta.activePromos || 0,
-        expiredPromos: existingMeta.expiredPromos || 0,
-        totalOffers: prevActiveOffers,
-        activeOffers: prevActiveOffers,
-        expiredOffers: 0,
-        error: wipeoutError,
+        status: "success",
+        source: "perfluence-api",
+        projectCount: cleanData.data.length,
+        totalPromos,
+        activePromos,
+        expiredPromos,
+        totalLinkOffers,
+        activeLinkOffers,
+        expiredLinkOffers,
+        totalOffers,
+        activeOffers,
+        expiredOffers,
         updatedAt: nowIso,
       };
 
-      atomicWriteJson(META_PATH, meta);
-      return { status: "fallback", meta };
+      atomicWriteJson(metaPath, meta);
+      console.log(`✓ Статус 'success' записан в ${metaPath}`);
+      return { status: "success", meta };
     }
-
-    // ЗАЩИТА 2: Резкое необъяснимое сокращение каталога (>60% потери данных)
-    const isCatastrophicDrop =
-      prevProjects >= 10 &&
-      prevActiveOffers >= 20 &&
-      (newProjects < Math.floor(prevProjects * 0.4) || activeOffers < Math.floor(prevActiveOffers * 0.4));
-
-    if (isCatastrophicDrop && !options.allowDrop) {
-      const dropError = `Аномальное сокращение каталога: проектов ${newProjects} (было ${prevProjects}), предложений ${activeOffers} (было ${prevActiveOffers}). Обновление заблокировано.`;
-      console.warn(`🚨 ${dropError}`);
-
-      const meta = {
-        lastSuccessSync: existingMeta.lastSuccessSync || null,
-        lastAttemptAt: nowIso,
-        status: "fallback",
-        source: "local-bundled-feed",
-        projectCount: prevProjects,
-        totalOffers: prevActiveOffers,
-        activeOffers: prevActiveOffers,
-        error: dropError,
-        updatedAt: nowIso,
-      };
-
-      atomicWriteJson(META_PATH, meta);
-      return { status: "fallback", meta };
-    }
-
-    // Успешная валидация: атомарно сохраняем свежий фид
-    atomicWriteJson(FEED_PATH, cleanData);
-    console.log(
-      `✓ Актуальный фид сохранён в ${FEED_PATH} (проектов: ${cleanData.data.length}, акций: ${activeOffers} [кодов: ${activePromos}, ссылок: ${activeLinkOffers}], отфильтровано: ${expiredOffers})`
-    );
-
-    const meta = {
-      lastSuccessSync: nowIso,
-      lastAttemptAt: nowIso,
-      status: "success",
-      source: "perfluence-api",
-      projectCount: cleanData.data.length,
-      totalPromos,
-      activePromos,
-      expiredPromos,
-      totalLinkOffers,
-      activeLinkOffers,
-      expiredLinkOffers,
-      totalOffers,
-      activeOffers,
-      expiredOffers,
-      updatedAt: nowIso,
-    };
-
-    atomicWriteJson(META_PATH, meta);
-    console.log(`✓ Статус 'success' записан в ${META_PATH}`);
-    return { status: "success", meta };
   }
 
-  // СЦЕНАРИЙ 2: API недоступен — проверяем наличие резервного локального фида
+  // СЦЕНАРИЙ 2: API недоступен или повреждён — проверяем наличие резервного локального фида
   console.log("Переход в резервный режим (проверка локального фида)...");
-  if (fs.existsSync(FEED_PATH)) {
+  if (fs.existsSync(feedPath)) {
     try {
-      const localFeed = JSON.parse(fs.readFileSync(FEED_PATH, "utf-8"));
+      const localFeed = JSON.parse(fs.readFileSync(feedPath, "utf-8"));
       if (Array.isArray(localFeed.data) && localFeed.data.length > 0) {
         const {
           totalPromos,
@@ -424,8 +433,8 @@ export async function runCatalogSync(options = {}) {
           updatedAt: nowIso,
         };
 
-        atomicWriteJson(META_PATH, meta);
-        console.log(`✓ Статус 'fallback' записан в ${META_PATH}`);
+        atomicWriteJson(metaPath, meta);
+        console.log(`✓ Статус 'fallback' записан в ${metaPath}`);
         return { status: "fallback", meta };
       }
     } catch (err) {
@@ -450,8 +459,8 @@ export async function runCatalogSync(options = {}) {
     updatedAt: nowIso,
   };
 
-  atomicWriteJson(META_PATH, meta);
-  console.error(`❌ Критический сбой синхронизации: статус 'failed' записан в ${META_PATH}`);
+  atomicWriteJson(metaPath, meta);
+  console.error(`❌ Критический сбой синхронизации: статус 'failed' записан в ${metaPath}`);
   return { status: "failed", meta };
 }
 

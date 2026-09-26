@@ -7,6 +7,7 @@
 
 import assert from "node:assert";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
@@ -549,46 +550,145 @@ let passed = 0;
   passed++;
 }
 
-// Test 28 [Регрессия]: Защита от случайного обнуления каталога
+// Test 28 [Регрессия]: Защита от случайного обнуления каталога (с изоляцией от рабочих файлов)
 {
   const { runCatalogSync } = await import("./sync-catalog.mjs");
-  // Симуляция ответа API, где после фильтрации остаётся 0 активных предложений
-  const wipeoutData = {
-    data: [
-      {
-        id: 999,
-        groups: [{ promocodes: [{ code: "OLD", date: "01.01.2020" }] }],
-      },
-    ],
-  };
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "pf-test-wipeout-"));
+  const tmpFeed = path.join(tmpDir, "perfluence-feed.json");
+  const tmpMeta = path.join(tmpDir, "sync-meta.json");
 
-  const result = await runCatalogSync({ rawFeed: wipeoutData });
+  try {
+    // Начальное валидное состояние
+    fs.writeFileSync(tmpFeed, JSON.stringify({ data: [{ id: 1, groups: [{ promocodes: [{ code: "ACT" }] }] }] }));
+    fs.writeFileSync(
+      tmpMeta,
+      JSON.stringify({
+        lastSuccessSync: "2026-09-26T12:00:00.000Z",
+        projectCount: 35,
+        activeOffers: 77,
+        status: "success",
+      })
+    );
 
-  assert.strictEqual(result.status, "fallback", "При обнулении каталога статус должен быть fallback");
-  assert.ok(result.meta.error.includes("Аномальное обнуление"), "Должна быть зафиксирована ошибка обнуления");
-  console.log("✓ Test 28 [Регрессия]: Защита от случайного обнуления каталога блокирует повреждение данных (PASS)");
-  passed++;
+    // Симуляция ответа API, где после фильтрации остаётся 0 активных предложений
+    const wipeoutData = {
+      data: [
+        {
+          id: 999,
+          groups: [{ promocodes: [{ code: "OLD", date: "01.01.2020" }] }],
+        },
+      ],
+    };
+
+    const result = await runCatalogSync({
+      rawFeed: wipeoutData,
+      feedPath: tmpFeed,
+      metaPath: tmpMeta,
+    });
+
+    assert.strictEqual(result.status, "fallback", "При обнулении каталога статус должен быть fallback");
+    assert.ok(result.meta.error.includes("Аномальное обнуление"), "Должна быть зафиксирована ошибка обнуления");
+    assert.strictEqual(result.meta.lastSuccessSync, "2026-09-26T12:00:00.000Z", "Честный lastSuccessSync должен сохраниться");
+    console.log("✓ Test 28 [Регрессия]: Защита от случайного обнуления каталога блокирует повреждение данных (PASS)");
+    passed++;
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
 }
 
 // Test 29 [Регрессия]: Защита от резкого аномального сокращения каталога (>60% падение)
 {
   const { runCatalogSync } = await import("./sync-catalog.mjs");
-  // Симуляция ответа, где вернулся всего 1 проект вместо 35
-  const truncatedData = {
-    data: [
-      {
-        id: 111,
-        groups: [{ promocodes: [{ code: "SINGLE", date: "31.12.2030" }] }],
-      },
-    ],
-  };
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "pf-test-drop-"));
+  const tmpFeed = path.join(tmpDir, "perfluence-feed.json");
+  const tmpMeta = path.join(tmpDir, "sync-meta.json");
 
-  const result = await runCatalogSync({ rawFeed: truncatedData });
+  try {
+    fs.writeFileSync(tmpFeed, JSON.stringify({ data: [{ id: 1, groups: [{ promocodes: [{ code: "ACT" }] }] }] }));
+    fs.writeFileSync(
+      tmpMeta,
+      JSON.stringify({
+        lastSuccessSync: "2026-09-26T12:00:00.000Z",
+        projectCount: 35,
+        activeOffers: 77,
+        status: "success",
+      })
+    );
 
-  assert.strictEqual(result.status, "fallback", "При аномальном сокращении статус должен быть fallback");
-  assert.ok(result.meta.error.includes("Аномальное сокращение"), "Должна быть зафиксирована ошибка сокращения");
-  console.log("✓ Test 29 [Регрессия]: Защита от резкого сокращения каталога блокирует срез данных (PASS)");
-  passed++;
+    // Симуляция ответа, где вернулся всего 1 проект вместо 35
+    const truncatedData = {
+      data: [
+        {
+          id: 111,
+          groups: [{ promocodes: [{ code: "SINGLE", date: "31.12.2030" }] }],
+        },
+      ],
+    };
+
+    const result = await runCatalogSync({
+      rawFeed: truncatedData,
+      feedPath: tmpFeed,
+      metaPath: tmpMeta,
+    });
+
+    assert.strictEqual(result.status, "fallback", "При аномальном сокращении статус должен быть fallback");
+    assert.ok(result.meta.error.includes("Аномальное сокращение"), "Должна быть зафиксирована ошибка сокращения");
+    assert.strictEqual(result.meta.lastSuccessSync, "2026-09-26T12:00:00.000Z", "Честный lastSuccessSync должен сохраниться");
+    console.log("✓ Test 29 [Регрессия]: Защита от резкого сокращения каталога блокирует срез данных (PASS)");
+    passed++;
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/29 ТЕСТОВ (23 Admitad + 6 Регрессий) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// Test 30 [Регрессия]: Безопасная обработка повреждённого rawFeed без необработанных исключений
+{
+  const { runCatalogSync } = await import("./sync-catalog.mjs");
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "pf-test-corrupt-"));
+  const tmpFeed = path.join(tmpDir, "perfluence-feed.json");
+  const tmpMeta = path.join(tmpDir, "sync-meta.json");
+
+  try {
+    fs.writeFileSync(tmpFeed, JSON.stringify({ data: [{ id: 1, groups: [{ promocodes: [{ code: "ACT" }] }] }] }));
+    fs.writeFileSync(
+      tmpMeta,
+      JSON.stringify({
+        lastSuccessSync: "2026-09-26T12:00:00.000Z",
+        projectCount: 1,
+        activeOffers: 1,
+        status: "success",
+      })
+    );
+
+    // Тест с повреждёнными структурами: null, {} и объект без data массива
+    const corruptInputs = [
+      null,
+      {},
+      { data: null },
+      { data: "not-an-array" },
+      { error: "Internal Server Error" },
+    ];
+
+    for (const corruptInput of corruptInputs) {
+      const result = await runCatalogSync({
+        rawFeed: corruptInput,
+        feedPath: tmpFeed,
+        metaPath: tmpMeta,
+      });
+
+      assert.strictEqual(
+        result.status,
+        "fallback",
+        `При повреждённом входе (${JSON.stringify(corruptInput)}) скрипт должен перейти в fallback`
+      );
+      assert.strictEqual(result.meta.lastSuccessSync, "2026-09-26T12:00:00.000Z");
+    }
+
+    console.log("✓ Test 30 [Регрессия]: Повреждённый rawFeed не вызывает необработанных исключений (PASS)");
+    passed++;
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/30 ТЕСТОВ (23 Admitad + 7 Регрессий) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
