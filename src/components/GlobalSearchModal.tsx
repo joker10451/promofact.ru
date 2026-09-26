@@ -49,6 +49,12 @@ export default function GlobalSearchModal() {
   const previouslyFocusedElement = useRef<HTMLElement | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const latestQueryRef = useRef<string>(query);
+
+  // Синхронизируем latestQueryRef при каждом обновлении поисковой строки
+  useEffect(() => {
+    latestQueryRef.current = query.trim();
+  }, [query]);
 
   const openSearch = useCallback(() => {
     if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
@@ -144,12 +150,14 @@ export default function GlobalSearchModal() {
       fetch("/api/search", { signal: controller.signal })
         .then((res) => res.json())
         .then((data) => {
+          // Явная проверка актуальности: если пользователь уже начал ввод, не перезаписываем
+          if (latestQueryRef.current !== "") return;
           setStores(data.stores || []);
           setCoupons([]);
           setLoading(false);
         })
         .catch((err) => {
-          if (err.name !== "AbortError") {
+          if (err.name !== "AbortError" && latestQueryRef.current === "") {
             setLoading(false);
           }
         });
@@ -167,6 +175,8 @@ export default function GlobalSearchModal() {
       fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
         .then((res) => res.json())
         .then((data) => {
+          // Явная проверка актуальности запроса после fetch/JSON parsing
+          if (latestQueryRef.current !== q) return;
           const foundStores = data.stores || [];
           const foundCoupons = data.coupons || [];
           setStores(foundStores);
@@ -182,7 +192,7 @@ export default function GlobalSearchModal() {
           });
         })
         .catch((err) => {
-          if (err.name !== "AbortError") {
+          if (err.name !== "AbortError" && latestQueryRef.current === q) {
             setLoading(false);
           }
         });

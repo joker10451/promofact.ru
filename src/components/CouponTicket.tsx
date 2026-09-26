@@ -78,7 +78,7 @@ export default function CouponTicket({
     };
   }, [showDetailsModal]);
 
-  const copyCode = async (code: string): Promise<boolean> => {
+  const copyCode = async (code: string, toastMode: "copied" | "opened" = "copied"): Promise<boolean> => {
     if (!code) return false;
     let success = false;
     if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
@@ -93,7 +93,7 @@ export default function CouponTicket({
     if (success) {
       setCopied(true);
       setCopyError(false);
-      setToastType("copied");
+      setToastType(toastMode);
       setToast(true);
       try {
         localStorage.setItem("has_copied_coupon", "true");
@@ -127,16 +127,28 @@ export default function CouponTicket({
     });
   };
 
-  const copyAndOpen = async (code: string, url: string) => {
-    if (code) {
-      const ok = await copyCode(code);
-      if (ok) {
-        setToastType("opened");
+  const copyAndOpen = (code: string, url: string) => {
+    let opened = false;
+    // 1. Открытие партнёрской ссылки непосредственно в синхронном контексте пользовательского клика
+    if (typeof window !== "undefined" && url && url !== "#") {
+      try {
+        const win = window.open(url, "_blank");
+        if (win) {
+          try {
+            win.opener = null;
+          } catch {}
+          opened = true;
+        }
+      } catch {
+        opened = false;
       }
     }
+
     handleAffiliateClick();
-    if (typeof window !== "undefined" && url && url !== "#") {
-      window.open(url, "_blank", "noopener,noreferrer");
+
+    // 2. Копирование промокода с сохранением обработки ошибок Clipboard API
+    if (code) {
+      copyCode(code, opened ? "opened" : "copied");
     }
   };
 
@@ -523,10 +535,10 @@ export default function CouponTicket({
                 <button
                   type="button"
                   onClick={() => {
-                    setShowDetailsModal(false);
+                    setTimeout(() => setShowDetailsModal(false), 150);
                     copyAndOpen(promocode.code, targetUrl);
                   }}
-                  className="w-full rounded-2xl bg-gradient-to-r from-red to-red-dark py-3.5 px-4 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                  className="w-full rounded-2xl bg-gradient-to-r from-red to-red-dark py-3.5 px-4 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer block"
                 >
                   {promocode.code ? `Скопировать ${promocode.code} и перейти →` : `Перейти в магазин →`}
                 </button>

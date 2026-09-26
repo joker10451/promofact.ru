@@ -1,4 +1,4 @@
-import { spawn as cpSpawn } from "node:child_process";
+import { spawn as cpSpawn, execSync } from "node:child_process";
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
@@ -65,6 +65,9 @@ async function run() {
 
   console.log(`[1/3] Запуск локального production-сервера на порту ${PORT}...`);
   if (isWin) {
+    try {
+      execSync(`for /f "tokens=5" %a in ('netstat -aon ^| findstr :${PORT}') do taskkill /f /pid %a`, { stdio: "ignore", shell: "cmd.exe" });
+    } catch {}
     server = cpSpawn("npx", ["next", "start", "-p", String(PORT)], {
       shell: true,
       stdio: "ignore",
@@ -82,6 +85,8 @@ async function run() {
 
   try {
     await waitForServer(`${BASE_URL}/`);
+    // Прогрев динамического API поиска для исключения задержек холодного старта в CI
+    await fetch(`${BASE_URL}/api/search?q=sunlight`).catch(() => {});
     console.log("✓ Сервер готов и отвечает 200 OK");
 
     const browser = await chromium.launch({ headless: true });
@@ -89,34 +94,28 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 8;
+    const totalTests = 9;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/`, { waitUntil: "load" });
+      await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
 
       const searchTrigger = page.locator('button[aria-label="Поиск по магазинам и купонам"]').first();
-      await searchTrigger.waitFor({ state: "visible" });
+      await searchTrigger.click();
 
       const searchModal = page.locator('div[role="dialog"][aria-label="Поиск по магазинам и купонам"]');
-      for (let i = 0; i < 5; i++) {
-        await searchTrigger.click();
-        try {
-          await searchModal.waitFor({ state: "visible", timeout: 800 });
-          break;
-        } catch {}
-      }
+      await searchModal.waitFor({ state: "visible", timeout: 5000 });
 
       const searchInput = searchModal.locator('input[type="search"]');
-      await searchInput.waitFor({ state: "visible", timeout: 2000 });
+      await searchInput.waitFor({ state: "visible", timeout: 3000 });
       // Вводим опечатку раскладки: "cfykfqn" (sunlight в русской раскладке)
       await searchInput.fill("cfykfqn");
 
       const sunlightItem = searchModal.locator('a[href="/store/sunlight-ru"]').first();
-      await sunlightItem.waitFor({ state: "visible", timeout: 5000 });
+      await sunlightItem.waitFor({ state: "visible", timeout: 10000 });
       console.log("  ✓ Поиск находит 'SUNLIGHT' по опечатке клавиатуры 'cfykfqn'");
 
       // Проверяем клавиатурную навигацию: Enter открывает выбранный результат
@@ -408,8 +407,77 @@ async function run() {
       passedTests++;
     }
 
-    // --- СЦЕНАРИЙ 8: Проверка отсутствия горизонтального скролла на всех разрешениях ---
-    console.log("\n[Тест 8] Сценарий: Полный контроль отсутствия горизонтального скролла (360, 390, 768, 1440 px)");
+    // --- СЦЕНАРИЙ 8: Совмещённое действие «Скопировать и перейти» (новая вкладка и буфер) ---
+    console.log("\n[Тест 8] Сценарий: Совмещённое действие (копирование промокода и открытие в новой вкладке)");
+    {
+      const context = await browser.newContext({
+        viewport: { width: 390, height: 844 },
+        permissions: ["clipboard-read", "clipboard-write"],
+      });
+      // Изолируем внешние партнерские сети от реальных покупок и задержек DNS/SSL
+      await context.route("**/*prfl.me/**", (route) =>
+        route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Partner Offer Landing</body></html>" })
+      );
+      await context.route("**/*sunlight*/**", (route) => {
+        if (route.request().url().includes("localhost")) {
+          return route.continue();
+        }
+        return route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Sunlight Partner Landing</body></html>" });
+      });
+
+      const page = await context.newPage();
+      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
+
+      const firstCard = page.locator("article").first();
+      await firstCard.waitFor({ state: "visible" });
+
+      // Открываем модальное окно деталей/условий купона
+      const detailsBtn = firstCard.locator("button:has-text('Условия акции')");
+      await detailsBtn.click();
+
+      // Ожидаем появление модального окна деталей в DOM (через createPortal)
+      const modal = page.locator("div[role='dialog']").last();
+      await modal.waitFor({ state: "visible", timeout: 4000 });
+      const copyAndOpenBtn = modal.locator("button:has-text('Скопировать'), a:has-text('Скопировать')").first();
+      await copyAndOpenBtn.waitFor({ state: "visible", timeout: 3000 });
+
+      // Ожидаем открытие новой вкладки непосредственно при клике (без блокировки браузером)
+      const [newPage] = await Promise.all([
+        context.waitForEvent("page", { timeout: 5000 }),
+        copyAndOpenBtn.click(),
+      ]);
+
+      // Проверяем, что в новой вкладке открылся партнёрский URL
+      const openedUrl = newPage.url();
+      if (!openedUrl.includes("prfl.me") && !openedUrl.includes("sunlight")) {
+        throw new Error(`В новой вкладке открылся некорректный URL: ${openedUrl}`);
+      }
+      console.log(`  ✓ Партнёрская ссылка успешно открыта в новой вкладке: ${openedUrl.slice(0, 45)}...`);
+
+      // Проверяем факт копирования промокода в системный буфер обмена
+      await page.waitForTimeout(300);
+      const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
+      if (!clipboardText || clipboardText.length < 3) {
+        throw new Error(`Промокод не был скопирован в буфер при совмещённом действии: "${clipboardText}"`);
+      }
+      console.log(`  ✓ Промокод успешно скопирован в буфер при совмещённом действии: "${clipboardText}"`);
+
+      // Проверяем тост со статусом «Магазин открывается»
+      const toastStatus = page.locator('div[role="status"]');
+      await toastStatus.waitFor({ state: "visible", timeout: 3000 });
+      const toastText = await toastStatus.innerText();
+      if (!toastText.toLowerCase().includes("магазин открывается")) {
+        throw new Error(`Ожидался статус 'Магазин открывается', получено: "${toastText}"`);
+      }
+      console.log(`  ✓ Тост честно подтвердил открытие магазина: "${toastText.split("\n")[0]}"`);
+
+      await newPage.close();
+      await context.close();
+      passedTests++;
+    }
+
+    // --- СЦЕНАРИЙ 9: Проверка отсутствия горизонтального скролла на всех разрешениях ---
+    console.log("\n[Тест 9] Сценарий: Полный контроль отсутствия горизонтального скролла (360, 390, 768, 1440 px)");
     {
       const resolutions = [
         { width: 360, height: 740, name: "360px" },
