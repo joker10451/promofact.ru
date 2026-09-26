@@ -4,6 +4,7 @@ import { translit } from "@/lib/translit";
 import { proxiedLogo } from "@/lib/logoProxy";
 import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
+import { CATEGORIES } from "@/lib/categoryTaxonomy";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
 
@@ -602,6 +603,9 @@ export interface CategoryInfo {
 export async function getCategories(): Promise<CategoryInfo[]> {
   const list = await getCoupons();
   const map = new Map<string, CategoryInfo>();
+  for (const cat of CATEGORIES) {
+    map.set(cat.slug, { name: cat.label, slug: cat.slug, count: 0 });
+  }
   for (const c of list) {
     const slug = c.store.categorySlug;
     const cur = map.get(slug);
