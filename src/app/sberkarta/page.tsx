@@ -94,19 +94,14 @@ export default function SberCardPage() {
 
   const productJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
-    "@type": "Product",
+    "@type": "FinancialProduct",
     name: "Кредитная СберКарта",
     description:
-      "Кредитная карта Сбера: до 120 дней без процентов, лимит до 1 млн ₽, кешбэк до 30% у партнёров, обслуживание 0₽.",
+      "Кредитная карта Сбера: до 120 дней без процентов, лимит до 1 млн ₽, кешбэк до 30% у партнёров, бесплатное обслуживание.",
     brand: { "@type": "Brand", name: "Сбер" },
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "RUB",
-      price: 0,
-      availability: "https://schema.org/InStock",
-      url: BASE_URL,
-      seller: { "@type": "Organization", name: "ПАО Сбербанк" },
-    },
+    feesAndCommissionsSpecification: "Бесплатное обслуживание карты навсегда без дополнительных условий",
+    url: BASE_URL,
+    provider: { "@type": "Organization", name: "ПАО Сбербанк" },
   };
 
   const breadcrumbJsonLd: Record<string, unknown> = {

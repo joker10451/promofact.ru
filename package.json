@@ -7,7 +7,12 @@
     "build": "next build",
     "build:check": "node scripts/build-check.mjs",
     "start": "next start",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "npm run test:normalizer && npm run test:links",
+    "test:normalizer": "node scripts/test-normalizer.mjs",
+    "test:links": "node scripts/test-internal-graph.mjs",
+    "test:seo": "node scripts/audit-seo-inventory.mjs",
+    "health:feeds": "node scripts/feed-healthcheck.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

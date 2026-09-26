@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getStores, getCategories } from "@/lib/perfluence";
 import { getArticles } from "@/lib/articles";
+import { ACTIONS } from "@/lib/actions";
 
 export const revalidate = false;
 
@@ -68,6 +69,22 @@ export default async function HtmlSitemap() {
                 className="block rounded-xl border border-line bg-white px-4 py-3 text-sm font-medium text-ink hover:border-red hover:text-red transition-colors"
               >
                 {a.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="font-display text-lg font-extrabold">Сезонные акции и распродажи</h2>
+        <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {ACTIONS.map((act) => (
+            <li key={act.slug}>
+              <Link
+                href={`/akcii/${act.slug}`}
+                className="block rounded-xl border border-line bg-white px-4 py-3 text-sm font-medium text-ink hover:border-red hover:text-red transition-colors"
+              >
+                {act.title}
               </Link>
             </li>
           ))}

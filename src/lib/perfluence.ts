@@ -6,8 +6,6 @@ import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 import bundledFeed from "@/data/perfluence-feed.json";
 
-const REVALIDATE_SECONDS: false = false; // 86400 — ISR: 24 часа для защиты лимита ISR Writes на Vercel
-
 const WIDGET_URL = process.env.PERFLUENCE_WIDGET_URL ?? "";
 const RESULTS_URL = process.env.PERFLUENCE_RESULTS_URL ?? "";
 
@@ -323,11 +321,22 @@ function topLevelCount(payload: string): number {
 }
 
 async function devMockFallback(reason: string): Promise<Coupon[]> {
-  // Мок — только когда ключа нет совсем (локально и в GitHub CI). Раньше
-  // условие было «production и не CI», а Vercel во время сборки выставляет
-  // CI=1: при недоступном API в прод-сборку попадали выдуманные купоны.
+  // Защита от публикации DEV-моков в production и на Vercel
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+    console.error(`[perfluence] КРИТИЧЕСКАЯ ОШИБКА: ${reason} в production/VERCEL! Публикация DEV-моков категорически заблокирована.`);
+    if (bundledFeed && typeof bundledFeed === "object" && "data" in bundledFeed) {
+      try {
+        const bundledCoupons = parsePayload(JSON.stringify(bundledFeed));
+        if (bundledCoupons.length > 0) {
+          console.log(`[perfluence] безопасно восстановлено из локального фида: ${bundledCoupons.length} купонов`);
+          return bundledCoupons;
+        }
+      } catch {}
+    }
+    return [];
+  }
   if (isPerfluenceConfigured()) return [];
-  console.warn(`[perfluence] ${reason} — отдаю DEV-мок`);
+  console.warn(`[perfluence] ${reason} — отдаю DEV-мок (только в local dev)`);
   return (await import("@/lib/mockCoupons")).DEV_MOCK_COUPONS;
 }
 
@@ -642,8 +651,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "pyaterochka",
     name: "Пятёрочка Доставка",
     logo: "https://favicon.yandex.net/favicon/v2/5ka.ru?size=120",
-    category: "Продукты и доставка",
-    categorySlug: "eda-i-dostavka",
+    category: "Доставка продуктов",
+    categorySlug: "dostavka-produktov",
     about: "«Пятёрочка» — сеть магазинов у дома с экспресс-доставкой продуктов питания и товаров первой необходимости от 30 минут.",
     conditions: "Скидка по промокодам действует в официальном приложении доставки «Пятёрочка».",
     site: "https://5ka.ru",
@@ -654,8 +663,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "samokat",
     name: "Самокат",
     logo: "https://favicon.yandex.net/favicon/v2/samokat.ru?size=120",
-    category: "Продукты и доставка",
-    categorySlug: "eda-i-dostavka",
+    category: "Доставка продуктов",
+    categorySlug: "dostavka-produktov",
     about: "«Самокат» — сервис мгновенной доставки продуктов и товаров для дома от 15 минут.",
     conditions: "Промокоды применяются при оформлении заказа в мобильном приложении Самокат.",
     site: "https://samokat.ru",
@@ -666,8 +675,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "riv-gosh",
     name: "РИВ ГОШ",
     logo: "https://favicon.yandex.net/favicon/v2/rivegauche.ru?size=120",
-    category: "Красота и косметика",
-    categorySlug: "krasota-i-uhod",
+    category: "Косметика и парфюмерия",
+    categorySlug: "kosmetika-i-parfyumeriya",
     about: "РИВ ГОШ — ведущая российская сеть парфюмерии и косметики мировых брендов.",
     conditions: "Скидки по промокодам действуют в интернет-магазине РИВ ГОШ на выделенный ассортимент.",
     site: "https://rivegauche.ru",
@@ -678,8 +687,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "sokolov-offline",
     name: "SOKOLOV",
     logo: "https://favicon.yandex.net/favicon/v2/sokolov.ru?size=120",
-    category: "Одежда и обувь",
-    categorySlug: "odezhda-i-obuv",
+    category: "Украшения и часы",
+    categorySlug: "ukrasheniya",
     about: "SOKOLOV — крупнейший российский ювелирный бренд украшений из золота и серебра.",
     conditions: "Купоны действуют в розничных флагманских магазинах и на сайте SOKOLOV.",
     site: "https://sokolov.ru",
@@ -690,8 +699,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "tanukifamily",
     name: "Тануки",
     logo: "https://favicon.yandex.net/favicon/v2/tanukifamily.ru?size=120",
-    category: "Продукты и доставка",
-    categorySlug: "eda-i-dostavka",
+    category: "Доставка из ресторанов",
+    categorySlug: "dostavka-iz-restoranov",
     about: "TanukiFamily — рестораны японской, паназиатской и европейской кухни с быстрой доставкой.",
     conditions: "Промокоды на скидку и подарки при заказе доставки на сайте и в приложении Тануки.",
     site: "https://tanukifamily.ru",
@@ -702,8 +711,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "magnit-dostavka",
     name: "Магнит Доставка",
     logo: "https://favicon.yandex.net/favicon/v2/dostavka.magnit.ru?size=120",
-    category: "Продукты и доставка",
-    categorySlug: "eda-i-dostavka",
+    category: "Доставка продуктов",
+    categorySlug: "dostavka-produktov",
     about: "«Магнит Доставка» — экспресс-доставка продуктов питания, готовой кулинарии и товаров для дома от 30 минут.",
     conditions: "Промокоды на скидку действуют при заказе в приложении «Магнит Доставка».",
     site: "https://dostavka.magnit.ru",
@@ -726,8 +735,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "zolotoe-yabloko",
     name: "Золотое Яблоко",
     logo: "https://favicon.yandex.net/favicon/v2/goldapple.ru?size=120",
-    category: "Красота и косметика",
-    categorySlug: "krasota-i-uhod",
+    category: "Косметика и парфюмерия",
+    categorySlug: "kosmetika-i-parfyumeriya",
     about: "«Золотое Яблоко» — флагманский парфюмерный супермаркет: косметика, парфюмерия и бьюти-новинки.",
     conditions: "Промокоды вводятся на шаге оплаты в интернет-магазине Золотое Яблоко.",
     site: "https://goldapple.ru",
@@ -738,8 +747,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "litres",
     name: "Литрес",
     logo: "https://favicon.yandex.net/favicon/v2/litres.ru?size=120",
-    category: "Книги и обучение",
-    categorySlug: "knigi-i-obuchenie",
+    category: "Онлайн-образование",
+    categorySlug: "onlayn-obrazovanie",
     about: "«Литрес» — крупнейший сервис электронных и аудиокниг в России и странах СНГ.",
     conditions: "Промокоды активируются в личном кабинете или в корзине на сайте litres.ru.",
     site: "https://litres.ru",
@@ -750,8 +759,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "tehnopark",
     name: "Технопарк",
     logo: "https://favicon.yandex.net/favicon/v2/tehnopark.ru?size=120",
-    category: "Электроника",
-    categorySlug: "elektronika",
+    category: "Электроника и техника",
+    categorySlug: "elektronika-i-tehnika",
     about: "«Технопарк» — сеть магазинов премиальной электроники, бытовой техники и инновационных гаджетов.",
     conditions: "Промокод вводится на этапе оформления заказа в интернет-магазине Технопарк.",
     site: "https://tehnopark.ru",
@@ -762,8 +771,8 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     slug: "librederm",
     name: "Либридерм",
     logo: "https://favicon.yandex.net/favicon/v2/librederm.ru?size=120",
-    category: "Красота и косметика",
-    categorySlug: "krasota-i-uhod",
+    category: "Косметика и парфюмерия",
+    categorySlug: "kosmetika-i-parfyumeriya",
     about: "«Либридерм» (LIBREDERM) — дерматологическая и аптечная косметика международного качества.",
     conditions: "Скидка по промокоду действует в официальном интернет-магазине librederm.ru.",
     site: "https://librederm.ru",

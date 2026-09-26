@@ -115,9 +115,14 @@ export function getCategoryDef(slug: string): CategoryDef | undefined {
  */
 export const CATEGORY_ALIASES: Record<string, string> = {
   "krasota-i-kosmetika": "kosmetika-i-parfyumeriya",
+  "krasota-i-uhod": "kosmetika-i-parfyumeriya",
   "produkty-i-dostavka": "dostavka-produktov",
+  "eda-i-dostavka": "dostavka-produktov",
   "knigi-i-obuchenie": "onlayn-obrazovanie",
   knigi: "onlayn-obrazovanie",
+  "kino-i-teatr": "onlayn-kinoteatry",
+  elektronika: "elektronika-i-tehnika",
+  "yuvelirnye-izdeliya": "ukrasheniya",
   "zdorove-i-krasota": "kosmetika-i-parfyumeriya",
   avtotovary: "raznoe",
 };

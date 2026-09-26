@@ -237,8 +237,7 @@ export function buildStoreDescription(input: StoreArticleInput): string {
     n > 0
       ? `Промокоды ${input.name} на ${input.monthRu}: ${n} ${word}${discount}.`
       : `Скидки и акции ${input.name} на ${input.monthRu}.`;
-  // todayRu уже оканчивается на «г.» — вторую точку не ставим.
-  const tail = ` Проверено ${input.todayRu.replace(/\.?$/, ".")}`;
+  const tail = ` Актуально на ${input.monthRu}.`;
   const full = `${head}${best ? ` ${best}.` : ""}${tail}`;
   return full.length <= 160 ? full : head + tail;
 }

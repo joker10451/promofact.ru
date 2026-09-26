@@ -248,6 +248,7 @@ export default async function Footer() {
               <Link href="/contacts" className="hover:text-white">Контакты</Link>
               <Link href="/privacy" className="hover:text-white">Политика конфиденциальности</Link>
               <Link href="/cookie" className="hover:text-white">Cookie</Link>
+              <Link href="/sitemap-html" className="hover:text-white">Карта сайта</Link>
             </nav>
           </div>
         </div>
