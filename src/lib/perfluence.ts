@@ -141,6 +141,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   602: { slug: "tanukifamily", name: "Тануки" },
   2582: { slug: "magnit-dostavka", name: "Магнит Доставка" },
   1384: { slug: "yandex-eda", name: "Яндекс Еда" },
+  1100: { slug: "sunlight-ru", name: "SUNLIGHT" },
 };
 
 export function parsePayload(payloadJson: string): Coupon[] {
@@ -519,9 +520,8 @@ function byScore(a: Coupon, b: Coupon): number {
  * магазинов, чей код временно истёк.
  */
 async function fetchMergedCoupons(): Promise<Coupon[]> {
-  const [perfluenceCoupons, admitadCoupons, saleadsCoupons, supabaseCoupons] = await Promise.all([
+  const [perfluenceCoupons, saleadsCoupons, supabaseCoupons] = await Promise.all([
     fetchData(),
-    (await import("@/lib/admitad")).fetchAdmitadCoupons(),
     (await import("@/lib/saleads")).fetchSaleadsCoupons(),
     (await import("@/lib/supabaseCoupons")).fetchSupabaseCoupons(),
   ]);
@@ -529,15 +529,12 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
   const customCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
   const { dedupeCoupons } = await import("@/lib/dedupe");
 
-  // Дедуп по приоритету источника: ручные купоны (в т.ч. дубль Кинопоиска
-  // с обновлённой ссылкой kp45.prfl.me) перебивают фиды, Perfluence
-  // перебивает сети. Между сетями один и тот же оффер (магазин + код)
-  // больше не двоится — раньше склеивались только custom-коды с Perfluence.
+  // Дедуп по приоритету источника: ручные купоны перебивают фиды, Perfluence
+  // перебивает сети.
   const { coupons, stats } = dedupeCoupons([
     { source: "custom", coupons: customCoupons },
     { source: "supabase", coupons: supabaseCoupons },
     { source: "perfluence", coupons: perfluenceCoupons },
-    { source: "admitad", coupons: admitadCoupons },
     { source: "saleads", coupons: saleadsCoupons },
   ]);
 

@@ -201,6 +201,7 @@ export const BRAND_CATEGORY: Record<string, string> = {
 
   // Украшения
   sunlight: "ukrasheniya",
+  "sunlight-ru": "ukrasheniya",
 
   // Онлайн-образование
   foxford: "onlayn-obrazovanie",
