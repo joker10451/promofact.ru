@@ -33,32 +33,52 @@ async function waitForServer(url, timeoutMs = 40000) {
   throw new Error(`Server did not respond at ${url} within ${timeoutMs}ms`);
 }
 
+let server = null;
+const isWin = process.platform === "win32";
+
+const cleanup = () => {
+  if (server) {
+    if (isWin) {
+      try {
+        cpSpawn("taskkill", ["/pid", String(server.pid), "/f", "/t"], { stdio: "ignore" });
+      } catch {}
+    } else {
+      try {
+        process.kill(-server.pid, "SIGKILL");
+      } catch {
+        try {
+          server.kill("SIGKILL");
+        } catch {}
+      }
+    }
+  }
+};
+
+process.on("exit", cleanup);
+process.on("SIGINT", () => { cleanup(); process.exit(1); });
+process.on("SIGTERM", () => { cleanup(); process.exit(1); });
+
 async function run() {
   console.log("================================================================================");
   console.log("🚀 ЗАПУСК РАСШИРЕННЫХ E2E СЦЕНАРИЕВ ДЛЯ PROMOFACT (PLAYWRIGHT)");
   console.log("================================================================================");
 
   console.log(`[1/3] Запуск локального production-сервера на порту ${PORT}...`);
-  const server = cpSpawn("npx", ["next", "start", "-p", String(PORT)], {
-    shell: true,
-    stdio: "pipe",
-    cwd: process.cwd(),
-    env: { ...process.env, PORT: String(PORT) },
-  });
-
-  const cleanup = () => {
-    if (server && !server.killed) {
-      if (process.platform === "win32") {
-        cpSpawn("taskkill", ["/pid", String(server.pid), "/f", "/t"], { stdio: "ignore" });
-      } else {
-        server.kill("SIGKILL");
-      }
-    }
-  };
-
-  process.on("exit", cleanup);
-  process.on("SIGINT", () => { cleanup(); process.exit(1); });
-  process.on("SIGTERM", () => { cleanup(); process.exit(1); });
+  if (isWin) {
+    server = cpSpawn("npx", ["next", "start", "-p", String(PORT)], {
+      shell: true,
+      stdio: "ignore",
+      cwd: process.cwd(),
+      env: { ...process.env, PORT: String(PORT) },
+    });
+  } else {
+    server = cpSpawn("npx", ["next", "start", "-p", String(PORT)], {
+      stdio: "ignore",
+      cwd: process.cwd(),
+      detached: true,
+      env: { ...process.env, PORT: String(PORT) },
+    });
+  }
 
   try {
     await waitForServer(`${BASE_URL}/`);
@@ -417,7 +437,13 @@ async function run() {
   }
 }
 
-run().catch((err) => {
-  console.error("❌ Тест E2E завершился с ошибкой:", err);
-  process.exit(1);
-});
+run()
+  .then(() => {
+    cleanup();
+    process.exit(0);
+  })
+  .catch((err) => {
+    cleanup();
+    console.error("❌ Тест E2E завершился с ошибкой:", err);
+    process.exit(1);
+  });
