@@ -121,7 +121,7 @@ export const ARTICLES: Article[] = [
         "Реклама. Рекламодатель: ПАО Сбербанк. ИНН: 7707083893. Ген. лицензия Банка России на осуществление банковских операций № 1481 от 11.08.2015 г. erid: 2RanykEC3Sj. Правила акции: sberbank.ru/common/img/uploaded/cards/sberkarta_kids/pravila_akcii_bonus_osen.pdf",
     },
     related: [
-      { text: "Кредитная СберКарта", href: "/store/kreditnaya-sberkarta" },
+      { text: "Кредитная СберКарта", href: "/sberkarta" },
       { text: "СберПрайм за 1 ₽", href: "/sovety/rozygrysh-sberprime-150000" },
       { text: "Сервисы и подписки", href: "/category/servisy-i-podpiski" },
     ],
@@ -664,8 +664,8 @@ export const ARTICLES: Article[] = [
       "Подпишитесь на рассылку — свежие акции косметических сетей появляются внезапно и живут один-два дня. Поймать их вовремя проще всего через уведомления.",
     ],
     related: [
-      { text: "Промокоды: Косметика и парфюмерия", href: "/category/kosmetika-i-parfyumeriya" },
-      { text: "Ювелирные изделия и подарки", href: "/category/yuvelirnye-izdeliya" },
+      { text: "Косметика и парфюмерия", href: "/category/kosmetika-i-parfyumeriya" },
+      { text: "Ювелирные изделия и подарки", href: "/category/ukrasheniya" },
     ],
   },
   {
@@ -699,7 +699,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды: Путешествия и туризм", href: "/category/puteshestviya-i-turizm" },
-      { text: "Кино и театр — скидки", href: "/category/kino-i-teatr" },
+      { text: "Кино и подписки — скидки", href: "/category/onlayn-kinoteatry" },
     ],
   },
   {
@@ -837,7 +837,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Путешествия и туризм", href: "/category/puteshestviya-i-turizm" },
-      { text: "Кино и театр", href: "/category/kino-i-teatr" },
+      { text: "Развлечения и события", href: "/category/razvlecheniya" },
     ],
   },
   {
@@ -1309,7 +1309,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды Яндекс Цветы", href: "/store/yandeks-tsvety" },
-      { text: "Промокоды FMART Flowwow", href: "/store/fmart-by-flowwow" },
+      { text: "Промокоды FMART Flowwow", href: "/store/fmart" },
       { text: "Цветы и подарки со скидкой", href: "/category/tsvety" },
     ],
   },
@@ -1393,8 +1393,8 @@ export const ARTICLES: Article[] = [
       "Используйте карту программы лояльности Fix Price: копите баллы и списывайте их на следующие заказы.",
     ],
     related: [
-      { text: "Промокоды Fix Price", href: "/store/fix-price" },
       { text: "Все для дома со скидкой", href: "/category/vse-dlya-doma" },
+      { text: "Каталог промокодов", href: "/promokody" },
     ],
   },
   {
@@ -1409,8 +1409,8 @@ export const ARTICLES: Article[] = [
       "Заказывайте тиражом: печать календарей для бабушек и дедушек к Новому году комплектом из 3–5 штук обходится значительно дешевле единичного заказа.",
     ],
     related: [
-      { text: "Промокоды Netprint", href: "/store/netprint" },
-      { text: "Все категории", href: "/category" },
+      { text: "Партнерская программа Netprint", href: "/partner/netprint" },
+      { text: "Все категории каталога", href: "/promokody" },
     ],
   },
   {

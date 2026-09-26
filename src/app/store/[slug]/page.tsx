@@ -232,8 +232,7 @@ export default async function StorePage({
     offers: {
       "@type": "Offer",
       url: c.affiliate.link || store.site,
-      priceCurrency: "RUB",
-      price: 0,
+      priceValidUntil: c.promocode.expires,
       availability: "https://schema.org/InStock",
     },
   }));
@@ -305,8 +304,7 @@ export default async function StorePage({
   // отзывов и рейтинга Google помечал её ошибками («нет review/aggregateRating»).
   // Подставлять выдуманный рейтинг нельзя — его уже убирали по аудиту.
 
-  // Организация магазина для сниппетов Яндекса
-  const ratingJsonLd: Record<string, unknown> = {
+  const organizationJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: store.name,
@@ -326,8 +324,7 @@ export default async function StorePage({
         name: `Промокод ${c.promocode.code || store.name}`,
         description: c.promocode.bonusName || store.name,
         url: c.affiliate.link || pageUrl,
-        priceCurrency: "RUB",
-        price: 0,
+        priceValidUntil: c.promocode.expires,
         availability: "https://schema.org/InStock",
         seller: { "@type": "Organization", name: store.name },
       },
@@ -340,7 +337,7 @@ export default async function StorePage({
       <JsonLd data={faqJsonLd} />
       <JsonLd data={howToJsonLd} />
       <JsonLd data={itemListJsonLd} />
-      <JsonLd data={ratingJsonLd} />
+      <JsonLd data={organizationJsonLd} />
       {couponsJsonLd.map((c) => (
         <JsonLd key={(c.discountCode as string) ?? JSON.stringify(c)} data={c} />
       ))}

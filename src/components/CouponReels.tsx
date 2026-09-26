@@ -23,20 +23,20 @@ const REELS: Reel[] = [
   {
     src: "/videos/otello.mp4",
     title: "Отелло",
-    caption: "Билеты и развлечения со скидкой",
-    href: "/category/kino-i-teatr",
+    caption: "Отели и путешествия со скидкой",
+    href: "/category/puteshestviya-i-turizm",
   },
   {
     src: "/videos/ebidoebi.mp4",
     title: "Ёбидоёби",
-    caption: "Промокоды на маркетплейсах",
-    href: "/category/marketpleysy",
+    caption: "Доставка еды и рестораны",
+    href: "/category/dostavka-iz-restoranov",
   },
   {
     src: "/videos/carte-blanche.mp4",
     title: "Carte Blanche",
     caption: "Подарки и ювелирные изделия",
-    href: "/category/yuvelirnye-izdeliya",
+    href: "/category/ukrasheniya",
   },
 ];
 

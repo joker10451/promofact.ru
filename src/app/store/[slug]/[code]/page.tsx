@@ -123,8 +123,7 @@ export default async function CouponPage({
     offers: {
       "@type": "Offer",
       url: coupon.affiliate.link || store.site,
-      priceCurrency: "RUB",
-      price: 0,
+      priceValidUntil: p.expires,
       availability: "https://schema.org/InStock",
     },
   };

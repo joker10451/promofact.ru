@@ -22,11 +22,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Unit & Regression Tests
+        run: npm test
+
       # В CI нет ключей Perfluence — Next.js использует DEV-моки (см. perfluence.ts).
       # Этот шаг гарантирует, что код компилируется и все страницы (вкл. SSG
       # /store, /category) успешно пререндерятся на мок-данных.
       - name: Build
         run: npm run build
+
+      - name: Dynamic SEO & Inventory Audit
+        run: npm run test:seo
 
       - name: Lint
         run: npm run lint

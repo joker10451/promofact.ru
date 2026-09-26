@@ -1,0 +1,87 @@
+name: Safe Catalog Sync & PR
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Раз в сутки в 09:00 МСК (06:00 UTC)
+  workflow_dispatch: # Возможность запустить вручную
+
+concurrency:
+  group: sync-catalog
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Sync Feed & Create PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # 1. npm ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
+      # 2. Синхронизация каталога
+      - name: Sync partner catalog
+        id: sync_catalog
+        env:
+          PERFLUENCE_WIDGET_URL: ${{ secrets.PERFLUENCE_WIDGET_URL }}
+        run: node scripts/sync-catalog.mjs
+
+      # 3. Проверка результата синхронизации (success vs fallback/failed)
+      - name: Verify sync status
+        id: verify_sync
+        run: node scripts/verify-sync-status.mjs
+
+      # 4. npm test
+      - name: Run unit & regression tests (npm test)
+        run: npm test
+
+      # 5. npm run lint
+      - name: Run linter (npm run lint)
+        run: npm run lint
+
+      # 6. npm run build
+      - name: Build Next.js application (npm run build)
+        run: npm run build
+
+      # 7. npm run test:seo
+      - name: Dynamic SEO & Inventory Audit (npm run test:seo)
+        run: npm run test:seo
+
+      # 8. Проверка содержательных изменений фида (исключая технические timestamps)
+      - name: Check substantive feed changes
+        id: check_changes
+        run: node scripts/check-feed-changes.mjs
+
+      # 9. Создание Pull Request только при выполнении всех необходимых условий
+      - name: Create Pull Request with updated catalog
+        if: steps.check_changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(catalog): регулярное обновление фида предложений"
+          title: "chore(catalog): обновление каталога партнерских предложений"
+          body: |
+            Автоматическое обновление фида предложений PromoFact:
+            - Успешно выполнен `scripts/sync-catalog.mjs` (status: success)
+            - Пройден полный цикл валидации: `npm test`, `npm run lint`, `npm run build` и `npm run test:seo`
+            - Подтверждены содержательные изменения каталога (технические timestamps проигнорированы)
+            - Включены обновлённые `src/data/perfluence-feed.json` и `src/data/sync-meta.json`
+
+            ⚠️ **Внимание:** автоматическое слияние и деплой отключены. Проверьте изменения и выполните merge вручную при готовности к релизу.
+          branch: chore/catalog-feed-update
+          base: main
+          delete-branch: true

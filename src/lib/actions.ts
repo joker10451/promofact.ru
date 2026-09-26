@@ -48,7 +48,7 @@ export const ACTIONS: ActionPage[] = [
     ],
     links: [
       { text: "Путешествия и туризм", href: "/category/puteshestviya-i-turizm" },
-      { text: "Кино и театр", href: "/category/kino-i-teatr" },
+      { text: "Развлечения и события", href: "/category/razvlecheniya" },
       { text: "Все советы по экономии", href: "/sovety" },
     ],
   },
