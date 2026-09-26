@@ -388,8 +388,22 @@ async function fetchData(): Promise<Coupon[]> {
   if (failedAt && Date.now() - failedAt < RETRY_AFTER_MS) return cache ?? [];
 
   pendingPromise = (async () => {
-    if (!isPerfluenceConfigured())
+    if (!isPerfluenceConfigured()) {
+      // Если URL API не задан (в CI или offline), приоритетно используем локальный сохранённый фид
+      if (bundledFeed && typeof bundledFeed === "object" && "data" in bundledFeed) {
+        try {
+          const bundledCoupons = parsePayload(JSON.stringify(bundledFeed));
+          if (bundledCoupons.length > 0) {
+            console.log(`[perfluence] WIDGET_URL не задан, использован локальный фид: ${bundledCoupons.length} купонов`);
+            cache = bundledCoupons;
+            return cache;
+          }
+        } catch (err) {
+          console.error("[perfluence] ошибка парсинга локального фида:", err);
+        }
+      }
       return devMockFallback("PERFLUENCE_WIDGET_URL не задан");
+    }
 
     try {
       const res = await fetch(WIDGET_URL, {
