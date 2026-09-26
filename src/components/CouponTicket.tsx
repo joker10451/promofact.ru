@@ -50,6 +50,8 @@ export default function CouponTicket({
   const { promocode, store, affiliate } = coupon;
 
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
+  const [toastType, setToastType] = useState<"copied" | "opened">("copied");
   const [toast, setToast] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -76,25 +78,46 @@ export default function CouponTicket({
     };
   }, [showDetailsModal]);
 
-  const copyCode = (code: string) => {
-    if (code && typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(code).catch(() => {});
-    }
-    setCopied(true);
-    setToast(true);
-    try {
-      localStorage.setItem("has_copied_coupon", "true");
-      if (typeof window !== "undefined" && window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+  const copyCode = async (code: string): Promise<boolean> => {
+    if (!code) return false;
+    let success = false;
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(code);
+        success = true;
+      } catch {
+        success = false;
       }
-    } catch {}
-    ymReachGoal("copy_code", { store: store.slug });
-    ymReachGoal("promo_show", { store: store.slug });
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
+    }
+
+    if (success) {
+      setCopied(true);
+      setCopyError(false);
+      setToastType("copied");
+      setToast(true);
+      try {
+        localStorage.setItem("has_copied_coupon", "true");
+        if (typeof window !== "undefined" && window.Telegram?.WebApp?.HapticFeedback) {
+          window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+        }
+      } catch {}
+      ymReachGoal("copy_code", { store: store.slug });
+      ymReachGoal("promo_show", { store: store.slug });
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        setCopied(false);
+        setToast(false);
+      }, 10000);
+      return true;
+    } else {
       setCopied(false);
-      setToast(false);
-    }, 10000);
+      setCopyError(true);
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        setCopyError(false);
+      }, 8000);
+      return false;
+    }
   };
 
   const handleAffiliateClick = () => {
@@ -104,9 +127,12 @@ export default function CouponTicket({
     });
   };
 
-  const copyAndOpen = (code: string, url: string) => {
+  const copyAndOpen = async (code: string, url: string) => {
     if (code) {
-      copyCode(code);
+      const ok = await copyCode(code);
+      if (ok) {
+        setToastType("opened");
+      }
     }
     handleAffiliateClick();
     if (typeof window !== "undefined" && url && url !== "#") {
@@ -274,6 +300,25 @@ export default function CouponTicket({
       <div className="mt-4 pt-3.5 border-t border-line/60">
         {!offer.isNoCode && promocode.code ? (
           <div className="space-y-2.5">
+            {/* Сообщение об ошибке буфера и ручное выделение кода */}
+            {copyError && (
+              <div className="rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-900 space-y-1.5" role="alert">
+                <div className="font-semibold flex items-center gap-1.5 text-[11px] text-amber-800">
+                  <Icon name="bulb" size={13} />
+                  <span>Буфер обмена недоступен. Выделите код:</span>
+                </div>
+                <input
+                  type="text"
+                  readOnly
+                  value={promocode.code}
+                  onFocus={(e) => e.target.select()}
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                  aria-label="Промокод для ручного копирования"
+                  className="w-full font-mono font-bold text-center text-xs sm:text-sm bg-white border border-amber-300 rounded-lg py-1.5 px-2 select-all focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+            )}
+
             {/* Поле с промокодом: клик копирует код */}
             <div
               onClick={() => copyCode(promocode.code)}
@@ -293,7 +338,7 @@ export default function CouponTicket({
                 <span className="truncate">{promocode.code}</span>
               </div>
               <span className={`font-sans text-[11px] font-bold shrink-0 transition-colors ${copied ? "text-mint-dark font-extrabold" : "text-ink/40"}`}>
-                {copied ? "скопировано!" : "нажмите для копирования"}
+                {copied ? "скопировано!" : copyError ? "нажмите для повтора" : "нажмите для копирования"}
               </span>
             </div>
 
@@ -309,6 +354,15 @@ export default function CouponTicket({
                 <CheckIcon className="h-4 w-4" />
                 <span className="truncate">Код скопирован! Перейти в {store.name} →</span>
               </a>
+            ) : copyError ? (
+              <button
+                type="button"
+                onClick={() => copyCode(promocode.code)}
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer px-4"
+              >
+                <Icon name="copy" size={16} />
+                <span className="truncate">Повторить копирование</span>
+              </button>
             ) : (
               <button
                 type="button"
@@ -498,7 +552,7 @@ export default function CouponTicket({
                 </span>
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-mint">
-                    Код скопирован! Магазин открыт
+                    {toastType === "opened" ? "Код скопирован! Магазин открывается" : "Промокод скопирован в буфер"}
                   </div>
                   <div className="font-display text-base font-extrabold text-white">
                     {promocode.code || store.name}

@@ -98,7 +98,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
     const v = term.trim();
     setIsOpen(false);
     setQ(v);
-    ymReachGoal("search", { query: v });
+    ymReachGoal("search_used", { source: "hero" });
     window.dispatchEvent(new CustomEvent("promo:search", { detail: v }));
     document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
   };

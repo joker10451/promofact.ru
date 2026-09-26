@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/components/Icon";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Msg =
   | { from: "bot" | "user"; text: string; link?: string; cta?: string }
@@ -267,6 +267,64 @@ export default function ChatHelper() {
     },
   ]);
   const [input, setInput] = useState("");
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // 1. Отслеживание визуального вьюпорта (виртуальной клавиатуры на смартфонах)
+    const handleResize = () => {
+      if (window.visualViewport) {
+        const isShrunk = window.visualViewport.height < window.innerHeight * 0.75;
+        setIsKeyboardOpen(isShrunk);
+      }
+    };
+
+    // 2. Отслеживание фокуса на полях ввода страницы (поиск, внешние формы)
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+        // Если фокус не внутри самого помощника
+        if (!target.closest("[data-chat-helper]")) {
+          setIsKeyboardOpen(true);
+        }
+      }
+    };
+
+    const handleFocusOut = () => {
+      setTimeout(() => {
+        const active = document.activeElement as HTMLElement | null;
+        if (!active || (active.tagName !== "INPUT" && active.tagName !== "TEXTAREA")) {
+          setIsKeyboardOpen(false);
+        }
+      }, 100);
+    };
+
+    // 3. Автоматическое скрытие при скролле вниз, чтобы гарантированно не перекрывать CTA карточек
+    let lastScrollY = window.scrollY;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY + 10 && currentScrollY > 50) {
+        setIsScrollingDown(true);
+      } else if (currentScrollY < lastScrollY - 10 || currentScrollY <= 50) {
+        setIsScrollingDown(false);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.visualViewport?.addEventListener("resize", handleResize);
+    window.addEventListener("focusin", handleFocusIn);
+    window.addEventListener("focusout", handleFocusOut);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", handleResize);
+      window.removeEventListener("focusin", handleFocusIn);
+      window.removeEventListener("focusout", handleFocusOut);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   function send(text?: string) {
     const value = (text ?? input).trim();
@@ -282,20 +340,40 @@ export default function ChatHelper() {
     setInput("");
   }
 
+  // На смартфонах при открытой клавиатуре скрываем плавающую кнопку
+  const shouldHideTrigger = isKeyboardOpen && !open;
+
   return (
     <>
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Открыть помощника"
-        className="fixed bottom-[84px] right-4 z-50 flex h-12 w-12 md:bottom-4 items-center justify-center rounded-full bg-red text-2xl text-white shadow-lg transition-transform hover:scale-105"
+        className={`fixed z-40 flex items-center justify-center bg-red text-white shadow-lg transition-all duration-200 cursor-pointer ${
+          shouldHideTrigger ? "hidden" : ""
+        } ${
+          isScrollingDown && !open
+            ? "translate-x-full opacity-0 pointer-events-none md:translate-x-0 md:opacity-100 md:pointer-events-auto"
+            : "translate-x-0 opacity-100"
+        } right-0 bottom-[68px] rounded-l-2xl py-2 px-2.5 md:bottom-4 md:right-4 md:h-12 md:w-12 md:rounded-full md:p-0 hover:scale-105 active:scale-95`}
       >
         {open ? <Icon name="close" size={18} /> : <Icon name="bulb" size={18} />}
       </button>
 
       {open && (
-        <div className="fixed bottom-[144px] right-4 z-50 flex max-h-[60vh] md:bottom-20 md:max-h-[70vh] w-[min(92vw,360px)] flex-col rounded-2xl border border-line bg-white shadow-xl">
-          <div className="rounded-t-2xl bg-ink px-4 py-3 text-sm font-bold text-white">
-            Помощник ПромоФакт
+        <div
+          data-chat-helper="true"
+          className="fixed bottom-[68px] left-3 right-3 z-50 flex max-h-[min(65vh,480px)] sm:left-auto sm:right-4 sm:w-[360px] md:bottom-20 md:max-h-[70vh] flex-col rounded-3xl border border-line bg-white shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
+        >
+          <div className="flex items-center justify-between bg-ink px-4 py-3 text-sm font-bold text-white">
+            <span>Помощник ПромоФакт</span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="p-1 text-white/60 hover:text-white transition-colors cursor-pointer"
+              aria-label="Закрыть помощника"
+            >
+              <Icon name="close" size={16} />
+            </button>
           </div>
           <div className="flex-1 space-y-2 overflow-y-auto p-3">
             {msgs.map((m, i) => (
@@ -349,7 +427,7 @@ export default function ChatHelper() {
               onClick={() => {
                 send();
               }}
-              className="rounded-full bg-red px-4 py-2 text-sm font-bold text-white"
+              className="rounded-full bg-red px-4 py-2 text-sm font-bold text-white cursor-pointer"
             >
               <Icon name="send" size={15} />
             </button>
@@ -358,7 +436,7 @@ export default function ChatHelper() {
             href="https://t.me/smart_zakupka"
             target="_blank"
             rel="noopener nofollow"
-            className="block rounded-b-2xl bg-mint/10 px-4 py-2 text-center text-xs font-semibold text-ink/70 hover:text-ink"
+            className="block bg-mint/10 px-4 py-2 text-center text-xs font-semibold text-ink/70 hover:text-ink"
           >
             Или напишите в ТГ @smart_zakupka
           </a>

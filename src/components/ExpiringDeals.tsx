@@ -45,7 +45,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
       setTimeout(() => setCopiedCode(null), 2500);
-      ymReachGoal("expiring_deal_copy", { code, store: storeName });
+      ymReachGoal("expiring_deal_copy", { store: storeName });
     } catch {}
   };
 

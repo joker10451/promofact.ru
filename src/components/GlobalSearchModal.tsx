@@ -46,17 +46,39 @@ export default function GlobalSearchModal() {
 
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const previouslyFocusedElement = useRef<HTMLElement | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const openSearch = useCallback(() => {
+    if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+      previouslyFocusedElement.current = document.activeElement;
+    }
     setIsOpen(true);
     ymReachGoal("search_modal_open");
   }, []);
 
   const closeSearch = useCallback(() => {
+    // Немедленно прерываем текущий сетевой запрос, если он выполняется
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+      debounceTimer.current = null;
+    }
     setIsOpen(false);
     setQuery("");
     setSelectedIndex(0);
+    setLoading(false);
+
+    // Возвращаем фокус на элемент, вызвавший поиск
+    setTimeout(() => {
+      if (previouslyFocusedElement.current && typeof previouslyFocusedElement.current.focus === "function") {
+        previouslyFocusedElement.current.focus();
+      }
+    }, 50);
   }, []);
 
   // Слушаем события открытия поиска и горячие клавиши (Cmd/Ctrl + K, "/")
@@ -67,7 +89,11 @@ export default function GlobalSearchModal() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        if (isOpen) {
+          closeSearch();
+        } else {
+          openSearch();
+        }
       } else if (e.key === "/" && !isOpen && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
         e.preventDefault();
         openSearch();
@@ -93,37 +119,73 @@ export default function GlobalSearchModal() {
     }
   }, [isOpen]);
 
-  // Выполнение поиска с дебаунсом
+  // Выполнение поиска с защитой от race conditions через AbortController
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      return;
+    }
+
+    // Отменяем предыдущий запрос при изменении query
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
 
     if (!query.trim()) {
-      fetch("/api/search")
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      queueMicrotask(() => setLoading(true));
+
+      fetch("/api/search", { signal: controller.signal })
         .then((res) => res.json())
         .then((data) => {
           setStores(data.stores || []);
           setCoupons([]);
           setLoading(false);
         })
-        .catch(() => setLoading(false));
+        .catch((err) => {
+          if (err.name !== "AbortError") {
+            setLoading(false);
+          }
+        });
       return;
     }
 
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
     debounceTimer.current = setTimeout(() => {
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
       setLoading(true);
+
       const q = query.trim();
-      fetch(`/api/search?q=${encodeURIComponent(q)}`)
+      fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
         .then((res) => res.json())
         .then((data) => {
-          setStores(data.stores || []);
-          setCoupons(data.coupons || []);
+          const foundStores = data.stores || [];
+          const foundCoupons = data.coupons || [];
+          setStores(foundStores);
+          setCoupons(foundCoupons);
           setLoading(false);
           setSelectedIndex(0);
-          ymReachGoal("search_used", { query: q.toLowerCase() });
+          // Безопасная аналитика: передаем только факт наличия результатов, без сырого query
+          ymReachGoal("search_used", {
+            source: "global_modal",
+            has_results: foundStores.length > 0 || foundCoupons.length > 0,
+            stores_count: foundStores.length,
+            coupons_count: foundCoupons.length,
+          });
         })
-        .catch(() => setLoading(false));
+        .catch((err) => {
+          if (err.name !== "AbortError") {
+            setLoading(false);
+          }
+        });
     }, 180);
 
     return () => {

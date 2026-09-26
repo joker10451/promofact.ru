@@ -42,10 +42,17 @@ export function ymReachGoal(goal: string, params?: Record<string, unknown>) {
     ym?: (id: number, method: string, goal: string, params?: Record<string, unknown>) => void;
   };
   if (typeof w.ym === "function") {
-    // Безопасность: никогда не передаём значения секретов, паролей или сырых промокодов в параметры целей
+    // Безопасность: никогда не передаём сырые поисковые строки, значения промокодов,
+    // персональные данные или секреты в параметры целей Яндекс.Метрики
     const safeParams = params ? { ...params } : undefined;
-    if (safeParams && "code" in safeParams) {
-      delete safeParams.code;
+    if (safeParams) {
+      const sensitiveKeys = [
+        "code", "promocode", "promoCode", "query", "q", "search",
+        "searchQuery", "text", "token", "secret", "password", "email", "phone"
+      ];
+      for (const key of sensitiveKeys) {
+        delete safeParams[key];
+      }
     }
     w.ym(YM_ID, "reachGoal", goal, safeParams);
   }

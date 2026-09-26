@@ -31,6 +31,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-End Scenarios (Playwright)
+        run: npm run test:e2e
+
       - name: Dynamic SEO & Inventory Audit
         run: npm run test:seo
 
