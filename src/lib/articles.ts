@@ -667,6 +667,7 @@ export const ARTICLES: Article[] = [
     related: [
       { text: "Косметика и парфюмерия", href: "/category/kosmetika-i-parfyumeriya" },
       { text: "Промокоды Geltek", href: "/store/geltek" },
+      { text: "Скидки Carely", href: "/store/carely" },
       { text: "Промокоды РИВ ГОШ", href: "/store/riv-gosh" },
       { text: "Скидки в ЛЭТУАЛЬ", href: "/store/letual" },
       { text: "Ювелирные изделия и подарки", href: "/category/ukrasheniya" },

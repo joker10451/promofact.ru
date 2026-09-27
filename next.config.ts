@@ -119,6 +119,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/carely-na-ozon/:path*",
+        destination: "/store/carely",
+        permanent: true,
+      },
+      {
+        source: "/store/carely-na-ozon",
+        destination: "/store/carely",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,

@@ -176,6 +176,8 @@ export const BRAND_CATEGORY: Record<string, string> = {
   randewoo: "kosmetika-i-parfyumeriya",
   aravia: "kosmetika-i-parfyumeriya",
   dewal: "kosmetika-i-parfyumeriya",
+  carely: "kosmetika-i-parfyumeriya",
+  "carely на ozon": "kosmetika-i-parfyumeriya",
   irnby: "kosmetika-i-parfyumeriya",
 
   // Аптека и здоровье
