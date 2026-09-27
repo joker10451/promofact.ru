@@ -11,7 +11,21 @@
       "product_info": "<p>Доставка продуктов и товаров для дома из гипермаркетов через сервис Яндекс Еда: Ашан, Лента, МЕТРО, ВкусВилл, Магнит и других с доставкой до двери.</p>",
       "subscribers_condition": "<p>Скидка 550 ₽ на заказ из гипермаркетов в сервисе Яндекс Еда по промокоду до 31.10.2026.</p>",
       "site": "https://eda.yandex.ru/collections/eda_gipera",
-      "regions": ["Москва", "Санкт-Петербург", "Казань", "Екатеринбург", "Новосибирск", "Нижний Новгород", "Самара", "Ростов-на-Дону", "Уфа", "Краснодар", "Воронеж", "Пермь", "Волгоград"],
+      "regions": [
+        "Москва",
+        "Санкт-Петербург",
+        "Казань",
+        "Екатеринбург",
+        "Новосибирск",
+        "Нижний Новгород",
+        "Самара",
+        "Ростов-на-Дону",
+        "Уфа",
+        "Краснодар",
+        "Воронеж",
+        "Пермь",
+        "Волгоград"
+      ],
       "pf": 0,
       "rsp": 80
     },
@@ -41,12 +55,120 @@
             "bonus_id": 16901,
             "name": "Скидка 550 ₽ на заказ из гипермаркетов",
             "promo_terms": "Скидка 550 ₽ при заказе из гипермаркетов в сервисе Яндекс Еда",
-            "region_promo": ["RU"],
+            "region_promo": [
+              "RU"
+            ],
             "repeat_order": false,
             "post_id": 17215901,
             "ord_marker": "2RanykzbK23",
             "ord_custom_text": "Реклама. ООО \"ЯНДЕКС.ЕДА\", ИНН 9705114405. erid: 2RanykzbK23",
             "discount": 550
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      }
+    ]
+  },
+  {
+    "project": {
+      "id": 1409,
+      "logo": "https://s3sc.perfluence.net/logos/17035039910221.png",
+      "logo_widget": "https://s3sc.perfluence.net/logos/17035039910221.png",
+      "name": "ВинЛаб",
+      "category_id": 301,
+      "category_name": "Продукты и напитки",
+      "activeBloggers": 3200,
+      "product_info": "<p>ВинЛаб — сеть супермаркетов напитков. Широкий выбор напитков, деликатесов и сопутствующих товаров с возможностью самовывоза или доставки.</p>",
+      "subscribers_condition": "<p>Розыгрыш 100 призов до 30 сентября и скидки до 10% по промокодам на сайте и в приложении ВинЛаб.</p>",
+      "site": "https://www.winelab.ru/",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 0,
+      "rsp": 100
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18567101,
+            "title": "Розыгрыш 100 призов и заказ в ВинЛаб",
+            "link": "https://winelab.prfl.me/sites/lnf1cg",
+            "landing_terms": "Розыгрыш 100 призов до 30 сентября на сайте и в приложении ВинЛаб"
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 1409,
+            "code": "10PFNS6570",
+            "is_barcode": false,
+            "image": "/images/winlab-banner.png",
+            "comment": "Скидка 10% на первый заказ",
+            "date": "31.10.2026",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": false,
+            "hit_custom_text": "ХИТ",
+            "bonus_id": 140901,
+            "name": "Скидка 10% на первый заказ",
+            "promo_terms": "Максимальная скидка — 3000 ₽. Суммируется со скидками, кроме раздела «Ваша цена». 1 промокод = 1 применение.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": false,
+            "post_id": 17214441,
+            "ord_marker": "",
+            "ord_custom_text": "Реклама. АО \"ВИНЛАБ\", ИНН 7727404495",
+            "discount": 10
+          },
+          {
+            "project_id": 1409,
+            "code": "5PFSEP5144",
+            "is_barcode": false,
+            "image": "/images/winlab-banner.png",
+            "comment": "Скидка 5% на каждый повторный заказ",
+            "date": "31.10.2026",
+            "group": "",
+            "is_hit": false,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "bonus_id": 140902,
+            "name": "Скидка 5% на каждый повторный заказ",
+            "promo_terms": "Максимальная скидка — 3000 ₽. Суммируется со скидками, кроме раздела «Ваша цена». 1 промокод = 1 применение.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": true,
+            "post_id": 17214442,
+            "ord_marker": "",
+            "ord_custom_text": "Реклама. АО \"ВИНЛАБ\", ИНН 7727404495",
+            "discount": 5
+          },
+          {
+            "project_id": 1409,
+            "code": "WCPFSEP7289",
+            "is_barcode": false,
+            "image": "/images/winlab-banner.png",
+            "comment": "Дополнительная скидка 10% на каждый заказ товаров со значком WinClub",
+            "date": "31.10.2026",
+            "group": "",
+            "is_hit": false,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "bonus_id": 140903,
+            "name": "Дополнительная скидка 10% на заказ товаров WinClub",
+            "promo_terms": "Максимальная скидка — 3000 ₽. Суммируется со скидками, кроме раздела «Ваша цена». 1 промокод = 1 применение.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": true,
+            "post_id": 17214443,
+            "ord_marker": "",
+            "ord_custom_text": "Реклама. АО \"ВИНЛАБ\", ИНН 7727404495",
+            "discount": 10
           }
         ],
         "has_widget_subscribers_promo": false,

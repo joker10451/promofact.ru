@@ -199,6 +199,26 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/vinlab/:path*",
+        destination: "/store/winlab",
+        permanent: true,
+      },
+      {
+        source: "/store/vinlab",
+        destination: "/store/winlab",
+        permanent: true,
+      },
+      {
+        source: "/store/winelab/:path*",
+        destination: "/store/winlab",
+        permanent: true,
+      },
+      {
+        source: "/store/winelab",
+        destination: "/store/winlab",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,

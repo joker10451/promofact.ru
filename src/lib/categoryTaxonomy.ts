@@ -171,6 +171,9 @@ export const BRAND_CATEGORY: Record<string, string> = {
   // Продукты и напитки
   "tasty coffee": "produkty-i-napitki",
   "colla gen": "produkty-i-napitki",
+  винлаб: "produkty-i-napitki",
+  winlab: "produkty-i-napitki",
+  winelab: "produkty-i-napitki",
 
   // Косметика и парфюмерия
   "yves rocher": "kosmetika-i-parfyumeriya",
