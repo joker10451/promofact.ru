@@ -176,5 +176,98 @@
         "widget_subscriber_codes": []
       }
     ]
+  },
+  {
+    "project": {
+      "id": 3758,
+      "name": "RUTUBE",
+      "logo": "https://s3sc.perfluence.net/logos/3/8/d/38dc11ee-7a6d-4395-93bb-00cf46b18629.png",
+      "logo_widget": "https://s3sc.perfluence.net/logos/3/8/d/38dc11ee-7a6d-4395-93bb-00cf46b18629.png",
+      "img": "https://s3sc.perfluence.net/logos/3/8/d/38dc11ee-7a6d-4395-93bb-00cf46b18629.png",
+      "category_id": 269,
+      "category_name": "Онлайн-кинотеатры",
+      "activeBloggers": 1540,
+      "product_info": "<p>RUTUBE – ведущий российский видеохостинг и стриминговая платформа с огромной библиотекой фильмов, сериалов, шоу, блогерского и эксклюзивного контента.</p>",
+      "subscribers_condition": "",
+      "site": "https://rutube.ru/",
+      "info": "",
+      "advantages": [
+        "Тысячи популярных фильмов, сериалов и шоу в высоком качестве Full HD",
+        "Эксклюзивный контент и оригинальные совместные проекты RUTUBE и PREMIER",
+        "Доступ на телевизорах Smart TV, смартфонах, планшетах и компьютерах"
+      ],
+      "subscriber_guide": "",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 0,
+      "rsp": 0
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18568001,
+            "title": "Оформить доступ к сервису на 35 дней",
+            "link": "https://rutube.prfl.me/sites/wkj0v0?erid=2RanynnP7i3",
+            "landing_terms": ""
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 3758,
+            "code": "5a2654yx",
+            "is_barcode": false,
+            "image": "",
+            "comment": "35 дней доступа к сервису RUTUBE за 1 ₽ для всех пользователей без активной подписки более полугода, далее 99 ₽",
+            "date": "30.09.2026",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 19001,
+            "is_universal": false,
+            "name": "35 дней доступа к сервису RUTUBE за 1 ₽",
+            "promo_terms": "35 дней доступа к сервису RUTUBE за 1 ₽ для всех пользователей без активной подписки более полугода, далее 99 ₽.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": false,
+            "post_id": 17215001,
+            "ord_marker": "2RanynnP7i3",
+            "ord_custom_text": "Реклама. Рекламодатель: ООО \"Руформ\" 16+ ИНН 7714886605 erid: 2RanynnP7i3",
+            "discount": null,
+            "btn_text": null,
+            "show": ""
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      },
+      {
+        "landing": [
+          {
+            "id": 18568002,
+            "name": "Подписка RUTUBE x PREMIER до 1 года за 1 ₽",
+            "link": "https://rutube1years.prfl.me/sites/w9j2os?erid=2Ranynku8Rh",
+            "ord_marker": "2Ranynku8Rh",
+            "ord_custom_text": "Реклама. Рекламодатель: ООО \"Руформ\" 16+ ИНН 7714886605 erid: 2Ranynku8Rh"
+          }
+        ],
+        "links_for_subscribers": [
+          {
+            "id": 18568002,
+            "title": "Подписка RUTUBE x PREMIER до 1 года за 1 ₽",
+            "link": "https://rutube1years.prfl.me/sites/w9j2os?erid=2Ranynku8Rh",
+            "landing_terms": ""
+          }
+        ],
+        "promocodes": []
+      }
+    ]
   }
 ]

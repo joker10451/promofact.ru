@@ -149,6 +149,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   112: { slug: "delimobil", name: "Делимобиль" },
   3161: { slug: "avito-puteshestviya", name: "Авито Путешествия" },
   1409: { slug: "winlab", name: "ВинЛаб" },
+  3758: { slug: "rutube", name: "RUTUBE" },
   1100: { slug: "sunlight-ru", name: "SUNLIGHT" },
 };
 

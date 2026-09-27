@@ -225,6 +225,8 @@ export const BRAND_CATEGORY: Record<string, string> = {
   // Кино и развлечения
   кинопоиск: "onlayn-kinoteatry",
   kion: "onlayn-kinoteatry",
+  rutube: "onlayn-kinoteatry",
+  рутуб: "onlayn-kinoteatry",
   korston: "razvlecheniya",
   "broadway-moscow": "razvlecheniya",
   "afisha.yandex": "razvlecheniya",

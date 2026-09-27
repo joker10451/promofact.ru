@@ -410,6 +410,7 @@ export const ARTICLES: Article[] = [
     related: [
       { text: "Все промокоды Кинопоиска", href: "/store/kinopoisk" },
       { text: "Онлайн-кинотеатры", href: "/category/onlayn-kinoteatry" },
+      { text: "RUTUBE — подписка за 1 ₽", href: "/store/rutube" },
       { text: "Промокод START", href: "/store/start-ru" },
     ],
   },

@@ -219,6 +219,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/rutube-ru/:path*",
+        destination: "/store/rutube",
+        permanent: true,
+      },
+      {
+        source: "/store/rutube-ru",
+        destination: "/store/rutube",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,
