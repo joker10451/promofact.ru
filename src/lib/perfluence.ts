@@ -134,6 +134,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   2548: { slug: "m-kosmetik", name: "М.Косметик" },
   3641: { slug: "cozy-home", name: "Cozy Home" },
   3807: { slug: "librederm", name: "Librederm" },
+  4338: { slug: "geltek", name: "Geltek" },
   1977: { slug: "vazhnaya-ryba", name: "Важная Рыба" },
   4447: { slug: "carte-blanche", name: "Carte Blanche" },
   4579: { slug: "fmart", name: "FMART" },

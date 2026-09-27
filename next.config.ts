@@ -99,6 +99,26 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/geltek-ai/:path*",
+        destination: "/store/geltek",
+        permanent: true,
+      },
+      {
+        source: "/store/geltek-ai",
+        destination: "/store/geltek",
+        permanent: true,
+      },
+      {
+        source: "/store/geltek-diagnostika-kozhi/:path*",
+        destination: "/store/geltek",
+        permanent: true,
+      },
+      {
+        source: "/store/geltek-diagnostika-kozhi",
+        destination: "/store/geltek",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,
