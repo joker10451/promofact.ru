@@ -101,7 +101,7 @@ async function run() {
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE_URL}/`, { waitUntil: "domcontentloaded" });
 
       const searchTrigger = page.locator('button[aria-label="Поиск по магазинам и купонам"]').first();
       await searchTrigger.click();
