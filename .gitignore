@@ -56,6 +56,10 @@ data/debug/
 data/banners/
 data/flash_deals.json
 data/notified_orders.json
+scripts/debug-*.mjs
+scripts/inspect-*.mjs
+scripts/post-*.mjs
+*.py
 
 # Материалы внутреннего аудита: описывают незакрытые уязвимости,
 # а репозиторий публичный. Держим только локально.

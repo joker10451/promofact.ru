@@ -550,6 +550,9 @@ let passed = 0;
   passed++;
 }
 
+const realFeedContentBefore = fs.readFileSync("src/data/perfluence-feed.json", "utf-8");
+const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8");
+
 // Test 28 [Регрессия]: Защита от случайного обнуления каталога (с изоляцией от рабочих файлов)
 {
   const { runCatalogSync } = await import("./sync-catalog.mjs");
@@ -667,6 +670,9 @@ let passed = 0;
       { data: null },
       { data: "not-an-array" },
       { error: "Internal Server Error" },
+      { data: [null] },
+      { data: [{ id: 1, groups: null }] },
+      { data: [{ id: 2, groups: [{ promocodes: [null] }] }] },
     ];
 
     for (const corruptInput of corruptInputs) {
@@ -684,7 +690,17 @@ let passed = 0;
       assert.strictEqual(result.meta.lastSuccessSync, "2026-09-26T12:00:00.000Z");
     }
 
-    console.log("✓ Test 30 [Регрессия]: Повреждённый rawFeed не вызывает необработанных исключений (PASS)");
+    assert.strictEqual(
+      fs.readFileSync("src/data/perfluence-feed.json", "utf-8"),
+      realFeedContentBefore,
+      "Тесты нарушили изоляцию: рабочий perfluence-feed.json был модифицирован!"
+    );
+    assert.strictEqual(
+      fs.readFileSync("src/data/sync-meta.json", "utf-8"),
+      realMetaContentBefore,
+      "Тесты нарушили изоляцию: рабочий sync-meta.json был модифицирован!"
+    );
+    console.log("✓ Test 30 [Регрессия]: Повреждённый rawFeed не вызывает необработанных исключений и рабочие файлы изолированы (PASS)");
     passed++;
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });

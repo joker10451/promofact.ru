@@ -147,16 +147,19 @@ export function filterExpiredOffers(data, referenceTime = Date.now()) {
   const cleanProjects = [];
 
   for (const projectItem of data.data) {
+    if (!projectItem || typeof projectItem !== "object") continue;
     const cleanGroups = [];
     const rawGroups = Array.isArray(projectItem.groups) ? projectItem.groups : [projectItem];
 
     for (const group of rawGroups) {
+      if (!group || typeof group !== "object") continue;
       const promos = Array.isArray(group.promocodes) ? group.promocodes : [];
 
       // ВАРИАНТ А: Группа с промокодами
       if (promos.length > 0) {
         const validPromos = [];
         for (const promo of promos) {
+          if (!promo || typeof promo !== "object") continue;
           totalPromos++;
           const dateStr = promo.date || promo.expires || group.date_end || group.dateEnd;
           if (dateStr) {
@@ -286,25 +289,30 @@ export async function runCatalogSync(options = {}) {
 
   // СЦЕНАРИЙ 1: Обработка ответа API с защитой от случайного обнуления и резкого спада
   if (apiSuccess && rawApiData) {
-    const {
-      cleanData,
-      totalPromos,
-      activePromos,
-      expiredPromos,
-      totalLinkOffers,
-      activeLinkOffers,
-      expiredLinkOffers,
-      totalOffers,
-      activeOffers,
-      expiredOffers,
-    } = filterExpiredOffers(rawApiData, now);
-
-    if (!cleanData || !Array.isArray(cleanData.data)) {
-      const corruptError = "Повреждённая структура фида: отсутствует валидный массив data";
+    if (typeof rawApiData !== "object" || rawApiData === null) {
+      const corruptError = "Повреждённая структура фида: входные данные не являются объектом";
       console.warn(`⚠️ ${corruptError}`);
       syncError = new Error(corruptError);
-      // Не завершаемся аварийно, переходим в резервный режим
     } else {
+      const {
+        cleanData,
+        totalPromos,
+        activePromos,
+        expiredPromos,
+        totalLinkOffers,
+        activeLinkOffers,
+        expiredLinkOffers,
+        totalOffers,
+        activeOffers,
+        expiredOffers,
+      } = filterExpiredOffers(rawApiData, now);
+
+      if (!cleanData || !Array.isArray(cleanData.data)) {
+        const corruptError = "Повреждённая структура фида: отсутствует валидный массив data";
+        console.warn(`⚠️ ${corruptError}`);
+        syncError = new Error(corruptError);
+        // Не завершаемся аварийно, переходим в резервный режим
+      } else {
       const prevActiveOffers = existingMeta.activeOffers || existingMeta.activePromos || 0;
       const prevProjects = existingMeta.projectCount || 0;
       const newProjects = cleanData.data.length;
@@ -388,6 +396,7 @@ export async function runCatalogSync(options = {}) {
       atomicWriteJson(metaPath, meta);
       console.log(`✓ Статус 'success' записан в ${metaPath}`);
       return { status: "success", meta };
+    }
     }
   }
 
