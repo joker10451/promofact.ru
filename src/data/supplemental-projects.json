@@ -490,5 +490,99 @@
         "widget_subscriber_codes": []
       }
     ]
+  },
+  {
+    "project_id": 2271,
+    "project_name": "Островок!",
+    "landing_link": "https://ostrovok.prfl.me/sites/if3s79?erid=2RanykDV59d",
+    "info": {
+      "logo": "https://s3sc.perfluence.net/logos/f/8/6/f862685c-ced6-45b1-b2a5-8ffea13281b3.png",
+      "about": "Островок! — ведущий сервис онлайн-бронирования отелей, апартаментов, хостелов и гостевых домов по всей России и миру. Сервис предлагает более 2.5 миллионов вариантов размещения, мгновенное подтверждение и круглосуточную службу поддержки.",
+      "advantages": [
+        "Более 2.5 млн отелей и апартаментов по России и всему миру",
+        "Скидки по промокоду суммируются со спецпредложениями сервиса",
+        "Мгновенное подтверждение бронирования и круглосуточная поддержка клиентов"
+      ],
+      "subscriber_guide": "",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 0,
+      "rsp": 0
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18569601,
+            "title": "Забронировать отель на Ostrovok.ru со скидкой",
+            "link": "https://ostrovok.prfl.me/sites/if3s79?erid=2RanykDV59d",
+            "landing_terms": "Скидка до 6% на бронирование отелей и апартаментов по России и миру"
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 2271,
+            "code": "PFRUS414",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Скидка 6% на каждое бронирование по России на сайте и в мобильном приложении Ostrovok.ru.",
+            "date": "31.10.2026",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": false,
+            "hit_custom_text": "По России",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 19211,
+            "is_universal": true,
+            "name": "Скидка 6% на бронирования по России",
+            "promo_terms": "Скидка 6% на каждое бронирование по России, действует на сайте и в приложении. Промокод суммируется с акциями сервиса. Применяется только для брони с оплатой онлайн. На отели с оплатой при заселении скидка не распространяется. Не более одного применения на один аккаунт пользователя.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": true,
+            "post_id": 17215461,
+            "ord_marker": "2RanykDV59d",
+            "ord_custom_text": "Реклама. ООО \"Бронирование Гостиниц\", ИНН 7703389880. erid: 2RanykDV59d",
+            "discount": 6,
+            "btn_text": null,
+            "show": ""
+          },
+          {
+            "project_id": 2271,
+            "code": "PFWOR417",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Скидка 5% на первое или одно повторное бронирование по всему миру на сайте и в мобильном приложении Ostrovok.ru.",
+            "date": "31.10.2026",
+            "group": "",
+            "is_hit": false,
+            "is_hiting": false,
+            "hit_custom_text": "По миру",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 19212,
+            "is_universal": true,
+            "name": "Скидка 5% на бронирование по всему миру",
+            "promo_terms": "Скидка 5% на первое или одно повторное бронирование по всему миру на сайте и в приложении. Промокод суммируется с акциями сервиса. Применяется только для брони с оплатой онлайн. Не более одного применения на один аккаунт пользователя.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": true,
+            "post_id": 17215462,
+            "ord_marker": "2RanykDV59d",
+            "ord_custom_text": "Реклама. ООО \"Бронирование Гостиниц\", ИНН 7703389880. erid: 2RanykDV59d",
+            "discount": 5,
+            "btn_text": null,
+            "show": ""
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      }
+    ]
   }
 ]

@@ -264,6 +264,10 @@ export const BRAND_CATEGORY: Record<string, string> = {
   "т-путешествия отели": "puteshestviya-i-turizm",
   "t-puteshestviya": "puteshestviya-i-turizm",
   "t-puteshestviya-oteli": "puteshestviya-i-turizm",
+  "островок": "puteshestviya-i-turizm",
+  "островок!": "puteshestviya-i-turizm",
+  ostrovok: "puteshestviya-i-turizm",
+  "ostrovok-ru": "puteshestviya-i-turizm",
 
   // Спорт
   velodrive_ru: "sport-i-otdyh",

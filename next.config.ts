@@ -299,6 +299,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/ostrovok-ru/:path*",
+        destination: "/store/ostrovok",
+        permanent: true,
+      },
+      {
+        source: "/store/ostrovok-ru",
+        destination: "/store/ostrovok",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,

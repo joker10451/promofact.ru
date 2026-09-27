@@ -145,6 +145,13 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     textColor: "text-white",
     domain: "netprint.ru",
   },
+  "ostrovok": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/ostrovok.ru?size=120",
+    emoji: "🏨",
+    bgGradient: "from-blue-600 to-indigo-700",
+    textColor: "text-white",
+    domain: "ostrovok.ru",
+  },
   "pro32-com": {
     logoUrl: "https://favicon.yandex.net/favicon/v2/pro32.com?size=120",
     emoji: "🛡",
