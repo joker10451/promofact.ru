@@ -414,7 +414,8 @@ async function run() {
         viewport: { width: 390, height: 844 },
         permissions: ["clipboard-read", "clipboard-write"],
       });
-      // Изолируем внешние партнерские сети от реальных покупок и задержек DNS/SSL
+      // Изолируем внешние партнерские сети и Метрику от реальных внешних сетевых задержек
+      await context.route("**/*mc.yandex.ru/**", (route) => route.abort());
       await context.route("**/*prfl.me/**", (route) =>
         route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Partner Offer Landing</body></html>" })
       );
@@ -428,9 +429,25 @@ async function run() {
       const page = await context.newPage();
       await page.addInitScript(() => {
         window.__ym_calls = [];
-        window.ym = (id, method, goal, params) => {
+        let ymFn = (id, method, goal, params) => {
           window.__ym_calls.push({ id, method, goal, params });
         };
+        try {
+          Object.defineProperty(window, "ym", {
+            get: () => ymFn,
+            set: (newFn) => {
+              ymFn = (id, method, goal, params) => {
+                window.__ym_calls.push({ id, method, goal, params });
+                if (typeof newFn === "function" && newFn !== ymFn) {
+                  try { newFn(id, method, goal, params); } catch {}
+                }
+              };
+            },
+            configurable: true,
+          });
+        } catch {
+          window.ym = ymFn;
+        }
       });
       await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
 
