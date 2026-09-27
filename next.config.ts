@@ -179,6 +179,26 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/avito-travel/:path*",
+        destination: "/store/avito-puteshestviya",
+        permanent: true,
+      },
+      {
+        source: "/store/avito-travel",
+        destination: "/store/avito-puteshestviya",
+        permanent: true,
+      },
+      {
+        source: "/store/avito-puteshestviya-arenda/:path*",
+        destination: "/store/avito-puteshestviya",
+        permanent: true,
+      },
+      {
+        source: "/store/avito-puteshestviya-arenda",
+        destination: "/store/avito-puteshestviya",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,
