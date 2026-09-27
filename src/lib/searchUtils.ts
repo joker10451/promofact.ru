@@ -77,6 +77,7 @@ export const STORE_ALIASES: Record<string, string[]> = {
   "start-ru": ["старт", "start", "старт ру", "сериалы"],
   "premier": ["премьер", "premier", "премьер тв"],
   "otello": ["отелло", "otello", "бронирование отелей", "гостиницы"],
+  "t-puteshestviya-oteli": ["т-путешествия", "т путешествия", "тинькофф путешествия", "t-travel", "t-puteshestviya", "бронирование отелей", "гостиницы тинькофф"],
   "magnit-dostavka": ["магнит доставка", "магнит", "magnit", "доставка магнит"],
   "magnit-plyus-premium": ["магнит плюс", "магнит премиум", "magnit plus"],
   "m-kosmetik": ["м косметик", "магнит косметик", "m kosmetik"],

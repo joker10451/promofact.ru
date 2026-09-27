@@ -302,10 +302,17 @@ export function getBrandMeta(storeSlug: string, storeName: string, domain?: stri
       domain: "yandex.ru",
     };
   }
-  if (slug.includes("tbank") || slug.includes("tinkoff") || lowerName.includes("т-банк") || lowerName.includes("тинькофф")) {
+  if (
+    slug.includes("tbank") ||
+    slug.includes("tinkoff") ||
+    slug.includes("t-puteshestviya") ||
+    lowerName.includes("т-банк") ||
+    lowerName.includes("тинькофф") ||
+    lowerName.includes("т-путешествия")
+  ) {
     return {
       logoUrl: "https://favicon.yandex.net/favicon/v2/tbank.ru?size=120",
-      emoji: "💛",
+      emoji: "🏨",
       bgGradient: "from-yellow-400 to-yellow-500",
       textColor: "text-ink",
       domain: "tbank.ru",

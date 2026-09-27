@@ -255,6 +255,11 @@ export const BRAND_CATEGORY: Record<string, string> = {
   delimobil: "puteshestviya-i-turizm",
   "авито путешествия": "puteshestviya-i-turizm",
   "avito-puteshestviya": "puteshestviya-i-turizm",
+  "т-путешествия": "puteshestviya-i-turizm",
+  "т-путешествия. отели": "puteshestviya-i-turizm",
+  "т-путешествия отели": "puteshestviya-i-turizm",
+  "t-puteshestviya": "puteshestviya-i-turizm",
+  "t-puteshestviya-oteli": "puteshestviya-i-turizm",
 
   // Спорт
   velodrive_ru: "sport-i-otdyh",

@@ -1,6 +1,81 @@
 [
   {
     "project": {
+      "id": 2233,
+      "logo": "https://s3sc.perfluence.net/logos/17035055247727.png",
+      "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/9/c/b/9cb3aab1-c852-4599-8a04-a72946582f39.png",
+      "name": "Яндекс Плюс",
+      "img": "https://s3sc.perfluence.net/img_widget/7/f/7/7f72cd6f-d10a-48c5-8311-c5e799cc50b7.webp",
+      "category_id": 252,
+      "category_name": "Подписка на скидки",
+      "activeBloggers": 4643,
+      "product_info": "<p>Яндекс Плюс — единая мультиподписка на сервисы Яндекса, включая Кинопоиск, Яндекс Музыку и Яндекс Книги. Мультиподписка позволяет копить и тратить баллы Плюса. Баллами можно оплатить как часть, так и полную стоимость товаров, услуг и билетов в сервисах Яндекса: Яндекс Go (такси и самокаты), Драйв, Яндекс Афиша, Кинопоиск, Яндекс Маркет, Заправки, Еда, Лавка, Путешествия.</p>",
+      "subscribers_condition": "<p>Условия мультиподписки Яндекс Плюс: clck.ru/FMQND. Условия использования промокода: уа.cc/pk. Предложение до 30.11.2025 г. Есть ограничения, подробнее <a href=\"https://clck.ru/3PrSsa\">здесь</a>. </p>",
+      "site": "https://plus.yandex.ru",
+      "info": "",
+      "advantages": [
+        "все сервисы Яндекса в одной мультиподписке: платишь 399 ₽/в месяц и получаешь доступ ко всем сервисам (не нужно отдельно оплачивать подписку на Кинопоиск и Яндекс Музыку);",
+        "возможность копить и тратить баллы Плюса на оплату до 100% стоимости услуг в сервисах Яндекса (Еде, Лавке, Маркете, Go);",
+        "бесплатная доставка на Яндекс Маркете;",
+        "возможность подключить к мультиподписке до 3х близких людей, которые будут пользоваться всеми преимуществами Яндекс Плюса без дополнительной оплаты;",
+        "мультиподпиской можно пользоваться на 10 устройствах, а также подключить Алису в машине. "
+      ],
+      "subscriber_guide": "",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 1,
+      "rsp": 399
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18566620,
+            "title": "Оформить мультиподписку Яндекс Плюс и принять участие в розыгрыше",
+            "link": "https://plus-gift.prfl.me/sites/rgnlxx?source=js-widget&source_id=8842",
+            "landing_terms": ""
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 2233,
+            "code": "PGSH7EJ8PS",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Розыгрыш денежных призов и сертификатов за оформление Яндекс Плюса: 45 дней бесплатно новым пользователям или 30 дней за 1 ₽ без активной мультиподписки",
+            "date": "30.09.2026",
+            "group": "",
+            "is_hit": false,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 17100,
+            "is_universal": false,
+            "name": "Розыгрыш денежных призов и сертификатов за оформление Яндекс Плюса: 45 дней бесплатно новым пользователям или 30 дней за 1 ₽ без активной мультиподписки",
+            "promo_terms": "",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": null,
+            "post_id": 17214024,
+            "ord_marker": "2Ranyo3BK7q",
+            "ord_custom_text": "Реклама. ООО «ЯНДЕКС», ИНН 7736207543",
+            "discount": null,
+            "btn_text": null,
+            "show": "https://pawss-api.perfluence.net/source-view?post_id=17214024&widget_id=8842&user_id=861964&source=js-widget"
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      }
+    ]
+  },
+  {
+    "project": {
       "id": 1408,
       "logo": "https://s3sc.perfluence.net/logos/16474494402231.png",
       "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/b/1/db192bec-541f-4c97-b796-64819c738a2e.png",
@@ -267,6 +342,79 @@
           }
         ],
         "promocodes": []
+      }
+    ]
+  },
+  {
+    "project": {
+      "id": 3285,
+      "logo": "https://s3sc.perfluence.net/logos/6/0/9/609f04d2-9724-4a04-b6a3-54d1bb979407.png",
+      "logo_widget": "https://s3sc.perfluence.net/logos/6/0/9/609f04d2-9724-4a04-b6a3-54d1bb979407.png",
+      "name": "Т-Путешествия. Отели",
+      "img": "https://s3sc.perfluence.net/logos/6/0/9/609f04d2-9724-4a04-b6a3-54d1bb979407.png",
+      "category_id": 110,
+      "category_name": "Путешествия и туризм",
+      "activeBloggers": 940,
+      "product_info": "<p>Т-Путешествия – сервис бронирования отелей, гостиниц, апартаментов и туров от Т-Банка с выгодным кешбэком и скидками по промокодам.</p>",
+      "subscribers_condition": "",
+      "site": "https://www.tbank.ru/travel/",
+      "info": "",
+      "advantages": [
+        "Скидка 15% на первое бронирование отелей по всему миру",
+        "Кешбэк баллами или рублями на карты Т-Банка",
+        "Тысячи проверенных отелей, гостиниц и апартаментов с гарантией заселения"
+      ],
+      "subscriber_guide": "",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 0,
+      "rsp": 0
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18569001,
+            "title": "Забронировать отель в Т-Путешествиях со скидкой 15%",
+            "link": "https://tinkoff.prfl.me/sites/x3cow9?erid=2RanyoF7adh",
+            "landing_terms": "Скидка на бронирование отеля 15% для новых пользователей сервиса на сайте или в приложении Т-Банка в разделе «Т-Путешествия» (макс. 3000 ₽)"
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 3285,
+            "code": "YE",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Скидка 15% на бронирование отеля для новых пользователей сервиса на сайте или в приложении Т-Банка в разделе «Т-Путешествия». Максимальный размер скидки 3000 рублей.",
+            "date": "11.10.2026",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 19101,
+            "is_universal": false,
+            "name": "Скидка 15% на бронирование отеля",
+            "promo_terms": "Скидка на бронирование отеля 15% для новых пользователей сервиса на сайте или в приложении Т-Банка в разделе «Т-Путешествия». Максимальная скидка — 3000 рублей. Действует только при оплате онлайн на сайте или в приложении.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": false,
+            "post_id": 17215363,
+            "ord_marker": "2RanyoF7adh",
+            "ord_custom_text": "Реклама. ООО \"Т-Путешествия\", ИНН 7743397341. erid: 2RanyoF7adh",
+            "discount": 15,
+            "btn_text": null,
+            "show": ""
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
       }
     ]
   }

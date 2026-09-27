@@ -708,6 +708,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды: Путешествия и туризм", href: "/category/puteshestviya-i-turizm" },
+      { text: "Т-Путешествия. Отели — скидка 15%", href: "/store/t-puteshestviya-oteli" },
       { text: "Авито Путешествия — жильё и отели", href: "/store/avito-puteshestviya" },
       { text: "Скидки на отели Отелло", href: "/store/otello" },
       { text: "Промокоды Туту", href: "/store/tutu" },

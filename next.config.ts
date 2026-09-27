@@ -229,6 +229,46 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/tinkoff-travel/:path*",
+        destination: "/store/t-puteshestviya-oteli",
+        permanent: true,
+      },
+      {
+        source: "/store/tinkoff-travel",
+        destination: "/store/t-puteshestviya-oteli",
+        permanent: true,
+      },
+      {
+        source: "/store/t-bank-travel/:path*",
+        destination: "/store/t-puteshestviya-oteli",
+        permanent: true,
+      },
+      {
+        source: "/store/t-bank-travel",
+        destination: "/store/t-puteshestviya-oteli",
+        permanent: true,
+      },
+      {
+        source: "/store/t-puteshestviya/:path*",
+        destination: "/store/t-puteshestviya-oteli",
+        permanent: true,
+      },
+      {
+        source: "/store/t-puteshestviya",
+        destination: "/store/t-puteshestviya-oteli",
+        permanent: true,
+      },
+      {
+        source: "/store/tinkoff-puteshestviya/:path*",
+        destination: "/store/t-puteshestviya-oteli",
+        permanent: true,
+      },
+      {
+        source: "/store/tinkoff-puteshestviya",
+        destination: "/store/t-puteshestviya-oteli",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,
