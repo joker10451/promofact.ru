@@ -850,6 +850,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Путешествия и туризм", href: "/category/puteshestviya-i-turizm" },
+      { text: "Делимобиль — промокоды на поездки", href: "/store/delimobil" },
       { text: "Скидки на отели Отелло", href: "/store/otello" },
       { text: "Билеты на Туту", href: "/store/tutu" },
       { text: "Развлечения и события", href: "/category/razvlecheniya" },

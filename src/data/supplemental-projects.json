@@ -1,0 +1,58 @@
+[
+  {
+    "project": {
+      "id": 1408,
+      "logo": "https://s3sc.perfluence.net/logos/16474494402231.png",
+      "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/b/1/db192bec-541f-4c97-b796-64819c738a2e.png",
+      "name": "Яндекс Еда Гипермаркеты",
+      "category_id": 303,
+      "category_name": "Доставка продуктов",
+      "activeBloggers": 5420,
+      "product_info": "<p>Доставка продуктов и товаров для дома из гипермаркетов через сервис Яндекс Еда: Ашан, Лента, МЕТРО, ВкусВилл, Магнит и других с доставкой до двери.</p>",
+      "subscribers_condition": "<p>Скидка 550 ₽ на заказ из гипермаркетов в сервисе Яндекс Еда по промокоду до 31.10.2026.</p>",
+      "site": "https://eda.yandex.ru/collections/eda_gipera",
+      "regions": ["Москва", "Санкт-Петербург", "Казань", "Екатеринбург", "Новосибирск", "Нижний Новгород", "Самара", "Ростов-на-Дону", "Уфа", "Краснодар", "Воронеж", "Пермь", "Волгоград"],
+      "pf": 0,
+      "rsp": 80
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18566999,
+            "title": "Скидка на заказ в Яндекс Еда Гипермаркеты",
+            "link": "https://yaeda.prfl.me/sites/apv6mn?erid=2RanykzbK23",
+            "landing_terms": null
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 1408,
+            "code": "GIP5xlzh",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Скидка 550 ₽ на заказ из гипермаркетов",
+            "date": "31.10.2026",
+            "group": "",
+            "is_hit": false,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "bonus_id": 16901,
+            "name": "Скидка 550 ₽ на заказ из гипермаркетов",
+            "promo_terms": "Скидка 550 ₽ при заказе из гипермаркетов в сервисе Яндекс Еда",
+            "region_promo": ["RU"],
+            "repeat_order": false,
+            "post_id": 17215901,
+            "ord_marker": "2RanykzbK23",
+            "ord_custom_text": "Реклама. ООО \"ЯНДЕКС.ЕДА\", ИНН 9705114405. erid: 2RanykzbK23",
+            "discount": 550
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      }
+    ]
+  }
+]

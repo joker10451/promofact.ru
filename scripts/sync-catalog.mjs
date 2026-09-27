@@ -294,7 +294,7 @@ export async function runCatalogSync(options = {}) {
       console.warn(`⚠️ ${corruptError}`);
       syncError = new Error(corruptError);
     } else {
-      const {
+      let {
         cleanData,
         totalPromos,
         activePromos,
@@ -367,6 +367,35 @@ export async function runCatalogSync(options = {}) {
 
         atomicWriteJson(metaPath, meta);
         return { status: "fallback", meta };
+      }
+
+      // Дополняем проектами из supplemental-projects.json, если их ещё нет в фиде
+      const suppPath = options.supplementalPath || (!options.feedPath ? path.resolve("src/data/supplemental-projects.json") : null);
+      if (suppPath && fs.existsSync(suppPath)) {
+        try {
+          const supp = JSON.parse(fs.readFileSync(suppPath, "utf-8"));
+          if (Array.isArray(supp)) {
+            const existingIds = new Set(cleanData.data.map((p) => p.project?.id));
+            for (const item of supp) {
+              if (item && item.project && !existingIds.has(item.project.id)) {
+                cleanData.data.push(item);
+                const groups = item.groups || [];
+                for (const g of groups) {
+                  for (const _ of g.promocodes || []) {
+                    totalPromos++;
+                    activePromos++;
+                  }
+                  for (const _ of g.links_for_subscribers || []) {
+                    totalLinkOffers++;
+                    activeLinkOffers++;
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Не удалось загрузить supplemental-projects.json:", e.message);
+        }
       }
 
       // Успешная валидация: атомарно сохраняем свежий фид

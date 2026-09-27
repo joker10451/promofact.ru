@@ -159,6 +159,26 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/delimobil-karshering/:path*",
+        destination: "/store/delimobil",
+        permanent: true,
+      },
+      {
+        source: "/store/delimobil-karshering",
+        destination: "/store/delimobil",
+        permanent: true,
+      },
+      {
+        source: "/store/delimobil-ru/:path*",
+        destination: "/store/delimobil",
+        permanent: true,
+      },
+      {
+        source: "/store/delimobil-ru",
+        destination: "/store/delimobil",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,

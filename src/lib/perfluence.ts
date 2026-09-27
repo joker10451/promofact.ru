@@ -146,6 +146,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   2582: { slug: "magnit-dostavka", name: "Магнит Доставка" },
   1384: { slug: "yandex-eda", name: "Яндекс Еда" },
   1408: { slug: "yandex-eda-gipermarkety", name: "Яндекс Еда Гипермаркеты" },
+  112: { slug: "delimobil", name: "Делимобиль" },
   1100: { slug: "sunlight-ru", name: "SUNLIGHT" },
 };
 
