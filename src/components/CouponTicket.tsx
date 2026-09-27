@@ -144,6 +144,7 @@ export default function CouponTicket({
       }
     }
 
+    ymReachGoal("copy_and_open", { store: store.slug });
     handleAffiliateClick();
 
     // 2. Копирование промокода с сохранением обработки ошибок Clipboard API
@@ -300,7 +301,10 @@ export default function CouponTicket({
           )}
           <button
             type="button"
-            onClick={() => setShowDetailsModal(true)}
+            onClick={() => {
+              setShowDetailsModal(true);
+              ymReachGoal("coupon_terms_open", { store: store.slug });
+            }}
             className="inline-flex items-center gap-1 text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer shrink-0 py-1"
           >
             Условия акции

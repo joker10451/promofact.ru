@@ -426,6 +426,12 @@ async function run() {
       });
 
       const page = await context.newPage();
+      await page.addInitScript(() => {
+        window.__ym_calls = [];
+        window.ym = (id, method, goal, params) => {
+          window.__ym_calls.push({ id, method, goal, params });
+        };
+      });
       await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
 
       const firstCard = page.locator("article").first();
@@ -470,6 +476,14 @@ async function run() {
         throw new Error(`Ожидался статус 'Магазин открывается', получено: "${toastText}"`);
       }
       console.log(`  ✓ Тост честно подтвердил открытие магазина: "${toastText.split("\n")[0]}"`);
+
+      // Проверяем фиксацию цели Яндекс.Метрики для совмещённого действия
+      const ymCalls = await page.evaluate(() => window.__ym_calls || []);
+      const copyAndOpenEvents = ymCalls.filter((c) => c.goal === "copy_and_open");
+      if (copyAndOpenEvents.length === 0) {
+        throw new Error("Цель copy_and_open не была отправлена в Яндекс.Метрику!");
+      }
+      console.log(`  ✓ Метрика зафиксировала цель 'copy_and_open': ${JSON.stringify(copyAndOpenEvents[0].params)}`);
 
       await newPage.close();
       await context.close();
