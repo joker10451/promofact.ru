@@ -189,6 +189,10 @@ export const BRAND_CATEGORY: Record<string, string> = {
   максавит: "zdorove-i-vitaminy",
   очкарик: "zdorove-i-vitaminy",
   "iherb.group": "zdorove-i-vitaminy",
+  сберздоровье: "zdorove-i-vitaminy",
+  sberzdorovie: "zdorove-i-vitaminy",
+  sberhealth: "zdorove-i-vitaminy",
+  "сберздоровье_телемедицина": "zdorove-i-vitaminy",
 
   // Одежда и обувь
   befree: "odezhda-i-obuv",

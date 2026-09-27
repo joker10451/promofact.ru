@@ -269,6 +269,36 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/sberhealth/:path*",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sberhealth",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sber-zdorovie/:path*",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sber-zdorovie",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sberzdorovye/:path*",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sberzdorovye",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,

@@ -927,6 +927,8 @@ export const ARTICLES: Article[] = [
       "Сравнивайте цены: одно лекарство в разных аптеках района может отличаться в 2 раза. Проверяйте онлайн-агрегаторы цен перед покупкой.",
     ],
     related: [
+      { text: "Аптека и здоровье", href: "/category/zdorove-i-vitaminy" },
+      { text: "СберЗдоровье — скидка 35% на врача", href: "/store/sberzdorovie" },
       { text: "Маркетплейсы", href: "/category/marketpleysy" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],

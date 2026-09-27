@@ -417,5 +417,78 @@
         "widget_subscriber_codes": []
       }
     ]
+  },
+  {
+    "project": {
+      "id": 3468,
+      "logo": "https://s3sc.perfluence.net/logos/7/f/6/7f69f88a-f542-411a-a4ca-c9bdbf9a4ff6.png",
+      "logo_widget": "https://s3sc.perfluence.net/logos/7/f/6/7f69f88a-f542-411a-a4ca-c9bdbf9a4ff6.png",
+      "name": "СберЗдоровье",
+      "img": "https://s3sc.perfluence.net/logos/7/f/6/7f69f88a-f542-411a-a4ca-c9bdbf9a4ff6.png",
+      "category_id": 250,
+      "category_name": "Аптека и здоровье",
+      "activeBloggers": 1850,
+      "product_info": "<p>СберЗдоровье — медицинский сервис онлайн-консультаций с квалифицированными врачами 24/7, расшифровки анализов и регулярного наблюдения за здоровьем.</p>",
+      "subscribers_condition": "",
+      "site": "https://sberhealth.ru/",
+      "info": "",
+      "advantages": [
+        "Дистанционные осмотры без лишних визитов в клинику",
+        "Быстрые рекомендации и официальные рецепты врачей",
+        "Регулярное наблюдение и поддержка профильных специалистов"
+      ],
+      "subscriber_guide": "",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 0,
+      "rsp": 320
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18569501,
+            "title": "Записаться на онлайн-консультацию с врачом со скидкой 35%",
+            "link": "https://sberanalizy.prfl.me/sites/97j5rs?erid=2Ranyo1nN4T",
+            "landing_terms": "Скидка 35% на первую или повторную онлайн-консультацию с врачом"
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 3468,
+            "code": "PERE7A4E5",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Скидка 35% на первую или повторную онлайн-консультацию с врачом. Воспользоваться услугой после приобретения можно в течение 12 месяцев.",
+            "date": "30.09.2026",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 19201,
+            "is_universal": true,
+            "name": "Скидка 35% на консультацию врача",
+            "promo_terms": "Скидка 35% на первую или повторную онлайн-консультацию с врачом. Воспользоваться услугой после приобретения можно в течение 12 месяцев. Имеются противопоказания, необходима консультация специалиста.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": true,
+            "post_id": 17215450,
+            "ord_marker": "2Ranyo1nN4T",
+            "ord_custom_text": "Реклама. ООО «Инновационная медицина», 115432, г.Москва, вн.тер.г. муниципальный округ Даниловский, пр-кт Андропова, д. 10, помещ. 115, ОГРН 1197746310618 erid: 2Ranyo1nN4T. ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА",
+            "discount": 35,
+            "btn_text": null,
+            "show": ""
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      }
+    ]
   }
 ]
