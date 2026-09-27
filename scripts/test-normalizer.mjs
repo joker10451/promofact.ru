@@ -851,6 +851,7 @@ const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8"
     fs.writeFileSync(tmpSupp, JSON.stringify([ostrovok]), "utf-8");
 
     await runCatalogSync({
+      rawFeed: { data: [] },
       feedPath: tmpFeed,
       supplementalPath: tmpSupp,
       metaPath: tmpMeta,
