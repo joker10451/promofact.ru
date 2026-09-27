@@ -632,6 +632,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды на доставку продуктов", href: "/category/dostavka-produktov" },
+      { text: "Яндекс Еда Гипермаркеты", href: "/store/yandex-eda-gipermarkety" },
       { text: "Пятёрочка Доставка — промокоды", href: "/store/pyaterochka" },
     ],
   },

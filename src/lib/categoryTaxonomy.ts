@@ -150,6 +150,8 @@ export const BRAND_CATEGORY: Record<string, string> = {
   "пятерочка доставка": "dostavka-produktov",
   самокат: "dostavka-produktov",
   "магнит доставка": "dostavka-produktov",
+  "яндекс еда гипермаркеты": "dostavka-produktov",
+  "yandex-eda-gipermarkety": "dostavka-produktov",
   вкусвилл: "dostavka-produktov",
   перекрёсток: "dostavka-produktov",
 

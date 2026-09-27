@@ -139,6 +139,26 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/yandeks-eda-gipermarkety/:path*",
+        destination: "/store/yandex-eda-gipermarkety",
+        permanent: true,
+      },
+      {
+        source: "/store/yandeks-eda-gipermarkety",
+        destination: "/store/yandex-eda-gipermarkety",
+        permanent: true,
+      },
+      {
+        source: "/store/yandex-eda-magaziny/:path*",
+        destination: "/store/yandex-eda-gipermarkety",
+        permanent: true,
+      },
+      {
+        source: "/store/yandex-eda-magaziny",
+        destination: "/store/yandex-eda-gipermarkety",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,

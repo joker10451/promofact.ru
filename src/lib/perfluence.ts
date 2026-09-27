@@ -145,6 +145,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   2233: { slug: "yandex-plus", name: "Яндекс Плюс" },
   2582: { slug: "magnit-dostavka", name: "Магнит Доставка" },
   1384: { slug: "yandex-eda", name: "Яндекс Еда" },
+  1408: { slug: "yandex-eda-gipermarkety", name: "Яндекс Еда Гипермаркеты" },
   1100: { slug: "sunlight-ru", name: "SUNLIGHT" },
 };
 
@@ -423,6 +424,20 @@ async function fetchData(): Promise<Coupon[]> {
 
       const top = topLevelCount(text);
       const coupons = parsePayload(text);
+
+      // Дополняем купонами из локального фида для проектов, ещё не включённых в виджет
+      if (bundledFeed && typeof bundledFeed === "object" && "data" in bundledFeed) {
+        try {
+          const bundledCoupons = parsePayload(JSON.stringify(bundledFeed));
+          const existingIds = new Set(coupons.map((c) => c.store.id));
+          for (const bc of bundledCoupons) {
+            if (!existingIds.has(bc.store.id)) {
+              coupons.push(bc);
+            }
+          }
+        } catch {}
+      }
+
       console.log(
         "[perfluence] status:",
         res.status,

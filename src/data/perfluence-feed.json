@@ -4167,6 +4167,79 @@
           "widget_subscriber_codes": []
         }
       ]
+    },
+    {
+      "project": {
+        "id": 1408,
+        "logo": "https://s3sc.perfluence.net/logos/16474494402231.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/b/1/db192bec-541f-4c97-b796-64819c738a2e.png",
+        "name": "Яндекс Еда Гипермаркеты",
+        "img": null,
+        "category_id": 304,
+        "category_name": "Доставка продуктов",
+        "activeBloggers": 5420,
+        "product_info": "<p>Доставка продуктов и товаров для дома из гипермаркетов через сервис Яндекс Еда: Ашан, Лента, МЕТРО, ВкусВилл, Магнит и других с доставкой до двери.</p>",
+        "subscribers_condition": "",
+        "site": "https://eda.yandex.ru/collections/eda_gipera",
+        "info": "",
+        "advantages": [
+          "Доставка из любимых гипермаркетов: Ашан, Лента, METRO, Глобус и других.",
+          "Скидки и промокоды суммируются с акциями гипермаркетов.",
+          "Быстрая сборка опытными сборщиками и доставка прямо до квартиры."
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 1,
+        "rsp": 350
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18568901,
+              "title": "Оформить заказ из гипермаркетов со скидкой",
+              "link": "https://yaeda.prfl.me/sites/apv6mn?erid=2RanykzbK23",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 1408,
+              "code": "GIP5xlzh",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 550 ₽ на заказ продуктов из гипермаркетов",
+              "date": "31.10.2026",
+              "group": "",
+              "is_hit": true,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 18055,
+              "is_universal": false,
+              "name": "Скидка 550 ₽ на заказ продуктов из гипермаркетов",
+              "promo_terms": "<p>Действует на заказ из раздела Гипермаркеты в приложении и на сайте Яндекс Еда</p>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17215901,
+              "ord_marker": "2RanykzbK23",
+              "ord_custom_text": "Реклама. ООО \"ЯНДЕКС.ЕДА\", ИНН 9705114405. erid: 2RanykzbK23",
+              "discount": 550,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17215901&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
     }
   ],
   "stats": []
