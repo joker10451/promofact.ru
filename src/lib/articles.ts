@@ -687,6 +687,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды: Маркетплейсы", href: "/category/marketpleysy" },
+      { text: "Скидки Poizon", href: "/store/poizon" },
       { text: "Все магазины с промокодами", href: "/" },
     ],
   },

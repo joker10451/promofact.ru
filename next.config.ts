@@ -129,6 +129,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/poizon-devu/:path*",
+        destination: "/store/poizon",
+        permanent: true,
+      },
+      {
+        source: "/store/poizon-devu",
+        destination: "/store/poizon",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,

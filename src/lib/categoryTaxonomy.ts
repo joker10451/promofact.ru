@@ -258,6 +258,8 @@ export const BRAND_CATEGORY: Record<string, string> = {
   "яндекс маркет": "marketpleysy",
   aliexpress: "marketpleysy",
   "aliexpress ru&cis": "marketpleysy",
+  poizon: "marketpleysy",
+  "poizon (дэву)": "marketpleysy",
   shoppinglive: "marketpleysy",
   "пикабу промокоды": "marketpleysy",
 };

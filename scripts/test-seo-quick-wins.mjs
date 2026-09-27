@@ -180,8 +180,9 @@ let passed = 0;
 {
   const appBuildDir = path.join(".next", "server", "app");
   if (fs.existsSync(appBuildDir)) {
-    // Пример пустой страницы: /gorod/moskva/marketpleysy.html (0 купонов)
-    const emptyPagePath = path.join(appBuildDir, "gorod", "moskva", "marketpleysy.html");
+    // Пустая страница (0 купонов, например sport-i-otdyh) обязана иметь noindex
+    const emptyCatSlug = "sport-i-otdyh";
+    const emptyPagePath = path.join(appBuildDir, "gorod", "moskva", `${emptyCatSlug}.html`);
     if (fs.existsSync(emptyPagePath)) {
       const html = fs.readFileSync(emptyPagePath, "utf-8");
       assert.ok(
