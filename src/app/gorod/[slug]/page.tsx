@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import CouponTicket from "@/components/CouponTicket";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import JsonLd from "@/components/JsonLd";
-import { getCoupons, getUsesStats } from "@/lib/perfluence";
+import { getCoupons, getUsesStats, getCategories } from "@/lib/perfluence";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { toCatalogCoupon } from "@/lib/catalogCoupon";
@@ -36,11 +36,12 @@ export async function generateMetadata({
   ];
   const dateStr = `${months[now.getMonth()]} ${now.getFullYear()}`;
 
-  const title = `Промокоды и скидки ${city.inCity} на ${dateStr} — ${SITE_NAME}`;
+  const pageTitle = `Промокоды и скидки ${city.inCity} на ${dateStr}`;
+  const ogTitle = `${pageTitle} — ${SITE_NAME}`;
   const description = `${city.description} Каталог актуальных промокодов и скидок на ${city.popularCategory} в ${city.name} на ${dateStr}.`;
 
   return {
-    title,
+    title: pageTitle,
     description,
     keywords: [
       `промокоды ${city.name.toLowerCase()}`,
@@ -50,10 +51,15 @@ export async function generateMetadata({
       `акции ${city.name.toLowerCase()}`,
     ],
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url: `${SITE_URL}/gorod/${city.slug}`,
       type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: ogTitle,
+      description,
     },
     alternates: {
       canonical: `${SITE_URL}/gorod/${city.slug}`,
@@ -70,9 +76,10 @@ export default async function CityPage({
   const city = CITIES_SEO.find((c) => c.slug === slug);
   if (!city) notFound();
 
-  const [allCoupons, uses] = await Promise.all([
+  const [allCoupons, uses, categories] = await Promise.all([
     getCoupons(),
     getUsesStats(),
+    getCategories(),
   ]);
 
   // Фильтруем купоны, действующие в этом городе (или по всей РФ)
@@ -82,6 +89,14 @@ export default async function CityPage({
     const matchesCity = r.includes(city.name.toLowerCase());
     return isAllRu || matchesCity;
   });
+
+  // Категории с достаточным количеством купонов в данном городе (>= 3)
+  const cityCategories = categories
+    .map((cat) => {
+      const count = cityCoupons.filter((c) => c.store.categorySlug === cat.slug).length;
+      return { cat, count };
+    })
+    .filter((item) => item.count >= 3);
 
   const proofsByCode = Object.fromEntries(uses.usesByCode);
   const proofsByStore = Object.fromEntries(uses.usesByStore);
@@ -169,6 +184,23 @@ export default async function CityPage({
                 </Link>
               ))}
             </div>
+
+            {/* Популярные категории города с активными промокодами */}
+            {cityCategories.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 pt-2 border-t border-line/40">
+                <span className="text-xs font-bold text-ink/50">Категории {city.inCity}:</span>
+                {cityCategories.map(({ cat, count }) => (
+                  <Link
+                    key={cat.slug}
+                    href={`/gorod/${city.slug}/${cat.slug}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1 text-xs font-bold text-ink/75 hover:border-red hover:text-red transition-all"
+                  >
+                    <span>{cat.name}</span>
+                    <span className="text-[10px] text-ink/40 font-normal">({count})</span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

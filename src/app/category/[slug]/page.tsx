@@ -50,8 +50,10 @@ export async function generateMetadata({
   const catName = getCategoryDef(slug)?.label ?? cat.name;
   const count = all.filter((c) => c.store.categorySlug === slug).length;
   const pageUrl = `${SITE_URL}/category/${slug}`;
+  const pageTitle = `Промокоды ${catName}: каталог скидок на ${MONTH_YEAR}`;
+  const ogTitle = `${pageTitle} — ${SITE_NAME}`;
   const og = {
-    title: `Промокоды ${catName}: каталог скидок на ${MONTH_YEAR} — ${SITE_NAME}`,
+    title: ogTitle,
     description: `Каталог рабочих промокодов и акций в категории «${catName}»: ${count} предложений от официальных брендов и сервисов. Экономьте на покупках в ${MONTH_YEAR}.`,
     url: pageUrl,
     type: "website" as const,
@@ -59,7 +61,7 @@ export async function generateMetadata({
     siteName: SITE_NAME,
   };
   return {
-    title: og.title,
+    title: pageTitle,
     description: og.description,
     alternates: { canonical: pageUrl },
     openGraph: og,

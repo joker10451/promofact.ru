@@ -122,6 +122,7 @@ export const ARTICLES: Article[] = [
     },
     related: [
       { text: "Кредитная СберКарта", href: "/sberkarta" },
+      { text: "Детские аксессуары Сбера", href: "/store/detskie-platezhnye-aksessuary-ot-sbera" },
       { text: "СберПрайм за 1 ₽", href: "/sovety/rozygrysh-sberprime-150000" },
       { text: "Сервисы и подписки", href: "/category/servisy-i-podpiski" },
     ],
@@ -665,6 +666,8 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Косметика и парфюмерия", href: "/category/kosmetika-i-parfyumeriya" },
+      { text: "Промокоды РИВ ГОШ", href: "/store/riv-gosh" },
+      { text: "Скидки в ЛЭТУАЛЬ", href: "/store/letual" },
       { text: "Ювелирные изделия и подарки", href: "/category/ukrasheniya" },
     ],
   },
@@ -699,7 +702,9 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды: Путешествия и туризм", href: "/category/puteshestviya-i-turizm" },
-      { text: "Кино и подписки — скидки", href: "/category/onlayn-kinoteatry" },
+      { text: "Скидки на отели Отелло", href: "/store/otello" },
+      { text: "Промокоды Туту", href: "/store/tutu" },
+      { text: "Сервис Яндекс Путешествия", href: "/store/yandeks-puteshestviya" },
     ],
   },
   {
@@ -803,6 +808,8 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Доставка из ресторанов", href: "/category/dostavka-iz-restoranov" },
+      { text: "Промокоды Тануки", href: "/store/tanukifamily" },
+      { text: "Скидки в Яндекс Еде", href: "/store/yandex-eda" },
       { text: "Как экономить на продуктах", href: "/sovety/kak-ekonomit-na-produktah" },
     ],
   },
@@ -820,6 +827,8 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Онлайн-кинотеатры", href: "/category/onlayn-kinoteatry" },
+      { text: "Промокоды Кинопоиска", href: "/store/kinopoisk" },
+      { text: "Подписка Иви бесплатно", href: "/store/ivi" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],
   },
@@ -837,6 +846,8 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Путешествия и туризм", href: "/category/puteshestviya-i-turizm" },
+      { text: "Скидки на отели Отелло", href: "/store/otello" },
+      { text: "Билеты на Туту", href: "/store/tutu" },
       { text: "Развлечения и события", href: "/category/razvlecheniya" },
     ],
   },
@@ -853,8 +864,9 @@ export const ARTICLES: Article[] = [
       "Будьте осторожны с подержанным: качественная вещь б/у выгодна, но проверяйте состояние. Для новорожденных выбирайте только новые товары гигиены.",
     ],
     related: [
-      { text: "Маркетплейсы", href: "/category/marketpleysy" },
-      { text: "Лайфхаки шопинга на маркетплейсах", href: "/sovety/laifhaki-shoppinga-na-marketpleysah" },
+      { text: "Детские аксессуары Сбера", href: "/store/detskie-platezhnye-aksessuary-ot-sbera" },
+      { text: "Скидки на первый заказ", href: "/collections/first-order" },
+      { text: "Как не переплачивать на распродажах", href: "/sovety/ne-pereplychivat-na-rasprodazhah" },
     ],
   },
   {
@@ -940,7 +952,8 @@ export const ARTICLES: Article[] = [
       "Кешбэк карты на обучение: некоторые банки возвращают процент с оплаты книг и курсов. Комбинируйте с промокодом.",
     ],
     related: [
-      { text: "Онлайн-кинотеатры", href: "/category/onlayn-kinoteatry" },
+      { text: "Промокоды Литрес", href: "/store/litres" },
+      { text: "Книги и аудиокниги", href: "/category/knigi" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],
   },
@@ -1003,6 +1016,7 @@ export const ARTICLES: Article[] = [
       "Проверенные промокоды на доставку продуктов собраны в одном месте — с ними кэшбэк бьёт вдвойне.",
     ],
     related: [
+      { text: "Промокоды Пятёрочка Доставка", href: "/store/pyaterochka" },
       { text: "Как экономить на продуктах", href: "/sovety/kak-ekonomit-na-produktah" },
       { text: "Промокоды на доставку продуктов", href: "/category/dostavka-produktov" },
     ],
@@ -1217,6 +1231,7 @@ export const ARTICLES: Article[] = [
       "Не берите такси «сейчас» в пик — подождите 5 минут, цена просядет.",
     ],
     related: [
+      { text: "Промокоды Ситидрайв", href: "/store/citydrive" },
       { text: "Экономия на путешествиях и билетах", href: "/sovety/ekonomim-na-puteshestviyah-i-biletah" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],

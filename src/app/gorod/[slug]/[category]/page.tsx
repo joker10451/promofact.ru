@@ -58,6 +58,7 @@ export async function generateMetadata({
 
   const pageUrl = `${SITE_URL}/gorod/${citySlug}/${catSlug}`;
   const title = `Промокоды на ${cat.name.toLowerCase()} ${city.inCity} — скидки ${MONTH_YEAR}`;
+  const ogTitle = `${title} — ${SITE_NAME}`;
   const description = `Проверенные промокоды на ${cat.name.toLowerCase()} ${city.inCity}: ${list.length} ${plural(
     list.length,
     "актуальное предложение",
@@ -65,12 +66,17 @@ export async function generateMetadata({
     "актуальных предложений",
   )} от магазинов-партнёров. Копируй код и экономь уже сегодня.`;
 
+  const isIndexable = list.length > 0;
+
   return {
     title,
     description,
+    robots: isIndexable
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
     alternates: { canonical: pageUrl },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url: pageUrl,
       type: "website",
@@ -79,7 +85,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary",
-      title,
+      title: ogTitle,
       description,
     },
   };
@@ -136,7 +142,7 @@ export default async function CityCategoryPage({
         name: `Где искать промокоды на ${cat.name.toLowerCase()} ${city.inCity}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Все актуальные купоны на ${cat.name.toLowerCase()} ${city.inCity} собраны на этой странице. Мы обновляем их каждый день по мере запуска акций партнёров.`,
+          text: `Все актуальные купоны на ${cat.name.toLowerCase()} ${city.inCity} собраны на этой странице. Новые предложения появляются по мере запуска акций партнёров, а истёкшие снимаются автоматически по сроку.`,
         },
       },
       {
@@ -204,8 +210,10 @@ export default async function CityCategoryPage({
           Промокоды на {cat.name.toLowerCase()} {city.inCity}
         </h1>
         <p className="mt-3 max-w-2xl text-ink/60">
-          {list.length} {list.length === 1 ? "промокод" : "промокодов"} на{" "}
-          {cat.name.toLowerCase()} {city.inCity}. Обновляем ежедневно.
+          {list.length}{" "}
+          {plural(list.length, "промокод", "промокода", "промокодов")} на{" "}
+          {cat.name.toLowerCase()} {city.inCity}. Показываем только действующие
+          по сроку.
         </p>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -222,8 +230,8 @@ export default async function CityCategoryPage({
         {list.length === 0 && (
           <p className="mt-8 rounded-2xl border border-line bg-white p-6 text-sm text-ink/60">
             Пока нет активных промокодов на {cat.name.toLowerCase()}{" "}
-            {city.inCity}. Загляните позже — мы добавляем свежие акции каждый
-            день, или посмотрите{" "}
+            {city.inCity}. Загляните позже — новые акции появляются по мере
+            запуска предложений партнёров, или посмотрите{" "}
             <Link
               href={`/category/${catSlug}`}
               className="text-red font-bold hover:underline"
@@ -275,8 +283,9 @@ export default async function CityCategoryPage({
               </summary>
               <p className="mt-3 text-sm leading-relaxed text-ink/70">
                 Все актуальные купоны на {cat.name.toLowerCase()} {city.inCity}{" "}
-                собраны на этой странице. Мы обновляем их каждый день по мере
-                запуска акций партнёров.
+                собраны на этой странице. Новые предложения появляются по мере
+                запуска акций партнёров, а истёкшие снимаются автоматически по
+                сроку.
               </p>
             </details>
             <details className="group rounded-2xl border border-line bg-white px-5 py-4">

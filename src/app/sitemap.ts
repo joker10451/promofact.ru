@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getCategories, getAllStores } from "@/lib/perfluence";
+import { getCategories, getAllStores, getCoupons } from "@/lib/perfluence";
 import { getArticles } from "@/lib/articles";
 import { ACTIONS } from "@/lib/actions";
 import { CITIES_SEO } from "@/lib/citiesSeo";
@@ -11,6 +11,7 @@ import syncMeta from "@/data/sync-meta.json";
 // Содержит ТОЛЬКО канонические, индексируемые страницы.
 // Исключены неканонические подстраницы /store/[slug]/[code] (их canonical -> /store/[slug]).
 // Исключены служебные и закрытые страницы (/admin, /partner/yookassa).
+// Исключены пустые (0) и тонкие (< 3) страницы гео-категорий /gorod/[slug]/[category].
 //
 // Политика lastModified:
 // - Для страниц со значимыми изменениями указываются реальные даты (статьи -> published,
@@ -22,9 +23,10 @@ export const revalidate = false;
 const CATALOG_SYNC_DATE = syncMeta.lastSuccessSync ? new Date(syncMeta.lastSuccessSync) : undefined;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, stores] = await Promise.all([
+  const [categories, stores, coupons] = await Promise.all([
     getCategories(),
     getAllStores(),
+    getCoupons(),
   ]);
 
   // Главная страница — витрина живых предложений
@@ -75,6 +77,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly" as const,
     priority: 0.85,
   }));
+
+  // Гео-категории: только содержательные страницы с достаточной ценностью (list.length >= 3).
+  // Пустые (0) и тонкие (< 3) страницы исключены для предотвращения размытия индекса.
+  const geoCategoryMap: MetadataRoute.Sitemap = [];
+  for (const city of CITIES_SEO) {
+    for (const cat of categories) {
+      const list = coupons.filter((c) => {
+        const r = (c.promocode?.region || "").toLowerCase();
+        const isAllRu = !r || r === "вся россия" || r === "ru" || r.includes("россия");
+        const matchesCity = r.includes(city.name.toLowerCase());
+        return (isAllRu || matchesCity) && c.store.categorySlug === cat.slug;
+      });
+      if (list.length >= 3) {
+        geoCategoryMap.push({
+          url: `${SITE_URL}/gorod/${city.slug}/${cat.slug}`,
+          ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
+          changeFrequency: "weekly" as const,
+          priority: 0.75,
+        });
+      }
+    }
+  }
 
   // База знаний / советы: реальные даты публикаций статей
   const allArticles = getArticles();
@@ -143,6 +167,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...categoryMap,
     ...collectionsMap,
     ...citiesMap,
+    ...geoCategoryMap,
     ...promokodyMap,
     ...tipsMap,
     ...actionsMap,

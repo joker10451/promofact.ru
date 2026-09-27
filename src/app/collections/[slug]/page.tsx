@@ -51,8 +51,10 @@ export async function generateMetadata({
   if (!col) return {};
   const count = all.filter(col.filter).length;
   const pageUrl = `${SITE_URL}/collections/${slug}`;
+  const pageTitle = `Подборка скидок «${col.name}» — лучшие промокоды на ${MONTH_YEAR}`;
+  const ogTitle = `${pageTitle} — ${SITE_NAME}`;
   const og = {
-    title: `Подборка скидок «${col.name}» — лучшие промокоды на ${MONTH_YEAR} | ${SITE_NAME}`,
+    title: ogTitle,
     description: `Тематическая подборка выгодных предложений «${col.name}»: ${count} актуальных промокодов и акций от проверенных сервисов на ${MONTH_YEAR}.`,
     url: pageUrl,
     type: "website" as const,
@@ -60,7 +62,7 @@ export async function generateMetadata({
     siteName: SITE_NAME,
   };
   return {
-    title: og.title,
+    title: pageTitle,
     description: og.description,
     alternates: { canonical: pageUrl },
     openGraph: og,

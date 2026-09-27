@@ -138,6 +138,9 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-ink sm:leading-[1.1]">
           Найдите скидку. <br />
           <span className="text-red">Заплатите меньше.</span>
+          <span className="mt-2 sm:mt-3 block text-base sm:text-xl md:text-2xl font-semibold tracking-normal text-ink/80">
+            Актуальные промокоды и купоны на скидку
+          </span>
         </h1>
 
         {/* Подзаголовок */}
