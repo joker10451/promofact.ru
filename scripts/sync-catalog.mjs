@@ -375,10 +375,23 @@ export async function runCatalogSync(options = {}) {
         try {
           const supp = JSON.parse(fs.readFileSync(suppPath, "utf-8"));
           if (Array.isArray(supp)) {
-            const existingIds = new Set(cleanData.data.map((p) => p.project?.id));
+            const existingMap = new Map(cleanData.data.map((p) => [p.project?.id, p]));
             for (const item of supp) {
-              if (item && item.project && !existingIds.has(item.project.id)) {
+              const projId = item.project?.id || item.project_id;
+              if (!projId) continue;
+              const existing = existingMap.get(projId);
+              if (!existing) {
+                // Нормализуем плоскую запись к формату project.id
+                if (!item.project) {
+                  item.project = {
+                    id: projId,
+                    name: item.project_name || "Проект",
+                    logo: item.info?.logo || "",
+                    ...item.info,
+                  };
+                }
                 cleanData.data.push(item);
+                existingMap.set(projId, item);
                 const groups = item.groups || [];
                 for (const g of groups) {
                   for (const _ of g.promocodes || []) {
@@ -388,6 +401,21 @@ export async function runCatalogSync(options = {}) {
                   for (const _ of g.links_for_subscribers || []) {
                     totalLinkOffers++;
                     activeLinkOffers++;
+                  }
+                }
+              } else {
+                // Обогащаем существующий проект из API дополнительными данными (маркировка, медицинские предупреждения)
+                const suppPromos = (item.groups || []).flatMap((g) => g.promocodes || []);
+                const suppPromoByCode = new Map(suppPromos.map((p) => [p.code, p]));
+                for (const g of existing.groups || []) {
+                  for (const p of g.promocodes || []) {
+                    const sp = suppPromoByCode.get(p.code);
+                    if (sp?.ord_custom_text && !p.ord_custom_text?.includes("ПРОТИВОПОКАЗАНИЯ") && sp.ord_custom_text.includes("ПРОТИВОПОКАЗАНИЯ")) {
+                      p.ord_custom_text = sp.ord_custom_text;
+                    }
+                    if (sp?.promo_terms && !p.promo_terms?.includes("противопоказан") && sp.promo_terms.includes("противопоказан")) {
+                      p.promo_terms = `${p.promo_terms || ""}\n${sp.promo_terms}`.trim();
+                    }
                   }
                 }
               }

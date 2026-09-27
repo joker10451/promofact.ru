@@ -793,4 +793,79 @@ const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8"
   passed++;
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/32 ТЕСТОВ (23 Admitad + 9 Регрессий) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// Test 33 [Hotfix]: Баннер СберЗдоровья перестаёт показываться после 30 сентября 2026 г. 23:59 МСК
+{
+  const { PROMO_BANNERS, getActivePromoBanners } = await import("@/lib/promoBanners");
+  const sberBanner = PROMO_BANNERS.find((b) => b.id === "sberzdorovie-telemed-2026");
+
+  assert.ok(sberBanner, "Баннер sberzdorovie-telemed-2026 должен присутствовать");
+  assert.strictEqual(sberBanner.endsAt, "2026-09-30", "endsAt должен быть строго 2026-09-30");
+
+  const activeBefore = getActivePromoBanners({
+    storeSlug: "sberzdorovie",
+    now: new Date("2026-09-30T23:59:58+03:00").getTime(),
+  });
+  assert.strictEqual(
+    activeBefore.some((b) => b.id === "sberzdorovie-telemed-2026"),
+    true,
+    "До конца 30 сентября баннер СберЗдоровья должен быть активен"
+  );
+
+  const activeAfter = getActivePromoBanners({
+    storeSlug: "sberzdorovie",
+    now: new Date("2026-10-01T00:00:01+03:00").getTime(),
+  });
+  assert.strictEqual(
+    activeAfter.some((b) => b.id === "sberzdorovie-telemed-2026"),
+    false,
+    "После 30 сентября (1 октября 00:00:01 МСК) баннер не должен отображаться"
+  );
+
+  console.log("✓ Test 33 [Hotfix]: Баннер СберЗдоровья скрывается после завершения акции (PASS)");
+  passed++;
+}
+
+// Test 34 [Hotfix]: Корректное объединение фидов при наличии проекта Островок (ID 2271)
+{
+  const { runCatalogSync } = await import("./sync-catalog.mjs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sync-test-feed-merge-"));
+  const tmpFeed = path.join(tmpDir, "feed.json");
+  const tmpSupp = path.join(tmpDir, "supp.json");
+  const tmpMeta = path.join(tmpDir, "meta.json");
+
+  try {
+    const suppContent = JSON.parse(fs.readFileSync("src/data/supplemental-projects.json", "utf-8"));
+    const ostrovok = suppContent.find((p) => p.project?.id === 2271);
+    assert.ok(ostrovok, "Островок должен быть представлен структурой с project.id === 2271");
+    assert.strictEqual(ostrovok.project.id, 2271);
+
+    const codes = (ostrovok.groups || []).flatMap((g) => g.promocodes || []).map((p) => p.code);
+    assert.ok(codes.includes("PFRUS414"), "Должен присутствовать промокод PFRUS414");
+    assert.ok(codes.includes("PFWOR417"), "Должен присутствовать промокод PFWOR417");
+
+    // Изолированный прогон синхронизации во временном каталоге
+    fs.writeFileSync(tmpFeed, JSON.stringify({ data: [] }), "utf-8");
+    fs.writeFileSync(tmpSupp, JSON.stringify([ostrovok]), "utf-8");
+
+    await runCatalogSync({
+      feedPath: tmpFeed,
+      supplementalPath: tmpSupp,
+      metaPath: tmpMeta,
+    });
+
+    const result = JSON.parse(fs.readFileSync(tmpFeed, "utf-8"));
+    const mergedOstrovok = result.data.find((p) => p.project?.id === 2271);
+    assert.ok(mergedOstrovok, "Островок должен успешно попадать в объединённый фид");
+    assert.strictEqual(mergedOstrovok.project.name, "Островок!");
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+
+  console.log("✓ Test 34 [Hotfix]: Корректное объединение фида с Островком (ID 2271) (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/34 ТЕСТОВ (23 Admitad + 11 Регрессий/Hotfix) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);

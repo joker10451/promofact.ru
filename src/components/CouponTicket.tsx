@@ -12,6 +12,23 @@ import { CheckIcon } from "@/components/CheckIcon";
 import { refineOffer } from "@/lib/offerRefiner";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
 
+const SBER_MED_WARNING = "ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА";
+
+function parseOrdAndWarning(ordText?: string) {
+  if (!ordText) return { legalText: "", medicalWarning: "" };
+  if (!/противопоказан/i.test(ordText)) {
+    return { legalText: ordText, medicalWarning: "" };
+  }
+  const legal = ordText
+    .replace(/[.\s]*ИМЕЮТСЯ\s+ПРОТИВОПОКАЗАНИЯ[,.\s]+НЕОБХОДИМА\s+КОНСУЛЬТАЦИЯ\s+СПЕЦИАЛИСТА[.\s]*/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return {
+    legalText: legal,
+    medicalWarning: SBER_MED_WARNING,
+  };
+}
+
 /** Склонение «заказ/заказа/заказов» по числу. */
 function pluralOrders(n: number): string {
   const mod10 = n % 10;
@@ -430,11 +447,21 @@ export default function CouponTicket({
           </span>
         </div>
 
-        {affiliate.ordText && (
-          <p className="mt-1.5 text-center text-[9px] text-ink/30 line-clamp-1">
-            {affiliate.ordText}
-          </p>
-        )}
+        {affiliate.ordText && (() => {
+          const { legalText, medicalWarning } = parseOrdAndWarning(affiliate.ordText);
+          return medicalWarning ? (
+            <div className="mt-1.5 space-y-0.5 text-center">
+              <p className="text-[9px] text-ink/30 line-clamp-1">{legalText}</p>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-ink/60">
+                {medicalWarning}
+              </p>
+            </div>
+          ) : (
+            <p className="mt-1.5 text-center text-[9px] text-ink/30 line-clamp-1">
+              {affiliate.ordText}
+            </p>
+          );
+        })()}
 
         {/* 6. Бейдж «Популярный промокод» — только по подтверждённым заказам */}
         {proofCount >= 10 && (
@@ -528,11 +555,23 @@ export default function CouponTicket({
                   </div>
                 </div>
 
-                {affiliate.ordText && (
-                  <div className="pt-2 text-[10px] text-ink/40 border-t border-line/40">
-                    {affiliate.ordText}
-                  </div>
-                )}
+                {affiliate.ordText && (() => {
+                  const { legalText, medicalWarning } = parseOrdAndWarning(affiliate.ordText);
+                  return medicalWarning ? (
+                    <div className="pt-2 space-y-1 border-t border-line/40">
+                      <div className="text-[10px] text-ink/40">
+                        {legalText}
+                      </div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-ink/70">
+                        {medicalWarning}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="pt-2 text-[10px] text-ink/40 border-t border-line/40">
+                      {affiliate.ordText}
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="mt-6 flex gap-2">

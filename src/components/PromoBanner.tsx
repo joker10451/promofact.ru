@@ -10,6 +10,23 @@ import { bannerStartMs, isBannerStarted, type PromoBanner as PromoBannerData } f
  * бывает юридический текст, который нельзя терять. Вертикальный креатив
  * (сторис) ставится узкой колонкой, чтобы баннер не растягивался на экран.
  */
+const SBER_MED_WARNING = "ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА";
+
+function parseOrdAndWarning(ordText?: string) {
+  if (!ordText) return { legalText: "", medicalWarning: "" };
+  if (!/противопоказан/i.test(ordText)) {
+    return { legalText: ordText, medicalWarning: "" };
+  }
+  const legal = ordText
+    .replace(/[.\s]*ИМЕЮТСЯ\s+ПРОТИВОПОКАЗАНИЯ[,.\s]+НЕОБХОДИМА\s+КОНСУЛЬТАЦИЯ\s+СПЕЦИАЛИСТА[.\s]*/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return {
+    legalText: legal,
+    medicalWarning: SBER_MED_WARNING,
+  };
+}
+
 export default function PromoBanner({ banner }: { banner: PromoBannerData }) {
   const startMs = bannerStartMs(banner);
   const started = isBannerStarted(banner);
@@ -91,7 +108,19 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
           </div>
         )}
       </a>
-      <p className="mt-2 text-[11px] leading-snug text-ink/45">{banner.ordText}</p>
+      {(() => {
+        const { legalText, medicalWarning } = parseOrdAndWarning(banner.ordText);
+        return medicalWarning ? (
+          <div className="mt-2 space-y-1">
+            <p className="text-[11px] leading-snug text-ink/45">{legalText}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-ink/70">
+              {medicalWarning}
+            </p>
+          </div>
+        ) : (
+          <p className="mt-2 text-[11px] leading-snug text-ink/45">{banner.ordText}</p>
+        );
+      })()}
     </aside>
   );
 }
