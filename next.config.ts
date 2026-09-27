@@ -89,6 +89,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/yandeks-plyus/:path*",
+        destination: "/store/yandex-plus",
+        permanent: true,
+      },
+      {
+        source: "/store/yandeks-plyus",
+        destination: "/store/yandex-plus",
+        permanent: true,
+      },
+      {
         source: "/store/kassir-ru/:path*",
         destination: "/category/razvlecheniya",
         permanent: false,
