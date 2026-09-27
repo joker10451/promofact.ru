@@ -170,7 +170,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
               />
               <button
                 type="submit"
-                className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-xl bg-gradient-to-r from-red to-red-dark px-3.5 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                className="absolute right-2 sm:right-2.5 top-2 sm:top-2.5 bottom-2 sm:bottom-2.5 flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-red to-red-dark px-3.5 sm:px-5 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:brightness-105 active:scale-[0.98] transition-all cursor-pointer"
               >
                 <span>Найти</span>
                 <span>→</span>
