@@ -44,6 +44,16 @@ export const metadata: Metadata = {
   description:
     "Рабочие промокоды и купоны на скидку в популярных магазинах: РИВ ГОШ, Отелло, Пятёрочка, Тануки, Start.ru и другие. Бесплатно, обновляем каждый день.",
   alternates: { canonical: SITE_URL },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   verification: {
     yandex: process.env.YANDEX_VERIFICATION || undefined,
     google: process.env.GOOGLE_VERIFICATION || undefined,
