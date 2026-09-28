@@ -1,8 +1,9 @@
-name: Safe Catalog Sync & PR
+name: Safe Catalog Sync & Auto-Deploy
 
 on:
   schedule:
-    - cron: '0 6 * * *' # Раз в сутки в 09:00 МСК (06:00 UTC)
+    # 4 раза в сутки: 00:05, 06:05, 12:05, 18:05 МСК (21:05, 03:05, 09:05, 15:05 UTC)
+    - cron: '5 21,3,9,15 * * *'
   workflow_dispatch: # Возможность запустить вручную
 
 concurrency:
@@ -11,11 +12,10 @@ concurrency:
 
 jobs:
   sync:
-    name: Sync Feed & Create PR
+    name: Sync Feed & Auto-Deploy
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -66,22 +66,13 @@ jobs:
         id: check_changes
         run: node scripts/check-feed-changes.mjs
 
-      # 9. Создание Pull Request только при выполнении всех необходимых условий
-      - name: Create Pull Request with updated catalog
+      # 9. Автоматический коммит и пуш в main при наличии подтвержденных изменений каталога
+      - name: Commit and push changes directly to main
         if: steps.check_changes.outputs.has_changes == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(catalog): регулярное обновление фида предложений"
-          title: "chore(catalog): обновление каталога партнерских предложений"
-          body: |
-            Автоматическое обновление фида предложений PromoFact:
-            - Успешно выполнен `scripts/sync-catalog.mjs` (status: success)
-            - Пройден полный цикл валидации: `npm test`, `npm run lint`, `npm run build` и `npm run test:seo`
-            - Подтверждены содержательные изменения каталога (технические timestamps проигнорированы)
-            - Включены обновлённые `src/data/perfluence-feed.json` и `src/data/sync-meta.json`
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/perfluence-feed.json src/data/sync-meta.json
+          git commit -m "chore(catalog): регулярное автообновление каталога партнерских предложений"
+          git push origin main
 
-            ⚠️ **Внимание:** автоматическое слияние и деплой отключены. Проверьте изменения и выполните merge вручную при готовности к релизу.
-          branch: chore/catalog-feed-update
-          base: main
-          delete-branch: true
