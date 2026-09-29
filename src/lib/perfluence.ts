@@ -151,6 +151,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   1409: { slug: "winlab", name: "ВинЛаб" },
   3758: { slug: "rutube", name: "RUTUBE" },
   3285: { slug: "t-puteshestviya-oteli", name: "Т-Путешествия. Отели" },
+  139: { slug: "t-bank-junior", name: "Т-Банк Джуниор" },
   3468: { slug: "sberzdorovie", name: "СберЗдоровье" },
   2271: { slug: "ostrovok", name: "Островок!" },
   1102: { slug: "elementaree", name: "Elementaree" },

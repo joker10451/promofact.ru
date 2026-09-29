@@ -669,5 +669,219 @@
         "widget_subscriber_codes": []
       }
     ]
+  },
+  {
+    "project": {
+      "id": 139,
+      "logo": "https://s3sc.perfluence.net/logos/17080906573658.png",
+      "logo_widget": "https://s3sc.perfluence.net/logos/17080906573658.png",
+      "name": "Т-Банк Джуниор",
+      "img": "https://s3sc.perfluence.net/logos/17080906573658.png",
+      "category_id": 257,
+      "category_name": "Банковские карты",
+      "activeBloggers": 1500,
+      "product_info": "<p>Детская дебетовая карта Т-Банк Джуниор — это удобная карта для детей до 14 лет с бесплатным выпуском, бесплатным обслуживанием и яркими дизайнами (включая светящиеся в темноте). Ребенок учится финансовой грамотности в отдельном детском приложении, получает до 30% бонусами за покупки и до 14% годовых на накопительный счет-копилку. Родители видят баланс и траты ребенка, мгновенно пополняют карту без комиссии и устанавливают лимиты в своем приложении Т-Банка.</p>",
+      "subscribers_condition": "",
+      "site": "https://www.tbank.ru",
+      "info": "",
+      "advantages": [
+        "Бесплатный выпуск и обслуживание карты навсегда без условий;",
+        "Кэшбэк до 30% бонусами за покупки у партнеров и 1% на все остальные траты (1 бонус = 1 ₽);",
+        "До 14% годовых на остаток в счете-копилке для накопления на мечту;",
+        "Яркие дизайны карты, включая светящиеся в темноте варианты;",
+        "Полный родительский контроль лимитов и моментальные бесплатные переводы."
+      ],
+      "subscriber_guide": "",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 0,
+      "rsp": 0
+    },
+    "groups": [
+      {
+        "landing": {
+          "id": 13901,
+          "project_id": 139,
+          "name": "Детская светящаяся карта Джуниор c кэшбэком до 30% бонусами",
+          "btn_text": "Оформить карту",
+          "link": "https://tjunior.prfl.me/sites/xh2mf5?erid=2RanymtM9xX",
+          "logo": "",
+          "post_id": 17223948,
+          "is_hiting": true,
+          "is_captcha_enabled": false,
+          "is_oauth_enabled": false,
+          "hit_custom_text": "ХИТ",
+          "hit_bg_color": null,
+          "hit_color": null,
+          "ord_marker": "2RanymtM9xX",
+          "ord_custom_text": "Реклама. АО «ТБанк», лицензия 2673. Подробнее на tbank.ru. erid: 2RanymtM9xX",
+          "show": ""
+        },
+        "links_for_subscribers": [
+          {
+            "id": 13901,
+            "title": "Детская светящаяся карта Джуниор c кэшбэком до 30% бонусами",
+            "link": "https://tjunior.prfl.me/sites/xh2mf5?erid=2RanymtM9xX",
+            "landing_terms": "Детская светящаяся карта Джуниор с кэшбэком до 30% бонусами на карту ребёнка для новых пользователей банка, у которых ранее не было детской карты. Бесплатное обслуживание и оповещения, выбор ярких светящихся дизайнов. До 14% годовых на накопительный счёт."
+          }
+        ],
+        "promocodes": [
+          {
+            "project_id": 139,
+            "code": "",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Детская светящаяся карта Джуниор c кэшбэком до 30% бонусами на карту ребёнка",
+            "date": "31.10.2026",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": true,
+            "hit_custom_text": "ХИТ",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 13901,
+            "is_universal": true,
+            "name": "Светящаяся карта Джуниор с кэшбэком до 30% бонусами",
+            "promo_terms": "Детская светящаяся карта Джуниор с кэшбэком до 30% бонусами на карту ребёнка для новых пользователей банка, у которых ранее не было детской карты. Бесплатное обслуживание и оповещения, выбор ярких светящихся дизайнов. До 14% годовых на накопительный счёт.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": false,
+            "post_id": 17223948,
+            "ord_marker": "2RanymtM9xX",
+            "ord_custom_text": "Реклама. АО «ТБанк», лицензия 2673. Подробнее на tbank.ru. erid: 2RanymtM9xX",
+            "discount": 30,
+            "btn_text": "Оформить карту",
+            "show": ""
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      },
+      {
+        "landing": {
+          "id": 13902,
+          "project_id": 139,
+          "name": "Дебетовая карта Джуниор c начислением 500 баллов за первую покупку",
+          "btn_text": "Оформить карту",
+          "link": "https://tnkff.prfl.me/sites/ino4u9?erid=2Ranymuq9Es",
+          "logo": "",
+          "post_id": 17223948,
+          "is_hiting": false,
+          "is_captcha_enabled": false,
+          "is_oauth_enabled": false,
+          "hit_custom_text": "",
+          "hit_bg_color": null,
+          "hit_color": null,
+          "ord_marker": "2Ranymuq9Es",
+          "ord_custom_text": "Реклама. АО «ТБанк», лицензия 2673. Подробнее на tbank.ru. erid: 2Ranymuq9Es",
+          "show": ""
+        },
+        "links_for_subscribers": [
+          {
+            "id": 13902,
+            "title": "Дебетовая карта Джуниор c начислением 500 баллов за первую покупку",
+            "link": "https://tnkff.prfl.me/sites/ino4u9?erid=2Ranymuq9Es",
+            "landing_terms": "Кэшбэк 500 баллов на карту ребёнка за первую покупку для новых пользователей банка, у которых ранее не было детской карты Джуниор. 1 балл = 1 рубль. Бесплатный выпуск и обслуживание."
+          }
+        ],
+        "promocodes": [
+          {
+            "project_id": 139,
+            "code": "",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Дебетовая карта Джуниор c начислением 500 баллов за первую покупку",
+            "date": "31.10.2026",
+            "group": "",
+            "is_hit": false,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 13902,
+            "is_universal": true,
+            "name": "500 баллов в подарок за первую покупку по карте Джуниор",
+            "promo_terms": "Кэшбэк 500 баллов на карту ребёнка за первую покупку для новых пользователей банка, у которых ранее не было детской карты Джуниор. 1 балл = 1 рубль. Бесплатный выпуск и обслуживание.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": false,
+            "post_id": 17223948,
+            "ord_marker": "2Ranymuq9Es",
+            "ord_custom_text": "Реклама. АО «ТБанк», лицензия 2673. Подробнее на tbank.ru. erid: 2Ranymuq9Es",
+            "discount": 500,
+            "btn_text": "Оформить карту",
+            "show": ""
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      },
+      {
+        "landing": {
+          "id": 13903,
+          "project_id": 139,
+          "name": "Дебетовая карта Джуниор с кэшбэком 500 ₽ за траты от 1000 ₽ два месяца подряд на карту родителю",
+          "btn_text": "Оформить карту",
+          "link": "https://tnkff.prfl.me/sites/sw8km2?erid=2RanymwK8XD",
+          "logo": "",
+          "post_id": 17223948,
+          "is_hiting": false,
+          "is_captcha_enabled": false,
+          "is_oauth_enabled": false,
+          "hit_custom_text": "",
+          "hit_bg_color": null,
+          "hit_color": null,
+          "ord_marker": "2RanymwK8XD",
+          "ord_custom_text": "Реклама. АО «ТБанк», лицензия 2673. Подробнее на tbank.ru. erid: 2RanymwK8XD",
+          "show": ""
+        },
+        "links_for_subscribers": [
+          {
+            "id": 13903,
+            "title": "Дебетовая карта Джуниор с кэшбэком 500 ₽ за траты от 1000 ₽ два месяца подряд на карту родителю",
+            "link": "https://tnkff.prfl.me/sites/sw8km2?erid=2RanymwK8XD",
+            "landing_terms": "Кэшбэк 1 000 ₽ на карту родителя — по 500 ₽ два месяца подряд за покупки от 1 000 ₽ в месяц по детской карте для новых пользователей банка."
+          }
+        ],
+        "promocodes": [
+          {
+            "project_id": 139,
+            "code": "",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Кэшбэк 1 000 ₽ на карту родителя — по 500 ₽ 2 месяца подряд за покупки от 1 000 ₽",
+            "date": "31.10.2026",
+            "group": "",
+            "is_hit": false,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 13903,
+            "is_universal": true,
+            "name": "Кэшбэк 1 000 ₽ родителю (по 500 ₽ 2 месяца подряд за покупки от 1 000 ₽)",
+            "promo_terms": "Кэшбэк 1 000 ₽ на карту родителя — по 500 ₽ два месяца подряд за покупки от 1 000 ₽ в месяц по детской карте для новых пользователей банка.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": false,
+            "post_id": 17223948,
+            "ord_marker": "2RanymwK8XD",
+            "ord_custom_text": "Реклама. АО «ТБанк», лицензия 2673. Подробнее на tbank.ru. erid: 2RanymwK8XD",
+            "discount": 1000,
+            "btn_text": "Оформить карту",
+            "show": ""
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      }
+    ]
   }
 ]
