@@ -149,6 +149,33 @@
       "link": "https://podrygka.prfl.me/smart_zakupka/hopflr?erid=2RanykAX6Cs",
       "erid": "2RanykAX6Cs",
       "date": "2026-09-22T10:51:33.689Z"
+    },
+    {
+      "id": 1790683428665,
+      "code": "158B2HT4F",
+      "store": "Перекрёсток Доставка",
+      "storeSlug": "perekrestok-dostavka",
+      "postUrl": "https://t.me/smart_zakupka/79",
+      "date": "2026-09-29T12:03:48.665Z",
+      "messageId": 79
+    },
+    {
+      "id": 1790683723024,
+      "code": "RND0-y4GSvwhT",
+      "store": "Randewoo",
+      "storeSlug": "randewoo",
+      "postUrl": "https://t.me/smart_zakupka/81",
+      "date": "2026-09-29T12:08:43.024Z",
+      "messageId": 81
+    },
+    {
+      "id": 1790683858801,
+      "code": "pf5m0gcpfw6",
+      "store": "Start.ru",
+      "storeSlug": "start-ru",
+      "postUrl": "https://t.me/smart_zakupka/82",
+      "date": "2026-09-29T12:10:58.801Z",
+      "messageId": 82
     }
   ]
 }

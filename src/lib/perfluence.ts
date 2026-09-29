@@ -153,6 +153,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   3285: { slug: "t-puteshestviya-oteli", name: "Т-Путешествия. Отели" },
   3468: { slug: "sberzdorovie", name: "СберЗдоровье" },
   2271: { slug: "ostrovok", name: "Островок!" },
+  1102: { slug: "elementaree", name: "Elementaree" },
   1100: { slug: "sunlight-ru", name: "SUNLIGHT" },
 };
 

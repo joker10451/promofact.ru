@@ -102,6 +102,7 @@ async function run() {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
       await page.goto(`${BASE_URL}/`, { waitUntil: "domcontentloaded" });
+      await page.waitForTimeout(1500);
 
       const searchTrigger = page.locator('button[aria-label="Поиск по магазинам и купонам"]').first();
       await searchTrigger.click();
@@ -120,7 +121,7 @@ async function run() {
 
       // Проверяем клавиатурную навигацию: Enter открывает выбранный результат
       await page.keyboard.press("Enter");
-      await page.waitForURL("**/store/sunlight-ru", { timeout: 5000 });
+      await page.waitForURL("**/store/sunlight-ru", { timeout: 5000, waitUntil: "domcontentloaded" });
       console.log("  ✓ Переход к магазину работает по нажатию клавиши Enter");
 
       await context.close();
@@ -132,7 +133,7 @@ async function run() {
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/`, { waitUntil: "load" });
+      await page.goto(`${BASE_URL}/`, { waitUntil: "domcontentloaded" });
 
       // Открываем модалку поиска по Cmd/Ctrl+K
       const searchModal = page.locator('div[role="dialog"][aria-label="Поиск по магазинам и купонам"]');
@@ -191,7 +192,7 @@ async function run() {
         };
       });
 
-      await page.goto(`${BASE_URL}/`, { waitUntil: "load" });
+      await page.goto(`${BASE_URL}/`, { waitUntil: "domcontentloaded" });
 
       // Открываем поиск и вводим запрос с чувствительными словами
       const searchTrigger = page.locator('button[aria-label="Поиск по магазинам и купонам"]').first();
@@ -245,7 +246,7 @@ async function run() {
         permissions: ["clipboard-read", "clipboard-write"],
       });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
+      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
 
       // Находим первую карточку купона
       const firstCard = page.locator("article").first();
@@ -292,7 +293,7 @@ async function run() {
         }
       });
 
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
+      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
 
       const firstCard = page.locator("article").first();
       const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
@@ -331,7 +332,7 @@ async function run() {
       for (const res of mobileResolutions) {
         const context = await browser.newContext({ viewport: { width: res.width, height: res.height } });
         const page = await context.newPage();
-        await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
+        await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
 
         const helperBtn = page.locator('button[aria-label="Открыть помощника"]');
         await helperBtn.waitFor({ state: "visible" });
@@ -377,7 +378,7 @@ async function run() {
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
+      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
 
       const affiliateLink = page.locator("a:has-text('Перейти на сайт SUNLIGHT')").first();
       await affiliateLink.waitFor({ state: "visible" });
@@ -398,7 +399,7 @@ async function run() {
       console.log(`  ✓ Партнёрская ссылка проверена без совершения заказа: ${href.slice(0, 45)}...`);
 
       // Проверяем страницу с предложением без промокода
-      await page.goto(`${BASE_URL}/store/sberprime`, { waitUntil: "load" });
+      await page.goto(`${BASE_URL}/store/sberprime`, { waitUntil: "domcontentloaded" });
       const noCodeBadge = page.locator("text=Промокод не требуется — скидка применится по ссылке").first();
       await noCodeBadge.waitFor({ state: "visible", timeout: 3000 });
       console.log("  ✓ Предложения без промокодов корректно маркированы бейджем без имитации кода");
@@ -449,7 +450,7 @@ async function run() {
           window.ym = ymFn;
         }
       });
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "load" });
+      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
 
       const firstCard = page.locator("article").first();
       await firstCard.waitFor({ state: "visible" });

@@ -592,5 +592,82 @@
         "widget_subscriber_codes": []
       }
     ]
+  },
+  {
+    "project": {
+      "id": 1102,
+      "logo": "https://s3sc.perfluence.net/logos/16451119437056.jpg",
+      "logo_widget": "https://s3sc.perfluence.net/logos/16451119437056.jpg",
+      "name": "Elementaree",
+      "img": "https://s3sc.perfluence.net/logos/16451119437056.jpg",
+      "category_id": 304,
+      "category_name": "Доставка продуктов",
+      "activeBloggers": 2400,
+      "product_info": "<p>Elementaree — сервис доставки наборов свежих продуктов с пошаговыми фоторецептами от шеф-повара. Все ингредиенты вымыты, очищены и нарезаны: приготовление полноценного ужина занимает всего 15 минут. В меню более 50 разнообразных блюд еженедельно.</p>",
+      "subscribers_condition": "",
+      "site": "https://elementaree.ru",
+      "info": "",
+      "advantages": [
+        "Ужин за 15 минут: все ингредиенты уже помыты, почищены и нарезаны;",
+        "Более 50 ресторанных блюд в еженедельном меню;",
+        "Только свежие фермерские продукты и крафтовые соусы собственного производства;",
+        "Гибкая настройка порций и состава меню под ваши вкусы и диету;",
+        "Бесплатная доставка до двери в удобный интервал времени."
+      ],
+      "subscriber_guide": "",
+      "regions": [
+        "Россия",
+        "Москва",
+        "Санкт-Петербург"
+      ],
+      "pf": 0,
+      "rsp": 3000
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18589999,
+            "title": "Оформить заказ в Elementaree со скидкой",
+            "link": "https://elementareenw.prfl.me/sites/t89jqk?erid=2RanynJ4HWB",
+            "landing_terms": ""
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 1102,
+            "code": "leam99",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Скидка 40% на первый заказ от 3000 ₽ или 12% на все повторные заказы от 3000 ₽",
+            "date": "30.09.2026",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": true,
+            "hit_custom_text": "ХИТ",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 11021,
+            "is_universal": true,
+            "name": "Скидка 40% на первый заказ от 3 000 ₽ или 12% на повторные заказы от 3 000 ₽",
+            "promo_terms": "Скидка 40% действует на первый заказ от 3 000 ₽. Скидка 12% действует на все повторные заказы от 3 000 ₽.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": true,
+            "post_id": 17223828,
+            "ord_marker": "2RanynJ4HWB",
+            "ord_custom_text": "Реклама. ООО \"ОЛИМП\", ИНН 7724417578. erid: 2RanynJ4HWB",
+            "discount": 40,
+            "btn_text": null,
+            "show": ""
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      }
+    ]
   }
 ]
