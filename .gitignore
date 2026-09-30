@@ -69,3 +69,4 @@ scripts/post-*.mjs
 # Локальная конфигурация запуска дев-сервера
 /.claude/
 .youtube-token.json
+data/yandex_session*
