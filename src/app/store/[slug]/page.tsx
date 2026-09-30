@@ -260,10 +260,17 @@ export default async function StorePage({
   }));
 
   const storeExtra = getStoreExtra(slug);
-  // Offer-specific FAQ из StoreExtra показываем только если офферы действительно активны.
-  // Если офферы истекли или отсутствуют — показываются только общие FAQ магазина.
-  const showCustomFaq = hasActiveRequiredCoupons(storeExtra, store.coupons);
-  const customFaqItems = showCustomFaq ? (storeExtra?.faq ?? []) : [];
+  // Offer-specific FAQ из StoreExtra фильтруем по сроку только если для магазина явно
+  // заданы requiredActiveCodes. Если requiredActiveCodes нет (например, общие FAQ для
+  // FARFOR, RUTUBE, СберЗдоровья) — FAQ сохраняется в полном объёме.
+  const customFaqItems =
+    !storeExtra?.faq
+      ? []
+      : storeExtra.requiredActiveCodes && storeExtra.requiredActiveCodes.length > 0
+        ? hasActiveRequiredCoupons(storeExtra, store.coupons)
+          ? storeExtra.faq
+          : []
+        : storeExtra.faq;
 
   const faqItems = [
     ...customFaqItems,

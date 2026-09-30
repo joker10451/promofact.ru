@@ -373,7 +373,48 @@ let passed = 0;
     "Если промокод WinClub WCPFSEP7289 истек -> custom FAQ и metadata отключаются"
   );
 
-  console.log("✓ Тест 8: Регрессия expiry fallback для SEO-офферов и custom FAQ подтверждена (PASS)");
+  // 4. Проверяем магазины БЕЗ requiredActiveCodes (FARFOR, RUTUBE, СберЗдоровье):
+  // Их FAQ не должен скрываться из-за отсутствия customTitle или requiredActiveCodes
+  const farforExtra = getStoreExtra("farfor");
+  assert.ok(farforExtra && farforExtra.faq && farforExtra.faq.length > 0, "У FARFOR должен быть FAQ");
+  assert.strictEqual(
+    farforExtra.requiredActiveCodes,
+    undefined,
+    "У FARFOR не должно быть requiredActiveCodes"
+  );
+  // Эмуляция логики отбора FAQ из page.tsx:
+  const getFaqForStore = (extra, coupons, now) =>
+    !extra?.faq
+      ? []
+      : extra.requiredActiveCodes && extra.requiredActiveCodes.length > 0
+        ? hasActiveRequiredCoupons(extra, coupons, now)
+          ? extra.faq
+          : []
+        : extra.faq;
+
+  assert.deepStrictEqual(
+    getFaqForStore(farforExtra, [], Date.now()),
+    farforExtra.faq,
+    "FAQ FARFOR должен сохраняться независимо от наличия кодов"
+  );
+
+  const rutubeExtra = getStoreExtra("rutube");
+  assert.ok(rutubeExtra && rutubeExtra.faq && rutubeExtra.faq.length > 0, "У RUTUBE должен быть FAQ");
+  assert.deepStrictEqual(
+    getFaqForStore(rutubeExtra, [], Date.now()),
+    rutubeExtra.faq,
+    "FAQ RUTUBE должен сохраняться независимо от наличия кодов"
+  );
+
+  const sberzExtra = getStoreExtra("sberzdorovie");
+  assert.ok(sberzExtra && sberzExtra.faq && sberzExtra.faq.length > 0, "У СберЗдоровья должен быть FAQ");
+  assert.deepStrictEqual(
+    getFaqForStore(sberzExtra, [], Date.now()),
+    sberzExtra.faq,
+    "FAQ СберЗдоровья должен сохраняться независимо от наличия кодов"
+  );
+
+  console.log("✓ Тест 8: Регрессия expiry fallback для SEO-офферов и сохранение FAQ без requiredActiveCodes подтверждены (PASS)");
   passed++;
 }
 
