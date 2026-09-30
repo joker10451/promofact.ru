@@ -94,7 +94,7 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 9;
+    const totalTests = 10;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
@@ -548,6 +548,110 @@ async function run() {
         await context.close();
       }
 
+      passedTests++;
+    }
+
+    // --- СЦЕНАРИЙ 10: Store Intent Filters (клиентская фильтрация и 308 редиректы) ---
+    console.log("\n[Тест 10] Сценарий: Фильтры типов заказов (клиентский стейт) и 308 редиректы устаревших маршрутов");
+    {
+      const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+      const page = await context.newPage();
+
+      // 1. Открываем /store/farfor (имеет 4 купона: 2 на первый заказ, 2 повторных)
+      await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
+      await page.waitForTimeout(500);
+
+      // Проверяем начальный фильтр "Все акции" и количество видимых карточек
+      const allBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Все акции")');
+      await allBtn.waitFor({ state: "visible" });
+      const isAllPressed = await allBtn.getAttribute("aria-pressed");
+      if (isAllPressed !== "true") {
+        throw new Error(`Начальный фильтр должен быть 'all' (aria-pressed=true), получено: ${isAllPressed}`);
+      }
+
+      // Считаем карточки купонов в сетке (article с id^="coupon-")
+      const cards = page.locator('article[id^="coupon-"]');
+      const initialCount = await cards.count();
+      if (initialCount !== 4) {
+        throw new Error(`Ожидалось 4 купона в начальном состоянии, найдено: ${initialCount}`);
+      }
+      console.log(`  ✓ Начальное состояние: фильтр 'Все акции' активен, отображаются все ${initialCount} карточки`);
+
+      // 2. Клик "На первый заказ"
+      const firstOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("На первый заказ")');
+      await firstOrderBtn.click();
+      await page.waitForTimeout(300);
+
+      // Проверяем, что pathname не изменился и нет query params
+      const urlAfterFirst = new URL(page.url());
+      if (urlAfterFirst.pathname !== "/store/farfor" || urlAfterFirst.search !== "") {
+        throw new Error(`URL не должен меняться при клике на фильтр: ${page.url()}`);
+      }
+
+      const isFirstPressed = await firstOrderBtn.getAttribute("aria-pressed");
+      if (isFirstPressed !== "true") {
+        throw new Error("Кнопка 'На первый заказ' должна иметь aria-pressed=true");
+      }
+
+      const firstOrderCount = await cards.count();
+      if (firstOrderCount !== 2) {
+        throw new Error(`Ожидалось 2 купона на первый заказ, отображается: ${firstOrderCount}`);
+      }
+      console.log(`  ✓ Фильтр 'На первый заказ': pathname неизменен (/store/farfor), отображается ${firstOrderCount} карточки`);
+
+      // 3. Клик "Повторные заказы"
+      const repeatOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Повторные заказы")');
+      await repeatOrderBtn.click();
+      await page.waitForTimeout(300);
+
+      const urlAfterRepeat = new URL(page.url());
+      if (urlAfterRepeat.pathname !== "/store/farfor" || urlAfterRepeat.search !== "") {
+        throw new Error(`URL не должен меняться при клике на фильтр: ${page.url()}`);
+      }
+
+      const isRepeatPressed = await repeatOrderBtn.getAttribute("aria-pressed");
+      if (isRepeatPressed !== "true") {
+        throw new Error("Кнопка 'Повторные заказы' должна иметь aria-pressed=true");
+      }
+
+      const repeatOrderCount = await cards.count();
+      if (repeatOrderCount !== 2) {
+        throw new Error(`Ожидалось 2 купона на повторный заказ, отображается: ${repeatOrderCount}`);
+      }
+      console.log(`  ✓ Фильтр 'Повторные заказы': pathname неизменен, отображается ${repeatOrderCount} карточки`);
+
+      // 4. Клик "Все акции"
+      await allBtn.click();
+      await page.waitForTimeout(300);
+      const allCountAgain = await cards.count();
+      if (allCountAgain !== initialCount) {
+        throw new Error(`Ожидалось восстановление всех ${initialCount} купонов, отображается: ${allCountAgain}`);
+      }
+      console.log(`  ✓ Сброс на 'Все акции': отображаются снова все ${allCountAgain} купонов`);
+
+      // 5. Проверка 308 редиректа для /store/[slug]/first-order
+      const firstOrderRes = await page.request.get(`${BASE_URL}/store/farfor/first-order`, { maxRedirects: 0 });
+      if (firstOrderRes.status() !== 308) {
+        throw new Error(`GET /store/farfor/first-order должен возвращать 308, получен: ${firstOrderRes.status()}`);
+      }
+      const locFirst = firstOrderRes.headers()["location"];
+      if (!locFirst || !locFirst.endsWith("/store/farfor")) {
+        throw new Error(`Location header для first-order должен вести на /store/farfor, получен: ${locFirst}`);
+      }
+      console.log(`  ✓ GET /store/farfor/first-order возвращает 308 -> ${locFirst}`);
+
+      // 6. Проверка 308 редиректа для /store/[slug]/repeat-order
+      const repeatOrderRes = await page.request.get(`${BASE_URL}/store/farfor/repeat-order`, { maxRedirects: 0 });
+      if (repeatOrderRes.status() !== 308) {
+        throw new Error(`GET /store/farfor/repeat-order должен возвращать 308, получен: ${repeatOrderRes.status()}`);
+      }
+      const locRepeat = repeatOrderRes.headers()["location"];
+      if (!locRepeat || !locRepeat.endsWith("/store/farfor")) {
+        throw new Error(`Location header для repeat-order должен вести на /store/farfor, получен: ${locRepeat}`);
+      }
+      console.log(`  ✓ GET /store/farfor/repeat-order возвращает 308 -> ${locRepeat}`);
+
+      await context.close();
       passedTests++;
     }
 

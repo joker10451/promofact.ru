@@ -380,6 +380,19 @@ const nextConfig: NextConfig = {
         destination: "/category/raznoe",
         permanent: true,
       },
+      // Wave 2: Intent filter redirects — клиентский фильтр заменил серверные страницы.
+      // Используем :slug (не :path*) чтобы не перехватывать /store/alias/first-order
+      // раньше alias-редиректов выше.
+      {
+        source: "/store/:slug/first-order",
+        destination: "/store/:slug",
+        permanent: true,
+      },
+      {
+        source: "/store/:slug/repeat-order",
+        destination: "/store/:slug",
+        permanent: true,
+      },
     ];
   },
 };

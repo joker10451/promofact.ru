@@ -601,4 +601,69 @@ let passed = 0;
   passed++;
 }
 
+// -----------------------------------------------------------------------------
+// Тест 12: Регрессия Wave 2: Store Intent Filters without Crawl Waste
+// -----------------------------------------------------------------------------
+{
+  // A. StoreIntentTabs has no Link/href to /first-order or /repeat-order
+  const storeIntentTabsSrc = fs.readFileSync(path.resolve("src/components/StoreIntentTabs.tsx"), "utf-8");
+  assert.ok(!storeIntentTabsSrc.includes("<Link"), "StoreIntentTabs не должен содержать компонент <Link>");
+  assert.ok(!storeIntentTabsSrc.includes("href="), "StoreIntentTabs не должен содержать атрибуты href");
+  assert.ok(storeIntentTabsSrc.includes('type="button"'), "StoreIntentTabs должен использовать кнопки type=\"button\"");
+  assert.ok(storeIntentTabsSrc.includes("aria-pressed"), "StoreIntentTabs кнопки должны иметь атрибут aria-pressed");
+
+  // B. next.config.ts has permanent redirects for intent routes
+  const nextConfigSrc = fs.readFileSync(path.resolve("next.config.ts"), "utf-8");
+  assert.ok(nextConfigSrc.includes('source: "/store/:slug/first-order"'), "next.config.ts должен содержать редирект для /store/:slug/first-order");
+  assert.ok(nextConfigSrc.includes('source: "/store/:slug/repeat-order"'), "next.config.ts должен содержать редирект для /store/:slug/repeat-order");
+  assert.ok(
+    nextConfigSrc.indexOf('source: "/store/:slug/first-order"') > nextConfigSrc.indexOf('source: "/store/sunlight"'),
+    "Intent-редиректы должны быть объявлены после специфичных алиас-редиректов магазинов"
+  );
+
+  // C. Old route page.tsx files don't exist
+  assert.ok(!fs.existsSync(path.resolve("src/app/store/[slug]/first-order/page.tsx")), "Старый маршрут first-order/page.tsx должен быть удален");
+  assert.ok(!fs.existsSync(path.resolve("src/app/store/[slug]/repeat-order/page.tsx")), "Старый маршрут repeat-order/page.tsx должен быть удален");
+
+  // D. HeaderSearch still uses /store/slug#coupon-id
+  const headerSearchSrc = fs.readFileSync(path.resolve("src/components/HeaderSearch.tsx"), "utf-8");
+  assert.ok(headerSearchSrc.includes("href={`/store/${coupon.storeSlug}#coupon-${coupon.id}`}"), "HeaderSearch должен сохранять ссылки с якорем #coupon-id");
+
+  // E. CouponTicket still has id={`coupon-${coupon.id}`}
+  const couponTicketSrc = fs.readFileSync(path.resolve("src/components/CouponTicket.tsx"), "utf-8");
+  assert.ok(couponTicketSrc.includes('id={`coupon-${coupon.id}`}'), "CouponTicket должен содержать id=\"coupon-{coupon.id}\"");
+
+  // F. sitemap has no intent subpages
+  const sitemapSrc = fs.readFileSync(path.resolve("src/app/sitemap.ts"), "utf-8");
+  assert.ok(!sitemapSrc.includes("first-order"), "sitemap.ts не должен генерировать first-order подстраницы");
+  assert.ok(!sitemapSrc.includes("repeat-order"), "sitemap.ts не должен генерировать repeat-order подстраницы");
+
+  // G. No UI link in src/components or src/app points to /store/.../first-order or /repeat-order (/collections/first-order preserved)
+  const scanDirs = ["src/components", "src/app"];
+  for (const dir of scanDirs) {
+    function walk(curr) {
+      const items = fs.readdirSync(curr, { withFileTypes: true });
+      for (const item of items) {
+        const full = path.join(curr, item.name);
+        if (item.isDirectory()) {
+          walk(full);
+        } else if (/\.(tsx?|jsx?)$/.test(item.name)) {
+          const code = fs.readFileSync(full, "utf-8");
+          const linkPattern = /href=[{"'`][^"'`]*\/store\/[^/"'`]+\/(first-order|repeat-order)/g;
+          const match = linkPattern.exec(code);
+          assert.ok(!match, `Файл ${full} содержит внутреннюю ссылку на удаленный подмаршрут: ${match ? match[0] : ""}`);
+        }
+      }
+    }
+    walk(path.resolve(dir));
+  }
+
+  // Проверяем, что /collections/first-order остался нетронутым
+  const footerSrc = fs.readFileSync(path.resolve("src/components/Footer.tsx"), "utf-8");
+  assert.ok(footerSrc.includes("/collections/first-order"), "Footer должен сохранять ссылку /collections/first-order");
+
+  console.log("✓ Тест 12: Регрессионные требования Wave 2 Store Intent Filters полностью соблюдены (PASS)");
+  passed++;
+}
+
 console.log("\n================================================================================");
