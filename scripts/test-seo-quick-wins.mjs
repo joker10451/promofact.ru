@@ -343,7 +343,37 @@ let passed = 0;
     "После 11.10.2026 промокод YE истекает и метаданные должны переключиться на fallback"
   );
 
-  console.log("✓ Тест 8: Регрессия expiry fallback для SEO-офферов подтверждена (PASS)");
+  // 3. Проверяем ВинЛаб: требуются 10PFNS6570, 5PFSEP5144 и WCPFSEP7289
+  const winlabExtra = getStoreExtra("winlab");
+  assert.ok(winlabExtra, "ВинЛаб должен иметь storeExtra");
+  assert.deepStrictEqual(winlabExtra.requiredActiveCodes, ["10PFNS6570", "5PFSEP5144", "WCPFSEP7289"]);
+
+  // Проверяем FAQ fallback логику:
+  // При наличии всех кодов -> showCustomFaq true
+  const winlabActiveCoupons = [
+    { promocode: { code: "10PFNS6570", expires: "2026-10-31" } },
+    { promocode: { code: "5PFSEP5144", expires: "2026-10-31" } },
+    { promocode: { code: "WCPFSEP7289", expires: "2026-10-31" } },
+  ];
+  assert.strictEqual(
+    hasActiveRequiredCoupons(winlabExtra, winlabActiveCoupons, new Date("2026-10-01").getTime()),
+    true,
+    "Все 3 промокода ВинЛаб активны -> FAQ и метаданные включены"
+  );
+
+  // При истечении WCPFSEP7289 -> showCustomFaq false (отключение offer-specific FAQ)
+  const winlabExpiredWinclub = [
+    { promocode: { code: "10PFNS6570", expires: "2026-10-31" } },
+    { promocode: { code: "5PFSEP5144", expires: "2026-10-31" } },
+    { promocode: { code: "WCPFSEP7289", expires: "2026-09-30" } }, // истек
+  ];
+  assert.strictEqual(
+    hasActiveRequiredCoupons(winlabExtra, winlabExpiredWinclub, new Date("2026-10-01").getTime()),
+    false,
+    "Если промокод WinClub WCPFSEP7289 истек -> custom FAQ и metadata отключаются"
+  );
+
+  console.log("✓ Тест 8: Регрессия expiry fallback для SEO-офферов и custom FAQ подтверждена (PASS)");
   passed++;
 }
 

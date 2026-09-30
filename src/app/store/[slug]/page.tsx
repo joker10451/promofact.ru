@@ -260,8 +260,13 @@ export default async function StorePage({
   }));
 
   const storeExtra = getStoreExtra(slug);
+  // Offer-specific FAQ из StoreExtra показываем только если офферы действительно активны.
+  // Если офферы истекли или отсутствуют — показываются только общие FAQ магазина.
+  const showCustomFaq = hasActiveRequiredCoupons(storeExtra, store.coupons);
+  const customFaqItems = showCustomFaq ? (storeExtra?.faq ?? []) : [];
+
   const faqItems = [
-    ...(storeExtra?.faq ?? []),
+    ...customFaqItems,
     {
       q: `Как применить промокод ${store.name}?`,
       a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Скидка применится автоматически до оплаты.`,

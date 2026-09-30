@@ -63,7 +63,7 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
     ],
   },
   winlab: {
-    requiredActiveCodes: ["10PFNS6570", "5PFSEP5144"],
+    requiredActiveCodes: ["10PFNS6570", "5PFSEP5144", "WCPFSEP7289"],
     customTitle: () => "Промокоды ВинЛаб: 10% первый, 5% повторный заказ",
     customDescription: () =>
       "Актуальные промокоды ВинЛаб: скидка 10% на первый заказ (10PFNS6570), 5% на повторный и 10% на WinClub. Онлайн-заказ и самовывоз.",
