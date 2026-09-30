@@ -572,8 +572,10 @@ let passed = 0;
   const categoryRedirectMatches = [
     ...nextConfigSrc.matchAll(/source:\s*["'](\/category\/[^"']+)["'],\s*destination:\s*["'](\/category\/[^"']+)["']/g)
   ];
+  const nextConfigRedirectSources = new Set();
   for (const match of categoryRedirectMatches) {
     const [, source, destination] = match;
+    nextConfigRedirectSources.add(source);
     const destSlug = destination.replace("/category/", "").trim();
     assert.ok(
       validCanonicalSlugs.has(destSlug),
@@ -585,7 +587,17 @@ let passed = 0;
     );
   }
 
-  console.log("✓ Тест 11: Безопасность Category Redirects подтверждена (1:1, существующие destination, отсутствие chains) (PASS)");
+  // 4. Покрытие всех CATEGORY_ALIASES серверными редиректами (Category Alias Coverage)
+  for (const alias of Object.keys(localAliases)) {
+    const isCoveredByNextConfig = nextConfigRedirectSources.has(`/category/${alias}`);
+    const isCoveredByLegacy = legacyRedirectsSrc.includes(`"${alias}":`) || legacyRedirectsSrc.includes(`'${alias}':`) || legacyRedirectsSrc.includes(`${alias}:`);
+    assert.ok(
+      isCoveredByNextConfig || isCoveredByLegacy,
+      `Алиас "${alias}" из CATEGORY_ALIASES не покрыт серверным редиректом ни в next.config.ts, ни в LEGACY_CATEGORY_REDIRECTS`
+    );
+  }
+
+  console.log("✓ Тест 11: Безопасность и 100% покрытие Category Redirects подтверждены (PASS)");
   passed++;
 }
 

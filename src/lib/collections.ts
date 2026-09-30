@@ -1,4 +1,4 @@
-import type { Coupon } from "@/lib/types";
+import { Coupon } from "@/lib/types";
 
 export interface Collection {
   slug: string;

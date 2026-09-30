@@ -326,6 +326,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/category/krasota-i-uhod",
+        destination: "/category/kosmetika-i-parfyumeriya",
+        permanent: true,
+      },
+      {
         source: "/category/kino-i-teatr",
         destination: "/category/onlayn-kinoteatry",
         permanent: true,
