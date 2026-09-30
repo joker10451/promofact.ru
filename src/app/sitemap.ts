@@ -5,6 +5,7 @@ import { ACTIONS } from "@/lib/actions";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { COLLECTIONS } from "@/lib/collections";
 import { SITE_URL } from "@/lib/site";
+import { canonicalCategorySlug } from "@/lib/categoryTaxonomy";
 import syncMeta from "@/data/sync-meta.json";
 
 // sitemap.ts — Dynamic Route Handler
@@ -51,18 +52,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  // Категории: дата синхронизации только если в категории есть живые промокоды
-  const categoryMap: MetadataRoute.Sitemap = categories.map((cat) => {
-    const hasActiveInCat = stores.some(
-      (s) => s.categorySlug === cat.slug && Array.isArray(s.coupons) && s.coupons.length > 0
-    );
-    return {
-      url: `${SITE_URL}/category/${cat.slug}`,
+  // Категории: дата синхронизации только если в категории есть живые промокоды.
+  // Дедуплицируем по каноническому slug (canonicalCategorySlug), исключая алиасы из sitemap.
+  const seenCategorySlugs = new Set<string>();
+  const categoryMap: MetadataRoute.Sitemap = [];
+
+  for (const cat of categories) {
+    const canonicalSlug = canonicalCategorySlug(cat.slug);
+    if (seenCategorySlugs.has(canonicalSlug)) {
+      continue;
+    }
+    seenCategorySlugs.add(canonicalSlug);
+
+    const hasActiveInCat = stores.some((s) => {
+      const storeCat = canonicalCategorySlug(s.categorySlug || "");
+      return storeCat === canonicalSlug && Array.isArray(s.coupons) && s.coupons.length > 0;
+    });
+
+    categoryMap.push({
+      url: `${SITE_URL}/category/${canonicalSlug}`,
       ...(hasActiveInCat && CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
       changeFrequency: hasActiveInCat ? ("daily" as const) : ("weekly" as const),
       priority: 0.8,
-    };
-  });
+    });
+  }
 
   // Подборки: статические агрегаторы без выдуманных дат
   const collectionsMap: MetadataRoute.Sitemap = COLLECTIONS.map((col) => ({
@@ -80,18 +93,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Гео-категории: только содержательные страницы с достаточной ценностью (list.length >= 3).
   // Пустые (0) и тонкие (< 3) страницы исключены для предотвращения размытия индекса.
+  // Категории нормализуются до канонического slug.
   const geoCategoryMap: MetadataRoute.Sitemap = [];
+  const seenGeoCategories = new Set<string>();
+
   for (const city of CITIES_SEO) {
     for (const cat of categories) {
+      const canonicalSlug = canonicalCategorySlug(cat.slug);
+      const geoKey = `${city.slug}/${canonicalSlug}`;
+      if (seenGeoCategories.has(geoKey)) {
+        continue;
+      }
+
       const list = coupons.filter((c) => {
         const r = (c.promocode?.region || "").toLowerCase();
         const isAllRu = !r || r === "вся россия" || r === "ru" || r.includes("россия");
         const matchesCity = r.includes(city.name.toLowerCase());
-        return (isAllRu || matchesCity) && c.store.categorySlug === cat.slug;
+        const storeCat = canonicalCategorySlug(c.store.categorySlug || "");
+        return (isAllRu || matchesCity) && storeCat === canonicalSlug;
       });
       if (list.length >= 3) {
+        seenGeoCategories.add(geoKey);
         geoCategoryMap.push({
-          url: `${SITE_URL}/gorod/${city.slug}/${cat.slug}`,
+          url: `${SITE_URL}/gorod/${city.slug}/${canonicalSlug}`,
           ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
           changeFrequency: "weekly" as const,
           priority: 0.75,

@@ -124,6 +124,7 @@ export const CATEGORY_ALIASES: Record<string, string> = {
   elektronika: "elektronika-i-tehnika",
   "yuvelirnye-izdeliya": "ukrasheniya",
   "zdorove-i-krasota": "kosmetika-i-parfyumeriya",
+  marketplejsy: "marketpleysy",
   avtotovary: "raznoe",
 };
 

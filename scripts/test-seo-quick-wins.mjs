@@ -418,4 +418,187 @@ let passed = 0;
   passed++;
 }
 
+// -----------------------------------------------------------------------------
+// Тест 9: Sitemap Invariant — Категории в Sitemap строго канонические
+// -----------------------------------------------------------------------------
+{
+  const categoryTaxonomySrc = fs.readFileSync(path.resolve("src/lib/categoryTaxonomy.ts"), "utf-8");
+  const sitemapSrc = fs.readFileSync(path.resolve("src/app/sitemap.ts"), "utf-8");
+
+  // 1. Проверяем, что sitemap.ts использует canonicalCategorySlug для категорий
+  assert.ok(
+    sitemapSrc.includes("canonicalCategorySlug(cat.slug)"),
+    "sitemap.ts должен нормализовать category.slug через canonicalCategorySlug"
+  );
+  assert.ok(
+    sitemapSrc.includes("seenCategorySlugs.has(canonicalSlug)"),
+    "sitemap.ts должен дедуплицировать категории по каноническому slug"
+  );
+
+  // 2. Статическая валидация sitemap.xml из build artifacts
+  const sitemapXmlPath = path.resolve(".next/server/app/sitemap.xml.body");
+  const sitemapStaticPath = path.resolve("public/sitemap.xml");
+  let sitemapContent = "";
+  if (fs.existsSync(sitemapXmlPath)) {
+    sitemapContent = fs.readFileSync(sitemapXmlPath, "utf-8");
+  } else if (fs.existsSync(sitemapStaticPath)) {
+    sitemapContent = fs.readFileSync(sitemapStaticPath, "utf-8");
+  }
+
+  // 3. Извлекаем CATEGORY_ALIASES
+  const aliasBlockMatch = categoryTaxonomySrc.match(/export const CATEGORY_ALIASES: Record<string, string> = {([^}]+)};/);
+  assert.ok(aliasBlockMatch, "Не найден блок CATEGORY_ALIASES в src/lib/categoryTaxonomy.ts");
+  const localAliases = {};
+  for (const line of aliasBlockMatch[1].split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("//")) continue;
+    const parts = trimmed.split(":");
+    if (parts.length >= 2) {
+      localAliases[parts[0].replace(/['",]/g, "").trim()] = parts[1].replace(/['",]/g, "").trim();
+    }
+  }
+
+  if (sitemapContent) {
+    const locMatches = [...sitemapContent.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
+    const categoryLocs = locMatches.filter(u => u.includes("/category/"));
+    assert.ok(categoryLocs.length > 0, "Sitemap должен содержать категории");
+
+    const seenSlugs = new Set();
+    for (const url of categoryLocs) {
+      const slug = url.split("/category/")[1];
+      assert.ok(!Object.prototype.hasOwnProperty.call(localAliases, slug), `Sitemap содержит alias категорию: ${url}`);
+      assert.notStrictEqual(slug, "knigi", "Sitemap не должен содержать /category/knigi");
+      assert.ok(!seenSlugs.has(slug), `Sitemap содержит дубликат категории: ${url}`);
+      seenSlugs.add(slug);
+    }
+
+    for (const u of locMatches) {
+      assert.ok(!u.includes("/store/") || !u.endsWith("/first-order"), `Sitemap содержит /store/.../first-order: ${u}`);
+      assert.ok(!u.includes("/store/") || !u.endsWith("/repeat-order"), `Sitemap содержит /store/.../repeat-order: ${u}`);
+      const storeSubMatch = u.match(/\/store\/[^/]+\/([^/]+)$/);
+      if (storeSubMatch && storeSubMatch[1] !== "first-order" && storeSubMatch[1] !== "repeat-order") {
+        assert.fail(`Sitemap содержит страницу отдельного купона: ${u}`);
+      }
+    }
+  }
+
+  console.log("✓ Тест 9: Инварианты Sitemap подтверждены (только канонические категории, 0 alias, 0 subpages) (PASS)");
+  passed++;
+}
+
+// -----------------------------------------------------------------------------
+// Тест 10: Честные формулировки в FAQ категорий (отсутствие непроверенных утверждений)
+// -----------------------------------------------------------------------------
+{
+  const categoryPageSrc = fs.readFileSync(path.resolve("src/app/category/[slug]/page.tsx"), "utf-8");
+  assert.ok(
+    !categoryPageSrc.includes("тестируем актуальность кодов"),
+    "Категория не должна утверждать ручное тестирование кодов"
+  );
+  assert.ok(
+    !categoryPageSrc.includes("удаляем недействительные акции"),
+    "Категория не должна утверждать ручное удаление недействительных акций"
+  );
+  assert.ok(
+    categoryPageSrc.includes("Предложения обновляются по данным партнёрских программ"),
+    "Категория должна содержать фактически подтверждаемую формулировку об обновлении"
+  );
+
+  console.log("✓ Тест 10: Формулировки FAQ категорий честны и соответствуют реальным процессам (PASS)");
+  passed++;
+}
+
+// -----------------------------------------------------------------------------
+// Тест 11: Валидация безопасности Category Redirects (отсутствие битых ссылок и цепочек)
+// -----------------------------------------------------------------------------
+{
+  const categoryTaxonomySrc = fs.readFileSync(path.resolve("src/lib/categoryTaxonomy.ts"), "utf-8");
+  const nextConfigSrc = fs.readFileSync(path.resolve("next.config.ts"), "utf-8");
+  const legacyRedirectsSrc = fs.readFileSync(path.resolve("src/lib/legacyRedirects.ts"), "utf-8");
+
+  // Извлекаем все канонические slug'и из CATEGORIES
+  const categoryMatches = [...categoryTaxonomySrc.matchAll(/slug:\s*["']([^"']+)["']/g)];
+  const validCanonicalSlugs = new Set(categoryMatches.map(m => m[1]));
+
+  // 1. Извлекаем CATEGORY_ALIASES из categoryTaxonomy.ts
+  const aliasBlockMatch = categoryTaxonomySrc.match(/export const CATEGORY_ALIASES: Record<string, string> = {([^}]+)};/);
+  assert.ok(aliasBlockMatch, "Не найден блок CATEGORY_ALIASES в src/lib/categoryTaxonomy.ts");
+  const localAliases = {};
+  for (const line of aliasBlockMatch[1].split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("//")) continue;
+    const parts = trimmed.split(":");
+    if (parts.length >= 2) {
+      const key = parts[0].replace(/['",]/g, "").trim();
+      const val = parts[1].replace(/['",]/g, "").trim();
+      localAliases[key] = val;
+    }
+  }
+
+  // Проверяем CATEGORY_ALIASES
+  for (const [alias, dest] of Object.entries(localAliases)) {
+    assert.ok(
+      validCanonicalSlugs.has(dest),
+      `CATEGORY_ALIASES[${alias}] указывает на несуществующую в CATEGORIES категорию: ${dest}`
+    );
+    assert.ok(
+      !Object.prototype.hasOwnProperty.call(localAliases, dest),
+      `CATEGORY_ALIASES[${alias}] указывает на другой алиас (образует цепочку): ${dest}`
+    );
+  }
+
+  // 2. Проверяем LEGACY_CATEGORY_REDIRECTS
+  const legacyMatch = legacyRedirectsSrc.match(/export const LEGACY_CATEGORY_REDIRECTS: Record<string, string> = {([^}]+)};/);
+  if (legacyMatch) {
+    const lines = legacyMatch[1].split("\n").filter(l => l.includes(":"));
+    for (const line of lines) {
+      const parts = line.split(":");
+      const destUrl = parts[1].replace(/['",]/g, "").trim();
+      if (destUrl.startsWith("/category/")) {
+        const destSlug = destUrl.replace("/category/", "").trim();
+        assert.ok(
+          validCanonicalSlugs.has(destSlug),
+          `LEGACY_CATEGORY_REDIRECTS destination не существует в CATEGORIES: ${destSlug}`
+        );
+        assert.ok(
+          !Object.prototype.hasOwnProperty.call(localAliases, destSlug),
+          `LEGACY_CATEGORY_REDIRECTS destination не канонический (цепочка алиасов): ${destSlug}`
+        );
+      }
+    }
+  }
+
+  // 3. Проверяем hardcoded category redirects в next.config.ts
+  const categoryRedirectMatches = [
+    ...nextConfigSrc.matchAll(/source:\s*["'](\/category\/[^"']+)["'],\s*destination:\s*["'](\/category\/[^"']+)["']/g)
+  ];
+  const nextConfigRedirectSources = new Set();
+  for (const match of categoryRedirectMatches) {
+    const [, source, destination] = match;
+    nextConfigRedirectSources.add(source);
+    const destSlug = destination.replace("/category/", "").trim();
+    assert.ok(
+      validCanonicalSlugs.has(destSlug),
+      `next.config.ts redirect ${source} -> ${destination} указывает на несуществующую категорию`
+    );
+    assert.ok(
+      !Object.prototype.hasOwnProperty.call(localAliases, destSlug),
+      `next.config.ts redirect ${source} -> ${destination} указывает на алиас (образует цепочку)`
+    );
+  }
+
+  // 4. Покрытие всех CATEGORY_ALIASES серверными редиректами (Category Alias Coverage)
+  for (const alias of Object.keys(localAliases)) {
+    const isCoveredByNextConfig = nextConfigRedirectSources.has(`/category/${alias}`);
+    const isCoveredByLegacy = legacyRedirectsSrc.includes(`"${alias}":`) || legacyRedirectsSrc.includes(`'${alias}':`) || legacyRedirectsSrc.includes(`${alias}:`);
+    assert.ok(
+      isCoveredByNextConfig || isCoveredByLegacy,
+      `Алиас "${alias}" из CATEGORY_ALIASES не покрыт серверным редиректом ни в next.config.ts, ни в LEGACY_CATEGORY_REDIRECTS`
+    );
+  }
+
+  console.log("✓ Тест 11: Безопасность и 100% покрытие Category Redirects подтверждены (PASS)");
+  passed++;
+}
+
 console.log("\n================================================================================");

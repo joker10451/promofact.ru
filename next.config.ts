@@ -318,6 +318,68 @@ const nextConfig: NextConfig = {
         destination: "/store/pyaterochka",
         permanent: true,
       },
+      // Исторические категории (P2.4 Wave 1A: Safe Index Hygiene)
+      // Робот Яндекса помнит старые слаги категорий до внедрения таксономии.
+      {
+        source: "/category/krasota-i-kosmetika",
+        destination: "/category/kosmetika-i-parfyumeriya",
+        permanent: true,
+      },
+      {
+        source: "/category/krasota-i-uhod",
+        destination: "/category/kosmetika-i-parfyumeriya",
+        permanent: true,
+      },
+      {
+        source: "/category/kino-i-teatr",
+        destination: "/category/onlayn-kinoteatry",
+        permanent: true,
+      },
+      {
+        source: "/category/yuvelirnye-izdeliya",
+        destination: "/category/ukrasheniya",
+        permanent: true,
+      },
+      {
+        source: "/category/marketplejsy",
+        destination: "/category/marketpleysy",
+        permanent: true,
+      },
+      {
+        source: "/category/knigi",
+        destination: "/category/onlayn-obrazovanie",
+        permanent: true,
+      },
+      {
+        source: "/category/knigi-i-obuchenie",
+        destination: "/category/onlayn-obrazovanie",
+        permanent: true,
+      },
+      {
+        source: "/category/produkty-i-dostavka",
+        destination: "/category/dostavka-produktov",
+        permanent: true,
+      },
+      {
+        source: "/category/eda-i-dostavka",
+        destination: "/category/dostavka-produktov",
+        permanent: true,
+      },
+      {
+        source: "/category/elektronika",
+        destination: "/category/elektronika-i-tehnika",
+        permanent: true,
+      },
+      {
+        source: "/category/zdorove-i-krasota",
+        destination: "/category/kosmetika-i-parfyumeriya",
+        permanent: true,
+      },
+      {
+        source: "/category/avtotovary",
+        destination: "/category/raznoe",
+        permanent: true,
+      },
     ];
   },
 };

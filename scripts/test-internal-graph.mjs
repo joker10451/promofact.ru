@@ -55,9 +55,51 @@ async function runInternalGraphSuite() {
   });
 
   // 5. Проверка каноничности и связности Coupon details -> Store
-  test("Страница отдельного купона /store/[slug]/[code] канонизирована на родительский магазин", () => {
+  test("Страница отдельного купона /store/[slug]/[code] канонизирована на родительский магазин и noindex", () => {
     const couponPage = fs.readFileSync(path.resolve("src/app/store/[slug]/[code]/page.tsx"), "utf-8");
     assert(couponPage.includes("parentStoreUrl = `${SITE_URL}/store/${slug}`"), "Coupon canonical must point to parent store");
+    assert(couponPage.includes("index: false"), "Coupon page must have robots.index = false");
+    assert(couponPage.includes("follow: true"), "Coupon page must have robots.follow = true");
+  });
+
+  // 6. Проверка отсутствия статических внутренних ссылок на CATEGORY_ALIASES
+  test("Ни одна статическая внутренняя ссылка в src/ не ведет на alias-категории", () => {
+    const taxonomyFile = fs.readFileSync(path.resolve("src/lib/categoryTaxonomy.ts"), "utf-8");
+    const m = taxonomyFile.match(/export const CATEGORY_ALIASES: Record<string, string> = \{([^}]+)\};/);
+    assert(m, "CATEGORY_ALIASES should exist");
+    const aliases = m[1]
+      .split("\n")
+      .map((line) => line.split(":")[0]?.trim().replace(/['"]/g, ""))
+      .filter(Boolean);
+
+    function scanDir(dir) {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          scanDir(fullPath);
+        } else if (/\.(tsx?|json)$/.test(entry.name)) {
+          if (entry.name === "categoryTaxonomy.ts" || entry.name === "legacyRedirects.ts") continue;
+          const content = fs.readFileSync(fullPath, "utf-8");
+          for (const alias of aliases) {
+            assert(
+              !content.includes(`/category/${alias}`),
+              `Файл ${fullPath} содержит внутреннюю ссылку на alias-категорию /category/${alias}`
+            );
+          }
+        }
+      }
+    }
+    scanDir(path.resolve("src"));
+  });
+
+  // 7. Проверка HeaderSearch: ссылки на купоны ведут на страницу магазина с якорем
+  test("HeaderSearch использует канонические URL магазинов с якорями #coupon-ID", () => {
+    const searchFile = fs.readFileSync(path.resolve("src/components/HeaderSearch.tsx"), "utf-8");
+    assert(searchFile.includes("href={`/store/${coupon.storeSlug}#coupon-${coupon.id}`}"), "HeaderSearch must link to store anchor");
+    assert(!searchFile.includes("href={`/store/${coupon.storeSlug}/${encodeURIComponent(coupon.code)}`}"), "HeaderSearch must not link to coupon subpage");
+    const ticketFile = fs.readFileSync(path.resolve("src/components/CouponTicket.tsx"), "utf-8");
+    assert(ticketFile.includes('id={`coupon-${coupon.id}`}'), "CouponTicket must have id matching coupon-${coupon.id}");
   });
 
   // 6. Проверка Crawl Depth: главная страница ссылается на каталог, категории и статьи
