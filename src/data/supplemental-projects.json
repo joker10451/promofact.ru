@@ -883,5 +883,80 @@
         "widget_subscriber_codes": []
       }
     ]
+  },
+  {
+    "project": {
+      "id": 4677,
+      "logo": "https://s3sc.perfluence.net/logos/4/d/e/4de8284f-50d4-4ff3-8b0b-2f0d8ad6d3a9.png",
+      "logo_widget": "https://s3sc.perfluence.net/logos/4/d/e/4de8284f-50d4-4ff3-8b0b-2f0d8ad6d3a9.png",
+      "name": "Mark Formelle",
+      "img": "https://s3sc.perfluence.net/logos/4/d/e/4de8284f-50d4-4ff3-8b0b-2f0d8ad6d3a9.png",
+      "category_id": 254,
+      "category_name": "Мода и стиль",
+      "activeBloggers": 800,
+      "product_info": "<p>Mark Formelle — белорусский бренд одежды и трикотажа, который делает ставку на комфорт и актуальные тренды. Коллекции охватывают базовый трикотаж, домашнюю одежду, белье, повседневные и стильные образы для мужчин, женщин и детей. Одежда из натуральных «дышащих» тканей (хлопок, лён, модал) приятна в носке, не сковывает движения и выдерживает многократные стирки. Заказывайте на Ozon со скидкой по промокоду.</p>",
+      "subscribers_condition": "",
+      "site": "https://www.ozon.ru/brand/mark-formelle-100247882/",
+      "info": "",
+      "advantages": [
+        "Натуральные «дышащие» ткани (хлопок, лён, модал) для комфорта весь день;",
+        "Коллекции для мужчин, женщин и детей — от базы до трендовых коллабораций;",
+        "Промокод действует на первый и все повторные заказы;",
+        "Доставка и возврат через Ozon — удобно и привычно;",
+        "Актуальные коллаборации (Mark Formelle x nkeeei) и стильные дизайны."
+      ],
+      "subscriber_guide": "",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 0,
+      "rsp": 0
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18590677,
+            "title": "Одежда Mark Formelle на Ozon со скидкой 15%",
+            "link": "https://mkf.prfl.me/sites/alqofs?erid=2Ranyn6Ahqm",
+            "landing_terms": "Скидка 15% на первый и все повторные заказы одежды Mark Formelle на Ozon"
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 4677,
+            "code": "MRKFR7B77F15",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Скидка 15% на первый и все повторные заказы одежды Mark Formelle на Ozon",
+            "date": "24.12.2026",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": true,
+            "hit_custom_text": "ХИТ",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 46771,
+            "is_universal": true,
+            "name": "Скидка 15% на одежду Mark Formelle на Ozon",
+            "promo_terms": "Скидка 15% на первый и все повторные заказы одежды Mark Formelle на Ozon. Промокод действует при оформлении заказа на Ozon. Заказы на один адрес с разных устройств/номеров не засчитываются как первые.",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": true,
+            "post_id": 17223798,
+            "ord_marker": "2Ranyn6Ahqm",
+            "ord_custom_text": "Реклама. ООО ТД МАРК ФОРМЭЛЬ ИНН:6950135110 erid: 2Ranyn6Ahqm",
+            "discount": 15,
+            "btn_text": null,
+            "show": ""
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": []
+      }
+    ]
   }
 ]
