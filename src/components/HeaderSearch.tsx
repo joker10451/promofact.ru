@@ -186,7 +186,7 @@ export default function HeaderSearch() {
                 {coupons.map((coupon) => (
                   <Link
                     key={coupon.id}
-                    href={`/store/${coupon.storeSlug}/${encodeURIComponent(coupon.code)}`}
+                    href={`/store/${coupon.storeSlug}#coupon-${coupon.id}`}
                     onClick={handleSelect}
                     className="flex flex-col gap-0.5 rounded-xl px-2.5 py-2 hover:bg-paper transition-colors"
                   >

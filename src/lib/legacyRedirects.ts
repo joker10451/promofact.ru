@@ -17,9 +17,9 @@ export const LEGACY_STORE_REDIRECTS: Record<string, string> = {
 };
 
 export const LEGACY_CATEGORY_REDIRECTS: Record<string, string> = {
-  elektronika: "/category/marketpleysy",
-  odezhda: "/category/marketpleysy",
-  odezhda_i_obuv: "/category/marketpleysy",
-  "sport-i-otdykh": "/category/marketpleysy",
+  elektronika: "/category/elektronika-i-tehnika",
+  odezhda: "/category/odezhda-i-obuv",
+  odezhda_i_obuv: "/category/odezhda-i-obuv",
+  "sport-i-otdykh": "/category/sport-i-otdyh",
   krasota: "/category/kosmetika-i-parfyumeriya",
 };

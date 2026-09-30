@@ -964,7 +964,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды Литрес", href: "/store/litres" },
-      { text: "Книги и аудиокниги", href: "/category/knigi" },
+      { text: "Книги и аудиокниги", href: "/category/onlayn-obrazovanie" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],
   },

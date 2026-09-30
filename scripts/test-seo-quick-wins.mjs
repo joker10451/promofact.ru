@@ -418,4 +418,80 @@ let passed = 0;
   passed++;
 }
 
+// -----------------------------------------------------------------------------
+// Тест 9: Sitemap Invariant — Категории в Sitemap строго канонические
+// -----------------------------------------------------------------------------
+{
+  const { CATEGORY_ALIASES } = await import("@/lib/categoryTaxonomy");
+  const sitemapFn = (await import("@/app/sitemap")).default;
+  const sitemapEntries = await sitemapFn();
+
+  const categoryUrls = sitemapEntries
+    .map((e) => e.url)
+    .filter((url) => url.includes("/category/"));
+
+  assert.ok(categoryUrls.length > 0, "В sitemap должны быть категории");
+
+  const seenSlugs = new Set();
+  const aliasKeys = Object.keys(CATEGORY_ALIASES);
+
+  for (const url of categoryUrls) {
+    const slug = url.split("/category/")[1];
+    assert.ok(slug, `Не удалось извлечь slug из ${url}`);
+
+    // 1. URL не должен быть ключом из CATEGORY_ALIASES
+    assert.ok(
+      !aliasKeys.includes(slug),
+      `Sitemap содержит alias категорию: ${slug} (${url})`
+    );
+
+    // 2. Sitemap не должен содержать /category/knigi
+    assert.notStrictEqual(slug, "knigi", "Sitemap не должен содержать /category/knigi");
+
+    // 3. Нет двух URL, схлопывающихся в один slug
+    assert.ok(
+      !seenSlugs.has(slug),
+      `Дубликат категории в sitemap: ${slug}`
+    );
+    seenSlugs.add(slug);
+  }
+
+  // 4. Общие инварианты sitemap: отсутствие неканонических/noindex подстраниц
+  for (const entry of sitemapEntries) {
+    const u = entry.url;
+    assert.ok(!u.includes("/store/") || !u.endsWith("/first-order"), `Sitemap содержит /store/.../first-order: ${u}`);
+    assert.ok(!u.includes("/store/") || !u.endsWith("/repeat-order"), `Sitemap содержит /store/.../repeat-order: ${u}`);
+    // Регулярка для проверки coupon detail: /store/[slug]/[code]
+    const storeSubMatch = u.match(/\/store\/[^/]+\/([^/]+)$/);
+    if (storeSubMatch && storeSubMatch[1] !== "first-order" && storeSubMatch[1] !== "repeat-order") {
+      assert.fail(`Sitemap содержит страницу отдельного купона: ${u}`);
+    }
+  }
+
+  console.log("✓ Тест 9: Инварианты Sitemap подтверждены (только канонические категории, 0 alias, 0 subpages) (PASS)");
+  passed++;
+}
+
+// -----------------------------------------------------------------------------
+// Тест 10: Честные формулировки в FAQ категорий (отсутствие непроверенных утверждений)
+// -----------------------------------------------------------------------------
+{
+  const categoryPageSrc = fs.readFileSync(path.resolve("src/app/category/[slug]/page.tsx"), "utf-8");
+  assert.ok(
+    !categoryPageSrc.includes("тестируем актуальность кодов"),
+    "Категория не должна утверждать ручное тестирование кодов"
+  );
+  assert.ok(
+    !categoryPageSrc.includes("удаляем недействительные акции"),
+    "Категория не должна утверждать ручное удаление недействительных акций"
+  );
+  assert.ok(
+    categoryPageSrc.includes("Предложения обновляются по данным партнёрских программ"),
+    "Категория должна содержать фактически подтверждаемую формулировку об обновлении"
+  );
+
+  console.log("✓ Тест 10: Формулировки FAQ категорий честны и соответствуют реальным процессам (PASS)");
+  passed++;
+}
+
 console.log("\n================================================================================");
