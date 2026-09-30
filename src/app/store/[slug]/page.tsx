@@ -97,32 +97,38 @@ export async function generateMetadata({
   const maxDisc = getMaxDiscount(store.coupons);
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
+  const storeExtra = getStoreExtra(slug);
   // Бренд к заголовку добавляет шаблон в layout («%s — ПромоФакт»), поэтому
   // сам заголовок его не содержит — иначе в выдаче получалось «… | ПромоФакт
   // — ПромоФакт». А вот в OpenGraph и Twitter шаблон не применяется, туда
   // бренд подставляем явно.
   const title =
-    n > 0
-      ? (maxDisc && maxDisc !== "скидки"
-          ? `Промокоды ${store.name} на ${monthRu}: ${maxDisc}, ${n} ${countWord}`
-          : `Промокоды и акции ${store.name} на ${monthRu}: ${n} ${countWord}`)
-      : `Скидки и акции ${store.name} на ${monthYear}`;
+    storeExtra?.customTitle
+      ? storeExtra.customTitle(monthRu, monthYear)
+      : n > 0
+        ? (maxDisc && maxDisc !== "скидки"
+            ? `Промокоды ${store.name} на ${monthRu}: ${maxDisc}, ${n} ${countWord}`
+            : `Промокоды и акции ${store.name} на ${monthRu}: ${n} ${countWord}`)
+        : `Скидки и акции ${store.name} на ${monthYear}`;
   const titleWithBrand = `${title} | ${SITE_NAME}`;
-  const description = buildStoreDescription({
-    name: store.name,
-    category: store.category,
-    categorySlug: store.categorySlug,
-    about: store.about,
-    conditions: store.conditions,
-    coupons: store.coupons.map((c) => ({ code: c.promocode.code, bonusName: c.promocode.bonusName })),
-    couponCount: n,
-    maxDiscount: maxDisc,
-    isFirstOrder: store.coupons.some((c) => c.promocode.isFirstOrderOnly),
-    activeBloggers: store.activeBloggers,
-    monthYear,
-    monthRu,
-    todayRu: TODAY_RU,
-  });
+  const description =
+    storeExtra?.customDescription
+      ? storeExtra.customDescription(monthRu, monthYear)
+      : buildStoreDescription({
+          name: store.name,
+          category: store.category,
+          categorySlug: store.categorySlug,
+          about: store.about,
+          conditions: store.conditions,
+          coupons: store.coupons.map((c) => ({ code: c.promocode.code, bonusName: c.promocode.bonusName })),
+          couponCount: n,
+          maxDiscount: maxDisc,
+          isFirstOrder: store.coupons.some((c) => c.promocode.isFirstOrderOnly),
+          activeBloggers: store.activeBloggers,
+          monthYear,
+          monthRu,
+          todayRu: TODAY_RU,
+        });
 
   const og = {
     title: titleWithBrand,
