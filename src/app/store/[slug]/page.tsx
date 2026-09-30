@@ -15,7 +15,7 @@ import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { buildStoreArticle, buildStoreDescription } from "@/lib/storeSeoContent";
-import { getStoreExtra } from "@/lib/storeExtras";
+import { getStoreExtra, hasActiveRequiredCoupons } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -98,12 +98,17 @@ export async function generateMetadata({
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
   const storeExtra = getStoreExtra(slug);
+
+  // Кастомные SEO-метаданные с конкретными условиями разрешено применять ТОЛЬКО если
+  // все требуемые промокоды действительно активны (не истекли) среди купонов магазина.
+  const useCustomMetadata = hasActiveRequiredCoupons(storeExtra, store.coupons);
+
   // Бренд к заголовку добавляет шаблон в layout («%s — ПромоФакт»), поэтому
   // сам заголовок его не содержит — иначе в выдаче получалось «… | ПромоФакт
   // — ПромоФакт». А вот в OpenGraph и Twitter шаблон не применяется, туда
   // бренд подставляем явно.
   const title =
-    storeExtra?.customTitle
+    useCustomMetadata && storeExtra?.customTitle
       ? storeExtra.customTitle(monthRu, monthYear)
       : n > 0
         ? (maxDisc && maxDisc !== "скидки"
@@ -112,7 +117,7 @@ export async function generateMetadata({
         : `Скидки и акции ${store.name} на ${monthYear}`;
   const titleWithBrand = `${title} | ${SITE_NAME}`;
   const description =
-    storeExtra?.customDescription
+    useCustomMetadata && storeExtra?.customDescription
       ? storeExtra.customDescription(monthRu, monthYear)
       : buildStoreDescription({
           name: store.name,
@@ -130,9 +135,20 @@ export async function generateMetadata({
           todayRu: TODAY_RU,
         });
 
+  // Безопасное усечение Description по границе предложения или слова без обрезания на полуслове
+  const safeOgDescription = (() => {
+    if (description.length <= 160) return description;
+    const truncated = description.slice(0, 160);
+    const lastPunct = Math.max(truncated.lastIndexOf(". "), truncated.lastIndexOf("! "), truncated.lastIndexOf("? "));
+    if (lastPunct > 50) return truncated.slice(0, lastPunct + 1).trim();
+    const lastSpace = truncated.lastIndexOf(" ");
+    if (lastSpace > 50) return truncated.slice(0, lastSpace).trim();
+    return truncated.trim();
+  })();
+
   const og = {
     title: titleWithBrand,
-    description: description.slice(0, 160),
+    description: safeOgDescription,
     url: pageUrl,
     type: "website" as const,
     locale: "ru_RU",
@@ -148,13 +164,13 @@ export async function generateMetadata({
   };
   return {
     title,
-    description: og.description,
+    description: safeOgDescription,
     alternates: { canonical: pageUrl },
     openGraph: og,
     twitter: {
       card: store.logo ? "summary_large_image" : "summary",
       title: titleWithBrand,
-      description: og.description,
+      description: safeOgDescription,
       images: store.logo ? [store.logo] : undefined,
     },
   };

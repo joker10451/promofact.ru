@@ -286,6 +286,65 @@ let passed = 0;
   passed++;
 }
 
+// -----------------------------------------------------------------------------
+// Тест 8: Защита от устаревших SEO-офферов (expiry fallback regression)
+// -----------------------------------------------------------------------------
+{
+  const { getStoreExtra, hasActiveRequiredCoupons } = await import("@/lib/storeExtras");
+
+  // 1. Проверяем Островок: требуются PFRUS414 и PFWOR417
+  const ostrovokExtra = getStoreExtra("ostrovok");
+  assert.ok(ostrovokExtra, "Островок должен иметь storeExtra");
+  assert.deepStrictEqual(ostrovokExtra.requiredActiveCodes, ["PFRUS414", "PFWOR417"]);
+
+  // Активные купоны -> true
+  const activeCoupons = [
+    { promocode: { code: "PFRUS414", expires: "2026-10-31" } },
+    { promocode: { code: "PFWOR417", expires: "2026-10-31" } },
+  ];
+  assert.strictEqual(
+    hasActiveRequiredCoupons(ostrovokExtra, activeCoupons, new Date("2026-10-01").getTime()),
+    true,
+    "При наличии действующих промокодов custom metadata должны быть активны"
+  );
+
+  // Один купон истек -> false (fallback на нейтральный генератор)
+  const expiredCoupons = [
+    { promocode: { code: "PFRUS414", expires: "2026-09-30" } }, // истек
+    { promocode: { code: "PFWOR417", expires: "2026-10-31" } },
+  ];
+  assert.strictEqual(
+    hasActiveRequiredCoupons(ostrovokExtra, expiredCoupons, new Date("2026-10-01").getTime()),
+    false,
+    "Если промокод истек, custom metadata должны отключиться (fallback)"
+  );
+
+  // Промокод отсутствует -> false
+  const missingCoupons = [
+    { promocode: { code: "OTHER_CODE", expires: "2026-10-31" } },
+  ];
+  assert.strictEqual(
+    hasActiveRequiredCoupons(ostrovokExtra, missingCoupons, new Date("2026-10-01").getTime()),
+    false,
+    "Если требуемый код отсутствует, custom metadata должны отключиться (fallback)"
+  );
+
+  // 2. Проверяем Т-Путешествия: требуется YE
+  const tpExtra = getStoreExtra("t-puteshestviya-oteli");
+  assert.ok(tpExtra, "Т-Путешествия должны иметь storeExtra");
+  assert.deepStrictEqual(tpExtra.requiredActiveCodes, ["YE"]);
+  assert.strictEqual(
+    hasActiveRequiredCoupons(tpExtra, [{ promocode: { code: "YE", expires: "2026-10-11" } }], new Date("2026-10-01").getTime()),
+    true
+  );
+  assert.strictEqual(
+    hasActiveRequiredCoupons(tpExtra, [{ promocode: { code: "YE", expires: "2026-10-11" } }], new Date("2026-10-12").getTime()),
+    false,
+    "После 11.10.2026 промокод YE истекает и метаданные должны переключиться на fallback"
+  );
+
+  console.log("✓ Тест 8: Регрессия expiry fallback для SEO-офферов подтверждена (PASS)");
+  passed++;
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/${passed} РЕГРЕССИОННЫХ ТЕСТОВ P2.2 УСПЕШНО ПРОЙДЕНЫ!`);
-console.log("================================================================================");

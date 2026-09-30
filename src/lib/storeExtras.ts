@@ -8,6 +8,13 @@
  * перечисляя города, которые реально ищут.
  */
 export interface StoreExtra {
+  /**
+   * Необходимые коды промокодов, которые должны присутствовать среди
+   * действующих (неистекших) купонов магазина, чтобы customTitle и
+   * customDescription были активированы. Если промокод истек или отсутствует,
+   * страница безопасно переключается на стандартный нейтральный генератор.
+   */
+  requiredActiveCodes?: string[];
   /** Кастомный Title (без суффикса бренда). */
   customTitle?: (monthRu: string, monthYear?: string) => string;
   /** Кастомный Description. */
@@ -56,8 +63,10 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
     ],
   },
   winlab: {
-    customTitle: (monthRu) => `Промокоды ВинЛаб на ${monthRu}: скидка 10% на первый и 5% на повторный заказ`,
-    customDescription: (monthRu) => `Действующие промокоды ВинЛаб на ${monthRu}: скидка 10% на первый заказ (код 10PFNS6570), 5% на повторный и 10% на товары WinClub. Онлайн-заказ и самовывоз.`,
+    requiredActiveCodes: ["10PFNS6570", "5PFSEP5144"],
+    customTitle: () => "Промокоды ВинЛаб: 10% первый, 5% повторный заказ",
+    customDescription: () =>
+      "Актуальные промокоды ВинЛаб: скидка 10% на первый заказ (10PFNS6570), 5% на повторный и 10% на WinClub. Онлайн-заказ и самовывоз.",
     faq: [
       {
         q: "Как работают промокоды ВинЛаб на первый и повторный заказ?",
@@ -82,8 +91,10 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
     ],
   },
   "t-puteshestviya-oteli": {
-    customTitle: (monthRu) => `Промокоды Т-Путешествия Отели на ${monthRu}: скидка 15% на первое бронирование`,
-    customDescription: (monthRu) => `Промокод Т-Путешествия Отели на ${monthRu}: скидка 15% для новых пользователей (максимум 3 000 ₽, код YE). Бронирование гостиниц онлайн на сайте и в приложении Т-Банка.`,
+    requiredActiveCodes: ["YE"],
+    customTitle: () => "Промокод Т-Путешествия: 15% на первое бронирование",
+    customDescription: () =>
+      "Промокод Т-Путешествия: скидка 15% на отели для новых пользователей (код YE, макс. 3 000 ₽). Бронирование гостиниц онлайн.",
     faq: [
       {
         q: "Как получить скидку 15% на бронирование отеля в Т-Путешествиях?",
@@ -95,7 +106,7 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
       },
       {
         q: "Суммируется ли скидка по промокоду с кешбэком Т-Банка?",
-        a: "Да, при оплате картой Т-Банка скидка 15% рассчитывается сразу при оформлении бронирования, а стандартный кешбэк за покупки начисляется по условиям тарифа вашей карты Т-Банка.",
+        a: "Да, при оплате картой Т-Банка скидка 15% рассчитывается при оформлении, а кешбэк до 10% начисляется по условиям программы лояльности Т-Банка за бронирование отелей.",
       },
     ],
   },
@@ -116,8 +127,10 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
     ],
   },
   ostrovok: {
-    customTitle: (monthRu) => `Промокоды Островок на ${monthRu}: 6% по России и 5% по миру на отели`,
-    customDescription: (monthRu) => `Рабочие промокоды Островок на ${monthRu}: скидка 6% на бронирование по России (код PFRUS414) и 5% по всему миру (код PFWOR417). Онлайн-оплата на сайте и в приложении.`,
+    requiredActiveCodes: ["PFRUS414", "PFWOR417"],
+    customTitle: () => "Промокоды Островок: 6% по России и 5% по миру",
+    customDescription: () =>
+      "Актуальные промокоды Островок: скидка 6% по России (PFRUS414) и 5% по миру (PFWOR417). Онлайн-бронирование отелей со скидкой.",
     faq: [
       {
         q: "Как получить скидку на бронирование отеля на Островке?",
@@ -134,8 +147,10 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
     ],
   },
   "m-kosmetik": {
-    customTitle: (monthRu) => `Промокоды М.Косметик на ${monthRu}: скидка 51% на первый и 21% на повторный заказ`,
-    customDescription: (monthRu) => `Промокоды М.Косметик на ${monthRu}: скидка 51% на первый заказ от 1500 ₽ (код PK4GMWJUK) и 21% на повторный заказ от 1000 ₽ в приложении Магнит Доставка.`,
+    requiredActiveCodes: ["PK4GMWJUK", "PF21K0T5LF"],
+    customTitle: () => "Промокоды М.Косметик: 51% первый, 21% повторный",
+    customDescription: () =>
+      "Промокоды М.Косметик: 51% на первый заказ от 1500 ₽ (PK4GMWJUK) и 21% на повторный от 1000 ₽ в приложении Магнит Доставка.",
     faq: [
       {
         q: "Как применить промокод М.Косметик со скидкой 51%?",
@@ -148,8 +163,10 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
     ],
   },
   "yandex-eda-gipermarkety": {
-    customTitle: (monthRu) => `Промокоды Яндекс Еда Гипермаркеты на ${monthRu}: скидка 550 ₽ на заказ`,
-    customDescription: (monthRu) => `Промокод Яндекс Еда Гипермаркеты на ${monthRu}: скидка 550 ₽ на доставку из гипермаркетов (код GIP5xlzh). Заказ продуктов через Яндекс Еду онлайн.`,
+    requiredActiveCodes: ["GIP5xlzh"],
+    customTitle: () => "Промокод Яндекс Еда Гипермаркеты: скидка 550 ₽",
+    customDescription: () =>
+      "Промокод Яндекс Еда Гипермаркеты: скидка 550 ₽ на доставку из гипермаркетов (код GIP5xlzh). Заказ продуктов через Яндекс Еду онлайн.",
     faq: [
       {
         q: "Как получить скидку 550 ₽ в Яндекс Еда Гипермаркеты?",
@@ -165,4 +182,27 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
 
 export function getStoreExtra(slug: string): StoreExtra | undefined {
   return STORE_EXTRAS[slug];
+}
+
+/**
+ * Проверяет, активны ли все требуемые для кастомного SEO промокоды.
+ * Если промокод истек по дате или отсутствует в списке купонов — возвращает false.
+ */
+export function hasActiveRequiredCoupons(
+  storeExtra: StoreExtra | undefined,
+  coupons: Array<{ promocode: { code: string | null; expires: string | null } }>,
+  now: number = Date.now()
+): boolean {
+  if (!storeExtra?.requiredActiveCodes || storeExtra.requiredActiveCodes.length === 0) {
+    return Boolean(storeExtra?.customTitle);
+  }
+  return storeExtra.requiredActiveCodes.every((reqCode) =>
+    coupons.some((c) => {
+      const codeMatches = c.promocode.code?.trim().toUpperCase() === reqCode.trim().toUpperCase();
+      if (!codeMatches) return false;
+      if (!c.promocode.expires) return true;
+      const expTime = new Date(`${c.promocode.expires}T23:59:59+03:00`).getTime();
+      return expTime >= now;
+    })
+  );
 }
