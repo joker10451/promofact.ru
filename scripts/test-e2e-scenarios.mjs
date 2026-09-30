@@ -557,11 +557,11 @@ async function run() {
       const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
       const page = await context.newPage();
 
-      // 1. Открываем /store/farfor (имеет 4 купона: 2 на первый заказ, 2 повторных)
+      // 1. Открываем /store/farfor
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(500);
 
-      // Проверяем начальный фильтр "Все акции" и количество видимых карточек
+      // Проверяем начальный фильтр "Все акции"
       const allBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Все акции")');
       await allBtn.waitFor({ state: "visible" });
       const isAllPressed = await allBtn.getAttribute("aria-pressed");
@@ -569,16 +569,36 @@ async function run() {
         throw new Error(`Начальный фильтр должен быть 'all' (aria-pressed=true), получено: ${isAllPressed}`);
       }
 
-      // Считаем карточки купонов в сетке (article с id^="coupon-")
-      const cards = page.locator('article[id^="coupon-"]');
-      const initialCount = await cards.count();
-      if (initialCount !== 4) {
-        throw new Error(`Ожидалось 4 купона в начальном состоянии, найдено: ${initialCount}`);
+      // Считываем badge counts из кнопок
+      const allCountText = await allBtn.locator("span:last-child").innerText();
+      const allCount = parseInt(allCountText.trim(), 10);
+
+      const firstOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("На первый заказ")');
+      const firstCountText = await firstOrderBtn.locator("span:last-child").innerText();
+      const firstCount = parseInt(firstCountText.trim(), 10);
+
+      const repeatOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Повторные заказы")');
+      const repeatCountText = await repeatOrderBtn.locator("span:last-child").innerText();
+      const repeatCount = parseInt(repeatCountText.trim(), 10);
+
+      if (isNaN(allCount) || isNaN(firstCount) || isNaN(repeatCount)) {
+        throw new Error(`Не удалось распарсить бейджи счётчиков: all=${allCountText}, first=${firstCountText}, repeat=${repeatCountText}`);
       }
-      console.log(`  ✓ Начальное состояние: фильтр 'Все акции' активен, отображаются все ${initialCount} карточки`);
+
+      // Инвариант: allCount === firstCount + repeatCount
+      if (allCount !== firstCount + repeatCount) {
+        throw new Error(`Инвариант нарушен: allCount (${allCount}) !== firstCount (${firstCount}) + repeatCount (${repeatCount})`);
+      }
+
+      // Карточки купонов в сетке (article с id^="coupon-")
+      const cards = page.locator('article[id^="coupon-"]');
+      const initialCardsCount = await cards.count();
+      if (initialCardsCount !== allCount) {
+        throw new Error(`Количество карточек (${initialCardsCount}) не совпадает со счётчиком 'Все акции' (${allCount})`);
+      }
+      console.log(`  ✓ Начальное состояние: all=${allCount} (first=${firstCount}, repeat=${repeatCount}), карточек в DOM: ${initialCardsCount}`);
 
       // 2. Клик "На первый заказ"
-      const firstOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("На первый заказ")');
       await firstOrderBtn.click();
       await page.waitForTimeout(300);
 
@@ -593,14 +613,22 @@ async function run() {
         throw new Error("Кнопка 'На первый заказ' должна иметь aria-pressed=true");
       }
 
-      const firstOrderCount = await cards.count();
-      if (firstOrderCount !== 2) {
-        throw new Error(`Ожидалось 2 купона на первый заказ, отображается: ${firstOrderCount}`);
+      const firstCardsCount = await cards.count();
+      if (firstCount === 0) {
+        // Empty state check
+        const emptyState = page.locator('text="Сейчас предложений этого типа нет."');
+        await emptyState.waitFor({ state: "visible" });
+        const resetBtn = page.locator('button:has-text("Показать все акции")');
+        await resetBtn.waitFor({ state: "visible" });
+        console.log("  ✓ Фильтр 'На первый заказ' (0 купонов): корректный empty-state показан");
+      } else {
+        if (firstCardsCount !== firstCount) {
+          throw new Error(`Ожидалось ${firstCount} купонов на первый заказ, отображается: ${firstCardsCount}`);
+        }
+        console.log(`  ✓ Фильтр 'На первый заказ': отображается ${firstCardsCount} карточек (ожидалось ${firstCount})`);
       }
-      console.log(`  ✓ Фильтр 'На первый заказ': pathname неизменен (/store/farfor), отображается ${firstOrderCount} карточки`);
 
       // 3. Клик "Повторные заказы"
-      const repeatOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Повторные заказы")');
       await repeatOrderBtn.click();
       await page.waitForTimeout(300);
 
@@ -614,18 +642,27 @@ async function run() {
         throw new Error("Кнопка 'Повторные заказы' должна иметь aria-pressed=true");
       }
 
-      const repeatOrderCount = await cards.count();
-      if (repeatOrderCount !== 2) {
-        throw new Error(`Ожидалось 2 купона на повторный заказ, отображается: ${repeatOrderCount}`);
+      const repeatCardsCount = await cards.count();
+      if (repeatCount === 0) {
+        // Empty state check
+        const emptyState = page.locator('text="Сейчас предложений этого типа нет."');
+        await emptyState.waitFor({ state: "visible" });
+        const resetBtn = page.locator('button:has-text("Показать все акции")');
+        await resetBtn.waitFor({ state: "visible" });
+        console.log("  ✓ Фильтр 'Повторные заказы' (0 купонов): корректный empty-state показан");
+      } else {
+        if (repeatCardsCount !== repeatCount) {
+          throw new Error(`Ожидалось ${repeatCount} купонов на повторный заказ, отображается: ${repeatCardsCount}`);
+        }
+        console.log(`  ✓ Фильтр 'Повторные заказы': отображается ${repeatCardsCount} карточек (ожидалось ${repeatCount})`);
       }
-      console.log(`  ✓ Фильтр 'Повторные заказы': pathname неизменен, отображается ${repeatOrderCount} карточки`);
 
       // 4. Клик "Все акции"
       await allBtn.click();
       await page.waitForTimeout(300);
       const allCountAgain = await cards.count();
-      if (allCountAgain !== initialCount) {
-        throw new Error(`Ожидалось восстановление всех ${initialCount} купонов, отображается: ${allCountAgain}`);
+      if (allCountAgain !== allCount) {
+        throw new Error(`Ожидалось восстановление всех ${allCount} купонов, отображается: ${allCountAgain}`);
       }
       console.log(`  ✓ Сброс на 'Все акции': отображаются снова все ${allCountAgain} купонов`);
 
@@ -650,6 +687,27 @@ async function run() {
         throw new Error(`Location header для repeat-order должен вести на /store/farfor, получен: ${locRepeat}`);
       }
       console.log(`  ✓ GET /store/farfor/repeat-order возвращает 308 -> ${locRepeat}`);
+
+      // 7. Проверка 1-hop редиректов для legacy stores (без chains)
+      const ostinRes = await page.request.get(`${BASE_URL}/store/ostin/first-order`, { maxRedirects: 0 });
+      if (ostinRes.status() !== 308) {
+        throw new Error(`GET /store/ostin/first-order должен возвращать 308, получен: ${ostinRes.status()}`);
+      }
+      const locOstin = ostinRes.headers()["location"];
+      if (!locOstin || !locOstin.endsWith("/category/marketpleysy")) {
+        throw new Error(`GET /store/ostin/first-order должен вести в 1 hop на /category/marketpleysy, получен: ${locOstin}`);
+      }
+      console.log(`  ✓ GET /store/ostin/first-order возвращает 308 в 1 hop -> ${locOstin}`);
+
+      const mvideoRes = await page.request.get(`${BASE_URL}/store/m-video/repeat-order`, { maxRedirects: 0 });
+      if (mvideoRes.status() !== 308) {
+        throw new Error(`GET /store/m-video/repeat-order должен возвращать 308, получен: ${mvideoRes.status()}`);
+      }
+      const locMvideo = mvideoRes.headers()["location"];
+      if (!locMvideo || !locMvideo.endsWith("/category/elektronika-i-tehnika")) {
+        throw new Error(`GET /store/m-video/repeat-order должен вести в 1 hop на /category/elektronika-i-tehnika, получен: ${locMvideo}`);
+      }
+      console.log(`  ✓ GET /store/m-video/repeat-order возвращает 308 в 1 hop -> ${locMvideo}`);
 
       await context.close();
       passedTests++;

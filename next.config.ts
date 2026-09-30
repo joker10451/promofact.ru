@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { LOGO_PROXIES } from "./src/lib/logoProxy";
+import { LEGACY_STORE_REDIRECTS } from "./src/lib/legacyRedirects";
 
 /**
  * Основное зеркало — апекс без www: именно он указан в canonical и в sitemap.
@@ -380,6 +381,20 @@ const nextConfig: NextConfig = {
         destination: "/category/raznoe",
         permanent: true,
       },
+      // Wave 2: Legacy store intent redirects — для устаревших магазинов сразу ведем
+      // на конечную каноническую категорию в 1 hop (без цепочки /store/ostin/first-order -> /store/ostin -> /category/...).
+      ...Object.entries(LEGACY_STORE_REDIRECTS).flatMap(([slug, destination]) => [
+        {
+          source: `/store/${slug}/first-order`,
+          destination,
+          permanent: true,
+        },
+        {
+          source: `/store/${slug}/repeat-order`,
+          destination,
+          permanent: true,
+        },
+      ]),
       // Wave 2: Intent filter redirects — клиентский фильтр заменил серверные страницы.
       // Используем :slug (не :path*) чтобы не перехватывать /store/alias/first-order
       // раньше alias-редиректов выше.

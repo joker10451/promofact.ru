@@ -662,6 +662,13 @@ let passed = 0;
   const footerSrc = fs.readFileSync(path.resolve("src/components/Footer.tsx"), "utf-8");
   assert.ok(footerSrc.includes("/collections/first-order"), "Footer должен сохранять ссылку /collections/first-order");
 
+  // H. Legacy store intent redirects должны вести в 1 hop сразу на канонический destination
+  assert.ok(
+    nextConfigSrc.includes("...Object.entries(LEGACY_STORE_REDIRECTS).flatMap") &&
+      nextConfigSrc.includes("LEGACY_STORE_REDIRECTS"),
+    "next.config.ts должен генерировать 1-hop редиректы из LEGACY_STORE_REDIRECTS для intent-маршрутов"
+  );
+
   console.log("✓ Тест 12: Регрессионные требования Wave 2 Store Intent Filters полностью соблюдены (PASS)");
   passed++;
 }
