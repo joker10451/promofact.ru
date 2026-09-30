@@ -321,11 +321,6 @@ const nextConfig: NextConfig = {
       // Исторические категории (P2.4 Wave 1A: Safe Index Hygiene)
       // Робот Яндекса помнит старые слаги категорий до внедрения таксономии.
       {
-        source: "/category/dostavka-edy",
-        destination: "/category/dostavka-iz-restoranov",
-        permanent: true,
-      },
-      {
         source: "/category/krasota-i-kosmetika",
         destination: "/category/kosmetika-i-parfyumeriya",
         permanent: true,
@@ -378,11 +373,6 @@ const nextConfig: NextConfig = {
       {
         source: "/category/avtotovary",
         destination: "/category/raznoe",
-        permanent: true,
-      },
-      {
-        source: "/category/zootovary",
-        destination: "/category/vse-dlya-doma",
         permanent: true,
       },
     ];

@@ -66,6 +66,8 @@ scripts/post-*.mjs
 /AUDIT.md
 /audit/
 /audit-screenshots/
+/INDEX_HYGIENE_AUDIT.md
+/promofact.ru_*.csv
 # Локальная конфигурация запуска дев-сервера
 /.claude/
 .youtube-token.json

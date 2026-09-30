@@ -118,7 +118,6 @@ export const CATEGORY_ALIASES: Record<string, string> = {
   "krasota-i-uhod": "kosmetika-i-parfyumeriya",
   "produkty-i-dostavka": "dostavka-produktov",
   "eda-i-dostavka": "dostavka-produktov",
-  "dostavka-edy": "dostavka-iz-restoranov",
   "knigi-i-obuchenie": "onlayn-obrazovanie",
   knigi: "onlayn-obrazovanie",
   "kino-i-teatr": "onlayn-kinoteatry",
