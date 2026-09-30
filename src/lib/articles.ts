@@ -1370,7 +1370,6 @@ export const ARTICLES: Article[] = [
       "Пополнять такие карты можно рублями через СБП прямо с карты любого российского банка по выгодному биржевому курсу.",
     ],
     related: [
-      { text: "Промокод Плати по миру", href: "/store/plati-po-miru" },
       { text: "Сервисы и подписки", href: "/category/servisy-i-podpiski" },
     ],
   },

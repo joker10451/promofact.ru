@@ -523,8 +523,6 @@ const PRIORITY_STORES = [
   "sinergiya-angliyskiy",
   "patch-and-go",
   "polzaru",
-  "plati-po-miru",
-  "irnby",
 ];
 
 function byScore(a: Coupon, b: Coupon): number {
@@ -549,9 +547,8 @@ function byScore(a: Coupon, b: Coupon): number {
  * магазинов, чей код временно истёк.
  */
 async function fetchMergedCoupons(): Promise<Coupon[]> {
-  const [perfluenceCoupons, saleadsCoupons, supabaseCoupons] = await Promise.all([
+  const [perfluenceCoupons, supabaseCoupons] = await Promise.all([
     fetchData(),
-    (await import("@/lib/saleads")).fetchSaleadsCoupons(),
     (await import("@/lib/supabaseCoupons")).fetchSupabaseCoupons(),
   ]);
 
@@ -559,12 +556,11 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
   const { dedupeCoupons } = await import("@/lib/dedupe");
 
   // Дедуп по приоритету источника: ручные купоны перебивают фиды, Perfluence
-  // перебивает сети.
+  // перебивает внешние источники.
   const { coupons, stats } = dedupeCoupons([
     { source: "custom", coupons: customCoupons },
     { source: "supabase", coupons: supabaseCoupons },
     { source: "perfluence", coupons: perfluenceCoupons },
-    { source: "saleads", coupons: saleadsCoupons },
   ]);
 
   if (stats.dropped > 0) {

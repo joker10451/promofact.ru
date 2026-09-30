@@ -179,8 +179,6 @@ export default function CouponGrid({
       "sinergiya-angliyskiy",
       "patch-and-go",
       "polzaru",
-      "plati-po-miru",
-      "irnby",
     ];
 
     const result = Array.from(storeMap.values()).map((storeCoupons) => {

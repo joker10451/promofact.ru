@@ -13,8 +13,7 @@ export type CouponSource =
   | "custom"
   | "supabase"
   | "perfluence"
-  | "admitad"
-  | "saleads";
+  | "admitad";
 
 /**
  * Приоритет при коллизии — от старшего к младшему.
@@ -26,7 +25,6 @@ export const SOURCE_PRIORITY: readonly CouponSource[] = [
   "supabase",
   "perfluence",
   "admitad",
-  "saleads",
 ];
 
 /** Ручные источники: их коды глушат дубли из фидов независимо от магазина. */

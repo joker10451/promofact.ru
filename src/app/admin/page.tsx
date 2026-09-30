@@ -25,7 +25,7 @@ export default async function AdminPage() {
           <p className="text-xs font-bold uppercase tracking-widest text-ink/45">ПромоФакт — приват</p>
           <h1 className="mt-1 font-display text-3xl font-extrabold">Админ — купоны</h1>
           <p className="mt-2 max-w-2xl text-sm text-ink/50">
-            Автозалив без деплоя. Perfluence/Saleads/Admitad льются сами (ISR 10 мин). Здесь — твои эксклюзивы с erid (Кинопоиск и т.д.).
+            Автозалив без деплоя. Perfluence льётся сам (ISR 10 мин). Здесь — твои эксклюзивы с erid (Кинопоиск и т.д.).
             После сохранения купон появится на сайте за ~10 мин (или сразу после ручного ревалида).
           </p>
         </div>

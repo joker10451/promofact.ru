@@ -59,16 +59,6 @@ const FEATURED_CALC_STORES: StoreOption[] = [
     affiliateUrl: "/store/iv-roshe",
   },
   {
-    slug: "irnby",
-    name: "IRNBY",
-    discountType: "fixed",
-    discountValue: 1000,
-    discountLabel: "−1 000 ₽",
-    code: "saleads",
-    minOrder: 3000,
-    affiliateUrl: "/store/irnby",
-  },
-  {
     slug: "pro32-com",
     name: "PRO32",
     discountType: "percent",

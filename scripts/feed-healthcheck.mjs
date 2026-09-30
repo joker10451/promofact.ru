@@ -5,7 +5,6 @@ const TIMEOUT_MS = 15_000;
 const sources = [
   { name: "Perfluence widget", url: process.env.PERFLUENCE_WIDGET_URL },
   { name: "Perfluence results", url: process.env.PERFLUENCE_RESULTS_URL },
-  { name: "Saleads feed", url: process.env.SALEADS_FEED_URL },
   { name: "Admitad feed", url: process.env.ADMITAD_FEED_URL },
 ];
 

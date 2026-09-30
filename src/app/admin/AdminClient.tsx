@@ -222,7 +222,7 @@ export default function AdminClient({ supabaseReady }: { supabaseReady: boolean 
       <section className="mt-6 rounded-2xl border border-line bg-paper p-5 text-xs leading-relaxed text-ink/60">
         <p className="font-bold text-ink">Как работает автозалив</p>
         <ul className="mt-2 list-disc pl-5">
-          <li>Perfluence/Saleads/Admitad — тянутся автоматом каждые 10 мин (переменные окружения).</li>
+          <li>Perfluence — тянется автоматом каждые 10 мин (переменные окружения).</li>
           <li>Твои эксклюзивы (erid) — добавляешь здесь → пишутся в Supabase → через 10 мин на всех страницах + sitemap.</li>
           <li>Старые `CUSTOM_COUPONS` из кода остаются как fallback, но новые лить только сюда (без деплоя).</li>
           <li>Дубль по коду: если в Supabase есть код `6ZJP6PZFQH`, Perfluence-дубль с тем же кодом глушится автоматом.</li>
