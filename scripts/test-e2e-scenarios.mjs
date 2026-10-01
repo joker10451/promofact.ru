@@ -86,7 +86,7 @@ async function run() {
   try {
     await waitForServer(`${BASE_URL}/`);
     // Прогрев динамического API поиска для исключения задержек холодного старта в CI
-    await fetch(`${BASE_URL}/api/search?q=sunlight`).catch(() => {});
+    await fetch(`${BASE_URL}/api/search?q=farfor`).catch(() => {});
     console.log("✓ Сервер готов и отвечает 200 OK");
 
     const browser = await chromium.launch({ headless: true });
@@ -94,7 +94,7 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 10;
+    const totalTests = 11;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
@@ -112,16 +112,16 @@ async function run() {
 
       const searchInput = searchModal.locator('input[type="search"]');
       await searchInput.waitFor({ state: "visible", timeout: 3000 });
-      // Вводим опечатку раскладки: "cfykfqn" (sunlight в русской раскладке)
-      await searchInput.fill("cfykfqn");
+      // Вводим опечатку раскладки: "афкащк" (farfor в русской раскладке)
+      await searchInput.fill("афкащк");
 
-      const sunlightItem = searchModal.locator('a[href="/store/sunlight-ru"]').first();
-      await sunlightItem.waitFor({ state: "visible", timeout: 10000 });
-      console.log("  ✓ Поиск находит 'SUNLIGHT' по опечатке клавиатуры 'cfykfqn'");
+      const farforItem = searchModal.locator('a[href="/store/farfor"]').first();
+      await farforItem.waitFor({ state: "visible", timeout: 10000 });
+      console.log("  ✓ Поиск находит 'FARFOR' по опечатке клавиатуры 'афкащк'");
 
       // Проверяем клавиатурную навигацию: Enter открывает выбранный результат
       await page.keyboard.press("Enter");
-      await page.waitForURL("**/store/sunlight-ru", { timeout: 5000, waitUntil: "domcontentloaded" });
+      await page.waitForURL("**/store/farfor", { timeout: 5000, waitUntil: "domcontentloaded" });
       console.log("  ✓ Переход к магазину работает по нажатию клавиши Enter");
 
       await context.close();
@@ -149,23 +149,23 @@ async function run() {
       const searchInput = searchModal.locator('input[type="search"]');
       
       // Имитируем частую смену запросов
-      await searchInput.fill("sam");
+      await searchInput.fill("dod");
       await page.waitForTimeout(40);
-      await searchInput.fill("samokat");
+      await searchInput.fill("dodo");
       await page.waitForTimeout(40);
       await searchInput.fill("");
       await page.waitForTimeout(40);
-      await searchInput.fill("sunlight");
+      await searchInput.fill("farfor");
 
-      // Ждём результатов и убеждаемся, что устаревший ответ samokat не перезаписал sunlight
+      // Ждём результатов и убеждаемся, что устаревший ответ dodo не перезаписал farfor
       await page.waitForTimeout(400);
-      const sunlightResult = searchModal.locator('a[href="/store/sunlight-ru"]').first();
-      await sunlightResult.waitFor({ state: "visible", timeout: 4000 });
-      
-      const samokatResult = searchModal.locator('a[href="/store/samokat"]').first();
-      const hasSamokat = await samokatResult.isVisible();
-      if (hasSamokat) {
-        throw new Error("Устаревший запрос перезаписал актуальные результаты поиска!");
+      const farforResult = searchModal.locator('a[href="/store/farfor"]').first();
+      await farforResult.waitFor({ state: "visible", timeout: 4000 });
+
+      const dodoResult = searchModal.locator('a[href="/store/dodo-pizza"]').first();
+      const isDodoVisible = await dodoResult.isVisible().catch(() => false);
+      if (isDodoVisible) {
+        throw new Error("Устаревший асинхронный ответ от запроса 'dodo' перезаписал результаты актуального запроса 'farfor'!");
       }
       console.log("  ✓ AbortController предотвратил гонку запросов: отображаются только актуальные результаты");
 
@@ -246,7 +246,7 @@ async function run() {
         permissions: ["clipboard-read", "clipboard-write"],
       });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
       // Находим первую карточку купона
       const firstCard = page.locator("article").first();
@@ -293,7 +293,7 @@ async function run() {
         }
       });
 
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
       const firstCard = page.locator("article").first();
       const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
@@ -332,7 +332,7 @@ async function run() {
       for (const res of mobileResolutions) {
         const context = await browser.newContext({ viewport: { width: res.width, height: res.height } });
         const page = await context.newPage();
-        await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
+        await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
         const helperBtn = page.locator('button[aria-label="Открыть помощника"]');
         await helperBtn.waitFor({ state: "visible" });
@@ -378,16 +378,16 @@ async function run() {
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
-      const affiliateLink = page.locator("a:has-text('Перейти на сайт SUNLIGHT')").first();
+      const affiliateLink = page.locator("a:has-text('Перейти на сайт')").first();
       await affiliateLink.waitFor({ state: "visible" });
 
       const href = await affiliateLink.getAttribute("href");
       const target = await affiliateLink.getAttribute("target");
       const rel = await affiliateLink.getAttribute("rel");
 
-      if (!href || !href.includes("sunlight.prfl.me")) {
+      if (!href || !href.includes("prfl.me")) {
         throw new Error(`Некорректная партнёрская ссылка: ${href}`);
       }
       if (target !== "_blank") {
@@ -420,11 +420,11 @@ async function run() {
       await context.route("**/*prfl.me/**", (route) =>
         route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Partner Offer Landing</body></html>" })
       );
-      await context.route("**/*sunlight*/**", (route) => {
+      await context.route("**/*farfor*/**", (route) => {
         if (route.request().url().includes("localhost")) {
           return route.continue();
         }
-        return route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Sunlight Partner Landing</body></html>" });
+        return route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Farfor Partner Landing</body></html>" });
       });
 
       const page = await context.newPage();
@@ -450,7 +450,7 @@ async function run() {
           window.ym = ymFn;
         }
       });
-      await page.goto(`${BASE_URL}/store/sunlight-ru`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
       const firstCard = page.locator("article").first();
       await firstCard.waitFor({ state: "visible" });
@@ -473,7 +473,7 @@ async function run() {
 
       // Проверяем, что в новой вкладке открылся партнёрский URL
       const openedUrl = newPage.url();
-      if (!openedUrl.includes("prfl.me") && !openedUrl.includes("sunlight")) {
+      if (!openedUrl.includes("prfl.me") && !openedUrl.includes("farfor")) {
         throw new Error(`В новой вкладке открылся некорректный URL: ${openedUrl}`);
       }
       console.log(`  ✓ Партнёрская ссылка успешно открыта в новой вкладке: ${openedUrl.slice(0, 45)}...`);
@@ -521,7 +521,7 @@ async function run() {
       const pagesToTest = [
         "/",
         "/promokody",
-        "/store/sunlight-ru",
+        "/store/farfor",
         "/category/dostavka-produktov",
         "/collections/first-order",
       ];
@@ -709,6 +709,56 @@ async function run() {
       }
       console.log(`  ✓ GET /store/m-video/repeat-order возвращает 308 в 1 hop -> ${locMvideo}`);
 
+      await context.close();
+      passedTests++;
+    }
+
+    // --- СЦЕНАРИЙ 11: Client Safety Expiry & Dynamic Freshness ---
+    console.log("\n[Тест 11] Сценарий: Клиентская фильтрация истёкших промокодов после гидратации (без rebuild)");
+    {
+      const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+      const page = await context.newPage();
+
+      // Открываем магазин farfor с нормальным временем
+      await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
+      await page.waitForTimeout(500);
+
+      const allBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Все акции")');
+      await allBtn.waitFor({ state: "visible" });
+      const cards = page.locator('article[id^="coupon-"]');
+      const initialCount = await cards.count();
+      console.log(`  ✓ Исходное число купонов farfor в обычном режиме: ${initialCount}`);
+
+      // Теперь эмулируем время в будущем (2030 год), когда все текущие купоны с фиксированной датой истекли
+      // Используем client script до навигации
+      const futureContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+      await futureContext.addInitScript(() => {
+        // Подменяем Date.now() на 2030 год
+        const futureTime = new Date("2030-01-01T00:00:00Z").getTime();
+        Date.now = () => futureTime;
+      });
+
+      const futurePage = await futureContext.newPage();
+      await futurePage.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
+      await futurePage.waitForTimeout(600);
+
+      const futureCards = futurePage.locator('article[id^="coupon-"]');
+      const futureCount = await futureCards.count();
+      console.log(`  ✓ Число активных купонов в 2030 году (после клиентской фильтрации): ${futureCount}`);
+
+      // В 2030 году купоны с expires должны исчезнуть
+      if (futureCount >= initialCount && initialCount > 0) {
+        throw new Error(`В 2030 году купоны с ограниченным сроком должны были исчезнуть. Было: ${initialCount}, стало: ${futureCount}`);
+      }
+
+      // Проверяем, что счётчик в табе "Все акции" синхронизирован
+      const allCountText = await futurePage.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Все акции") span.rounded-full').textContent();
+      if (parseInt(allCountText || "0", 10) !== futureCount) {
+        throw new Error(`Счётчик таба 'Все акции' (${allCountText}) не совпадает с числом карточек (${futureCount})`);
+      }
+      console.log(`  ✓ Счётчик таба 'Все акции' (${allCountText}) синхронизирован с карточками (${futureCount})`);
+
+      await futureContext.close();
       await context.close();
       passedTests++;
     }

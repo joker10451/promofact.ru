@@ -26,6 +26,7 @@ const { CITIES_SEO } = await import("@/lib/citiesSeo");
 const { getCategories, getAllStores, getCoupons } = await import("@/lib/perfluence");
 const { getArticles } = await import("@/lib/articles");
 const { SITE_NAME, SITE_URL } = await import("@/lib/site");
+const { canonicalCategorySlug } = await import("@/lib/categoryTaxonomy");
 
 console.log("================================================================================");
 console.log("🚀 ЗАПУСК РЕГРЕССИОННЫХ ТЕСТОВ SEO QUICK-WINS (P2.2)");
@@ -111,21 +112,30 @@ let passed = 0;
   const coupons = await getCoupons();
   const categories = await getCategories();
 
-  // Симулируем правила sitemap
+  // Симулируем правила sitemap точно по алгоритму sitemap.ts
   const validGeoCategories = [];
   const thinGeoCategories = [];
   const emptyGeoCategories = [];
+  const seenGeoKeys = new Set();
 
   for (const city of CITIES_SEO) {
     for (const cat of categories) {
+      const canonicalSlug = canonicalCategorySlug(cat.slug);
+      const geoKey = `${city.slug}/${canonicalSlug}`;
+      if (seenGeoKeys.has(geoKey)) {
+        continue;
+      }
+      seenGeoKeys.add(geoKey);
+
       const list = coupons.filter((c) => {
         const r = (c.promocode?.region || "").toLowerCase();
         const isAllRu = !r || r === "вся россия" || r === "ru" || r.includes("россия");
         const matchesCity = r.includes(city.name.toLowerCase());
-        return (isAllRu || matchesCity) && c.store.categorySlug === cat.slug;
+        const storeCat = canonicalCategorySlug(c.store.categorySlug || "");
+        return (isAllRu || matchesCity) && storeCat === canonicalSlug;
       });
 
-      const url = `${SITE_URL}/gorod/${city.slug}/${cat.slug}`;
+      const url = `${SITE_URL}/gorod/${city.slug}/${canonicalSlug}`;
       if (list.length >= 3) {
         validGeoCategories.push({ url, count: list.length });
       } else if (list.length > 0) {

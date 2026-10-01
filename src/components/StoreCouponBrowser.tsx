@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import StoreIntentTabs, { type IntentFilter } from "@/components/StoreIntentTabs";
 import CouponTicket from "@/components/CouponTicket";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
+import { isCouponActive, expiryTimestamp } from "@/lib/couponExpiry";
 
 interface StoreCouponBrowserProps {
   coupons: CatalogCoupon[];
@@ -11,6 +12,9 @@ interface StoreCouponBrowserProps {
   usesMap: Record<string, number>;
   storeProofCount: number;
 }
+
+// 24 часа в миллисекундах (максимальный безопасный таймаут для setTimeout)
+const MAX_SAFE_TIMEOUT = 24 * 60 * 60 * 1000;
 
 export default function StoreCouponBrowser({
   coupons,
@@ -20,13 +24,65 @@ export default function StoreCouponBrowser({
 }: StoreCouponBrowserProps) {
   const [activeFilter, setActiveFilter] = useState<IntentFilter>("all");
 
+  // null во время SSR и initial client render во избежание hydration mismatch.
+  // Заполняется текущим временем сразу после монтирования.
+  const [clientNow, setClientNow] = useState<number | null>(null);
+
+  useEffect(() => {
+    // 1. Фиксируем время клиента после hydration в следующем тике/таймере
+    const initialTimer = setTimeout(() => {
+      setClientNow(Date.now());
+    }, 0);
+
+    // 2. Рассчитываем ближайший момент экспирации для автоматического скрытия
+    // промокода, если вкладка открыта долго (например, с 23:55 до 00:05).
+    function scheduleNextCheck() {
+      const now = Date.now();
+      let nearestTs = Infinity;
+
+      for (const c of coupons) {
+        const ts = expiryTimestamp(c.promocode.expires);
+        if (ts > now && ts < nearestTs) {
+          nearestTs = ts;
+        }
+      }
+
+      if (nearestTs !== Infinity) {
+        // Добавляем буфер в 500 мс для гарантированного перехода границы
+        const delay = Math.min(Math.max(100, nearestTs - now + 500), MAX_SAFE_TIMEOUT);
+        const timer = setTimeout(() => {
+          setClientNow(Date.now());
+          scheduleNextCheck();
+        }, delay);
+        return timer;
+      }
+      return null;
+    }
+
+    const timer = scheduleNextCheck();
+    return () => {
+      clearTimeout(initialTimer);
+      if (timer) clearTimeout(timer);
+    };
+  }, [coupons]);
+
+  // Фильтрация активных купонов:
+  // Если clientNow ещё не определён (SSR / первый кадр гидратации) — используем coupons из SSR.
+  // Как только клиент гидрировался — фильтруем по реальному времени клиента.
+  const activeCoupons = useMemo(() => {
+    if (clientNow === null) {
+      return coupons;
+    }
+    return coupons.filter((c) => isCouponActive(c.promocode.expires, clientNow));
+  }, [coupons, clientNow]);
+
   const firstOrderCoupons = useMemo(
-    () => coupons.filter((c) => c.promocode.isFirstOrderOnly),
-    [coupons],
+    () => activeCoupons.filter((c) => c.promocode.isFirstOrderOnly),
+    [activeCoupons],
   );
   const repeatOrderCoupons = useMemo(
-    () => coupons.filter((c) => !c.promocode.isFirstOrderOnly),
-    [coupons],
+    () => activeCoupons.filter((c) => !c.promocode.isFirstOrderOnly),
+    [activeCoupons],
   );
 
   const filteredCoupons = useMemo(() => {
@@ -36,15 +92,15 @@ export default function StoreCouponBrowser({
       case "repeat-order":
         return repeatOrderCoupons;
       default:
-        return coupons;
+        return activeCoupons;
     }
-  }, [activeFilter, coupons, firstOrderCoupons, repeatOrderCoupons]);
+  }, [activeFilter, activeCoupons, firstOrderCoupons, repeatOrderCoupons]);
 
   return (
     <>
       <StoreIntentTabs
         activeTab={activeFilter}
-        allCount={coupons.length}
+        allCount={activeCoupons.length}
         firstCount={firstOrderCoupons.length}
         repeatCount={repeatOrderCoupons.length}
         onTabChange={setActiveFilter}
