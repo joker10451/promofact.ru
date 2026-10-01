@@ -88,15 +88,17 @@ export function fetchJson(url) {
 
 /**
  * Парсинг даты экспирации купона или акции.
- * Возвращает timestamp конца дня или null, если дата отсутствует/некорректна.
+ * Возвращает точный timestamp (миллисекунды эпохи) или null, если дата отсутствует/некорректна.
+ * Для date-only значений трактуется как конец дня по Москве (23:59:59.999+03:00).
+ * При наличии точного времени (HH:mm[:ss]) вычисляет точный timestamp момента.
  */
 export function parseDateTs(dateStr) {
   if (!dateStr || typeof dateStr !== "string") return null;
   const trimmed = dateStr.trim();
   if (!trimmed) return null;
 
-  // Формат DD.MM.YYYY
-  const ruMatch = trimmed.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+  // Формат DD.MM.YYYY с опциональным временем HH:mm[:ss]
+  const ruMatch = trimmed.match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
   if (ruMatch) {
     const day = parseInt(ruMatch[1], 10);
     const month = parseInt(ruMatch[2], 10);
@@ -104,13 +106,39 @@ export function parseDateTs(dateStr) {
     if (month < 1 || month > 12 || day < 1 || day > 31 || year < 2020 || year > 2040) {
       return null;
     }
-    const ts = new Date(`${year}-${ruMatch[2]}-${ruMatch[1]}T23:59:59.999Z`).getTime();
+    const yyyy = String(year);
+    const mm = ruMatch[2];
+    const dd = ruMatch[1];
+    if (ruMatch[4] !== undefined && ruMatch[5] !== undefined) {
+      const hh = ruMatch[4];
+      const min = ruMatch[5];
+      const ss = ruMatch[6] !== undefined ? ruMatch[6] : "00";
+      const ts = new Date(`${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}+03:00`).getTime();
+      return isNaN(ts) ? null : ts;
+    }
+    const ts = new Date(`${yyyy}-${mm}-${dd}T23:59:59.999+03:00`).getTime();
     return isNaN(ts) ? null : ts;
   }
 
-  // ISO / стандартный формат YYYY-MM-DD
-  const isoTs = new Date(trimmed.includes("T") ? trimmed : `${trimmed}T23:59:59.999Z`).getTime();
-  return isNaN(isoTs) ? null : isoTs;
+  // ISO с явным временем YYYY-MM-DD[T ]HH:mm...
+  const isoTimeMatch = trimmed.match(/^(\d{4}-\d{2}-\d{2})[T\s](\d{2}:\d{2}(?::\d{2})?)/);
+  if (isoTimeMatch) {
+    if (/(?:Z|[+-]\d{2}:\d{2})$/.test(trimmed)) {
+      const ts = new Date(trimmed).getTime();
+      return isNaN(ts) ? null : ts;
+    }
+    const ts = new Date(`${trimmed}+03:00`).getTime();
+    return isNaN(ts) ? null : ts;
+  }
+
+  // ISO date-only YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const ts = new Date(`${trimmed}T23:59:59.999+03:00`).getTime();
+    return isNaN(ts) ? null : ts;
+  }
+
+  const genericTs = new Date(trimmed).getTime();
+  return isNaN(genericTs) ? null : genericTs;
 }
 
 /**
@@ -241,6 +269,259 @@ export function filterExpiredOffers(data, referenceTime = Date.now()) {
   };
 }
 
+/**
+ * Извлекает точные данные публикаций (exact datetime, clean links, erid)
+ * из авторизованного кабинета Perfluence (https://dash.perfluence.net/posts).
+ * НЕ падает при отсутствии сессии или сетевых сбоях — возвращает null.
+ */
+export async function fetchAuthorizedPublicationDetails(sessionFilePath) {
+  const sessionPath = sessionFilePath || path.resolve("data/perfluence_session.json");
+  if (!fs.existsSync(sessionPath)) {
+    console.log("ℹ️ [sync-catalog] exact expiry time source unavailable (no authorized session file); using date-only semantics.");
+    return null;
+  }
+
+  let cookieHeader = "";
+  try {
+    const session = JSON.parse(fs.readFileSync(sessionPath, "utf-8"));
+    const cookies = Array.isArray(session.cookies) ? session.cookies : [];
+    cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+  } catch (err) {
+    console.warn(`⚠️ [sync-catalog] failed to read session file: ${err.message}`);
+    return null;
+  }
+
+  if (!cookieHeader) {
+    console.log("ℹ️ [sync-catalog] empty session cookies; using date-only semantics.");
+    return null;
+  }
+
+  try {
+    const res = await fetch("https://dash.perfluence.net/posts", {
+      headers: {
+        Cookie: cookieHeader,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0",
+      },
+    });
+
+    if (!res.ok) {
+      console.warn(`⚠️ [sync-catalog] authorized publication details request failed (HTTP ${res.status}); using date-only semantics.`);
+      return null;
+    }
+
+    const html = await res.text();
+    return parsePublicationTiles(html);
+  } catch (err) {
+    console.warn(`⚠️ [sync-catalog] authorized publication details fetch error: ${err.message}; using date-only semantics.`);
+    return null;
+  }
+}
+
+/**
+ * Generic-парсер плиток публикаций из HTML кабинета блогера
+ */
+export function parsePublicationTiles(html) {
+  if (!html || typeof html !== "string") return new Map();
+
+  const tiles = html.split('<div class="post-tile-widget');
+  const projectMap = new Map();
+
+  for (const rawTile of tiles.slice(1)) {
+    const projMatch = rawTile.match(/href="\/project\/(\d+)/i);
+    if (!projMatch) continue;
+    const projId = parseInt(projMatch[1], 10);
+
+    const tile = rawTile
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&#039;/g, "'")
+      .replace(/&nbsp;/g, " ");
+
+    const promoRegex = /data-clipboard-text="([A-Za-z0-9_-]+)"[\s\S]*?до\s+(\d{2}\.\d{2}\.\d{4}(?:\s+\d{2}:\d{2}(?::\d{2})?)?)/g;
+    const promos = new Map();
+    let m;
+    while ((m = promoRegex.exec(tile)) !== null) {
+      const code = m[1];
+      const expiry = m[2];
+      promos.set(code, expiry);
+    }
+
+    const linkRegex = /https?:\/\/[a-zA-Z0-9.-]*prfl\.me\/[^\s"<>]+/g;
+    const links = [];
+    while ((m = linkRegex.exec(tile)) !== null) {
+      let l = m[0].replace(/[";,]+$/, "");
+      if (!links.includes(l)) {
+        links.push(l);
+      }
+    }
+
+    const eridRegex = /erid[:=\s]+([A-Za-z0-9_-]+)/g;
+    const erids = [];
+    while ((m = eridRegex.exec(tile)) !== null) {
+      if (!erids.includes(m[1])) {
+        erids.push(m[1]);
+      }
+    }
+
+    const existing = projectMap.get(projId) || { promos: new Map(), links: [], erids: [] };
+    for (const [code, exp] of promos.entries()) {
+      existing.promos.set(code, exp);
+    }
+    for (const l of links) {
+      if (!existing.links.includes(l)) existing.links.push(l);
+    }
+    for (const e of erids) {
+      if (!existing.erids.includes(e)) existing.erids.push(e);
+    }
+    projectMap.set(projId, existing);
+  }
+
+  return projectMap;
+}
+
+/**
+ * Обогащает live-проекты точными данными публикаций (exact datetime, subscriber links, erid)
+ */
+export function enrichWithPublicationDetails(projects, pubDetails) {
+  if (!Array.isArray(projects)) return projects;
+  if (!pubDetails || typeof pubDetails.get !== "function") {
+    return projects;
+  }
+
+  for (const projectItem of projects) {
+    if (!projectItem || typeof projectItem !== "object") continue;
+    const projId = projectItem.project?.id || projectItem.project_id;
+    if (!projId) continue;
+
+    const details = pubDetails.get(Number(projId)) || pubDetails.get(String(projId));
+    const groups = Array.isArray(projectItem.groups) ? projectItem.groups : [];
+
+    for (const group of groups) {
+      const promos = Array.isArray(group.promocodes) ? group.promocodes : [];
+      for (const p of promos) {
+        if (!p || !p.code) continue;
+        if (details && details.promos && details.promos.has(p.code)) {
+          const exactDate = details.promos.get(p.code);
+          p.date = exactDate;
+          p.expires = exactDate;
+        }
+      }
+
+      if (details) {
+        if (details.erids && details.erids.length > 0 && !group.ord_marker) {
+          group.ord_marker = details.erids[0];
+        }
+      }
+    }
+  }
+
+  return projects;
+}
+
+/**
+ * Снимает снепшот динамических данных живого API по каждому проекту.
+ */
+export function createLiveSnapshot(projects) {
+  const snapshot = new Map();
+  for (const p of projects || []) {
+    if (!p || typeof p !== "object") continue;
+    const projId = p.project?.id || p.project_id;
+    if (!projId) continue;
+
+    const promos = (p.groups || []).flatMap((g) => g.promocodes || []);
+    const promoMap = new Map();
+    for (const pr of promos) {
+      if (pr.code) {
+        promoMap.set(pr.code, {
+          date: pr.date || pr.expires || null,
+          ordMarker: pr.ord_marker || null,
+        });
+      }
+    }
+
+    const links = (p.groups || []).flatMap((g) =>
+      (g.links_for_subscribers || []).map((l) => l.link).filter(Boolean)
+    );
+    const ordMarkers = (p.groups || []).map((g) => g.ord_marker).filter(Boolean);
+
+    snapshot.set(projId, {
+      projId,
+      promoCodes: new Set(promoMap.keys()),
+      promos: promoMap,
+      links: new Set(links),
+      ordMarkers: new Set(ordMarkers),
+    });
+  }
+  return snapshot;
+}
+
+/**
+ * Проверяет общий инвариант семантической свежести после слияния с supplemental.
+ */
+export function assertSemanticFreshness(cleanProjects, liveSnapshot) {
+  if (!liveSnapshot || liveSnapshot.size === 0) return;
+  const cleanMap = new Map(cleanProjects.map((p) => [p.project?.id || p.project_id, p]));
+
+  for (const [projId, live] of liveSnapshot.entries()) {
+    const cleanProj = cleanMap.get(projId);
+    if (!cleanProj) {
+      throw new Error(`Semantic Freshness Violation: live project ${projId} disappeared after supplemental merge!`);
+    }
+
+    const cleanPromos = (cleanProj.groups || []).flatMap((g) => g.promocodes || []);
+    const cleanPromoMap = new Map(cleanPromos.map((p) => [p.code, p]));
+
+    // 1. Ни один live active промокод не должен исчезнуть
+    for (const code of live.promoCodes) {
+      if (!cleanPromoMap.has(code)) {
+        throw new Error(
+          `Semantic Freshness Violation: live active promo code '${code}' in project ${projId} disappeared after supplemental merge!`
+        );
+      }
+      // 2. Expiry live промокода не должен быть заменен
+      const livePromo = live.promos.get(code);
+      const cleanPromo = cleanPromoMap.get(code);
+      const cleanDate = cleanPromo.date || cleanPromo.expires || null;
+      if (livePromo.date && cleanDate !== livePromo.date) {
+        throw new Error(
+          `Semantic Freshness Violation: live promo '${code}' expiry in project ${projId} was mutated from '${livePromo.date}' to '${cleanDate}'!`
+        );
+      }
+      // 3. ord_marker live промокода не должен быть заменен
+      if (livePromo.ordMarker && cleanPromo.ord_marker && cleanPromo.ord_marker !== livePromo.ordMarker) {
+        throw new Error(
+          `Semantic Freshness Violation: live promo '${code}' ord_marker in project ${projId} was mutated!`
+        );
+      }
+    }
+
+    // 4. Проверяем, что supplemental не подмешал лишних промокодов в существующий проект
+    for (const code of cleanPromoMap.keys()) {
+      if (!live.promoCodes.has(code)) {
+        throw new Error(
+          `Semantic Freshness Violation: stale promo code '${code}' was injected into live project ${projId} from supplemental!`
+        );
+      }
+    }
+
+    // 5. Проверяем подписные ссылки: live ссылки не должны исчезать
+    const cleanLinks = new Set(
+      (cleanProj.groups || []).flatMap((g) =>
+        (g.links_for_subscribers || []).map((l) => l.link).filter(Boolean)
+      )
+    );
+    for (const link of live.links) {
+      if (!cleanLinks.has(link)) {
+        throw new Error(
+          `Semantic Freshness Violation: live subscriber link in project ${projId} was replaced or removed!`
+        );
+      }
+    }
+  }
+}
+
 export async function runCatalogSync(options = {}) {
   const feedPath = options.feedPath || FEED_PATH;
   const metaPath = options.metaPath || META_PATH;
@@ -294,6 +575,12 @@ export async function runCatalogSync(options = {}) {
       console.warn(`⚠️ ${corruptError}`);
       syncError = new Error(corruptError);
     } else {
+      // Попытка обогатить live-данные точным временем экспирации из авторизованного источника
+      const pubDetails = await fetchAuthorizedPublicationDetails(options.sessionPath);
+      if (pubDetails && Array.isArray(rawApiData.data)) {
+        enrichWithPublicationDetails(rawApiData.data, pubDetails);
+      }
+
       let {
         cleanData,
         totalPromos,
@@ -313,6 +600,8 @@ export async function runCatalogSync(options = {}) {
         syncError = new Error(corruptError);
         // Не завершаемся аварийно, переходим в резервный режим
       } else {
+      // Снимаем снепшот динамических данных живого API ДО supplemental merge
+      const liveSnapshot = createLiveSnapshot(cleanData.data);
       const prevActiveOffers = existingMeta.activeOffers || existingMeta.activePromos || 0;
       const prevProjects = existingMeta.projectCount || 0;
       const newProjects = cleanData.data.length;
@@ -375,36 +664,66 @@ export async function runCatalogSync(options = {}) {
         try {
           const supp = JSON.parse(fs.readFileSync(suppPath, "utf-8"));
           if (Array.isArray(supp)) {
-            const existingMap = new Map(cleanData.data.map((p) => [p.project?.id, p]));
+            const existingMap = new Map(cleanData.data.map((p) => [p.project?.id || p.project_id, p]));
             for (const item of supp) {
               const projId = item.project?.id || item.project_id;
               if (!projId) continue;
               const existing = existingMap.get(projId);
               if (!existing) {
-                // Нормализуем плоскую запись к формату project.id
-                if (!item.project) {
-                  item.project = {
-                    id: projId,
-                    name: item.project_name || "Проект",
-                    logo: item.info?.logo || "",
-                    ...item.info,
-                  };
-                }
-                cleanData.data.push(item);
-                existingMap.set(projId, item);
+                // Проекта нет в live API: фильтруем акции из supplemental по сроку действия
                 const groups = item.groups || [];
+                const validGroups = [];
                 for (const g of groups) {
-                  for (const _ of g.promocodes || []) {
-                    totalPromos++;
-                    activePromos++;
+                  const validPromos = (g.promocodes || []).filter((p) => {
+                    const d = p.date || p.expires;
+                    if (!d) return true;
+                    const ts = parseDateTs(d);
+                    return ts !== null && ts >= now;
+                  });
+                  const validLinks = (g.links_for_subscribers || []).filter((l) => {
+                    const d = l.date_end || l.dateEnd;
+                    if (!d) return true;
+                    const ts = parseDateTs(d);
+                    return ts !== null && ts >= now;
+                  });
+                  if (validPromos.length > 0 || validLinks.length > 0) {
+                    validGroups.push({
+                      ...g,
+                      promocodes: validPromos,
+                      links_for_subscribers: validLinks,
+                    });
                   }
-                  for (const _ of g.links_for_subscribers || []) {
-                    totalLinkOffers++;
-                    activeLinkOffers++;
+                }
+
+                if (validGroups.length > 0) {
+                  const cleanItem = {
+                    ...item,
+                    project: item.project || {
+                      id: projId,
+                      name: item.project_name || "Проект",
+                      logo: item.info?.logo || "",
+                      ...item.info,
+                    },
+                    groups: validGroups,
+                  };
+                  cleanData.data.push(cleanItem);
+                  existingMap.set(projId, cleanItem);
+                  for (const g of validGroups) {
+                    const pCount = (g.promocodes || []).length;
+                    totalPromos += pCount;
+                    activePromos += pCount;
+                    const lCount = (g.links_for_subscribers || []).length;
+                    totalLinkOffers += lCount;
+                    activeLinkOffers += lCount;
                   }
                 }
               } else {
-                // Обогащаем существующий проект из API дополнительными данными (маркировка, медицинские предупреждения)
+                // Проект УЖЕ ЕСТЬ в live API.
+                // ПРАВИЛО: live API имеет абсолютный приоритет для динамических полей:
+                // promocodes, expiration, links_for_subscribers, ord_marker.
+                // НЕ восстанавливаем старые промокоды/ссылки/erid из supplemental.
+                // Supplemental используется ТОЛЬКО для обогащения данными, отсутствующими в API:
+                // medical warning (ПРОТИВОПОКАЗАНИЯ) для ord_custom_text / promo_terms.
                 const suppPromos = (item.groups || []).flatMap((g) => g.promocodes || []);
                 const suppPromoByCode = new Map(suppPromos.map((p) => [p.code, p]));
                 for (const g of existing.groups || []) {
@@ -425,6 +744,9 @@ export async function runCatalogSync(options = {}) {
           console.warn("Не удалось загрузить supplemental-projects.json:", e.message);
         }
       }
+
+      // Проверка общего инварианта семантической свежести для ВСЕХ проектов
+      assertSemanticFreshness(cleanData.data, liveSnapshot);
 
       // Успешная валидация: атомарно сохраняем свежий фид
       atomicWriteJson(feedPath, cleanData);

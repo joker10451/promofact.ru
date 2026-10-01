@@ -869,4 +869,57 @@ const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8"
   passed++;
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/34 ТЕСТОВ (23 Admitad + 11 Регрессий/Hotfix) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// Test 35 [Hotfix]: Fallback store 4025 (detskie-platezhnye-aksessuary-ot-sbera)
+// гарантированно присутствует в getAllStores() даже при отсутствии оффера в Perfluence,
+// а при появлении оффера не создает дублей страниц
+{
+  const { getAllStores, parsePayload } = await import("@/lib/perfluence");
+
+  // 1. Проверяем, что getAllStores() содержит detskie-platezhnye-aksessuary-ot-sbera
+  const stores = await getAllStores();
+  const sberKids = stores.find((s) => s.slug === "detskie-platezhnye-aksessuary-ot-sbera");
+  assert.ok(sberKids, "Магазин 'detskie-platezhnye-aksessuary-ot-sbera' должен присутствовать в getAllStores()");
+  assert.strictEqual(sberKids.id, 4025, "ID магазина должен быть 4025");
+  assert.strictEqual(sberKids.categorySlug, "servisy-i-podpiski", "Категория должна быть 'servisy-i-podpiski'");
+
+  // 2. Проверяем дедупликацию: если в фид приходит активный оффер 4025
+  const mockPayloadWith4025 = JSON.stringify({
+    data: [
+      {
+        project: {
+          id: 4025,
+          name: "Детские платёжные аксессуары от Сбера",
+          category_name: "Банковские карты",
+          site: "https://www.sberbank.com/ru",
+        },
+        groups: [
+          {
+            landing: {
+              id: 9999,
+              link: "https://sberbank.ru/kids",
+            },
+            promocodes: [
+              {
+                id: 111,
+                code: "KIDS2026",
+                discount: "500 ₽",
+                date_to: "2026-12-31",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  const parsedCoupons = parsePayload(mockPayloadWith4025);
+  assert.strictEqual(parsedCoupons.length, 1, "Должен распарситься 1 купон");
+  assert.strictEqual(parsedCoupons[0].store.slug, "detskie-platezhnye-aksessuary-ot-sbera");
+  assert.strictEqual(parsedCoupons[0].store.id, 4025);
+  assert.strictEqual(parsedCoupons[0].store.categorySlug, "servisy-i-podpiski");
+
+  console.log("✓ Test 35 [Hotfix]: Fallback store 4025 доступен без офферов и дедуплицируется (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/35 ТЕСТОВ (23 Admitad + 12 Регрессий/Hotfix) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
