@@ -102,7 +102,7 @@ const timeAfter2359 = new Date("2026-11-01T00:01:00+03:00").getTime();
 assert.strictEqual(isCouponActive(parsedPromos[1].expires, timeAfter2359), false, "После 23:59 nxr645 обязан стать inactive");
 console.log("✓ 6. Регрессионный тест Project 112 (Делимобиль): точный datetime 00:59 MSK и 23:59 MSK (PASS)");
 
-// 7. Live dynamic data > stale supplemental/bundled data (Link and ERID update)
+// 7. Live dynamic data > stale supplemental/bundled data (Link and ERID update + normalizeAffiliateLink Safety)
 const oldLink = "https://delimobil.prfl.me/sites/0q95fq?source=js-widget&source_id=8842";
 const oldErid = "2RanynunP9u";
 
@@ -117,6 +117,111 @@ assert.strictEqual(
 );
 assert.ok(!normalizedNewLink.includes("0q95fq"), "Новая ссылка не должна содержать старый slug 0q95fq");
 assert.ok(!normalizedNewLink.includes(oldErid), "Новая ссылка не должна содержать старый erid");
-console.log("✓ 7. Регрессионный тест обновления link/erid: live dynamic data > stale supplemental/bundled data (PASS)");
+
+// Безопасность normalizeAffiliateLink: НЕ модифицировать сторонние / прямые URL параметром erid
+const directExternalUrl = "https://example.com/promo-landing?tag=special";
+assert.strictEqual(
+  normalizeAffiliateLink(directExternalUrl, newErid),
+  directExternalUrl,
+  "Сторонний/прямой URL не должен модифицироваться параметром erid"
+);
+console.log("✓ 7. Регрессионный тест обновления link/erid и безопасности normalizeAffiliateLink (PASS)");
+
+// 8. Тест generic publication enrichment & semantic freshness invariant (Пункт 5)
+const {
+  enrichWithPublicationDetails,
+  createLiveSnapshot,
+  assertSemanticFreshness,
+} = await import("./sync-catalog.mjs");
+
+// Сценарий А: Live Widget (date-only) + Publication Details (точный datetime)
+const mockLiveWidget = [
+  {
+    project: { id: 112, name: "Делимобиль" },
+    groups: [
+      {
+        promocodes: [
+          { code: "h49fcs", date: "31.10.2026" },
+          { code: "nxr645", date: "31.10.2026" },
+        ],
+        links_for_subscribers: [{ link: newLink }],
+        ord_marker: newErid,
+      },
+    ],
+  },
+];
+
+const mockPubDetails = new Map([
+  [
+    112,
+    {
+      promos: new Map([
+        ["h49fcs", "31.10.2026 00:59"],
+        ["nxr645", "31.10.2026 23:59"],
+      ]),
+      links: [normalizedNewLink],
+      erids: [newErid],
+    },
+  ],
+]);
+
+enrichWithPublicationDetails(mockLiveWidget, mockPubDetails);
+assert.strictEqual(
+  mockLiveWidget[0].groups[0].promocodes[0].date,
+  "31.10.2026 00:59",
+  "h49fcs должен быть обогащен точным временем 00:59"
+);
+assert.strictEqual(
+  mockLiveWidget[0].groups[0].promocodes[1].date,
+  "31.10.2026 23:59",
+  "nxr645 должен быть обогащен точным временем 23:59"
+);
+assert.strictEqual(
+  isoDate(mockLiveWidget[0].groups[0].promocodes[0].date),
+  "2026-10-31T00:59:00+03:00",
+  "isoDate обязан преобразовать обогащенный h49fcs в полный ISO datetime с таймзоной +03:00"
+);
+
+// Сценарий Б: Тест БЕЗ publication detail (fallback)
+const mockWidgetWithoutPub = [
+  {
+    project: { id: 812, name: "PREMIER" },
+    groups: [
+      {
+        promocodes: [{ code: "wtuynkrk", date: "31.10.2026" }],
+        links_for_subscribers: [{ link: "https://premier.prfl.me/sites/xlwp23" }],
+      },
+    ],
+  },
+];
+enrichWithPublicationDetails(mockWidgetWithoutPub, null);
+assert.strictEqual(
+  mockWidgetWithoutPub[0].groups[0].promocodes[0].date,
+  "31.10.2026",
+  "Без publication detail дата должна оставаться date-only (время НЕ выдумывается)"
+);
+assert.strictEqual(
+  isoDate(mockWidgetWithoutPub[0].groups[0].promocodes[0].date),
+  "2026-10-31",
+  "isoDate для date-only возвращает чистый YYYY-MM-DD"
+);
+
+// Сценарий В: Тест инварианта assertSemanticFreshness
+const liveSnap = createLiveSnapshot(mockLiveWidget);
+assert.doesNotThrow(() => {
+  assertSemanticFreshness(mockLiveWidget, liveSnap);
+}, "Семантический инвариант должен успешно проходить при неизменных live-данных");
+
+// Проверяем, что попытка подмешать устаревший промокод или удалить live промокод вызывает исключение
+const corruptedProjects = JSON.parse(JSON.stringify(mockLiveWidget));
+corruptedProjects[0].groups[0].promocodes.pop(); // удалили nxr645
+assert.throws(
+  () => {
+    assertSemanticFreshness(corruptedProjects, liveSnap);
+  },
+  /Semantic Freshness Violation/,
+  "Удаление live промокода обязано приводить к Semantic Freshness Violation"
+);
+console.log("✓ 8. Generic publication enrichment & semantic freshness invariant tests (PASS)");
 
 console.log("\n🎉 ВСЕ ТЕСТЫ EXPIRY УСПЕШНО ПРОЙДЕНЫ!");

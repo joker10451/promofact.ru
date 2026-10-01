@@ -72,8 +72,8 @@ export function normalizeAffiliateLink(link: string, ordMarker?: string): string
   if (!link) return "";
   try {
     const url = new URL(link);
-    // Если это prfl.me ссылка
-    if (url.hostname.endsWith("prfl.me")) {
+    // Нормализуем только известные партнерские ссылки Perfluence (prfl.me)
+    if (url.hostname.endsWith("prfl.me") || url.hostname === "prfl.me") {
       // Удаляем виджетные query-параметры трекинга
       url.searchParams.delete("source");
       url.searchParams.delete("source_id");
@@ -82,10 +82,7 @@ export function normalizeAffiliateLink(link: string, ordMarker?: string): string
       }
       return url.toString();
     }
-    if (ordMarker && !url.searchParams.has("erid")) {
-      url.searchParams.set("erid", ordMarker);
-      return url.toString();
-    }
+    // Для всех сторонних / прямых URL — не модифицируем параметры
     return link;
   } catch {
     return link;
