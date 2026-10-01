@@ -193,6 +193,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   139: { slug: "t-bank-junior", name: "Т-Банк Джуниор" },
   4677: { slug: "mark-formelle", name: "Mark Formelle" },
   3468: { slug: "sberzdorovie", name: "СберЗдоровье" },
+  2332: { slug: "sberzdorovie", name: "СберЗдоровье" },
   2271: { slug: "ostrovok", name: "Островок!" },
   1102: { slug: "elementaree", name: "Elementaree" },
   1100: { slug: "sunlight-ru", name: "SUNLIGHT" },
@@ -219,12 +220,14 @@ export function parsePayload(payloadJson: string): Coupon[] {
       alias?.name || str(project.name || project.store_name).trim() || "Магазин";
     const baseSlug = alias?.slug || translit(name) || "magazin";
     let slug = baseSlug;
-    let n = 1;
-    while (seenSlugs.has(slug)) {
-      n += 1;
-      slug = `${baseSlug}-${n}`;
+    if (!alias?.slug) {
+      let n = 1;
+      while (seenSlugs.has(slug)) {
+        n += 1;
+        slug = `${baseSlug}-${n}`;
+      }
+      seenSlugs.add(slug);
     }
-    seenSlugs.add(slug);
 
     const categoryName =
       str(project.category_name || project.category).trim() || "Другое";

@@ -37,7 +37,76 @@ export default function PromoBanner({ banner }: { banner: PromoBannerData }) {
   );
 }
 
+function ExactCopyRenderer({ text }: { text: string }) {
+  // Находим URL в тексте и делаем их кликабельными, сохраняя точный текст
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+
+  return (
+    <>
+      {parts.map((part, idx) => {
+        if (/^https?:\/\//.test(part)) {
+          return (
+            <a
+              key={idx}
+              href={part}
+              target="_blank"
+              rel="sponsored nofollow noopener"
+              className="text-[#0088cc] font-medium underline break-all hover:text-ink transition-colors"
+            >
+              {part}
+            </a>
+          );
+        }
+        return <span key={idx}>{part}</span>;
+      })}
+    </>
+  );
+}
+
 function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
+  if (banner.creativeOnly) {
+    const { legalText, medicalWarning } = parseOrdAndWarning(banner.ordText);
+    return (
+      <aside aria-label="Реклама" className="w-full">
+        <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-offset transition-all">
+          <a
+            href={banner.link}
+            target="_blank"
+            rel="sponsored nofollow noopener"
+            className="block overflow-hidden bg-paper transition-opacity hover:opacity-95"
+          >
+            {banner.image && (
+              <Image
+                src={banner.image}
+                alt={banner.imageAlt ?? banner.title}
+                width={banner.imageWidth || 2600}
+                height={banner.imageHeight || 1856}
+                unoptimized
+                className="h-auto w-full object-contain"
+              />
+            )}
+          </a>
+          {banner.exactCopy && (
+            <div className="p-5 sm:p-7 text-ink text-sm sm:text-base leading-relaxed whitespace-pre-line border-t border-line">
+              <ExactCopyRenderer text={banner.exactCopy} />
+            </div>
+          )}
+        </div>
+        {medicalWarning ? (
+          <div className="mt-2 space-y-1">
+            <p className="text-[11px] leading-snug text-ink/45">{legalText}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-ink/70">
+              {medicalWarning}
+            </p>
+          </div>
+        ) : (
+          <p className="mt-2 text-[11px] leading-snug text-ink/45">{banner.ordText}</p>
+        )}
+      </aside>
+    );
+  }
+
   const hasImage = Boolean(banner.image && banner.imageWidth && banner.imageHeight);
   const portrait = hasImage && banner.imageHeight! > banner.imageWidth!;
 
