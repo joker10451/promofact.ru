@@ -29,6 +29,7 @@ export interface SearchCoupon {
   id: number;
   /** Название магазина: и для поиска, и для показа в подсказке. */
   store: string;
+  storeSlug?: string;
   code: string;
   bonus: string | null;
 }
@@ -53,6 +54,7 @@ export function buildSearchIndex(
     coupons: coupons.map((c) => ({
       id: c.id,
       store: c.store.name,
+      storeSlug: c.store.slug,
       code: c.promocode.code,
       bonus: c.promocode.bonusName,
     })),

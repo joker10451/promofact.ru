@@ -18,6 +18,27 @@ const RU_TO_EN: Record<string, string> = Object.entries(EN_TO_RU).reduce(
   {} as Record<string, string>
 );
 
+// Транслитерация кириллицы в латиницу (для фонетического поиска: «рутуб» -> «rutub»)
+const RU_TO_LATIN: Record<string, string> = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i",
+  й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t",
+  у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh", щ: "shch", ъ: "", ы: "y",
+  ь: "", э: "e", ю: "yu", я: "ya",
+};
+
+/**
+ * Фонетическая транслитерация кириллицы в латиницу («рутуб» -> «rutub», «делимобиль» -> «delimobil»).
+ */
+export function transliterateRuToEn(str: string): string {
+  if (!str) return "";
+  const lower = str.toLowerCase();
+  let result = "";
+  for (const ch of lower) {
+    result += RU_TO_LATIN[ch] !== undefined ? RU_TO_LATIN[ch] : ch;
+  }
+  return result;
+}
+
 /**
  * Нормализует поисковую строку: приводит к нижнему регистру, заменяет «ё» на «е»,
  * убирает лишние пробелы и знаки пунктуации.
@@ -75,7 +96,8 @@ export const STORE_ALIASES: Record<string, string[]> = {
   "kinopoisk": ["кинопоиск", "kinopoisk", "кино", "фильмы", "сериалы"],
   "ivi": ["иви", "ivi", "онлайн кинотеатр", "фильмы"],
   "start-ru": ["старт", "start", "старт ру", "сериалы"],
-  "premier": ["премьер", "premier", "премьер тв"],
+  "premier": ["премьер", "premier", "премьер тв", "онлайн кинотеатр", "сериалы", "фильмы"],
+  "rutube": ["рутуб", "рутьюб", "рутубе", "rutube", "видеохостинг", "видео", "рутуб премиум"],
   "otello": ["отелло", "otello", "бронирование отелей", "гостиницы"],
   "t-puteshestviya-oteli": ["т-путешествия", "т путешествия", "тинькофф путешествия", "t-travel", "t-puteshestviya", "бронирование отелей", "гостиницы тинькофф"],
   "ostrovok": ["островок", "островок ру", "ostrovok", "ostrovok ru", "бронирование отелей", "гостиницы", "отели по россии", "отели по миру"],
@@ -83,14 +105,14 @@ export const STORE_ALIASES: Record<string, string[]> = {
   "magnit-dostavka": ["магнит доставка", "магнит", "magnit", "доставка магнит"],
   "magnit-plyus-premium": ["магнит плюс", "магнит премиум", "magnit plus"],
   "m-kosmetik": ["м косметик", "магнит косметик", "m kosmetik"],
-  "letual": ["лэтуаль", "летуаль", "letual", "letoile", "парфюмерия"],
+  "letual": ["лэтуаль", "летуаль", "letual", "letoile", "парфюмерия", "косметика"],
   "vazhnaya-ryba": ["важная рыба", "суши", "роллы", "рыба"],
   "tanukifamily": ["тануки", "tanuki", "японская кухня", "суши"],
   "dodo-pizza": ["додо", "додо пицца", "dodo", "пицца"],
   "ebidoebi": ["ебидоеби", "ёбидоёби", "суши"],
   "vkusvill-dostavka": ["вкусвилл", "vkusvill", "вкус вилл", "правильное питание"],
   "perekrestok-dostavka": ["перекресток", "перекрёсток", "perekrestok", "доставка продуктов"],
-  "sberprime": ["сберпрайм", "сбер прайм", "sberprime", "сбер"],
+  "sberprime": ["сберпрайм", "сбер прайм", "sberprime", "сбер", "подписка сберпрайм"],
   "detskie-platezhnye-aksessuary-ot-sbera": ["сбер дети", "детская карта", "платежный стикер", "сбер"],
   "litres": ["литрес", "litres", "книги", "электронные книги"],
   "tehnopark": ["технопарк", "tehnopark", "бытовая техника", "электроника"],
@@ -106,11 +128,26 @@ export const STORE_ALIASES: Record<string, string[]> = {
   "irnby": ["айрнби", "irnby", "ironby", "одежда"],
   "plati-po-miru": ["плати по миру", "зарубежные карты", "оплата сервисов"],
   "fmart": ["фмарт", "fmart"],
+  "delimobil": ["делимобиль", "delimobil", "делик", "каршеринг", "аренда авто", "прокат авто"],
+  "citydrive": ["ситидрайв", "сити драйв", "ситимобил", "citydrive", "каршеринг", "аренда авто"],
+  "cozy-home": ["кози хоум", "козихоум", "кози хом", "кози", "cozy home", "постельное белье", "текстиль", "товары для дома"],
+  "elementaree": ["элементари", "элементарее", "elementaree", "наборы еды", "конструктор еды", "доставка продуктов", "ужины"],
+  "geltek": ["гельтек", "гельтек медика", "geltek", "косметика", "уход за кожей", "диагностика кожи"],
+  "poizon": ["пойзон", "пойзон бокс", "пойзонбокс", "poizon", "poizon box", "дэву", "кроссовки", "обувь", "брендовые вещи"],
+  "carely": ["керли", "кейрли", "карли", "carely", "косметика", "уход"],
+  "mark-formelle": ["марк формель", "маркформель", "марк формел", "mark formelle", "трикотаж", "белье", "одежда"],
+  "yandex-plus": ["яндекс плюс", "яндексплюс", "yandex plus", "плюс", "подписка плюс", "баллы плюс"],
+  "yandex-eda-gipermarkety": ["яндекс еда гипермаркеты", "гипермаркеты", "яндекс еда магазины", "yandex eda gipermarkety", "доставка продуктов"],
+  "avito-puteshestviya": ["авито путешествия", "авито", "avito", "авито отели", "авито жилье", "посуточно", "аренда квартир"],
+  "t-bank-junior": ["т-банк джуниор", "т банк джуниор", "тинькофф джуниор", "t-bank junior", "детская карта", "тбанк", "тинькофф", "джуниор"],
+  "winlab": ["винлаб", "вин лаб", "winlab", "вино", "напитки", "алкоголь"],
+  "podruzhka": ["подружка", "podruzhka", "косметика", "парфюмерия"],
+  "megamarket": ["мегамаркет", "сбермегамаркет", "megamarket", "маркетплейс"],
 };
 
 /**
  * Проверяет совпадение магазина с поисковым запросом с учётом нормализации,
- * раскладки клавиатуры и словаря псевдонимов.
+ * раскладки клавиатуры, фонетической транслитерации и словаря псевдонимов.
  */
 export function matchStoreSearch(
   store: { name: string; slug: string; category?: string },
@@ -121,6 +158,7 @@ export function matchStoreSearch(
   if (!q) return true;
 
   const convertedQ = normalizeSearchTerm(convertKeyboardLayout(query));
+  const translitQ = normalizeSearchTerm(transliterateRuToEn(query));
 
   const storeName = normalizeSearchTerm(store.name);
   const storeSlug = normalizeSearchTerm(store.slug);
@@ -145,12 +183,36 @@ export function matchStoreSearch(
     return true;
   }
 
-  // 3. Проверка словаря псевдонимов
-  const aliases = STORE_ALIASES[store.slug] || [];
+  // 3. Фонетическая транслитерация («рутуб» -> «rutub» для «rutube»)
+  if (
+    translitQ && translitQ.length >= 3 &&
+    (storeSlug.includes(translitQ) || storeName.includes(translitQ))
+  ) {
+    return true;
+  }
+
+  // 4. Проверка словаря псевдонимов
+  let aliases = STORE_ALIASES[store.slug] || [];
+
+  // Если slug пустой или по нему нет алиасов, пытаемся найти алиасы по имени магазина
+  if (aliases.length === 0 && storeName) {
+    for (const [key, aliasList] of Object.entries(STORE_ALIASES)) {
+      if (
+        key === storeName ||
+        aliasList.some((a) => normalizeSearchTerm(a) === storeName)
+      ) {
+        aliases = aliasList;
+        break;
+      }
+    }
+  }
+
   for (const alias of aliases) {
     const normAlias = normalizeSearchTerm(alias);
+    if (!normAlias) continue;
     if (normAlias.includes(q) || q.includes(normAlias)) return true;
     if (convertedQ && (normAlias.includes(convertedQ) || convertedQ.includes(normAlias))) return true;
+    if (translitQ && translitQ.length >= 3 && (normAlias.includes(translitQ) || translitQ.includes(normAlias))) return true;
   }
 
   return false;

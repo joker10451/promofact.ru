@@ -8,11 +8,12 @@
     "build:check": "node scripts/build-check.mjs",
     "start": "next start",
     "lint": "eslint src",
-    "test": "npm run test:normalizer && npm run test:links && npm run test:expiry && npm run test:quick-wins",
+    "test": "npm run test:normalizer && npm run test:links && npm run test:expiry && npm run test:quick-wins && npm run test:search",
     "test:normalizer": "node --experimental-strip-types scripts/test-normalizer.mjs",
     "test:links": "node scripts/test-internal-graph.mjs",
     "test:expiry": "node scripts/test-coupon-expiry.mjs",
     "test:quick-wins": "node --experimental-strip-types scripts/test-seo-quick-wins.mjs",
+    "test:search": "node --loader ./scripts/ts-loader.mjs scripts/test-search-aliases.mjs",
     "test:seo": "node scripts/audit-seo-inventory.mjs",
     "test:e2e": "node scripts/test-e2e-scenarios.mjs",
     "health:feeds": "node scripts/feed-healthcheck.mjs"

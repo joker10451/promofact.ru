@@ -71,7 +71,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
             store.includes(normQ) ||
             bonus.includes(normQ) ||
             (convertedQ && (code.includes(convertedQ) || store.includes(convertedQ) || bonus.includes(convertedQ))) ||
-            matchStoreSearch({ name: c.store, slug: "" }, query)
+            matchStoreSearch({ name: c.store, slug: c.storeSlug || "" }, query)
           );
         })
         .slice(0, 5)
