@@ -33,42 +33,64 @@ jobs:
       - name: Install dependencies (npm ci)
         run: npm ci
 
-      # 2. Синхронизация каталога
+      # 2. Восстановление сессии Perfluence (если задан секрет)
+      - name: Restore Perfluence session
+        env:
+          PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}
+        run: |
+          mkdir -p data
+          if [ -n "$PERFLUENCE_SESSION_B64" ]; then
+            echo "$PERFLUENCE_SESSION_B64" | base64 -d > data/perfluence_session.json
+            chmod 600 data/perfluence_session.json
+            echo "✓ Perfluence session restored for authorized publication details"
+          else
+            echo "ℹ️ PERFLUENCE_SESSION_B64 not configured; exact expiry enrichment unavailable"
+          fi
+
+      # 3. Синхронизация каталога
       - name: Sync partner catalog
         id: sync_catalog
         env:
           PERFLUENCE_WIDGET_URL: ${{ secrets.PERFLUENCE_WIDGET_URL }}
+          PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}
         run: node scripts/sync-catalog.mjs
 
-      # 3. Проверка результата синхронизации (success vs fallback/failed)
+      # 4. Проверка результата синхронизации (success vs fallback/failed)
       - name: Verify sync status
         id: verify_sync
         run: node scripts/verify-sync-status.mjs
 
-      # 4. npm test
+      # 5. npm test
       - name: Run unit & regression tests (npm test)
         run: npm test
 
-      # 5. npm run lint
+      # 6. npm run lint
       - name: Run linter (npm run lint)
         run: npm run lint
 
-      # 6. npm run build
+      # 7. npm run build
       - name: Build Next.js application (npm run build)
         run: npm run build
 
-      # 7. npm run test:seo
+      # 8. npm run test:seo
       - name: Dynamic SEO & Inventory Audit (npm run test:seo)
         run: npm run test:seo
 
-      # 8. Проверка содержательных изменений фида (исключая технические timestamps)
+      # 9. Проверка содержательных изменений фида (исключая технические timestamps)
       - name: Check substantive feed changes
         id: check_changes
         run: node scripts/check-feed-changes.mjs
 
-      # 9. Автоматический коммит и пуш в main при наличии подтвержденных изменений каталога
+      # 10. Безопасная очистка файла сессии при любом исходе
+      - name: Cleanup Perfluence session
+        if: always()
+        run: |
+          rm -f data/perfluence_session.json
+          echo "✓ Perfluence session cleaned up"
+
+      # 11. Автоматический коммит и пуш в main при наличии подтвержденных изменений каталога
       - name: Commit and push changes directly to main
-        if: steps.check_changes.outputs.has_changes == 'true'
+        if: success() && steps.check_changes.outputs.has_changes == 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

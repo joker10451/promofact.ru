@@ -4,6 +4,7 @@
  */
 
 import assert from "node:assert";
+import fs from "node:fs";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 
@@ -223,5 +224,30 @@ assert.throws(
   "Удаление live промокода обязано приводить к Semantic Freshness Violation"
 );
 console.log("✓ 8. Generic publication enrichment & semantic freshness invariant tests (PASS)");
+
+// 9. Статический аудит безопасности и структуры workflow sync-catalog.yml (Пункт 4)
+const workflowContent = fs.readFileSync(".github/workflows/sync-catalog.yml", "utf-8");
+
+assert.ok(
+  workflowContent.includes("PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}"),
+  "sync-catalog.yml обязан ссылаться на secrets.PERFLUENCE_SESSION_B64"
+);
+assert.ok(
+  workflowContent.includes("data/perfluence_session.json"),
+  "sync-catalog.yml обязан создавать data/perfluence_session.json"
+);
+assert.ok(
+  workflowContent.includes("rm -f data/perfluence_session.json"),
+  "sync-catalog.yml обязан безопасно удалять data/perfluence_session.json"
+);
+assert.ok(
+  workflowContent.includes("if: always()"),
+  "sync-catalog.yml обязан выполнять cleanup сессии с условием if: always()"
+);
+assert.ok(
+  !workflowContent.includes("echo ${{ secrets.PERFLUENCE_SESSION_B64 }}"),
+  "Запрещен прямой вывод секрета в echo"
+);
+console.log("✓ 9. Статический аудит безопасности и структуры sync-catalog.yml (PASS)");
 
 console.log("\n🎉 ВСЕ ТЕСТЫ EXPIRY УСПЕШНО ПРОЙДЕНЫ!");
