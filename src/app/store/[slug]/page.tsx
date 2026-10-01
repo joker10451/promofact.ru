@@ -2,7 +2,6 @@ import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import CouponTicket from "@/components/CouponTicket";
 import PromoBanner from "@/components/PromoBanner";
 import { getActivePromoBanners } from "@/lib/promoBanners";
 import HowToApply from "@/components/HowToApply";
@@ -10,7 +9,7 @@ import JsonLd from "@/components/JsonLd";
 import OtherStores from "@/components/OtherStores";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import StoreLogo from "@/components/StoreLogo";
-import StoreIntentTabs from "@/components/StoreIntentTabs";
+import StoreCouponBrowser from "@/components/StoreCouponBrowser";
 import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
@@ -195,15 +194,7 @@ export default async function StorePage({
   const maxDisc = getMaxDiscount(store.coupons);
 
   const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
-  const firstOrderCoupons = store.coupons.filter(
-    (c) =>
-      c.promocode.isFirstOrderOnly ||
-      /перв|1[-‑–—]?[ыое]?й/i.test(c.promocode.bonusName || "") ||
-      /перв|1[-‑–—]?[ыое]?й/i.test(c.promocode.terms || "")
-  );
-  const repeatOrderCoupons = store.coupons.filter(
-    (c) => !c.promocode.isFirstOrderOnly
-  );
+
 
   // Уникальный SEO-текст: собирается из реальных фактов магазина, а не шаблона.
   const storeArticle = buildStoreArticle(
@@ -448,33 +439,11 @@ export default async function StorePage({
 
         {/* 1. ГЛАВНЫЙ БЛОК: АКТИВНЫЕ КУПОНЫ И ПРОМОКОДЫ (СРАЗУ НА 1-М ЭКРАНЕ) */}
         <div className="mt-6">
-          <StoreIntentTabs
-            storeSlug={store.slug}
-            activeTab="all"
-            allCount={store.coupons.length}
-            firstCount={firstOrderCoupons.length}
-            repeatCount={repeatOrderCoupons.length}
-          />
-
           {getActivePromoBanners({ storeSlug: store.slug }).map((banner) => (
             <div key={banner.id} className="mb-6">
               <PromoBanner banner={banner} />
             </div>
           ))}
-
-          <div className="flex items-center justify-between mb-3.5">
-            <h2 className="font-display text-base sm:text-lg font-extrabold text-ink">
-              {store.name.length > 25 ? "Рабочие промокоды и акции" : `Рабочие промокоды и акции ${store.name}`}
-            </h2>
-            <span className="text-xs font-bold text-ink/50 bg-paper px-2.5 py-1 rounded-full border border-line">
-              {store.coupons.length}{" "}
-              {store.coupons.length === 1
-                ? "купон"
-                : store.coupons.length >= 2 && store.coupons.length <= 4
-                  ? "купона"
-                  : "купонов"}
-            </span>
-          </div>
 
           {store.coupons.length === 0 ? (
             <div className="rounded-3xl border border-line bg-white p-6 sm:p-10 text-center shadow-xs">
@@ -512,16 +481,14 @@ export default async function StorePage({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {store.coupons.map((coupon) => (
-                <CouponTicket
-                  key={`${coupon.id}-${coupon.promocode.code}`}
-                  coupon={coupon}
-                  proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
-                  storeProofCount={storeProofCount}
-                />
-              ))}
-            </div>
+            <StoreCouponBrowser
+              coupons={store.coupons}
+              storeName={store.name}
+              usesMap={Object.fromEntries(
+                store.coupons.map((c) => [c.promocode.code, uses.usesByCode.get(c.promocode.code) ?? 0])
+              )}
+              storeProofCount={storeProofCount}
+            />
           )}
         </div>
 

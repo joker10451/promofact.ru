@@ -94,7 +94,7 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 9;
+    const totalTests = 10;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
@@ -548,6 +548,168 @@ async function run() {
         await context.close();
       }
 
+      passedTests++;
+    }
+
+    // --- СЦЕНАРИЙ 10: Store Intent Filters (клиентская фильтрация и 308 редиректы) ---
+    console.log("\n[Тест 10] Сценарий: Фильтры типов заказов (клиентский стейт) и 308 редиректы устаревших маршрутов");
+    {
+      const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+      const page = await context.newPage();
+
+      // 1. Открываем /store/farfor
+      await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
+      await page.waitForTimeout(500);
+
+      // Проверяем начальный фильтр "Все акции"
+      const allBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Все акции")');
+      await allBtn.waitFor({ state: "visible" });
+      const isAllPressed = await allBtn.getAttribute("aria-pressed");
+      if (isAllPressed !== "true") {
+        throw new Error(`Начальный фильтр должен быть 'all' (aria-pressed=true), получено: ${isAllPressed}`);
+      }
+
+      // Считываем badge counts из кнопок
+      const allCountText = await allBtn.locator("span:last-child").innerText();
+      const allCount = parseInt(allCountText.trim(), 10);
+
+      const firstOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("На первый заказ")');
+      const firstCountText = await firstOrderBtn.locator("span:last-child").innerText();
+      const firstCount = parseInt(firstCountText.trim(), 10);
+
+      const repeatOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Повторные заказы")');
+      const repeatCountText = await repeatOrderBtn.locator("span:last-child").innerText();
+      const repeatCount = parseInt(repeatCountText.trim(), 10);
+
+      if (isNaN(allCount) || isNaN(firstCount) || isNaN(repeatCount)) {
+        throw new Error(`Не удалось распарсить бейджи счётчиков: all=${allCountText}, first=${firstCountText}, repeat=${repeatCountText}`);
+      }
+
+      // Инвариант: allCount === firstCount + repeatCount
+      if (allCount !== firstCount + repeatCount) {
+        throw new Error(`Инвариант нарушен: allCount (${allCount}) !== firstCount (${firstCount}) + repeatCount (${repeatCount})`);
+      }
+
+      // Карточки купонов в сетке (article с id^="coupon-")
+      const cards = page.locator('article[id^="coupon-"]');
+      const initialCardsCount = await cards.count();
+      if (initialCardsCount !== allCount) {
+        throw new Error(`Количество карточек (${initialCardsCount}) не совпадает со счётчиком 'Все акции' (${allCount})`);
+      }
+      console.log(`  ✓ Начальное состояние: all=${allCount} (first=${firstCount}, repeat=${repeatCount}), карточек в DOM: ${initialCardsCount}`);
+
+      // 2. Клик "На первый заказ"
+      await firstOrderBtn.click();
+      await page.waitForTimeout(300);
+
+      // Проверяем, что pathname не изменился и нет query params
+      const urlAfterFirst = new URL(page.url());
+      if (urlAfterFirst.pathname !== "/store/farfor" || urlAfterFirst.search !== "") {
+        throw new Error(`URL не должен меняться при клике на фильтр: ${page.url()}`);
+      }
+
+      const isFirstPressed = await firstOrderBtn.getAttribute("aria-pressed");
+      if (isFirstPressed !== "true") {
+        throw new Error("Кнопка 'На первый заказ' должна иметь aria-pressed=true");
+      }
+
+      const firstCardsCount = await cards.count();
+      if (firstCount === 0) {
+        // Empty state check
+        const emptyState = page.locator('text="Сейчас предложений этого типа нет."');
+        await emptyState.waitFor({ state: "visible" });
+        const resetBtn = page.locator('button:has-text("Показать все акции")');
+        await resetBtn.waitFor({ state: "visible" });
+        console.log("  ✓ Фильтр 'На первый заказ' (0 купонов): корректный empty-state показан");
+      } else {
+        if (firstCardsCount !== firstCount) {
+          throw new Error(`Ожидалось ${firstCount} купонов на первый заказ, отображается: ${firstCardsCount}`);
+        }
+        console.log(`  ✓ Фильтр 'На первый заказ': отображается ${firstCardsCount} карточек (ожидалось ${firstCount})`);
+      }
+
+      // 3. Клик "Повторные заказы"
+      await repeatOrderBtn.click();
+      await page.waitForTimeout(300);
+
+      const urlAfterRepeat = new URL(page.url());
+      if (urlAfterRepeat.pathname !== "/store/farfor" || urlAfterRepeat.search !== "") {
+        throw new Error(`URL не должен меняться при клике на фильтр: ${page.url()}`);
+      }
+
+      const isRepeatPressed = await repeatOrderBtn.getAttribute("aria-pressed");
+      if (isRepeatPressed !== "true") {
+        throw new Error("Кнопка 'Повторные заказы' должна иметь aria-pressed=true");
+      }
+
+      const repeatCardsCount = await cards.count();
+      if (repeatCount === 0) {
+        // Empty state check
+        const emptyState = page.locator('text="Сейчас предложений этого типа нет."');
+        await emptyState.waitFor({ state: "visible" });
+        const resetBtn = page.locator('button:has-text("Показать все акции")');
+        await resetBtn.waitFor({ state: "visible" });
+        console.log("  ✓ Фильтр 'Повторные заказы' (0 купонов): корректный empty-state показан");
+      } else {
+        if (repeatCardsCount !== repeatCount) {
+          throw new Error(`Ожидалось ${repeatCount} купонов на повторный заказ, отображается: ${repeatCardsCount}`);
+        }
+        console.log(`  ✓ Фильтр 'Повторные заказы': отображается ${repeatCardsCount} карточек (ожидалось ${repeatCount})`);
+      }
+
+      // 4. Клик "Все акции"
+      await allBtn.click();
+      await page.waitForTimeout(300);
+      const allCountAgain = await cards.count();
+      if (allCountAgain !== allCount) {
+        throw new Error(`Ожидалось восстановление всех ${allCount} купонов, отображается: ${allCountAgain}`);
+      }
+      console.log(`  ✓ Сброс на 'Все акции': отображаются снова все ${allCountAgain} купонов`);
+
+      // 5. Проверка 308 редиректа для /store/[slug]/first-order
+      const firstOrderRes = await page.request.get(`${BASE_URL}/store/farfor/first-order`, { maxRedirects: 0 });
+      if (firstOrderRes.status() !== 308) {
+        throw new Error(`GET /store/farfor/first-order должен возвращать 308, получен: ${firstOrderRes.status()}`);
+      }
+      const locFirst = firstOrderRes.headers()["location"];
+      if (!locFirst || !locFirst.endsWith("/store/farfor")) {
+        throw new Error(`Location header для first-order должен вести на /store/farfor, получен: ${locFirst}`);
+      }
+      console.log(`  ✓ GET /store/farfor/first-order возвращает 308 -> ${locFirst}`);
+
+      // 6. Проверка 308 редиректа для /store/[slug]/repeat-order
+      const repeatOrderRes = await page.request.get(`${BASE_URL}/store/farfor/repeat-order`, { maxRedirects: 0 });
+      if (repeatOrderRes.status() !== 308) {
+        throw new Error(`GET /store/farfor/repeat-order должен возвращать 308, получен: ${repeatOrderRes.status()}`);
+      }
+      const locRepeat = repeatOrderRes.headers()["location"];
+      if (!locRepeat || !locRepeat.endsWith("/store/farfor")) {
+        throw new Error(`Location header для repeat-order должен вести на /store/farfor, получен: ${locRepeat}`);
+      }
+      console.log(`  ✓ GET /store/farfor/repeat-order возвращает 308 -> ${locRepeat}`);
+
+      // 7. Проверка 1-hop редиректов для legacy stores (без chains)
+      const ostinRes = await page.request.get(`${BASE_URL}/store/ostin/first-order`, { maxRedirects: 0 });
+      if (ostinRes.status() !== 308) {
+        throw new Error(`GET /store/ostin/first-order должен возвращать 308, получен: ${ostinRes.status()}`);
+      }
+      const locOstin = ostinRes.headers()["location"];
+      if (!locOstin || !locOstin.endsWith("/category/marketpleysy")) {
+        throw new Error(`GET /store/ostin/first-order должен вести в 1 hop на /category/marketpleysy, получен: ${locOstin}`);
+      }
+      console.log(`  ✓ GET /store/ostin/first-order возвращает 308 в 1 hop -> ${locOstin}`);
+
+      const mvideoRes = await page.request.get(`${BASE_URL}/store/m-video/repeat-order`, { maxRedirects: 0 });
+      if (mvideoRes.status() !== 308) {
+        throw new Error(`GET /store/m-video/repeat-order должен возвращать 308, получен: ${mvideoRes.status()}`);
+      }
+      const locMvideo = mvideoRes.headers()["location"];
+      if (!locMvideo || !locMvideo.endsWith("/category/elektronika-i-tehnika")) {
+        throw new Error(`GET /store/m-video/repeat-order должен вести в 1 hop на /category/elektronika-i-tehnika, получен: ${locMvideo}`);
+      }
+      console.log(`  ✓ GET /store/m-video/repeat-order возвращает 308 в 1 hop -> ${locMvideo}`);
+
+      await context.close();
       passedTests++;
     }
 

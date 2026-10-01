@@ -1,20 +1,21 @@
 import Icon from "@/components/Icon";
-import Link from "next/link";
+
+export type IntentFilter = "all" | "first-order" | "repeat-order";
 
 interface StoreIntentTabsProps {
-  storeSlug: string;
-  activeTab: "all" | "first-order" | "repeat-order";
+  activeTab: IntentFilter;
   allCount: number;
   firstCount: number;
   repeatCount: number;
+  onTabChange: (tab: IntentFilter) => void;
 }
 
 export default function StoreIntentTabs({
-  storeSlug,
   activeTab,
   allCount,
   firstCount,
   repeatCount,
+  onTabChange,
 }: StoreIntentTabsProps) {
   return (
     <nav
@@ -22,9 +23,11 @@ export default function StoreIntentTabs({
       className="flex flex-wrap items-center gap-2 mb-5"
     >
       {/* 1. Все предложения */}
-      <Link
-        href={`/store/${storeSlug}`}
-        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs ${
+      <button
+        type="button"
+        aria-pressed={activeTab === "all"}
+        onClick={() => onTabChange("all")}
+        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
           activeTab === "all"
             ? "bg-ink text-white font-extrabold shadow-xs"
             : "border border-line bg-white text-ink/70 hover:border-ink hover:text-ink"
@@ -39,12 +42,14 @@ export default function StoreIntentTabs({
         >
           {allCount}
         </span>
-      </Link>
+      </button>
 
       {/* 2. На первый заказ */}
-      <Link
-        href={`/store/${storeSlug}/first-order`}
-        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs ${
+      <button
+        type="button"
+        aria-pressed={activeTab === "first-order"}
+        onClick={() => onTabChange("first-order")}
+        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
           activeTab === "first-order"
             ? "bg-red text-white font-extrabold shadow-xs"
             : "border border-line bg-white text-ink/70 hover:border-red hover:text-red"
@@ -59,12 +64,14 @@ export default function StoreIntentTabs({
         >
           {firstCount}
         </span>
-      </Link>
+      </button>
 
       {/* 3. Повторные заказы */}
-      <Link
-        href={`/store/${storeSlug}/repeat-order`}
-        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs ${
+      <button
+        type="button"
+        aria-pressed={activeTab === "repeat-order"}
+        onClick={() => onTabChange("repeat-order")}
+        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
           activeTab === "repeat-order"
             ? "bg-mint-dark text-white font-extrabold shadow-xs"
             : "border border-line bg-white text-ink/70 hover:border-mint-dark hover:text-mint-dark"
@@ -79,7 +86,7 @@ export default function StoreIntentTabs({
         >
           {repeatCount}
         </span>
-      </Link>
+      </button>
     </nav>
   );
 }
