@@ -152,6 +152,9 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   2271: { slug: "ostrovok", name: "Островок!" },
   1102: { slug: "elementaree", name: "Elementaree" },
   1100: { slug: "sunlight-ru", name: "SUNLIGHT" },
+  354: { slug: "yandeks-lavka", name: "Яндекс Лавка" },
+  2993: { slug: "iv-roshe", name: "Ив Роше" },
+  4025: { slug: "detskie-platezhnye-aksessuary-ot-sbera", name: "Детские платёжные аксессуары от Сбера" },
 };
 
 export function parsePayload(payloadJson: string): Coupon[] {
@@ -815,6 +818,42 @@ const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
     conditions: "Скидка по промокоду действует в официальном интернет-магазине librederm.ru.",
     site: "https://librederm.ru",
     activeBloggers: 13,
+  },
+  "detskie-platezhnye-aksessuary-ot-sbera": {
+    id: 4025,
+    slug: "detskie-platezhnye-aksessuary-ot-sbera",
+    name: "Детские платёжные аксессуары от Сбера",
+    logo: "https://favicon.yandex.net/favicon/v2/sberbank.ru?size=120",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+    about: "«Детские платёжные аксессуары от Сбера» — платёжные стикеры и брелоки для детей и подростков, позволяющие удобно и безопасно оплачивать покупки картой Сбера.",
+    conditions: "Условия и тарифы обслуживания платёжных аксессуаров определяются ПАО Сбербанк.",
+    site: "https://www.sberbank.com/ru",
+    activeBloggers: 291,
+  },
+  "yandeks-lavka": {
+    id: 354,
+    slug: "yandeks-lavka",
+    name: "Яндекс Лавка",
+    logo: "https://favicon.yandex.net/favicon/v2/lavka.yandex?size=120",
+    category: "Доставка продуктов",
+    categorySlug: "dostavka-produktov",
+    about: "«Яндекс Лавка» — сервис быстрой доставки продуктов питания, готовой еды и товаров для дома от 15 минут.",
+    conditions: "Скидки по промокодам применяются при оформлении заказа в приложении и на сайте Яндекс Лавки.",
+    site: "https://lavka.yandex",
+    activeBloggers: 120,
+  },
+  "iv-roshe": {
+    id: 2993,
+    slug: "iv-roshe",
+    name: "Ив Роше",
+    logo: "https://favicon.yandex.net/favicon/v2/yves-rocher.ru?size=120",
+    category: "Косметика и парфюмерия",
+    categorySlug: "kosmetika-i-parfyumeriya",
+    about: "«Ив Роше» (Yves Rocher) — французская растительная косметика и парфюмерия на основе натуральных ингредиентов.",
+    conditions: "Промокоды на скидку и подарки вводятся в корзине официального интернет-магазина Ив Роше.",
+    site: "https://www.yves-rocher.ru",
+    activeBloggers: 65,
   },
 };
 

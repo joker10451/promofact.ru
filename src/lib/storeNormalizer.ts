@@ -16,6 +16,21 @@ interface NormalizedStoreMeta {
 }
 
 const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
+  "detskie-platezhnye-aksessuary-ot-sbera": {
+    name: "Детские платёжные аксессуары от Сбера",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+  },
+  "yandeks-lavka": {
+    name: "Яндекс Лавка",
+    category: "Доставка продуктов",
+    categorySlug: "dostavka-produktov",
+  },
+  "iv-roshe": {
+    name: "Ив Роше",
+    category: "Косметика и парфюмерия",
+    categorySlug: "kosmetika-i-parfyumeriya",
+  },
   "patch-and-go": {
     name: "Patch & Go",
     category: "Косметика и парфюмерия",
