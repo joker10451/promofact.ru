@@ -88,15 +88,17 @@ export function fetchJson(url) {
 
 /**
  * Парсинг даты экспирации купона или акции.
- * Возвращает timestamp конца дня или null, если дата отсутствует/некорректна.
+ * Возвращает точный timestamp (миллисекунды эпохи) или null, если дата отсутствует/некорректна.
+ * Для date-only значений трактуется как конец дня по Москве (23:59:59.999+03:00).
+ * При наличии точного времени (HH:mm[:ss]) вычисляет точный timestamp момента.
  */
 export function parseDateTs(dateStr) {
   if (!dateStr || typeof dateStr !== "string") return null;
   const trimmed = dateStr.trim();
   if (!trimmed) return null;
 
-  // Формат DD.MM.YYYY
-  const ruMatch = trimmed.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+  // Формат DD.MM.YYYY с опциональным временем HH:mm[:ss]
+  const ruMatch = trimmed.match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
   if (ruMatch) {
     const day = parseInt(ruMatch[1], 10);
     const month = parseInt(ruMatch[2], 10);
@@ -104,13 +106,39 @@ export function parseDateTs(dateStr) {
     if (month < 1 || month > 12 || day < 1 || day > 31 || year < 2020 || year > 2040) {
       return null;
     }
-    const ts = new Date(`${year}-${ruMatch[2]}-${ruMatch[1]}T23:59:59.999Z`).getTime();
+    const yyyy = String(year);
+    const mm = ruMatch[2];
+    const dd = ruMatch[1];
+    if (ruMatch[4] !== undefined && ruMatch[5] !== undefined) {
+      const hh = ruMatch[4];
+      const min = ruMatch[5];
+      const ss = ruMatch[6] !== undefined ? ruMatch[6] : "00";
+      const ts = new Date(`${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}+03:00`).getTime();
+      return isNaN(ts) ? null : ts;
+    }
+    const ts = new Date(`${yyyy}-${mm}-${dd}T23:59:59.999+03:00`).getTime();
     return isNaN(ts) ? null : ts;
   }
 
-  // ISO / стандартный формат YYYY-MM-DD
-  const isoTs = new Date(trimmed.includes("T") ? trimmed : `${trimmed}T23:59:59.999Z`).getTime();
-  return isNaN(isoTs) ? null : isoTs;
+  // ISO с явным временем YYYY-MM-DD[T ]HH:mm...
+  const isoTimeMatch = trimmed.match(/^(\d{4}-\d{2}-\d{2})[T\s](\d{2}:\d{2}(?::\d{2})?)/);
+  if (isoTimeMatch) {
+    if (/(?:Z|[+-]\d{2}:\d{2})$/.test(trimmed)) {
+      const ts = new Date(trimmed).getTime();
+      return isNaN(ts) ? null : ts;
+    }
+    const ts = new Date(`${trimmed}+03:00`).getTime();
+    return isNaN(ts) ? null : ts;
+  }
+
+  // ISO date-only YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const ts = new Date(`${trimmed}T23:59:59.999+03:00`).getTime();
+    return isNaN(ts) ? null : ts;
+  }
+
+  const genericTs = new Date(trimmed).getTime();
+  return isNaN(genericTs) ? null : genericTs;
 }
 
 /**
@@ -375,36 +403,66 @@ export async function runCatalogSync(options = {}) {
         try {
           const supp = JSON.parse(fs.readFileSync(suppPath, "utf-8"));
           if (Array.isArray(supp)) {
-            const existingMap = new Map(cleanData.data.map((p) => [p.project?.id, p]));
+            const existingMap = new Map(cleanData.data.map((p) => [p.project?.id || p.project_id, p]));
             for (const item of supp) {
               const projId = item.project?.id || item.project_id;
               if (!projId) continue;
               const existing = existingMap.get(projId);
               if (!existing) {
-                // Нормализуем плоскую запись к формату project.id
-                if (!item.project) {
-                  item.project = {
-                    id: projId,
-                    name: item.project_name || "Проект",
-                    logo: item.info?.logo || "",
-                    ...item.info,
-                  };
-                }
-                cleanData.data.push(item);
-                existingMap.set(projId, item);
+                // Проекта нет в live API: фильтруем акции из supplemental по сроку действия
                 const groups = item.groups || [];
+                const validGroups = [];
                 for (const g of groups) {
-                  for (const _ of g.promocodes || []) {
-                    totalPromos++;
-                    activePromos++;
+                  const validPromos = (g.promocodes || []).filter((p) => {
+                    const d = p.date || p.expires;
+                    if (!d) return true;
+                    const ts = parseDateTs(d);
+                    return ts !== null && ts >= now;
+                  });
+                  const validLinks = (g.links_for_subscribers || []).filter((l) => {
+                    const d = l.date_end || l.dateEnd;
+                    if (!d) return true;
+                    const ts = parseDateTs(d);
+                    return ts !== null && ts >= now;
+                  });
+                  if (validPromos.length > 0 || validLinks.length > 0) {
+                    validGroups.push({
+                      ...g,
+                      promocodes: validPromos,
+                      links_for_subscribers: validLinks,
+                    });
                   }
-                  for (const _ of g.links_for_subscribers || []) {
-                    totalLinkOffers++;
-                    activeLinkOffers++;
+                }
+
+                if (validGroups.length > 0) {
+                  const cleanItem = {
+                    ...item,
+                    project: item.project || {
+                      id: projId,
+                      name: item.project_name || "Проект",
+                      logo: item.info?.logo || "",
+                      ...item.info,
+                    },
+                    groups: validGroups,
+                  };
+                  cleanData.data.push(cleanItem);
+                  existingMap.set(projId, cleanItem);
+                  for (const g of validGroups) {
+                    const pCount = (g.promocodes || []).length;
+                    totalPromos += pCount;
+                    activePromos += pCount;
+                    const lCount = (g.links_for_subscribers || []).length;
+                    totalLinkOffers += lCount;
+                    activeLinkOffers += lCount;
                   }
                 }
               } else {
-                // Обогащаем существующий проект из API дополнительными данными (маркировка, медицинские предупреждения)
+                // Проект УЖЕ ЕСТЬ в live API.
+                // ПРАВИЛО: live API имеет абсолютный приоритет для динамических полей:
+                // promocodes, expiration, links_for_subscribers, ord_marker.
+                // НЕ восстанавливаем старые промокоды/ссылки/erid из supplemental.
+                // Supplemental используется ТОЛЬКО для обогащения данными, отсутствующими в API:
+                // medical warning (ПРОТИВОПОКАЗАНИЯ) для ord_custom_text / promo_terms.
                 const suppPromos = (item.groups || []).flatMap((g) => g.promocodes || []);
                 const suppPromoByCode = new Map(suppPromos.map((p) => [p.code, p]));
                 for (const g of existing.groups || []) {
@@ -423,6 +481,30 @@ export async function runCatalogSync(options = {}) {
           }
         } catch (e) {
           console.warn("Не удалось загрузить supplemental-projects.json:", e.message);
+        }
+      }
+
+      // Проверка семантической свежести для проекта 112 (Делимобиль)
+      const rawItems = Array.isArray(rawApiData?.data) ? rawApiData.data : [];
+      const rawDelimobil = rawItems.find((p) => (p.project?.id || p.project_id) === 112);
+      if (rawDelimobil) {
+        const rawPromos = (rawDelimobil.groups || []).flatMap((g) => g.promocodes || []);
+        const rawCodes = new Set(rawPromos.map((p) => p.code).filter(Boolean));
+        const rawLinks = (rawDelimobil.groups || []).flatMap((g) => g.links_for_subscribers || []);
+        const hasDux1e5InRaw = rawLinks.some((l) => l.link && l.link.includes("dux1e5"));
+
+        const cleanDelimobil = cleanData.data.find((p) => (p.project?.id || p.project_id) === 112);
+        if (cleanDelimobil) {
+          const cleanPromos = (cleanDelimobil.groups || []).flatMap((g) => g.promocodes || []);
+          const cleanCodes = new Set(cleanPromos.map((p) => p.code).filter(Boolean));
+          const cleanLinks = (cleanDelimobil.groups || []).flatMap((g) => g.links_for_subscribers || []);
+
+          if (rawCodes.has("h49fcs") && !cleanCodes.has("h49fcs")) {
+            throw new Error("Semantic Freshness Violation: raw source contains 'h49fcs', but clean feed is missing it!");
+          }
+          if (hasDux1e5InRaw && !cleanLinks.some((l) => l.link && l.link.includes("dux1e5"))) {
+            throw new Error("Semantic Freshness Violation: raw source contains 'dux1e5', but clean feed is missing it!");
+          }
         }
       }
 

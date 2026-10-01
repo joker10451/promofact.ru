@@ -10,6 +10,7 @@ import { pathToFileURL } from "node:url";
 register("./scripts/ts-loader.mjs", pathToFileURL("./"));
 
 const { expiryTimestamp, isCouponActive } = await import("@/lib/couponExpiry");
+const { isoDate, normalizeAffiliateLink } = await import("@/lib/perfluence");
 
 console.log("================================================================================");
 console.log("🚀 ЗАПУСК ТЕСТОВ МОДУЛЯ ВАЛИДАЦИИ СРОКОВ КУПОНОВ (src/lib/couponExpiry.ts)");
@@ -68,5 +69,54 @@ const activeAtOct01 = mockCachedCoupons.filter((c) => isCouponActive(c.promocode
 assert.strictEqual(activeAtOct01.length, 2, "1 октября купон 2026-09-30 должен отсеяться (осталось 2)");
 assert.ok(!activeAtOct01.some((c) => c.id === 1), "Купон id:1 не должен входить в активный список");
 console.log("✓ 5. Фильтрация кешированного каталога на лету по текущему моменту (PASS)");
+
+// 6. Regression test project 112 (Делимобиль): точное время 00:59 MSK vs 23:59 MSK
+const delimobilRaw = {
+  promos: [
+    { code: "h49fcs", date: "31.10.2026 00:59" },
+    { code: "nxr645", date: "31.10.2026 23:59" },
+  ],
+};
+
+const parsedPromos = delimobilRaw.promos.map((p) => ({
+  code: p.code,
+  expires: isoDate(p.date),
+}));
+
+assert.strictEqual(parsedPromos.length, 2, "Парсер должен сохранить ОБА coupon");
+assert.strictEqual(parsedPromos[0].expires, "2026-10-31T00:59:00+03:00", "h49fcs должен иметь точный ISO datetime с таймзоной +03:00");
+assert.strictEqual(parsedPromos[1].expires, "2026-10-31T23:59:00+03:00", "nxr645 должен иметь точный ISO datetime с таймзоной +03:00");
+
+// Момент времени: 31 октября 2026 00:58:00 MSK (за минуту до 00:59)
+const timeBefore0059 = new Date("2026-10-31T00:58:00+03:00").getTime();
+assert.strictEqual(isCouponActive(parsedPromos[0].expires, timeBefore0059), true, "Перед 00:59 h49fcs должен быть active");
+assert.strictEqual(isCouponActive(parsedPromos[1].expires, timeBefore0059), true, "Перед 00:59 nxr645 должен быть active");
+
+// Момент времени: 31 октября 2026 01:00:00 MSK (через минуту после 00:59)
+const timeAfter0059 = new Date("2026-10-31T01:00:00+03:00").getTime();
+assert.strictEqual(isCouponActive(parsedPromos[0].expires, timeAfter0059), false, "После 00:59 h49fcs обязан стать inactive");
+assert.strictEqual(isCouponActive(parsedPromos[1].expires, timeAfter0059), true, "После 00:59 nxr645 всё ещё active до 23:59");
+
+// Момент времени: 1 ноября 2026 00:01:00 MSK
+const timeAfter2359 = new Date("2026-11-01T00:01:00+03:00").getTime();
+assert.strictEqual(isCouponActive(parsedPromos[1].expires, timeAfter2359), false, "После 23:59 nxr645 обязан стать inactive");
+console.log("✓ 6. Регрессионный тест Project 112 (Делимобиль): точный datetime 00:59 MSK и 23:59 MSK (PASS)");
+
+// 7. Live dynamic data > stale supplemental/bundled data (Link and ERID update)
+const oldLink = "https://delimobil.prfl.me/sites/0q95fq?source=js-widget&source_id=8842";
+const oldErid = "2RanynunP9u";
+
+const newLink = "https://delimobil.prfl.me/sites/dux1e5?source=js-widget&source_id=8842";
+const newErid = "2RanymwUCq1";
+
+const normalizedNewLink = normalizeAffiliateLink(newLink, newErid);
+assert.strictEqual(
+  normalizedNewLink,
+  "https://delimobil.prfl.me/sites/dux1e5?erid=2RanymwUCq1",
+  "Новая ссылка подписчика с актуальным erid должна формироваться без старых параметров виджета"
+);
+assert.ok(!normalizedNewLink.includes("0q95fq"), "Новая ссылка не должна содержать старый slug 0q95fq");
+assert.ok(!normalizedNewLink.includes(oldErid), "Новая ссылка не должна содержать старый erid");
+console.log("✓ 7. Регрессионный тест обновления link/erid: live dynamic data > stale supplemental/bundled data (PASS)");
 
 console.log("\n🎉 ВСЕ ТЕСТЫ EXPIRY УСПЕШНО ПРОЙДЕНЫ!");

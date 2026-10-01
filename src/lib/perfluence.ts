@@ -35,14 +35,61 @@ function bool(v: unknown): boolean {
   return v === true || v === 1 || v === "1" || v === "true";
 }
 
-function isoDate(v: unknown): string | null {
-  const s = str(v);
+export function isoDate(v: unknown): string | null {
+  const s = str(v).trim();
   if (!s) return null;
-  // widget-json отдаёт "31.08.2026"
-  const ru = s.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
-  if (ru) return `${ru[3]}-${ru[2]}-${ru[1]}`;
-  const m = s.match(/^\d{4}-\d{2}-\d{2}/);
-  return m ? m[0] : s.slice(0, 10);
+
+  // Формат DD.MM.YYYY с возможным временем HH:mm или HH:mm:ss
+  const ru = s.match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
+  if (ru) {
+    const yyyy = ru[3];
+    const mm = ru[2];
+    const dd = ru[1];
+    if (ru[4] !== undefined && ru[5] !== undefined) {
+      const hh = ru[4];
+      const min = ru[5];
+      const ss = ru[6] !== undefined ? ru[6] : "00";
+      return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}+03:00`;
+    }
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  // Если строка в формате ISO (YYYY-MM-DD...)
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+    // Если уже указана таймзона (Z или +HH:MM / -HH:MM)
+    if (/(?:Z|[+-]\d{2}:\d{2})$/.test(s)) return s;
+    return `${s}+03:00`;
+  }
+
+  // Чистый date-only YYYY-MM-DD
+  const m = s.match(/^\d{4}-\d{2}-\d{2}$/);
+  if (m) return m[0];
+
+  return s.slice(0, 10);
+}
+
+export function normalizeAffiliateLink(link: string, ordMarker?: string): string {
+  if (!link) return "";
+  try {
+    const url = new URL(link);
+    // Если это prfl.me ссылка
+    if (url.hostname.endsWith("prfl.me")) {
+      // Удаляем виджетные query-параметры трекинга
+      url.searchParams.delete("source");
+      url.searchParams.delete("source_id");
+      if (ordMarker && !url.searchParams.has("erid")) {
+        url.searchParams.set("erid", ordMarker);
+      }
+      return url.toString();
+    }
+    if (ordMarker && !url.searchParams.has("erid")) {
+      url.searchParams.set("erid", ordMarker);
+      return url.toString();
+    }
+    return link;
+  } catch {
+    return link;
+  }
 }
 
 function stripHtml(v: unknown): string {
@@ -218,9 +265,12 @@ export function parsePayload(payloadJson: string): Coupon[] {
       const ordMarker = str(p.ord_marker || landing?.ord_marker);
       const ordText = str(p.ord_custom_text || landing?.ord_custom_text);
 
+      const rawLink = primaryLink || landingLink || site;
+      const rawLanding = landingLink || primaryLink || site;
+
       const affiliate: Affiliate = {
-        link: primaryLink || landingLink || site,
-        landingLink: landingLink || primaryLink || site,
+        link: normalizeAffiliateLink(rawLink, ordMarker),
+        landingLink: normalizeAffiliateLink(rawLanding, ordMarker),
         ordMarker,
         ordText,
       };
