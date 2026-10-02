@@ -22,7 +22,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 32
+        "rsp": 26
       },
       "groups": [
         {
@@ -92,7 +92,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 23
+        "rsp": 17
       },
       "groups": [
         {
@@ -178,7 +178,7 @@
           "Калуга"
         ],
         "pf": 1,
-        "rsp": 396
+        "rsp": 401
       },
       "groups": [
         {
@@ -256,7 +256,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 411
+        "rsp": 403
       },
       "groups": [
         {
@@ -410,7 +410,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 101
+        "rsp": 68
       },
       "groups": [
         {
@@ -480,7 +480,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 16
+        "rsp": 21
       },
       "groups": [
         {
@@ -538,7 +538,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 249
+        "rsp": 133
       },
       "groups": [
         {
@@ -587,82 +587,6 @@
     },
     {
       "project": {
-        "id": 2657,
-        "logo": "https://s3sc.perfluence.net/logos/17117241389268.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/3/c/33cccb38-9a0a-4371-85b6-75532b3d8700.png",
-        "name": "Подружка",
-        "type": "cpa",
-        "img": null,
-        "category_id": 269,
-        "category_name": "Косметика и парфюмерия",
-        "activeBloggers": 6851,
-        "product_info": "",
-        "subscribers_condition": "<p>Для покупок в магазинах покажите штрих-код на кассе. Советуем сделать скриншот экрана.</p>",
-        "site": "https://www.podrygka.ru",
-        "info": "",
-        "advantages": [
-          "разнообразие скидок и акций, в том числе ежедневная дополнительная скидка 5% с 9.00 до 12.00, товары в подарок при заказах определенных брендов, акция 1+1=3;",
-          "всегда бесплатная доставка в магазины Подружка, а также при заказе от 990р для курьерской доставки и доставки в постаматы в магазинах Пятерочка и пункты выдачи СДЭК по всей стране;",
-          "большое количество магазинов в шаговой доступности, простая и понятная программа лояльности;",
-          "большой выбор декоративной и уходовой косметики, средств для ухода за волосами, аксессуаров, товаров для детей;",
-          "широкий ассортимент азиатской и корейской косметики по выгодным ценам."
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 29
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18515327,
-              "title": "Оформить заказ со скидкой 30% онлайн или в розничном магазине",
-              "link": "https://podrygka.prfl.me/sites/8xiu6h?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 2657,
-              "code": "2921060875255",
-              "is_barcode": true,
-              "image": "https://barcode.tec-it.com/barcode.ashx?data=2921060875255&code=EAN13",
-              "comment": "Скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах",
-              "date": "06.10.2026",
-              "group": "11058",
-              "is_hit": true,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 11058,
-              "is_universal": false,
-              "name": "Скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17166811,
-              "ord_marker": "2RanynSjSHZ",
-              "ord_custom_text": "Реклама. ООО «Табер Трейд», ИНН 7709505477, ОГРН 1037739861851. Адрес места нахождения (Юридический адрес): 115280, г.Москва, ул.Ленинская Слобода, д.19, комн. 21В",
-              "discount": 30,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17166811&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 3807,
         "logo": "https://s3sc.perfluence.net/logos/6/c/2/6c2e7907-adc0-4049-95be-2b63010b9b82.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/c/b/e/cbe7b31d-248a-4b93-b661-a6360855194c.webp",
@@ -685,7 +609,7 @@
         "subscriber_guide": "",
         "regions": [],
         "pf": 1,
-        "rsp": 150
+        "rsp": 171
       },
       "groups": [
         {
@@ -736,208 +660,6 @@
     },
     {
       "project": {
-        "id": 4176,
-        "logo": "https://s3sc.perfluence.net/logos/5/9/6/5968d2f6-0a52-4df3-909c-6d9fdaa7efee.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/b/d/3bd10ee6-97e7-44cb-858a-c888cf1ad50b.webp",
-        "name": "Poizon (ДЭВУ)",
-        "type": "cpa",
-        "img": "https://s3sc.perfluence.net/img_widget/0/2/a/02a905e1-949c-4ee2-9d5e-6499ec48b303.webp",
-        "category_id": 293,
-        "category_name": "Маркетплейсы",
-        "activeBloggers": 2319,
-        "product_info": "<p>Poizon — это китайский маркетплейс, на котором можно купить более 2 млн товаров: оригинальную обувь, одежду и технику от частных продавцов, а также напрямую от производителя без комиссии по ценам на 40-50% дешевле, чем в российских розничных магазинах. 100% оригинальная продукция с быстрой доставкой от 10 дней. Первое и единственное официальное приложение в России.</p>",
-        "subscribers_condition": "",
-        "site": "https://bbmax.onelink.me/FPhq/v4qq7sf4",
-        "info": "",
-        "advantages": [
-          "Гарантия оригинала и качества: каждая коробка содержит эксклюзивный набор для защиты от подделок Poizon (ДЭВУ). Отсканируй QR-код на бирке и сертификате Poizon (ДЭВУ), чтобы узнать подробности.",
-          "Товар проходит проверку на оригинальность на складе в Китае.",
-          "Более 2 млн товаров и 1500 глобальных брендов.",
-          "Быстрая и бесплатная доставка, также есть вариант ускоренной доставки за дополнительную плату.",
-          "Доставка доступна в ближайший пункт выдачи 5Post и прямо до двери.",
-          "Оплата покупок картами любых российских банков."
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 1,
-        "rsp": 126
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18566805,
-              "title": "Оформить заказ на сайте и в приложении Poizon (ДЭВУ)",
-              "link": "https://poizon.prfl.me/sites/08vmlg?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 4176,
-              "code": "PERF79WJXX5E",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 12% (не более 4 000 ₽) на первый заказ на сайте и в приложении по промокоду блогера",
-              "date": "31.12.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 15107,
-              "is_universal": false,
-              "name": "Скидка 12% (не более 4 000 ₽) на первый заказ на сайте и в приложении по промокоду блогера",
-              "promo_terms": "<p>Максимальная сумма скидки - 4 000 ₽. Без минимальной суммы заказа. Суммируется со скидками на товары.</p>",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": false,
-              "post_id": 17214203,
-              "ord_marker": "2Ranyo4fyN3",
-              "ord_custom_text": "Реклама. Филиал ПРО НЬЮ ВОРД (Гонг Конг) Лимитед\r\nНЗА 10250004545 ИНН 9909735626 КПП 774791001",
-              "discount": 12,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17214203&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "31.12.2026 23:59"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": [],
-          "ord_marker": "2Ranyo4fyN3"
-        }
-      ]
-    },
-    {
-      "project": {
-        "id": 812,
-        "logo": "https://s3sc.perfluence.net/logos/17103376638461.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/4/4/d44656f4-ff4d-4237-becc-65dceee2834c.svg",
-        "name": "PREMIER",
-        "type": "cpa",
-        "img": "https://s3sc.perfluence.net/img_widget/b/d/f/bdf828cb-fdfb-4f5b-910d-1be8d2f87c71.webp",
-        "category_id": 310,
-        "category_name": "Онлайн кинотеатры",
-        "activeBloggers": 10072,
-        "product_info": "<p>Онлайн-кинотеатр с любовью к российской уникальности, который создаёт оригинальный контент и показывает его первым. Новинки и сериалы собственного производства PREMIER каждую неделю.</p>",
-        "subscribers_condition": "",
-        "site": "https://premier.one/",
-        "info": "",
-        "advantages": [
-          "Отдельный детский аккаунт, который можно настроить под своего ребенка",
-          "К одному аккаунту можно подключить до 5 устройств, у каждого профиля сохранится персональная история просмотра",
-          "Просмотр без интернета - кино можно взять в дорогу: скачать на смартфон или планшет",
-          "Весь контент онлайн-кинотеатра доступен в единой подписке без дополнительных платежей"
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 1,
-        "rsp": 387
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18590445,
-              "title": "Оформить бесплатный период на 60 дней доступа к сервисам RUTUBE+PREMIER и принять участие в розыгрыше",
-              "link": "https://premier-gift.prfl.me/sites/ad4owy?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 812,
-              "code": "vfdhuvgv",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Розыгрыш денежных призов и сертификатов за оформление доступа к сервисам RUTUBE + PREMIER на 60 дней за 1 ₽ для пользователей без активной подписки более полугода или подписка на один месяц за 99 ₽ для неактивных пользователей менее полугода, далее 399 ₽",
-              "date": "14.10.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17168,
-              "is_universal": false,
-              "name": "Розыгрыш денежных призов и сертификатов за оформление доступа к сервисам RUTUBE + PREMIER на 60 дней за 1 ₽ для пользователей без активной подписки более полугода или подписка на один месяц за 99 ₽ для неактивных пользователей менее полугода, далее 399 ₽",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": null,
-              "post_id": 17236055,
-              "ord_marker": "2RanymjcJaF",
-              "ord_custom_text": "Реклама. Рекламодатель: ООО \"ПРЕМЬЕР\" 16+ ИНН 9702011190",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17236055&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "14.10.2026 23:59"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": [],
-          "ord_marker": "2RanymgeL1Z"
-        },
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18590443,
-              "title": "Оформить бесплатный период на 50 дней доступа к сервисам RUTUBE + PREMIER или оформить подписку за 99 ₽",
-              "link": "https://premier.prfl.me/sites/xlwp23?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 812,
-              "code": "wtuynkrk",
-              "is_barcode": false,
-              "image": "",
-              "comment": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки более полугода или подписка на один месяц за 99 ₽ для неактивных пользователей менее полугода, далее 399 ₽",
-              "date": "31.10.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 15507,
-              "is_universal": false,
-              "name": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки более полугода или подписка на один месяц за 99 ₽ для неактивных пользователей менее полугода, далее 399 ₽",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": false,
-              "post_id": 17236053,
-              "ord_marker": "2RanymgeL1Z",
-              "ord_custom_text": "Реклама. Рекламодатель: ООО \"ПРЕМЬЕР\" 16+ ИНН 9702011190",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17236053&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "31.10.2026 23:59"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": [],
-          "ord_marker": "2RanymgeL1Z"
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 4328,
         "logo": "https://s3sc.perfluence.net/logos/e/d/9/ed9eb153-dc6d-46a4-acf6-53327ea91866.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/e/8/de836514-d9e0-47d0-a58f-260ecca8f7ca.webp",
@@ -963,7 +685,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 56
+        "rsp": 35
       },
       "groups": [
         {
@@ -1074,6 +796,284 @@
     },
     {
       "project": {
+        "id": 4176,
+        "logo": "https://s3sc.perfluence.net/logos/5/9/6/5968d2f6-0a52-4df3-909c-6d9fdaa7efee.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/b/d/3bd10ee6-97e7-44cb-858a-c888cf1ad50b.webp",
+        "name": "Poizon (ДЭВУ)",
+        "type": "cpa",
+        "img": "https://s3sc.perfluence.net/img_widget/0/2/a/02a905e1-949c-4ee2-9d5e-6499ec48b303.webp",
+        "category_id": 293,
+        "category_name": "Маркетплейсы",
+        "activeBloggers": 2319,
+        "product_info": "<p>Poizon — это китайский маркетплейс, на котором можно купить более 2 млн товаров: оригинальную обувь, одежду и технику от частных продавцов, а также напрямую от производителя без комиссии по ценам на 40-50% дешевле, чем в российских розничных магазинах. 100% оригинальная продукция с быстрой доставкой от 10 дней. Первое и единственное официальное приложение в России.</p>",
+        "subscribers_condition": "",
+        "site": "https://bbmax.onelink.me/FPhq/v4qq7sf4",
+        "info": "",
+        "advantages": [
+          "Гарантия оригинала и качества: каждая коробка содержит эксклюзивный набор для защиты от подделок Poizon (ДЭВУ). Отсканируй QR-код на бирке и сертификате Poizon (ДЭВУ), чтобы узнать подробности.",
+          "Товар проходит проверку на оригинальность на складе в Китае.",
+          "Более 2 млн товаров и 1500 глобальных брендов.",
+          "Быстрая и бесплатная доставка, также есть вариант ускоренной доставки за дополнительную плату.",
+          "Доставка доступна в ближайший пункт выдачи 5Post и прямо до двери.",
+          "Оплата покупок картами любых российских банков."
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 1,
+        "rsp": 69
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18566805,
+              "title": "Оформить заказ на сайте и в приложении Poizon (ДЭВУ)",
+              "link": "https://poizon.prfl.me/sites/08vmlg?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 4176,
+              "code": "PERF79WJXX5E",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 12% (не более 4 000 ₽) на первый заказ на сайте и в приложении по промокоду блогера",
+              "date": "31.12.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 15107,
+              "is_universal": false,
+              "name": "Скидка 12% (не более 4 000 ₽) на первый заказ на сайте и в приложении по промокоду блогера",
+              "promo_terms": "<p>Максимальная сумма скидки - 4 000 ₽. Без минимальной суммы заказа. Суммируется со скидками на товары.</p>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17214203,
+              "ord_marker": "2Ranyo4fyN3",
+              "ord_custom_text": "Реклама. Филиал ПРО НЬЮ ВОРД (Гонг Конг) Лимитед\r\nНЗА 10250004545 ИНН 9909735626 КПП 774791001",
+              "discount": 12,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17214203&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "31.12.2026 23:59"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": [],
+          "ord_marker": "2Ranyo4fyN3"
+        }
+      ]
+    },
+    {
+      "project": {
+        "id": 812,
+        "logo": "https://s3sc.perfluence.net/logos/17103376638461.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/4/4/d44656f4-ff4d-4237-becc-65dceee2834c.svg",
+        "name": "PREMIER",
+        "type": "cpa",
+        "img": "https://s3sc.perfluence.net/img_widget/b/d/f/bdf828cb-fdfb-4f5b-910d-1be8d2f87c71.webp",
+        "category_id": 310,
+        "category_name": "Онлайн кинотеатры",
+        "activeBloggers": 10072,
+        "product_info": "<p>Онлайн-кинотеатр с любовью к российской уникальности, который создаёт оригинальный контент и показывает его первым. Новинки и сериалы собственного производства PREMIER каждую неделю.</p>",
+        "subscribers_condition": "",
+        "site": "https://premier.one/",
+        "info": "",
+        "advantages": [
+          "Отдельный детский аккаунт, который можно настроить под своего ребенка",
+          "К одному аккаунту можно подключить до 5 устройств, у каждого профиля сохранится персональная история просмотра",
+          "Просмотр без интернета - кино можно взять в дорогу: скачать на смартфон или планшет",
+          "Весь контент онлайн-кинотеатра доступен в единой подписке без дополнительных платежей"
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 1,
+        "rsp": 241
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18590445,
+              "title": "Оформить бесплатный период на 60 дней доступа к сервисам RUTUBE+PREMIER и принять участие в розыгрыше",
+              "link": "https://premier-gift.prfl.me/sites/ad4owy?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 812,
+              "code": "vfdhuvgv",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Розыгрыш денежных призов и сертификатов за оформление доступа к сервисам RUTUBE + PREMIER на 60 дней за 1 ₽ для пользователей без активной подписки более полугода или подписка на один месяц за 99 ₽ для неактивных пользователей менее полугода, далее 399 ₽",
+              "date": "14.10.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17168,
+              "is_universal": false,
+              "name": "Розыгрыш денежных призов и сертификатов за оформление доступа к сервисам RUTUBE + PREMIER на 60 дней за 1 ₽ для пользователей без активной подписки более полугода или подписка на один месяц за 99 ₽ для неактивных пользователей менее полугода, далее 399 ₽",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": null,
+              "post_id": 17236055,
+              "ord_marker": "2RanymjcJaF",
+              "ord_custom_text": "Реклама. Рекламодатель: ООО \"ПРЕМЬЕР\" 16+ ИНН 9702011190",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17236055&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "14.10.2026 23:59"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": [],
+          "ord_marker": "2RanymgeL1Z"
+        },
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18590443,
+              "title": "Оформить бесплатный период на 50 дней доступа к сервисам RUTUBE + PREMIER или оформить подписку за 99 ₽",
+              "link": "https://premier.prfl.me/sites/xlwp23?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 812,
+              "code": "wtuynkrk",
+              "is_barcode": false,
+              "image": "",
+              "comment": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки более полугода или подписка на один месяц за 99 ₽ для неактивных пользователей менее полугода, далее 399 ₽",
+              "date": "31.10.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 15507,
+              "is_universal": false,
+              "name": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки более полугода или подписка на один месяц за 99 ₽ для неактивных пользователей менее полугода, далее 399 ₽",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17236053,
+              "ord_marker": "2RanymgeL1Z",
+              "ord_custom_text": "Реклама. Рекламодатель: ООО \"ПРЕМЬЕР\" 16+ ИНН 9702011190",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17236053&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "31.10.2026 23:59"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": [],
+          "ord_marker": "2RanymgeL1Z"
+        }
+      ]
+    },
+    {
+      "project": {
+        "id": 2657,
+        "logo": "https://s3sc.perfluence.net/logos/17117241389268.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/3/c/33cccb38-9a0a-4371-85b6-75532b3d8700.png",
+        "name": "Подружка",
+        "type": "cpa",
+        "img": null,
+        "category_id": 269,
+        "category_name": "Косметика и парфюмерия",
+        "activeBloggers": 6851,
+        "product_info": "",
+        "subscribers_condition": "<p>Для покупок в магазинах покажите штрих-код на кассе. Советуем сделать скриншот экрана.</p>",
+        "site": "https://www.podrygka.ru",
+        "info": "",
+        "advantages": [
+          "разнообразие скидок и акций, в том числе ежедневная дополнительная скидка 5% с 9.00 до 12.00, товары в подарок при заказах определенных брендов, акция 1+1=3;",
+          "всегда бесплатная доставка в магазины Подружка, а также при заказе от 990р для курьерской доставки и доставки в постаматы в магазинах Пятерочка и пункты выдачи СДЭК по всей стране;",
+          "большое количество магазинов в шаговой доступности, простая и понятная программа лояльности;",
+          "большой выбор декоративной и уходовой косметики, средств для ухода за волосами, аксессуаров, товаров для детей;",
+          "широкий ассортимент азиатской и корейской косметики по выгодным ценам."
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 60
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18515327,
+              "title": "Оформить заказ со скидкой 30% онлайн или в розничном магазине",
+              "link": "https://podrygka.prfl.me/sites/8xiu6h?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 2657,
+              "code": "2921060875255",
+              "is_barcode": true,
+              "image": "https://barcode.tec-it.com/barcode.ashx?data=2921060875255&code=EAN13",
+              "comment": "Скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах",
+              "date": "06.10.2026",
+              "group": "11058",
+              "is_hit": true,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 11058,
+              "is_universal": false,
+              "name": "Скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17166811,
+              "ord_marker": "2RanynSjSHZ",
+              "ord_custom_text": "Реклама. ООО «Табер Трейд», ИНН 7709505477, ОГРН 1037739861851. Адрес места нахождения (Юридический адрес): 115280, г.Москва, ул.Ленинская Слобода, д.19, комн. 21В",
+              "discount": 30,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17166811&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
         "id": 3758,
         "logo": "https://s3sc.perfluence.net/logos/3/8/d/38dc11ee-7a6d-4395-93bb-00cf46b18629.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/f/7/b/f7ba5b73-56a6-4b60-8fdb-1c0f98daee21.png",
@@ -1099,7 +1099,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 408
+        "rsp": 411
       },
       "groups": [
         {
@@ -1208,7 +1208,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 74
+        "rsp": 63
       },
       "groups": [
         {
@@ -1340,7 +1340,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 90
+        "rsp": 84
       },
       "groups": [
         {
@@ -1421,7 +1421,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 37
+        "rsp": 48
       },
       "groups": [
         {
@@ -1496,7 +1496,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 105
+        "rsp": 152
       },
       "groups": [
         {
@@ -1587,7 +1587,7 @@
           "более 60 видов роллов и суши, дим-самы, сашими, невероятно вкусные лимонады и смузи, десерты;",
           "оплата любым удобным способом - наличными, картой онлайн, картой курьеру;",
           "есть детское и вегетарианское меню, ланчи, сезонное меню;",
-          "каждое блюдо содержит подробное описание, в котором указаны все используемые ингредиенты, а также КБЖУ для тех, кто хочет есть люб��мые блюда без вреда для фигуры."
+          "каждое блюдо содержит подробное описание, в котором указаны все используемые ингредиенты, а также КБЖУ для тех, кто хочет есть любимые блюда без вреда для фигуры."
         ],
         "subscriber_guide": "",
         "regions": [
@@ -1720,82 +1720,6 @@
     },
     {
       "project": {
-        "id": 2271,
-        "logo": "https://s3sc.perfluence.net/logos/f/8/6/f862685c-ced6-45b1-b2a5-8ffea13281b3.png",
-        "logo_widget": "",
-        "name": "Островок!",
-        "type": "cpa",
-        "img": null,
-        "category_id": 250,
-        "category_name": "Путешествия и туризм",
-        "activeBloggers": 4787,
-        "product_info": "<p>Островок! — это сервис онлайн-бронирования жилья в 220 странах мира. Более 2 600 000 вариантов размещения (из них более 180 000 — в России). Независимо от того, ищете ли вы роскошный отель, уютный гостевой дом, экзотический кемпинг или уникальный дом в деревне, Островок — идеальный вариант, чтобы сделать ваш отдых незабываемым.</p>",
-        "subscribers_condition": "<ul><li>Промокод суммируется с акциями сервиса.</li><li>Промокод можно применить только для брони с оплатой онлайн. На отели с оплатой при заселении скидка не распространяется.</li><li>Не более одного применения на один аккаунт пользователя. </li></ul>",
-        "site": "https://ostrovok.ru/",
-        "info": "",
-        "advantages": [
-          "Низкие цены на большинство направлений. Островок работает напрямую с тысячами отелей и может контролировать цены на номера.",
-          "Надёжно и безопасно. Все объекты проходят строгую проверку, чтобы вы могли отдыхать спокойно — только проверенные партнёры и высокие стандарты качества.",
-          "Программа лояльности GURU: чем больше поездок, тем больше скидка, максимум 40%.",
-          "Удобное приложение, в котором можно получить офлайн-доступ к совершенным бронированиям, а также бесплатно совершить интернет-звонки в службу поддержки из любой точки мира. Цены в приложении ниже, чем на сайте.",
-          "Быстрая оплата бронирований онлайн через приложение или на сайте. А ещё зарубежные отели можно оплатить российской картой."
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 120
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18590437,
-              "title": "Получить промокод на скидку в приложении или на сайте Островок!",
-              "link": "https://ostrovok.prfl.me/sites/pqub37?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 2271,
-              "code": "PF4ALL80",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 4% на первое или одно повторное бронирование по всему миру на сайте и в приложении",
-              "date": "30.11.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17178,
-              "is_universal": false,
-              "name": "Скидка 4% на первое или одно повторное бронирование по всему миру на сайте и в приложении",
-              "promo_terms": "",
-              "region_promo": [],
-              "repeat_order": null,
-              "post_id": 17236047,
-              "ord_marker": "2RanymXkQKV",
-              "ord_custom_text": "Реклама. ООО \"Бронирование Гостиниц\", ИНН 7703389880.",
-              "discount": 4,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17236047&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "30.11.2026 23:59"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": [],
-          "ord_marker": "2RanymXkQKV"
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 2233,
         "logo": "https://s3sc.perfluence.net/logos/17035055247727.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/9/c/b/9cb3aab1-c852-4599-8a04-a72946582f39.png",
@@ -1821,7 +1745,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 423
+        "rsp": 396
       },
       "groups": [
         {
@@ -1900,7 +1824,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 402
+        "rsp": 405
       },
       "groups": [
         {
@@ -1951,6 +1875,82 @@
     },
     {
       "project": {
+        "id": 2271,
+        "logo": "https://s3sc.perfluence.net/logos/f/8/6/f862685c-ced6-45b1-b2a5-8ffea13281b3.png",
+        "logo_widget": "",
+        "name": "Островок!",
+        "type": "cpa",
+        "img": null,
+        "category_id": 250,
+        "category_name": "Путешествия и туризм",
+        "activeBloggers": 4787,
+        "product_info": "<p>Островок! — это сервис онлайн-бронирования жилья в 220 странах мира. Более 2 600 000 вариантов размещения (из них более 180 000 — в России). Независимо от того, ищете ли вы роскошный отель, уютный гостевой дом, экзотический кемпинг или уникальный дом в деревне, Островок — идеальный вариант, чтобы сделать ваш отдых незабываемым.</p>",
+        "subscribers_condition": "<ul><li>Промокод суммируется с акциями сервиса.</li><li>Промокод можно применить только для брони с оплатой онлайн. На отели с оплатой при заселении скидка не распространяется.</li><li>Не более одного применения на один аккаунт пользователя. </li></ul>",
+        "site": "https://ostrovok.ru/",
+        "info": "",
+        "advantages": [
+          "Низкие цены на большинство направлений. Островок работает напрямую с тысячами отелей и может контролировать цены на номера.",
+          "Надёжно и безопасно. Все объекты проходят строгую проверку, чтобы вы могли отдыхать спокойно — только проверенные партнёры и высокие стандарты качества.",
+          "Программа лояльности GURU: чем больше поездок, тем больше скидка, максимум 40%.",
+          "Удобное приложение, в котором можно получить офлайн-доступ к совершенным бронированиям, а также бесплатно совершить интернет-звонки в службу поддержки из любой точки мира. Цены в приложении ниже, чем на сайте.",
+          "Быстрая оплата бронирований онлайн через приложение или на сайте. А ещё зарубежные отели можно оплатить российской картой."
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 142
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18590437,
+              "title": "Получить промокод на скидку в приложении или на сайте Островок!",
+              "link": "https://ostrovok.prfl.me/sites/pqub37?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 2271,
+              "code": "PF4ALL80",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 4% на первое или одно повторное бронирование по всему миру на сайте и в приложении",
+              "date": "30.11.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17178,
+              "is_universal": false,
+              "name": "Скидка 4% на первое или одно повторное бронирование по всему миру на сайте и в приложении",
+              "promo_terms": "",
+              "region_promo": [],
+              "repeat_order": null,
+              "post_id": 17236047,
+              "ord_marker": "2RanymXkQKV",
+              "ord_custom_text": "Реклама. ООО \"Бронирование Гостиниц\", ИНН 7703389880.",
+              "discount": 4,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17236047&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "30.11.2026 23:59"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": [],
+          "ord_marker": "2RanymXkQKV"
+        }
+      ]
+    },
+    {
+      "project": {
         "id": 1384,
         "logo": "https://s3sc.perfluence.net/logos/16474494402231.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/b/1/db192bec-541f-4c97-b796-64819c738a2e.png",
@@ -1977,7 +1977,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 373
+        "rsp": 375
       },
       "groups": [
         {
@@ -2099,7 +2099,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 162
+        "rsp": 147
       },
       "groups": [
         {
@@ -2281,7 +2281,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 97
+        "rsp": 124
       },
       "groups": [
         {
@@ -2341,7 +2341,7 @@
         "category_id": 269,
         "category_name": "Косметика и парфюмерия",
         "activeBloggers": 8048,
-        "product_info": "<p>М.Косметик — одна из ведущих розничных сетей по продаже косметики, бытовой химии и товаров для дома в России. В ассортименте представлены популярные бюджетные бренды и эксклюзивные марки уходовой и декоративной косметики, также есть товары для детей, мужчин, животных, товары для дома, товары для здоровья и автотовары. В каталоге более 13 тысяч наименований товаров, среди которых популярные бренды декоративной косметики:  L'Oreal, Maybelline, LAF (собственная торговая марка Магнит Косметик), Beauty Bomb и многие другие.</p>",
+        "product_info": "<p>М.Косметик — одна из ведущих розничных сетей по продаже косметики, бытовой химии и товаров для дома в России. В ассортименте представлены популярные бюджетные бренды и эксклюзивные марки уходовой и декора��ивной косметики, также есть товары для детей, мужчин, животных, товары для дома, товары для здоровья и автотовары. В каталоге более 13 тысяч наименований товаров, среди которых популярные бренды декоративной косметики:  L'Oreal, Maybelline, LAF (собственная торговая марка Магнит Косметик), Beauty Bomb и многие другие.</p>",
         "subscribers_condition": "",
         "site": "https://promokod.magnit.ru/",
         "info": "<p>Сеть супермаркетов \"Магнит\" является одной из крупнейших розничных сетей в России.</p>",
@@ -2356,7 +2356,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 222
+        "rsp": 203
       },
       "groups": [
         {
@@ -2435,52 +2435,49 @@
     },
     {
       "project": {
-        "id": 2231,
-        "logo": "https://s3sc.perfluence.net/logos/17035055659741.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/0/f/9/0f92514f-a411-479a-9f18-4f0c7d203dcb.png",
-        "name": "Кинопоиск",
+        "id": 2582,
+        "logo": "https://s3sc.perfluence.net/logos/a/8/e/a8e92681-c02f-40f5-aa26-695967710217.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/7/c/d7ccda73-b2f4-441d-aeb9-15683b1079b1.svg",
+        "name": "Магнит Доставка",
         "type": "cpa",
-        "img": "https://s3sc.perfluence.net/img_widget/0/e/1/0e1f0128-f495-4e80-b45d-bfe5a20fb6b9.webp",
-        "category_id": 310,
-        "category_name": "Онлайн кинотеатры",
-        "activeBloggers": 5009,
-        "product_info": "<p>Кинопоиск — онлайн-кинотеатр с доступом к тысячам фильмов, сериалов, мультфильмов и шоу. В сервисе представлены оригинальные проекты: \"Красная поляна\", \"Беспринципные в Питере\", \"Триггер\", \"Проект Анна Николаевна\", \"Мажор\".</p>",
+        "img": null,
+        "category_id": 304,
+        "category_name": "Доставка продуктов",
+        "activeBloggers": 8720,
+        "product_info": "<p>Онлайн-сервис доставки, в котором можно заказать товары из магазина «Магнит», узнать об акциях и скидках, участвовать в играх и использовать купоны. В приложении есть ваша карта лояльности и информация о доступных бонусах. Можно выбрать до 10 «Любимых категорий» и получать до 40% кешбэка бонусами.</p>",
         "subscribers_condition": "",
-        "site": "https://www.kinopoisk.ru/",
-        "info": "<p>Яндекс Плюс — единая мультиподписка на сервисы Яндекса, включая Кинопоиск и Яндекс Музыку. Мультиподписка позволяет копить и тратить баллы Плюса. Баллами можно оплатить как часть, так и полную стоимость товаров, услуг и билетов в сервисах Яндекса: Яндекс Go (такси и самокаты), Драйв, Яндекс Афиша, Кинопоиск, Яндекс Маркет, Заправки, Еда, Лавка, Путешествия.</p>",
+        "site": "https://dostavka.magnit.ru/",
+        "info": "<p>Сеть супермаркетов «Магнит» является одной из крупнейших розничных сетей в России.</p>",
         "advantages": [
-          "Тысячи фильмов и сериалов без рекламы, детский режим и возможность просмотра офлайн, а также просмотра с нескольких аккаунтов;",
-          "подключив Кинопоиск, пользователь получает бесплатный доступ к Яндекс Музыке, Яндекс Плюсу, Яндекс Книгам;",
-          "удобная система рекомендаций, возможность пропускать титры и заставку одним кликом;",
-          "фильмы в оригинальной озвучке и с субтитрами, доступ к телеканалам и спортивным трансляциям;",
-          "есть возможность обсудить фильм и даже оставить отзыв;",
-          "покупка билетов в кино в приложении. "
+          "Доставка из всех форматов магазинов: Экспресс, М.Косметик, Гипер, Аптека;",
+          "Доступные цены. В магазинах Магнит цены на товары часто ниже, чем в других сетях;",
+          "Обновленная система лояльности, позволяет копить баллы даже с покупок по желтым ценникам."
         ],
-        "subscriber_guide": "<p>Яндекс Плюс — единая мультиподписка на сервисы Яндекса, включая Кинопоиск и Яндекс Музыку. Мультиподписка позволяет копить и тратить баллы Плюса. Баллами можно оплатить как часть, так и полную стоимость товаров, услуг и билетов в сервисах Яндекса: Яндекс Go (такси и самокаты), Драйв, Яндекс Афиша, Кинопоиск, Яндекс Маркет, Заправки, Еда, Лавка, Путешествия.</p>",
+        "subscriber_guide": "<p>Сеть супермаркетов «Магнит» является одной из крупнейших розничных сетей в России.</p>",
         "regions": [
           "Россия"
         ],
         "pf": 0,
-        "rsp": 376
+        "rsp": 372
       },
       "groups": [
         {
           "links_for_subscribers": [
             {
-              "id": 18538389,
-              "title": "Оформить бесплатный период на 45 дней",
-              "link": "https://kp45.prfl.me/sites/xvytsp?source=js-widget&source_id=8842",
-              "landing_terms": ""
+              "id": 18515324,
+              "title": "Оформить заказ со скидкой в приложении Магнит, в разделе Гипермаркет ",
+              "link": "https://mgntgm.prfl.me/sites/xmzf3p?source=js-widget&source_id=8842",
+              "landing_terms": null
             }
           ],
           "landing": [],
           "promocodes": [
             {
-              "project_id": 2231,
-              "code": "6ZJP6PZFQH",
+              "project_id": 2582,
+              "code": "25GFC1TL4",
               "is_barcode": false,
               "image": "",
-              "comment": "45 дней доступа к Кинопоиску бесплатно для новых пользователей или 30 дней за 1 ₽ для пользователей без активной мультиподписки Яндекс Плюс",
+              "comment": "Скидка 31% на первый заказ от 2000 ₽ в разделе \"Гипермаркет\" для нового пользователя",
               "date": "31.10.2026",
               "group": "",
               "is_hit": false,
@@ -2488,20 +2485,20 @@
               "hit_custom_text": "",
               "hit_bg_color": null,
               "hit_color": null,
-              "bonus_id": 13521,
+              "bonus_id": 15982,
               "is_universal": false,
-              "name": "45 дней доступа к Кинопоиску бесплатно для новых пользователей или 30 дней за 1 ₽ для пользователей без активной мультиподписки Яндекс Плюс",
-              "promo_terms": "<p><em></em></p><p>30 дней доступа для тех, кто не пользовался сервисом более 30 дней и ранее не использовал услугу реактивации за 1 ₽</p>",
+              "name": "Скидка 31% на первый заказ от 2000 ₽ в разделе \"Гипермаркет\" для нового пользователя",
+              "promo_terms": "<p>Максимальная скидка - 2000 ₽</p>",
               "region_promo": [
                 "RU"
               ],
-              "repeat_order": true,
-              "post_id": 17188384,
-              "ord_marker": "2RanymYcmsR",
-              "ord_custom_text": "Реклама. ООО «ЯНДЕКС», ИНН 7736207543",
-              "discount": null,
+              "repeat_order": false,
+              "post_id": 17166808,
+              "ord_marker": "2RanynHqWbV",
+              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475.",
+              "discount": 31,
               "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17188384&widget_id=8842&user_id=861964&source=js-widget"
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17166808&widget_id=8842&user_id=861964&source=js-widget"
             }
           ],
           "has_widget_subscribers_promo": false,
@@ -2537,7 +2534,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 91
+        "rsp": 113
       },
       "groups": [
         {
@@ -2610,6 +2607,69 @@
           "widget_subscribers_codes_count": 0,
           "widget_subscriber_codes": [],
           "ord_marker": "2Ranynyn94F"
+        }
+      ]
+    },
+    {
+      "project": {
+        "id": 2288,
+        "logo": "https://s3sc.perfluence.net/logos/17035059032830.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/7/9/5/795e889c-fd7a-4703-9c41-ed68083b54e0.svg",
+        "name": "Отелло",
+        "type": "cpa",
+        "img": "https://s3sc.perfluence.net/img_widget/c/7/c/c7cb93aa-3815-43a1-a3a4-632f722ed26f.png",
+        "category_id": 250,
+        "category_name": "Путешествия и туризм",
+        "activeBloggers": 6856,
+        "product_info": "<p>Отелло - надежный сервис удобного бронирования отелей, апартаментов, гостевых домов и санаториев для ваших путешествий по России и за рубежом.</p>",
+        "subscribers_condition": "",
+        "site": "https://otello.2gis.ru/",
+        "info": "",
+        "advantages": [
+          "Подробные описания каждого отеля, фотографии номеров, отзывы от реальных путешественников",
+          "Программа лояльности - до 15% кешбэк бонусами Спасибо. Списание баллов до 99%",
+          "Оперативная работа поддержки 24/7",
+          "Бесплатный апгрейд номера по специальному фильтру в поиске жилья"
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 378
+      },
+      "groups": [
+        {
+          "landing": {
+            "id": 12269,
+            "project_id": 2288,
+            "name": "Забронировать отель с сертификатом",
+            "btn_text": "",
+            "link": "https://otellokolesosert.pfm.promo/",
+            "logo": "",
+            "post_id": 17160692,
+            "is_hiting": false,
+            "is_captcha_enabled": false,
+            "is_oauth_enabled": false,
+            "hit_custom_text": "",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "ord_marker": "2RanynaFRHd",
+            "ord_custom_text": "Реклама. ООО \"Дубльгис\", ИНН 5405276278.",
+            "show": "https://pawss-api.perfluence.net/source-view?post_id=17160692&widget_id=8842&user_id=861964&source=js-widget"
+          },
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "links_for_subscribers": [
+            {
+              "id": 18508805,
+              "title": "Ссылка для подписчиков",
+              "link": "https://otello1.prfl.me/sites/tm6639?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "promocodes": [],
+          "widget_subscriber_codes": []
         }
       ]
     },
@@ -2691,69 +2751,6 @@
     },
     {
       "project": {
-        "id": 2288,
-        "logo": "https://s3sc.perfluence.net/logos/17035059032830.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/7/9/5/795e889c-fd7a-4703-9c41-ed68083b54e0.svg",
-        "name": "Отелло",
-        "type": "cpa",
-        "img": "https://s3sc.perfluence.net/img_widget/c/7/c/c7cb93aa-3815-43a1-a3a4-632f722ed26f.png",
-        "category_id": 250,
-        "category_name": "Путешествия и туризм",
-        "activeBloggers": 6856,
-        "product_info": "<p>Отелло - надежный сервис удобного бронирования отелей, апартаментов, гостевых домов и санаториев для ваших путешествий по России и за рубежом.</p>",
-        "subscribers_condition": "",
-        "site": "https://otello.2gis.ru/",
-        "info": "",
-        "advantages": [
-          "Подробные описания каждого отеля, фотографии номеров, отзывы от реальных путешественников",
-          "Программа лояльности - до 15% кешбэк бонусами Спасибо. Списание баллов до 99%",
-          "Оперативная работа поддержки 24/7",
-          "Бесплатный апгрейд номера по специальному фильтру в поиске жилья"
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 385
-      },
-      "groups": [
-        {
-          "landing": {
-            "id": 12269,
-            "project_id": 2288,
-            "name": "Забронировать отель с сертификатом",
-            "btn_text": "",
-            "link": "https://otellokolesosert.pfm.promo/",
-            "logo": "",
-            "post_id": 17160692,
-            "is_hiting": false,
-            "is_captcha_enabled": false,
-            "is_oauth_enabled": false,
-            "hit_custom_text": "",
-            "hit_bg_color": null,
-            "hit_color": null,
-            "ord_marker": "2RanynaFRHd",
-            "ord_custom_text": "Реклама. ООО \"Дубльгис\", ИНН 5405276278.",
-            "show": "https://pawss-api.perfluence.net/source-view?post_id=17160692&widget_id=8842&user_id=861964&source=js-widget"
-          },
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "links_for_subscribers": [
-            {
-              "id": 18508805,
-              "title": "Ссылка для подписчиков",
-              "link": "https://otello1.prfl.me/sites/tm6639?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "promocodes": [],
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 4579,
         "logo": "https://s3sc.perfluence.net/logos/c/0/b/c0bcdeaf-3b5a-4ef7-b3dd-06dd9ac6b36a.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/0/d/e/0deb9f9e-f1f1-4131-8121-e2e70e982852.webp",
@@ -2773,7 +2770,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 421
+        "rsp": 419
       },
       "groups": [
         {
@@ -2854,7 +2851,7 @@
           "Адлер"
         ],
         "pf": 1,
-        "rsp": 415
+        "rsp": 399
       },
       "groups": [
         {
@@ -3005,49 +3002,52 @@
     },
     {
       "project": {
-        "id": 2582,
-        "logo": "https://s3sc.perfluence.net/logos/a/8/e/a8e92681-c02f-40f5-aa26-695967710217.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/7/c/d7ccda73-b2f4-441d-aeb9-15683b1079b1.svg",
-        "name": "Магнит Доставка",
+        "id": 2231,
+        "logo": "https://s3sc.perfluence.net/logos/17035055659741.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/0/f/9/0f92514f-a411-479a-9f18-4f0c7d203dcb.png",
+        "name": "Кинопоиск",
         "type": "cpa",
-        "img": null,
-        "category_id": 304,
-        "category_name": "Доставка продуктов",
-        "activeBloggers": 8720,
-        "product_info": "<p>Онлайн-сервис доставки, в котором можно заказать товары из магазина «Магнит», узнать об акциях и скидках, участвовать в играх и использовать купоны. В приложении есть ваша карта лояльности и информация о доступных бонусах. Можно выбрать до 10 «Любимых категорий» и получать до 40% кешбэка бонусами.</p>",
+        "img": "https://s3sc.perfluence.net/img_widget/0/e/1/0e1f0128-f495-4e80-b45d-bfe5a20fb6b9.webp",
+        "category_id": 310,
+        "category_name": "Онлайн кинотеатры",
+        "activeBloggers": 5009,
+        "product_info": "<p>Кинопоиск — онлайн-кинотеатр с доступом к тысячам фильмов, сериалов, мультфильмов и шоу. В сервисе представлены оригинальные проекты: \"Красная поляна\", \"Беспринципные в Питере\", \"Триггер\", \"Проект Анна Николаевна\", \"Мажор\".</p>",
         "subscribers_condition": "",
-        "site": "https://dostavka.magnit.ru/",
-        "info": "<p>Сеть супермаркетов «Магнит» является одной из крупнейших розничных сетей в России.</p>",
+        "site": "https://www.kinopoisk.ru/",
+        "info": "<p>Яндекс Плюс — единая мультиподписка на сервисы Яндекса, включая Кинопоиск и Яндекс Музыку. Мультиподписка позволяет копить и тратить баллы Плюса. Баллами можно оплатить как часть, так и полную стоимость товаров, услуг и билетов в сервисах Яндекса: Яндекс Go (такси и самокаты), Драйв, Яндекс Афиша, Кинопоиск, Яндекс Маркет, Заправки, Еда, Лавка, Путешествия.</p>",
         "advantages": [
-          "Доставка из всех форматов магазинов: Экспресс, М.Косметик, Гипер, Аптека;",
-          "Доступные цены. В магазинах Магнит цены на товары часто ниже, чем в других сетях;",
-          "Обновленная система лояльности, позволяет копить баллы даже с покупок по желтым ценникам."
+          "Тысячи фильмов и сериалов без рекламы, детский режим и возможность просмотра офлайн, а также просмотра с нескольких аккаунтов;",
+          "подключив Кинопоиск, пользователь получает бесплатный доступ к Яндекс Музыке, Яндекс Плюсу, Яндекс Книгам;",
+          "удобная система рекомендаций, возможность пропускать титры и заставку одним кликом;",
+          "фильмы в оригинальной озвучке и с субтитрами, доступ к телеканалам и спортивным трансляциям;",
+          "есть возможность обсудить фильм и даже оставить отзыв;",
+          "покупка билетов в кино в приложении. "
         ],
-        "subscriber_guide": "<p>Сеть супермаркетов «Магнит» является одной из крупнейших розничных сетей в России.</p>",
+        "subscriber_guide": "<p>Яндекс Плюс — единая мультиподписка на сервисы Яндекса, включая Кинопоиск и Яндекс Музыку. Мультиподписка позволяет копить и тратить баллы Плюса. Баллами можно оплатить как часть, так и полную стоимость товаров, услуг и билетов в сервисах Яндекса: Яндекс Go (такси и самокаты), Драйв, Яндекс Афиша, Кинопоиск, Яндекс Маркет, Заправки, Еда, Лавка, Путешествия.</p>",
         "regions": [
           "Россия"
         ],
         "pf": 0,
-        "rsp": 388
+        "rsp": 390
       },
       "groups": [
         {
           "links_for_subscribers": [
             {
-              "id": 18515324,
-              "title": "Оформить заказ со скидкой в приложении Магнит, в разделе Гипермаркет ",
-              "link": "https://mgntgm.prfl.me/sites/xmzf3p?source=js-widget&source_id=8842",
-              "landing_terms": null
+              "id": 18538389,
+              "title": "Оформить бесплатный период на 45 дней",
+              "link": "https://kp45.prfl.me/sites/xvytsp?source=js-widget&source_id=8842",
+              "landing_terms": ""
             }
           ],
           "landing": [],
           "promocodes": [
             {
-              "project_id": 2582,
-              "code": "25GFC1TL4",
+              "project_id": 2231,
+              "code": "6ZJP6PZFQH",
               "is_barcode": false,
               "image": "",
-              "comment": "Скидка 31% на первый заказ от 2000 ₽ в разделе \"Гипермаркет\" для нового пользователя",
+              "comment": "45 дней доступа к Кинопоиску бесплатно для новых пользователей или 30 дней за 1 ₽ для пользователей без активной мультиподписки Яндекс Плюс",
               "date": "31.10.2026",
               "group": "",
               "is_hit": false,
@@ -3055,20 +3055,20 @@
               "hit_custom_text": "",
               "hit_bg_color": null,
               "hit_color": null,
-              "bonus_id": 15982,
+              "bonus_id": 13521,
               "is_universal": false,
-              "name": "Скидка 31% на первый заказ от 2000 ₽ в разделе \"Гипермаркет\" для нового пользователя",
-              "promo_terms": "<p>Максимальная скидка - 2000 ₽</p>",
+              "name": "45 дней доступа к Кинопоиску бесплатно для новых пользователей или 30 дней за 1 ₽ для пользователей без активной мультиподписки Яндекс Плюс",
+              "promo_terms": "<p><em></em></p><p>30 дней доступа для тех, кто не пользовался сервисом более 30 дней и ранее не использовал услугу реактивации за 1 ₽</p>",
               "region_promo": [
                 "RU"
               ],
-              "repeat_order": false,
-              "post_id": 17166808,
-              "ord_marker": "2RanynHqWbV",
-              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475.",
-              "discount": 31,
+              "repeat_order": true,
+              "post_id": 17188384,
+              "ord_marker": "2RanymYcmsR",
+              "ord_custom_text": "Реклама. ООО «ЯНДЕКС», ИНН 7736207543",
+              "discount": null,
               "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17166808&widget_id=8842&user_id=861964&source=js-widget"
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17188384&widget_id=8842&user_id=861964&source=js-widget"
             }
           ],
           "has_widget_subscribers_promo": false,
@@ -3088,7 +3088,7 @@
         "category_id": 310,
         "category_name": "Онлайн кинотеатры",
         "activeBloggers": 5363,
-        "product_info": "<p>Иви — один из крупнейших онлайн-кинотеатров в России с самым большим каталогом. Здесь 100 000+ фильмов, мультфильмов и сериалов. Много новинок и культовых проектов крупнейших зарубежных и российских студий.</p>",
+        "product_info": "<p>Иви — один из крупнейших онлайн-кинотеатров в России с самым большим каталогом. Здесь 100 000+ фильмов, мультфильмов и сериалов. Много новинок и кул��товых проектов крупнейших зарубежных и российских студий.</p>",
         "subscribers_condition": "<p>Активация промокода доступна  для пользователей, не имевших Подписку Иви, а также активаций сертификатов в предыдущие 90 дней.</p><p>Для активации промокода требуются данные банковской карты.</p><p>Услуги предоставляются в соответствии с Пользовательским соглашением Сервиса: www.ivi.ru/info/agreement.</p><p>18+</p>",
         "site": "https://www.ivi.ru/",
         "info": "",
@@ -3104,7 +3104,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 155
+        "rsp": 139
       },
       "groups": [
         {
@@ -3180,7 +3180,7 @@
           "Санкт-Петербург"
         ],
         "pf": 0,
-        "rsp": 403
+        "rsp": 413
       },
       "groups": [
         {
@@ -3366,7 +3366,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 410
+        "rsp": 414
       },
       "groups": [
         {
@@ -3557,150 +3557,6 @@
     },
     {
       "project": {
-        "id": 3468,
-        "logo": "https://s3sc.perfluence.net/logos/7/f/6/7f69f88a-f542-411a-a4ca-c9bdbf9a4ff6.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/8/7/b/87b04112-18fb-42ab-a1cc-bd966e9929f8.png",
-        "name": "Сберздоровье_Телемедицина",
-        "type": "cpa",
-        "img": null,
-        "category_id": 268,
-        "category_name": "Здоровый образ жизни",
-        "activeBloggers": 1151,
-        "product_info": "<p>СберЗдоровье — компания №1 в сфере цифровой медицины, которая предоставляет услуги по поиску и подбору врачей, онлайн-консультациям с врачами, дистанционному мониторингу.Онлайн-консультация с врачом от СберЗдоровья позволяет быстро связаться с опытным врачом и получить рекомендации по вопросам здоровья, диагностике симптомов или уточнению назначений.</p>",
-        "subscribers_condition": "",
-        "site": "https://sberhealth.ru/",
-        "info": "<p>СберЗдоровье — компания №1 в сфере цифровой медицины, которая предоставляет услуги по поиску и подбору врачей, онлайн-консультациям с врачами, дистанционному мониторингу.</p>",
-        "advantages": [
-          "Консультации проводятся в удобное для вас время, включая выходные и праздники. Есть дежурные врачи, которые ответят в течение 2 минут;",
-          "Не нужно тратить время на дорогу до клиники и ожидание в очередях;",
-          "Общайтесь с врачом из дома, офиса или даже из-за границы;",
-          "Данные остаются конфиденциальными;",
-          "Только проверенные специалисты из ведущих клиник России со средним стажем 6 лет и высоким рейтингом."
-        ],
-        "subscriber_guide": "<p>СберЗдоровье — компания №1 в сфере цифровой медицины, которая предоставляет услуги по поиску и подбору врачей, онлайн-консультациям с врачами, дистанционному мониторингу.</p>",
-        "regions": [],
-        "pf": 0,
-        "rsp": 417
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18568300,
-              "title": "Записаться на онлайн-консультацию с врачом",
-              "link": "https://sberanalizy.prfl.me/sites/97j5rs?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 3468,
-              "code": "PERE7A4E5",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 35% на первую или любую повторную онлайн-консультацию",
-              "date": "31.10.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 14107,
-              "is_universal": false,
-              "name": "Скидка 35% на первую или любую повторную онлайн-консультацию",
-              "promo_terms": "<ul><li>Промокод применяется единоразово для одного аккаунта. Повторная скидка возможна по новому промокоду.</li><li>Промокоды действуют на врачей: инфекционист, эндокринолог, хирург, флеболог, уролог, травматолог, терапевт, стоматолог, ревматолог, пульмонолог, педиатр, онколог, окулист, нефролог,  невролог, ЛОР, кардиолог, диетолог,  дерматолог, гинеколог, гастроэнтеролог, врач ЛФК, ветеринар, аллерголог, дежурный ветеринар, дежурный педиатр, дежурный терапевт.</li></ul>\nСкидка 35% на первую или повторную онлайн-консультацию с врачом. Воспользоваться услугой после приобретения можно в течение 12 месяцев. Имеются противопоказания, необходима консультация специалиста.",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17215649,
-              "ord_marker": "2Ranyo1nN4T",
-              "ord_custom_text": "Реклама. ООО «Инновационная медицина», 115432, г.Москва, вн.тер.г. муниципальный округ Даниловский, пр-кт Андропова, д. 10, помещ. 115, ОГРН 1197746310618 erid: 2Ranyo1nN4T. ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА",
-              "discount": 35,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17215649&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "31.10.2026 23:59"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": [],
-          "ord_marker": "2Ranyo1nN4T"
-        }
-      ]
-    },
-    {
-      "project": {
-        "id": 4575,
-        "logo": "https://s3sc.perfluence.net/logos/2/5/e/25e15b0d-eb26-423c-af16-e0f74a7a7d2b.png",
-        "logo_widget": "",
-        "name": "Carely на Ozon",
-        "type": "cpa",
-        "img": null,
-        "category_id": 293,
-        "category_name": "Маркетплейсы",
-        "activeBloggers": 674,
-        "product_info": "<ul><li>ART&amp;FACT — российский бренд уходовой косметики для лица и тела. В линейке: сыворотки, кремы, тоники, средства для очищения и ухода с активными компонентами. </li><li>Verifique — антивозрастная косметика с эффективными составами. Бренд предлагает сыворотки, кремы, тоники и средства для комплексного ухода за кожей. </li><li>Structura — профессиональный уход за волосами и кожей головы. Представлены средства для очищения, восстановления, увлажнения и защиты волос на каждом этапе ухода.</li></ul>",
-        "subscribers_condition": "",
-        "site": "https://www.ozon.ru/seller/carelygroup/",
-        "info": "<p>Carely Group — компания, объединяющая бренды уходовой косметики. Создает эффективные средства для кожи и волос с акцентом на современные формулы и реальные потребности пользователей.</p>",
-        "advantages": [],
-        "subscriber_guide": "<p>Carely Group — компания, объединяющая бренды уходовой косметики. Создает эффективные средства для кожи и волос с акцентом на современные формулы и реальные потребности пользователей.</p>",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 1,
-        "rsp": 390
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18566731,
-              "title": "Купить продукцию Carely на Ozon",
-              "link": "https://carely.prfl.me/sites/xzu15x?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 4575,
-              "code": "S4D6C866C9FF",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 17% на первый и все повторные заказы",
-              "date": "10.10.2026",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17064,
-              "is_universal": false,
-              "name": "Скидка 17% на первый и все повторные заказы",
-              "promo_terms": "",
-              "region_promo": [],
-              "repeat_order": true,
-              "post_id": 17214132,
-              "ord_marker": "2RanykMXHVV",
-              "ord_custom_text": "Реклама. ООО \"КЕАРЛИ ГРУПП\", ИНН 9715397054.",
-              "discount": 17,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17214132&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 1483,
         "logo": "https://s3sc.perfluence.net/logos/16511548706573.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/e/6/de6fa60e-9f2e-44d7-b269-fe7c40a1e4f2.png",
@@ -3733,7 +3589,7 @@
           "Екатеринбург"
         ],
         "pf": 0,
-        "rsp": 418
+        "rsp": 420
       },
       "groups": [
         {
@@ -3789,6 +3645,150 @@
     },
     {
       "project": {
+        "id": 4575,
+        "logo": "https://s3sc.perfluence.net/logos/2/5/e/25e15b0d-eb26-423c-af16-e0f74a7a7d2b.png",
+        "logo_widget": "",
+        "name": "Carely на Ozon",
+        "type": "cpa",
+        "img": null,
+        "category_id": 293,
+        "category_name": "Маркетплейсы",
+        "activeBloggers": 674,
+        "product_info": "<ul><li>ART&amp;FACT — российский бренд уходовой косметики для лица и тела. В линейке: сыворотки, кремы, тоники, средства для очищения и ухода с активными компонентами. </li><li>Verifique — антивозрастная косметика с эффективными составами. Бренд предлагает сыворотки, кремы, тоники и средства для комплексного ухода за кожей. </li><li>Structura — профессиональный уход за волосами и кожей головы. Представлены средства для очищения, восстановления, увлажнения и защиты волос на каждом этапе ухода.</li></ul>",
+        "subscribers_condition": "",
+        "site": "https://www.ozon.ru/seller/carelygroup/",
+        "info": "<p>Carely Group — компания, объединяющая бренды уходовой косметики. Создает эффективные средства для кожи и волос с акцентом на современные формулы и реальные потребности пользователей.</p>",
+        "advantages": [],
+        "subscriber_guide": "<p>Carely Group — компания, объединяющая бренды уходовой косметики. Создает эффективные средства для кожи и волос с акцентом на современные формулы и реальные потребности пользователей.</p>",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 1,
+        "rsp": 387
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18566731,
+              "title": "Купить продукцию Carely на Ozon",
+              "link": "https://carely.prfl.me/sites/xzu15x?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 4575,
+              "code": "S4D6C866C9FF",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 17% на первый и все повторные заказы",
+              "date": "10.10.2026",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17064,
+              "is_universal": false,
+              "name": "Скидка 17% на первый и все повторные заказы",
+              "promo_terms": "",
+              "region_promo": [],
+              "repeat_order": true,
+              "post_id": 17214132,
+              "ord_marker": "2RanykMXHVV",
+              "ord_custom_text": "Реклама. ООО \"КЕАРЛИ ГРУПП\", ИНН 9715397054.",
+              "discount": 17,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17214132&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
+        "id": 3468,
+        "logo": "https://s3sc.perfluence.net/logos/7/f/6/7f69f88a-f542-411a-a4ca-c9bdbf9a4ff6.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/8/7/b/87b04112-18fb-42ab-a1cc-bd966e9929f8.png",
+        "name": "Сберздоровье_Телемедицина",
+        "type": "cpa",
+        "img": null,
+        "category_id": 268,
+        "category_name": "Здоровый образ жизни",
+        "activeBloggers": 1151,
+        "product_info": "<p>СберЗдоровье — компания №1 в сфере цифровой медицины, которая предоставляет услуги по поиску и подбору врачей, онлайн-консультациям с врачами, дистанционному мониторингу.Онлайн-консультация с врачом от СберЗдоровья позволяет быстро связаться с опытным врачом и получить рекомендации по вопросам здоровья, диагностике симптомов или уточнению назначений.</p>",
+        "subscribers_condition": "",
+        "site": "https://sberhealth.ru/",
+        "info": "<p>СберЗдоровье — компания №1 в сфере цифровой медицины, которая предоставляет услуги по поиску и подбору врачей, онлайн-консультациям с врачами, дистанционному мониторингу.</p>",
+        "advantages": [
+          "Консультации проводятся в удобное для вас время, включая выходные и праздники. Есть дежурные врачи, которые ответят в течение 2 минут;",
+          "Не нужно тратить время на дорогу до клиники и ожидание в очередях;",
+          "Общайтесь с врачом из дома, офиса или даже из-за границы;",
+          "Данные остаются конфиденциальными;",
+          "Только проверенные специалисты из ведущих клиник России со средним стажем 6 лет и высоким рейтингом."
+        ],
+        "subscriber_guide": "<p>СберЗдоровье — компания №1 в сфере цифровой медицины, которая предоставляет услуги по поиску и подбору врачей, онлайн-консультациям с врачами, дистанционному мониторингу.</p>",
+        "regions": [],
+        "pf": 0,
+        "rsp": 423
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18568300,
+              "title": "Записаться на онлайн-консультацию с врачом",
+              "link": "https://sberanalizy.prfl.me/sites/97j5rs?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 3468,
+              "code": "PERE7A4E5",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 35% на первую или любую повторную онлайн-консультацию",
+              "date": "31.10.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 14107,
+              "is_universal": false,
+              "name": "Скидка 35% на первую или любую повторную онлайн-консультацию",
+              "promo_terms": "<ul><li>Промокод применяется единоразово для одного аккаунта. Повторная скидка возможна по новому промокоду.</li><li>Промокоды действуют на врачей: инфекционист, эндокринолог, хирург, флеболог, уролог, травматолог, терапевт, стоматолог, ревматолог, пульмонолог, педиатр, онколог, окулист, нефролог,  невролог, ЛОР, кардиолог, диетолог,  дерматолог, гинеколог, гастроэнтеролог, врач ЛФК, ветеринар, аллерголог, дежурный ветеринар, дежурный педиатр, дежурный терапевт.</li></ul>\nСкидка 35% на первую или повторную онлайн-консультацию с врачом. Воспользоваться услугой после приобретения можно в течение 12 месяцев. Имеются противопоказания, необходима консультация специалиста.",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17215649,
+              "ord_marker": "2Ranyo1nN4T",
+              "ord_custom_text": "Реклама. ООО «Инновационная медицина», 115432, г.Москва, вн.тер.г. муниципальный округ Даниловский, пр-кт Андропова, д. 10, помещ. 115, ОГРН 1197746310618 erid: 2Ranyo1nN4T. ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА",
+              "discount": 35,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17215649&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "31.10.2026 23:59"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": [],
+          "ord_marker": "2Ranyo1nN4T"
+        }
+      ]
+    },
+    {
+      "project": {
         "id": 112,
         "logo": "https://s3sc.perfluence.net/logos/17035315171212.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/c/f/a/cfa0a9b1-24c7-4058-aed1-b6d5ba9491b7.svg",
@@ -3799,7 +3799,7 @@
         "category_name": "Такси и каршеринг",
         "activeBloggers": 4163,
         "product_info": "<p>Делимобиль — крупнейший онлайн-сервис каршеринга в России, работает в 16 городах. В парке почти 30 тысяч авто: от привычных Polo и Solaris, веселых Smart и MINI, спортивного Stinger, и до презентабельных Audi, BMW, Mercedes. </p>",
-        "subscribers_condition": "<p>Реклама. Делимобиль - сервис каршеринга. Промокод на 2000 бонусов на первую поездку для новых пользователей. Нужно активировать до 30.09.2026  г. Промоко�� на 200 бонусов для пользователей, не совершавших аренды более 60 дней. Нужно активировать до 30.09.2026 г. Не является публичной офертой. Скидки применяются согласно условиям на сайте </p>",
+        "subscribers_condition": "<p>Реклама. Делимобиль - сервис каршеринга. Промокод на 2000 бонусов на первую поездку для новых пользователей. Нужно активировать до 30.09.2026  г. Промокод на 200 бонусов для пользователей, не совершавших аренды более 60 дней. Нужно активировать до 30.09.2026 г. Не является публичной офертой. Скидки применяются согласно условиям на сайте </p>",
         "site": "https://delimobil.ru",
         "info": "",
         "advantages": [
@@ -3825,7 +3825,7 @@
           "Новосибирск"
         ],
         "pf": 1,
-        "rsp": 179
+        "rsp": 144
       },
       "groups": [
         {
@@ -4090,7 +4090,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 34
+        "rsp": 28
       },
       "groups": [
         {
@@ -4127,7 +4127,7 @@
               "repeat_order": true,
               "post_id": 17237040,
               "ord_marker": "2Ranym5xMV5",
-              "ord_custom_text": "Реклама. ООО Инновационная медицина, 115432, г.Москва, вн.тер.г. муниципальный округ Даниловский, пр-кт Андропов��, д. 10, помещ. 115, ОГРН 1197746310618",
+              "ord_custom_text": "Реклама. ООО Инновационная медицина, 115432, г.Москва, вн.тер.г. муниципальный округ Даниловский, пр-кт Андропова, д. 10, помещ. 115, ОГРН 1197746310618",
               "discount": 30,
               "btn_text": null,
               "show": "https://pawss-api.perfluence.net/source-view?post_id=17237040&widget_id=8842&user_id=861964&source=js-widget",
