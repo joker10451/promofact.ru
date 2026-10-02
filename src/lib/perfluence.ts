@@ -200,6 +200,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   354: { slug: "yandeks-lavka", name: "Яндекс Лавка" },
   2993: { slug: "iv-roshe", name: "Ив Роше" },
   4025: { slug: "detskie-platezhnye-aksessuary-ot-sbera", name: "Детские платёжные аксессуары от Сбера" },
+  4264: { slug: "pyaterochka", name: "Пятёрочка Доставка" },
 };
 
 export function parsePayload(payloadJson: string): Coupon[] {

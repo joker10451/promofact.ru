@@ -958,5 +958,97 @@
         "widget_subscriber_codes": []
       }
     ]
+  },
+  {
+    "project": {
+      "id": 4264,
+      "logo": "https://favicon.yandex.net/favicon/v2/5ka.ru?size=120",
+      "logo_widget": "https://favicon.yandex.net/favicon/v2/5ka.ru?size=120",
+      "name": "Пятёрочка Доставка",
+      "category_id": 303,
+      "category_name": "Доставка продуктов",
+      "activeBloggers": 3500,
+      "product_info": "<p>Экспресс-доставка свежих продуктов и товаров первой необходимости из магазинов «Пятёрочка» прямо до вашей двери от 30 минут.</p>",
+      "subscribers_condition": "<p>Скидка до 55% на первый заказ в приложении «Пятёрочка Доставка» по промокодам до 31.10.2026.</p>",
+      "site": "https://5ka.ru",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 0,
+      "rsp": 600
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18569999,
+            "title": "Заказать в Пятёрочка Доставка",
+            "link": "https://pyaterochka.prfl.me/smart_zakupka/rusxy0?erid=2Ranym6MsGf",
+            "landing_terms": null
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 4264,
+            "code": "6wrhnueusp6",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Скидка 55% на первый заказ от 700 ₽ (максимальная скидка 600 ₽)",
+            "date": "31.10.2026 23:59",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": false,
+            "hit_custom_text": "Хит",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 18001,
+            "is_universal": false,
+            "name": "Скидка 55% на первый заказ от 700 ₽",
+            "promo_terms": "<p>Действует на первый заказ от 700 ₽ (макс. 600 ₽), а также для тех, кто не заказывал более года.</p>",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": null,
+            "post_id": 17290001,
+            "ord_marker": "2Ranym6MsGf",
+            "ord_custom_text": "Реклама. ООО «Агроторг». ИНН 7825706086 erid: 2Ranym6MsGf",
+            "discount": "55%",
+            "btn_text": null,
+            "show": ""
+          },
+          {
+            "project_id": 4264,
+            "code": "4pmhdjrhsp7",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Скидка 750 ₽ на первый заказ от 1500 ₽",
+            "date": "31.10.2026 23:59",
+            "group": "",
+            "is_hit": false,
+            "is_hiting": false,
+            "hit_custom_text": "",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 18002,
+            "is_universal": false,
+            "name": "Скидка 750 ₽ на первый заказ от 1500 ₽",
+            "promo_terms": "<p>Действует на первый заказ от 1500 ₽, а также для тех, кто не заказывал более года.</p>",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": null,
+            "post_id": 17290002,
+            "ord_marker": "2Ranym6MsGf",
+            "ord_custom_text": "Реклама. ООО «Агроторг». ИНН 7825706086 erid: 2Ranym6MsGf",
+            "discount": "750 ₽",
+            "btn_text": null,
+            "show": ""
+          }
+        ],
+        "ord_marker": "2Ranym6MsGf",
+        "ord_legal": "Реклама. ООО «Агроторг». ИНН 7825706086 erid: 2Ranym6MsGf"
+      }
+    ]
   }
 ]
