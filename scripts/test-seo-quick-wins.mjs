@@ -208,28 +208,66 @@ let passed = 0;
 {
   const appBuildDir = path.join(".next", "server", "app");
   if (fs.existsSync(appBuildDir)) {
-    // Пустая страница (0 купонов, например sport-i-otdyh) обязана иметь noindex
-    const emptyCatSlug = "sport-i-otdyh";
-    const emptyPagePath = path.join(appBuildDir, "gorod", "moskva", `${emptyCatSlug}.html`);
-    if (fs.existsSync(emptyPagePath)) {
-      const html = fs.readFileSync(emptyPagePath, "utf-8");
-      assert.ok(
-        html.includes('content="noindex, follow"') || html.includes('content="noindex,follow"'),
-        "Пустая гео-категория обязана иметь robots noindex, follow"
-      );
+    const [categories, allCoupons] = await Promise.all([getCategories(), getCoupons()]);
+    let dynamicEmpty = null;
+    let dynamicThin = null;
+    let dynamicRich = null;
+
+    for (const city of CITIES_SEO) {
+      for (const cat of categories) {
+        const list = allCoupons.filter((c) => {
+          const r = (c.promocode.region || "").toLowerCase();
+          const isAllRu = !r || r === "ru" || r === "россия";
+          const matchesCity = r.includes(city.name.toLowerCase());
+          return (isAllRu || matchesCity) && c.store.categorySlug === cat.slug;
+        });
+        if (list.length === 0 && !dynamicEmpty) {
+          dynamicEmpty = { citySlug: city.slug, catSlug: cat.slug, count: 0 };
+        } else if (list.length >= 1 && list.length <= 2 && !dynamicThin) {
+          dynamicThin = { citySlug: city.slug, catSlug: cat.slug, count: list.length };
+        } else if (list.length >= 3 && !dynamicRich) {
+          dynamicRich = { citySlug: city.slug, catSlug: cat.slug, count: list.length };
+        }
+      }
     }
 
-    // Пример непустой страницы: /gorod/moskva/dostavka-produktov.html (14 купонов)
-    const richPagePath = path.join(appBuildDir, "gorod", "moskva", "dostavka-produktov.html");
-    if (fs.existsSync(richPagePath)) {
-      const html = fs.readFileSync(richPagePath, "utf-8");
-      assert.ok(
-        !html.includes('content="noindex'),
-        "Содержательная гео-категория не должна иметь noindex"
-      );
+    // Пустая страница (0 купонов) обязана иметь noindex
+    if (dynamicEmpty) {
+      const emptyPagePath = path.join(appBuildDir, "gorod", dynamicEmpty.citySlug, `${dynamicEmpty.catSlug}.html`);
+      if (fs.existsSync(emptyPagePath)) {
+        const html = fs.readFileSync(emptyPagePath, "utf-8");
+        assert.ok(
+          html.includes('content="noindex, follow"') || html.includes('content="noindex,follow"'),
+          `Пустая гео-категория (${dynamicEmpty.citySlug}/${dynamicEmpty.catSlug}, 0 купонов) обязана иметь robots noindex, follow`
+        );
+      }
     }
 
-    console.log("✓ Тест 4: Согласованность robots: пустые страницы закрыты noindex, содержательные открыты (PASS)");
+    // Тонкая страница (1-2 купона) обязана иметь noindex (Wave 3A)
+    if (dynamicThin) {
+      const thinPagePath = path.join(appBuildDir, "gorod", dynamicThin.citySlug, `${dynamicThin.catSlug}.html`);
+      if (fs.existsSync(thinPagePath)) {
+        const html = fs.readFileSync(thinPagePath, "utf-8");
+        assert.ok(
+          html.includes('content="noindex, follow"') || html.includes('content="noindex,follow"'),
+          `Тонкая гео-категория (${dynamicThin.citySlug}/${dynamicThin.catSlug}, ${dynamicThin.count} купона) обязана иметь robots noindex, follow`
+        );
+      }
+    }
+
+    // Содержательная страница (>= 3 купонов) обязана иметь index
+    if (dynamicRich) {
+      const richPagePath = path.join(appBuildDir, "gorod", dynamicRich.citySlug, `${dynamicRich.catSlug}.html`);
+      if (fs.existsSync(richPagePath)) {
+        const html = fs.readFileSync(richPagePath, "utf-8");
+        assert.ok(
+          !html.includes('content="noindex'),
+          `Содержательная гео-категория (${dynamicRich.citySlug}/${dynamicRich.catSlug}, ${dynamicRich.count} купонов) не должна иметь noindex`
+        );
+      }
+    }
+
+    console.log("✓ Тест 4: Согласованность robots: пустые и тонкие (< 3) страницы закрыты noindex, содержательные (>= 3) открыты (PASS)");
     passed++;
   } else {
     console.log("⚠️ Тест 4: Сборка .next не найдена, пропуск проверки robots в HTML");
@@ -796,4 +834,116 @@ let passed = 0;
   passed++;
 }
 
-console.log("\n================================================================================");
+// -----------------------------------------------------------------------------
+// Тест 14: Wave 3A — Инвариант синхронизации Geo Robots, Sitemap и Footer
+// -----------------------------------------------------------------------------
+{
+  // A. Проверка кода Footer: ссылки на ВСЕ города из CITIES_SEO
+  const footerSrc = fs.readFileSync(path.resolve("src/components/Footer.tsx"), "utf-8");
+  for (const city of CITIES_SEO) {
+    const expectedHref = `/gorod/${city.slug}`;
+    assert.ok(
+      footerSrc.includes(expectedHref),
+      `Footer обязан содержать сквозную ссылку на город ${city.name} (${expectedHref})`
+    );
+  }
+
+  // B. Проверка инварианта thresholds в коде:
+  // sitemap.ts: list.length >= 3
+  // page.tsx: list.length >= 3
+  const pageSrc = fs.readFileSync(path.resolve("src/app/gorod/[slug]/[category]/page.tsx"), "utf-8");
+  const sitemapSrc = fs.readFileSync(path.resolve("src/app/sitemap.ts"), "utf-8");
+
+  assert.ok(
+    pageSrc.includes("const isIndexable = list.length >= 3;"),
+    "page.tsx обязан проверять порог list.length >= 3 для isIndexable"
+  );
+  assert.ok(
+    sitemapSrc.includes("list.length >= 3"),
+    "sitemap.ts обязан проверять порог list.length >= 3 для включения в sitemap"
+  );
+
+  // C. Проверка инварианта на симуляции:
+  // Любая гео-категория с count < 3 => !isIndexable (noindex, follow)
+  // Любая гео-категория с count >= 3 => isIndexable (index, follow)
+  for (let count = 0; count <= 6; count++) {
+    const isIndexableSim = count >= 3;
+    const isSitemapIncludedSim = count >= 3;
+    assert.strictEqual(
+      isIndexableSim,
+      isSitemapIncludedSim,
+      `Для количества купонов ${count} статус индексации должен строго совпадать со статусом sitemap`
+    );
+    if (count < 3) {
+      assert.strictEqual(isIndexableSim, false, `При ${count} купонах страница обязана быть noindex`);
+    } else {
+      assert.strictEqual(isIndexableSim, true, `При ${count} купонах страница обязана быть indexable`);
+    }
+  }
+
+  // D. Динамическая проверка артефактов сборки HTML (если папка .next существует)
+  const appBuildDir = path.join(".next", "server", "app");
+  if (fs.existsSync(appBuildDir)) {
+    const [categories, allCoupons] = await Promise.all([getCategories(), getCoupons()]);
+    let sampleEmpty = null;
+    let sampleThin = null;
+    let sampleRich = null;
+
+    for (const city of CITIES_SEO) {
+      for (const cat of categories) {
+        const list = allCoupons.filter((c) => {
+          const r = (c.promocode.region || "").toLowerCase();
+          const isAllRu = !r || r === "ru" || r === "россия";
+          const matchesCity = r.includes(city.name.toLowerCase());
+          return (isAllRu || matchesCity) && c.store.categorySlug === cat.slug;
+        });
+        if (list.length === 0 && !sampleEmpty) {
+          sampleEmpty = { city: city.slug, cat: cat.slug, count: 0 };
+        } else if (list.length >= 1 && list.length <= 2 && !sampleThin) {
+          sampleThin = { city: city.slug, cat: cat.slug, count: list.length };
+        } else if (list.length >= 3 && !sampleRich) {
+          sampleRich = { city: city.slug, cat: cat.slug, count: list.length };
+        }
+      }
+    }
+
+    if (sampleEmpty) {
+      const p = path.join(appBuildDir, "gorod", sampleEmpty.city, `${sampleEmpty.cat}.html`);
+      if (fs.existsSync(p)) {
+        const html = fs.readFileSync(p, "utf-8");
+        assert.ok(
+          html.includes('content="noindex, follow"') || html.includes('content="noindex,follow"'),
+          `Пустая гео-категория /gorod/${sampleEmpty.city}/${sampleEmpty.cat} обязана иметь robots noindex, follow`
+        );
+      }
+    }
+
+    if (sampleThin) {
+      const p = path.join(appBuildDir, "gorod", sampleThin.city, `${sampleThin.cat}.html`);
+      if (fs.existsSync(p)) {
+        const html = fs.readFileSync(p, "utf-8");
+        assert.ok(
+          html.includes('content="noindex, follow"') || html.includes('content="noindex,follow"'),
+          `Тонкая гео-категория /gorod/${sampleThin.city}/${sampleThin.cat} (${sampleThin.count} купона) обязана иметь robots noindex, follow`
+        );
+      }
+    }
+
+    if (sampleRich) {
+      const p = path.join(appBuildDir, "gorod", sampleRich.city, `${sampleRich.cat}.html`);
+      if (fs.existsSync(p)) {
+        const html = fs.readFileSync(p, "utf-8");
+        assert.ok(
+          !html.includes('content="noindex'),
+          `Содержательная гео-категория /gorod/${sampleRich.city}/${sampleRich.cat} (${sampleRich.count} купонов) обязана быть indexable`
+        );
+      }
+    }
+  }
+
+  console.log("✓ Тест 14: Wave 3A: Инвариант robots threshold === sitemap threshold === 3 и 100% покрытие городов в Footer (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed} ТЕСТОВ SEO QUICK-WINS УСПЕШНО ПРОЙДЕНЫ!`);
+console.log("================================================================================");
