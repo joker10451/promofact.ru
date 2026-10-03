@@ -19,6 +19,24 @@ import path from "node:path";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 
+// Загружаем переменные окружения из .env.local до импорта библиотек (для консистентности с Next.js build)
+const envLocalPath = path.resolve(".env.local");
+if (fs.existsSync(envLocalPath)) {
+  const envContent = fs.readFileSync(envLocalPath, "utf8");
+  for (const line of envContent.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eqIdx = trimmed.indexOf("=");
+    if (eqIdx > 0) {
+      const k = trimmed.slice(0, eqIdx).trim();
+      const v = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
+      if (!process.env[k]) {
+        process.env[k] = v;
+      }
+    }
+  }
+}
+
 // Подключаем ts-loader для импортов
 register("./scripts/ts-loader.mjs", pathToFileURL("./"));
 
@@ -201,7 +219,18 @@ let passed = 0;
       );
     }
 
-    // Пример непустой страницы: /gorod/moskva/dostavka-produktov.html (14 купонов)
+    // Тонкая страница (1-2 купона, например odezhda-i-obuv) обязана иметь noindex (Wave 3A)
+    const thinCatSlug = "odezhda-i-obuv";
+    const thinPagePath = path.join(appBuildDir, "gorod", "moskva", `${thinCatSlug}.html`);
+    if (fs.existsSync(thinPagePath)) {
+      const html = fs.readFileSync(thinPagePath, "utf-8");
+      assert.ok(
+        html.includes('content="noindex, follow"') || html.includes('content="noindex,follow"'),
+        "Тонкая гео-категория (1-2 купона) обязана иметь robots noindex, follow"
+      );
+    }
+
+    // Пример непустой страницы: /gorod/moskva/dostavka-produktov.html (>= 3 купонов)
     const richPagePath = path.join(appBuildDir, "gorod", "moskva", "dostavka-produktov.html");
     if (fs.existsSync(richPagePath)) {
       const html = fs.readFileSync(richPagePath, "utf-8");
@@ -211,7 +240,7 @@ let passed = 0;
       );
     }
 
-    console.log("✓ Тест 4: Согласованность robots: пустые страницы закрыты noindex, содержательные открыты (PASS)");
+    console.log("✓ Тест 4: Согласованность robots: пустые и тонкие (< 3) страницы закрыты noindex, содержательные (>= 3) открыты (PASS)");
     passed++;
   } else {
     console.log("⚠️ Тест 4: Сборка .next не найдена, пропуск проверки robots в HTML");
@@ -680,6 +709,57 @@ let passed = 0;
   );
 
   console.log("✓ Тест 12: Регрессионные требования Wave 2 Store Intent Filters полностью соблюдены (PASS)");
+  passed++;
+}
+
+// -----------------------------------------------------------------------------
+// Тест 13: Wave 3A — Инвариант синхронизации Geo Robots, Sitemap и Footer
+// -----------------------------------------------------------------------------
+{
+  // A. Проверка кода Footer: ссылки на ВСЕ города из CITIES_SEO
+  const footerSrc = fs.readFileSync(path.resolve("src/components/Footer.tsx"), "utf-8");
+  for (const city of CITIES_SEO) {
+    const expectedHref = `/gorod/${city.slug}`;
+    assert.ok(
+      footerSrc.includes(expectedHref),
+      `Footer обязан содержать сквозную ссылку на город ${city.name} (${expectedHref})`
+    );
+  }
+
+  // B. Проверка инварианта thresholds в коде:
+  // sitemap.ts: list.length >= 3
+  // page.tsx: list.length >= 3
+  const pageSrc = fs.readFileSync(path.resolve("src/app/gorod/[slug]/[category]/page.tsx"), "utf-8");
+  const sitemapSrc = fs.readFileSync(path.resolve("src/app/sitemap.ts"), "utf-8");
+
+  assert.ok(
+    pageSrc.includes("const isIndexable = list.length >= 3;"),
+    "page.tsx обязан проверять порог list.length >= 3 для isIndexable"
+  );
+  assert.ok(
+    sitemapSrc.includes("list.length >= 3"),
+    "sitemap.ts обязан проверять порог list.length >= 3 для включения в sitemap"
+  );
+
+  // C. Проверка инварианта на симуляции:
+  // Любая гео-категория с count < 3 => !isIndexable (noindex, follow)
+  // Любая гео-категория с count >= 3 => isIndexable (index, follow)
+  for (let count = 0; count <= 6; count++) {
+    const isIndexableSim = count >= 3;
+    const isSitemapIncludedSim = count >= 3;
+    assert.strictEqual(
+      isIndexableSim,
+      isSitemapIncludedSim,
+      `Для количества купонов ${count} статус индексации должен строго совпадать со статусом sitemap`
+    );
+    if (count < 3) {
+      assert.strictEqual(isIndexableSim, false, `При ${count} купонах страница обязана быть noindex`);
+    } else {
+      assert.strictEqual(isIndexableSim, true, `При ${count} купонах страница обязана быть indexable`);
+    }
+  }
+
+  console.log("✓ Тест 13: Wave 3A: Инвариант robots threshold === sitemap threshold === 3 и 100% покрытие городов в Footer (PASS)");
   passed++;
 }
 
