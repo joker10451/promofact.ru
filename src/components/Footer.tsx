@@ -129,6 +129,7 @@ export default async function Footer() {
               ["Самара", "/gorod/samara"],
               ["Нижний Новгород", "/gorod/nizhniy-novgorod"],
               ["Уфа", "/gorod/ufa"],
+              ["Воронеж", "/gorod/voronezh"],
             ].map(([label, href]) => (
               <li key={href}>
                 <Link href={href} className={footerLink}>
