@@ -40,6 +40,13 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     textColor: "text-ink",
     domain: "market.yandex.ru",
   },
+  "megamarket": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/megamarket.ru?size=120",
+    emoji: "🛍️",
+    bgGradient: "from-fuchsia-600 to-purple-700",
+    textColor: "text-white",
+    domain: "megamarket.ru",
+  },
   "zolotoe-yabloko": {
     logoUrl: "https://favicon.yandex.net/favicon/v2/goldapple.ru?size=120",
     emoji: "🍏",

@@ -280,6 +280,9 @@ export const BRAND_CATEGORY: Record<string, string> = {
   fmart: "tsvety",
 
   // Настоящие маркетплейсы — их действительно немного
+  мегамаркет: "marketpleysy",
+  "мегамаркет сра": "marketpleysy",
+  megamarket: "marketpleysy",
   "яндекс маркет": "marketpleysy",
   aliexpress: "marketpleysy",
   "aliexpress ru&cis": "marketpleysy",

@@ -4940,6 +4940,224 @@
           "widget_subscriber_codes": []
         }
       ]
+    },
+    {
+      "project": {
+        "id": 4362,
+        "logo": "https://s3sc.perfluence.net/logos/3/4/8/348457e2-b292-498b-93eb-37e63fcfc88e.png",
+        "logo_widget": "https://s3sc.perfluence.net/logos/3/4/8/348457e2-b292-498b-93eb-37e63fcfc88e.png",
+        "name": "Плати по миру",
+        "category_id": 252,
+        "category_name": "Сервисы и подписки",
+        "activeBloggers": 2400,
+        "product_info": "<p>«Плати по всему миру» — сервис оформления зарубежных виртуальных и пластиковых банковских карт. Доступны Amazon, Spotify, ChatGPT, Netflix и международные оплаты без ограничений. Быстрое пополнение рублями через СБП без комиссии.</p>",
+        "subscribers_condition": "<p>Скидка 4000 ₽ на оформление пластиковой Премиальной карты с бесплатной доставкой по промокоду PFPLPCGN + кешбэк 5 $ после активации. Первый год обслуживания — 0 ₽.</p>",
+        "site": "https://platipomiru.com",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 4000
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18570001,
+              "title": "Оформить пластиковую Премиальную карту Плати по всему миру",
+              "link": "https://platipomiru.prfl.me/sites/6qcqcp?erid=2RanynysXpw",
+              "landing_terms": null
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 4362,
+              "code": "PFPLPCGN",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 4000 ₽ на оформление пластиковой Премиальной карты + кешбэк 5 $",
+              "date": "31.10.2026 23:59",
+              "group": "",
+              "is_hit": true,
+              "is_hiting": false,
+              "hit_custom_text": "Хит",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 18002,
+              "is_universal": false,
+              "name": "Скидка 4 000 ₽ на пластиковую Премиальную карту + кешбэк 5 $",
+              "promo_terms": "<p>Скидка 4000 ₽ на оформление пластиковой Премиальной карты с бесплатной доставкой по РФ. Кешбэк 5 $ после активации. Первый год обслуживания 0 ₽.</p>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": null,
+              "post_id": 17290003,
+              "ord_marker": "2RanynysXpw",
+              "ord_custom_text": "Реклама ООО \"КАПИБАРА\". ИНН 9703231520 erid: 2RanynysXpw",
+              "discount": "4000 ₽",
+              "btn_text": null,
+              "show": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": {
+        "id": 3611,
+        "logo": "https://s3sc.perfluence.net/logos/e/b/5/eb5ac0ac-7fa7-40c8-a947-fcafc8ffb3d2.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/0/9/d092f096-b21a-4abf-aeb5-e5ba61d1ab0d.png",
+        "name": "Мегамаркет СРА",
+        "type": "cpa",
+        "img": "https://s3sc.perfluence.net/img_widget/6/f/4/6f4565c3-bf73-4012-a456-855da05ff02f.webp",
+        "category_id": 293,
+        "category_name": "Маркетплейсы",
+        "activeBloggers": 3444,
+        "product_info": "<p>Мегамаркет — один из крупнейших в России маркетплейсов с миллионами товаров. Здесь можно купить все: от ручки до посудомойки. Можно заказать экспресс-доставку, есть доставка по клику. До 99% вы сможете оплатить бонусами Спасибо, а еще оформить покупку в рассрочку.</p>",
+        "subscribers_condition": "",
+        "site": "https://megamarket.ru/",
+        "info": "",
+        "advantages": [],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 407
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18604608,
+              "title": "Заказать товары со скидкой 30% по промокоду (до 7.10)",
+              "link": "https://megamarket1.prfl.me/sites/4gfzri?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 3611,
+              "code": "pfoкt298189",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 30%, но не более 5 000 ₽ на один любой заказ",
+              "date": "07.10.2026",
+              "group": "17228",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17228,
+              "is_universal": true,
+              "name": "Скидка 30%, но не более 5 000 ₽ на один любой заказ",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17249417,
+              "ord_marker": "2RanymbrDVu",
+              "ord_custom_text": "Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17249417&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        },
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18604609,
+              "title": "Заказать товары со скидкой 15% по промокоду PRF1 (до 31.10)",
+              "link": "https://megamarket1.prfl.me/sites/lo16jz?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 3611,
+              "code": "PRF1",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Товары со скидкой 15%, но не более 10 000 ₽ по промокоду PRF1 на первый заказ",
+              "date": "31.10.2026",
+              "group": "17204",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17204,
+              "is_universal": true,
+              "name": "Товары со скидкой 15%, но не более 10 000 ₽ по промокоду PRF1 на первый заказ",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17249418,
+              "ord_marker": "2RanymdLCnF",
+              "ord_custom_text": "Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17249418&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        },
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18604612,
+              "title": "Заказать товары с выгодой до 30% по промокоду ASKNA5 (до 6.10)",
+              "link": "https://megamarket1.prfl.me/sites/1z2pj0?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 3611,
+              "code": "ASKNA5",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Товары с выгодой до 30% по проокоду ASKNA5 на один любой заказ",
+              "date": "06.10.2026",
+              "group": "17194",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17194,
+              "is_universal": true,
+              "name": "Товары с выгодой до 30% по проокоду ASKNA5 на один любой заказ",
+              "promo_terms": "",
+              "region_promo": [],
+              "repeat_order": true,
+              "post_id": 17249421,
+              "ord_marker": "2RanymhnAdH",
+              "ord_custom_text": "Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17249421&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
     }
   ],
   "stats": []

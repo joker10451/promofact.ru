@@ -201,6 +201,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   2993: { slug: "iv-roshe", name: "Ив Роше" },
   4025: { slug: "detskie-platezhnye-aksessuary-ot-sbera", name: "Детские платёжные аксессуары от Сбера" },
   4264: { slug: "pyaterochka", name: "Пятёрочка Доставка" },
+  4362: { slug: "plati-po-miru", name: "Плати по миру" },
 };
 
 export function parsePayload(payloadJson: string): Coupon[] {
@@ -738,6 +739,30 @@ export async function getStores(): Promise<StoreInfo[]> {
  * момент. Каждый магазин несёт свои активные купоны (возможно, пустой список).
  */
 const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
+  "megamarket": {
+    id: 100011,
+    slug: "megamarket",
+    name: "Мегамаркет",
+    logo: "https://favicon.yandex.net/favicon/v2/megamarket.ru?size=120",
+    category: "Маркетплейсы",
+    categorySlug: "marketpleysy",
+    about: "Мегамаркет — один из крупнейших маркетплейсов в России с миллионами товаров, быстрой доставкой и бонусами Спасибо до 99%.",
+    conditions: "Скидка по промокодам действует при оформлении заказа на сайте или в приложении Мегамаркет.",
+    site: "https://megamarket.ru",
+    activeBloggers: 35,
+  },
+  "plati-po-miru": {
+    id: 100010,
+    slug: "plati-po-miru",
+    name: "Плати по миру",
+    logo: "https://s3sc.perfluence.net/logos/3/4/8/348457e2-b292-498b-93eb-37e63fcfc88e.png",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+    about: "«Плати по всему миру» — сервис оформления международных виртуальных и пластиковых банковских карт для оплаты зарубежных сервисов, подписок и покупок за границей.",
+    conditions: "Скидка по промокодам действует при оформлении карты на официальном сайте сервиса.",
+    site: "https://platipomiru.com",
+    activeBloggers: 14,
+  },
   "pyaterochka": {
     id: 100001,
     slug: "pyaterochka",

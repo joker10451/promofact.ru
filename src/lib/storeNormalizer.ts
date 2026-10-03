@@ -16,6 +16,11 @@ interface NormalizedStoreMeta {
 }
 
 const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
+  "megamarket": {
+    name: "Мегамаркет",
+    category: "Маркетплейсы",
+    categorySlug: "marketpleysy",
+  },
   "detskie-platezhnye-aksessuary-ot-sbera": {
     name: "Детские платёжные аксессуары от Сбера",
     category: "Сервисы и подписки",
