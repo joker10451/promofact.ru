@@ -6,21 +6,20 @@ import { getCoupons, getAllStores } from "../src/lib/perfluence.ts";
 
 console.log("=== Тестирование оффера и макета Плати по миру (Премиальная пластиковая карта) ===");
 
-const originalPath = "C:/Users/Kriri/AppData/Local/hermes/attachments/template (3).png";
 const publicImagePath = "public/images/plati-po-miru-premium-card.png";
+const EXPECTED_IMAGE_SHA256 = "9b32db5ceaebc7bc5bc623da813b72b3fe81cd651a56a5c9c2a5a8619d1174d5";
+const EXPECTED_IMAGE_SIZE = 8063286;
 
-// 1. Проверка файла изображения
+// 1. Портативная проверка файла изображения через эталонный SHA256 (без локальных абсолютных путей)
 assert(fs.existsSync(publicImagePath), "Файл public/images/plati-po-miru-premium-card.png должен существовать");
 const publicBuf = fs.readFileSync(publicImagePath);
-const origBuf = fs.readFileSync(originalPath);
+assert.strictEqual(publicBuf.length, EXPECTED_IMAGE_SIZE, `Размер изображения должен быть ровно ${EXPECTED_IMAGE_SIZE} байт`);
 
-const origHash = crypto.createHash("sha256").update(origBuf).digest("hex");
 const publicHash = crypto.createHash("sha256").update(publicBuf).digest("hex");
-
 console.log("Image size:", publicBuf.length, "bytes");
 console.log("Image SHA256:", publicHash);
-assert.strictEqual(publicHash, origHash, "Изображение в public/images должно быть байт-в-байт идентично template (3).png");
-console.log("✓ Подтверждено: байты изображения строго идентичны исходному template (3).png");
+assert.strictEqual(publicHash, EXPECTED_IMAGE_SHA256, "Изображение в public/images должно строго совпадать с эталонным SHA256");
+console.log("✓ Подтверждено: байты изображения строго идентичны эталонному макету (SHA256 проверен портативно)");
 
 // 2. Проверка баннера
 const banners = getActivePromoBanners({ storeSlug: "plati-po-miru" });

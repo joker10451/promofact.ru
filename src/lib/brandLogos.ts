@@ -159,6 +159,13 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     textColor: "text-white",
     domain: "ostrovok.ru",
   },
+  "tutu": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/tutu.ru?size=120",
+    emoji: "🚆",
+    bgGradient: "from-amber-500 to-orange-600",
+    textColor: "text-white",
+    domain: "tutu.ru",
+  },
   "pro32-com": {
     logoUrl: "https://favicon.yandex.net/favicon/v2/pro32.com?size=120",
     emoji: "🛡",

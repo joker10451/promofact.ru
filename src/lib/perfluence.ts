@@ -6,6 +6,7 @@ import { normalizeStore } from "@/lib/storeNormalizer";
 import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 import { CATEGORIES } from "@/lib/categoryTaxonomy";
 import { isCouponActive } from "@/lib/couponExpiry";
+import { STABLE_STORES } from "@/lib/stableStores";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
 
@@ -202,6 +203,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   4025: { slug: "detskie-platezhnye-aksessuary-ot-sbera", name: "Детские платёжные аксессуары от Сбера" },
   4264: { slug: "pyaterochka", name: "Пятёрочка Доставка" },
   4362: { slug: "plati-po-miru", name: "Плати по миру" },
+  3000: { slug: "tutu", name: "Туту" },
 };
 
 export function parsePayload(payloadJson: string): Coupon[] {
@@ -738,200 +740,7 @@ export async function getStores(): Promise<StoreInfo[]> {
  * «промокод {магазин}» индексировались даже когда промокод не действует в этот
  * момент. Каждый магазин несёт свои активные купоны (возможно, пустой список).
  */
-const CORE_FALLBACK_STORES: Record<string, Partial<StoreInfo>> = {
-  "megamarket": {
-    id: 100011,
-    slug: "megamarket",
-    name: "Мегамаркет",
-    logo: "https://favicon.yandex.net/favicon/v2/megamarket.ru?size=120",
-    category: "Маркетплейсы",
-    categorySlug: "marketpleysy",
-    about: "Мегамаркет — один из крупнейших маркетплейсов в России с миллионами товаров, быстрой доставкой и бонусами Спасибо до 99%.",
-    conditions: "Скидка по промокодам действует при оформлении заказа на сайте или в приложении Мегамаркет.",
-    site: "https://megamarket.ru",
-    activeBloggers: 35,
-  },
-  "plati-po-miru": {
-    id: 100010,
-    slug: "plati-po-miru",
-    name: "Плати по миру",
-    logo: "https://s3sc.perfluence.net/logos/3/4/8/348457e2-b292-498b-93eb-37e63fcfc88e.png",
-    category: "Сервисы и подписки",
-    categorySlug: "servisy-i-podpiski",
-    about: "«Плати по всему миру» — сервис оформления международных виртуальных и пластиковых банковских карт для оплаты зарубежных сервисов, подписок и покупок за границей.",
-    conditions: "Скидка по промокодам действует при оформлении карты на официальном сайте сервиса.",
-    site: "https://platipomiru.com",
-    activeBloggers: 14,
-  },
-  "pyaterochka": {
-    id: 100001,
-    slug: "pyaterochka",
-    name: "Пятёрочка Доставка",
-    logo: "https://favicon.yandex.net/favicon/v2/5ka.ru?size=120",
-    category: "Доставка продуктов",
-    categorySlug: "dostavka-produktov",
-    about: "«Пятёрочка» — сеть магазинов у дома с экспресс-доставкой продуктов питания и товаров первой необходимости от 30 минут.",
-    conditions: "Скидка по промокодам действует в официальном приложении доставки «Пятёрочка».",
-    site: "https://5ka.ru",
-    activeBloggers: 12,
-  },
-  "samokat": {
-    id: 100002,
-    slug: "samokat",
-    name: "Самокат",
-    logo: "https://favicon.yandex.net/favicon/v2/samokat.ru?size=120",
-    category: "Доставка продуктов",
-    categorySlug: "dostavka-produktov",
-    about: "«Самокат» — сервис мгновенной доставки продуктов и товаров для дома от 15 минут.",
-    conditions: "Промокоды применяются при оформлении заказа в мобильном приложении Самокат.",
-    site: "https://samokat.ru",
-    activeBloggers: 18,
-  },
-  "riv-gosh": {
-    id: 100003,
-    slug: "riv-gosh",
-    name: "РИВ ГОШ",
-    logo: "https://favicon.yandex.net/favicon/v2/rivegauche.ru?size=120",
-    category: "Косметика и парфюмерия",
-    categorySlug: "kosmetika-i-parfyumeriya",
-    about: "РИВ ГОШ — ведущая российская сеть парфюмерии и косметики мировых брендов.",
-    conditions: "Скидки по промокодам действуют в интернет-магазине РИВ ГОШ на выделенный ассортимент.",
-    site: "https://rivegauche.ru",
-    activeBloggers: 8,
-  },
-  "sokolov-offline": {
-    id: 100004,
-    slug: "sokolov-offline",
-    name: "SOKOLOV",
-    logo: "https://favicon.yandex.net/favicon/v2/sokolov.ru?size=120",
-    category: "Украшения и часы",
-    categorySlug: "ukrasheniya",
-    about: "SOKOLOV — крупнейший российский ювелирный бренд украшений из золота и серебра.",
-    conditions: "Купоны действуют в розничных флагманских магазинах и на сайте SOKOLOV.",
-    site: "https://sokolov.ru",
-    activeBloggers: 15,
-  },
-  "tanukifamily": {
-    id: 100005,
-    slug: "tanukifamily",
-    name: "Тануки",
-    logo: "https://favicon.yandex.net/favicon/v2/tanukifamily.ru?size=120",
-    category: "Доставка из ресторанов",
-    categorySlug: "dostavka-iz-restoranov",
-    about: "TanukiFamily — рестораны японской, паназиатской и европейской кухни с быстрой доставкой.",
-    conditions: "Промокоды на скидку и подарки при заказе доставки на сайте и в приложении Тануки.",
-    site: "https://tanukifamily.ru",
-    activeBloggers: 6,
-  },
-  "magnit-dostavka": {
-    id: 100006,
-    slug: "magnit-dostavka",
-    name: "Магнит Доставка",
-    logo: "https://favicon.yandex.net/favicon/v2/dostavka.magnit.ru?size=120",
-    category: "Доставка продуктов",
-    categorySlug: "dostavka-produktov",
-    about: "«Магнит Доставка» — экспресс-доставка продуктов питания, готовой кулинарии и товаров для дома от 30 минут.",
-    conditions: "Промокоды на скидку действуют при заказе в приложении «Магнит Доставка».",
-    site: "https://dostavka.magnit.ru",
-    activeBloggers: 14,
-  },
-  "yandex-market": {
-    id: 100007,
-    slug: "yandex-market",
-    name: "Яндекс Маркет",
-    logo: "https://favicon.yandex.net/favicon/v2/market.yandex.ru?size=120",
-    category: "Маркетплейсы",
-    categorySlug: "marketpleysy",
-    about: "«Яндекс Маркет» — популярный маркетплейс с миллионами товаров, быстрой доставкой и бонусами Яндекс Плюс.",
-    conditions: "Скидки по промокодам применяются в корзине при оформлении заказа на сайте и в приложении.",
-    site: "https://market.yandex.ru",
-    activeBloggers: 25,
-  },
-  "zolotoe-yabloko": {
-    id: 100008,
-    slug: "zolotoe-yabloko",
-    name: "Золотое Яблоко",
-    logo: "https://favicon.yandex.net/favicon/v2/goldapple.ru?size=120",
-    category: "Косметика и парфюмерия",
-    categorySlug: "kosmetika-i-parfyumeriya",
-    about: "«Золотое Яблоко» — флагманский парфюмерный супермаркет: косметика, парфюмерия и бьюти-новинки.",
-    conditions: "Промокоды вводятся на шаге оплаты в интернет-магазине Золотое Яблоко.",
-    site: "https://goldapple.ru",
-    activeBloggers: 16,
-  },
-  "litres": {
-    id: 100009,
-    slug: "litres",
-    name: "Литрес",
-    logo: "https://favicon.yandex.net/favicon/v2/litres.ru?size=120",
-    category: "Онлайн-образование",
-    categorySlug: "onlayn-obrazovanie",
-    about: "«Литрес» — крупнейший сервис электронных и аудиокниг в России и странах СНГ.",
-    conditions: "Промокоды активируются в личном кабинете или в корзине на сайте litres.ru.",
-    site: "https://litres.ru",
-    activeBloggers: 19,
-  },
-  "tehnopark": {
-    id: 100010,
-    slug: "tehnopark",
-    name: "Технопарк",
-    logo: "https://favicon.yandex.net/favicon/v2/tehnopark.ru?size=120",
-    category: "Электроника и техника",
-    categorySlug: "elektronika-i-tehnika",
-    about: "«Технопарк» — сеть магазинов премиальной электроники, бытовой техники и инновационных гаджетов.",
-    conditions: "Промокод вводится на этапе оформления заказа в интернет-магазине Технопарк.",
-    site: "https://tehnopark.ru",
-    activeBloggers: 11,
-  },
-  "librederm": {
-    id: 100011,
-    slug: "librederm",
-    name: "Либридерм",
-    logo: "https://favicon.yandex.net/favicon/v2/librederm.ru?size=120",
-    category: "Косметика и парфюмерия",
-    categorySlug: "kosmetika-i-parfyumeriya",
-    about: "«Либридерм» (LIBREDERM) — дерматологическая и аптечная косметика международного качества.",
-    conditions: "Скидка по промокоду действует в официальном интернет-магазине librederm.ru.",
-    site: "https://librederm.ru",
-    activeBloggers: 13,
-  },
-  "detskie-platezhnye-aksessuary-ot-sbera": {
-    id: 4025,
-    slug: "detskie-platezhnye-aksessuary-ot-sbera",
-    name: "Детские платёжные аксессуары от Сбера",
-    logo: "https://favicon.yandex.net/favicon/v2/sberbank.ru?size=120",
-    category: "Сервисы и подписки",
-    categorySlug: "servisy-i-podpiski",
-    about: "«Детские платёжные аксессуары от Сбера» — платёжные стикеры и брелоки для детей и подростков, позволяющие удобно и безопасно оплачивать покупки картой Сбера.",
-    conditions: "Условия и тарифы обслуживания платёжных аксессуаров определяются ПАО Сбербанк.",
-    site: "https://www.sberbank.com/ru",
-    activeBloggers: 291,
-  },
-  "yandeks-lavka": {
-    id: 354,
-    slug: "yandeks-lavka",
-    name: "Яндекс Лавка",
-    logo: "https://favicon.yandex.net/favicon/v2/lavka.yandex?size=120",
-    category: "Доставка продуктов",
-    categorySlug: "dostavka-produktov",
-    about: "«Яндекс Лавка» — сервис быстрой доставки продуктов питания, готовой еды и товаров для дома от 15 минут.",
-    conditions: "Скидки по промокодам применяются при оформлении заказа в приложении и на сайте Яндекс Лавки.",
-    site: "https://lavka.yandex",
-    activeBloggers: 120,
-  },
-  "iv-roshe": {
-    id: 2993,
-    slug: "iv-roshe",
-    name: "Ив Роше",
-    logo: "https://favicon.yandex.net/favicon/v2/yves-rocher.ru?size=120",
-    category: "Косметика и парфюмерия",
-    categorySlug: "kosmetika-i-parfyumeriya",
-    about: "«Ив Роше» (Yves Rocher) — французская растительная косметика и парфюмерия на основе натуральных ингредиентов.",
-    conditions: "Промокоды на скидку и подарки вводятся в корзине официального интернет-магазина Ив Роше.",
-    site: "https://www.yves-rocher.ru",
-    activeBloggers: 65,
-  },
-};
+export const CORE_FALLBACK_STORES = STABLE_STORES;
 
 export async function getAllStores(): Promise<StoreInfo[]> {
   const list = await getCachedMergedCoupons();
@@ -958,16 +767,16 @@ export async function getAllStores(): Promise<StoreInfo[]> {
     }
   }
 
-  // Гарантируем, что ключевые высокочастотные магазины не дают 404 при временном окончании купонов
-  for (const [slug, meta] of Object.entries(CORE_FALLBACK_STORES)) {
+  // Гарантируем, что бренды из стабильного реестра (включая цели внутренних ссылок статей) не дают 404 при временном окончании купонов
+  for (const [slug, meta] of Object.entries(STABLE_STORES)) {
     if (!map.has(slug)) {
       map.set(slug, {
-        id: meta.id!,
+        id: meta.id,
         slug,
-        name: meta.name!,
+        name: meta.name,
         logo: meta.logo || null,
-        category: meta.category!,
-        categorySlug: meta.categorySlug!,
+        category: meta.category,
+        categorySlug: meta.categorySlug,
         about: meta.about || null,
         conditions: meta.conditions || null,
         site: meta.site || `https://${slug}.ru`,
