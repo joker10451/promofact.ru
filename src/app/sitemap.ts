@@ -40,17 +40,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Магазины: для магазинов с живыми промокодами lastModified привязан к синхронизации каталога.
-  // Для магазинов без актуальных акций lastModified не выдумывается (опускается).
-  const storeMap: MetadataRoute.Sitemap = stores.map((store) => {
-    const hasLiveCoupons = Array.isArray(store.coupons) && store.coupons.length > 0;
-    return {
+  // Магазины: в sitemap включаются ТОЛЬКО страницы с живыми промокодами (store.coupons.length > 0).
+  // Магазины с 0 активных предложений исключаются из XML sitemap (для них действует robots: noindex, follow).
+  const storeMap: MetadataRoute.Sitemap = stores
+    .filter((store) => Array.isArray(store.coupons) && store.coupons.length > 0)
+    .map((store) => ({
       url: `${SITE_URL}/store/${store.slug}`,
-      ...(hasLiveCoupons && CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
-      changeFrequency: hasLiveCoupons ? ("daily" as const) : ("weekly" as const),
-      priority: hasLiveCoupons ? 0.9 : 0.7,
-    };
-  });
+      ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    }));
 
   // Категории: дата синхронизации только если в категории есть живые промокоды.
   // Дедуплицируем по каноническому slug (canonicalCategorySlug), исключая алиасы из sitemap.
