@@ -13,7 +13,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   getAdmitadConfig,
-  validateWebsite,
+  resolveWebsite,
   getConnectedPrograms,
   getWebsiteCoupons,
   mapApiCouponToRaw,
@@ -21,6 +21,7 @@ import {
   evaluateQualityGate,
   evaluateLegalGate,
   calculateCandidateScore,
+  REQUIRED_ADMITAD_SCOPES,
 } from "../src/lib/admitadApi.ts";
 import { normalizeAdmitadCoupon, validateOffer } from "../src/lib/admitadNormalizer.ts";
 import { getCoupons } from "../src/lib/perfluence.ts";
@@ -68,29 +69,54 @@ async function main() {
   if (!config) {
     console.log("🚨 ADMITAD CREDENTIALS REQUIRED");
     console.log("Для выполнения live dry-run необходимо настроить переменные окружения:");
-    console.log("  - ADMITAD_API_TOKEN (Bearer токен Publisher API)");
-    console.log("  - ADMITAD_WEBSITE_ID (ID площадки в Admitad)");
+    console.log("  Required:");
+    console.log("    - ADMITAD_CLIENT_ID (OAuth2 Client ID)");
+    console.log("    - ADMITAD_CLIENT_SECRET (OAuth2 Client Secret)");
+    console.log("  Optional:");
+    console.log("    - ADMITAD_WEBSITE_ID (ID площадки в Admitad)");
+    console.log("    - ADMITAD_WEBSITE_HOST (Хост для автоопределения, по умолчанию promofact.ru)");
     console.log("\nLive validation остановлена в соответствии с политикой безопасности.");
     console.log("================================================================================");
     process.exit(0);
   }
 
-  console.log("✓ Конфигурация API: НАЙДЕНА (ADMITAD_API_TOKEN configured: YES)");
-  console.log(`✓ Проверка площадки (Website ID: ${config.websiteId})...`);
+  console.log("✓ OAuth credentials configured: YES");
+  console.log("✓ Проверка и определение площадки PromoFact...");
 
-  let website;
+  let resolutionResult;
   try {
-    website = await validateWebsite(config.websiteId, config.apiToken);
-    console.log(`✓ Площадка подтверждена: «${website.name}» (status: ${website.status})`);
+    resolutionResult = await resolveWebsite(config);
   } catch (err) {
-    console.error(`❌ Ошибка проверки площадки ID ${config.websiteId}:`, err.message);
+    console.error("❌ Ошибка определения площадки:", err.message);
     process.exit(1);
+  }
+
+  if (
+    resolutionResult.resolution === "NOT_FOUND" ||
+    resolutionResult.resolution === "AMBIGUOUS" ||
+    !resolutionResult.website
+  ) {
+    console.error(
+      `❌ Ошибка определения площадки (${resolutionResult.resolution}):`,
+      resolutionResult.error
+    );
+    process.exit(1);
+  }
+
+  const website = resolutionResult.website;
+  console.log(
+    `✓ Площадка определена (${resolutionResult.resolution}): «${website.name}» (ID: ${website.id}, status: ${website.status}, site_url: ${website.site_url || "—"})`
+  );
+  if (website.status !== "active") {
+    console.warn(
+      `⚠️ ВНИМАНИЕ: Статус площадки не active («${website.status}»).`
+    );
   }
 
   console.log("\n[1/4] Загрузка подключенных программ площадки...");
   let campaigns = [];
   try {
-    campaigns = await getConnectedPrograms(config.websiteId, config.apiToken);
+    campaigns = await getConnectedPrograms(website.id);
     console.log(`✓ Загружено партнерских программ: ${campaigns.length}`);
   } catch (err) {
     console.error("❌ Ошибка загрузки программ:", err.message);
@@ -102,7 +128,7 @@ async function main() {
   console.log("\n[2/4] Загрузка доступных купонов и акций площадки...");
   let rawCoupons = [];
   try {
-    rawCoupons = await getWebsiteCoupons(config.websiteId, config.apiToken);
+    rawCoupons = await getWebsiteCoupons(website.id);
     console.log(`✓ Загружено купонов из API: ${rawCoupons.length}`);
   } catch (err) {
     console.error("❌ Ошибка загрузки купонов:", err.message);
@@ -252,9 +278,13 @@ async function main() {
     `*Дата генерации: ${new Date().toISOString()}*`,
     "",
     "## A. API Summary",
-    `- **Website ID**: ${config.websiteId} («${website.name}», ${website.status})`,
+    `- **AUTH METHOD**: OAuth2 client_credentials`,
+    `- **AUTH**: configured YES`,
+    `- **TOKEN**: acquired YES`,
+    `- **SCOPES**: ${REQUIRED_ADMITAD_SCOPES}`,
+    `- **WEBSITE RESOLUTION**: ${resolutionResult.resolution}`,
+    `- **WEBSITE**: id: ${website.id}, name: «${website.name}», status: ${website.status}, site_url: ${website.site_url || "—"}`,
     `- **API Endpoint**: https://api.admitad.com`,
-    `- **Auth**: Bearer Token (ADMITAD_API_TOKEN)`,
     `- **Read-only Mode**: Активен (Supabase и catalog не затрагивались)`,
     "",
     "## B. Campaigns",

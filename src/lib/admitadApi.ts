@@ -18,17 +18,155 @@ import type {
 import { STABLE_STORES } from "@/lib/stableStores";
 
 export interface AdmitadConfig {
-  apiToken: string;
-  websiteId: string;
+  clientId: string;
+  clientSecret: string;
+  websiteId?: string;
+  websiteHost?: string;
 }
 
 export function getAdmitadConfig(): AdmitadConfig | null {
-  const apiToken = process.env.ADMITAD_API_TOKEN?.trim() || "";
-  const websiteId = process.env.ADMITAD_WEBSITE_ID?.trim() || "";
-  if (!apiToken || !websiteId) {
+  const clientId = process.env.ADMITAD_CLIENT_ID?.trim() || "";
+  const clientSecret = process.env.ADMITAD_CLIENT_SECRET?.trim() || "";
+  if (!clientId || !clientSecret) {
     return null;
   }
-  return { apiToken, websiteId };
+  const websiteId = process.env.ADMITAD_WEBSITE_ID?.trim() || undefined;
+  const websiteHost = process.env.ADMITAD_WEBSITE_HOST?.trim() || "promofact.ru";
+  return { clientId, clientSecret, websiteId, websiteHost };
+}
+
+export const REQUIRED_ADMITAD_SCOPES = "websites advcampaigns_for_website coupons_for_website";
+
+export type AdmitadErrorCode =
+  | "AUTH_CONFIG_MISSING"
+  | "TOKEN_REQUEST_FAILED"
+  | "TOKEN_SCOPE_DENIED"
+  | "WEBSITE_NOT_FOUND"
+  | "WEBSITE_AMBIGUOUS"
+  | "WEBSITE_ACCESS_DENIED"
+  | "API_RATE_LIMITED";
+
+export interface AdmitadTokenResponse {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+  scope: string;
+  refresh_token?: string;
+}
+
+export interface AdmitadAccessToken {
+  accessToken: string;
+  expiresIn: number;
+  scope: string;
+  tokenType: string;
+}
+
+let tokenCache: {
+  accessToken: string;
+  expiresAt: number;
+} | null = null;
+
+export function clearTokenCache(): void {
+  tokenCache = null;
+}
+
+export function getTokenCache(): { accessToken: string; expiresAt: number } | null {
+  return tokenCache;
+}
+
+/**
+ * Получение OAuth 2.0 Client Credentials токена доступа Admitad
+ * Никогда не логирует clientId, clientSecret или полученный токен.
+ */
+export async function getAdmitadAccessToken(
+  clientId: string,
+  clientSecret: string,
+  options: { customFetch?: typeof fetch; scopes?: string } = {}
+): Promise<AdmitadAccessToken> {
+  const fetchFn = options.customFetch ?? globalThis.fetch;
+  const scopes = options.scopes ?? REQUIRED_ADMITAD_SCOPES;
+  const tokenUrl = "https://api.admitad.com/token/";
+
+  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+  const bodyParams = new URLSearchParams();
+  bodyParams.set("grant_type", "client_credentials");
+  bodyParams.set("client_id", clientId);
+  bodyParams.set("scope", scopes);
+
+  const res = await fetchFn(tokenUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${basicAuth}`,
+      Accept: "application/json",
+    },
+    body: bodyParams.toString(),
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    let errBody: unknown = null;
+    try {
+      errBody = await res.json();
+    } catch {}
+    throw new AdmitadApiError(
+      "Ошибка аутентификации Admitad OAuth: неверные client_id или client_secret",
+      res.status,
+      "TOKEN_REQUEST_FAILED",
+      errBody
+    );
+  }
+
+  if (!res.ok) {
+    let errBody: unknown = null;
+    try {
+      errBody = await res.json();
+    } catch {}
+    throw new AdmitadApiError(
+      `Ошибка получения access_token (${res.status}): ${res.statusText}`,
+      res.status,
+      "TOKEN_REQUEST_FAILED",
+      errBody
+    );
+  }
+
+  const data = (await res.json()) as AdmitadTokenResponse;
+
+  return {
+    accessToken: data.access_token,
+    expiresIn: data.expires_in,
+    scope: data.scope,
+    tokenType: data.token_type,
+  };
+}
+
+/**
+ * Получение валидного токена доступа с использованием in-memory кэша (> 60 сек до expiry)
+ */
+export async function getValidAccessToken(
+  options: { customFetch?: typeof fetch } = {}
+): Promise<string> {
+  const now = Date.now();
+  if (tokenCache && tokenCache.expiresAt - now > 60000) {
+    return tokenCache.accessToken;
+  }
+
+  const config = getAdmitadConfig();
+  if (!config) {
+    throw new AdmitadApiError(
+      "Отсутствуют OAuth credentials (ADMITAD_CLIENT_ID / ADMITAD_CLIENT_SECRET)",
+      401,
+      "AUTH_CONFIG_MISSING"
+    );
+  }
+
+  const tokenData = await getAdmitadAccessToken(config.clientId, config.clientSecret, options);
+  tokenCache = {
+    accessToken: tokenData.accessToken,
+    expiresAt: Date.now() + tokenData.expiresIn * 1000,
+  };
+
+  return tokenCache.accessToken;
 }
 
 export interface AdmitadPaginatedMeta {
@@ -123,28 +261,33 @@ export interface FetchOptions extends RequestInit {
 
 export class AdmitadApiError extends Error {
   statusCode: number;
+  code?: AdmitadErrorCode;
   details?: unknown;
 
   constructor(
     message: string,
     statusCode: number,
+    code?: AdmitadErrorCode,
     details?: unknown
   ) {
     super(message);
     this.name = "AdmitadApiError";
     this.statusCode = statusCode;
+    this.code = code;
     this.details = details;
   }
 }
 
 /**
- * Базовый сетевой клиент Admitad с Bearer-авторизацией, таймаутом и безопасным retry
+ * Базовый сетевой клиент Admitad с автоматической OAuth 2.0 Bearer-авторизацией,
+ * таймаутом, безопасным retry и повтором при 401 с инвалидацией токена (ровно 1 раз).
  */
 export async function admitadFetch<T>(
   endpoint: string,
-  token: string,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
+  isRetryAfterAuth = false
 ): Promise<T> {
+  const token = await getValidAccessToken({ customFetch: options.customFetch });
   const baseUrl = "https://api.admitad.com";
   const url = endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
   const timeoutMs = options.timeoutMs ?? 15000;
@@ -172,17 +315,24 @@ export async function admitadFetch<T>(
 
       clearTimeout(timeoutId);
 
-      // 401 / 403: Ошибка авторизации — НЕ ретраим
+      // При API 401: очистить кэш токена, получить новый токен и повторить запрос ОДИН раз
       if (res.status === 401) {
+        clearTokenCache();
+        if (!isRetryAfterAuth) {
+          return await admitadFetch<T>(endpoint, options, true);
+        }
         throw new AdmitadApiError(
-          "Ошибка авторизации Admitad API: неверный или просроченный ADMITAD_API_TOKEN",
-          401
+          "Ошибка авторизации Admitad API (401): доступ запрещен после повторной попытки получения токена",
+          401,
+          "TOKEN_REQUEST_FAILED"
         );
       }
+
       if (res.status === 403) {
         throw new AdmitadApiError(
           "Доступ запрещен (403): токен не имеет прав на данный endpoint или площадку",
-          403
+          403,
+          "WEBSITE_ACCESS_DENIED"
         );
       }
       if (res.status === 400 || res.status === 404) {
@@ -190,9 +340,11 @@ export async function admitadFetch<T>(
         try {
           errJson = await res.json();
         } catch {}
+        const code: AdmitadErrorCode = res.status === 404 ? "WEBSITE_NOT_FOUND" : "TOKEN_REQUEST_FAILED";
         throw new AdmitadApiError(
           `Ошибка запроса Admitad API (${res.status}): ${res.statusText}`,
           res.status,
+          code,
           errJson
         );
       }
@@ -208,7 +360,8 @@ export async function admitadFetch<T>(
         }
         throw new AdmitadApiError(
           `Сервер Admitad вернул статус ${res.status} после ${maxRetries} повторов`,
-          res.status
+          res.status,
+          res.status === 429 ? "API_RATE_LIMITED" : undefined
         );
       }
 
@@ -244,7 +397,6 @@ export async function admitadFetch<T>(
  */
 export async function fetchAllPages<T>(
   endpoint: string,
-  token: string,
   queryParams: Record<string, string | number | boolean> = {},
   options: FetchOptions = {},
   pageSize = 100,
@@ -266,7 +418,7 @@ export async function fetchAllPages<T>(
     const separator = endpoint.includes("?") ? "&" : "?";
     const fullPath = `${endpoint}${separator}${params.toString()}`;
 
-    const resp = await admitadFetch<AdmitadPaginatedResponse<T>>(fullPath, token, options);
+    const resp = await admitadFetch<AdmitadPaginatedResponse<T>>(fullPath, options);
     const results = resp.results || [];
     allResults.push(...results);
 
@@ -287,10 +439,123 @@ export async function fetchAllPages<T>(
  */
 export async function validateWebsite(
   websiteId: string,
-  token: string,
   options: FetchOptions = {}
 ): Promise<AdmitadApiWebsite> {
-  return await admitadFetch<AdmitadApiWebsite>(`/websites/v2/${websiteId}/`, token, options);
+  return await admitadFetch<AdmitadApiWebsite>(`/websites/v2/${websiteId}/`, options);
+}
+
+/**
+ * Получение всех площадок аккаунта
+ * Endpoint: GET /websites/v2/
+ */
+export async function getWebsites(
+  options: FetchOptions = {}
+): Promise<AdmitadApiWebsite[]> {
+  return await fetchAllPages<AdmitadApiWebsite>("/websites/v2/", {}, options);
+}
+
+export type WebsiteResolutionType = "EXPLICIT" | "AUTO_HOST" | "NOT_FOUND" | "AMBIGUOUS";
+
+export interface WebsiteResolutionResult {
+  resolution: WebsiteResolutionType;
+  website: AdmitadApiWebsite | null;
+  error?: string;
+  matchedCount?: number;
+}
+
+/**
+ * Нормализация хоста для надежного сравнения (promofact.ru === www.promofact.ru)
+ */
+export function normalizeWebsiteHost(inputUrlOrHost: string): string {
+  let host = inputUrlOrHost.trim().toLowerCase();
+  try {
+    if (host.includes("://")) {
+      host = new URL(host).hostname.toLowerCase();
+    } else {
+      host = host.split("/")[0].split(":")[0];
+    }
+  } catch {}
+  return host.replace(/^www\./, "");
+}
+
+/**
+ * Автоопределение площадки PromoFact
+ * 1. Если задан explicit ID — валидируем через /websites/v2/{id}/
+ * 2. Если ID не задан — получаем /websites/v2/ и ищем по host (default: promofact.ru)
+ */
+export async function resolveWebsite(
+  config: AdmitadConfig,
+  options: FetchOptions = {}
+): Promise<WebsiteResolutionResult> {
+  if (config.websiteId) {
+    try {
+      const site = await validateWebsite(config.websiteId, options);
+      return {
+        resolution: "EXPLICIT",
+        website: site,
+      };
+    } catch (err) {
+      if (err instanceof AdmitadApiError && err.statusCode === 404) {
+        return {
+          resolution: "NOT_FOUND",
+          website: null,
+          error: `Площадка с ID ${config.websiteId} не найдена в аккаунте (404)`,
+        };
+      }
+      throw err;
+    }
+  }
+
+  // Auto discovery по host
+  const targetHost = normalizeWebsiteHost(config.websiteHost || "promofact.ru");
+  const allSites = await getWebsites(options);
+
+  if (!allSites || allSites.length === 0) {
+    return {
+      resolution: "NOT_FOUND",
+      website: null,
+      error: "В аккаунте Admitad не найдено ни одной площадки",
+      matchedCount: 0,
+    };
+  }
+
+  // 1. Exact site_url hostname match
+  let matches = allSites.filter((s) => {
+    if (!s.site_url) return false;
+    const h = normalizeWebsiteHost(s.site_url);
+    return h === targetHost;
+  });
+
+  // 2. Если не найден по site_url, проверяем name contains PromoFact (только если ищем promofact.ru)
+  if (matches.length === 0 && targetHost === "promofact.ru") {
+    matches = allSites.filter((s) =>
+      (s.name || "").toLowerCase().includes("promofact")
+    );
+  }
+
+  if (matches.length === 1) {
+    return {
+      resolution: "AUTO_HOST",
+      website: matches[0],
+      matchedCount: 1,
+    };
+  }
+
+  if (matches.length > 1) {
+    return {
+      resolution: "AMBIGUOUS",
+      website: null,
+      error: `Найдено ${matches.length} площадок, соответствующих host "${targetHost}". Укажите ADMITAD_WEBSITE_ID явно.`,
+      matchedCount: matches.length,
+    };
+  }
+
+  return {
+    resolution: "NOT_FOUND",
+    website: null,
+    error: `Площадка с хостом "${targetHost}" не найдена среди ${allSites.length} площадок аккаунта.`,
+    matchedCount: 0,
+  };
 }
 
 /**
@@ -298,12 +563,10 @@ export async function validateWebsite(
  */
 export async function getConnectedPrograms(
   websiteId: string,
-  token: string,
   options: FetchOptions = {}
 ): Promise<AdmitadApiCampaign[]> {
   return await fetchAllPages<AdmitadApiCampaign>(
     `/advcampaigns/website/${websiteId}/`,
-    token,
     {},
     options
   );
@@ -314,13 +577,11 @@ export async function getConnectedPrograms(
  */
 export async function getWebsiteCoupons(
   websiteId: string,
-  token: string,
   filters: Record<string, string | number | boolean> = {},
   options: FetchOptions = {}
 ): Promise<AdmitadApiCoupon[]> {
   return await fetchAllPages<AdmitadApiCoupon>(
     `/coupons/website/${websiteId}/`,
-    token,
     filters,
     options
   );
