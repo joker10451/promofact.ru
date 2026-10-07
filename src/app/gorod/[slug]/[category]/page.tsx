@@ -221,6 +221,7 @@ export default async function CityCategoryPage({
             <CouponTicket
               key={`${coupon.id}-${coupon.promocode.code}`}
               coupon={coupon}
+              placement="geo_category_coupon"
               proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
               storeProofCount={uses.usesByStore.get(coupon.store.id) ?? 0}
             />

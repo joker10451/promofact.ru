@@ -492,6 +492,7 @@ export default function CouponGrid({
                       {/* Главная карточка с лучшим предложением */}
                       <CouponTicket
                         coupon={primaryCoupon}
+                        placement="home_catalog"
                         proofCount={proofsByCode?.[primaryCoupon.promocode.code] ?? 0}
                         storeProofCount={proofsByStore?.[store.id] ?? 0}
                       />
@@ -525,6 +526,7 @@ export default function CouponGrid({
                                 <CouponTicket
                                   key={`${c.id}-${c.promocode.code}`}
                                   coupon={c}
+                                  placement="home_catalog"
                                   proofCount={proofsByCode?.[c.promocode.code] ?? 0}
                                   storeProofCount={proofsByStore?.[store.id] ?? 0}
                                 />

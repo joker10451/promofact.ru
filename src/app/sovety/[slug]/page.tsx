@@ -211,6 +211,7 @@ export default async function ArticlePage({
                       </div>
                       <CouponTicket
                         coupon={relevantCoupons[0]}
+                        placement="article_coupon"
                         proofCount={uses.usesByCode.get(relevantCoupons[0].promocode.code) ?? 0}
                         storeProofCount={uses.usesByStore.get(relevantCoupons[0].store.id) ?? 0}
                       />
@@ -287,6 +288,7 @@ export default async function ArticlePage({
                     <CouponTicket
                       key={c.id}
                       coupon={c}
+                      placement="article_coupon"
                       proofCount={uses.usesByCode.get(c.promocode.code) ?? 0}
                       storeProofCount={uses.usesByStore.get(c.store.id) ?? 0}
                     />

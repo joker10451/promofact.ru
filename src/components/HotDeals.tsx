@@ -37,7 +37,7 @@ export default function HotDeals({ coupons }: { coupons: CatalogCoupon[] }) {
         {/* 3 уникальные карточки */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {hotCoupons.map((coupon) => (
-            <CouponTicket key={coupon.id} coupon={coupon} />
+            <CouponTicket key={coupon.id} coupon={coupon} placement="home_hot_deals" />
           ))}
         </div>
       </div>

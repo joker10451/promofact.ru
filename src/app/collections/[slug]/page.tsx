@@ -219,6 +219,7 @@ export default async function CollectionPage({
             <CouponTicket
               key={`${coupon.id}-${coupon.promocode.code}`}
               coupon={coupon}
+              placement="collection_coupon"
               proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
               storeProofCount={uses.usesByStore.get(coupon.store.id) ?? 0}
             />

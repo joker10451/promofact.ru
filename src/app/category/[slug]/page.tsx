@@ -305,6 +305,7 @@ export default async function CategoryPage({
             <CouponTicket
               key={`${coupon.id}-${coupon.promocode.code}`}
               coupon={coupon}
+              placement="category_coupon"
               proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
               storeProofCount={uses.usesByStore.get(coupon.store.id) ?? 0}
             />
