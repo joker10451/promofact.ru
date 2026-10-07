@@ -1,8 +1,8 @@
 name: Admitad Feed Import
 
 on:
-  schedule:
-    - cron: '0 */6 * * *' # каждые 6 часов: фид Admitad меняется разы в день
+  # Scheduled run disabled: Admitad feed is not used in production promofact.ru catalog.
+  # Can still be manually triggered via Actions UI if needed.
   workflow_dispatch: # ручной запуск
 
 jobs:

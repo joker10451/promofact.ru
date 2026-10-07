@@ -21,6 +21,11 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
     category: "Маркетплейсы",
     categorySlug: "marketpleysy",
   },
+  "tutu": {
+    name: "Туту",
+    category: "Путешествия и туризм",
+    categorySlug: "puteshestviya-i-turizm",
+  },
   "detskie-platezhnye-aksessuary-ot-sbera": {
     name: "Детские платёжные аксессуары от Сбера",
     category: "Сервисы и подписки",

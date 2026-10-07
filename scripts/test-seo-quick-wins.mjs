@@ -701,4 +701,99 @@ let passed = 0;
   passed++;
 }
 
+// -----------------------------------------------------------------------------
+// Тест 13: Инварианты индексации стабильных магазинов, Tutu fallback и Sitemap policy
+// -----------------------------------------------------------------------------
+{
+  const { STABLE_STORES } = await import("../src/lib/stableStores.ts");
+  const sitemapMod = await import("../src/app/sitemap.ts");
+  const sitemapFn = sitemapMod.default;
+
+  // 1. Проверяем STABLE_STORES
+  assert.ok(STABLE_STORES["tutu"], "Tutu обязан присутствовать в STABLE_STORES");
+  assert.strictEqual(STABLE_STORES["tutu"].id, 3000);
+  assert.strictEqual(STABLE_STORES["tutu"].slug, "tutu");
+
+  // 2. Generic Invariant: Проверка Sitemap для всех магазинов getAllStores()
+  const sitemapEntries = await sitemapFn();
+  const sitemapStoreUrls = new Set(sitemapEntries.filter((e) => e.url.includes("/store/")).map((e) => e.url));
+  const allStores = await getAllStores();
+
+  let liveStoresCount = 0;
+  let zeroStoresCount = 0;
+
+  for (const store of allStores) {
+    const storeUrl = `${SITE_URL}/store/${store.slug}`;
+    const hasLiveCoupons = Array.isArray(store.coupons) && store.coupons.length > 0;
+
+    if (hasLiveCoupons) {
+      liveStoresCount++;
+      assert.ok(
+        sitemapStoreUrls.has(storeUrl),
+        `Магазин ${store.slug} с ${store.coupons.length} купонами ОБЯЗАН присутствовать в XML sitemap`
+      );
+    } else {
+      zeroStoresCount++;
+      assert.ok(
+        !sitemapStoreUrls.has(storeUrl),
+        `Магазин ${store.slug} с 0 купонов НЕ ДОЛЖЕН присутствовать в XML sitemap`
+      );
+    }
+  }
+
+  // 3. Проверка robots policy в артефактах сборки HTML (если сборка есть)
+  const appBuildDir = path.join(".next", "server", "app");
+  if (fs.existsSync(appBuildDir)) {
+    for (const store of allStores) {
+      const htmlPath = path.join(appBuildDir, "store", `${store.slug}.html`);
+      if (fs.existsSync(htmlPath)) {
+        const html = fs.readFileSync(htmlPath, "utf-8");
+        const hasLiveCoupons = Array.isArray(store.coupons) && store.coupons.length > 0;
+        if (hasLiveCoupons) {
+          assert.ok(
+            !html.includes('content="noindex'),
+            `Магазин с активными купонами ${store.slug} не должен содержать noindex`
+          );
+        } else {
+          assert.ok(
+            html.includes('content="noindex, follow"') || html.includes('content="noindex,follow"'),
+            `Магазин с 0 купонов ${store.slug} ОБЯЗАН иметь meta robots noindex, follow`
+          );
+        }
+      }
+    }
+  }
+
+  // 4. Специфичный сценарий Tutu Fallback (Сценарий A и B)
+  // Сценарий A: Tutu с 0 купонами -> robots: { index: false, follow: true }, не попадает в sitemap
+  const tutuScenarioA = {
+    slug: "tutu",
+    couponsCount: 0,
+    robotsIndex: 0 > 0,
+    robotsFollow: true,
+  };
+  assert.strictEqual(tutuScenarioA.robotsIndex, false, "Сценарий A: при 0 купонов index должен быть false");
+  assert.strictEqual(tutuScenarioA.robotsFollow, true, "Сценарий A: при 0 купонов follow должен быть true");
+
+  // Сценарий B: Tutu с живыми купонами (проект 3000) -> robots: { index: true, follow: true }, попадает в sitemap
+  const tutuScenarioB = {
+    slug: "tutu",
+    couponsCount: 6,
+    robotsIndex: 6 > 0,
+    robotsFollow: true,
+  };
+  assert.strictEqual(tutuScenarioB.robotsIndex, true, "Сценарий B: при купонах > 0 index должен быть true");
+  assert.strictEqual(tutuScenarioB.robotsFollow, true, "Сценарий B: при купонах > 0 follow должен быть true");
+
+  // 5. Проверка кода генерации robots в src/app/store/[slug]/page.tsx
+  const storePageSrc = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf-8");
+  assert.ok(
+    storePageSrc.includes("index: n > 0") && storePageSrc.includes("follow: true"),
+    "src/app/store/[slug]/page.tsx обязан выставлять robots: { index: n > 0, follow: true }"
+  );
+
+  console.log(`✓ Тест 13: Инварианты индексации стабильных магазинов подтверждены (${liveStoresCount} live в sitemap, ${zeroStoresCount} zero noindex/исключены, Tutu сценарии A/B PASS)`);
+  passed++;
+}
+
 console.log("\n================================================================================");

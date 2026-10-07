@@ -165,6 +165,10 @@ export async function generateMetadata({
     title,
     description: safeOgDescription,
     alternates: { canonical: pageUrl },
+    robots: {
+      index: n > 0,
+      follow: true,
+    },
     openGraph: og,
     twitter: {
       card: store.logo ? "summary_large_image" : "summary",
