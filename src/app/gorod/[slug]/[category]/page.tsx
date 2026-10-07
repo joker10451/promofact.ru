@@ -66,7 +66,7 @@ export async function generateMetadata({
     "актуальных предложений",
   )} от магазинов-партнёров. Копируй код и экономь уже сегодня.`;
 
-  const isIndexable = list.length > 0;
+  const isIndexable = list.length >= 3;
 
   return {
     title,

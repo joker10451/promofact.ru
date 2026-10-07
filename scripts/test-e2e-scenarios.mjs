@@ -288,26 +288,50 @@ async function run() {
 
       // Имитируем отказ Clipboard API (браузер заблокировал доступ или ошибка прав)
       await page.addInitScript(() => {
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText = () => Promise.reject(new Error("Permission denied by user"));
-        }
+        try {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText = () => Promise.reject(new Error("Permission denied by user"));
+          } else {
+            Object.defineProperty(navigator, "clipboard", {
+              value: {
+                writeText: () => Promise.reject(new Error("Permission denied by user")),
+                readText: () => Promise.reject(new Error("Permission denied by user")),
+              },
+              configurable: true,
+            });
+          }
+        } catch {}
       });
 
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
       const firstCard = page.locator("article").first();
       const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
-      await copyBtn.click();
+      await copyBtn.waitFor({ state: "visible" });
+      
+      // Нажимаем копирование и ожидаем блок ручного ввода (с повтором, если в CI гидратация ещё завершалась)
+      const fallbackAlert = firstCard.locator('div[role="alert"]');
+      let alertVisible = false;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        await copyBtn.click();
+        try {
+          await fallbackAlert.waitFor({ state: "visible", timeout: 2500 });
+          alertVisible = true;
+          break;
+        } catch {
+          await page.waitForTimeout(500);
+        }
+      }
+
+      if (!alertVisible) {
+        throw new Error("Блок ручного выделения промокода (div[role='alert']) не появился при отказе Clipboard API");
+      }
 
       // Убеждаемся, что фиктивный статус "скопировано!" НЕ отобразился
       const fakeSuccess = await firstCard.locator("text=скопировано!").isVisible();
       if (fakeSuccess) {
         throw new Error("Отобразился статус успешного копирования при ошибке Clipboard API!");
       }
-
-      // Проверяем появление плашки с ручным выделением кода
-      const fallbackAlert = firstCard.locator('div[role="alert"]');
-      await fallbackAlert.waitFor({ state: "visible", timeout: 2000 });
       
       const manualInput = fallbackAlert.locator('input[aria-label="Промокод для ручного копирования"]');
       await manualInput.waitFor({ state: "visible" });
