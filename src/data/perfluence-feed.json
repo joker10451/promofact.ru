@@ -3032,9 +3032,9 @@
         {
           "links_for_subscribers": [
             {
-              "id": 18515324,
-              "title": "Оформить заказ со скидкой в приложении Магнит, в разделе Гипермаркет ",
-              "link": "https://mgntgm.prfl.me/sites/xmzf3p?source=js-widget&source_id=8842",
+              "id": 18622882,
+              "title": "Оформить заказ со скидкой в приложении Магнит, в разделе Гипермаркет",
+              "link": "https://mgntgm.prfl.me/sites/ysj43d?erid=2RanymjPYjM",
               "landing_terms": null
             }
           ],
@@ -3042,11 +3042,40 @@
           "promocodes": [
             {
               "project_id": 2582,
+              "code": "Дом",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 31% на каждый заказ от 1700/2500 ₽ в разделе \"Экспресс\"/\"Гипермаркет\" из подборки \"Магнит\"",
+              "date": "13.10.2026 23:59",
+              "group": "13682",
+              "is_hit": true,
+              "is_hiting": false,
+              "hit_custom_text": "Хит",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 13682,
+              "is_universal": true,
+              "name": "Скидка 31% на каждый заказ от 1700/2500 ₽ в разделе \"Экспресс\"/\"Гипермаркет\" из подборки \"Магнит\"",
+              "promo_terms": "<ul><li>Скидка действует на товары из подборки в Магнит Экспресс, Магнит Гипермаркет.</li><li>Предложение не распространяется на товары из раздела «Аптека», на товары с отметкой «Финальная цена» и на Магнит Косметик.</li><li>Максимальная скидка — 2000 ₽</li></ul>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17266711,
+              "ord_marker": "2RanymjPYjM",
+              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475. erid: 2RanymjPYjM",
+              "discount": 31,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17266711&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "13.10.2026 23:59"
+            },
+            {
+              "project_id": 2582,
               "code": "25GFC1TL4",
               "is_barcode": false,
               "image": "",
               "comment": "Скидка 31% на первый заказ от 2000 ₽ в разделе \"Гипермаркет\" для нового пользователя",
-              "date": "31.10.2026",
+              "date": "31.10.2026 23:59",
               "group": "",
               "is_hit": false,
               "is_hiting": false,
@@ -3056,22 +3085,53 @@
               "bonus_id": 15982,
               "is_universal": false,
               "name": "Скидка 31% на первый заказ от 2000 ₽ в разделе \"Гипермаркет\" для нового пользователя",
-              "promo_terms": "<p>Максимальная скидка - 2000 ₽</p>",
+              "promo_terms": "<p>Максимальная скидка — 2000 ₽</p>",
               "region_promo": [
                 "RU"
               ],
               "repeat_order": false,
-              "post_id": 17166808,
-              "ord_marker": "2RanynHqWbV",
-              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475.",
+              "post_id": 17266711,
+              "ord_marker": "2RanymjPYjM",
+              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475. erid: 2RanymjPYjM",
               "discount": 31,
               "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17166808&widget_id=8842&user_id=861964&source=js-widget"
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17266711&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "31.10.2026 23:59"
+            },
+            {
+              "project_id": 2582,
+              "code": "SGPFB7JJGY",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 26% при заказе от 2000 ₽ в разделе \"Гипермаркет\" при самовывозе",
+              "date": "31.10.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 16870,
+              "is_universal": false,
+              "name": "Скидка 26% при заказе от 2000 ₽ в разделе \"Гипермаркет\" при самовывозе",
+              "promo_terms": "<ul><li>Максимальная сумма скидки 2000 ₽</li></ul>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17266711,
+              "ord_marker": "2RanymjPYjM",
+              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475. erid: 2RanymjPYjM",
+              "discount": 26,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17266711&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "31.10.2026 23:59"
             }
           ],
           "has_widget_subscribers_promo": false,
           "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
+          "widget_subscriber_codes": [],
+          "ord_marker": "2RanymjPYjM"
         }
       ]
     },
