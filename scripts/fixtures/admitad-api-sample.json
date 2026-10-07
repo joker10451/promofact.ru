@@ -1,0 +1,105 @@
+{
+  "website": {
+    "id": 12345,
+    "name": "PromoFact Platform",
+    "status": "active",
+    "site_url": "https://promofact.ru",
+    "kind": "website",
+    "regions": ["RU"],
+    "categories": [{ "id": 1, "name": "Интернет-магазины" }]
+  },
+  "campaigns": [
+    {
+      "id": 812,
+      "name": "PREMIER",
+      "site_url": "https://premier.one",
+      "status": "active",
+      "connection_status": "active",
+      "currency": "RUB",
+      "advertiser_info": {
+        "name": "ООО «ПРЕМЬЕР»",
+        "inn": "9702011190"
+      }
+    },
+    {
+      "id": 3000,
+      "name": "Туту",
+      "site_url": "https://tutu.ru",
+      "status": "active",
+      "connection_status": "active",
+      "currency": "RUB",
+      "advertiser_info": {
+        "name": "ООО «НТТ»",
+        "inn": "7724929270"
+      }
+    },
+    {
+      "id": 99999,
+      "name": "Unknown Global Shop",
+      "site_url": "https://unknown-shop-us.com",
+      "status": "active",
+      "connection_status": "active",
+      "currency": "USD"
+    }
+  ],
+  "coupons": [
+    {
+      "id": 101,
+      "name": "Скидка 20% на билеты Туту",
+      "short_name": "Скидка 20%",
+      "promocode": "TUTU20",
+      "discount": "20%",
+      "status": "active",
+      "species": "promocode",
+      "date_start": "2026-10-01T00:00:00",
+      "date_end": "2026-12-31T23:59:59",
+      "goto_link": "https://ad.admitad.com/g/tutu/?erid=2RanyTestEridTutu",
+      "description": "Скидка 20% на бронирование отелей и билетов",
+      "regions": ["RU"],
+      "language": "ru",
+      "campaign": {
+        "id": 3000,
+        "name": "Туту",
+        "site_url": "https://tutu.ru"
+      }
+    },
+    {
+      "id": 102,
+      "name": "Истёкшая акция PREMIER",
+      "promocode": "EXPIRED50",
+      "discount": "50%",
+      "status": "active",
+      "species": "promocode",
+      "date_start": "2026-08-01T00:00:00",
+      "date_end": "2026-09-01T23:59:59",
+      "goto_link": "https://ad.admitad.com/g/premier/?erid=2RanymTestEridOld",
+      "description": "Истекший промокод",
+      "regions": ["RU"],
+      "language": "ru",
+      "campaign": {
+        "id": 812,
+        "name": "PREMIER",
+        "site_url": "https://premier.one"
+      }
+    },
+    {
+      "id": 103,
+      "name": "Оффер без ERID и рекламодателя",
+      "promocode": "NOERID10",
+      "discount": "10%",
+      "status": "active",
+      "species": "promocode",
+      "date_start": "2026-10-01T00:00:00",
+      "date_end": "2026-12-31T23:59:59",
+      "goto_link": "https://ad.admitad.com/g/unknown/",
+      "description": "Иностранный магазин без маркировки",
+      "regions": ["US"],
+      "language": "en",
+      "campaign": {
+        "id": 99999,
+        "name": "Unknown Global Shop",
+        "site_url": "https://unknown-shop-us.com"
+      }
+    }
+  ]
+}

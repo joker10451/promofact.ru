@@ -68,6 +68,10 @@ scripts/post-*.mjs
 /audit-screenshots/
 /INDEX_HYGIENE_AUDIT.md
 /promofact.ru_*.csv
+# Локальные отчеты аудита и интеграций
+ADMITAD_API_DRY_RUN_REPORT.md
+REVENUE_ATTRIBUTION_AUDIT.md
+REVENUE_ATTRIBUTION_DATA.csv
 # Локальная конфигурация запуска дев-сервера
 /.claude/
 .youtube-token.json
