@@ -6,6 +6,7 @@
  * - НИКАКИХ изменений производственного каталога getCoupons().
  * - Не логирует API токен и персональные данные.
  * - При отсутствии env-переменных останавливается с сообщением ADMITAD CREDENTIALS REQUIRED.
+ * - Поддерживает загрузку .env.local без перезаписи существующих process.env.
  */
 
 import fs from "node:fs";
@@ -25,10 +26,42 @@ import { normalizeAdmitadCoupon, validateOffer } from "../src/lib/admitadNormali
 import { getCoupons } from "../src/lib/perfluence.ts";
 import { normalizeCode } from "../src/lib/dedupe.ts";
 
+/**
+ * Безопасная загрузка .env.local без сторонних зависимостей
+ * Приоритет: already-set process.env > .env.local
+ */
+export function loadEnvLocalSafe(filePath = ".env.local") {
+  const envLocalPath = path.resolve(filePath);
+  if (!fs.existsSync(envLocalPath)) return;
+  try {
+    const content = fs.readFileSync(envLocalPath, "utf-8");
+    for (const rawLine of content.split("\n")) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith("#")) continue;
+      const eqIdx = line.indexOf("=");
+      if (eqIdx === -1) continue;
+      const key = line.slice(0, eqIdx).trim();
+      let val = line.slice(eqIdx + 1).trim();
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
+        val = val.slice(1, -1);
+      }
+      if (!process.env[key] && val) {
+        process.env[key] = val;
+      }
+    }
+  } catch {}
+}
+
 async function main() {
   console.log("================================================================================");
   console.log("🚀 ЗАПУСК ADMITAD PUBLISHER API DRY-RUN (READ-ONLY FOUNDATION)");
   console.log("================================================================================\n");
+
+  // Загружаем .env.local, если существует (не перезаписывая установленные env)
+  loadEnvLocalSafe();
 
   const config = getAdmitadConfig();
 
@@ -114,7 +147,7 @@ async function main() {
       unmappedStoreNames.add(camp.name);
     }
 
-    const qualityGate = evaluateQualityGate(apiCoupon, storeMapping);
+    const qualityGate = evaluateQualityGate(apiCoupon, camp);
     const legalGate = evaluateLegalGate(apiCoupon, camp);
 
     if (legalGate.eridStatus !== "PRESENT") missingErid++;
@@ -123,7 +156,7 @@ async function main() {
 
     if (!qualityGate.passed) {
       if (qualityGate.reasons.some((r) => r.includes("истёк"))) expiredCount++;
-      if (qualityGate.reasons.some((r) => r.includes("не таргетирован"))) foreignCount++;
+      if (qualityGate.reasons.some((r) => r.includes("Foreign") || r.includes("не таргетирован"))) foreignCount++;
       invalidCount++;
     }
 
@@ -225,7 +258,19 @@ async function main() {
     `- **Read-only Mode**: Активен (Supabase и catalog не затрагивались)`,
     "",
     "## B. Campaigns",
-    `- Всего подключено программ: **${campaigns.length}**`,
+    `Всего подключено программ: **${campaigns.length}**`,
+    "",
+    "| ID | Кампания | Статус | Валюта | EPC | CR | Deeplink | Юр. данные | RU Eligible |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...campaigns.map((c) => {
+      const hasLegal = Boolean(c.advertiser_legal_info?.trim() || c.legal_info?.trim());
+      const ruEligible = Boolean(
+        c.action_countries?.some((co) => ["RU", "RUS", "99"].includes(co.toUpperCase())) ||
+        c.regions?.some((r) => ["RU", "RUS", "99"].includes(r.region.toUpperCase())) ||
+        c.allow_actions_all_countries
+      );
+      return `| ${c.id} | ${c.name} | ${c.connection_status || c.status || "active"} | ${c.currency || "RUB"} | ${c.epc ?? "—"} | ${c.cr ?? "—"} | ${c.allow_deeplink ? "YES" : "NO"} | ${hasLegal ? "PRESENT" : "MISSING"} | ${ruEligible ? "YES" : "NO"} |`;
+    }),
     "",
     "## C. Coupon Counts",
     `- Загружено из API: **${rawCoupons.length}**`,
@@ -269,7 +314,15 @@ async function main() {
   console.log(`✓ Локальный отчет сформирован: ${reportPath} (локально, не отслеживается в git)`);
 }
 
-main().catch((err) => {
-  console.error("Фатальная ошибка dry-run:", err);
-  process.exit(1);
-});
+// Запуск main только если скрипт вызывается напрямую
+const isDirectRun =
+  process.argv[1] &&
+  (process.argv[1].endsWith("admitad-api-dry-run.mjs") ||
+    process.argv[1].endsWith("admitad-api-dry-run"));
+
+if (isDirectRun) {
+  main().catch((err) => {
+    console.error("Фатальная ошибка dry-run:", err);
+    process.exit(1);
+  });
+}

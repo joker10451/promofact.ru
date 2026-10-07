@@ -62,13 +62,24 @@ export interface AdmitadApiCampaign {
   currency?: string;
   categories?: Array<{ id: number; name: string }>;
   description?: string;
+  advertiser_legal_info?: string;
+  regions?: Array<{
+    region: string;
+  }>;
+  action_countries?: string[] | null;
+  allow_actions_all_countries?: boolean;
+  actions?: Array<{
+    id: number;
+    name: string;
+    type: string;
+    payment_size?: string;
+  }>;
+  epc?: number;
+  ecpc?: number;
+  cr?: number;
+  allow_deeplink?: boolean;
+  gotolink?: string;
   legal_info?: string;
-  advertiser_info?: {
-    name?: string;
-    inn?: string;
-    ogrn?: string;
-    address?: string;
-  };
 }
 
 export interface AdmitadApiCoupon {
@@ -89,6 +100,7 @@ export interface AdmitadApiCoupon {
   exclusive?: boolean;
   is_personal?: boolean;
   is_unique?: boolean;
+  is_tracking_promo_code?: boolean;
   is_tracking_promocode?: boolean;
   has_affiliate_link?: boolean;
   customer_type?: "all_customers" | "new_customers" | string;
@@ -97,7 +109,7 @@ export interface AdmitadApiCoupon {
   campaign: {
     id: number;
     name: string;
-    site_url: string;
+    site_url?: string;
   };
   categories?: Array<{ id: number; name: string }>;
   types?: Array<{ id: number; name: string }>;
@@ -271,21 +283,14 @@ export async function fetchAllPages<T>(
 
 /**
  * Валидация площадки по ADMITAD_WEBSITE_ID
+ * Source of truth: GET /websites/v2/{id}/ (без fallback на legacy при 404)
  */
 export async function validateWebsite(
   websiteId: string,
   token: string,
   options: FetchOptions = {}
 ): Promise<AdmitadApiWebsite> {
-  try {
-    return await admitadFetch<AdmitadApiWebsite>(`/websites/v2/${websiteId}/`, token, options);
-  } catch (err) {
-    if (err instanceof AdmitadApiError && err.statusCode === 404) {
-      // Fallback на v1 endpoint
-      return await admitadFetch<AdmitadApiWebsite>(`/websites/${websiteId}/`, token, options);
-    }
-    throw err;
-  }
+  return await admitadFetch<AdmitadApiWebsite>(`/websites/v2/${websiteId}/`, token, options);
 }
 
 /**
@@ -366,11 +371,12 @@ export interface StoreMappingResult {
 
 /**
  * Явный реестр сопоставления партнерских программ Admitad с каноническими магазинами PromoFact
+ * До live dry-run неподтвержденные числовые campaign IDs удалены.
+ * Разрешены подтвержденные строковые алиасы брендов.
  */
 export const EXPLICIT_STORE_MAPPINGS: Record<string, { slug: string; name: string }> = {
-  "812": { slug: "premier", name: "PREMIER" },
-  "3000": { slug: "tutu", name: "Туту" },
   "premier": { slug: "premier", name: "PREMIER" },
+  "туту": { slug: "tutu", name: "Туту" },
   "tutu": { slug: "tutu", name: "Туту" },
 };
 
@@ -466,35 +472,73 @@ export interface QualityGateResult {
 }
 
 export function evaluateQualityGate(
-  coupon: AdmitadApiCoupon
+  coupon: AdmitadApiCoupon,
+  campaign?: AdmitadApiCampaign
 ): QualityGateResult {
   const reasons: string[] = [];
 
-  // Проверка активности
+  // 1. Проверка активности
   if (coupon.status !== "active") {
     reasons.push(`Статус оффера не active (${coupon.status})`);
   }
 
-  // Проверка партнерской ссылки
+  // 2. Проверка партнерской ссылки
   if (!coupon.goto_link && !coupon.frameset_link) {
     reasons.push("Отсутствует партнерская ссылка (goto_link)");
   }
 
-  // Проверка RU доступности
-  const regions = coupon.regions || [];
-  const hasRuRegion = regions.length === 0 || regions.some((r) => ["RU", "RU-MOW", "RUS", "99"].includes(r.toUpperCase()));
-  const siteUrl = (coupon.campaign?.site_url || "").toLowerCase();
-  const isRuDomain = siteUrl.endsWith(".ru") || siteUrl.endsWith(".рф") || siteUrl.includes(".ru/") || siteUrl.includes(".рф/");
-  const isRuLang = !coupon.language || coupon.language.toLowerCase() === "ru";
+  // 3. Проверка географии РФ
+  const couponRegions = coupon.regions || [];
+  let ruGeoConfirmed = false;
 
-  if (!hasRuRegion && !isRuDomain && !isRuLang) {
-    reasons.push(`Оффер не таргетирован на РФ (regions: ${regions.join(", ")})`);
+  if (couponRegions.length > 0) {
+    // Правило A: Если coupon.regions непустой — должен содержать RU
+    const hasRu = couponRegions.some((r) =>
+      ["RU", "RUS", "99", "RU-MOW"].includes(String(r).toUpperCase())
+    );
+    if (!hasRu) {
+      reasons.push(`Foreign: оффер не таргетирован на РФ (regions: ${couponRegions.join(", ")})`);
+    } else {
+      ruGeoConfirmed = true;
+    }
+  } else {
+    // Правило B: Если coupon.regions пустой — проверяем campaign
+    const campCountries = campaign?.action_countries || [];
+    const hasCampCountry = campCountries.some((c) =>
+      ["RU", "RUS", "99"].includes(String(c).toUpperCase())
+    );
+
+    const campRegions = campaign?.regions || [];
+    const hasCampRegion = campRegions.some((r) =>
+      ["RU", "RUS", "99"].includes(String(r.region).toUpperCase())
+    );
+
+    const allowAll = Boolean(campaign?.allow_actions_all_countries);
+
+    if (hasCampCountry || hasCampRegion || allowAll) {
+      ruGeoConfirmed = true;
+    } else {
+      // Правило C: География не подтверждена
+      reasons.push("UNKNOWN_GEO: География кампании или купона не подтверждена для РФ");
+    }
   }
 
-  // Проверка дат (active through 23:59:59 MSK)
+  // 4. Проверка языка
+  if (coupon.language) {
+    const lang = coupon.language.toLowerCase();
+    if (lang !== "ru") {
+      reasons.push(`Language: язык оффера не русский (${coupon.language})`);
+    }
+  } else {
+    // Язык отсутствует: допустимо ТОЛЬКО если RU geo подтверждено
+    if (!ruGeoConfirmed) {
+      reasons.push("Language: отсутствует язык и не подтверждена география РФ");
+    }
+  }
+
+  // 5. Проверка дат (active through 23:59:59 MSK)
   if (coupon.date_end) {
     const endStr = coupon.date_end.slice(0, 10);
-    // Делаем явную таймзону +03:00 (MSK)
     const mskExpiryDate = new Date(`${endStr}T23:59:59+03:00`);
     if (isNaN(mskExpiryDate.getTime())) {
       reasons.push("Некорректный формат date_end");
@@ -532,14 +576,10 @@ export function evaluateLegalGate(
   const eridValue = eridMatch ? eridMatch[1] : null;
   const eridStatus: EridStatus = eridValue ? "PRESENT" : "MISSING";
 
-  let legalInfoText: string | null = null;
-  if (campaign?.advertiser_info?.inn || campaign?.advertiser_info?.name) {
-    legalInfoText = `Рекламодатель: ${campaign.advertiser_info.name || ""}${campaign.advertiser_info.inn ? ` ИНН ${campaign.advertiser_info.inn}` : ""}`.trim();
-  } else if (campaign?.legal_info) {
-    legalInfoText = campaign.legal_info.trim();
-  }
-
+  // Юридические данные берем в первую очередь из campaign.advertiser_legal_info
+  const legalInfoText = campaign?.advertiser_legal_info?.trim() || campaign?.legal_info?.trim() || null;
   const legalInfoStatus: LegalInfoStatus = legalInfoText ? "PRESENT" : "MISSING";
+
   // Для РФ показа обязателен erid и юридические реквизиты рекламодателя
   const needsMarking = eridStatus !== "PRESENT" || legalInfoStatus !== "PRESENT";
 

@@ -16,10 +16,13 @@
       "status": "active",
       "connection_status": "active",
       "currency": "RUB",
-      "advertiser_info": {
-        "name": "ООО «ПРЕМЬЕР»",
-        "inn": "9702011190"
-      }
+      "advertiser_legal_info": "Рекламодатель: ООО «ПРЕМЬЕР» ИНН 9702011190",
+      "action_countries": ["RU"],
+      "regions": [{ "region": "RU" }],
+      "allow_actions_all_countries": false,
+      "allow_deeplink": true,
+      "epc": 12.5,
+      "cr": 2.1
     },
     {
       "id": 3000,
@@ -28,10 +31,13 @@
       "status": "active",
       "connection_status": "active",
       "currency": "RUB",
-      "advertiser_info": {
-        "name": "ООО «НТТ»",
-        "inn": "7724929270"
-      }
+      "advertiser_legal_info": "Рекламодатель: ООО «НТТ» ИНН 7724929270",
+      "action_countries": ["RU"],
+      "regions": [{ "region": "RU" }],
+      "allow_actions_all_countries": false,
+      "allow_deeplink": true,
+      "epc": 8.4,
+      "cr": 1.7
     },
     {
       "id": 99999,
@@ -39,7 +45,14 @@
       "site_url": "https://unknown-shop-us.com",
       "status": "active",
       "connection_status": "active",
-      "currency": "USD"
+      "currency": "USD",
+      "advertiser_legal_info": "",
+      "action_countries": ["US"],
+      "regions": [{ "region": "US" }],
+      "allow_actions_all_countries": false,
+      "allow_deeplink": false,
+      "epc": 0.5,
+      "cr": 0.2
     }
   ],
   "coupons": [
@@ -57,6 +70,7 @@
       "description": "Скидка 20% на бронирование отелей и билетов",
       "regions": ["RU"],
       "language": "ru",
+      "is_tracking_promo_code": true,
       "campaign": {
         "id": 3000,
         "name": "Туту",
@@ -76,6 +90,7 @@
       "description": "Истекший промокод",
       "regions": ["RU"],
       "language": "ru",
+      "is_tracking_promo_code": true,
       "campaign": {
         "id": 812,
         "name": "PREMIER",
@@ -95,6 +110,7 @@
       "description": "Иностранный магазин без маркировки",
       "regions": ["US"],
       "language": "en",
+      "is_tracking_promo_code": false,
       "campaign": {
         "id": 99999,
         "name": "Unknown Global Shop",

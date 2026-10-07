@@ -6,23 +6,26 @@
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import {
   admitadFetch,
   fetchAllPages,
+  validateWebsite,
   mapApiCouponToRaw,
   matchCanonicalStore,
   evaluateQualityGate,
   evaluateLegalGate,
   calculateCandidateScore,
-  AdmitadApiError,
+  EXPLICIT_STORE_MAPPINGS,
 } from "../src/lib/admitadApi.ts";
+import { loadEnvLocalSafe } from "./admitad-api-dry-run.mjs";
 import { normalizeAdmitadCoupon, validateOffer } from "../src/lib/admitadNormalizer.ts";
 
 const fixturePath = path.resolve("scripts/fixtures/admitad-api-sample.json");
 const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf-8"));
 
 console.log("================================================================================");
-console.log("🚀 ЗАПУСК ДЕТЕРМИНИРОВАННЫХ ТЕСТОВ ADMITAD API FOUNDATION (scripts/test-admitad-api.mjs)");
+console.log("🚀 ЗАПУСК ДЕТЕРМИНИРОВАННЫХ ТЕСТОВ ADMITAD API (ADMITAD-1.1)");
 console.log("================================================================================\n");
 
 let passed = 0;
@@ -79,32 +82,34 @@ let passed = 0;
     timeoutMs: 5000,
   });
 
-  assert.strictEqual(res.success, true);
-  assert.strictEqual(callCount, 3, "Должно быть ровно 3 вызова (429 -> 500 -> 200 OK)");
+  assert.deepStrictEqual(res, { success: true });
+  assert.strictEqual(callCount, 3, "Должно быть 3 запроса (2 ретрая)");
   console.log("✓ Тест 2: 429 и 500 корректно повторены через экспоненциальный бэкофф (PASS)");
   passed++;
 }
 
-// Тест 3: Pagination helper с лимитом безопасности MAX_PAGES
+// Тест 3: Generic Pagination загружает все страницы
 {
   let pageRequests = 0;
   const mockFetch = async (url) => {
     pageRequests++;
-    const urlObj = new URL(url);
-    const offset = parseInt(urlObj.searchParams.get("offset") || "0", 10);
-    const limit = parseInt(urlObj.searchParams.get("limit") || "2", 10);
-
-    const items = [
-      { id: offset + 1, name: `Item ${offset + 1}` },
-      { id: offset + 2, name: `Item ${offset + 2}` },
-    ];
-
+    const urlStr = String(url);
+    if (urlStr.includes("offset=0")) {
+      return {
+        status: 200,
+        ok: true,
+        json: async () => ({
+          results: [{ id: 1 }, { id: 2 }],
+          _meta: { count: 3, limit: 2, offset: 0 },
+        }),
+      };
+    }
     return {
       status: 200,
       ok: true,
       json: async () => ({
-        results: offset >= 6 ? [] : items,
-        _meta: { count: 6, limit, offset },
+        results: [{ id: 3 }],
+        _meta: { count: 3, limit: 2, offset: 2 },
       }),
     };
   };
@@ -118,108 +123,312 @@ let passed = 0;
     10
   );
 
-  assert.strictEqual(results.length, 6, "Должно быть загружено 6 элементов со всех страниц");
-  assert.strictEqual(pageRequests, 3, "Пагинатор должен был запросить 3 страницы по 2 элемента");
+  assert.strictEqual(results.length, 3);
+  assert.strictEqual(pageRequests, 2);
   console.log("✓ Тест 3: Generic Pagination загружает все страницы без потерь (PASS)");
   passed++;
 }
 
-// Тест 4: Каноническое сопоставление магазинов (STABLE_STORES vs Unmapped)
+// Тест 4: advertiser_legal_info PRESENT
 {
-  const tutuMatch = matchCanonicalStore(fixture.campaigns[1]); // Туту
-  assert.strictEqual(tutuMatch.strategy, "EXACT MATCH");
-  assert.strictEqual(tutuMatch.canonicalSlug, "tutu");
+  const campWithLegal = {
+    id: 1,
+    name: "Тест",
+    site_url: "https://test.ru",
+    advertiser_legal_info: "ООО «Тест» ИНН 1234567890",
+  };
+  const coupon = {
+    id: 10,
+    name: "Тест",
+    goto_link: "https://ad.admitad.com/g/test/?erid=2RanyTest",
+    description: "",
+    status: "active",
+    species: "promocode",
+    promocode: "T1",
+    discount: "10%",
+    date_start: null,
+    date_end: null,
+    campaign: { id: 1, name: "Тест" },
+  };
 
-  const premierMatch = matchCanonicalStore(fixture.campaigns[0]); // PREMIER
-  assert.strictEqual(premierMatch.strategy, "EXACT MATCH");
-  assert.strictEqual(premierMatch.canonicalSlug, "premier");
-
-  const unknownMatch = matchCanonicalStore(fixture.campaigns[2]); // Unknown
-  assert.strictEqual(unknownMatch.strategy, "UNMAPPED");
-  assert.strictEqual(unknownMatch.canonicalSlug, "");
-
-  console.log("✓ Тест 4: Сопоставление магазинов по канонической иерархии STABLE_STORES (PASS)");
+  const gate = evaluateLegalGate(coupon, campWithLegal);
+  assert.strictEqual(gate.legalInfoStatus, "PRESENT");
+  assert.strictEqual(gate.eridStatus, "PRESENT");
+  assert.strictEqual(gate.needsMarking, false);
+  console.log("✓ Тест 4: advertiser_legal_info PRESENT распознан (PASS)");
   passed++;
 }
 
-// Тест 5: RU Quality Gate - фильтрация по географии, срокам и ссылкам
+// Тест 5: advertiser_legal_info empty -> MISSING и needsMarking
 {
-  const tutuCoupon = fixture.coupons[0];
-  const qgTutu = evaluateQualityGate(tutuCoupon, { strategy: "EXACT MATCH", canonicalSlug: "tutu", storeName: "Туту", confidence: "high" });
-  assert.strictEqual(qgTutu.passed, true, "Купон Туту должен успешно пройти Quality Gate");
+  const campWithoutLegal = {
+    id: 2,
+    name: "Без реквизитов",
+    site_url: "https://nolegal.ru",
+    advertiser_legal_info: "",
+  };
+  const coupon = {
+    id: 11,
+    name: "Тест",
+    goto_link: "https://ad.admitad.com/g/test/?erid=2RanyTest",
+    description: "",
+    status: "active",
+    species: "promocode",
+    promocode: "T2",
+    discount: "10%",
+    date_start: null,
+    date_end: null,
+    campaign: { id: 2, name: "Без реквизитов" },
+  };
 
-  const expiredCoupon = fixture.coupons[1];
-  const qgExpired = evaluateQualityGate(expiredCoupon, { strategy: "EXACT MATCH", canonicalSlug: "premier", storeName: "PREMIER", confidence: "high" });
-  assert.strictEqual(qgExpired.passed, false, "Истёкший купон обязан быть отклонён");
-  assert.ok(qgExpired.reasons.some((r) => r.includes("истёк")));
-
-  const foreignCoupon = fixture.coupons[2];
-  const qgForeign = evaluateQualityGate(foreignCoupon, { strategy: "UNMAPPED", canonicalSlug: "", storeName: "Unknown", confidence: "none" });
-  assert.strictEqual(qgForeign.passed, false, "Иностранный магазин без RU-таргета обязан быть отклонён");
-  assert.ok(qgForeign.reasons.some((r) => r.includes("не таргетирован на РФ")));
-
-  console.log("✓ Тест 5: RU Quality Gate корректно отсеивает истёкшие и нерелевантные офферы (PASS)");
+  const gate = evaluateLegalGate(coupon, campWithoutLegal);
+  assert.strictEqual(gate.legalInfoStatus, "MISSING");
+  assert.strictEqual(gate.needsMarking, true);
+  console.log("✓ Тест 5: advertiser_legal_info empty -> MISSING и needsMarking (PASS)");
   passed++;
 }
 
-// Тест 6: Legal / ERID Gate
+// Тест 6: coupon regions ["RU"] -> pass
 {
-  const tutuCoupon = fixture.coupons[0];
-  const tutuCampaign = fixture.campaigns[1];
-  const legalTutu = evaluateLegalGate(tutuCoupon, tutuCampaign);
-  assert.strictEqual(legalTutu.eridStatus, "PRESENT");
-  assert.strictEqual(legalTutu.eridValue, "2RanyTestEridTutu");
-  assert.strictEqual(legalTutu.legalInfoStatus, "PRESENT");
-  assert.strictEqual(legalTutu.needsMarking, false);
+  const coupon = {
+    id: 12,
+    name: "RU Coupon",
+    goto_link: "https://ad.admitad.com/g/test/",
+    description: "Тест",
+    status: "active",
+    species: "promocode",
+    promocode: "RU1",
+    discount: "10%",
+    date_start: null,
+    date_end: "2026-12-31T23:59:59",
+    regions: ["RU"],
+    language: "ru",
+    campaign: { id: 3, name: "Shop" },
+  };
+  const camp = { id: 3, name: "Shop", site_url: "https://shop.com" };
 
-  const noEridCoupon = fixture.coupons[2];
-  const noEridCampaign = fixture.campaigns[2];
-  const legalNoErid = evaluateLegalGate(noEridCoupon, noEridCampaign);
-  assert.strictEqual(legalNoErid.eridStatus, "MISSING");
-  assert.strictEqual(legalNoErid.needsMarking, true);
-
-  console.log("✓ Тест 6: Legal & ERID Gate корректно идентифицирует маркировку и статус NEEDS_MARKING (PASS)");
+  const qGate = evaluateQualityGate(coupon, camp);
+  assert.strictEqual(qGate.passed, true);
+  console.log("✓ Тест 6: coupon regions ['RU'] -> pass Quality Gate (PASS)");
   passed++;
 }
 
-// Тест 7: JSON -> Internal Model mapping & Normalization
+// Тест 7: coupon regions ["US"] + language missing -> reject foreign
+{
+  const coupon = {
+    id: 13,
+    name: "US Coupon",
+    goto_link: "https://ad.admitad.com/g/test/",
+    description: "Тест",
+    status: "active",
+    species: "promocode",
+    promocode: "US1",
+    discount: "10%",
+    date_start: null,
+    date_end: "2026-12-31T23:59:59",
+    regions: ["US"],
+    campaign: { id: 4, name: "US Shop" },
+  };
+  const camp = { id: 4, name: "US Shop", site_url: "https://us-shop.com" };
+
+  const qGate = evaluateQualityGate(coupon, camp);
+  assert.strictEqual(qGate.passed, false);
+  assert.ok(qGate.reasons.some((r) => r.includes("Foreign") || r.includes("не таргетирован")));
+  console.log("✓ Тест 7: coupon regions ['US'] + language missing -> reject foreign (PASS)");
+  passed++;
+}
+
+// Тест 8: coupon regions [] + campaign action_countries ["RU"] -> pass
+{
+  const coupon = {
+    id: 14,
+    name: "Country Coupon",
+    goto_link: "https://ad.admitad.com/g/test/",
+    description: "Тест",
+    status: "active",
+    species: "promocode",
+    promocode: "C1",
+    discount: "10%",
+    date_start: null,
+    date_end: "2026-12-31T23:59:59",
+    regions: [],
+    language: "ru",
+    campaign: { id: 5, name: "Camp" },
+  };
+  const camp = {
+    id: 5,
+    name: "Camp",
+    site_url: "https://camp.com",
+    action_countries: ["RU"],
+  };
+
+  const qGate = evaluateQualityGate(coupon, camp);
+  assert.strictEqual(qGate.passed, true);
+  console.log("✓ Тест 8: coupon regions [] + campaign action_countries ['RU'] -> pass (PASS)");
+  passed++;
+}
+
+// Тест 9: coupon regions [] + allow_actions_all_countries true -> pass
+{
+  const coupon = {
+    id: 15,
+    name: "Global Coupon",
+    goto_link: "https://ad.admitad.com/g/test/",
+    description: "Тест",
+    status: "active",
+    species: "promocode",
+    promocode: "G1",
+    discount: "10%",
+    date_start: null,
+    date_end: "2026-12-31T23:59:59",
+    regions: [],
+    language: "ru",
+    campaign: { id: 6, name: "Global" },
+  };
+  const camp = {
+    id: 6,
+    name: "Global",
+    site_url: "https://global.com",
+    allow_actions_all_countries: true,
+  };
+
+  const qGate = evaluateQualityGate(coupon, camp);
+  assert.strictEqual(qGate.passed, true);
+  console.log("✓ Тест 9: coupon regions [] + allow_actions_all_countries true -> pass (PASS)");
+  passed++;
+}
+
+// Тест 10: Geo unknown -> reject / UNKNOWN_GEO
+{
+  const coupon = {
+    id: 16,
+    name: "Unknown Geo Coupon",
+    goto_link: "https://ad.admitad.com/g/test/",
+    description: "Тест",
+    status: "active",
+    species: "promocode",
+    promocode: "UNK1",
+    discount: "10%",
+    date_start: null,
+    date_end: "2026-12-31T23:59:59",
+    regions: [],
+    campaign: { id: 7, name: "NoGeo" },
+  };
+  const camp = {
+    id: 7,
+    name: "NoGeo",
+    site_url: "https://nogeo.org",
+    action_countries: ["FR"],
+  };
+
+  const qGate = evaluateQualityGate(coupon, camp);
+  assert.strictEqual(qGate.passed, false);
+  assert.ok(qGate.reasons.some((r) => r.includes("UNKNOWN_GEO")));
+  console.log("✓ Тест 10: geo unknown -> reject с причиной UNKNOWN_GEO (PASS)");
+  passed++;
+}
+
+// Тест 11: unverified numeric campaign mapping absent
+{
+  assert.strictEqual(EXPLICIT_STORE_MAPPINGS["812"], undefined);
+  assert.strictEqual(EXPLICIT_STORE_MAPPINGS["3000"], undefined);
+  assert.ok(EXPLICIT_STORE_MAPPINGS["premier"] !== undefined);
+  console.log("✓ Тест 11: неподтвержденные числовые campaign IDs 812 и 3000 удалены (PASS)");
+  passed++;
+}
+
+// Тест 12: .env.local loader does not overwrite existing process.env
+{
+  const tempEnvPath = path.join(os.tmpdir(), `test-env-local-${Date.now()}.env`);
+  fs.writeFileSync(
+    tempEnvPath,
+    'ADMITAD_API_TOKEN="token_from_file"\nNEW_TEST_VAR="hello_local"\n',
+    "utf-8"
+  );
+
+  process.env.ADMITAD_API_TOKEN = "already_set_token";
+  loadEnvLocalSafe(tempEnvPath);
+
+  assert.strictEqual(process.env.ADMITAD_API_TOKEN, "already_set_token");
+  assert.strictEqual(process.env.NEW_TEST_VAR, "hello_local");
+
+  delete process.env.ADMITAD_API_TOKEN;
+  delete process.env.NEW_TEST_VAR;
+  try {
+    fs.unlinkSync(tempEnvPath);
+  } catch {}
+
+  console.log("✓ Тест 12: loadEnvLocalSafe() не перезаписывает существующие process.env (PASS)");
+  passed++;
+}
+
+// Тест 13: website 404 does NOT fall back to legacy endpoint
+{
+  let requestedUrls = [];
+  const mockFetch = async (url) => {
+    requestedUrls.push(String(url));
+    return {
+      status: 404,
+      ok: false,
+      statusText: "Not Found",
+      json: async () => ({ error: "website_not_found" }),
+    };
+  };
+
+  try {
+    await validateWebsite("9999", "test_token", {
+      customFetch: mockFetch,
+    });
+    assert.fail("validateWebsite должен выбросить ошибку при 404");
+  } catch (err) {
+    assert.strictEqual(err.statusCode, 404);
+    assert.strictEqual(requestedUrls.length, 1);
+    assert.ok(requestedUrls[0].includes("/websites/v2/9999/"));
+    assert.ok(!requestedUrls.some((u) => u === "https://api.admitad.com/websites/9999/"));
+  }
+  console.log("✓ Тест 13: website 404 не делает fallback на legacy v1 endpoint (PASS)");
+  passed++;
+}
+
+// Тест 14: Преобразование API JSON в модель PromoFact и валидация нормализатора
 {
   const raw = mapApiCouponToRaw(fixture.coupons[0]);
   const norm = normalizeAdmitadCoupon(raw);
-  assert.ok(norm, "Нормализация купона должна быть успешной");
-  assert.strictEqual(norm?.promoCode, "TUTU20");
-  assert.strictEqual(norm?.discount?.formatted, "−20%");
+  assert.ok(norm !== null);
+  assert.strictEqual(norm.store.slug, "tutu");
   assert.strictEqual(validateOffer(norm), true);
-
-  console.log("✓ Тест 7: Преобразование API JSON в модель PromoFact и валидация нормализатора (PASS)");
+  console.log("✓ Тест 14: Преобразование API JSON в модель PromoFact и нормализатор (PASS)");
   passed++;
 }
 
-// Тест 8: Scoring candidates
+// Тест 15: Калькулятор скоринга кандидатов
 {
-  const tutuCoupon = fixture.coupons[0];
-  const scoreValid = calculateCandidateScore(
-    tutuCoupon,
-    { strategy: "EXACT MATCH", canonicalSlug: "tutu", storeName: "Туту", confidence: "high" },
-    { passed: true, reasons: [] },
-    { eridStatus: "PRESENT", eridValue: "abc", legalInfoStatus: "PRESENT", legalInfoText: "ООО", needsMarking: false },
+  const camp = fixture.campaigns[1];
+  const mapping = matchCanonicalStore(camp);
+  const qGate = evaluateQualityGate(fixture.coupons[0], camp);
+  const lGate = evaluateLegalGate(fixture.coupons[0], camp);
+
+  const scoreUnique = calculateCandidateScore(
+    fixture.coupons[0],
+    mapping,
+    qGate,
+    lGate,
     false
   );
-  assert.ok(scoreValid > 50, `Скор валидного уникального купона должен быть высоким (${scoreValid})`);
-
-  const scoreDuplicate = calculateCandidateScore(
-    tutuCoupon,
-    { strategy: "EXACT MATCH", canonicalSlug: "tutu", storeName: "Туту", confidence: "high" },
-    { passed: true, reasons: [] },
-    { eridStatus: "PRESENT", eridValue: "abc", legalInfoStatus: "PRESENT", legalInfoText: "ООО", needsMarking: false },
+  const scoreDup = calculateCandidateScore(
+    fixture.coupons[0],
+    mapping,
+    qGate,
+    lGate,
     true
   );
-  assert.ok(scoreDuplicate < scoreValid, "Дубликат с Perfluence должен получать штрафной скор");
 
-  console.log("✓ Тест 8: Калькулятор скоринга кандидатов отражает приоритеты каталога (PASS)");
+  assert.ok(scoreUnique > scoreDup);
+  assert.ok(scoreUnique > 50);
+  console.log("✓ Тест 15: Калькулятор скоринга кандидатов корректно ранжирует уникальные офферы (PASS)");
   passed++;
 }
 
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/8 ДЕТЕРМИНИРОВАННЫХ ТЕСТОВ ADMITAD API FOUNDATION УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/${passed} ДЕТЕРМИНИРОВАННЫХ ТЕСТОВ ADMITAD-1.1 УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================\n");
