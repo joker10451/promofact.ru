@@ -501,7 +501,39 @@ async function run() {
       if (copyAndOpenEvents.length === 0) {
         throw new Error("Цель copy_and_open не была отправлена в Яндекс.Метрику!");
       }
-      console.log(`  ✓ Метрика зафиксировала цель 'copy_and_open': ${JSON.stringify(copyAndOpenEvents[0].params)}`);
+      const caoParams = copyAndOpenEvents[0].params;
+      if (caoParams.store !== "farfor") {
+        throw new Error(`copy_and_open: ожидался store "farfor", получено "${caoParams.store}"`);
+      }
+      if (!caoParams.coupon_id) {
+        throw new Error(`copy_and_open: отсутствует coupon_id в параметрах!`);
+      }
+      if (caoParams.placement !== "store_coupon") {
+        throw new Error(`copy_and_open: ожидался placement "store_coupon", получено "${caoParams.placement}"`);
+      }
+      if (caoParams.page_type !== "store") {
+        throw new Error(`copy_and_open: ожидался page_type "store", получено "${caoParams.page_type}"`);
+      }
+      if (caoParams.page_path !== "/store/farfor") {
+        throw new Error(`copy_and_open: ожидался page_path "/store/farfor", получено "${caoParams.page_path}"`);
+      }
+      if (caoParams.code !== undefined || caoParams.promocode !== undefined) {
+        throw new Error("copy_and_open: обнаружена утечка сырого промокода в параметры Метрики!");
+      }
+      console.log(`  ✓ Метрика зафиксировала цель 'copy_and_open': ${JSON.stringify(caoParams)}`);
+
+      const affEvents = ymCalls.filter((c) => c.goal === "affiliate_click");
+      if (affEvents.length === 0) {
+        throw new Error("Цель affiliate_click не была отправлена в Яндекс.Метрику!");
+      }
+      const affParams = affEvents[0].params;
+      if (affParams.store !== "farfor" || !affParams.coupon_id || affParams.placement !== "store_coupon") {
+        throw new Error(`affiliate_click: некорректный контекст атрибуции: ${JSON.stringify(affParams)}`);
+      }
+      if (affParams.code !== undefined || affParams.promocode !== undefined) {
+        throw new Error("affiliate_click: обнаружена утечка сырого промокода в параметры Метрики!");
+      }
+      console.log(`  ✓ Метрика зафиксировала цель 'affiliate_click': ${JSON.stringify(affParams)}`);
 
       await newPage.close();
       await context.close();

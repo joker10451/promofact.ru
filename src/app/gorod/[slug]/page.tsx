@@ -220,6 +220,7 @@ export default async function CityPage({
               <CouponTicket
                 key={`${coupon.id}-${coupon.promocode.code}`}
                 coupon={toCatalogCoupon(coupon)}
+                placement="geo_city_coupon"
                 proofCount={proofsByCode[coupon.promocode.code] ?? 0}
                 storeProofCount={proofsByStore[coupon.store.id] ?? 0}
               />

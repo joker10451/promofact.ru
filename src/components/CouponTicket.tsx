@@ -54,17 +54,80 @@ function getDiscountStyles(type: string): string {
   }
 }
 
+export type CouponTicketPlacement =
+  | "home_catalog"
+  | "home_hot_deals"
+  | "store_coupon"
+  | "article_coupon"
+  | "category_coupon"
+  | "collection_coupon"
+  | "geo_city_coupon"
+  | "geo_category_coupon"
+  | "coupon_detail"
+  | "unknown";
+
+function getPageTypeFromPlacement(placement: CouponTicketPlacement): string {
+  switch (placement) {
+    case "home_catalog":
+    case "home_hot_deals":
+      return "home";
+    case "store_coupon":
+      return "store";
+    case "article_coupon":
+      return "article";
+    case "category_coupon":
+      return "category";
+    case "collection_coupon":
+      return "collection";
+    case "geo_city_coupon":
+    case "geo_category_coupon":
+      return "geo";
+    case "coupon_detail":
+      return "coupon_detail";
+    default:
+      return "unknown";
+  }
+}
+
 export default function CouponTicket({
   coupon,
   proofCount = 0,
+  placement = "unknown",
 }: {
   coupon: CatalogCoupon;
   proofCount?: number;
   storeProofCount?: number;
+  placement?: CouponTicketPlacement;
   /** Страницы старого маршрута передают флаг для обратной совместимости. */
   isDetailPage?: boolean;
 }) {
   const { promocode, store, affiliate } = coupon;
+
+  const targetUrl = affiliate.link || affiliate.landingLink || store.site || "#";
+
+  const offer = refineOffer(
+    promocode.bonusName || "",
+    promocode.terms || "",
+    promocode.code || "",
+    store.name,
+    promocode.isFirstOrderOnly
+  );
+
+  const getAnalyticsContext = () => {
+    let pagePath = "";
+    if (typeof window !== "undefined" && window.location) {
+      pagePath = window.location.pathname || "";
+    }
+    return {
+      store: store.slug,
+      coupon_id: coupon.id,
+      placement,
+      page_path: pagePath,
+      page_type: getPageTypeFromPlacement(placement),
+      offer_type: offer.isNoCode ? "deal" : "promo",
+      source_component: "coupon_ticket",
+    };
+  };
 
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
@@ -118,8 +181,9 @@ export default function CouponTicket({
           window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
         }
       } catch {}
-      ymReachGoal("copy_code", { store: store.slug });
-      ymReachGoal("promo_show", { store: store.slug });
+      const ctx = getAnalyticsContext();
+      ymReachGoal("copy_code", ctx);
+      ymReachGoal("promo_show", ctx);
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
         setCopied(false);
@@ -138,10 +202,7 @@ export default function CouponTicket({
   };
 
   const handleAffiliateClick = () => {
-    ymReachGoal("affiliate_click", {
-      store: store.slug,
-      type: offer.isNoCode ? "deal" : "promo",
-    });
+    ymReachGoal("affiliate_click", getAnalyticsContext());
   };
 
   const copyAndOpen = (code: string, url: string) => {
@@ -161,7 +222,7 @@ export default function CouponTicket({
       }
     }
 
-    ymReachGoal("copy_and_open", { store: store.slug });
+    ymReachGoal("copy_and_open", getAnalyticsContext());
     handleAffiliateClick();
 
     // 2. Копирование промокода с сохранением обработки ошибок Clipboard API
@@ -169,16 +230,6 @@ export default function CouponTicket({
       copyCode(code, opened ? "opened" : "copied");
     }
   };
-
-  const targetUrl = affiliate.link || affiliate.landingLink || store.site || "#";
-
-  const offer = refineOffer(
-    promocode.bonusName || "",
-    promocode.terms || "",
-    promocode.code || "",
-    store.name,
-    promocode.isFirstOrderOnly
-  );
 
   const discountSizeClass =
     offer.discount.length > 20
@@ -323,7 +374,7 @@ export default function CouponTicket({
             type="button"
             onClick={() => {
               setShowDetailsModal(true);
-              ymReachGoal("coupon_terms_open", { store: store.slug });
+              ymReachGoal("coupon_terms_open", getAnalyticsContext());
             }}
             className="inline-flex items-center gap-1 text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer shrink-0 py-1"
           >
@@ -453,16 +504,18 @@ export default function CouponTicket({
         {affiliate.ordText && (() => {
           const { legalText, medicalWarning } = parseOrdAndWarning(affiliate.ordText);
           return medicalWarning ? (
-            <div className="mt-1.5 space-y-0.5 text-center">
-              <p className="text-[9px] text-ink/30 line-clamp-1">{legalText}</p>
-              <p className="text-[9px] font-bold uppercase tracking-wider text-ink/60">
+            <div className="mt-2 space-y-1 text-center border-t border-line/30 pt-1.5">
+              <p className="text-[10px] sm:text-[11px] leading-tight text-ink/45 select-all break-words">{legalText}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-ink/70">
                 {medicalWarning}
               </p>
             </div>
           ) : (
-            <p className="mt-1.5 text-center text-[9px] text-ink/30 line-clamp-1">
-              {affiliate.ordText}
-            </p>
+            <div className="mt-2 text-center border-t border-line/30 pt-1.5">
+              <p className="text-[10px] sm:text-[11px] leading-tight text-ink/45 select-all break-words">
+                {affiliate.ordText}
+              </p>
+            </div>
           );
         })()}
 
@@ -561,16 +614,16 @@ export default function CouponTicket({
                 {affiliate.ordText && (() => {
                   const { legalText, medicalWarning } = parseOrdAndWarning(affiliate.ordText);
                   return medicalWarning ? (
-                    <div className="pt-2 space-y-1 border-t border-line/40">
-                      <div className="text-[10px] text-ink/40">
+                    <div className="pt-2.5 space-y-1 border-t border-line/40">
+                      <div className="text-[11px] leading-relaxed text-ink/60 select-all break-words">
                         {legalText}
                       </div>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-ink/70">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-ink/80">
                         {medicalWarning}
                       </div>
                     </div>
                   ) : (
-                    <div className="pt-2 text-[10px] text-ink/40 border-t border-line/40">
+                    <div className="pt-2.5 text-[11px] leading-relaxed text-ink/60 select-all break-words border-t border-line/40">
                       {affiliate.ordText}
                     </div>
                   );

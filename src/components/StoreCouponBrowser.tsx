@@ -137,6 +137,7 @@ export default function StoreCouponBrowser({
             <CouponTicket
               key={`${coupon.id}-${coupon.promocode.code}`}
               coupon={coupon}
+              placement="store_coupon"
               proofCount={usesMap[coupon.promocode.code] ?? 0}
               storeProofCount={storeProofCount}
             />
