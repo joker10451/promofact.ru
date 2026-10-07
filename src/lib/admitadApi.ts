@@ -44,7 +44,8 @@ export type AdmitadErrorCode =
   | "WEBSITE_NOT_FOUND"
   | "WEBSITE_AMBIGUOUS"
   | "WEBSITE_ACCESS_DENIED"
-  | "API_RATE_LIMITED";
+  | "API_RATE_LIMITED"
+  | "API_SCHEMA_ERROR";
 
 export interface AdmitadTokenResponse {
   access_token: string;
@@ -447,11 +448,26 @@ export async function validateWebsite(
 /**
  * Получение всех площадок аккаунта
  * Endpoint: GET /websites/v2/
+ * Официальный ответ: плоский массив [{ website }, ...] без пагинации results/_meta
  */
 export async function getWebsites(
   options: FetchOptions = {}
 ): Promise<AdmitadApiWebsite[]> {
-  return await fetchAllPages<AdmitadApiWebsite>("/websites/v2/", {}, options);
+  const response = await admitadFetch<AdmitadApiWebsite[]>(
+    "/websites/v2/",
+    options
+  );
+
+  if (!Array.isArray(response)) {
+    throw new AdmitadApiError(
+      "Некорректный формат ответа эндпоинта площадок /websites/v2/: ожидался массив",
+      500,
+      "API_SCHEMA_ERROR",
+      response
+    );
+  }
+
+  return response;
 }
 
 export type WebsiteResolutionType = "EXPLICIT" | "AUTO_HOST" | "NOT_FOUND" | "AMBIGUOUS";

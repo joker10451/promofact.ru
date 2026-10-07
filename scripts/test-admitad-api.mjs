@@ -627,7 +627,7 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
       return { status: 200, ok: true, json: async () => mockWebsites[0] };
     }
     if (urlStr.includes("/websites/v2/")) {
-      return { status: 200, ok: true, json: async () => ({ results: mockWebsites, _meta: { count: 2, limit: 100, offset: 0 } }) };
+      return { status: 200, ok: true, json: async () => mockWebsites };
     }
     return { status: 404, ok: false, statusText: "Not Found", json: async () => ({ error: "not_found" }) };
   };
@@ -666,7 +666,7 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
     if (urlStr.includes("/token/")) {
       return { status: 200, ok: true, json: async () => ({ access_token: "t", expires_in: 3600, token_type: "bearer", scope: "websites" }) };
     }
-    return { status: 200, ok: true, json: async () => ({ results: mockMultiSites, _meta: { count: 2, limit: 100, offset: 0 } }) };
+    return { status: 200, ok: true, json: async () => mockMultiSites };
   };
   const ambigRes = await resolveWebsite(
     { clientId: "c", clientSecret: "s", websiteHost: "promofact.ru" },
@@ -681,7 +681,7 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
   );
   assert.strictEqual(notFoundRes.resolution, "NOT_FOUND");
 
-  console.log("✓ Тест 20: Auto Website Discovery (EXPLICIT, AUTO_HOST, www, AMBIGUOUS, NOT_FOUND) (PASS)");
+  console.log("✓ Тест 20: Auto Website Discovery c реальным форматом массива (PASS)");
   passed++;
 }
 
@@ -693,7 +693,7 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
     if (urlStr.includes("/token/")) {
       return { status: 200, ok: true, json: async () => ({ access_token: "t", expires_in: 3600, token_type: "bearer", scope: "websites" }) };
     }
-    return { status: 200, ok: true, json: async () => ({ results: [mockSuspended], _meta: { count: 1, limit: 100, offset: 0 } }) };
+    return { status: 200, ok: true, json: async () => [mockSuspended] };
   };
 
   const res = await resolveWebsite(
@@ -703,6 +703,32 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
   assert.strictEqual(res.resolution, "AUTO_HOST");
   assert.strictEqual(res.website?.status, "suspended");
   console.log("✓ Тест 21: Приостановленная площадка честно сохраняет статус suspended (PASS)");
+  passed++;
+}
+
+// Тест 22: GET /websites/v2/ возвращает неожиданный объект (schema error)
+{
+  const mockMalformedFetch = async (url) => {
+    const urlStr = String(url);
+    if (urlStr.includes("/token/")) {
+      return { status: 200, ok: true, json: async () => ({ access_token: "t", expires_in: 3600, token_type: "bearer", scope: "websites" }) };
+    }
+    // Ошибочно возвращает объект вместо массива
+    return { status: 200, ok: true, json: async () => ({ results: [], _meta: { count: 0 } }) };
+  };
+
+  let threwExpected = false;
+  try {
+    await resolveWebsite(
+      { clientId: "c", clientSecret: "s", websiteHost: "promofact.ru" },
+      { customFetch: mockMalformedFetch }
+    );
+  } catch (err) {
+    threwExpected = true;
+    assert.strictEqual(err.code, "API_SCHEMA_ERROR");
+  }
+  assert.strictEqual(threwExpected, true, "Ожидалась ошибка API_SCHEMA_ERROR при возврате объекта вместо массива");
+  console.log("✓ Тест 22: Некорректный формат ответа /websites/v2/ выбрасывает API_SCHEMA_ERROR (PASS)");
   passed++;
 }
 
