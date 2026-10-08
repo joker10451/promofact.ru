@@ -517,8 +517,12 @@ console.log("===================================================================
   assert.ok(sql.includes("alter table if exists public.admitad_sync_meta enable row level security;"));
   assert.ok(sql.includes("revoke all on public.admitad_sync_meta from PUBLIC, anon, authenticated;"));
 
+  const sql0006 = fs.readFileSync(path.join(process.cwd(), "supabase/migrations/0006_security_hardening.sql"), "utf8");
+  assert.ok(sql0006.includes("set search_path = public"));
+  assert.ok(sql0006.includes("handle_updated_at"));
+
   passed++;
-  console.log("✓ Тест 22: SQL Migration Security Hardening: Revoke public RPC & RLS (PASS)");
+  console.log("✓ Тест 22: SQL Migration Security Hardening: Revoke public RPC, RLS & search_path (PASS)");
 }
 
 // 23. Тест: Count Semantics & Catastrophic Threshold (Section 4, 5, 6, 7, 15)
