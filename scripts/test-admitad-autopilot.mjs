@@ -1,4 +1,6 @@
 import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 import {
   CATASTROPHIC_DROP_THRESHOLD,
   evaluateSnapshotSafety,
@@ -622,6 +624,22 @@ console.log("===================================================================
   console.log("✓ Тест 25: Security Migration 0006 search_path & Metrika Declined Consent SPA Protection (PASS)");
 }
 
+// 26. Тест: Migration 0007 Safeupdate Fix (Section 1 & 2)
+{
+  const migPath = path.resolve("supabase/migrations/0007_admitad_safeupdate_fix.sql");
+  assert.ok(fs.existsSync(migPath), "0007_admitad_safeupdate_fix.sql must exist");
+  const sql = fs.readFileSync(migPath, "utf-8");
+  assert.ok(sql.includes("delete from public.admitad_coupons"), "Must delete old production coupons");
+  assert.ok(sql.includes("where id is not null"), "Must satisfy pg-safeupdate with 'where id is not null'");
+  assert.ok(!sql.match(/delete\s+from\s+public\.admitad_coupons\s*;/i), "Must NOT contain unqualified delete without WHERE clause");
+  assert.ok(sql.includes("revoke all on function public.publish_admitad_snapshot(text, integer, numeric) from PUBLIC;"));
+  assert.ok(sql.includes("revoke all on function public.publish_admitad_snapshot(text, integer, numeric) from anon;"));
+  assert.ok(sql.includes("revoke all on function public.publish_admitad_snapshot(text, integer, numeric) from authenticated;"));
+  assert.ok(sql.includes("grant execute on function public.publish_admitad_snapshot(text, integer, numeric) to service_role;"));
+  passed++;
+  console.log("✓ Тест 26: Migration 0007 Safeupdate Fix & RPC Permissions (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/25 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/26 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");
