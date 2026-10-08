@@ -1,0 +1,25 @@
+{
+  "last_attempt_at": "2026-10-08T11:58:28.454Z",
+  "last_success_at": "2026-10-08T11:58:28.454Z",
+  "last_success_count": 13,
+  "last_status": "SUCCESS",
+  "last_error_code": null,
+  "duration_ms": 8430,
+  "details": {
+    "sync_run_id": "sync_1791460700150_tmuxj7",
+    "campaigns_total": 136,
+    "coupons_total": 524,
+    "normalized": 459,
+    "quality_pass": 458,
+    "mapped": 14,
+    "legal_ready": 456,
+    "publishable": 13,
+    "ready_not_approved": 0,
+    "duplicates_vs_perfluence": 0,
+    "written": 524,
+    "updated": 524,
+    "deactivated": 0,
+    "quarantined": 511,
+    "duration_ms": 8430
+  }
+}

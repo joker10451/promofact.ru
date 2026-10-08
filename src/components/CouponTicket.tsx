@@ -11,6 +11,7 @@ import { CHANNELS } from "@/lib/site";
 import { CheckIcon } from "@/components/CheckIcon";
 import { refineOffer } from "@/lib/offerRefiner";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
+import { decorateAdmitadUrl, generateClickId } from "@/lib/admitadAutopilot";
 
 const SBER_MED_WARNING = "ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА";
 
@@ -104,6 +105,17 @@ export default function CouponTicket({
   const { promocode, store, affiliate } = coupon;
 
   const targetUrl = affiliate.link || affiliate.landingLink || store.site || "#";
+  const isAdmitad =
+    (coupon as unknown as { promocode?: { group?: string } }).promocode?.group === "admitad" ||
+    Boolean(targetUrl && (targetUrl.includes("admitad.com") || targetUrl.includes("fas.st")));
+
+  const outgoingUrl = isAdmitad
+    ? decorateAdmitadUrl(targetUrl, {
+        placement,
+        pageType: getPageTypeFromPlacement(placement),
+        couponId: coupon.id,
+      })
+    : targetUrl;
 
   const offer = refineOffer(
     promocode.bonusName || "",
@@ -207,10 +219,20 @@ export default function CouponTicket({
 
   const copyAndOpen = (code: string, url: string) => {
     let opened = false;
+    const clickId = isAdmitad ? generateClickId() : undefined;
+    const finalUrl = isAdmitad
+      ? decorateAdmitadUrl(url, {
+          placement,
+          pageType: getPageTypeFromPlacement(placement),
+          couponId: coupon.id,
+          clickId,
+        })
+      : url;
+
     // 1. Открытие партнёрской ссылки непосредственно в синхронном контексте пользовательского клика
-    if (typeof window !== "undefined" && url && url !== "#") {
+    if (typeof window !== "undefined" && finalUrl && finalUrl !== "#") {
       try {
-        const win = window.open(url, "_blank");
+        const win = window.open(finalUrl, "_blank");
         if (win) {
           try {
             win.opener = null;
@@ -432,10 +454,10 @@ export default function CouponTicket({
             {/* Основная кнопка действия */}
             {copied ? (
               <a
-                href={targetUrl}
+                href={outgoingUrl}
                 target="_blank"
                 rel="noopener nofollow"
-                onClick={handleAffiliateClick}
+                onClick={() => handleAffiliateClick()}
                 className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-mint hover:bg-mint-dark text-white text-xs sm:text-sm font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer px-4"
               >
                 <CheckIcon className="h-4 w-4" />
@@ -463,10 +485,10 @@ export default function CouponTicket({
 
             {/* Прямой переход по ссылке */}
             <a
-              href={targetUrl}
+              href={outgoingUrl}
               target="_blank"
               rel="noopener nofollow"
-              onClick={handleAffiliateClick}
+              onClick={() => handleAffiliateClick()}
               className="text-[11px] sm:text-xs font-semibold text-ink/50 hover:text-red hover:underline flex items-center justify-center gap-1 py-1 transition-colors"
             >
               <span>Перейти на сайт {store.name} →</span>
@@ -478,10 +500,10 @@ export default function CouponTicket({
               Промокод не требуется — скидка применится по ссылке
             </div>
             <a
-              href={targetUrl}
+              href={outgoingUrl}
               target="_blank"
               rel="noopener nofollow"
-              onClick={handleAffiliateClick}
+              onClick={() => handleAffiliateClick()}
               className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red to-red-dark text-white text-xs sm:text-sm font-bold shadow-offset-red hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] transition-all cursor-pointer px-4"
             >
               <span>Перейти к предложению →</span>

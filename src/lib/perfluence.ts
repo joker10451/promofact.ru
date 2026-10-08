@@ -610,11 +610,26 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
 
   // Дедуп по приоритету источника: ручные купоны перебивают фиды, Perfluence
   // перебивает внешние источники.
-  const { coupons, stats } = dedupeCoupons([
+  const sources: import("@/lib/dedupe").SourceBucket[] = [
     { source: "custom", coupons: customCoupons },
     { source: "supabase", coupons: supabaseCoupons },
     { source: "perfluence", coupons: perfluenceCoupons },
-  ]);
+  ];
+
+  // ADMITAD-2: Мерж Admitad source активен ТОЛЬКО при явном флаге ADMITAD_CATALOG_ENABLED === "true"
+  if (process.env.ADMITAD_CATALOG_ENABLED === "true") {
+    try {
+      const { fetchAdmitadCouponsCached } = await import("@/lib/admitadSupabase");
+      const admitadCoupons = await fetchAdmitadCouponsCached();
+      if (admitadCoupons.length > 0) {
+        sources.push({ source: "admitad", coupons: admitadCoupons });
+      }
+    } catch (e) {
+      console.error("[perfluence] admitad merge error:", e);
+    }
+  }
+
+  const { coupons, stats } = dedupeCoupons(sources);
 
   if (stats.dropped > 0) {
     console.log(
