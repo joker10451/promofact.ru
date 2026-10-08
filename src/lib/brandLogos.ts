@@ -208,6 +208,13 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     textColor: "text-white",
     domain: "platipomiru.com",
   },
+  "otp-bank": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/www.otpbank.ru?size=120",
+    emoji: "💳",
+    bgGradient: "from-lime-500 to-green-700",
+    textColor: "text-white",
+    domain: "www.otpbank.ru",
+  },
   "irnby": {
     logoUrl: "https://favicon.yandex.net/favicon/v2/ironbymironova.com?size=120",
     emoji: "👕",

@@ -276,6 +276,31 @@ export const PROMO_BANNERS: PromoBanner[] = [
     startsAt: "2026-10-01",
     endsAt: "2026-10-31",
   },
+  {
+    id: "otp-bank-debet-card-2026",
+    storeSlug: "otp-bank",
+    storeSlugs: ["otp-bank", "goldapple", "pyaterochka"],
+    creativeOnly: true,
+    link: "https://otpsert.prfl.me/sites/q3n058?erid=2RanynrNE1y",
+    image: "/images/otp-bank-debet-card.png",
+    imageAlt: "ОТП Банк: подарок за оформление дебетовой ОТП Карты",
+    imageWidth: 2600,
+    imageHeight: 1856,
+    title: "Подарок за оформление дебетовой ОТП Карты!",
+    subtitle: "",
+    badge: "Сертификат 2 000 ₽",
+    note: "Сертификат на 2000 ₽ в Золотое яблоко, Wildberries, Пятерочка, Giftery или Ozon",
+    cta: "Оформить карту",
+    exactCopy: `Подарок за оформление дебетовой ОТП Карты!
+
+Закажите карту по ссылке https://otpsert.prfl.me/sites/q3n058?erid=2RanynrNE1y и получите сертификат на 2000 ₽ в Золотое яблоко, Wildberries, Пятерочка, Giftery или Ozon.
+
+Реклама. АО «ОТП Банк» ИНН: 7708001614 Сайт: https://www.otpbank.ru/`,
+    ordText:
+      "Реклама. АО «ОТП Банк» ИНН: 7708001614 Сайт: https://www.otpbank.ru/ erid: 2RanynrNE1y",
+    startsAt: "2026-10-01",
+    endsAt: "2026-11-30",
+  },
 ];
 
 /** Момент начала показа (мс). */

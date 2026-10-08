@@ -281,6 +281,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://platipomiru.com/",
     "activeBloggers": 1448
   },
+  "otp-bank": {
+    "id": 4700,
+    "slug": "otp-bank",
+    "name": "ОТП Банк",
+    "logo": "https://favicon.yandex.net/favicon/v2/www.otpbank.ru?size=120",
+    "category": "Сервисы и подписки",
+    "categorySlug": "servisy-i-podpiski",
+    "about": "ОТП Банк - один из ведущих универсальных банков России. Оформление дебетовых карт МИР с бесплатным обслуживанием и сертификатами на 2000 ₽ в подарок.",
+    "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
+    "site": "https://www.otpbank.ru/",
+    "activeBloggers": 1520
+  },
   "poizon": {
     "id": 4176,
     "slug": "poizon",

@@ -1268,5 +1268,81 @@
         "widget_subscriber_codes": []
       }
     ]
+  },
+  {
+    "project": {
+      "id": 4700,
+      "logo": "https://favicon.yandex.net/favicon/v2/www.otpbank.ru?size=120",
+      "logo_widget": "",
+      "name": "ОТП Банк",
+      "type": "cpa",
+      "img": null,
+      "category_id": 260,
+      "category_name": "Сервисы и подписки",
+      "activeBloggers": 1520,
+      "product_info": "<p>ОТП Банк - дебетовая карта МИР с бесплатным обслуживанием и сертификатом на 2000 ₽ в подарок на выбор: Золотое яблоко, Wildberries, Пятерочка, Giftery или Ozon.</p>",
+      "subscribers_condition": "",
+      "site": "https://www.otpbank.ru/",
+      "info": "",
+      "advantages": [
+        "Бесплатное обслуживание дебетовой карты;",
+        "Подарочный сертификат на 2000 ₽ на выбор в любимые магазины;",
+        "Оформление онлайн за несколько минут."
+      ],
+      "subscriber_guide": "",
+      "regions": [
+        "Россия"
+      ],
+      "pf": 1,
+      "rsp": 500
+    },
+    "groups": [
+      {
+        "links_for_subscribers": [
+          {
+            "id": 18609100,
+            "title": "Оформить дебетовую ОТП Карту и получить сертификат на 2000 ₽",
+            "link": "https://otpsert.prfl.me/sites/q3n058?erid=2RanynrNE1y",
+            "landing_terms": ""
+          }
+        ],
+        "landing": [],
+        "promocodes": [
+          {
+            "project_id": 4700,
+            "code": "",
+            "is_barcode": false,
+            "image": "",
+            "comment": "Подарок за оформление дебетовой ОТП Карты: сертификат на 2000 ₽ в Золотое яблоко, Wildberries, Пятерочка, Giftery или Ozon",
+            "date": "30.11.2026 23:59",
+            "group": "",
+            "is_hit": true,
+            "is_hiting": true,
+            "hit_custom_text": "Подарок",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "bonus_id": 18050,
+            "is_universal": false,
+            "name": "Сертификат на 2000 ₽ в подарок за оформление дебетовой ОТП Карты",
+            "promo_terms": "<ul><li>Закажите карту по ссылке и получите сертификат на 2000 ₽ в Золотое яблоко, Wildberries, Пятерочка, Giftery или Ozon</li><li>Сертификат отправляется после совершения первой покупки от 100 ₽</li></ul>",
+            "region_promo": [
+              "RU"
+            ],
+            "repeat_order": false,
+            "post_id": 17295050,
+            "ord_marker": "2RanynrNE1y",
+            "ord_custom_text": "Реклама. АО «ОТП Банк» ИНН: 7708001614 Сайт: https://www.otpbank.ru/",
+            "discount": "2000 ₽",
+            "btn_text": "Оформить карту",
+            "show": "",
+            "expires": "30.11.2026 23:59"
+          }
+        ],
+        "has_widget_subscribers_promo": false,
+        "widget_subscribers_codes_count": 0,
+        "widget_subscriber_codes": [],
+        "ord_marker": "2RanynrNE1y"
+      }
+    ]
   }
 ]

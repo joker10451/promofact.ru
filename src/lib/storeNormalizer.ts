@@ -181,6 +181,11 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
     category: "Сервисы и подписки",
     categorySlug: "servisy-i-podpiski",
   },
+  "otp-bank": {
+    name: "ОТП Банк",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+  },
   "fmart": {
     name: "FMART",
     category: "Цветы",

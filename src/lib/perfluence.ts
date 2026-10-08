@@ -203,6 +203,7 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   4025: { slug: "detskie-platezhnye-aksessuary-ot-sbera", name: "Детские платёжные аксессуары от Сбера" },
   4264: { slug: "pyaterochka", name: "Пятёрочка Доставка" },
   4362: { slug: "plati-po-miru", name: "Плати по миру" },
+  4700: { slug: "otp-bank", name: "ОТП Банк" },
   3000: { slug: "tutu", name: "Туту" },
 };
 

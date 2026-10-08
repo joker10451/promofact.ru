@@ -240,6 +240,10 @@ export const BRAND_CATEGORY: Record<string, string> = {
   winline: "razvlecheniya",
 
   // Сервисы и подписки
+  "отп банк": "servisy-i-podpiski",
+  отпбанк: "servisy-i-podpiski",
+  "otp bank": "servisy-i-podpiski",
+  "otp-bank": "servisy-i-podpiski",
   kaspersky: "servisy-i-podpiski",
   pro32: "servisy-i-podpiski",
   "яндекс плюс": "servisy-i-podpiski",
