@@ -23,11 +23,13 @@ export default function YandexMetrika() {
   // C3: Отслеживание клиентских переходов App Router (SPA route tracking).
   // Первый рендер пропускается, так как первичный просмотр фиксируется при вызове init.
   // Последующие изменения пути отправляют ym('hit', sanitizedPath).
+  // При отказе пользователя (consent === "declined") вызовы ym полностью блокируются.
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
+    if (isDeclined || getConsent() === "declined") return;
     const w = window as unknown as {
       ym?: (id: number, method: string, url: string) => void;
     };
@@ -35,7 +37,7 @@ export default function YandexMetrika() {
       const sanitized = sanitizeAnalyticsPath(pathname);
       w.ym(YM_ID, "hit", sanitized);
     }
-  }, [pathname]);
+  }, [pathname, isDeclined]);
 
   if (!YM_ID || isDeclined) return null;
 

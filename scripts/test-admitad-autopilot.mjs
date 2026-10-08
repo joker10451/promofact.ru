@@ -604,6 +604,24 @@ console.log("===================================================================
   console.log("✓ Тест 24: Failure & RPC Failure paths preserve Last Success baseline (PASS)");
 }
 
+// 25. Тест: Security Migration 0006 & Metrika Declined Consent SPA Protection (Section 1A, 1B)
+{
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+
+  // 1A: Проверка отсутствия SECURITY DEFINER в 0006
+  const sql0006 = fs.readFileSync(path.join(process.cwd(), "supabase/migrations/0006_security_hardening.sql"), "utf8");
+  assert.strictEqual(sql0006.toLowerCase().includes("security definer"), false, "0006 не должна содержать SECURITY DEFINER");
+  assert.ok(sql0006.toLowerCase().includes("set search_path = public"), "0006 обязана содержать set search_path = public");
+
+  // 1B: Проверка логики блокировки SPA в YandexMetrika.tsx
+  const ymCode = fs.readFileSync(path.join(process.cwd(), "src/components/YandexMetrika.tsx"), "utf8");
+  assert.ok(ymCode.includes('if (isDeclined || getConsent() === "declined") return;'), "SPA effect должен блокироваться при declined consent");
+
+  passed++;
+  console.log("✓ Тест 25: Security Migration 0006 search_path & Metrika Declined Consent SPA Protection (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/24 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/25 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");
