@@ -40,8 +40,8 @@ const DODO_ORD = "Реклама. ИП Гринев Денис Петрович,
 const LAVKA_LINK = "https://yalavka.prfl.me/sites/6twglo?erid=2RanykUgmfH";
 const LAVKA_ORD = "Реклама. ООО «Яндекс.Лавка», ИНН 9718101499. erid: 2RanykUgmfH";
 
-const PEREKRESTOK_LINK = "https://perekrestok.prfl.me/smart_zakupka/tqn1nj?erid=2RanynaQ9oq";
-const PEREKRESTOK_ORD = "Реклама. ООО «ИКС 5 ДИДЖИТАЛ», ИНН 9722010808. erid: 2RanynaQ9oq";
+const PEREKRESTOK_LINK = "https://perekrestok.prfl.me/sites/rlj0bi?erid=2Ranyo8ekC3";
+const PEREKRESTOK_ORD = "Реклама. ООО «ИКС 5 ДИДЖИТАЛ», ИНН 9722010808. erid: 2Ranyo8ekC3";
 
 const VKUSVILL_LINK = "https://vksvl.prfl.me/smart_zakupka/ekg3pn?erid=2RanynjH547";
 const VKUSVILL_ORD =

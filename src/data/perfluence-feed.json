@@ -1162,12 +1162,41 @@
             {
               "id": 18590430,
               "title": "Оформить заказ со скидкой в приложении Перекрёсток Доставка",
-              "link": "https://perekrestok.prfl.me/sites/os23jr?source=js-widget&source_id=8842",
+              "link": "https://perekrestok.prfl.me/sites/rlj0bi?source=js-widget&source_id=8842",
               "landing_terms": ""
             }
           ],
           "landing": [],
           "promocodes": [
+            {
+              "project_id": 4328,
+              "code": "945J8BMGJ",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 650 ₽ на заказ в приложении Перекрёсток Доставка",
+              "date": "08.10.2026 23:59",
+              "group": "",
+              "is_hit": true,
+              "is_hiting": true,
+              "hit_custom_text": "Флеш-акция",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17290,
+              "is_universal": true,
+              "name": "Скидка 650 ₽ на заказ в приложении Перекрёсток Доставка",
+              "promo_terms": "<ul><li>Действует только 8 октября до 23:59</li></ul>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17236040,
+              "ord_marker": "2Ranyo8ekC3",
+              "ord_custom_text": "Реклама. ООО \"ИКС 5 ДИДЖИТАЛ\", ИНН 9722010808",
+              "discount": 650,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17236040&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "08.10.2026 23:59"
+            },
             {
               "project_id": 4328,
               "code": "173T5R64A",
@@ -1190,7 +1219,7 @@
               ],
               "repeat_order": true,
               "post_id": 17236040,
-              "ord_marker": "2Ranym26egb",
+              "ord_marker": "2Ranyo8ekC3",
               "ord_custom_text": "Реклама. ООО \"ИКС 5 ДИДЖИТАЛ\", ИНН 9722010808",
               "discount": 99,
               "btn_text": null,
@@ -1219,7 +1248,7 @@
               ],
               "repeat_order": false,
               "post_id": 17236040,
-              "ord_marker": "2Ranym26egb",
+              "ord_marker": "2Ranyo8ekC3",
               "ord_custom_text": "Реклама. ООО \"ИКС 5 ДИДЖИТАЛ\", ИНН 9722010808",
               "discount": null,
               "btn_text": null,
@@ -1248,7 +1277,7 @@
               ],
               "repeat_order": false,
               "post_id": 17236040,
-              "ord_marker": "2Ranym26egb",
+              "ord_marker": "2Ranyo8ekC3",
               "ord_custom_text": "Реклама. ООО \"ИКС 5 ДИДЖИТАЛ\", ИНН 9722010808",
               "discount": null,
               "btn_text": null,
@@ -1259,7 +1288,7 @@
           "has_widget_subscribers_promo": false,
           "widget_subscribers_codes_count": 0,
           "widget_subscriber_codes": [],
-          "ord_marker": "2Ranym26egb"
+          "ord_marker": "2Ranyo8ekC3"
         }
       ]
     },

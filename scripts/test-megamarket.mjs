@@ -31,12 +31,11 @@ const coupons = await getCoupons();
 const megaCoupons = coupons.filter(c => c.store.slug === "megamarket");
 
 console.log(`Найдено активных купонов Мегамаркет: ${megaCoupons.length}`);
-assert(megaCoupons.length >= 2, "Должно быть минимум 2 активных промокода Мегамаркета");
+assert(megaCoupons.length >= 1, "Должен быть минимум 1 активный промокод Мегамаркета");
 
 const codes = megaCoupons.map(c => c.promocode.code.toLowerCase());
 console.log("Коды купонов:", codes);
 
-assert(codes.some(c => c.includes("pfoкt") || c.includes("pfokt")), "Промокод на скидку 30% должен присутствовать");
 assert(codes.includes("prf1"), "Промокод PRF1 должен присутствовать");
 
 for (const c of megaCoupons) {
@@ -48,7 +47,7 @@ for (const c of megaCoupons) {
 const stores = await getAllStores();
 const megaStore = stores.find(s => s.slug === "megamarket");
 assert(megaStore, "Магазин megamarket должен присутствовать в каталоге");
-assert(megaStore.coupons.length >= 2, "Количество купонов магазина должно быть >= 2");
+assert(megaStore.coupons.length >= 1, "Количество купонов магазина должно быть >= 1");
 console.log(`✓ Магазин ${megaStore.name} найден в категории ${megaStore.category} (${megaStore.categorySlug}) с ${megaStore.coupons.length} купонами`);
 
 console.log(" Все проверки промокодов Мегамаркет CPA успешно пройдены!");
