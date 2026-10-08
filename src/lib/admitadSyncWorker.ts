@@ -31,10 +31,11 @@ import {
   type SyncAggregates,
 } from "@/lib/admitadAutopilot";
 import {
-  upsertAdmitadSnapshot,
-  deactivateStaleSnapshots,
+  upsertAdmitadStaging,
+  publishAdmitadSnapshot,
   getActiveSnapshotCount,
-  saveAdmitadSyncMeta,
+  updateAdmitadSyncDiagnostics,
+  recordAdmitadSyncFailure,
   type AdmitadRowInput,
 } from "@/lib/admitadSupabase";
 import type { AdmitadApiCampaign } from "@/lib/admitadApi";
@@ -57,12 +58,9 @@ export async function runAdmitadSafeSync(options: {
   const config = getAdmitadConfig();
   if (!config) {
     const error = "ADMITAD_CLIENT_ID или ADMITAD_CLIENT_SECRET не настроены";
-    await saveAdmitadSyncMeta({
-      last_attempt_at: new Date().toISOString(),
-      last_success_at: null,
-      last_success_count: 0,
-      last_status: "FAILED",
-      last_error_code: "AUTH_CONFIG_MISSING",
+    await recordAdmitadSyncFailure({
+      status: "FAILED",
+      errorCode: "AUTH_CONFIG_MISSING",
       duration_ms: Date.now() - startTime,
     });
     return { success: false, status: "FAILED", error };
@@ -76,12 +74,9 @@ export async function runAdmitadSafeSync(options: {
 
     if (!websiteResult.website) {
       const error = websiteResult.error || "Площадка не найдена";
-      await saveAdmitadSyncMeta({
-        last_attempt_at: new Date().toISOString(),
-        last_success_at: null,
-        last_success_count: 0,
-        last_status: "FAILED",
-        last_error_code: websiteResult.resolution,
+      await recordAdmitadSyncFailure({
+        status: "FAILED",
+        errorCode: websiteResult.resolution,
         duration_ms: Date.now() - startTime,
       });
       return { success: false, status: "FAILED", error };
@@ -215,12 +210,9 @@ export async function runAdmitadSafeSync(options: {
 
     if (!safetyCheck.safe) {
       console.warn(`[admitad/sync] 🚨 ${safetyCheck.reason}. Переход в режим SYNC_DEGRADED без изменения базы.`);
-      await saveAdmitadSyncMeta({
-        last_attempt_at: nowIso,
-        last_success_at: null,
-        last_success_count: previousCount,
-        last_status: "DEGRADED",
-        last_error_code: "CATASTROPHIC_DROP",
+      await recordAdmitadSyncFailure({
+        status: "DEGRADED",
+        errorCode: "CATASTROPHIC_DROP",
         duration_ms: Date.now() - startTime,
         details: {
           previousCount,
@@ -235,16 +227,21 @@ export async function runAdmitadSafeSync(options: {
       };
     }
 
-    // 6. Запись нового снимка в Supabase (если не включен режим skipDbWrite)
+    // 6. Запись нового поколения в Staging (если не включен режим skipDbWrite)
     let written = 0;
-    let deactivated = 0;
+    let published = 0;
 
     if (!options.skipDbWrite) {
-      written = await upsertAdmitadSnapshot(rowsToUpsert);
+      // B6: Подготовка пишет ТОЛЬКО в admitad_coupons_staging. Боевая таблица не тронута.
+      written = await upsertAdmitadStaging(rowsToUpsert, syncRunId);
 
-      // 7. Деактивация устаревших записей (Stale Deactivation)
-      // Выполняется ТОЛЬКО после успешной записи текущего снимка
-      deactivated = await deactivateStaleSnapshots(syncRunId);
+      // 7. Транзакционная публикация нового поколения через PostgreSQL RPC (B3, Section 6)
+      // Передаем rowsToUpsert.length (Total Count поколения в staging)
+      const pubResult = await publishAdmitadSnapshot(syncRunId, rowsToUpsert.length);
+      if (!pubResult.success) {
+        throw new Error(`Atomic publish RPC failed: ${pubResult.error}`);
+      }
+      published = pubResult.publishedCount;
     }
 
     const duration = Date.now() - startTime;
@@ -261,24 +258,19 @@ export async function runAdmitadSafeSync(options: {
       duplicates_vs_perfluence: 0,
       written,
       updated: written,
-      deactivated,
+      deactivated: 0,
       quarantined: quarantinedCount,
       duration_ms: duration,
     };
 
-    // 8. Сохранение метаданных успешной синхронизации
-    await saveAdmitadSyncMeta({
-      last_attempt_at: nowIso,
-      last_success_at: nowIso,
-      last_success_count: publishableCount,
-      last_status: "SUCCESS",
-      last_error_code: null,
+    // 8. Обновление диагностических метаданных (authoritative last_success_* уже записаны RPC, Section 9)
+    await updateAdmitadSyncDiagnostics({
       duration_ms: duration,
       details: aggregates as unknown as Record<string, unknown>,
     });
 
     console.log(
-      `[admitad/sync] ✓ Успешно завершено: программ ${programs.length}, купонов ${apiCoupons.length}, к публикации ${publishableCount}, записано ${written}, деактивировано ${deactivated} (${duration}мс)`
+      `[admitad/sync] ✓ Успешно завершено (Atomic): программ ${programs.length}, купонов ${apiCoupons.length}, к публикации ${publishableCount}, staged ${written}, published ${published} (${duration}мс)`
     );
 
     return {
@@ -289,12 +281,9 @@ export async function runAdmitadSafeSync(options: {
   } catch (error) {
     const errorMsg = (error as Error).message;
     console.error("[admitad/sync] 🚨 Ошибка выполнения синхронизации:", errorMsg);
-    await saveAdmitadSyncMeta({
-      last_attempt_at: new Date().toISOString(),
-      last_success_at: null,
-      last_success_count: 0,
-      last_status: "FAILED",
-      last_error_code: "SYNC_EXCEPTION",
+    await recordAdmitadSyncFailure({
+      status: "FAILED",
+      errorCode: "SYNC_EXCEPTION",
       duration_ms: Date.now() - startTime,
       details: { error: errorMsg },
     });
