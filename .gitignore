@@ -72,6 +72,10 @@ scripts/post-*.mjs
 ADMITAD_API_DRY_RUN_REPORT.md
 REVENUE_ATTRIBUTION_AUDIT.md
 REVENUE_ATTRIBUTION_DATA.csv
+# Admitad local snapshot & sync metadata (runtime state, never commit to git)
+/src/data/admitad-snapshot.json
+/src/data/admitad-sync-meta.json
+/data/local/
 # Локальная конфигурация запуска дев-сервера
 /.claude/
 .youtube-token.json
