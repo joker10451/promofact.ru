@@ -652,6 +652,18 @@ export interface StoreMappingResult {
  * Разрешены подтвержденные строковые алиасы брендов.
  */
 export const EXPLICIT_STORE_MAPPINGS: Record<string, { slug: string; name: string }> = {
+  // Подтверждённые живым dry-run ID программ Admitad (площадка 2990501)
+  "25224": { slug: "yandeks-puteshestviya", name: "Яндекс Путешествия" },
+  "яндекс.путешествия": { slug: "yandeks-puteshestviya", name: "Яндекс Путешествия" },
+  "яндекс путешествия": { slug: "yandeks-puteshestviya", name: "Яндекс Путешествия" },
+  "1667": { slug: "iv-roshe", name: "Ив Роше" },
+  "yves rocher": { slug: "iv-roshe", name: "Ив Роше" },
+  "141770": { slug: "yandex-plus", name: "Яндекс Плюс" },
+  "яндекс плюс": { slug: "yandex-plus", name: "Яндекс Плюс" },
+  "яндекс плюс ru": { slug: "yandex-plus", name: "Яндекс Плюс" },
+  "118265": { slug: "t-puteshestviya-oteli", name: "Т-Путешествия Отели" },
+  "отели в т-банке ru": { slug: "t-puteshestviya-oteli", name: "Т-Путешествия Отели" },
+  "45863": { slug: "premier", name: "PREMIER" },
   "premier": { slug: "premier", name: "PREMIER" },
   "туту": { slug: "tutu", name: "Туту" },
   "tutu": { slug: "tutu", name: "Туту" },
