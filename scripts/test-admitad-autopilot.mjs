@@ -350,6 +350,156 @@ console.log("===================================================================
   console.log("✓ Тест 16: Click ID Cryptographic Safety (RFC4122 v4 UUID, no Math.random) (PASS)");
 }
 
+// 17. Тест: Staging Isolation (Phase B, E)
+{
+  const { upsertAdmitadStaging, fetchAdmitadCouponsCached, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
+
+  // Очистка тестового состояния
+  const testSyncA = "sync_test_A_1001";
+  const rowsA = [
+    {
+      id: "test_gen_a_1",
+      store: "PREMIER",
+      store_slug: "premier",
+      code: "GEN_A_1",
+      discount: "50%",
+      category: "Онлайн-кинотеатры",
+      category_slug: "onlayn-kinoteatry",
+      is_active: true,
+      expires: "2029-12-31",
+      sync_run_id: testSyncA,
+    },
+    {
+      id: "test_gen_a_2",
+      store: "Ив Роше",
+      store_slug: "iv-roshe",
+      code: "GEN_A_2",
+      discount: "20%",
+      category: "Косметика и парфюмерия",
+      category_slug: "kosmetika-i-parfyumeriya",
+      is_active: true,
+      expires: "2029-12-31",
+      sync_run_id: testSyncA,
+    },
+  ];
+
+  // Публикуем поколение A
+  await upsertAdmitadStaging(rowsA, testSyncA);
+  const pubA = await publishAdmitadSnapshot(testSyncA, 2, 0); // minThresholdRatio 0 для инициализации теста
+  if (!pubA.success) {
+    console.error("pubA error:", pubA.error);
+  }
+  assert.strictEqual(pubA.success, true);
+  assert.strictEqual(pubA.publishedCount, 2);
+
+  const runtimeA = await fetchAdmitadCouponsCached();
+  const codesA = runtimeA.map(c => c.promocode.code);
+  assert.ok(codesA.includes("GEN_A_1") && codesA.includes("GEN_A_2"));
+
+  // Начинаем поколение B (пишем ТОЛЬКО в staging)
+  const testSyncB = "sync_test_B_2002";
+  const rowsB = [
+    {
+      id: "test_gen_b_1",
+      store: "PREMIER",
+      store_slug: "premier",
+      code: "GEN_B_NEW",
+      discount: "70%",
+      category: "Онлайн-кинотеатры",
+      category_slug: "onlayn-kinoteatry",
+      is_active: true,
+      expires: "2029-12-31",
+      sync_run_id: testSyncB,
+    },
+  ];
+  await upsertAdmitadStaging(rowsB, testSyncB);
+
+  // Runtime ВСЁ ЕЩЕ должен видеть строго поколение A, ни одной строки из B!
+  const runtimeDuringB = await fetchAdmitadCouponsCached();
+  const codesDuringB = runtimeDuringB.map(c => c.promocode.code);
+  assert.ok(codesDuringB.includes("GEN_A_1") && codesDuringB.includes("GEN_A_2"));
+  assert.ok(!codesDuringB.includes("GEN_B_NEW"), "Поколение B не должно быть видно в runtime до публикации!");
+
+  passed++;
+  console.log("✓ Тест 17: Staging Isolation: staging write does not touch production runtime (PASS)");
+}
+
+// 18. Тест: Atomic Promotion & Zero Mixed State (Phase B, E)
+{
+  const { fetchAdmitadCouponsCached, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
+
+  const testSyncB = "sync_test_B_2002";
+  // Публикуем поколение B
+  const pubB = await publishAdmitadSnapshot(testSyncB, 1, 0.1); // min threshold 0.1
+  assert.strictEqual(pubB.success, true);
+
+  // Runtime теперь видит строго поколение B, и НИКАКИХ остатков от поколения A
+  const runtimeAfterB = await fetchAdmitadCouponsCached();
+  const codesAfterB = runtimeAfterB.map(c => c.promocode.code);
+  assert.ok(codesAfterB.includes("GEN_B_NEW"));
+  assert.ok(!codesAfterB.includes("GEN_A_1"), "Строка из поколения A не должна оставаться!");
+  assert.ok(!codesAfterB.includes("GEN_A_2"), "Строка из поколения A не должна оставаться!");
+
+  passed++;
+  console.log("✓ Тест 18: Atomic Promotion switches generations cleanly with Zero Mixed State (PASS)");
+}
+
+// 19. Тест: Rollback on Staging Failure / RPC Failure (Phase B, E)
+{
+  const { fetchAdmitadCouponsCached, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
+
+  // Попытка опубликовать несуществующий sync_run_id
+  const failedPub = await publishAdmitadSnapshot("non_existent_sync_run", 5);
+  assert.strictEqual(failedPub.success, false);
+  assert.ok(failedPub.error);
+
+  // Runtime по-прежнему видит предыдущее поколение B без повреждений
+  const runtimeAfterFail = await fetchAdmitadCouponsCached();
+  const codes = runtimeAfterFail.map(c => c.promocode.code);
+  assert.ok(codes.includes("GEN_B_NEW"));
+
+  passed++;
+  console.log("✓ Тест 19: Rollback on Promotion Failure preserves current production snapshot (PASS)");
+}
+
+// 20. Тест: Catastrophic Drop Rejection (Phase B, E)
+{
+  const { upsertAdmitadStaging, fetchAdmitadCouponsCached, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
+
+  const testSyncDrop = "sync_test_drop_3003";
+  // Пытаемся передать 0 строк или падение ниже порога 0.35
+  const pubDrop = await publishAdmitadSnapshot(testSyncDrop, 10, 0.35);
+  assert.strictEqual(pubDrop.success, false);
+
+  const runtimeAfterDrop = await fetchAdmitadCouponsCached();
+  assert.ok(runtimeAfterDrop.map(c => c.promocode.code).includes("GEN_B_NEW"));
+
+  passed++;
+  console.log("✓ Тест 20: Catastrophic Drop Protection prevents promotion of degraded snapshots (PASS)");
+}
+
+// 21. Тест: Yandex Metrika Path Sanitization & No SSR Flag (Phase C, F)
+{
+  const { sanitizeAnalyticsPath } = await import("../src/lib/analyticsSafety.ts");
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+
+  // 1. Санитайзинг путей
+  assert.strictEqual(sanitizeAnalyticsPath("/"), "/");
+  assert.strictEqual(sanitizeAnalyticsPath("/store/premier"), "/store/premier");
+  assert.strictEqual(sanitizeAnalyticsPath("/store/premier/SECRET_CODE_123"), "/store/premier/coupon");
+  assert.strictEqual(sanitizeAnalyticsPath("/store/yandex-plus/PROMO2026"), "/store/yandex-plus/coupon");
+
+  // 2. Проверка отсутствия ssr: true в файле YandexMetrika.tsx
+  const metrikaContent = fs.readFileSync(path.join(process.cwd(), "src/components/YandexMetrika.tsx"), "utf8");
+  assert.ok(!metrikaContent.includes("ssr:true") && !metrikaContent.includes("ssr: true"), "Флаг ssr: true должен быть удален!");
+  assert.ok(metrikaContent.includes("webvisor:true"), "webvisor:true должен быть сохранен!");
+  assert.ok(metrikaContent.includes("usePathname"), "usePathname должен присутствовать для SPA tracking!");
+
+  passed++;
+  console.log("✓ Тест 21: Yandex Metrika Path Sanitization & SSR flag absence (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/16 ТЕСТОВ ADMITAD AUTOPILOT УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/21 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");

@@ -1,12 +1,17 @@
 "use client";
 
 import Script from "next/script";
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { getConsent, onConsentChange } from "@/lib/cookieConsent";
+import { sanitizeAnalyticsPath } from "@/lib/analyticsSafety";
 
 const YM_ID = Number(process.env.NEXT_PUBLIC_YM_ID ?? "111247117");
 
 export default function YandexMetrika() {
+  const pathname = usePathname();
+  const isFirstRender = useRef(true);
+
   // Счётчик Яндекс.Метрики загружается по умолчанию для корректного сбора
   // статистики посещений и вебвизора, отключается только при явном отказе (declined)
   const isDeclined = useSyncExternalStore(
@@ -15,11 +20,29 @@ export default function YandexMetrika() {
     () => false,
   );
 
+  // C3: Отслеживание клиентских переходов App Router (SPA route tracking).
+  // Первый рендер пропускается, так как первичный просмотр фиксируется при вызове init.
+  // Последующие изменения пути отправляют ym('hit', sanitizedPath).
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const w = window as unknown as {
+      ym?: (id: number, method: string, url: string) => void;
+    };
+    if (typeof w.ym === "function" && pathname) {
+      const sanitized = sanitizeAnalyticsPath(pathname);
+      w.ym(YM_ID, "hit", sanitized);
+    }
+  }, [pathname]);
+
   if (!YM_ID || isDeclined) return null;
+
   return (
     <>
       <Script id="yandex-metrika" strategy="afterInteractive">
-        {`(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');ym(${YM_ID},'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLayer',referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true});`}
+        {`(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');ym(${YM_ID},'init',{webvisor:true,clickmap:true,ecommerce:'dataLayer',referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true});`}
       </Script>
       <noscript>
         <div>

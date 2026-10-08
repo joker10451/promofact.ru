@@ -31,8 +31,8 @@ import {
   type SyncAggregates,
 } from "@/lib/admitadAutopilot";
 import {
-  upsertAdmitadSnapshot,
-  deactivateStaleSnapshots,
+  upsertAdmitadStaging,
+  publishAdmitadSnapshot,
   getActiveSnapshotCount,
   saveAdmitadSyncMeta,
   type AdmitadRowInput,
@@ -235,16 +235,20 @@ export async function runAdmitadSafeSync(options: {
       };
     }
 
-    // 6. Запись нового снимка в Supabase (если не включен режим skipDbWrite)
+    // 6. Запись нового поколения в Staging (если не включен режим skipDbWrite)
     let written = 0;
-    let deactivated = 0;
+    let published = 0;
 
     if (!options.skipDbWrite) {
-      written = await upsertAdmitadSnapshot(rowsToUpsert);
+      // B6: Подготовка пишет ТОЛЬКО в admitad_coupons_staging. Боевая таблица не тронута.
+      written = await upsertAdmitadStaging(rowsToUpsert, syncRunId);
 
-      // 7. Деактивация устаревших записей (Stale Deactivation)
-      // Выполняется ТОЛЬКО после успешной записи текущего снимка
-      deactivated = await deactivateStaleSnapshots(syncRunId);
+      // 7. Транзакционная публикация нового поколения через PostgreSQL RPC (B3)
+      const pubResult = await publishAdmitadSnapshot(syncRunId, publishableCount);
+      if (!pubResult.success) {
+        throw new Error(`Atomic publish RPC failed: ${pubResult.error}`);
+      }
+      published = pubResult.publishedCount;
     }
 
     const duration = Date.now() - startTime;
@@ -261,7 +265,7 @@ export async function runAdmitadSafeSync(options: {
       duplicates_vs_perfluence: 0,
       written,
       updated: written,
-      deactivated,
+      deactivated: 0,
       quarantined: quarantinedCount,
       duration_ms: duration,
     };
@@ -271,6 +275,7 @@ export async function runAdmitadSafeSync(options: {
       last_attempt_at: nowIso,
       last_success_at: nowIso,
       last_success_count: publishableCount,
+      last_success_sync_run_id: syncRunId,
       last_status: "SUCCESS",
       last_error_code: null,
       duration_ms: duration,
@@ -278,7 +283,7 @@ export async function runAdmitadSafeSync(options: {
     });
 
     console.log(
-      `[admitad/sync] ✓ Успешно завершено: программ ${programs.length}, купонов ${apiCoupons.length}, к публикации ${publishableCount}, записано ${written}, деактивировано ${deactivated} (${duration}мс)`
+      `[admitad/sync] ✓ Успешно завершено (Atomic): программ ${programs.length}, купонов ${apiCoupons.length}, к публикации ${publishableCount}, staged ${written}, published ${published} (${duration}мс)`
     );
 
     return {
