@@ -500,6 +500,106 @@ console.log("===================================================================
   console.log("✓ Тест 21: Yandex Metrika Path Sanitization & SSR flag absence (PASS)");
 }
 
+// 22. Тест: SQL Security Hardening & Permissions (Section 1, 2, 3)
+{
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+  const sql = fs.readFileSync(path.join(process.cwd(), "supabase/migrations/0005_admitad_atomic_publish.sql"), "utf8");
+
+  // Проверка RPC сигнатуры и REVOKE
+  assert.ok(sql.includes("revoke all on function public.publish_admitad_snapshot(text, integer, numeric) from PUBLIC;"));
+  assert.ok(sql.includes("revoke all on function public.publish_admitad_snapshot(text, integer, numeric) from anon;"));
+  assert.ok(sql.includes("revoke all on function public.publish_admitad_snapshot(text, integer, numeric) from authenticated;"));
+  assert.ok(sql.includes("grant execute on function public.publish_admitad_snapshot(text, integer, numeric) to service_role;"));
+
+  // Проверка прав staging и sync_meta
+  assert.ok(sql.includes("revoke all on public.admitad_coupons_staging from PUBLIC, anon, authenticated;"));
+  assert.ok(sql.includes("alter table if exists public.admitad_sync_meta enable row level security;"));
+  assert.ok(sql.includes("revoke all on public.admitad_sync_meta from PUBLIC, anon, authenticated;"));
+
+  passed++;
+  console.log("✓ Тест 22: SQL Migration Security Hardening: Revoke public RPC & RLS (PASS)");
+}
+
+// 23. Тест: Count Semantics & Catastrophic Threshold (Section 4, 5, 6, 7, 15)
+{
+  const { upsertAdmitadStaging, publishAdmitadSnapshot, getAdmitadSyncMeta } = await import("../src/lib/admitadSupabase.ts");
+
+  const testSyncGen = "sync_test_counts_4004";
+  const rows = [];
+  // Создаем 524 строк всего, из них только 13 active (publishable)
+  for (let i = 0; i < 524; i++) {
+    rows.push({
+      id: `count_test_${i}`,
+      store: "PREMIER",
+      store_slug: "premier",
+      code: `CODE_${i}`,
+      discount: "500 ₽",
+      category: "Онлайн-кинотеатры",
+      category_slug: "onlayn-kinoteatry",
+      is_active: i < 13, // только 13 активных
+      expires: "2029-12-31",
+      sync_run_id: testSyncGen,
+    });
+  }
+
+  await upsertAdmitadStaging(rows, testSyncGen);
+
+  // Передаем Total Count = 524 (Section 6)
+  const pubRes = await publishAdmitadSnapshot(testSyncGen, 524, 0);
+  assert.strictEqual(pubRes.success, true);
+  assert.strictEqual(pubRes.publishedCount, 13);
+  assert.strictEqual(pubRes.totalCount, 524);
+
+  const meta = await getAdmitadSyncMeta();
+  assert.strictEqual(meta?.last_success_count, 13);
+  assert.strictEqual(meta?.last_success_total_count, 524);
+  assert.strictEqual(meta?.last_success_sync_run_id, testSyncGen);
+
+  passed++;
+  console.log("✓ Тест 23: Count Semantics: Total (524) vs Publishable (13) strictly distinguished (PASS)");
+}
+
+// 24. Тест: Failure Paths Preserve Last Success Baseline (Section 10, 16, 17)
+{
+  const { recordAdmitadSyncFailure, getAdmitadSyncMeta, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
+
+  const baseline = await getAdmitadSyncMeta();
+  assert.strictEqual(baseline?.last_success_sync_run_id, "sync_test_counts_4004");
+  assert.strictEqual(baseline?.last_success_count, 13);
+  assert.strictEqual(baseline?.last_success_total_count, 524);
+  const baselineSuccessAt = baseline?.last_success_at;
+
+  // Имитируем сбой выполнения синка (FAILED)
+  await recordAdmitadSyncFailure({
+    status: "FAILED",
+    errorCode: "NETWORK_TIMEOUT",
+    duration_ms: 1200,
+    details: { test: true },
+  });
+
+  const metaAfterFail = await getAdmitadSyncMeta();
+  // Поля успешного baseline ОБЯЗАНЫ сохраниться нетронутыми
+  assert.strictEqual(metaAfterFail?.last_status, "FAILED");
+  assert.strictEqual(metaAfterFail?.last_error_code, "NETWORK_TIMEOUT");
+  assert.strictEqual(metaAfterFail?.last_success_sync_run_id, "sync_test_counts_4004");
+  assert.strictEqual(metaAfterFail?.last_success_count, 13);
+  assert.strictEqual(metaAfterFail?.last_success_total_count, 524);
+  assert.strictEqual(metaAfterFail?.last_success_at, baselineSuccessAt);
+
+  // Имитируем сбой RPC
+  const failedRpc = await publishAdmitadSnapshot("non_existent_run", 100);
+  assert.strictEqual(failedRpc.success, false);
+
+  const metaAfterRpcFail = await getAdmitadSyncMeta();
+  assert.strictEqual(metaAfterRpcFail?.last_success_sync_run_id, "sync_test_counts_4004");
+  assert.strictEqual(metaAfterRpcFail?.last_success_count, 13);
+  assert.strictEqual(metaAfterRpcFail?.last_success_total_count, 524);
+
+  passed++;
+  console.log("✓ Тест 24: Failure & RPC Failure paths preserve Last Success baseline (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/21 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/24 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");

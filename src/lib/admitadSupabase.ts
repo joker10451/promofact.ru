@@ -269,9 +269,9 @@ export async function upsertAdmitadStaging(rows: AdmitadRowInput[], syncRunId: s
  */
 export async function publishAdmitadSnapshot(
   syncRunId: string,
-  expectedCount?: number,
+  expectedTotalCount?: number,
   minThresholdRatio = 0.35
-): Promise<{ success: boolean; publishedCount: number; error?: string }> {
+): Promise<{ success: boolean; publishedCount: number; totalCount?: number; error?: string }> {
   const supabase = getSupabaseAdmin();
 
   if (!supabase) {
@@ -288,15 +288,20 @@ export async function publishAdmitadSnapshot(
           throw new Error(`STAGING_EMPTY: No rows found for sync_run_id ${syncRunId}`);
         }
 
-        // Проверка ожидаемого количества
-        if (expectedCount !== undefined && generationRows.length < expectedCount) {
-          throw new Error(`STAGING_COUNT_MISMATCH: Expected ${expectedCount}, got ${generationRows.length}`);
+        const totalCount = generationRows.length;
+        const publishableRows = generationRows.filter((r) => r.is_active);
+        const publishableCount = publishableRows.length;
+
+        // Section 6: Точная проверка общего числа строк поколения (Total Count)
+        if (expectedTotalCount !== undefined && totalCount !== expectedTotalCount) {
+          throw new Error(`STAGING_COUNT_MISMATCH: Expected exactly ${expectedTotalCount}, got ${totalCount}`);
         }
 
-        // Проверка катастрофического падения
-        const prevCount = await getActiveSnapshotCount();
-        if (prevCount > 0 && generationRows.length < prevCount * minThresholdRatio) {
-          throw new Error(`CATASTROPHIC_DROP: Count ${generationRows.length} dropped below threshold of ${prevCount}`);
+        // Section 7: Проверка катастрофического падения сравнивает publishable (действующие), а не total
+        const prevMeta = await getAdmitadSyncMeta();
+        const prevPublishable = prevMeta?.last_success_count ?? (await getActiveSnapshotCount());
+        if (prevPublishable > 0 && publishableCount < prevPublishable * minThresholdRatio) {
+          throw new Error(`CATASTROPHIC_DROP: Count ${publishableCount} dropped below threshold of ${prevPublishable}`);
         }
 
         // Атомарная замена в локальный боевой файл
@@ -305,13 +310,29 @@ export async function publishAdmitadSnapshot(
         fs.writeFileSync(tempPath, JSON.stringify(generationRows, null, 2), "utf8");
         fs.renameSync(tempPath, LOCAL_SNAPSHOT_PATH);
 
+        // Section 8: Атомарная запись success метаданных
+        const nowIso = new Date().toISOString();
+        const currentMeta: AdmitadSyncMeta = {
+          last_attempt_at: nowIso,
+          last_success_at: nowIso,
+          last_success_count: publishableCount,
+          last_success_total_count: totalCount,
+          last_success_sync_run_id: syncRunId,
+          last_status: "SUCCESS",
+          last_error_code: null,
+          duration_ms: prevMeta?.duration_ms ?? 0,
+        };
+        fs.mkdirSync(path.dirname(LOCAL_META_PATH), { recursive: true });
+        fs.writeFileSync(LOCAL_META_PATH, JSON.stringify(currentMeta, null, 2), "utf8");
+
         // Очистка старых поколений в staging
         delete stagingData[syncRunId];
         fs.writeFileSync(LOCAL_STAGING_PATH, JSON.stringify(stagingData, null, 2), "utf8");
 
         return {
           success: true,
-          publishedCount: generationRows.length,
+          publishedCount: publishableCount,
+          totalCount,
         };
       } catch (e) {
         return {
@@ -327,7 +348,7 @@ export async function publishAdmitadSnapshot(
   try {
     const { data, error } = await supabase.rpc("publish_admitad_snapshot", {
       p_sync_run_id: syncRunId,
-      p_expected_count: expectedCount ?? null,
+      p_expected_total_count: expectedTotalCount ?? null,
       p_min_threshold_ratio: minThresholdRatio,
     });
 
@@ -336,10 +357,11 @@ export async function publishAdmitadSnapshot(
       return { success: false, publishedCount: 0, error: error.message };
     }
 
-    const res = data as { success?: boolean; published_count?: number };
+    const res = data as { success?: boolean; published_count?: number; total_count?: number };
     return {
       success: Boolean(res?.success),
       publishedCount: Number(res?.published_count || 0),
+      totalCount: Number(res?.total_count || 0),
     };
   } catch (e) {
     const msg = (e as Error).message;
@@ -399,6 +421,7 @@ export interface AdmitadSyncMeta {
   last_attempt_at: string;
   last_success_at: string | null;
   last_success_count: number;
+  last_success_total_count?: number;
   last_success_sync_run_id?: string | null;
   last_status: "SUCCESS" | "DEGRADED" | "FAILED";
   last_error_code: string | null;
@@ -420,6 +443,8 @@ export async function getAdmitadSyncMeta(): Promise<AdmitadSyncMeta | null> {
           last_attempt_at: data.last_attempt_at,
           last_success_at: data.last_success_at,
           last_success_count: Number(data.last_success_count || 0),
+          last_success_total_count: Number(data.last_success_total_count || 0),
+          last_success_sync_run_id: data.last_success_sync_run_id || null,
           last_status: data.last_status,
           last_error_code: data.last_error_code,
           duration_ms: Number(data.duration_ms || 0),
@@ -439,16 +464,150 @@ export async function getAdmitadSyncMeta(): Promise<AdmitadSyncMeta | null> {
   return null;
 }
 
+/**
+ * Section 9: Обновление только диагностических метрик после успешной атомарной публикации.
+ * НЕ затрагивает authoritative поля last_success_*, записанные RPC транзакцией.
+ */
+export async function updateAdmitadSyncDiagnostics(options: {
+  duration_ms: number;
+  details?: Record<string, unknown>;
+}): Promise<void> {
+  const supabase = getSupabaseAdmin();
+  if (supabase) {
+    try {
+      const { error } = await supabase
+        .from("admitad_sync_meta")
+        .update({
+          duration_ms: options.duration_ms,
+          details: options.details,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", "admitad_main");
+      if (error) {
+        console.warn("[admitad/supabase] diagnostic update warning:", error.message);
+      }
+      return;
+    } catch (e) {
+      console.warn("[admitad/supabase] diagnostic update warning:", e);
+      return;
+    }
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      if (fs.existsSync(LOCAL_META_PATH)) {
+        const meta = JSON.parse(fs.readFileSync(LOCAL_META_PATH, "utf8"));
+        meta.duration_ms = options.duration_ms;
+        meta.details = options.details;
+        fs.writeFileSync(LOCAL_META_PATH, JSON.stringify(meta, null, 2), "utf8");
+      }
+    } catch {}
+  }
+}
+
+/**
+ * Section 10: Фиксация неуспешного или деградировавшего запуска.
+ * ОБЯЗАНА сохранять предыдущие значения last_success_* нетронутыми!
+ */
+export async function recordAdmitadSyncFailure(options: {
+  status: "FAILED" | "DEGRADED";
+  errorCode: string | null;
+  duration_ms: number;
+  details?: Record<string, unknown>;
+}): Promise<void> {
+  const supabase = getSupabaseAdmin();
+  const nowIso = new Date().toISOString();
+
+  if (supabase) {
+    try {
+      // Сначала пытаемся обновить существующую строку, сохраняя baseline
+      const { data: existing, error: selectErr } = await supabase
+        .from("admitad_sync_meta")
+        .select("id")
+        .eq("id", "admitad_main")
+        .maybeSingle();
+
+      if (!selectErr && existing) {
+        const { error: updateErr } = await supabase
+          .from("admitad_sync_meta")
+          .update({
+            last_attempt_at: nowIso,
+            last_status: options.status,
+            last_error_code: options.errorCode,
+            duration_ms: options.duration_ms,
+            details: options.details,
+            updated_at: nowIso,
+          })
+          .eq("id", "admitad_main");
+        if (updateErr) throw updateErr;
+      } else {
+        // Если строки еще нет вообще
+        const { error: insertErr } = await supabase.from("admitad_sync_meta").insert({
+          id: "admitad_main",
+          last_attempt_at: nowIso,
+          last_success_at: null,
+          last_success_count: 0,
+          last_success_total_count: 0,
+          last_success_sync_run_id: null,
+          last_status: options.status,
+          last_error_code: options.errorCode,
+          duration_ms: options.duration_ms,
+          details: options.details,
+          updated_at: nowIso,
+        });
+        if (insertErr) throw insertErr;
+      }
+      return;
+    } catch (e) {
+      console.error("[admitad/supabase] record failure meta failed:", e);
+      if (process.env.NODE_ENV === "production") throw e;
+    }
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      let meta: AdmitadSyncMeta = {
+        last_attempt_at: nowIso,
+        last_success_at: null,
+        last_success_count: 0,
+        last_success_total_count: 0,
+        last_success_sync_run_id: null,
+        last_status: options.status,
+        last_error_code: options.errorCode,
+        duration_ms: options.duration_ms,
+        details: options.details,
+      };
+      if (fs.existsSync(LOCAL_META_PATH)) {
+        const prev = JSON.parse(fs.readFileSync(LOCAL_META_PATH, "utf8")) as AdmitadSyncMeta;
+        meta = {
+          ...prev,
+          last_attempt_at: nowIso,
+          last_status: options.status,
+          last_error_code: options.errorCode,
+          duration_ms: options.duration_ms,
+          details: options.details,
+        };
+      }
+      fs.mkdirSync(path.dirname(LOCAL_META_PATH), { recursive: true });
+      fs.writeFileSync(LOCAL_META_PATH, JSON.stringify(meta, null, 2), "utf8");
+    } catch {}
+  }
+}
+
 export async function saveAdmitadSyncMeta(meta: AdmitadSyncMeta): Promise<void> {
   const supabase = getSupabaseAdmin();
   if (supabase) {
     try {
-      await supabase.from("admitad_sync_meta").upsert({
+      const { error } = await supabase.from("admitad_sync_meta").upsert({
         id: "admitad_main",
         ...meta,
         updated_at: new Date().toISOString(),
       });
-      return; // При успешной записи в Supabase локальный файл не пишем (Section 12)
+      if (error) {
+        console.error("[admitad/supabase] save sync meta failed:", error.message);
+        throw error;
+      }
+      return;
     } catch (e) {
       console.error("[admitad/supabase] save sync meta failed:", e);
       if (process.env.NODE_ENV === "production") throw e;
