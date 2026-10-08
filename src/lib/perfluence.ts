@@ -599,28 +599,72 @@ function byScore(a: Coupon, b: Coupon): number {
  * сейчас нет активных купонов) — чтобы индексировать «промокод {магазин}» для
  * магазинов, чей код временно истёк.
  */
-async function fetchMergedCoupons(): Promise<Coupon[]> {
+interface BaseSourceBucket {
+  source: "custom" | "supabase" | "perfluence";
+  coupons: Coupon[];
+}
+
+/**
+ * Базовые стабильные источники каталога PromoFact (Perfluence, Supabase manual, Custom).
+ * Кэшируются долгосрочно (до смены версии фида syncMeta).
+ */
+async function fetchBaseSourceBuckets(): Promise<BaseSourceBucket[]> {
   const [perfluenceCoupons, supabaseCoupons] = await Promise.all([
     fetchData(),
     (await import("@/lib/supabaseCoupons")).fetchSupabaseCoupons(),
   ]);
 
   const customCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
-  const { dedupeCoupons } = await import("@/lib/dedupe");
 
-  // Дедуп по приоритету источника: ручные купоны перебивают фиды, Perfluence
-  // перебивает внешние источники.
-  const sources: import("@/lib/dedupe").SourceBucket[] = [
+  return [
     { source: "custom", coupons: customCoupons },
     { source: "supabase", coupons: supabaseCoupons },
     { source: "perfluence", coupons: perfluenceCoupons },
   ];
+}
 
-  // ADMITAD-2: Мерж Admitad source активен ТОЛЬКО при явном флаге ADMITAD_CATALOG_ENABLED === "true"
-  if (process.env.ADMITAD_CATALOG_ENABLED === "true") {
+const getCachedBaseSourceBuckets = unstable_cache(
+  fetchBaseSourceBuckets,
+  ["promofact", "base-source-buckets", syncMeta.lastSuccessSync || "initial"],
+  { revalidate: false },
+);
+
+/**
+ * Динамический снимок Admitad (ADMITAD-2.1).
+ * Кэшируется с revalidate: 900 (15 минут), что позволяет автоматически подхватывать
+ * свежий снимок Supabase без полной пересборки сайта.
+ */
+export const getCachedAdmitadCoupons = unstable_cache(
+  async (): Promise<Coupon[]> => {
+    if (process.env.ADMITAD_CATALOG_ENABLED !== "true") return [];
     try {
       const { fetchAdmitadCouponsCached } = await import("@/lib/admitadSupabase");
-      const admitadCoupons = await fetchAdmitadCouponsCached();
+      return await fetchAdmitadCouponsCached();
+    } catch (e) {
+      console.error("[perfluence] admitad snapshot read error:", e);
+      return [];
+    }
+  },
+  ["promofact", "admitad-snapshot-coupons"],
+  { revalidate: 900 },
+);
+
+/**
+ * Полный объединённый стек каталога со строгим приоритетом:
+ * custom > supabase > perfluence > admitad.
+ */
+export async function getCombinedCoupons(): Promise<Coupon[]> {
+  const baseBuckets = await getCachedBaseSourceBuckets();
+  const { dedupeCoupons } = await import("@/lib/dedupe");
+
+  const sources: import("@/lib/dedupe").SourceBucket[] = baseBuckets.map((b) => ({
+    source: b.source,
+    coupons: b.coupons,
+  }));
+
+  if (process.env.ADMITAD_CATALOG_ENABLED === "true") {
+    try {
+      const admitadCoupons = await getCachedAdmitadCoupons();
       if (admitadCoupons.length > 0) {
         sources.push({ source: "admitad", coupons: admitadCoupons });
       }
@@ -638,13 +682,6 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
     );
   }
 
-  // Логотипы проксируем здесь, на выходе всех источников: часть купонов
-  // Admitad приходит путями, где адрес CDN не переписывался, и на проде
-  // оставались прямые ссылки на cdn.admitad.com (их режет блокировщик).
-  //
-  // Там же дописываем erid в текст маркировки: карточка, лента Дзена и посты
-  // выводят только ordText, а у Perfluence erid лежит отдельно в ordMarker —
-  // на сайте маркировка показывалась без токена.
   return coupons.map((c) => {
     const logo = proxiedLogo(c.store.logo);
     const ordText = withErid(c.affiliate.ordText, c.affiliate.ordMarker);
@@ -657,21 +694,7 @@ async function fetchMergedCoupons(): Promise<Coupon[]> {
   });
 }
 
-/**
- * Единый снимок каталога для SSG/ISR. Без него каждая из сотен статических
- * страниц заново собирала все источники и запускала дедупликацию. Data Cache
- * разделяется между рендерами и воркерами Next.js, поэтому за сутки фиды
- * загружаются один раз, а все страницы получают один согласованный набор.
- *
- * `unstable_cache` остаётся совместимым с текущей конфигурацией Next 16 без
- * включения Cache Components. Ключ намеренно версионирован: при изменении
- * правил слияния достаточно сменить суффикс, чтобы не читать старый снимок.
- */
-const getCachedMergedCoupons = unstable_cache(
-  fetchMergedCoupons,
-  ["promofact", "merged-coupons", syncMeta.lastSuccessSync || "initial"],
-  { revalidate: false },
-);
+const getCachedMergedCoupons = getCombinedCoupons;
 
 function withErid(ordText: string, ordMarker: string): string {
   const marker = ordMarker.trim();

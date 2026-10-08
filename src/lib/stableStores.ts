@@ -305,6 +305,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://poizon.com",
     "activeBloggers": 2321
   },
+  "premier": {
+    "id": 45863,
+    "slug": "premier",
+    "name": "PREMIER",
+    "logo": "https://favicon.yandex.net/favicon/v2/premier.one?size=120",
+    "category": "Онлайн-кинотеатры",
+    "categorySlug": "onlayn-kinoteatry",
+    "about": "PREMIER - онлайн-кинотеатр с эксклюзивными российскими сериалами, фильмами и шоу собственного производства.",
+    "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
+    "site": "https://premier.one",
+    "activeBloggers": 1500
+  },
   "pyaterochka": {
     "id": 4264,
     "slug": "pyaterochka",

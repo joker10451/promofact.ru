@@ -3,17 +3,19 @@ import type { Coupon } from "@/lib/types";
 import { translit } from "@/lib/translit";
 import { proxiedLogo } from "@/lib/logoProxy";
 import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
+import { STABLE_STORES } from "@/lib/stableStores";
 import fs from "node:fs";
 import path from "node:path";
 
 /**
  * Кэш-слой Admitad в Supabase (таблица admitad_coupons).
  *
- * Безопасный snapshot-based sync автопилота:
+ * Безопасный snapshot-based sync автопилота (ADMITAD-2.1):
  *  - Чтение кэша для runtime (только is_active=true и не протухшие);
- *  - Запись снапшота батчами с техническими полями (sync_run_id, erid_status, mapping_strategy и т.д.);
- *  - Деактивация устаревших строк ТОЛЬКО после 100% успешного прогона синка;
- *  - Хранение метаданных и агрегатов синка для Observability / Healthcheck.
+ *  - Приоритет партнерских ссылок (affiliate_link всегда для клика, site только для merchant site);
+ *  - Канонические category_slug и стабильные store ID из STABLE_STORES;
+ *  - Stale deactivation fail-closed при ошибках БД;
+ *  - Локальный fallback изолирован и исключен из production рендера.
  */
 
 function str(v: unknown): string {
@@ -48,10 +50,20 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
   const code = str(row.code);
   const storeName = str(row.store).replace(/[\u200B-\u200D\uFEFF]/g, "").trim() || "Магазин";
   const storeSlug = str(row.store_slug) ? translit(str(row.store_slug)) : translit(storeName) || "magazin";
-  const category = str(row.category) || "Другое";
-  const categorySlug = str(row.category_slug) ? translit(str(row.category_slug)) : translit(category) || "drugoe";
+
+  // Разделение сайтов и трекинговых ссылок (ADMITAD-2.1 Section 1)
+  const merchantSite = str(row.site);
+  const affiliateLink = str(row.affiliate_link) || str(row.affiliate_url);
+  const storeSite = merchantSite || affiliateLink;
+  const finalAffiliateLink = affiliateLink || merchantSite;
+
+  // Канонические метаданные магазина из реестра STABLE_STORES (Section 2, 3)
+  const stableMeta = (STABLE_STORES as Record<string, { id?: number; name?: string; categorySlug?: string; category?: string }>)[storeSlug];
+  const storeId = stableMeta?.id ?? (900000 + Math.abs(hash(str(row.source_campaign_id) || storeSlug) % 99999));
+  const category = stableMeta?.category || str(row.category) || "Другое";
+  const categorySlug = stableMeta?.categorySlug || (str(row.category_slug) ? translit(str(row.category_slug)) : translit(category) || "drugoe");
+
   const expires = str(row.expires) ? str(row.expires).slice(0, 10) : null;
-  const site = str(row.site) || str(row.affiliate_link) || str(row.affiliate_url);
   const bonusName = str(row.bonus_name || row.discount) || null;
   const terms = str(row.terms || row.description) || null;
   const id = num(row.id) || hash(String(row.code || storeSlug));
@@ -77,7 +89,7 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
       group: "admitad",
     },
     store: {
-      id: num(row.id) || 90000,
+      id: storeId,
       name: storeName,
       slug: storeSlug,
       logo: proxiedLogo(str(row.logo)),
@@ -85,18 +97,21 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
       categorySlug,
       about: str(row.about) || null,
       conditions: terms,
-      site,
+      site: storeSite,
       activeBloggers: 0,
     },
     affiliate: {
-      link: site || str(row.affiliate_link) || str(row.affiliate_url),
-      landingLink: site || str(row.affiliate_link) || str(row.affiliate_url),
+      link: finalAffiliateLink,
+      landingLink: finalAffiliateLink,
       ordMarker,
       ordText,
     },
     extraLinks: [],
   };
 }
+
+const LOCAL_SNAPSHOT_PATH = path.join(process.cwd(), "src/data/admitad-snapshot.json");
+const LOCAL_META_PATH = path.join(process.cwd(), "src/data/admitad-sync-meta.json");
 
 /**
  * Чтение активных и валидных купонов Admitad из снимка Supabase.
@@ -105,6 +120,10 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
 export async function fetchAdmitadCouponsCached(): Promise<Coupon[]> {
   const supabase = getSupabase();
   if (!supabase) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn("[admitad] snapshot unavailable (supabase not configured in production)");
+      return [];
+    }
     try {
       if (fs.existsSync(LOCAL_SNAPSHOT_PATH)) {
         const raw = JSON.parse(fs.readFileSync(LOCAL_SNAPSHOT_PATH, "utf8")) as Record<string, unknown>[];
@@ -122,6 +141,7 @@ export async function fetchAdmitadCouponsCached(): Promise<Coupon[]> {
     } catch {}
     return [];
   }
+
   try {
     const { data, error } = await supabase
       .from("admitad_coupons")
@@ -177,7 +197,6 @@ export interface AdmitadRowInput {
   region?: string;
   is_hit?: boolean;
   is_first_order_only?: boolean;
-  // Технические поля snapshot sync
   source_campaign_id?: string | null;
   source_coupon_id?: string | null;
   last_seen_at?: string;
@@ -189,16 +208,13 @@ export interface AdmitadRowInput {
   updated_at?: string;
 }
 
-const LOCAL_SNAPSHOT_PATH = path.join(process.cwd(), "src/data/admitad-snapshot.json");
-
 /**
- * Батч-апсорт снапшота в admitad_coupons (service role с локальным snapshot-fallback).
+ * Батч-апсорт снапшота в admitad_coupons (service role).
  */
 export async function upsertAdmitadSnapshot(rows: AdmitadRowInput[]): Promise<number> {
   const supabase = getSupabaseAdmin();
   if (rows.length === 0) return 0;
 
-  // Дедуп по id внутри пакета
   const seen = new Set<string>();
   const uniqueRows: AdmitadRowInput[] = [];
   for (const r of rows) {
@@ -208,14 +224,14 @@ export async function upsertAdmitadSnapshot(rows: AdmitadRowInput[]): Promise<nu
     }
   }
 
-  // Если Supabase service role не настроен локально — сохраняем снимок в локальный JSON кэш
   if (!supabase) {
-    console.info(`[admitad/snapshot] Supabase не настроен, сохранение локального снимка (${uniqueRows.length} записей)`);
-    try {
-      fs.mkdirSync(path.dirname(LOCAL_SNAPSHOT_PATH), { recursive: true });
-      fs.writeFileSync(LOCAL_SNAPSHOT_PATH, JSON.stringify(uniqueRows, null, 2), "utf8");
-    } catch (e) {
-      console.warn("[admitad/snapshot] ошибка записи локального снимка:", e);
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        fs.mkdirSync(path.dirname(LOCAL_SNAPSHOT_PATH), { recursive: true });
+        fs.writeFileSync(LOCAL_SNAPSHOT_PATH, JSON.stringify(uniqueRows, null, 2), "utf8");
+      } catch (e) {
+        console.warn("[admitad/snapshot] ошибка записи локального снимка:", e);
+      }
     }
     return uniqueRows.length;
   }
@@ -237,64 +253,64 @@ export async function upsertAdmitadSnapshot(rows: AdmitadRowInput[]): Promise<nu
 
 /**
  * Деактивация устаревших строк (Stale Deactivation).
- * Выполняется ТОЛЬКО после 100% успешного завершения записи текущего снимка.
+ * ВЫПОЛНЯЕТСЯ FAIL-CLOSED: при ошибке БД выбрасывает исключение (Section 13).
  */
 export async function deactivateStaleSnapshots(currentSyncRunId: string): Promise<number> {
   const supabase = getSupabaseAdmin();
   if (!supabase) {
-    try {
-      if (fs.existsSync(LOCAL_SNAPSHOT_PATH)) {
-        const raw = JSON.parse(fs.readFileSync(LOCAL_SNAPSHOT_PATH, "utf8")) as AdmitadRowInput[];
-        let deactivated = 0;
-        for (const row of raw) {
-          if (row.sync_run_id !== currentSyncRunId && row.is_active) {
-            row.is_active = false;
-            row.sync_status = "stale_deactivated";
-            deactivated++;
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        if (fs.existsSync(LOCAL_SNAPSHOT_PATH)) {
+          const raw = JSON.parse(fs.readFileSync(LOCAL_SNAPSHOT_PATH, "utf8")) as AdmitadRowInput[];
+          let deactivated = 0;
+          for (const row of raw) {
+            if (row.sync_run_id !== currentSyncRunId && row.is_active) {
+              row.is_active = false;
+              row.sync_status = "stale_deactivated";
+              deactivated++;
+            }
           }
+          fs.writeFileSync(LOCAL_SNAPSHOT_PATH, JSON.stringify(raw, null, 2), "utf8");
+          return deactivated;
         }
-        fs.writeFileSync(LOCAL_SNAPSHOT_PATH, JSON.stringify(raw, null, 2), "utf8");
-        return deactivated;
-      }
-    } catch {}
-    return 0;
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("admitad_coupons")
-      .update({
-        is_active: false,
-        sync_status: "stale_deactivated",
-        updated_at: new Date().toISOString(),
-      })
-      .neq("sync_run_id", currentSyncRunId)
-      .eq("is_active", true)
-      .select("id");
-
-    if (error) {
-      console.error("[admitad/supabase] deactivate stale failed:", error.message);
-      return 0;
+      } catch {}
     }
-    return data ? data.length : 0;
-  } catch (e) {
-    console.error("[admitad/supabase] deactivate stale exception:", e);
     return 0;
   }
+
+  const { data, error } = await supabase
+    .from("admitad_coupons")
+    .update({
+      is_active: false,
+      sync_status: "stale_deactivated",
+      updated_at: new Date().toISOString(),
+    })
+    .neq("sync_run_id", currentSyncRunId)
+    .eq("is_active", true)
+    .select("id");
+
+  if (error) {
+    console.error("[admitad/supabase] deactivate stale failed (fail-closed):", error.message);
+    throw new Error(`DB error during stale deactivation: ${error.message}`);
+  }
+
+  return data ? data.length : 0;
 }
 
 /**
- * Получение текущего количества активных записей снимка (для защиты от падения).
+ * Получение текущего количества активных записей снимка.
  */
 export async function getActiveSnapshotCount(): Promise<number> {
   const supabase = getSupabaseAdmin() || getSupabase();
   if (!supabase) {
-    try {
-      if (fs.existsSync(LOCAL_SNAPSHOT_PATH)) {
-        const raw = JSON.parse(fs.readFileSync(LOCAL_SNAPSHOT_PATH, "utf8")) as AdmitadRowInput[];
-        return raw.filter((r) => r.is_active).length;
-      }
-    } catch {}
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        if (fs.existsSync(LOCAL_SNAPSHOT_PATH)) {
+          const raw = JSON.parse(fs.readFileSync(LOCAL_SNAPSHOT_PATH, "utf8")) as AdmitadRowInput[];
+          return raw.filter((r) => r.is_active).length;
+        }
+      } catch {}
+    }
     return 0;
   }
 
@@ -322,8 +338,6 @@ export interface AdmitadSyncMeta {
   details?: Record<string, unknown>;
 }
 
-const LOCAL_META_PATH = path.join(process.cwd(), "src/data/admitad-sync-meta.json");
-
 export async function getAdmitadSyncMeta(): Promise<AdmitadSyncMeta | null> {
   const supabase = getSupabaseAdmin() || getSupabase();
   if (supabase) {
@@ -347,17 +361,17 @@ export async function getAdmitadSyncMeta(): Promise<AdmitadSyncMeta | null> {
     } catch {}
   }
 
-  // Fallback на локальный JSON файл
-  try {
-    if (fs.existsSync(LOCAL_META_PATH)) {
-      return JSON.parse(fs.readFileSync(LOCAL_META_PATH, "utf8"));
-    }
-  } catch {}
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      if (fs.existsSync(LOCAL_META_PATH)) {
+        return JSON.parse(fs.readFileSync(LOCAL_META_PATH, "utf8"));
+      }
+    } catch {}
+  }
   return null;
 }
 
 export async function saveAdmitadSyncMeta(meta: AdmitadSyncMeta): Promise<void> {
-  // 1. Запись в Supabase
   const supabase = getSupabaseAdmin();
   if (supabase) {
     try {
@@ -366,16 +380,19 @@ export async function saveAdmitadSyncMeta(meta: AdmitadSyncMeta): Promise<void> 
         ...meta,
         updated_at: new Date().toISOString(),
       });
+      return; // При успешной записи в Supabase локальный файл не пишем (Section 12)
     } catch (e) {
       console.error("[admitad/supabase] save sync meta failed:", e);
+      if (process.env.NODE_ENV === "production") throw e;
     }
   }
 
-  // 2. Локальный fallback JSON
-  try {
-    fs.mkdirSync(path.dirname(LOCAL_META_PATH), { recursive: true });
-    fs.writeFileSync(LOCAL_META_PATH, JSON.stringify(meta, null, 2), "utf8");
-  } catch {}
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      fs.mkdirSync(path.dirname(LOCAL_META_PATH), { recursive: true });
+      fs.writeFileSync(LOCAL_META_PATH, JSON.stringify(meta, null, 2), "utf8");
+    } catch {}
+  }
 }
 
 /** Совместимость с legacy import */

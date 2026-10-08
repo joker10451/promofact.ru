@@ -125,12 +125,14 @@ export default function CouponTicket({
     promocode.isFirstOrderOnly
   );
 
+  const activeClickIdRef = useRef<string | undefined>(undefined);
+
   const getAnalyticsContext = () => {
     let pagePath = "";
     if (typeof window !== "undefined" && window.location) {
       pagePath = window.location.pathname || "";
     }
-    return {
+    const ctx: Record<string, unknown> = {
       store: store.slug,
       coupon_id: coupon.id,
       placement,
@@ -139,6 +141,10 @@ export default function CouponTicket({
       offer_type: offer.isNoCode ? "deal" : "promo",
       source_component: "coupon_ticket",
     };
+    if (activeClickIdRef.current) {
+      ctx.click_id = activeClickIdRef.current;
+    }
+    return ctx;
   };
 
   const [copied, setCopied] = useState(false);
@@ -217,9 +223,38 @@ export default function CouponTicket({
     ymReachGoal("affiliate_click", getAnalyticsContext());
   };
 
+  const handleDirectCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isAdmitad) {
+      e.preventDefault();
+      const clickId = generateClickId();
+      activeClickIdRef.current = clickId;
+      const finalUrl = decorateAdmitadUrl(targetUrl, {
+        placement,
+        pageType: getPageTypeFromPlacement(placement),
+        couponId: coupon.id,
+        clickId,
+      });
+      handleAffiliateClick();
+      activeClickIdRef.current = undefined;
+      if (typeof window !== "undefined" && finalUrl && finalUrl !== "#") {
+        try {
+          const win = window.open(finalUrl, "_blank", "noopener,noreferrer");
+          if (win) {
+            try {
+              win.opener = null;
+            } catch {}
+          }
+        } catch {}
+      }
+    } else {
+      handleAffiliateClick();
+    }
+  };
+
   const copyAndOpen = (code: string, url: string) => {
     let opened = false;
     const clickId = isAdmitad ? generateClickId() : undefined;
+    activeClickIdRef.current = clickId;
     const finalUrl = isAdmitad
       ? decorateAdmitadUrl(url, {
           placement,
@@ -246,6 +281,7 @@ export default function CouponTicket({
 
     ymReachGoal("copy_and_open", getAnalyticsContext());
     handleAffiliateClick();
+    activeClickIdRef.current = undefined;
 
     // 2. Копирование промокода с сохранением обработки ошибок Clipboard API
     if (code) {
@@ -456,8 +492,8 @@ export default function CouponTicket({
               <a
                 href={outgoingUrl}
                 target="_blank"
-                rel="noopener nofollow"
-                onClick={() => handleAffiliateClick()}
+                rel="noopener sponsored nofollow"
+                onClick={handleDirectCtaClick}
                 className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-mint hover:bg-mint-dark text-white text-xs sm:text-sm font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer px-4"
               >
                 <CheckIcon className="h-4 w-4" />
@@ -487,8 +523,8 @@ export default function CouponTicket({
             <a
               href={outgoingUrl}
               target="_blank"
-              rel="noopener nofollow"
-              onClick={() => handleAffiliateClick()}
+              rel="noopener sponsored nofollow"
+              onClick={handleDirectCtaClick}
               className="text-[11px] sm:text-xs font-semibold text-ink/50 hover:text-red hover:underline flex items-center justify-center gap-1 py-1 transition-colors"
             >
               <span>Перейти на сайт {store.name} →</span>
@@ -502,8 +538,8 @@ export default function CouponTicket({
             <a
               href={outgoingUrl}
               target="_blank"
-              rel="noopener nofollow"
-              onClick={() => handleAffiliateClick()}
+              rel="noopener sponsored nofollow"
+              onClick={handleDirectCtaClick}
               className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red to-red-dark text-white text-xs sm:text-sm font-bold shadow-offset-red hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] transition-all cursor-pointer px-4"
             >
               <span>Перейти к предложению →</span>

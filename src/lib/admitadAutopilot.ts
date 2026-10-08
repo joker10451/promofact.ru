@@ -271,13 +271,25 @@ export function decorateAdmitadUrl(
 }
 
 /**
- * Генерация безопасного Opaque Click ID без PII (Section 20).
+ * Генерация безопасного Opaque Click ID без PII (Section 7, 20).
+ * Основной механизм: crypto.randomUUID(), fallback: crypto.getRandomValues().
+ * Никаких Math.random(), email, телефонов или cookie id.
  */
 export function generateClickId(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
+  if (typeof crypto !== "undefined") {
+    if (typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    if (typeof crypto.getRandomValues === "function") {
+      const bytes = new Uint8Array(16);
+      crypto.getRandomValues(bytes);
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+      const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+      return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+    }
   }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}-${Math.random().toString(36).slice(2, 10)}`;
+  throw new Error("Web Crypto API is required for generating secure click IDs");
 }
 
 export interface SyncAggregates {

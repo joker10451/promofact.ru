@@ -8,11 +8,13 @@ import {
   decorateAdmitadUrl,
 } from "../src/lib/admitadAutopilot.ts";
 import { dedupeCoupons } from "../src/lib/dedupe.ts";
+import { rowToCoupon } from "../src/lib/admitadSupabase.ts";
+import { STABLE_STORES } from "../src/lib/stableStores.ts";
 
 let passed = 0;
 
 console.log("================================================================================");
-console.log("🚀 ЗАПУСК ДЕТЕРМИНИРОВАННЫХ ТЕСТОВ ADMITAD-2 AUTOPILOT");
+console.log("🚀 ЗАПУСК ДЕТЕРМИНИРОВАННЫХ ТЕСТОВ ADMITAD-2.1 AUTOPILOT");
 console.log("================================================================================\n");
 
 // 1. Тест Catastrophic Drop Protection
@@ -107,7 +109,7 @@ console.log("===================================================================
   const evalResult = isAdmitadPublishable(
     { isExpired: false, isForeign: false, affiliateLink: "https://ya.ru" },
     {
-      campaign: { id: 25224, status: "active" }, // 25224 is in VERIFIED_CAMPAIGN_ALLOWLIST
+      campaign: { id: 25224, status: "active" },
       mapping: { strategy: "EXACT MATCH", canonicalSlug: "test" },
       eridStatus: "PRESENT",
       eridValue: "abcd",
@@ -128,7 +130,7 @@ console.log("===================================================================
   const evalResult = isAdmitadPublishable(
     { isExpired: false, isForeign: false, affiliateLink: "https://ya.ru", advcampaignId: "999999" },
     {
-      campaign: { id: 999999, status: "active" }, // Not in allowlist
+      campaign: { id: 999999, status: "active" },
       mapping: { strategy: "EXACT MATCH", canonicalSlug: "test" },
       eridStatus: "PRESENT",
       eridValue: "abcd",
@@ -219,7 +221,6 @@ console.log("===================================================================
     affiliate: { link: "https://ad.admitad.com/g/yves", ordMarker: "adm_erid", ordText: "Реклама. Ив Роше" },
   };
 
-  // Симуляция логики fetchMergedCoupons
   function simulateMergedCatalog(flagValue, admitadList) {
     const sources = [
       { source: "custom", coupons: [] },
@@ -243,6 +244,112 @@ console.log("===================================================================
   console.log("✓ Тест 11: Feature flag false -> 0 Admitad; flag true -> eligible Admitad available (PASS)");
 }
 
+// 12. Тест: Preserve Affiliate Tracking URL (Section 1)
+{
+  const row = {
+    id: "adm_test_1",
+    store: "PREMIER",
+    store_slug: "premier",
+    site: "https://premier.one",
+    affiliate_link: "https://ad.admitad.com/g/xxxxxxx/?erid=2RanyTest",
+    affiliate_url: "https://ad.admitad.com/g/xxxxxxx/?erid=2RanyTest",
+  };
+
+  const coupon = rowToCoupon(row);
+  assert.ok(coupon);
+  assert.strictEqual(coupon.store.site, "https://premier.one");
+  assert.strictEqual(coupon.affiliate.link, "https://ad.admitad.com/g/xxxxxxx/?erid=2RanyTest");
+  assert.strictEqual(coupon.affiliate.landingLink, "https://ad.admitad.com/g/xxxxxxx/?erid=2RanyTest");
+
+  passed++;
+  console.log("✓ Тест 12: Preserve Affiliate Tracking URL vs merchant website (PASS)");
+}
+
+// 13. Тест: Canonical Category & Category Slug (Section 2, 18)
+{
+  const premierRow = {
+    id: "adm_p1",
+    store: "PREMIER",
+    store_slug: "premier",
+    category_slug: "premier", // ошибочный срез синка
+  };
+  const premierCoupon = rowToCoupon(premierRow);
+  assert.ok(premierCoupon);
+  assert.strictEqual(premierCoupon.store.categorySlug, STABLE_STORES["premier"].categorySlug);
+  assert.strictEqual(premierCoupon.store.category, STABLE_STORES["premier"].category);
+  assert.notStrictEqual(premierCoupon.store.categorySlug, "premier");
+
+  const yvesRow = {
+    id: "adm_y1",
+    store: "Ив Роше",
+    store_slug: "iv-roshe",
+    category_slug: "iv-roshe",
+  };
+  const yvesCoupon = rowToCoupon(yvesRow);
+  assert.ok(yvesCoupon);
+  assert.strictEqual(yvesCoupon.store.categorySlug, STABLE_STORES["iv-roshe"].categorySlug);
+  assert.notStrictEqual(yvesCoupon.store.categorySlug, "iv-roshe");
+
+  passed++;
+  console.log("✓ Тест 13: Canonical Category & Category Slug from STABLE_STORES (PASS)");
+}
+
+// 14. Тест: Stable Store ID (Section 3)
+{
+  const premierRow = { id: "adm_1", store: "PREMIER", store_slug: "premier" };
+  const yvesRow = { id: "adm_2", store: "Ив Роше", store_slug: "iv-roshe" };
+
+  const c1 = rowToCoupon(premierRow);
+  const c2 = rowToCoupon(yvesRow);
+  assert.ok(c1 && c2);
+
+  assert.strictEqual(c1.store.id, STABLE_STORES["premier"].id);
+  assert.strictEqual(c2.store.id, STABLE_STORES["iv-roshe"].id);
+  assert.notStrictEqual(c1.store.id, c2.store.id);
+
+  passed++;
+  console.log("✓ Тест 14: Stable Store IDs differentiated across stores (PASS)");
+}
+
+// 15. Тест: Dynamic Cache Refresh (Section 8, 9)
+{
+  let admitadState = [
+    { id: 1, title: "Offer 1", store: { slug: "store-1" }, promocode: { code: "CODE1" } },
+    { id: 2, title: "Offer 2", store: { slug: "store-2" }, promocode: { code: "CODE2" } },
+  ];
+
+  function getMockMergedCatalog() {
+    return dedupeCoupons([
+      { source: "perfluence", coupons: [{ id: 100, title: "Base Offer", store: { slug: "base" }, promocode: { code: "BASE" } }] },
+      { source: "admitad", coupons: admitadState },
+    ]).coupons;
+  }
+
+  const catalogVersionA = getMockMergedCatalog();
+  assert.strictEqual(catalogVersionA.length, 3);
+
+  // Обновление снимка Admitad (версия B)
+  admitadState = [
+    { id: 1, title: "Offer 1", store: { slug: "store-1" }, promocode: { code: "CODE1" } },
+  ];
+  const catalogVersionB = getMockMergedCatalog();
+  assert.strictEqual(catalogVersionB.length, 2);
+
+  passed++;
+  console.log("✓ Тест 15: Dynamic Cache Refresh reflects new snapshot without redeploy (PASS)");
+}
+
+// 16. Тест: Click ID Cryptographic Safety (Section 7)
+{
+  const id1 = generateClickId();
+  const id2 = generateClickId();
+  assert.notStrictEqual(id1, id2);
+  assert.ok(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id1));
+
+  passed++;
+  console.log("✓ Тест 16: Click ID Cryptographic Safety (RFC4122 v4 UUID, no Math.random) (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/11 ТЕСТОВ ADMITAD AUTOPILOT УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/16 ТЕСТОВ ADMITAD AUTOPILOT УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");

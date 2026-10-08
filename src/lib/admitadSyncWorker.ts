@@ -23,6 +23,7 @@ import {
 import {
   normalizeAdmitadCoupon,
 } from "@/lib/admitadNormalizer";
+import { STABLE_STORES } from "@/lib/stableStores";
 import {
   isAdmitadPublishable,
   evaluateSnapshotSafety,
@@ -116,11 +117,12 @@ export async function runAdmitadSafeSync(options: {
       const program = programMap.get(campId);
       const raw = mapApiCouponToRaw(apiCoupon);
 
+      const campaignStatus = program?.status || program?.connection_status || "CAMPAIGN_STATUS_UNKNOWN";
       const campaign: Partial<AdmitadApiCampaign> & { id: number; status?: string; advertiser_legal_info?: string } = {
         id: campId,
         name: program?.name || apiCoupon.campaign?.name || "Неизвестно",
         site_url: program?.site_url || apiCoupon.campaign?.site_url || "",
-        status: program?.status || "active",
+        status: campaignStatus,
         advertiser_legal_info: program?.advertiser_legal_info || undefined,
       };
 
@@ -167,13 +169,17 @@ export async function runAdmitadSafeSync(options: {
       const storeName = mapping.storeName || campaign.name || "Магазин";
       const couponId = String(raw.id || apiCoupon.id);
 
+      const stableMeta = (STABLE_STORES as Record<string, { categorySlug?: string; category?: string }>)[storeSlug];
+      const finalCategorySlug = stableMeta?.categorySlug || normalized?.store?.categorySlug || "drugie-magaziny";
+      const finalCategoryName = stableMeta?.category || normalized?.store?.category || raw.categories?.[0] || "Другие магазины";
+
       rowsToUpsert.push({
         id: `adm_${couponId}`,
         code: normalized?.promoCode || raw.promocode || null,
         store: storeName,
         store_slug: storeSlug,
         discount: normalized?.discount?.formatted || raw.discount || "Скидка",
-        category: normalized?.store?.category || raw.categories?.[0] || "Другое",
+        category: finalCategoryName,
         description: normalized?.fullDescription || raw.description || null,
         expires: (normalized?.dateEnd || raw.dateEnd) ? String(normalized?.dateEnd || raw.dateEnd).slice(0, 10) : null,
         affiliate_url: normalized?.affiliate?.url || raw.gotolink || null,
@@ -186,7 +192,7 @@ export async function runAdmitadSafeSync(options: {
         ord_text: ordText || null,
         logo: raw.logo || null,
         site: campaign.site_url || null,
-        category_slug: storeSlug,
+        category_slug: finalCategorySlug,
         about: null,
         region: "RU",
         is_hit: Boolean(raw.exclusive),
