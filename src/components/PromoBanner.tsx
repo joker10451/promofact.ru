@@ -68,7 +68,15 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
   if (banner.creativeOnly) {
     const { legalText, medicalWarning } = parseOrdAndWarning(banner.ordText);
     return (
-      <aside aria-label="Реклама" className="w-full">
+      <aside
+        aria-label="Реклама"
+        className="w-full mx-auto"
+        style={{
+          maxWidth: banner.maxDisplayWidth
+            ? `${banner.maxDisplayWidth}px`
+            : undefined,
+        }}
+      >
         <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-offset transition-all">
           <a
             href={banner.link}

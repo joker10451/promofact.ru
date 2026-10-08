@@ -37,6 +37,8 @@ export interface PromoBanner {
   endsAt: string;
   /** Режим показа официального макета рекламодателя без оверлеев PromoFact */
   creativeOnly?: boolean;
+  /** Ограничение максимальной ширины отображения креатива на десктопе в px */
+  maxDisplayWidth?: number;
   /** Точный рекламный текст партнера под макетом */
   exactCopy?: string;
 }
@@ -286,6 +288,7 @@ export const PROMO_BANNERS: PromoBanner[] = [
     imageAlt: "ОТП Банк: подарок за оформление дебетовой ОТП Карты",
     imageWidth: 2600,
     imageHeight: 1856,
+    maxDisplayWidth: 900,
     title: "Подарок за оформление дебетовой ОТП Карты!",
     subtitle: "",
     badge: "Сертификат 2 000 ₽",

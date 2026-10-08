@@ -27,6 +27,9 @@ assert(banners.length > 0, "Должен быть активный баннер 
 const banner = banners.find((b) => b.id === "otp-bank-debet-card-2026");
 assert(banner, "Баннер otp-bank-debet-card-2026 должен существовать");
 assert.strictEqual(banner.creativeOnly, true, "creativeOnly должно быть true для показа макета как есть");
+assert.strictEqual(banner.maxDisplayWidth, 900, "maxDisplayWidth должно быть 900 для полировки размера баннера");
+assert.strictEqual(banner.imageWidth, 2600, "imageWidth должен оставаться 2600 для сохранения aspect ratio");
+assert.strictEqual(banner.imageHeight, 1856, "imageHeight должен оставаться 1856 для сохранения aspect ratio");
 assert.strictEqual(banner.image, "/images/otp-bank-debet-card.png", "Путь к изображению баннера должен совпадать");
 assert(banner.exactCopy, "exactCopy должен присутствовать");
 assert(banner.exactCopy.includes("Подарок за оформление дебетовой ОТП Карты!"), "exactCopy должен содержать заголовок акции");
