@@ -28,12 +28,14 @@ import {
   isAdmitadPublishable,
   evaluateSnapshotSafety,
   buildAdmitadOrdText,
+  getEffectiveCampaignAllowlist,
   type SyncAggregates,
 } from "@/lib/admitadAutopilot";
 import {
   upsertAdmitadStaging,
   publishAdmitadSnapshot,
   getActiveSnapshotCount,
+  getExistingActiveSnapshotRows,
   updateAdmitadSyncDiagnostics,
   recordAdmitadSyncFailure,
   type AdmitadRowInput,
@@ -61,6 +63,19 @@ export async function runAdmitadSafeSync(options: {
     await recordAdmitadSyncFailure({
       status: "FAILED",
       errorCode: "AUTH_CONFIG_MISSING",
+      duration_ms: Date.now() - startTime,
+    });
+    return { success: false, status: "FAILED", error };
+  }
+
+  // 1b. Проверка явного allowlist кампаний (ADMITAD-4 Блокер 1)
+  const effectiveAllowlist = getEffectiveCampaignAllowlist();
+  if (effectiveAllowlist.length === 0) {
+    const error = "ALLOWLIST_NOT_CONFIGURED: ADMITAD_APPROVED_CAMPAIGNS не настроен или пуст. Публикация заблокирована, синхронизация остановлена без изменения каталога.";
+    console.warn(`[admitad/sync] 🚨 ${error}`);
+    await recordAdmitadSyncFailure({
+      status: "FAILED",
+      errorCode: "ALLOWLIST_NOT_CONFIGURED",
       duration_ms: Date.now() - startTime,
     });
     return { success: false, status: "FAILED", error };
@@ -96,6 +111,12 @@ export async function runAdmitadSafeSync(options: {
     }
 
     // 4. Нормализация, Quality Gates, ОРД и классификация пригодности к публикации
+    const existingActiveRows = await getExistingActiveSnapshotRows();
+    const existingActiveMap = new Map<string, AdmitadRowInput>();
+    for (const r of existingActiveRows) {
+      existingActiveMap.set(r.id, r);
+    }
+
     const rowsToUpsert: AdmitadRowInput[] = [];
     let normalizedCount = 0;
     let qualityPassCount = 0;
@@ -109,6 +130,7 @@ export async function runAdmitadSafeSync(options: {
 
     for (const apiCoupon of apiCoupons) {
       const campId = apiCoupon.campaign?.id || 0;
+      const isApprovedInCurrentSync = effectiveAllowlist.includes(String(campId));
       const program = programMap.get(campId);
       const raw = mapApiCouponToRaw(apiCoupon);
 
@@ -144,14 +166,31 @@ export async function runAdmitadSafeSync(options: {
         legalInfoStatus: legal.legalInfoStatus,
         eridValue: legal.eridValue || undefined,
         advertiserLegalInfo: program?.advertiser_legal_info || undefined,
+        allowlist: effectiveAllowlist,
       });
 
-      if (evalResult.publishable) {
-        publishableCount++;
-      } else if (evalResult.status === "READY_NOT_APPROVED") {
-        readyNotApprovedCount++;
+      const couponId = String(raw.id || apiCoupon.id);
+      const rowId = `adm_${couponId}`;
+      let isRowActive = false;
+      let syncStatus = evalResult.status;
+
+      if (isApprovedInCurrentSync) {
+        if (evalResult.publishable) {
+          isRowActive = true;
+          publishableCount++;
+        } else {
+          quarantinedCount++;
+        }
       } else {
-        quarantinedCount++;
+        // ADMITAD-4 Блокер 2: Кампания вне текущего пилотного allowlist.
+        // Сохраняем существующую активную запись из снимка (если она была активна).
+        if (existingActiveMap.has(rowId)) {
+          isRowActive = true;
+          publishableCount++;
+          syncStatus = "PUBLISHABLE";
+        } else {
+          readyNotApprovedCount++;
+        }
       }
 
       // Формирование ОРД текста
@@ -162,14 +201,13 @@ export async function runAdmitadSafeSync(options: {
 
       const storeSlug = mapping.canonicalSlug || "unmapped";
       const storeName = mapping.storeName || campaign.name || "Магазин";
-      const couponId = String(raw.id || apiCoupon.id);
 
       const stableMeta = (STABLE_STORES as Record<string, { categorySlug?: string; category?: string }>)[storeSlug];
       const finalCategorySlug = stableMeta?.categorySlug || normalized?.store?.categorySlug || "drugie-magaziny";
       const finalCategoryName = stableMeta?.category || normalized?.store?.category || raw.categories?.[0] || "Другие магазины";
 
       rowsToUpsert.push({
-        id: `adm_${couponId}`,
+        id: rowId,
         code: normalized?.promoCode || raw.promocode || null,
         store: storeName,
         store_slug: storeSlug,
@@ -178,7 +216,7 @@ export async function runAdmitadSafeSync(options: {
         description: normalized?.fullDescription || raw.description || null,
         expires: (normalized?.dateEnd || raw.dateEnd) ? String(normalized?.dateEnd || raw.dateEnd).slice(0, 10) : null,
         affiliate_url: normalized?.affiliate?.url || raw.gotolink || null,
-        is_active: evalResult.publishable,
+        is_active: isRowActive,
         uses_count: 0,
         bonus_name: normalized?.shortDescription || raw.name || null,
         terms: normalized?.fullDescription || raw.description || null,
@@ -196,12 +234,27 @@ export async function runAdmitadSafeSync(options: {
         source_coupon_id: couponId,
         last_seen_at: nowIso,
         sync_run_id: syncRunId,
-        sync_status: evalResult.status,
+        sync_status: syncStatus,
         mapping_strategy: mapping.strategy,
         legal_status: legal.legalInfoStatus,
         erid_status: legal.eridStatus,
         updated_at: nowIso,
       });
+    }
+
+    // Сохранение активных офферов других проверенных кампаний, отсутствующих в текущем батче API
+    const processedIds = new Set(rowsToUpsert.map((r) => r.id));
+    for (const [id, existingRow] of existingActiveMap.entries()) {
+      const campId = String(existingRow.source_campaign_id || "");
+      if (!effectiveAllowlist.includes(campId) && !processedIds.has(id)) {
+        rowsToUpsert.push({
+          ...existingRow,
+          sync_run_id: syncRunId,
+          last_seen_at: nowIso,
+          updated_at: nowIso,
+        });
+        publishableCount++;
+      }
     }
 
     // 5. Защита от катастрофического падения количества офферов (Catastrophic Drop Protection)
