@@ -2054,7 +2054,7 @@
             {
               "id": 18508803,
               "title": "Оформить заказ со скидкой в приложении Магнит",
-              "link": "https://mgntksm1.prfl.me/sites/ul4dk7?source=js-widget&source_id=8842",
+              "link": "https://mgntksm1.prfl.me/sites/4mhdm6?erid=2Ranymg97is",
               "landing_terms": ""
             }
           ],
@@ -2062,10 +2062,40 @@
           "promocodes": [
             {
               "project_id": 2548,
+              "code": "Дом",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 41% на первый заказ в приложении \"Магнит Доставка\"",
+              "date": "13.10.2026 23:59",
+              "group": "",
+              "is_hit": true,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 99991,
+              "id": 99991,
+              "is_universal": false,
+              "name": "Скидка 41% на первый заказ в приложении \"Магнит Доставка\"",
+              "promo_terms": "Скидка 41%",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17160690,
+              "ord_marker": "2Ranymg97is",
+              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475. erid: 2Ranymg97is",
+              "discount": 41,
+              "btn_text": null,
+              "show": "",
+              "expires": "13.10.2026 23:59"
+            },
+            {
+              "project_id": 2548,
               "code": "PK4GMWJUK",
               "is_barcode": false,
               "image": "",
-              "comment": "Скидка 51% на первый заказ от 1500 ₽ в приложении \"Магнит Доставка\"",
+              "comment": "Скидка 36% на первый заказ в приложении \"Магнит Доставка\"",
               "date": "31.10.2026 23:59",
               "group": "",
               "is_hit": false,
@@ -2074,17 +2104,18 @@
               "hit_bg_color": null,
               "hit_color": null,
               "bonus_id": 14884,
+              "id": 14884,
               "is_universal": false,
-              "name": "Скидка 51% на первый заказ от 1500 ₽ в приложении \"Магнит Доставка\"",
+              "name": "Скидка 36% на первый заказ в приложении \"Магнит Доставка\"",
               "promo_terms": "<ul><li>Предложение не распространяется на товары из раздела «Аптека», на товары с отметкой «Финальная цена». </li><li>Максимальный размер скидки - 1500 ₽.</li></ul>",
               "region_promo": [
                 "RU"
               ],
               "repeat_order": false,
               "post_id": 17160690,
-              "ord_marker": "2RanynXHSiw",
-              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475.",
-              "discount": 51,
+              "ord_marker": "2Ranymg97is",
+              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475. erid: 2Ranymg97is",
+              "discount": 36,
               "btn_text": null,
               "show": "https://pawss-api.perfluence.net/source-view?post_id=17160690&widget_id=8842&user_id=861964&source=js-widget",
               "expires": "31.10.2026 23:59"
@@ -2103,6 +2134,7 @@
               "hit_bg_color": null,
               "hit_color": null,
               "bonus_id": 17044,
+              "id": 17044,
               "is_universal": false,
               "name": "Скидка 21% на один любой заказ от 1000 ₽ в приложении \"Магнит Доставка\" в разделе М.Косметик",
               "promo_terms": "<ul><li>Максимальная сумма скидки 2000 ₽</li><li>Не распространяется на товары с пометкой «финальная цена»</li></ul>",
@@ -2111,8 +2143,8 @@
               ],
               "repeat_order": true,
               "post_id": 17160690,
-              "ord_marker": "2RanynXHSiw",
-              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475.",
+              "ord_marker": "2Ranymg97is",
+              "ord_custom_text": "Реклама. АО \"Тандер\", ИНН 2310031475. erid: 2Ranymg97is",
               "discount": 21,
               "btn_text": null,
               "show": "https://pawss-api.perfluence.net/source-view?post_id=17160690&widget_id=8842&user_id=861964&source=js-widget",
@@ -2122,7 +2154,7 @@
           "has_widget_subscribers_promo": false,
           "widget_subscribers_codes_count": 0,
           "widget_subscriber_codes": [],
-          "ord_marker": "2RanynXHSiw"
+          "ord_marker": "2Ranymg97is"
         }
       ]
     },

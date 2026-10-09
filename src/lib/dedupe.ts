@@ -47,14 +47,47 @@ export function normalizeCode(code: string): string {
   return code.trim().toUpperCase();
 }
 
+/** Маркеры отсутствия реального промокода (скидка по ссылке, акции, условия перехода) */
+const NO_CODE_MARKERS = new Set([
+  "",
+  "НЕ НУЖЕН",
+  "НЕ_НУЖЕН",
+  "НЕ ТРЕБУЕТСЯ",
+  "НЕ_ТРЕБУЕТСЯ",
+  "БЕЗ ПРОМОКОДА",
+  "БЕЗ_ПРОМОКОДА",
+  "БЕЗ КОДА",
+  "БЕЗ_КОДА",
+  "NO_CODE",
+  "NOCODE",
+  "НЕТ",
+  "АКЦИЯ",
+]);
+
+/** Проверяет, является ли значение реальным промокодом или плейсхолдером отсутствия кода */
+export function isRealPromoCode(code: string | null | undefined): boolean {
+  if (!code) return false;
+  const normalized = normalizeCode(code);
+  return normalized !== "" && !NO_CODE_MARKERS.has(normalized);
+}
+
 /**
- * Ключ купона. Для купонов с кодом — «магазин + код»: именно эта пара
- * определяет оффер. Для акций без кода (скидка по ссылке) — «магазин + ссылка».
+ * Ключ купона. Для купонов с реальным промокодом — «магазин + код».
+ * Для самостоятельных акций без кода (скидка по ссылке, промокод не требуется) —
+ * уникальная идентичность формируется из магазина, ссылки/лендинга, erid и ID оффера,
+ * чтобы разные акции одного рекламодателя (например, 3 разных предложения Яндекс Путешествий)
+ * не схлопывались в одну карточку.
  */
 function couponKey(c: Coupon): string {
-  const code = normalizeCode(c.promocode.code);
-  if (code) return `${c.store.slug}::code::${code}`;
-  return `${c.store.slug}::link::${c.affiliate.link || c.store.site}`;
+  const rawCode = c.promocode?.code;
+  if (isRealPromoCode(rawCode)) {
+    return `${c.store.slug}::code::${normalizeCode(rawCode)}`;
+  }
+  const link = (c.affiliate?.link || c.affiliate?.landingLink || c.store?.site || "").trim();
+  const erid = (c.affiliate?.ordMarker || "").trim();
+  const offerId = c.promocode?.id || c.id || "";
+  const bonus = (c.promocode?.bonusName || "").trim().toLowerCase();
+  return `${c.store.slug}::deal::${link}::${erid}::${offerId}::${bonus}`;
 }
 
 /**
@@ -79,8 +112,10 @@ export function dedupeCoupons(buckets: SourceBucket[]): {
   const manualCodes = new Set<string>();
   for (const source of MANUAL_SOURCES) {
     for (const c of bySource.get(source) ?? []) {
-      const code = normalizeCode(c.promocode.code);
-      if (code) manualCodes.add(code);
+      if (isRealPromoCode(c.promocode.code)) {
+        const code = normalizeCode(c.promocode.code);
+        if (code) manualCodes.add(code);
+      }
     }
   }
 
@@ -91,8 +126,9 @@ export function dedupeCoupons(buckets: SourceBucket[]): {
   for (const source of SOURCE_PRIORITY) {
     const isManual = MANUAL_SOURCES.includes(source);
     for (const c of bySource.get(source) ?? []) {
-      const code = normalizeCode(c.promocode.code);
-      const shadowedByManual = !isManual && code !== "" && manualCodes.has(code);
+      const hasRealCode = isRealPromoCode(c.promocode.code);
+      const code = hasRealCode ? normalizeCode(c.promocode.code) : "";
+      const shadowedByManual = !isManual && hasRealCode && code !== "" && manualCodes.has(code);
       const key = couponKey(c);
 
       if (shadowedByManual || seen.has(key)) {

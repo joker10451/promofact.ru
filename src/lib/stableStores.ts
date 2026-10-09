@@ -209,6 +209,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://litres.ru",
     "activeBloggers": 19
   },
+  "m-kosmetik": {
+    "id": 2548,
+    "slug": "m-kosmetik",
+    "name": "М.Косметик",
+    "logo": "https://favicon.yandex.net/favicon/v2/promokod.magnit.ru?size=120",
+    "category": "Косметика и парфюмерия",
+    "categorySlug": "kosmetika-i-parfyumeriya",
+    "about": "М.Косметик — одна из ведущих розничных сетей по продаже косметики, бытовой химии и товаров для дома в России.",
+    "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
+    "site": "https://promokod.magnit.ru/",
+    "activeBloggers": 8083
+  },
   "magnit-dostavka": {
     "id": 2582,
     "slug": "magnit-dostavka",
@@ -400,6 +412,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "conditions": "Купоны действуют в розничных флагманских магазинах и на сайте SOKOLOV.",
     "site": "https://sokolov.ru",
     "activeBloggers": 15
+  },
+  "sunlight-ru": {
+    "id": 1100,
+    "slug": "sunlight-ru",
+    "name": "SUNLIGHT",
+    "logo": "https://favicon.yandex.net/favicon/v2/sunlight.net?size=120",
+    "category": "Украшения и часы",
+    "categorySlug": "ukrasheniya",
+    "about": "SUNLIGHT - федеральная ювелирная сеть в России, представляющая широкий ассортимент украшений из золота, серебра и драгоценных камней.",
+    "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
+    "site": "https://sunlight.net/",
+    "activeBloggers": 5115
   },
   "t-puteshestviya-oteli": {
     "id": 3285,

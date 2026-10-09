@@ -227,7 +227,7 @@ export function isForeignJunk(
 export function resolveOfferDetails(
   name: string,
   description: string,
-  rawDiscount: string,
+  rawDiscount: string | null | undefined,
   code: string | null,
   isFirstOrder: boolean,
   storeName: string
@@ -241,6 +241,7 @@ export function resolveOfferDetails(
   fullDescription: string;
   ctaText: string;
 } {
+  const safeDiscount = rawDiscount || "";
   const cleanName = stripHtml(name)
     .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
     .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
@@ -277,7 +278,7 @@ export function resolveOfferDetails(
   }
 
   // 2. Комбинация: Скидка (%) + Подарок (например, Кинопоиск 50% + 60 дней в подарок)
-  const pctMatch = rawDiscount.match(/(\d+)\s*%/) || cleanName.match(/(\d+)\s*%/);
+  const pctMatch = safeDiscount.match(/(\d+)\s*%/) || cleanName.match(/(\d+)\s*%/);
   const isGiftInText =
     /подарок|ролл|фото|пицца|подвеск|gift|в\s+подарок/i.test(cleanName) ||
     /подарок|ролл|фото|пицца|подвеск|в\s+подарок/i.test(cleanDesc);
@@ -399,7 +400,7 @@ export function resolveOfferDetails(
 
   // 6. Фиксированная скидка в рублях
   const rubMatch =
-    rawDiscount.match(/(\d+[\s\d]*)\s*(rub|руб|₽)/i) ||
+    safeDiscount.match(/(\d+[\s\d]*)\s*(rub|руб|₽)/i) ||
     cleanName.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(rub|руб|₽)/i) ||
     cleanName.match(/(\d+[\s\d]*)\s*(rub|руб|₽)/i);
 

@@ -33,6 +33,13 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     textColor: "text-white",
     domain: "dostavka.magnit.ru",
   },
+  "m-kosmetik": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/promokod.magnit.ru?size=120",
+    emoji: "💄",
+    bgGradient: "from-rose-500 to-pink-600",
+    textColor: "text-white",
+    domain: "promokod.magnit.ru",
+  },
   "yandex-market": {
     logoUrl: "https://favicon.yandex.net/favicon/v2/market.yandex.ru?size=120",
     emoji: "📦",
