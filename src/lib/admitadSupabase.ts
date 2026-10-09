@@ -47,7 +47,8 @@ export function isNotExpired(expires: string | null): boolean {
 /* ------------------------- чтение (runtime) ------------------------- */
 
 export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
-  const code = str(row.code);
+  const rawCode = str(row.code);
+  const code = (rawCode && rawCode.toUpperCase() !== "НЕ НУЖЕН" && rawCode.toUpperCase() !== "НЕ ТРЕБУЕТСЯ") ? rawCode : "";
   const storeName = str(row.store).replace(/[\u200B-\u200D\uFEFF]/g, "").trim() || "Магазин";
   const storeSlug = str(row.store_slug) ? translit(str(row.store_slug)) : translit(storeName) || "magazin";
 
@@ -66,7 +67,8 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
   const expires = str(row.expires) ? str(row.expires).slice(0, 10) : null;
   const bonusName = str(row.bonus_name || row.discount) || null;
   const terms = str(row.terms || row.description) || null;
-  const id = num(row.id) || hash(String(row.code || storeSlug));
+  const rawSourceId = str(row.source_coupon_id || row.id);
+  const id = num(row.id) || (rawSourceId ? hash(rawSourceId) : hash(String(row.code ? `${storeSlug}::${row.code}` : `${storeSlug}::${row.affiliate_link || row.affiliate_url || row.description}`)));
   const ordMarker = str(row.ord_marker);
   const ordText = str(row.ord_text) || (ordMarker ? `Реклама. erid: ${ordMarker}` : `Реклама. ${storeName}`);
 

@@ -214,6 +214,33 @@ console.log("===================================================================
   console.log("✓ Тест 10: Perfluence collision -> Perfluence wins (PASS)");
 }
 
+// 10b. Тест: Независимые акции без промокода НЕ схлопываются в один купон
+{
+  const dealHotels = {
+    id: 13901,
+    store: { id: 1135, title: "Яндекс Путешествия", slug: "yandeks-puteshestviya", site: "https://travel.yandex.ru" },
+    promocode: { id: 13901, code: "", bonusName: "Скидка до 20% на отели", discount: "20%", isUniversal: true, group: "perfluence" },
+    affiliate: { link: "https://prfl.me/travel/hotels", ordMarker: "erid_hotels", ordText: "Реклама. ООО Яндекс" },
+  };
+
+  const dealTrains = {
+    id: 13902,
+    store: { id: 1135, title: "Яндекс Путешествия", slug: "yandeks-puteshestviya", site: "https://travel.yandex.ru" },
+    promocode: { id: 13902, code: "НЕ НУЖЕН", bonusName: "Кешбэк на поезда", discount: "5%", isUniversal: true, group: "perfluence" },
+    affiliate: { link: "https://prfl.me/travel/trains", ordMarker: "erid_trains", ordText: "Реклама. ООО Яндекс" },
+  };
+
+  const { coupons, stats } = dedupeCoupons([
+    { source: "perfluence", coupons: [dealHotels, dealTrains] },
+  ]);
+
+  assert.strictEqual(coupons.length, 2, "Разные акции без промокода одного рекламодателя должны сохраняться обе");
+  assert.strictEqual(stats.dropped, 0);
+
+  passed++;
+  console.log("✓ Тест 10b: Distinct no-code deals preserve independent identities (PASS)");
+}
+
 // 11. Тест Feature Flag: false -> zero Admitad in catalog, true -> eligible Admitad available
 {
   const mockAdmitadCoupon = {
