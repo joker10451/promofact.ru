@@ -241,6 +241,42 @@ console.log("===================================================================
   console.log("✓ Тест 10b: Distinct no-code deals preserve independent identities (PASS)");
 }
 
+// 10c. Тест: Ручной купон с 'НЕ НУЖЕН' не затеняет независимые no-code акции из Admitad/Perfluence
+{
+  const manualDeal = {
+    id: 1001,
+    store: { id: 1135, title: "Яндекс Путешествия", slug: "yandeks-puteshestviya", site: "https://travel.yandex.ru" },
+    promocode: { id: 1001, code: "НЕ НУЖЕН", bonusName: "Ручная акция: скидка на туры", discount: "10%", isUniversal: true, group: "manual" },
+    affiliate: { link: "https://travel.yandex.ru/tours", ordMarker: "manual_erid", ordText: "Реклама" },
+  };
+
+  const admitadDeal = {
+    id: 2002,
+    store: { id: 1135, title: "Яндекс Путешествия", slug: "yandeks-puteshestviya", site: "https://travel.yandex.ru" },
+    promocode: { id: 2002, code: "НЕ ТРЕБУЕТСЯ", bonusName: "Admitad акция: кешбэк на отели", discount: "15%", isUniversal: true, group: "admitad" },
+    affiliate: { link: "https://ad.admitad.com/g/travel_hotels", ordMarker: "adm_erid_hotels", ordText: "Реклама" },
+  };
+
+  const perfluenceDeal = {
+    id: 3003,
+    store: { id: 1135, title: "Яндекс Путешествия", slug: "yandeks-puteshestviya", site: "https://travel.yandex.ru" },
+    promocode: { id: 3003, code: "", bonusName: "Perfluence акция: скидка на билеты", discount: "500 ₽", isUniversal: true, group: "perfluence" },
+    affiliate: { link: "https://prfl.me/travel_trains", ordMarker: "prf_erid_trains", ordText: "Реклама" },
+  };
+
+  const { coupons, stats } = dedupeCoupons([
+    { source: "custom", coupons: [manualDeal] },
+    { source: "perfluence", coupons: [perfluenceDeal] },
+    { source: "admitad", coupons: [admitadDeal] },
+  ]);
+
+  assert.strictEqual(coupons.length, 3, "Ручной купон без кода (НЕ НУЖЕН) не должен затенять no-code акции других источников");
+  assert.strictEqual(stats.dropped, 0);
+
+  passed++;
+  console.log("✓ Тест 10c: Manual no-code placeholder does not shadow feed no-code deals (PASS)");
+}
+
 // 11. Тест Feature Flag: false -> zero Admitad in catalog, true -> eligible Admitad available
 {
   const mockAdmitadCoupon = {

@@ -112,8 +112,10 @@ export function dedupeCoupons(buckets: SourceBucket[]): {
   const manualCodes = new Set<string>();
   for (const source of MANUAL_SOURCES) {
     for (const c of bySource.get(source) ?? []) {
-      const code = normalizeCode(c.promocode.code);
-      if (code) manualCodes.add(code);
+      if (isRealPromoCode(c.promocode.code)) {
+        const code = normalizeCode(c.promocode.code);
+        if (code) manualCodes.add(code);
+      }
     }
   }
 
@@ -124,8 +126,9 @@ export function dedupeCoupons(buckets: SourceBucket[]): {
   for (const source of SOURCE_PRIORITY) {
     const isManual = MANUAL_SOURCES.includes(source);
     for (const c of bySource.get(source) ?? []) {
-      const code = normalizeCode(c.promocode.code);
-      const shadowedByManual = !isManual && code !== "" && manualCodes.has(code);
+      const hasRealCode = isRealPromoCode(c.promocode.code);
+      const code = hasRealCode ? normalizeCode(c.promocode.code) : "";
+      const shadowedByManual = !isManual && hasRealCode && code !== "" && manualCodes.has(code);
       const key = couponKey(c);
 
       if (shadowedByManual || seen.has(key)) {
