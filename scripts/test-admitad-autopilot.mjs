@@ -127,6 +127,47 @@ console.log("===================================================================
   console.log("✓ Тест 6: Allowlisted ready offer -> Admitad published (PASS)");
 }
 
+// 6b. Тест ADMITAD_APPROVED_CAMPAIGNS isolation (PREMIER pilot only)
+{
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  try {
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863";
+    // Кампания PREMIER разрешена
+    const premierResult = isAdmitadPublishable(
+      { isExpired: false, isForeign: false, affiliateLink: "https://premier.one" },
+      {
+        campaign: { id: 45863, status: "active" },
+        mapping: { strategy: "EXACT MATCH", canonicalSlug: "premier" },
+        eridStatus: "PRESENT",
+        eridValue: "2bL9aMPo2e49hMef4rrUCjFgtw",
+        legalInfoStatus: "PRESENT",
+        advertiserLegalInfo: "ООО ПРЕМЬЕР",
+      }
+    );
+    assert.strictEqual(premierResult.publishable, true);
+    assert.strictEqual(premierResult.status, "PUBLISHABLE");
+
+    // Другая кампания (Яндекс Путешествия 25224) заблокирована
+    const yandexResult = isAdmitadPublishable(
+      { isExpired: false, isForeign: false, affiliateLink: "https://travel.yandex.ru" },
+      {
+        campaign: { id: 25224, status: "active" },
+        mapping: { strategy: "EXACT MATCH", canonicalSlug: "yandeks-puteshestviya" },
+        eridStatus: "PRESENT",
+        eridValue: "2bL9aMPo2e49hMef4rqyS6igwd",
+        legalInfoStatus: "PRESENT",
+        advertiserLegalInfo: "ООО Яндекс.Вертикали",
+      }
+    );
+    assert.strictEqual(yandexResult.publishable, false);
+    assert.strictEqual(yandexResult.status, "READY_NOT_APPROVED");
+    passed++;
+    console.log("✓ Тест 6b: ADMITAD_APPROVED_CAMPAIGNS strict isolation for pilot (PASS)");
+  } finally {
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+  }
+}
+
 // 7. Тест NON-ALLOWLISTED VALID OFFER -> READY_NOT_APPROVED
 {
   const evalResult = isAdmitadPublishable(
