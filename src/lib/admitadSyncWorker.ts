@@ -182,14 +182,25 @@ export async function runAdmitadSafeSync(options: {
           quarantinedCount++;
         }
       } else {
-        // ADMITAD-4 Блокер 2: Кампания вне текущего пилотного allowlist.
-        // Сохраняем существующую активную запись из снимка (если она была активна).
-        if (existingActiveMap.has(rowId)) {
+        // ADMITAD-4 Блокер 2 & ADMITAD-5 Safety:
+        // Кампания вне текущего пилотного allowlist.
+        // Сохраняем ранее активную запись ТОЛЬКО если:
+        // 1) Она уже была активной в снимке;
+        // 2) Текущий API подтверждает её валидность (evalResult.status === "READY_NOT_APPROVED"
+        //    означает, что оффер проходит ВСЕ проверки качества, ERID, legal info, гео,
+        //    и не публикуется СТРОГО из-за отсутствия кампании в allowlist).
+        // Если же оффер стал недействительным в API (CAMPAIGN_INACTIVE, EXPIRED, MISSING_ERID,
+        // MISSING_LEGAL_INFO, FOREIGN_GEO, UNMAPPED, INVALID_AFFILIATE_URL),
+        // он НЕ должен оставаться активным!
+        const passesAllQualityGates = evalResult.status === "READY_NOT_APPROVED";
+        if (existingActiveMap.has(rowId) && passesAllQualityGates) {
           isRowActive = true;
           publishableCount++;
           syncStatus = "PUBLISHABLE";
         } else {
           readyNotApprovedCount++;
+          isRowActive = false;
+          syncStatus = evalResult.status;
         }
       }
 
