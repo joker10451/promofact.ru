@@ -134,13 +134,21 @@ export async function runAdmitadSafeSync(options: {
       const program = programMap.get(campId);
       const raw = mapApiCouponToRaw(apiCoupon);
 
-      const campaignStatus = program?.status || program?.connection_status || "CAMPAIGN_STATUS_UNKNOWN";
-      const campaign: Partial<AdmitadApiCampaign> & { id: number; status?: string; advertiser_legal_info?: string } = {
+      const campaignStatus = program?.status || "CAMPAIGN_STATUS_UNKNOWN";
+      const campaign: Partial<AdmitadApiCampaign> & {
+        id: number;
+        status?: string;
+        connection_status?: string;
+        advertiser_legal_info?: string;
+        moderation?: boolean;
+      } = {
         id: campId,
         name: program?.name || apiCoupon.campaign?.name || "Неизвестно",
         site_url: program?.site_url || apiCoupon.campaign?.site_url || "",
         status: campaignStatus,
+        connection_status: program?.connection_status,
         advertiser_legal_info: program?.advertiser_legal_info || undefined,
+        moderation: program?.moderation,
       };
 
       const normalized = normalizeAdmitadCoupon(raw);

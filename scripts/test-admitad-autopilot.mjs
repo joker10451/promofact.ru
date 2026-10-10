@@ -14,6 +14,7 @@ import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
 import { dedupeCoupons } from "../src/lib/dedupe.ts";
 import { rowToCoupon } from "../src/lib/admitadSupabase.ts";
 import { STABLE_STORES } from "../src/lib/stableStores.ts";
+import { evaluateQualityGate } from "../src/lib/admitadApi.ts";
 
 let passed = 0;
 
@@ -1103,6 +1104,122 @@ console.log("===================================================================
   console.log("✓ Тест 33: CATASTROPHIC_DROP пороговые значения и атомарность RPC подтверждены (PASS)");
 }
 
+// 34. Тест: Модерация программы и connection_status = "pending" блокируют публикацию
+{
+  const pendingRes = isAdmitadPublishable(
+    { isExpired: false, isForeign: false, affiliateLink: "https://wbbsv.com/g/p29zmc7b8sc7dde8999c285dacb824/?erid=2bL9aMPo2e49hMef4pgVYYJiE3" },
+    {
+      campaign: { id: 45863, status: "active", connection_status: "pending", moderation: true },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "premier" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4pgVYYJiE3",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО ПРЕМЬЕР, ИНН 9702011190",
+      allowlist: ["45863"],
+    }
+  );
+  assert.strictEqual(pendingRes.publishable, false);
+  assert.strictEqual(pendingRes.status, "CAMPAIGN_MODERATION");
+  assert.ok(pendingRes.reason?.includes("pending"));
+
+  passed++;
+  console.log("✓ Тест 34: connection_status pending -> блокировка CAMPAIGN_MODERATION (PASS)");
+}
+
+// 35. Тест: Расхождение ERID (erid в ссылке vs eridValue в метаданных)
+{
+  const mismatchRes = isAdmitadPublishable(
+    { isExpired: false, isForeign: false, affiliateLink: "https://wbbsv.com/g/419cb7qqvkc7dde8999c285dacb824/?i=31&erid=2bL9aMPo2e49hMef4rrUCjFgtw" },
+    {
+      campaign: { id: 45863, status: "active", connection_status: "active" },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "premier" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4pgVYYJiE3", // кабинетный ERID не совпадает с ссылкой купона!
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО ПРЕМЬЕР, ИНН 9702011190",
+      allowlist: ["45863"],
+    }
+  );
+  assert.strictEqual(mismatchRes.publishable, false);
+  assert.strictEqual(mismatchRes.status, "ERID_MISMATCH");
+  assert.ok(mismatchRes.reason?.includes("Расхождение ERID"));
+
+  passed++;
+  console.log("✓ Тест 35: Расхождение ERID ссылки и метаданных -> блокировка ERID_MISMATCH (PASS)");
+}
+
+// 36. Тест: Защита от персональных / несогласованных промокодов
+{
+  const personalRes = isAdmitadPublishable(
+    {
+      isExpired: false,
+      isForeign: false,
+      is_personal: true,
+      affiliateLink: "https://wbbsv.com/g/test/?erid=2bL9aMPo2e49hMef4rrUCjFgtw",
+    },
+    {
+      campaign: { id: 45863, status: "active", connection_status: "active" },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "premier" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4rrUCjFgtw",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО ПРЕМЬЕР, ИНН 9702011190",
+      allowlist: ["45863"],
+    }
+  );
+  assert.strictEqual(personalRes.publishable, false);
+  assert.strictEqual(personalRes.status, "UNAUTHORIZED_PROMOCODE");
+
+  passed++;
+  console.log("✓ Тест 36: is_personal true -> блокировка UNAUTHORIZED_PROMOCODE (PASS)");
+}
+
+// 37. Тест: Альтернативный кандидат pizzasushiwok (26110)
+{
+  const pswRes = isAdmitadPublishable(
+    {
+      isExpired: false,
+      isForeign: false,
+      is_personal: false,
+      affiliateLink: "https://naiawork.com/g/kfxv4uuefoc7dde8999c07268febb5/?i=31&erid=2bL9aMPo2e49hMef4rrUCer5M4",
+    },
+    {
+      campaign: { id: 26110, status: "active", connection_status: "active", moderation: false },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "pizzasushiwok" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4rrUCer5M4",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО «СМАК», ИНН: 7720798121",
+      allowlist: ["26110"],
+    }
+  );
+  assert.strictEqual(pswRes.publishable, true);
+  assert.strictEqual(pswRes.status, "PUBLISHABLE");
+
+  passed++;
+  console.log("✓ Тест 37: Альтернативный кандидат pizzasushiwok (26110) валидирован (PASS)");
+}
+
+// 38. Тест: evaluateQualityGate с connection_status pending и is_personal
+{
+  const qgPending = evaluateQualityGate(
+    { status: "active", goto_link: "https://ya.ru", regions: ["RU"] },
+    { id: 45863, status: "active", connection_status: "pending", moderation: true }
+  );
+  assert.strictEqual(qgPending.passed, false);
+  assert.ok(qgPending.reasons.some((r) => r.includes("CONNECTION_INACTIVE")));
+
+  const qgPersonal = evaluateQualityGate(
+    { status: "active", is_personal: true, goto_link: "https://ya.ru", regions: ["RU"] },
+    { id: 45863, status: "active", connection_status: "active" }
+  );
+  assert.strictEqual(qgPersonal.passed, false);
+  assert.ok(qgPersonal.reasons.some((r) => r.includes("UNAUTHORIZED_PROMOCODE")));
+
+  passed++;
+  console.log("✓ Тест 38: evaluateQualityGate отклоняет неактивное подключение и personal промокод (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/33 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/38 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");
