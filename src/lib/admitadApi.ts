@@ -630,6 +630,8 @@ export function mapApiCouponToRaw(api: AdmitadApiCoupon): RawAdmitadCoupon {
     isTakeadsCoupon: false,
     trackingPromocode: Boolean(api.is_tracking_promocode),
     hasAffiliateLink: Boolean(api.has_affiliate_link ?? true),
+    is_personal: Boolean(api.is_personal),
+    isPersonal: Boolean(api.is_personal),
     rawCampaignName: api.campaign?.name || "",
     rawCampaignSite: api.campaign?.site_url || "",
   };
@@ -664,6 +666,10 @@ export const EXPLICIT_STORE_MAPPINGS: Record<string, { slug: string; name: strin
   "яндекс плюс ru": { slug: "yandex-plus", name: "Яндекс Плюс" },
   "118265": { slug: "t-puteshestviya-oteli", name: "Т-Путешествия Отели" },
   "отели в т-банке ru": { slug: "t-puteshestviya-oteli", name: "Т-Путешествия Отели" },
+  "26110": { slug: "pizzasushiwok", name: "Pizza Sushi Wok" },
+  "pizzasushiwok": { slug: "pizzasushiwok", name: "Pizza Sushi Wok" },
+  "pizza sushi wok": { slug: "pizzasushiwok", name: "Pizza Sushi Wok" },
+  "pizzasushiwok.ru": { slug: "pizzasushiwok", name: "Pizza Sushi Wok" },
   "45863": { slug: "premier", name: "PREMIER" },
   "premier": { slug: "premier", name: "PREMIER" },
   "premier.one": { slug: "premier", name: "PREMIER" },
@@ -787,7 +793,7 @@ export function evaluateQualityGate(
 
   // 1c. Проверка статуса подключения площадки к программе рекламодателя
   if (campaign && campaign.connection_status && campaign.connection_status !== "active") {
-    reasons.push(`CONNECTION_INACTIVE: статус подключения площадки ${campaign.connection_status}`);
+    reasons.push(`CONNECTION_INACTIVE: статус подключения площадки не подтверждён active (${campaign.connection_status})`);
   }
 
   // 1d. Проверка флага модерации программы

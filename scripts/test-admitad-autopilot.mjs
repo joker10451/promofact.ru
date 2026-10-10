@@ -9,12 +9,13 @@ import {
   generateClickId,
   decorateAdmitadUrl,
   getEffectiveCampaignAllowlist,
+  VERIFIED_CAMPAIGN_ALLOWLIST,
 } from "../src/lib/admitadAutopilot.ts";
 import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
 import { dedupeCoupons } from "../src/lib/dedupe.ts";
 import { rowToCoupon } from "../src/lib/admitadSupabase.ts";
 import { STABLE_STORES } from "../src/lib/stableStores.ts";
-import { evaluateQualityGate } from "../src/lib/admitadApi.ts";
+import { evaluateQualityGate, matchCanonicalStore } from "../src/lib/admitadApi.ts";
 
 let passed = 0;
 
@@ -1220,6 +1221,115 @@ console.log("===================================================================
   console.log("✓ Тест 38: evaluateQualityGate отклоняет неактивное подключение и personal промокод (PASS)");
 }
 
+// 39. Тест ADMITAD-6: Fail-closed для connection_status и персональных промокодов
+{
+  // 39a. connection_status = undefined/missing -> публикация запрещена при fail-closed
+  const resMissing = isAdmitadPublishable(
+    { isExpired: false, isForeign: false, affiliateLink: "https://pizzasushiwok.ru" },
+    {
+      campaign: { id: 26110, status: "active", connection_status: "pending" },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "pizzasushiwok" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4rrUCer5M",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО Пицца Суши Вок",
+      allowlist: ["26110"],
+    }
+  );
+  assert.strictEqual(resMissing.publishable, false);
+  assert.strictEqual(resMissing.status, "CAMPAIGN_MODERATION");
+
+  // 39b. is_personal = true отклоняется независимо от нормализации
+  const resPersonal = isAdmitadPublishable(
+    { isExpired: false, isForeign: false, is_personal: true, affiliateLink: "https://pizzasushiwok.ru" },
+    {
+      campaign: { id: 26110, status: "active", connection_status: "active" },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "pizzasushiwok" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4rrUCer5M",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО Пицца Суши Вок",
+      allowlist: ["26110"],
+      qualityGatePassed: false,
+      qualityGateReasons: ["UNAUTHORIZED_PROMOCODE: персональный промокод"],
+    }
+  );
+  assert.strictEqual(resPersonal.publishable, false);
+  assert.strictEqual(resPersonal.status, "UNAUTHORIZED_PROMOCODE");
+
+  passed++;
+  console.log("✓ Тест 39: Fail-closed connection_status и блокировка is_personal в Gate (PASS)");
+}
+
+// 40. Тест ADMITAD-6: Исключение PREMIER из публичной выдачи и изоляция Perfluence
+{
+  // Проверяем, что в VERIFIED_CAMPAIGN_ALLOWLIST нет PREMIER (45863), но есть Pizza Sushi Wok (26110)
+  assert.ok(!VERIFIED_CAMPAIGN_ALLOWLIST.includes("45863"), "PREMIER 45863 не должен быть в VERIFIED_CAMPAIGN_ALLOWLIST");
+  assert.ok(VERIFIED_CAMPAIGN_ALLOWLIST.includes("26110"), "Pizza Sushi Wok 26110 должен быть в VERIFIED_CAMPAIGN_ALLOWLIST");
+
+  // При явном задании ADMITAD_APPROVED_CAMPAIGNS="26110" в allowlist ровно 26110
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  try {
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "26110";
+    const allowlist = getEffectiveCampaignAllowlist();
+    assert.deepStrictEqual(allowlist, ["26110"]);
+  } finally {
+    if (prevEnv !== undefined) {
+      process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+    } else {
+      delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    }
+  }
+
+  // Проверяем, что каталог Perfluence не пересекается со slug pizzasushiwok
+  assert.ok(STABLE_STORES["pizzasushiwok"] !== undefined, "Канонический магазин pizzasushiwok должен быть зарегистрирован");
+  assert.strictEqual(STABLE_STORES["pizzasushiwok"].id, 26110);
+  assert.strictEqual(STABLE_STORES["pizzasushiwok"].slug, "pizzasushiwok");
+
+  passed++;
+  console.log("✓ Тест 40: Исключение PREMIER и каноническая регистрация pizzasushiwok (PASS)");
+}
+
+// 41. Тест ADMITAD-6: Допуск пилотной кампании Pizza Sushi Wok (26110)
+{
+  const pswCampaign = {
+    id: 26110,
+    name: "Pizza Sushi Wok",
+    site_url: "https://pizzasushiwok.ru/",
+    status: "active",
+    connection_status: "active",
+    moderation: false,
+  };
+  const mapping = matchCanonicalStore(pswCampaign);
+  assert.strictEqual(mapping.strategy, "EXACT MATCH");
+  assert.strictEqual(mapping.canonicalSlug, "pizzasushiwok");
+
+  const pswEval = isAdmitadPublishable(
+    {
+      isExpired: false,
+      isForeign: false,
+      is_personal: false,
+      affiliateLink: "https://alitems.co/g/m9z5y18g3ic7dde8999c0d3810f27c/?erid=2bL9aMPo2e49hMef4rrUCer5M",
+    },
+    {
+      campaign: pswCampaign,
+      mapping,
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4rrUCer5M",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО 'ПИЦЦА СУШИ ВОК'",
+      allowlist: ["26110"],
+      qualityGatePassed: true,
+      qualityGateReasons: [],
+    }
+  );
+  assert.strictEqual(pswEval.publishable, true);
+  assert.strictEqual(pswEval.status, "PUBLISHABLE");
+
+  passed++;
+  console.log("✓ Тест 41: Пилотное предложение Pizza Sushi Wok успешно опубликовано (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/38 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/41 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");

@@ -167,6 +167,7 @@ export async function runAdmitadSafeSync(options: {
       if (hasLegalInfo && hasErid) legalReadyCount++;
 
       // Проверка публикации через Publication Eligibility Gate
+      const isPersonal = Boolean(apiCoupon.is_personal || raw.is_personal || (normalized && normalized.isPersonal));
       const evalResult = isAdmitadPublishable(normalized || raw, {
         campaign,
         mapping,
@@ -175,7 +176,21 @@ export async function runAdmitadSafeSync(options: {
         eridValue: legal.eridValue || undefined,
         advertiserLegalInfo: program?.advertiser_legal_info || undefined,
         allowlist: effectiveAllowlist,
+        qualityGatePassed: qg.passed && !isPersonal,
+        qualityGateReasons: isPersonal ? ["UNAUTHORIZED_PROMOCODE: персональный промокод"] : qg.reasons,
       });
+
+      // Обязательный гейт: Quality Gate обязан быть пройден, а персональные промокоды строго отклонены
+      if (!qg.passed || isPersonal) {
+        evalResult.publishable = false;
+        if (isPersonal) {
+          evalResult.status = "UNAUTHORIZED_PROMOCODE";
+        } else if (evalResult.status === "PUBLISHABLE") {
+          evalResult.status = qg.reasons.some(r => r.includes("CAMPAIGN_MODERATION") || r.includes("CONNECTION_INACTIVE"))
+            ? "CAMPAIGN_MODERATION"
+            : "QUALITY_GATE_FAILED";
+        }
+      }
 
       const couponId = String(raw.id || apiCoupon.id);
       const rowId = `adm_${couponId}`;
@@ -191,8 +206,8 @@ export async function runAdmitadSafeSync(options: {
         }
       } else {
         // ADMITAD-4 Блокер 2: Кампания вне текущего пилотного allowlist.
-        // Сохраняем существующую активную запись из снимка (если она была активна).
-        if (existingActiveMap.has(rowId)) {
+        // Сохраняем существующую активную запись из снимка (если она была активна и не относится к исключённым).
+        if (existingActiveMap.has(rowId) && String(campId) !== "45863") {
           isRowActive = true;
           publishableCount++;
           syncStatus = "PUBLISHABLE";
@@ -256,6 +271,20 @@ export async function runAdmitadSafeSync(options: {
     const processedIds = new Set(rowsToUpsert.map((r) => r.id));
     for (const [id, existingRow] of existingActiveMap.entries()) {
       const campId = String(existingRow.source_campaign_id || "");
+      const storeSlug = String(existingRow.store_slug || "");
+
+      // Дефект 3: Исключение устаревшего оффера PREMIER (45863) с неподтверждённым ERID/модерацией
+      if (campId === "45863" || storeSlug === "premier") {
+        rowsToUpsert.push({
+          ...existingRow,
+          is_active: false,
+          sync_run_id: syncRunId,
+          sync_status: "CAMPAIGN_MODERATION",
+          updated_at: nowIso,
+        });
+        continue;
+      }
+
       if (!effectiveAllowlist.includes(campId) && !processedIds.has(id)) {
         // Проверка: не продлевать просроченные предложения
         const expiresStr = existingRow.expires ? String(existingRow.expires).slice(0, 10) : null;
