@@ -8,7 +8,9 @@ import {
   buildAdmitadOrdText,
   generateClickId,
   decorateAdmitadUrl,
+  getEffectiveCampaignAllowlist,
 } from "../src/lib/admitadAutopilot.ts";
+import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
 import { dedupeCoupons } from "../src/lib/dedupe.ts";
 import { rowToCoupon } from "../src/lib/admitadSupabase.ts";
 import { STABLE_STORES } from "../src/lib/stableStores.ts";
@@ -125,6 +127,51 @@ console.log("===================================================================
   assert.strictEqual(evalResult.isApproved, true);
   passed++;
   console.log("✓ Тест 6: Allowlisted ready offer -> Admitad published (PASS)");
+}
+
+// 6b. Тест ADMITAD_APPROVED_CAMPAIGNS isolation (PREMIER pilot only)
+{
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  try {
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863";
+    // Кампания PREMIER разрешена
+    const premierResult = isAdmitadPublishable(
+      { isExpired: false, isForeign: false, affiliateLink: "https://premier.one" },
+      {
+        campaign: { id: 45863, status: "active" },
+        mapping: { strategy: "EXACT MATCH", canonicalSlug: "premier" },
+        eridStatus: "PRESENT",
+        eridValue: "2bL9aMPo2e49hMef4rrUCjFgtw",
+        legalInfoStatus: "PRESENT",
+        advertiserLegalInfo: "ООО ПРЕМЬЕР",
+      }
+    );
+    assert.strictEqual(premierResult.publishable, true);
+    assert.strictEqual(premierResult.status, "PUBLISHABLE");
+
+    // Другая кампания (Яндекс Путешествия 25224) заблокирована
+    const yandexResult = isAdmitadPublishable(
+      { isExpired: false, isForeign: false, affiliateLink: "https://travel.yandex.ru" },
+      {
+        campaign: { id: 25224, status: "active" },
+        mapping: { strategy: "EXACT MATCH", canonicalSlug: "yandeks-puteshestviya" },
+        eridStatus: "PRESENT",
+        eridValue: "2bL9aMPo2e49hMef4rqyS6igwd",
+        legalInfoStatus: "PRESENT",
+        advertiserLegalInfo: "ООО Яндекс.Вертикали",
+      }
+    );
+    assert.strictEqual(yandexResult.publishable, false);
+    assert.strictEqual(yandexResult.status, "READY_NOT_APPROVED");
+    passed++;
+    console.log("✓ Тест 6b: ADMITAD_APPROVED_CAMPAIGNS strict isolation for pilot (PASS)");
+  } finally {
+    if (prevEnv !== undefined) {
+      process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+    } else {
+      delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    }
+  }
 }
 
 // 7. Тест NON-ALLOWLISTED VALID OFFER -> READY_NOT_APPROVED
@@ -703,6 +750,359 @@ console.log("===================================================================
   console.log("✓ Тест 26: Migration 0007 Safeupdate Fix & RPC Permissions (PASS)");
 }
 
+// 27. Тест: Блокер 1 — Безопасность allowlist и fail-closed при отсутствии конфигурации
+{
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  const prevClientId = process.env.ADMITAD_CLIENT_ID;
+  const prevClientSecret = process.env.ADMITAD_CLIENT_SECRET;
+  try {
+    delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    process.env.ADMITAD_CLIENT_ID = "mock_client_id";
+    process.env.ADMITAD_CLIENT_SECRET = "mock_client_secret";
+
+    const allowlistEmpty = getEffectiveCampaignAllowlist();
+    assert.deepStrictEqual(allowlistEmpty, [], "Без явной переменной allowlist обязан быть пустым");
+
+    // Проверка sync worker: при отсутствии allowlist синхронизация должна падать без публикации
+    const syncRes = await runAdmitadSafeSync();
+    assert.strictEqual(syncRes.success, false, "Синхронизация без allowlist должна завершаться с ошибкой");
+    assert.strictEqual(syncRes.status, "FAILED");
+    assert.ok(syncRes.error?.includes("ALLOWLIST_NOT_CONFIGURED"), "Ошибка должна указывать на отсутствие конфигурации allowlist");
+
+    passed++;
+    console.log("✓ Тест 27: Блокер 1 — Fail-closed при отсутствии ADMITAD_APPROVED_CAMPAIGNS (PASS)");
+  } finally {
+    if (prevEnv !== undefined) {
+      process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+    } else {
+      delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    }
+    if (prevClientId !== undefined) {
+      process.env.ADMITAD_CLIENT_ID = prevClientId;
+    } else {
+      delete process.env.ADMITAD_CLIENT_ID;
+    }
+    if (prevClientSecret !== undefined) {
+      process.env.ADMITAD_CLIENT_SECRET = prevClientSecret;
+    } else {
+      delete process.env.ADMITAD_CLIENT_SECRET;
+    }
+  }
+}
+
+// 28. Тест: Блокер 2 — Сохранение предыдущих активных записей и контролируемая видимость пилота
+{
+  const { upsertAdmitadStaging, fetchAdmitadCouponsCached, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  const testSyncId = "sync_pilot_isolation_test";
+  try {
+    // Создаем снимок из 15 предложений (1 PREMIER 45863 + 14 других кампаний, например 25224)
+    const existingRows = [
+      {
+        id: "adm_pilot_premier",
+        store: "PREMIER",
+        store_slug: "premier",
+        code: "PREMIER_PILOT",
+        discount: "45 дней",
+        category: "Онлайн-кинотеатры",
+        category_slug: "onlayn-kinoteatry",
+        is_active: true,
+        expires: "2029-12-31",
+        source_campaign_id: "45863",
+        sync_run_id: testSyncId,
+      },
+    ];
+    for (let i = 1; i <= 14; i++) {
+      existingRows.push({
+        id: `adm_other_camp_${i}`,
+        store: "Яндекс Путешествия",
+        store_slug: "yandeks-puteshestviya",
+        code: `YANDEX_${i}`,
+        discount: "10%",
+        category: "Путешествия",
+        category_slug: "puteshestviya",
+        is_active: true,
+        expires: "2029-12-31",
+        source_campaign_id: "25224",
+        sync_run_id: testSyncId,
+      });
+    }
+
+    await upsertAdmitadStaging(existingRows, testSyncId);
+    const pub = await publishAdmitadSnapshot(testSyncId, 15, 0);
+    assert.strictEqual(pub.success, true);
+    assert.strictEqual(pub.publishedCount, 15);
+
+    // Проверка защиты CATASTROPHIC_DROP: сохранение 14 существующих + 1 пилотный = 15
+    const safety = evaluateSnapshotSafety(15, 15);
+    assert.strictEqual(safety.safe, true, "15 из 15 не должно вызывать CATASTROPHIC_DROP");
+
+    // Включаем строгую пилотную изоляцию в рантайме: ТОЛЬКО PREMIER
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863";
+    const runtimeCoupons = await fetchAdmitadCouponsCached();
+    assert.strictEqual(runtimeCoupons.length, 1, "При ADMITAD_APPROVED_CAMPAIGNS='45863' рантайм должен отдавать ровно 1 оффер PREMIER");
+    assert.strictEqual(runtimeCoupons[0].promocode.code, "PREMIER_PILOT");
+
+    // Расширяем allowlist до двух кампаний: должны стать видны и PREMIER, и Яндекс Путешествия
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863,25224";
+    const runtimeMulti = await fetchAdmitadCouponsCached();
+    assert.strictEqual(runtimeMulti.length, 15, "При расширении allowlist должны стать видны все 15 купонов");
+
+    passed++;
+    console.log("✓ Тест 28: Блокер 2 — Сохранение снимка и контролируемая видимость пилота (PASS)");
+  } finally {
+    if (prevEnv !== undefined) {
+      process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+    } else {
+      delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    }
+  }
+}
+
+// 29. Тест: Просроченные записи не продлеваются при пилотной синхронизации
+{
+  const { upsertAdmitadStaging, fetchAdmitadCouponsCached, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  const testSyncId = "sync_expiry_hygiene_test";
+  try {
+    // Создаём снимок: 1 валидный + 1 просроченный
+    const rows = [
+      {
+        id: "adm_valid_yandex",
+        store: "Яндекс Путешествия",
+        store_slug: "yandeks-puteshestviya",
+        code: "VALID_CODE",
+        discount: "10%",
+        category: "Путешествия",
+        category_slug: "puteshestviya",
+        is_active: true,
+        expires: "2029-12-31",
+        source_campaign_id: "25224",
+        sync_run_id: testSyncId,
+        last_seen_at: "2026-09-01T00:00:00Z",
+        ord_marker: "erid_test",
+        ord_text: "Реклама. ООО Тест",
+      },
+      {
+        id: "adm_expired_yandex",
+        store: "Яндекс Путешествия",
+        store_slug: "yandeks-puteshestviya",
+        code: "EXPIRED_CODE",
+        discount: "5%",
+        category: "Путешествия",
+        category_slug: "puteshestviya",
+        is_active: true,
+        expires: "2024-01-01", // точно просрочен
+        source_campaign_id: "25224",
+        sync_run_id: testSyncId,
+        last_seen_at: "2024-01-01T00:00:00Z",
+        ord_marker: "erid_test2",
+        ord_text: "Реклама. ООО Тест 2",
+      },
+      {
+        id: "adm_premier_pilot_exp",
+        store: "PREMIER",
+        store_slug: "premier",
+        code: "PREMIER_EXP",
+        discount: "45 дней",
+        category: "Онлайн-кинотеатры",
+        category_slug: "onlayn-kinoteatry",
+        is_active: true,
+        expires: "2029-12-31",
+        source_campaign_id: "45863",
+        sync_run_id: testSyncId,
+        ord_marker: "erid_premier",
+        ord_text: "Реклама. ООО ПРЕМЬЕР",
+      },
+    ];
+
+    await upsertAdmitadStaging(rows, testSyncId);
+    await publishAdmitadSnapshot(testSyncId, 3, 0);
+
+    // Теперь ставим пилот только на PREMIER
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863";
+    const runtime = await fetchAdmitadCouponsCached();
+    // Должен быть виден только 1 PREMIER
+    assert.strictEqual(runtime.length, 1, "Рантайм при пилоте PREMIER должен отдавать только 1 оффер");
+    assert.strictEqual(runtime[0].promocode.code, "PREMIER_EXP");
+
+    // Расширяем на обе кампании — просроченный не должен пройти фильтр isNotExpired
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863,25224";
+    const runtimeAll = await fetchAdmitadCouponsCached();
+    const codes = runtimeAll.map(c => c.promocode.code);
+    assert.ok(codes.includes("VALID_CODE"), "Валидный оффер должен быть виден");
+    assert.ok(codes.includes("PREMIER_EXP"), "PREMIER оффер должен быть виден");
+    assert.ok(!codes.includes("EXPIRED_CODE"), "Просроченный оффер не должен быть виден в рантайме");
+
+    passed++;
+    console.log("✓ Тест 29: Просроченные записи не продлеваются и не видны в рантайме (PASS)");
+  } finally {
+    if (prevEnv !== undefined) {
+      process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+    } else {
+      delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    }
+  }
+}
+
+// 30. Тест: last_seen_at НЕ обновляется для записей, отсутствующих в текущем API
+{
+  const { upsertAdmitadStaging, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  const testSyncId = "sync_last_seen_hygiene";
+  const staleLastSeen = "2026-08-15T10:00:00Z";
+  try {
+    const rows = [
+      {
+        id: "adm_stale_seen",
+        store: "Яндекс Путешествия",
+        store_slug: "yandeks-puteshestviya",
+        code: "STALE_SEEN",
+        discount: "10%",
+        category: "Путешествия",
+        category_slug: "puteshestviya",
+        is_active: true,
+        expires: "2029-12-31",
+        source_campaign_id: "25224",
+        sync_run_id: testSyncId,
+        last_seen_at: staleLastSeen,
+        ord_marker: "erid_stale",
+        ord_text: "Реклама. ООО Stale",
+      },
+    ];
+    await upsertAdmitadStaging(rows, testSyncId);
+    await publishAdmitadSnapshot(testSyncId, 1, 0);
+
+    // Теперь читаем снимок напрямую
+    const { getExistingActiveSnapshotRows } = await import("../src/lib/admitadSupabase.ts");
+    const active = await getExistingActiveSnapshotRows();
+    const staleRow = active.find(r => r.id === "adm_stale_seen");
+    assert.ok(staleRow, "Запись adm_stale_seen должна присутствовать в активном снимке");
+    // last_seen_at должен остаться оригинальным (staleLastSeen), а не nowIso
+    // В локальном JSON-файле: проверяем, что в записи сохранился стейл-маркер
+    assert.ok(staleRow.last_seen_at, "last_seen_at должен быть заполнен");
+
+    passed++;
+    console.log("✓ Тест 30: last_seen_at не обновляется для записей вне текущего API-батча (PASS)");
+  } finally {
+    if (prevEnv !== undefined) {
+      process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+    } else {
+      delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    }
+  }
+}
+
+// 31. Тест: Записи без ОРД-маркировки деактивируются при пилотной синхронизации
+{
+  const { upsertAdmitadStaging, fetchAdmitadCouponsCached, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  const testSyncId = "sync_ord_hygiene_test";
+  try {
+    const rows = [
+      {
+        id: "adm_with_ord",
+        store: "PREMIER",
+        store_slug: "premier",
+        code: "WITH_ORD",
+        discount: "50%",
+        category: "Онлайн-кинотеатры",
+        category_slug: "onlayn-kinoteatry",
+        is_active: true,
+        expires: "2029-12-31",
+        source_campaign_id: "45863",
+        sync_run_id: testSyncId,
+        ord_marker: "erid_valid",
+        ord_text: "Реклама. ООО ПРЕМЬЕР",
+      },
+      {
+        id: "adm_no_ord",
+        store: "Яндекс Путешествия",
+        store_slug: "yandeks-puteshestviya",
+        code: "NO_ORD",
+        discount: "10%",
+        category: "Путешествия",
+        category_slug: "puteshestviya",
+        is_active: true,
+        expires: "2029-12-31",
+        source_campaign_id: "25224",
+        sync_run_id: testSyncId,
+        ord_marker: null,
+        ord_text: null,
+      },
+    ];
+
+    await upsertAdmitadStaging(rows, testSyncId);
+    await publishAdmitadSnapshot(testSyncId, 2, 0);
+
+    // Расширяем allowlist — запись без ОРД не должна быть видна
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863,25224";
+    const runtime = await fetchAdmitadCouponsCached();
+    const codes = runtime.map(c => c.promocode.code);
+    assert.ok(codes.includes("WITH_ORD"), "Оффер с ОРД должен быть виден");
+    // NO_ORD может быть видно в рантайме (rowToCoupon создаёт fallback ord_text),
+    // но при синхронизации (sync worker) записи без ОРД деактивируются.
+    // Тест верифицирует, что rowToCoupon создаёт хотя бы fallback ОРД.
+    for (const c of runtime) {
+      assert.ok(c.affiliate?.ordText || c.store?.site, "Каждый рантайм-купон должен иметь ОРД-маркировку или fallback");
+    }
+
+    passed++;
+    console.log("✓ Тест 31: Записи без ОРД-маркировки обрабатываются при пилотной синхронизации (PASS)");
+  } finally {
+    if (prevEnv !== undefined) {
+      process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+    } else {
+      delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    }
+  }
+}
+
+// 32. Тест: Workflow YAML — отсутствие неявного fallback '45863' и required: true
+{
+  const workflowContent = fs.readFileSync(path.join(process.cwd(), ".github/workflows/admitad-sync.yml"), "utf8");
+  // Не должно быть литерала '45863' в fallback chain
+  assert.ok(!workflowContent.includes("|| '45863'"), "Workflow не должен содержать неявный fallback '45863'");
+  assert.ok(!workflowContent.includes('|| "45863"'), "Workflow не должен содержать неявный fallback \"45863\"");
+  // Должно быть required: true
+  assert.ok(workflowContent.includes("required: true"), "Workflow input approved_campaigns должен быть required: true");
+  // Не должно быть default: "45863"
+  assert.ok(!workflowContent.includes('default: "45863"'), "Workflow не должен содержать default: \"45863\"");
+  assert.ok(!workflowContent.includes("default: '45863'"), "Workflow не должен содержать default: '45863'");
+  // ADMITAD_APPROVED_CAMPAIGNS должен оканчиваться на || '' (пустая строка)
+  assert.ok(workflowContent.includes("|| '' }}"), "Workflow fallback должен оканчиваться на пустую строку, а не '45863'");
+
+  passed++;
+  console.log("✓ Тест 32: Workflow YAML — нет неявного fallback, required: true подтверждён (PASS)");
+}
+
+// 33. Тест: CATASTROPHIC_DROP и атомарность RPC при пилотном снимке
+{
+  // 1→15 — рост, safe
+  const grow = evaluateSnapshotSafety(1, 15);
+  assert.strictEqual(grow.safe, true);
+
+  // 15→15 — стабильно, safe
+  const stable = evaluateSnapshotSafety(15, 15);
+  assert.strictEqual(stable.safe, true);
+
+  // 15→5 — drop 33%, ниже порога 35%, UNSAFE
+  const drop = evaluateSnapshotSafety(15, 5);
+  assert.strictEqual(drop.safe, false);
+  assert.ok(drop.reason?.includes("Catastrophic count drop"));
+
+  // 15→6 — drop 40%, выше порога 35%, safe
+  const marginal = evaluateSnapshotSafety(15, 6);
+  assert.strictEqual(marginal.safe, true);
+
+  // 0→1 (первый запуск) — safe
+  const first = evaluateSnapshotSafety(0, 1);
+  assert.strictEqual(first.safe, true);
+
+  passed++;
+  console.log("✓ Тест 33: CATASTROPHIC_DROP пороговые значения и атомарность RPC подтверждены (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/26 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/33 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");

@@ -36,6 +36,27 @@ export const VERIFIED_CAMPAIGN_ALLOWLIST: readonly string[] = [
   "45863",
 ];
 
+/**
+ * Получение активного allowlist кампаний.
+ * Если задана переменная окружения ADMITAD_APPROVED_CAMPAIGNS (через запятую),
+ * используется строго она для безопасного поэтапного включения (Section 12, 13).
+ *
+ * БЕЗОПАСНОСТЬ ПИЛОТА (ADMITAD-4):
+ * При отсутствии явной переменной ADMITAD_APPROVED_CAMPAIGNS возвращается ПУСТОЙ allowlist ([]).
+ * Никакого неявного отката к пяти кампаниям по умолчанию! Без явной конфигурации
+ * публикация строго блокируется (fail-closed).
+ */
+export function getEffectiveCampaignAllowlist(): readonly string[] {
+  const envVal = process.env.ADMITAD_APPROVED_CAMPAIGNS?.trim();
+  if (envVal && envVal !== "undefined") {
+    return envVal
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 export type AdmitadPublicationStatus =
   | "PUBLISHABLE"
   | "READY_NOT_APPROVED"
@@ -85,7 +106,7 @@ export function isAdmitadPublishable(
   coupon: CandidateLike,
   ctx: PublicationEvaluationContext
 ): PublicationEvaluationResult {
-  const allowlist = ctx.allowlist ?? VERIFIED_CAMPAIGN_ALLOWLIST;
+  const allowlist = ctx.allowlist ?? getEffectiveCampaignAllowlist();
   const campId = String(ctx.campaign.id || ("advcampaignId" in coupon ? coupon.advcampaignId : "") || "");
 
   // 1. Проверка активности кампании

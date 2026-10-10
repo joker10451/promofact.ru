@@ -4,6 +4,7 @@ import { translit } from "@/lib/translit";
 import { proxiedLogo } from "@/lib/logoProxy";
 import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 import { STABLE_STORES } from "@/lib/stableStores";
+import { getEffectiveCampaignAllowlist } from "@/lib/admitadAutopilot";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -119,8 +120,15 @@ const LOCAL_META_PATH = path.join(process.cwd(), "src/data/admitad-sync-meta.jso
 /**
  * Чтение активных и валидных купонов Admitad из снимка Supabase.
  * Runtime путь: читает ТОЛЬКО Supabase, никогда не делает прямых запросов к Admitad API.
+ * Безопасность пилота (ADMITAD-4): выдаются только купоны кампаний из getEffectiveCampaignAllowlist().
  */
 export async function fetchAdmitadCouponsCached(): Promise<Coupon[]> {
+  const allowlist = getEffectiveCampaignAllowlist();
+  if (process.env.NODE_ENV === "production" && allowlist.length === 0) {
+    // Безопасность: в продакшене без явной конфигурации ADMITAD_APPROVED_CAMPAIGNS купоны не выдаются
+    return [];
+  }
+
   const supabase = getSupabase();
   if (!supabase) {
     if (process.env.NODE_ENV === "production") {
@@ -133,6 +141,8 @@ export async function fetchAdmitadCouponsCached(): Promise<Coupon[]> {
         const out: Coupon[] = [];
         for (const row of raw) {
           if (row.is_active) {
+            const campId = str(row.source_campaign_id);
+            if (allowlist.length > 0 && !allowlist.includes(campId)) continue;
             const c = rowToCoupon(row);
             if (c && isNotExpired(c.promocode.expires)) {
               out.push(c);
@@ -162,6 +172,8 @@ export async function fetchAdmitadCouponsCached(): Promise<Coupon[]> {
 
     const out: Coupon[] = [];
     for (const row of data as Record<string, unknown>[]) {
+      const campId = str(row.source_campaign_id);
+      if (allowlist.length > 0 && !allowlist.includes(campId)) continue;
       const c = rowToCoupon(row);
       if (c && isNotExpired(c.promocode.expires)) {
         out.push(c);
@@ -414,6 +426,36 @@ export async function getActiveSnapshotCount(): Promise<number> {
     return count || 0;
   } catch {
     return 0;
+  }
+}
+
+/**
+ * Получение текущих активных записей снимка для сохранения в поколениях (ADMITAD-4).
+ */
+export async function getExistingActiveSnapshotRows(): Promise<AdmitadRowInput[]> {
+  const supabase = getSupabaseAdmin() || getSupabase();
+  if (!supabase) {
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        if (fs.existsSync(LOCAL_SNAPSHOT_PATH)) {
+          const raw = JSON.parse(fs.readFileSync(LOCAL_SNAPSHOT_PATH, "utf8")) as AdmitadRowInput[];
+          return raw.filter((r) => r.is_active);
+        }
+      } catch {}
+    }
+    return [];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("admitad_coupons")
+      .select("*")
+      .eq("is_active", true);
+
+    if (error || !data) return [];
+    return data as AdmitadRowInput[];
+  } catch {
+    return [];
   }
 }
 

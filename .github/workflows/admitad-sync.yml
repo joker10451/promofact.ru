@@ -2,6 +2,10 @@ name: Admitad Safe Snapshot Sync (Autopilot)
 
 on:
   workflow_dispatch: # Ручной запуск через Actions UI
+    inputs:
+      approved_campaigns:
+        description: "Comma-separated Admitad campaign IDs to publish (e.g. 45863 for PREMIER pilot). REQUIRED — empty value blocks sync."
+        required: true
 
   # SCHEDULE CONFIGURED (каждые 3 часа UTC: 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 UTC).
   # По требованию ТЗ: сконфигурирован, но отключен до явного подтверждения (enabled only after manual approval).
@@ -30,6 +34,7 @@ jobs:
           ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
           ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}
           ADMITAD_WEBSITE_HOST: "promofact.ru"
+          ADMITAD_APPROVED_CAMPAIGNS: ${{ github.event.inputs.approved_campaigns || vars.ADMITAD_APPROVED_CAMPAIGNS || '' }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
