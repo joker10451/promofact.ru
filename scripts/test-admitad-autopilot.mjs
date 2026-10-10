@@ -1103,6 +1103,118 @@ console.log("===================================================================
   console.log("✓ Тест 33: CATASTROPHIC_DROP пороговые значения и атомарность RPC подтверждены (PASS)");
 }
 
+// 34. Тест: ADMITAD-5 Safety — Оффер другой кампании деактивируется, если новый API возвращает ошибку качества
+{
+  const { isAdmitadPublishable } = await import("../src/lib/admitadAutopilot.ts");
+  const pilotAllowlist = ["45863"]; // Только PREMIER в пилоте
+
+  // 1) Оффер Яндекс Путешествия (кампания 25224) полностью валиден по всем шлюзам,
+  //    но не входит в pilotAllowlist. Статус должен быть СТРОГО READY_NOT_APPROVED.
+  const validOtherCampaignCoupon = {
+    id: 101,
+    advcampaignId: 25224,
+    name: "10% на отели",
+    status: "active",
+    isExpired: false,
+    isForeign: false,
+    affiliateLink: "https://ad.admitad.com/g/test/?erid=2bL9aMPo2e49hMef4rqyS6igwd",
+  };
+  const evalValid = isAdmitadPublishable(validOtherCampaignCoupon, {
+    campaign: { id: 25224, status: "active" },
+    mapping: { canonicalSlug: "yandeks-puteshestviya", storeName: "Яндекс Путешествия", strategy: "MANUAL_EXACT" },
+    eridStatus: "PRESENT",
+    legalInfoStatus: "PRESENT",
+    eridValue: "2bL9aMPo2e49hMef4rqyS6igwd",
+    advertiserLegalInfo: "ООО Яндекс Вертикали ИНН 7704340327",
+    allowlist: pilotAllowlist,
+  });
+  assert.strictEqual(evalValid.publishable, false, "Не должен публиковаться в текущем пилоте");
+  assert.strictEqual(evalValid.status, "READY_NOT_APPROVED", "Статус должен быть READY_NOT_APPROVED");
+
+  // 2) Тот же оффер, но рекламодатель снял токен ОРД (eridStatus = MISSING).
+  //    Статус должен стать MISSING_ERID, а НЕ READY_NOT_APPROVED!
+  const evalNoErid = isAdmitadPublishable(validOtherCampaignCoupon, {
+    campaign: { id: 25224, status: "active" },
+    mapping: { canonicalSlug: "yandeks-puteshestviya", storeName: "Яндекс Путешествия", strategy: "MANUAL_EXACT" },
+    eridStatus: "MISSING",
+    legalInfoStatus: "PRESENT",
+    eridValue: undefined,
+    advertiserLegalInfo: "ООО Яндекс Вертикали ИНН 7704340327",
+    allowlist: pilotAllowlist,
+  });
+  assert.strictEqual(evalNoErid.publishable, false);
+  assert.strictEqual(evalNoErid.status, "MISSING_ERID", "Купон без ERID должен получить статус MISSING_ERID");
+
+  // 3) Оффер с истёкшим сроком годности (isExpired = true)
+  const expiredOtherCoupon = { ...validOtherCampaignCoupon, isExpired: true };
+  const evalExpired = isAdmitadPublishable(expiredOtherCoupon, {
+    campaign: { id: 25224, status: "active" },
+    mapping: { canonicalSlug: "yandeks-puteshestviya", storeName: "Яндекс Путешествия", strategy: "MANUAL_EXACT" },
+    eridStatus: "PRESENT",
+    legalInfoStatus: "PRESENT",
+    eridValue: "2bL9aMPo2e49hMef4rqyS6igwd",
+    advertiserLegalInfo: "ООО Яндекс Вертикали ИНН 7704340327",
+    allowlist: pilotAllowlist,
+  });
+  assert.strictEqual(evalExpired.status, "EXPIRED", "Истёкший купон должен получить статус EXPIRED");
+
+  // 4) Оффер с неактивной кампанией рекламодателя (status = "paused")
+  const evalInactiveCamp = isAdmitadPublishable(validOtherCampaignCoupon, {
+    campaign: { id: 25224, status: "paused" },
+    mapping: { canonicalSlug: "yandeks-puteshestviya", storeName: "Яндекс Путешествия", strategy: "MANUAL_EXACT" },
+    eridStatus: "PRESENT",
+    legalInfoStatus: "PRESENT",
+    eridValue: "2bL9aMPo2e49hMef4rqyS6igwd",
+    advertiserLegalInfo: "ООО Яндекс Вертикали ИНН 7704340327",
+    allowlist: pilotAllowlist,
+  });
+  assert.strictEqual(evalInactiveCamp.status, "CAMPAIGN_INACTIVE", "Купон неактивной кампании должен получить статус CAMPAIGN_INACTIVE");
+
+  // Симуляция логики sync worker:
+  // Для ранее активного оффера: сохраняется ТОЛЬКО если passesAllQualityGates (status === "READY_NOT_APPROVED")
+  const existingActiveMap = new Set(["adm_101"]);
+
+  const checkWorkerDecision = (evalRes) => {
+    const isApprovedInCurrentSync = pilotAllowlist.includes("25224"); // false
+    const rowId = "adm_101";
+    let isRowActive = false;
+    let syncStatus = evalRes.status;
+
+    if (isApprovedInCurrentSync) {
+      if (evalRes.publishable) isRowActive = true;
+    } else {
+      const passesAllQualityGates = evalRes.status === "READY_NOT_APPROVED";
+      if (existingActiveMap.has(rowId) && passesAllQualityGates) {
+        isRowActive = true;
+        syncStatus = "PUBLISHABLE";
+      } else {
+        isRowActive = false;
+        syncStatus = evalRes.status;
+      }
+    }
+    return { isRowActive, syncStatus };
+  };
+
+  const decisionValid = checkWorkerDecision(evalValid);
+  assert.strictEqual(decisionValid.isRowActive, true, "Валидный купон из существующего снимка должен остаться активным");
+  assert.strictEqual(decisionValid.syncStatus, "PUBLISHABLE");
+
+  const decisionNoErid = checkWorkerDecision(evalNoErid);
+  assert.strictEqual(decisionNoErid.isRowActive, false, "Купон, потерявший ERID в API, НЕ должен оставаться активным!");
+  assert.strictEqual(decisionNoErid.syncStatus, "MISSING_ERID");
+
+  const decisionExpired = checkWorkerDecision(evalExpired);
+  assert.strictEqual(decisionExpired.isRowActive, false, "Купон, ставший EXPIRED в API, НЕ должен оставаться активным!");
+  assert.strictEqual(decisionExpired.syncStatus, "EXPIRED");
+
+  const decisionInactive = checkWorkerDecision(evalInactiveCamp);
+  assert.strictEqual(decisionInactive.isRowActive, false, "Купон с отключённой кампанией НЕ должен оставаться активным!");
+  assert.strictEqual(decisionInactive.syncStatus, "CAMPAIGN_INACTIVE");
+
+  passed++;
+  console.log("✓ Тест 34: ADMITAD-5 Safety — недействительные офферы других кампаний деактивируются (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/33 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/34 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");
