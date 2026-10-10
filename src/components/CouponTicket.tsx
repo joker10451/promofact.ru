@@ -12,6 +12,7 @@ import { CheckIcon } from "@/components/CheckIcon";
 import { refineOffer } from "@/lib/offerRefiner";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
 import { decorateAdmitadUrl, generateClickId } from "@/lib/admitadAutopilot";
+import BarcodeEan13 from "@/components/BarcodeEan13";
 
 const SBER_MED_WARNING = "ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА";
 
@@ -343,7 +344,11 @@ export default function CouponTicket({
                 <Icon name="flame" size={11} /> Хит
               </span>
             )}
-            {promocode.customerTypeLabel ? (
+            {promocode.isBarcode ? (
+              <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-[10px] font-extrabold text-blue-700 flex items-center gap-1 shadow-2xs">
+                Штрихкод
+              </span>
+            ) : promocode.customerTypeLabel ? (
               <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                 promocode.customerTypeLabel.includes("года")
                   ? "bg-purple-100 text-purple-800 border border-purple-200"
@@ -464,28 +469,57 @@ export default function CouponTicket({
               </div>
             )}
 
-            {/* Поле с промокодом: клик копирует код */}
-            <div
-              onClick={() => copyCode(promocode.code)}
-              className="flex cursor-pointer items-center justify-between rounded-xl border-2 border-dashed border-ink/20 bg-paper px-3.5 py-2.5 font-mono text-xs sm:text-sm font-bold tracking-wider text-ink transition-all hover:border-red hover:bg-red/5 active:scale-[0.99]"
-              title="Нажмите, чтобы скопировать промокод"
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  copyCode(promocode.code);
-                }
-              }}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <Icon name="copy" size={14} className={copied ? "text-mint-dark" : "text-ink/40"} />
-                <span className="truncate">{promocode.code}</span>
+            {/* Поле со штрихкодом или промокодом */}
+            {promocode.isBarcode ? (
+              <div
+                onClick={() => copyCode(promocode.code)}
+                className="group/barcode flex flex-col items-center justify-center cursor-pointer rounded-2xl border-2 border-dashed border-ink/25 bg-white p-3 transition-all hover:border-red hover:shadow-xs active:scale-[0.99]"
+                title="Покажите штрихкод на кассе или нажмите для копирования"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    copyCode(promocode.code);
+                  }
+                }}
+              >
+                <div className="w-full flex justify-center py-1 bg-white rounded-lg">
+                  <BarcodeEan13 code={promocode.code} />
+                </div>
+                <div className="mt-1 flex items-center justify-between w-full px-1 text-[11px] font-bold">
+                  <span className="text-ink/60 flex items-center gap-1">
+                    <Icon name="copy" size={12} className={copied ? "text-mint-dark" : "text-ink/40"} />
+                    Показать на кассе
+                  </span>
+                  <span className={copied ? "text-mint-dark font-extrabold" : "text-ink/40"}>
+                    {copied ? "штрихкод скопирован!" : copyError ? "нажмите для повтора" : "нажмите для копирования"}
+                  </span>
+                </div>
               </div>
-              <span className={`font-sans text-[11px] font-bold shrink-0 transition-colors ${copied ? "text-mint-dark font-extrabold" : "text-ink/40"}`}>
-                {copied ? "скопировано!" : copyError ? "нажмите для повтора" : "нажмите для копирования"}
-              </span>
-            </div>
+            ) : (
+              <div
+                onClick={() => copyCode(promocode.code)}
+                className="flex cursor-pointer items-center justify-between rounded-xl border-2 border-dashed border-ink/20 bg-paper px-3.5 py-2.5 font-mono text-xs sm:text-sm font-bold tracking-wider text-ink transition-all hover:border-red hover:bg-red/5 active:scale-[0.99]"
+                title="Нажмите, чтобы скопировать промокод"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    copyCode(promocode.code);
+                  }
+                }}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Icon name="copy" size={14} className={copied ? "text-mint-dark" : "text-ink/40"} />
+                  <span className="truncate">{promocode.code}</span>
+                </div>
+                <span className={`font-sans text-[11px] font-bold shrink-0 transition-colors ${copied ? "text-mint-dark font-extrabold" : "text-ink/40"}`}>
+                  {copied ? "скопировано!" : copyError ? "нажмите для повтора" : "нажмите для копирования"}
+                </span>
+              </div>
+            )}
 
             {/* Основная кнопка действия */}
             {copied ? (
@@ -497,7 +531,11 @@ export default function CouponTicket({
                 className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-mint hover:bg-mint-dark text-white text-xs sm:text-sm font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer px-4"
               >
                 <CheckIcon className="h-4 w-4" />
-                <span className="truncate">Код скопирован! Перейти в {store.name} →</span>
+                <span className="truncate">
+                  {promocode.isBarcode
+                    ? `Штрихкод скопирован! Перейти в ${store.name} →`
+                    : `Код скопирован! Перейти в ${store.name} →`}
+                </span>
               </a>
             ) : copyError ? (
               <button
@@ -515,7 +553,9 @@ export default function CouponTicket({
                 className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red to-red-dark text-white text-xs sm:text-sm font-bold shadow-offset-red hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] transition-all cursor-pointer px-4"
               >
                 <Icon name="copy" size={16} />
-                <span className="truncate">Скопировать промокод</span>
+                <span className="truncate">
+                  {promocode.isBarcode ? "Скопировать номер штрихкода" : "Скопировать промокод"}
+                </span>
               </button>
             )}
 
@@ -631,6 +671,21 @@ export default function CouponTicket({
                 <div className="mt-1 text-sm font-semibold text-ink/80">{offer.condition}</div>
               </div>
 
+              {/* Отображение штрихкода для кассы розничного магазина */}
+              {promocode.isBarcode && promocode.code && (
+                <div className="mt-4 rounded-2xl bg-white p-4 border-2 border-line text-center shadow-xs">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-ink/60 mb-2">
+                    Штрихкод для кассы в магазине «{store.name}»
+                  </div>
+                  <div className="flex justify-center py-2 bg-white rounded-xl">
+                    <BarcodeEan13 code={promocode.code} className="max-w-[280px]" />
+                  </div>
+                  <p className="mt-2 text-[11px] text-ink/60 font-medium">
+                    Покажите этот экран кассиру в магазине. Рекомендуется увеличить яркость экрана.
+                  </p>
+                </div>
+              )}
+
               <div className="mt-5 space-y-3 text-xs leading-relaxed text-ink/80">
                 <div>
                   <span className="font-bold text-ink block mb-1"><Icon name="clipboard" size={12} /> Полные условия акции:</span>
@@ -697,7 +752,11 @@ export default function CouponTicket({
                   }}
                   className="w-full rounded-2xl bg-gradient-to-r from-red to-red-dark py-3.5 px-4 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer block"
                 >
-                  {promocode.code ? `Скопировать ${promocode.code} и перейти →` : `Перейти в магазин →`}
+                  {promocode.code
+                    ? promocode.isBarcode
+                      ? `Скопировать номер штрихкода (${promocode.code}) и перейти →`
+                      : `Скопировать ${promocode.code} и перейти →`
+                    : `Перейти в магазин →`}
                 </button>
               </div>
             </div>
@@ -721,7 +780,13 @@ export default function CouponTicket({
                 </span>
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-mint">
-                    {toastType === "opened" ? "Код скопирован! Магазин открывается" : "Промокод скопирован в буфер"}
+                    {promocode.isBarcode
+                      ? toastType === "opened"
+                        ? "Штрихкод скопирован! Магазин открывается"
+                        : "Штрихкод скопирован в буфер"
+                      : toastType === "opened"
+                        ? "Код скопирован! Магазин открывается"
+                        : "Промокод скопирован в буфер"}
                   </div>
                   <div className="font-display text-base font-extrabold text-white">
                     {promocode.code || store.name}
@@ -738,7 +803,10 @@ export default function CouponTicket({
               </button>
             </div>
             <div className="mt-2.5 border-t border-white/10 pt-2 text-xs text-white/80">
-              <Icon name="bulb" size={12} /> Вставьте промокод в поле купона при оплате в <span className="font-bold text-white">{store.name}</span>.
+              <Icon name="bulb" size={12} />{" "}
+              {promocode.isBarcode
+                ? `Покажите штрихкод на кассе или вставьте номер в поле промокода в ${store.name}.`
+                : `Вставьте промокод в поле купона при оплате в ${store.name}.`}
             </div>
             <a
               href={CHANNELS.telegram}

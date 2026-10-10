@@ -37,9 +37,11 @@ export async function generateMetadata({
   const coupon = store.coupons.find((c) => c.promocode.code === code);
   if (!coupon) return {};
   const p = coupon.promocode;
-  const offer = p.bonusName || `скидка по промокоду ${code}`;
-  const title = `Промокод ${code} — ${store.name}: ${offer}`;
-  const description = `Промокод ${code} для ${store.name}: ${offer}.${p.terms ? " " + p.terms : ""} Копируй и применяй при оплате.`;
+  const isBarcode = Boolean(p.isBarcode);
+  const label = isBarcode ? "Штрихкод" : "Промокод";
+  const offer = p.bonusName || (isBarcode ? `скидка по штрихкоду ${code}` : `скидка по промокоду ${code}`);
+  const title = `${label} ${code} - ${store.name}: ${offer}`;
+  const description = `${label} ${code} для ${store.name}: ${offer}.${p.terms ? " " + p.terms : ""} ${isBarcode ? "Покажи на кассе или применяй онлайн." : "Копируй и применяй при оплате."}`;
   const pageUrl = `${SITE_URL}/store/${slug}/${code}`;
   const parentStoreUrl = `${SITE_URL}/store/${slug}`;
   return {
@@ -92,6 +94,8 @@ export default async function CouponPage({
   if (!coupon) notFound();
 
   const p = coupon.promocode;
+  const isBarcode = Boolean(p.isBarcode);
+  const label = isBarcode ? "Штрихкод" : "Промокод";
   const pageUrl = `${SITE_URL}/store/${slug}/${code}`;
   const storeUrl = `${SITE_URL}/store/${slug}`;
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
@@ -109,17 +113,17 @@ export default async function CouponPage({
         item: `${SITE_URL}/category/${store.categorySlug}`,
       },
       { "@type": "ListItem", position: 3, name: store.name, item: storeUrl },
-      { "@type": "ListItem", position: 4, name: `Промокод ${code}`, item: pageUrl },
+      { "@type": "ListItem", position: 4, name: `${label} ${code}`, item: pageUrl },
     ],
   };
 
   const couponJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Coupon",
-    name: p.bonusName || `Промокод ${code}`,
+    name: p.bonusName || `${label} ${code}`,
     description: p.bonusName || store.name,
     discountCode: code,
-    category: "Промокод",
+    category: label,
     validThrough: p.expires,
     dateModified: todayIso,
     url: coupon.affiliate.link || store.site,
@@ -151,12 +155,12 @@ export default async function CouponPage({
         </Link>
         <span className="mx-2">/</span>
         <span aria-current="page" className="text-ink">
-          Промокод {code}
+          {label} {code}
         </span>
       </nav>
 
       <h1 className="font-display text-2xl font-extrabold sm:text-3xl">
-        Промокод {code} — {store.name}
+        {label} {code} - {store.name}
       </h1>
       {p.bonusName && (
         <p className="mt-2 text-lg text-ink/80">{p.bonusName}</p>
@@ -182,14 +186,23 @@ export default async function CouponPage({
             Действует до {new Date(p.expires).toLocaleDateString("ru-RU")}.
           </p>
         )}
-        <ol className="mt-4 list-decimal space-y-2 pl-5 leading-relaxed text-ink/70">
-          <li>Скопируйте промокод {code} кнопкой выше.</li>
-          <li>
-            Перейдите в магазин {store.name} по нашей партнёрской ссылке.
-          </li>
-          <li>Вставьте код в поле «Промокод» на этапе оплаты.</li>
-          <li>Скидка применится сразу — её видно до подтверждения заказа.</li>
-        </ol>
+        {isBarcode ? (
+          <ol className="mt-4 list-decimal space-y-2 pl-5 leading-relaxed text-ink/70">
+            <li>Покажите штрихкод кассиру в магазине {store.name} прямо с экрана смартфона.</li>
+            <li>Или скопируйте номер {code} кнопкой выше для применения онлайн.</li>
+            <li>При заказе на сайте вставьте код в поле «Промокод» на этапе оплаты.</li>
+            <li>Скидка 30% применится к покупке.</li>
+          </ol>
+        ) : (
+          <ol className="mt-4 list-decimal space-y-2 pl-5 leading-relaxed text-ink/70">
+            <li>Скопируйте промокод {code} кнопкой выше.</li>
+            <li>
+              Перейдите в магазин {store.name} по нашей партнёрской ссылке.
+            </li>
+            <li>Вставьте код в поле «Промокод» на этапе оплаты.</li>
+            <li>Скидка применится сразу — её видно до подтверждения заказа.</li>
+          </ol>
+        )}
       </section>
 
       <div className="mt-8">

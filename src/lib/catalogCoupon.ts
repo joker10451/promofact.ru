@@ -29,7 +29,7 @@ import type { Coupon, Promocode, Store, Affiliate } from "@/lib/types";
 export type CatalogCoupon = Omit<Coupon, "promocode" | "store" | "affiliate" | "extraLinks"> & {
   promocode: Omit<
     Promocode,
-    "group" | "barcodeImage" | "isBarcode" | "minimumOrder" | "isUniversal"
+    "group" | "minimumOrder" | "isUniversal"
   >;
   store: Omit<Store, "about" | "conditions" | "activeBloggers">;
   affiliate: Omit<Affiliate, "ordMarker">;
@@ -46,6 +46,8 @@ export function toCatalogCoupon(c: Coupon): CatalogCoupon {
       terms: p.terms,
       expires: p.expires,
       isHit: p.isHit,
+      isBarcode: Boolean(p.isBarcode),
+      barcodeImage: p.barcodeImage ?? null,
       isFirstOrderOnly: p.isFirstOrderOnly,
       customerTypeLabel: p.customerTypeLabel,
       region: p.region,
