@@ -90,6 +90,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/podrygka/:path*",
+        destination: "/store/podruzhka",
+        permanent: true,
+      },
+      {
+        source: "/store/podrygka",
+        destination: "/store/podruzhka",
+        permanent: true,
+      },
+      {
         source: "/store/yandeks-plyus/:path*",
         destination: "/store/yandex-plus",
         permanent: true,

@@ -317,6 +317,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://poizon.com",
     "activeBloggers": 2321
   },
+  "podruzhka": {
+    "id": 5040,
+    "slug": "podruzhka",
+    "name": "Подружка",
+    "logo": "https://favicon.yandex.net/favicon/v2/podrygka.ru?size=120",
+    "category": "Косметика и парфюмерия",
+    "categorySlug": "kosmetika-i-parfyumeriya",
+    "about": "«Подружка» — сеть магазинов косметики, парфюмерии, средств по уходу за собой и аксессуаров. В каталоге представлены тысячи оригинальных бьюти-товаров популярных мировых и корейских брендов.",
+    "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
+    "site": "https://www.podrygka.ru",
+    "activeBloggers": 3120
+  },
   "premier": {
     "id": 45863,
     "slug": "premier",
