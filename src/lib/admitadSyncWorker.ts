@@ -242,16 +242,49 @@ export async function runAdmitadSafeSync(options: {
       });
     }
 
-    // Сохранение активных офферов других проверенных кампаний, отсутствующих в текущем батче API
+    // Сохранение активных офферов других проверенных кампаний, отсутствующих в текущем батче API.
+    // ADMITAD-4 Safety: НЕ обновляем last_seen_at — сохраняем last-known-good без искусственного
+    // продления валидности. Фильтруем просроченные, отозванные и лишённые маркировки записи.
     const processedIds = new Set(rowsToUpsert.map((r) => r.id));
     for (const [id, existingRow] of existingActiveMap.entries()) {
       const campId = String(existingRow.source_campaign_id || "");
       if (!effectiveAllowlist.includes(campId) && !processedIds.has(id)) {
+        // Проверка: не продлевать просроченные предложения
+        const expiresStr = existingRow.expires ? String(existingRow.expires).slice(0, 10) : null;
+        if (expiresStr) {
+          const expiresDate = new Date(expiresStr + "T23:59:59+03:00");
+          if (expiresDate.getTime() < Date.now()) {
+            // Просрочено — деактивировать, не переносить как активное
+            rowsToUpsert.push({
+              ...existingRow,
+              is_active: false,
+              sync_run_id: syncRunId,
+              sync_status: "EXPIRED_RETAINED",
+              updated_at: nowIso,
+              // last_seen_at НЕ обновляется — сохраняем оригинальное значение
+            });
+            continue;
+          }
+        }
+
+        // Проверка: не сохранять записи без обязательной ОРД-маркировки
+        if (!existingRow.ord_marker && !existingRow.ord_text) {
+          rowsToUpsert.push({
+            ...existingRow,
+            is_active: false,
+            sync_run_id: syncRunId,
+            sync_status: "MISSING_ORD_RETAINED",
+            updated_at: nowIso,
+          });
+          continue;
+        }
+
+        // Валидная запись — сохраняем активной, но last_seen_at остаётся оригинальным
         rowsToUpsert.push({
           ...existingRow,
           sync_run_id: syncRunId,
-          last_seen_at: nowIso,
           updated_at: nowIso,
+          // last_seen_at НЕ обновляется — запись не была получена из API в этом цикле
         });
         publishableCount++;
       }
