@@ -9,11 +9,13 @@ import {
   generateClickId,
   decorateAdmitadUrl,
   getEffectiveCampaignAllowlist,
+  VERIFIED_CAMPAIGN_ALLOWLIST,
 } from "../src/lib/admitadAutopilot.ts";
 import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
 import { dedupeCoupons } from "../src/lib/dedupe.ts";
 import { rowToCoupon } from "../src/lib/admitadSupabase.ts";
 import { STABLE_STORES } from "../src/lib/stableStores.ts";
+import { evaluateQualityGate, matchCanonicalStore } from "../src/lib/admitadApi.ts";
 
 let passed = 0;
 
@@ -34,12 +36,12 @@ console.log("===================================================================
   console.log("✓ Тест 1: Catastrophic count drop -> old snapshot preserved (PASS)");
 }
 
-// 2. Тест UNMAPPED -> not publishable
+// 2. Тест UNMAPPED strategy -> not publishable
 {
   const evalResult = isAdmitadPublishable(
     { isExpired: false, isForeign: false },
     {
-      campaign: { id: 25224, status: "active" },
+      campaign: { id: 25224, status: "active", connection_status: "active" },
       mapping: { strategy: "UNMAPPED" },
       eridStatus: "PRESENT",
       legalInfoStatus: "PRESENT",
@@ -58,7 +60,7 @@ console.log("===================================================================
   const evalResult = isAdmitadPublishable(
     { isExpired: false, isForeign: false, affiliateLink: "http://ya.ru" },
     {
-      campaign: { id: 25224, status: "active" },
+      campaign: { id: 25224, status: "active", connection_status: "active" },
       mapping: { strategy: "EXACT MATCH", canonicalSlug: "test" },
       eridStatus: "MISSING",
       legalInfoStatus: "PRESENT",
@@ -76,7 +78,7 @@ console.log("===================================================================
   const evalResult = isAdmitadPublishable(
     { isExpired: false, isForeign: false, affiliateLink: "http://ya.ru" },
     {
-      campaign: { id: 25224, status: "active" },
+      campaign: { id: 25224, status: "active", connection_status: "active" },
       mapping: { strategy: "EXACT MATCH", canonicalSlug: "test" },
       eridStatus: "PRESENT",
       eridValue: "abcd",
@@ -93,14 +95,14 @@ console.log("===================================================================
 {
   const forRes = isAdmitadPublishable(
     { isExpired: false, isForeign: true },
-    { campaign: { id: 25224, status: "active" } }
+    { campaign: { id: 25224, status: "active", connection_status: "active" } }
   );
   assert.strictEqual(forRes.publishable, false);
   assert.strictEqual(forRes.status, "FOREIGN_GEO");
 
   const expRes = isAdmitadPublishable(
     { isExpired: true, isForeign: false },
-    { campaign: { id: 25224, status: "active" } }
+    { campaign: { id: 25224, status: "active", connection_status: "active" } }
   );
   assert.strictEqual(expRes.publishable, false);
   assert.strictEqual(expRes.status, "EXPIRED");
@@ -113,7 +115,7 @@ console.log("===================================================================
   const evalResult = isAdmitadPublishable(
     { isExpired: false, isForeign: false, affiliateLink: "https://ya.ru" },
     {
-      campaign: { id: 25224, status: "active" },
+      campaign: { id: 25224, status: "active", connection_status: "active" },
       mapping: { strategy: "EXACT MATCH", canonicalSlug: "test" },
       eridStatus: "PRESENT",
       eridValue: "abcd",
@@ -138,7 +140,7 @@ console.log("===================================================================
     const premierResult = isAdmitadPublishable(
       { isExpired: false, isForeign: false, affiliateLink: "https://premier.one" },
       {
-        campaign: { id: 45863, status: "active" },
+        campaign: { id: 45863, status: "active", connection_status: "active" },
         mapping: { strategy: "EXACT MATCH", canonicalSlug: "premier" },
         eridStatus: "PRESENT",
         eridValue: "2bL9aMPo2e49hMef4rrUCjFgtw",
@@ -153,7 +155,7 @@ console.log("===================================================================
     const yandexResult = isAdmitadPublishable(
       { isExpired: false, isForeign: false, affiliateLink: "https://travel.yandex.ru" },
       {
-        campaign: { id: 25224, status: "active" },
+        campaign: { id: 25224, status: "active", connection_status: "active" },
         mapping: { strategy: "EXACT MATCH", canonicalSlug: "yandeks-puteshestviya" },
         eridStatus: "PRESENT",
         eridValue: "2bL9aMPo2e49hMef4rqyS6igwd",
@@ -179,7 +181,7 @@ console.log("===================================================================
   const evalResult = isAdmitadPublishable(
     { isExpired: false, isForeign: false, affiliateLink: "https://ya.ru", advcampaignId: "999999" },
     {
-      campaign: { id: 999999, status: "active" },
+      campaign: { id: 999999, status: "active", connection_status: "active" },
       mapping: { strategy: "EXACT MATCH", canonicalSlug: "test" },
       eridStatus: "PRESENT",
       eridValue: "abcd",
@@ -1103,6 +1105,394 @@ console.log("===================================================================
   console.log("✓ Тест 33: CATASTROPHIC_DROP пороговые значения и атомарность RPC подтверждены (PASS)");
 }
 
+// 34. Тест: Модерация программы и connection_status = "pending" блокируют публикацию
+{
+  const pendingRes = isAdmitadPublishable(
+    { isExpired: false, isForeign: false, affiliateLink: "https://wbbsv.com/g/p29zmc7b8sc7dde8999c285dacb824/?erid=2bL9aMPo2e49hMef4pgVYYJiE3" },
+    {
+      campaign: { id: 45863, status: "active", connection_status: "pending", moderation: true },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "premier" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4pgVYYJiE3",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО ПРЕМЬЕР, ИНН 9702011190",
+      allowlist: ["45863"],
+    }
+  );
+  assert.strictEqual(pendingRes.publishable, false);
+  assert.strictEqual(pendingRes.status, "CAMPAIGN_MODERATION");
+  assert.ok(pendingRes.reason?.includes("pending"));
+
+  passed++;
+  console.log("✓ Тест 34: connection_status pending -> блокировка CAMPAIGN_MODERATION (PASS)");
+}
+
+// 35. Тест: Расхождение ERID (erid в ссылке vs eridValue в метаданных)
+{
+  const mismatchRes = isAdmitadPublishable(
+    { isExpired: false, isForeign: false, affiliateLink: "https://wbbsv.com/g/419cb7qqvkc7dde8999c285dacb824/?i=31&erid=2bL9aMPo2e49hMef4rrUCjFgtw" },
+    {
+      campaign: { id: 45863, status: "active", connection_status: "active" },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "premier" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4pgVYYJiE3", // кабинетный ERID не совпадает с ссылкой купона!
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО ПРЕМЬЕР, ИНН 9702011190",
+      allowlist: ["45863"],
+    }
+  );
+  assert.strictEqual(mismatchRes.publishable, false);
+  assert.strictEqual(mismatchRes.status, "ERID_MISMATCH");
+  assert.ok(mismatchRes.reason?.includes("Расхождение ERID"));
+
+  passed++;
+  console.log("✓ Тест 35: Расхождение ERID ссылки и метаданных -> блокировка ERID_MISMATCH (PASS)");
+}
+
+// 36. Тест: Защита от персональных / несогласованных промокодов
+{
+  const personalRes = isAdmitadPublishable(
+    {
+      isExpired: false,
+      isForeign: false,
+      is_personal: true,
+      affiliateLink: "https://wbbsv.com/g/test/?erid=2bL9aMPo2e49hMef4rrUCjFgtw",
+    },
+    {
+      campaign: { id: 45863, status: "active", connection_status: "active" },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "premier" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4rrUCjFgtw",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО ПРЕМЬЕР, ИНН 9702011190",
+      allowlist: ["45863"],
+    }
+  );
+  assert.strictEqual(personalRes.publishable, false);
+  assert.strictEqual(personalRes.status, "UNAUTHORIZED_PROMOCODE");
+
+  passed++;
+  console.log("✓ Тест 36: is_personal true -> блокировка UNAUTHORIZED_PROMOCODE (PASS)");
+}
+
+// 37. Тест: Альтернативный кандидат pizzasushiwok (26110)
+{
+  const pswRes = isAdmitadPublishable(
+    {
+      isExpired: false,
+      isForeign: false,
+      is_personal: false,
+      affiliateLink: "https://naiawork.com/g/kfxv4uuefoc7dde8999c07268febb5/?i=31&erid=2bL9aMPo2e49hMef4rrUCer5M4",
+    },
+    {
+      campaign: { id: 26110, status: "active", connection_status: "active", moderation: false },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "pizzasushiwok" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4rrUCer5M4",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО «СМАК», ИНН: 7720798121",
+      allowlist: ["26110"],
+    }
+  );
+  assert.strictEqual(pswRes.publishable, true);
+  assert.strictEqual(pswRes.status, "PUBLISHABLE");
+
+  passed++;
+  console.log("✓ Тест 37: Альтернативный кандидат pizzasushiwok (26110) валидирован (PASS)");
+}
+
+// 38. Тест: evaluateQualityGate с connection_status pending и is_personal
+{
+  const qgPending = evaluateQualityGate(
+    { status: "active", goto_link: "https://ya.ru", regions: ["RU"] },
+    { id: 45863, status: "active", connection_status: "pending", moderation: true }
+  );
+  assert.strictEqual(qgPending.passed, false);
+  assert.ok(qgPending.reasons.some((r) => r.includes("CONNECTION_INACTIVE")));
+
+  const qgPersonal = evaluateQualityGate(
+    { status: "active", is_personal: true, goto_link: "https://ya.ru", regions: ["RU"] },
+    { id: 45863, status: "active", connection_status: "active" }
+  );
+  assert.strictEqual(qgPersonal.passed, false);
+  assert.ok(qgPersonal.reasons.some((r) => r.includes("UNAUTHORIZED_PROMOCODE")));
+
+  passed++;
+  console.log("✓ Тест 38: evaluateQualityGate отклоняет неактивное подключение и personal промокод (PASS)");
+}
+
+// 39. Тест ADMITAD-6: Fail-closed для connection_status и персональных промокодов
+{
+  // 39a. connection_status = undefined/missing, null, пустая строка -> публикация запрещена при fail-closed
+  const invalidStatuses = [undefined, null, "", "pending", "suspended", "rejected"];
+  for (const status of invalidStatuses) {
+    const res = isAdmitadPublishable(
+      { isExpired: false, isForeign: false, affiliateLink: "https://pizzasushiwok.ru" },
+      {
+        campaign: { id: 26110, status: "active", ...(status !== undefined ? { connection_status: status } : {}) },
+        mapping: { strategy: "EXACT MATCH", canonicalSlug: "pizzasushiwok" },
+        eridStatus: "PRESENT",
+        eridValue: "2bL9aMPo2e49hMef4rrUCer5M",
+        legalInfoStatus: "PRESENT",
+        advertiserLegalInfo: "ООО Пицца Суши Вок",
+        allowlist: ["26110"],
+      }
+    );
+    assert.strictEqual(
+      res.publishable,
+      false,
+      `connection_status=${status} должен блокировать публикацию (fail-closed)`
+    );
+    assert.strictEqual(
+      res.status,
+      "CAMPAIGN_MODERATION",
+      `connection_status=${status} должен возвращать статус CAMPAIGN_MODERATION`
+    );
+
+    // Также проверяем evaluateQualityGate:
+    const qg = evaluateQualityGate(
+      {
+        id: 999,
+        goto_link: "https://pizzasushiwok.ru",
+        regions: ["RU"],
+      },
+      { id: 26110, status: "active", ...(status !== undefined ? { connection_status: status } : {}) }
+    );
+    assert.strictEqual(
+      qg.passed,
+      false,
+      `evaluateQualityGate должен блокировать при connection_status=${status}`
+    );
+    assert.ok(
+      qg.reasons.some((r) => r.includes("CONNECTION_INACTIVE")),
+      `evaluateQualityGate должен содержать причину CONNECTION_INACTIVE для connection_status=${status}`
+    );
+  }
+
+  // 39b. is_personal = true отклоняется независимо от нормализации
+  const resPersonal = isAdmitadPublishable(
+    { isExpired: false, isForeign: false, is_personal: true, affiliateLink: "https://pizzasushiwok.ru" },
+    {
+      campaign: { id: 26110, status: "active", connection_status: "active" },
+      mapping: { strategy: "EXACT MATCH", canonicalSlug: "pizzasushiwok" },
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4rrUCer5M",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО Пицца Суши Вок",
+      allowlist: ["26110"],
+      qualityGatePassed: false,
+      qualityGateReasons: ["UNAUTHORIZED_PROMOCODE: персональный промокод"],
+    }
+  );
+  assert.strictEqual(resPersonal.publishable, false);
+  assert.strictEqual(resPersonal.status, "UNAUTHORIZED_PROMOCODE");
+
+  passed++;
+  console.log("✓ Тест 39: Fail-closed connection_status (undefined, null, '') и блокировка is_personal (PASS)");
+}
+
+// 40. Тест ADMITAD-6: Исключение PREMIER из публичной выдачи и изоляция Perfluence
+{
+  // Проверяем, что в VERIFIED_CAMPAIGN_ALLOWLIST нет PREMIER (45863), но есть Pizza Sushi Wok (26110)
+  assert.ok(!VERIFIED_CAMPAIGN_ALLOWLIST.includes("45863"), "PREMIER 45863 не должен быть в VERIFIED_CAMPAIGN_ALLOWLIST");
+  assert.ok(VERIFIED_CAMPAIGN_ALLOWLIST.includes("26110"), "Pizza Sushi Wok 26110 должен быть в VERIFIED_CAMPAIGN_ALLOWLIST");
+
+  // При явном задании ADMITAD_APPROVED_CAMPAIGNS="26110" в allowlist ровно 26110
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  try {
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "26110";
+    const allowlist = getEffectiveCampaignAllowlist();
+    assert.deepStrictEqual(allowlist, ["26110"]);
+  } finally {
+    if (prevEnv !== undefined) {
+      process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+    } else {
+      delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    }
+  }
+
+  // Проверяем, что каталог Perfluence не пересекается со slug pizzasushiwok
+  assert.ok(STABLE_STORES["pizzasushiwok"] !== undefined, "Канонический магазин pizzasushiwok должен быть зарегистрирован");
+  assert.strictEqual(STABLE_STORES["pizzasushiwok"].id, 26110);
+  assert.strictEqual(STABLE_STORES["pizzasushiwok"].slug, "pizzasushiwok");
+
+  passed++;
+  console.log("✓ Тест 40: Исключение PREMIER и каноническая регистрация pizzasushiwok (PASS)");
+}
+
+// 41. Тест ADMITAD-6: Допуск пилотной кампании Pizza Sushi Wok (26110)
+{
+  const pswCampaign = {
+    id: 26110,
+    name: "Pizza Sushi Wok",
+    site_url: "https://pizzasushiwok.ru/",
+    status: "active",
+    connection_status: "active",
+    moderation: false,
+  };
+  const mapping = matchCanonicalStore(pswCampaign);
+  assert.strictEqual(mapping.strategy, "EXACT MATCH");
+  assert.strictEqual(mapping.canonicalSlug, "pizzasushiwok");
+
+  const pswEval = isAdmitadPublishable(
+    {
+      isExpired: false,
+      isForeign: false,
+      is_personal: false,
+      affiliateLink: "https://alitems.co/g/m9z5y18g3ic7dde8999c0d3810f27c/?erid=2bL9aMPo2e49hMef4rrUCer5M",
+    },
+    {
+      campaign: pswCampaign,
+      mapping,
+      eridStatus: "PRESENT",
+      eridValue: "2bL9aMPo2e49hMef4rrUCer5M",
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО 'ПИЦЦА СУШИ ВОК'",
+      allowlist: ["26110"],
+      qualityGatePassed: true,
+      qualityGateReasons: [],
+    }
+  );
+  assert.strictEqual(pswEval.publishable, true);
+  assert.strictEqual(pswEval.status, "PUBLISHABLE");
+
+  passed++;
+  console.log("✓ Тест 41: Пилотное предложение Pizza Sushi Wok успешно опубликовано (PASS)");
+}
+
+// 42. Тест ADMITAD-6: Дедупликация staging при одновременном присутствии в API и existingActiveMap
+{
+  const prevEnv = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  const prevClientId = process.env.ADMITAD_CLIENT_ID;
+  const prevClientSecret = process.env.ADMITAD_CLIENT_SECRET;
+  const prevWebsiteId = process.env.ADMITAD_WEBSITE_ID;
+  try {
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "26110";
+    process.env.ADMITAD_CLIENT_ID = "mock_client_id";
+    process.env.ADMITAD_CLIENT_SECRET = "mock_client_secret";
+    process.env.ADMITAD_WEBSITE_ID = "2990501";
+
+    // Имитируем API, возвращающий купон "with_ord", который УЖЕ есть в admitad-snapshot.json как "adm_with_ord" (PREMIER 45863)
+    const mockCustomFetch = async (url, opts) => {
+      const urlStr = String(url);
+      if (urlStr.includes("/token/")) {
+        return new Response(JSON.stringify({ access_token: "mock_tok", expires_in: 3600 }), { status: 200 });
+      }
+      if (urlStr.includes("/websites/v2/2990501/")) {
+        return new Response(
+          JSON.stringify({ id: 2990501, status: "active", site_url: "https://promofact.ru" }),
+          { status: 200 }
+        );
+      }
+      if (urlStr.includes("/websites/")) {
+        return new Response(
+          JSON.stringify([{ id: 2990501, status: "active", site_url: "https://promofact.ru" }]),
+          { status: 200 }
+        );
+      }
+      if (urlStr.includes("/advcampaigns/website/")) {
+        return new Response(
+          JSON.stringify({
+            results: [
+              { id: 45863, name: "PREMIER", status: "active", connection_status: "pending", site_url: "https://premier.one" },
+              {
+                id: 26110,
+                name: "Pizza Sushi Wok",
+                status: "active",
+                connection_status: "active",
+                site_url: "https://pizzasushiwok.ru/",
+                advertiser_legal_info: "ООО «СМАК» ИНН 7720798121",
+              },
+            ],
+            _meta: { limit: 20, offset: 0, count: 2 },
+          }),
+          { status: 200 }
+        );
+      }
+      if (urlStr.includes("/coupons/website/")) {
+        return new Response(
+          JSON.stringify({
+            results: [
+              {
+                id: "with_ord",
+                name: "Скидка PREMIER",
+                promocode: "WITH_ORD",
+                status: "active",
+                campaign: { id: 45863, name: "PREMIER", status: "active" },
+                goto_link: "https://alitems.co/g/premier",
+                regions: ["RU"],
+                language: "ru",
+              },
+              {
+                id: 941845,
+                name: "Удон с креветкой",
+                promocode: "WW-82894",
+                status: "active",
+                campaign: { id: 26110, name: "Pizza Sushi Wok", status: "active" },
+                goto_link: "https://alitems.co/g/psw/?erid=2bL9aMPo2e49hMef4rrUCer5M6",
+                regions: ["RU"],
+                language: "ru",
+              },
+            ],
+            _meta: { limit: 20, offset: 0, count: 2 },
+          }),
+          { status: 200 }
+        );
+      }
+      return new Response("{}", { status: 200 });
+    };
+
+    const syncRes = await runAdmitadSafeSync({
+      customFetch: mockCustomFetch,
+      skipCatastrophicDropCheck: true,
+    });
+
+    assert.strictEqual(syncRes.success, true);
+    assert.strictEqual(syncRes.aggregates?.written, 3, "stagedCount (written) должен быть ровно 3 (без дублей adm_with_ord)");
+
+    // Проверяем актуальный снимок поколения: adm_with_ord присутствует ровно 1 раз и деактивирован
+    const localSnapshotPath = path.resolve("src/data/admitad-snapshot.json");
+    assert.ok(fs.existsSync(localSnapshotPath));
+    const snapshotJson = JSON.parse(fs.readFileSync(localSnapshotPath, "utf-8"));
+    const premierOccurrences = snapshotJson.filter((r) => r.id === "adm_with_ord");
+    assert.strictEqual(
+      premierOccurrences.length,
+      1,
+      `Купон adm_with_ord должен присутствовать в снимке поколения ровно 1 раз, получено: ${premierOccurrences.length}`
+    );
+    assert.strictEqual(premierOccurrences[0].is_active, false, "PREMIER должен быть деактивирован (is_active: false)");
+    assert.strictEqual(
+      premierOccurrences[0].sync_status,
+      "CAMPAIGN_MODERATION",
+      "PREMIER должен иметь sync_status: CAMPAIGN_MODERATION"
+    );
+
+    passed++;
+    console.log("✓ Тест 42: Дедупликация staging — купон одновременно в API и existingActiveMap не дублируется (PASS)");
+  } finally {
+    if (prevEnv !== undefined) {
+      process.env.ADMITAD_APPROVED_CAMPAIGNS = prevEnv;
+    } else {
+      delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    }
+    if (prevClientId !== undefined) {
+      process.env.ADMITAD_CLIENT_ID = prevClientId;
+    } else {
+      delete process.env.ADMITAD_CLIENT_ID;
+    }
+    if (prevClientSecret !== undefined) {
+      process.env.ADMITAD_CLIENT_SECRET = prevClientSecret;
+    } else {
+      delete process.env.ADMITAD_CLIENT_SECRET;
+    }
+    if (prevWebsiteId !== undefined) {
+      process.env.ADMITAD_WEBSITE_ID = prevWebsiteId;
+    } else {
+      delete process.env.ADMITAD_WEBSITE_ID;
+    }
+  }
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/33 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/42 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");

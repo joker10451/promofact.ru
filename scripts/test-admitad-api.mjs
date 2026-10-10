@@ -256,7 +256,7 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
     language: "ru",
     campaign: { id: 3, name: "Shop" },
   };
-  const camp = { id: 3, name: "Shop", site_url: "https://shop.com" };
+  const camp = { id: 3, name: "Shop", site_url: "https://shop.com", connection_status: "active" };
 
   const qGate = evaluateQualityGate(coupon, camp);
   assert.strictEqual(qGate.passed, true);
@@ -280,7 +280,7 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
     regions: ["US"],
     campaign: { id: 4, name: "US Shop" },
   };
-  const camp = { id: 4, name: "US Shop", site_url: "https://us-shop.com" };
+  const camp = { id: 4, name: "US Shop", site_url: "https://us-shop.com", connection_status: "active" };
 
   const qGate = evaluateQualityGate(coupon, camp);
   assert.strictEqual(qGate.passed, false);
@@ -311,6 +311,7 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
     name: "Camp",
     site_url: "https://camp.com",
     action_countries: ["RU"],
+    connection_status: "active",
   };
 
   const qGate = evaluateQualityGate(coupon, camp);
@@ -341,6 +342,7 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
     name: "Global",
     site_url: "https://global.com",
     allow_actions_all_countries: true,
+    connection_status: "active",
   };
 
   const qGate = evaluateQualityGate(coupon, camp);
@@ -370,6 +372,7 @@ process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
     name: "NoGeo",
     site_url: "https://nogeo.org",
     action_countries: ["FR"],
+    connection_status: "active",
   };
 
   const qGate = evaluateQualityGate(coupon, camp);

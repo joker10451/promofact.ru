@@ -329,6 +329,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://www.podrygka.ru",
     "activeBloggers": 3120
   },
+  "pizzasushiwok": {
+    "id": 26110,
+    "slug": "pizzasushiwok",
+    "name": "Pizza Sushi Wok",
+    "logo": "https://favicon.yandex.net/favicon/v2/pizzasushiwok.ru?size=120",
+    "category": "Доставка из ресторанов",
+    "categorySlug": "dostavka-iz-restoranov",
+    "about": "Pizza Sushi Wok - популярный сервис круглосуточной бесплатной доставки пиццы, суши, роллов и вок-блюд в Москве и Московской области.",
+    "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
+    "site": "https://pizzasushiwok.ru/",
+    "activeBloggers": 120
+  },
   "premier": {
     "id": 45863,
     "slug": "premier",
