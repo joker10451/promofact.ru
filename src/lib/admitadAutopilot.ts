@@ -146,15 +146,15 @@ export function isAdmitadPublishable(
   }
 
   // 2. Проверка статуса подключения площадки (модерация рекламодателя)
-  // Если статус передан и он не active -> немедленно блокируем
-  const connStatus = ctx.campaign.connection_status;
-  if (connStatus && connStatus !== "active") {
+  // Fail-closed: требуем строго connection_status === "active"
+  const connStatus = ctx.campaign?.connection_status;
+  if (!connStatus || connStatus !== "active") {
     return {
       publishable: false,
       status: "CAMPAIGN_MODERATION",
       reason: connStatus === "pending"
         ? "Площадка находится на модерации рекламодателя (connection_status: pending)"
-        : `Подключение площадки к программе не активно (connection_status: ${connStatus})`,
+        : `Подключение площадки к программе не активно (connection_status: ${connStatus || "missing"})`,
       isApproved: false,
     };
   }
@@ -213,6 +213,8 @@ export function isAdmitadPublishable(
     link = coupon.affiliateLink;
   } else if ("gotolink" in coupon && coupon.gotolink) {
     link = coupon.gotolink;
+  } else if ("goto_link" in coupon && coupon.goto_link) {
+    link = coupon.goto_link as string;
   }
 
   if (!link || (!link.startsWith("http://") && !link.startsWith("https://"))) {

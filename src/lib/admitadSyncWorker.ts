@@ -205,14 +205,25 @@ export async function runAdmitadSafeSync(options: {
           quarantinedCount++;
         }
       } else {
-        // ADMITAD-4 Блокер 2: Кампания вне текущего пилотного allowlist.
-        // Сохраняем существующую активную запись из снимка (если она была активна и не относится к исключённым).
-        if (existingActiveMap.has(rowId) && String(campId) !== "45863") {
+        // ADMITAD-4 Блокер 2 & ADMITAD-5/6 Safety:
+        // Кампания вне текущего пилотного allowlist.
+        // Сохраняем ранее активную запись ТОЛЬКО если:
+        // 1) Она уже была активной в снимке;
+        // 2) Текущий API подтверждает её валидность (evalResult.status === "READY_NOT_APPROVED"
+        //    означает, что оффер проходит ВСЕ проверки качества, ERID, legal info, гео,
+        //    и не публикуется СТРОГО из-за отсутствия кампании в allowlist).
+        // Если же оффер стал недействительным в API (CAMPAIGN_INACTIVE, EXPIRED, MISSING_ERID,
+        // MISSING_LEGAL_INFO, FOREIGN_GEO, UNMAPPED, INVALID_AFFILIATE_URL),
+        // он НЕ должен оставаться активным!
+        const passesAllQualityGates = evalResult.status === "READY_NOT_APPROVED";
+        if (existingActiveMap.has(rowId) && passesAllQualityGates && String(campId) !== "45863") {
           isRowActive = true;
           publishableCount++;
           syncStatus = "PUBLISHABLE";
         } else {
           readyNotApprovedCount++;
+          isRowActive = false;
+          syncStatus = evalResult.status;
         }
       }
 
@@ -270,6 +281,12 @@ export async function runAdmitadSafeSync(options: {
     // продления валидности. Фильтруем просроченные, отозванные и лишённые маркировки записи.
     const processedIds = new Set(rowsToUpsert.map((r) => r.id));
     for (const [id, existingRow] of existingActiveMap.entries()) {
+      // Защита от дублей в staging: если id уже обработан в батче API, не добавляем его повторно
+      if (processedIds.has(id)) {
+        continue;
+      }
+      processedIds.add(id);
+
       const campId = String(existingRow.source_campaign_id || "");
       const storeSlug = String(existingRow.store_slug || "");
 
@@ -285,7 +302,7 @@ export async function runAdmitadSafeSync(options: {
         continue;
       }
 
-      if (!effectiveAllowlist.includes(campId) && !processedIds.has(id)) {
+      if (!effectiveAllowlist.includes(campId)) {
         // Проверка: не продлевать просроченные предложения
         const expiresStr = existingRow.expires ? String(existingRow.expires).slice(0, 10) : null;
         if (expiresStr) {

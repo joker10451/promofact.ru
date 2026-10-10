@@ -791,9 +791,11 @@ export function evaluateQualityGate(
     reasons.push("UNAUTHORIZED_PROMOCODE: персональный промокод не авторизован для открытой публикации");
   }
 
-  // 1c. Проверка статуса подключения площадки к программе рекламодателя
-  if (campaign && campaign.connection_status && campaign.connection_status !== "active") {
-    reasons.push(`CONNECTION_INACTIVE: статус подключения площадки не подтверждён active (${campaign.connection_status})`);
+  // 1c. Проверка статуса подключения площадки к программе рекламодателя (Fail-closed: строго "active")
+  if (!campaign || campaign.connection_status !== "active") {
+    reasons.push(
+      `CONNECTION_INACTIVE: статус подключения площадки не подтверждён active (${campaign?.connection_status || "missing"})`
+    );
   }
 
   // 1d. Проверка флага модерации программы
