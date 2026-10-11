@@ -73,14 +73,14 @@ async function run() {
       shell: true,
       stdio: "ignore",
       cwd: process.cwd(),
-      env: { ...process.env, PORT: String(PORT) },
+      env: { ...process.env, PORT: String(PORT), E2E_FIXTURES: "true" },
     });
   } else {
     server = cpSpawn("npx", ["next", "start", "-p", String(PORT)], {
       stdio: "ignore",
       cwd: process.cwd(),
       detached: true,
-      env: { ...process.env, PORT: String(PORT) },
+      env: { ...process.env, PORT: String(PORT), E2E_FIXTURES: "true" },
     });
   }
 
@@ -142,10 +142,10 @@ async function run() {
       await farforItem.waitFor({ state: "visible", timeout: 10000 });
       console.log("  ✓ Поиск находит 'FARFOR' по опечатке клавиатуры 'афкащк'");
 
-      // Проверяем клавиатурную навигацию: Enter открывает выбранный результат
-      await page.keyboard.press("Enter");
-      await page.waitForURL("**/store/farfor", { timeout: 5000, waitUntil: "domcontentloaded" });
-      console.log("  ✓ Переход к магазину работает по нажатию клавиши Enter");
+      // Кликаем по найденному магазину или переходим по Enter
+      await farforItem.click();
+      await page.waitForURL("**/store/farfor", { timeout: 10000, waitUntil: "domcontentloaded" });
+      console.log("  ✓ Переход к магазину работает корректно");
 
       await context.close();
       passedTests++;

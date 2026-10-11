@@ -616,16 +616,28 @@ async function fetchBaseSourceBuckets(): Promise<BaseSourceBucket[]> {
 
   const customCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
 
-  return [
+  const buckets: BaseSourceBucket[] = [
     { source: "custom", coupons: customCoupons },
     { source: "supabase", coupons: supabaseCoupons },
     { source: "perfluence", coupons: perfluenceCoupons },
   ];
+
+  if (process.env.E2E_FIXTURES === "true") {
+    const { getE2EFixtureCoupons } = await import("@/lib/e2eFixtures");
+    buckets.push({ source: "custom", coupons: getE2EFixtureCoupons() });
+  }
+
+  return buckets;
 }
 
 const getCachedBaseSourceBuckets = unstable_cache(
   fetchBaseSourceBuckets,
-  ["promofact", "base-source-buckets", syncMeta.lastSuccessSync || "initial"],
+  [
+    "promofact",
+    "base-source-buckets",
+    syncMeta.lastSuccessSync || "initial",
+    process.env.E2E_FIXTURES === "true" ? "e2e" : "prod",
+  ],
   { revalidate: false },
 );
 
