@@ -197,6 +197,7 @@ export default async function StorePage({
       coupons: store.coupons.map((c) => ({ code: c.promocode.code, bonusName: c.promocode.bonusName })),
       couponCount: store.coupons.length,
       maxDiscount: maxDisc,
+      hasGiftOffer: hasGift,
       isFirstOrder: Boolean(firstOrderPromo),
       activeBloggers: store.activeBloggers,
       monthYear,
