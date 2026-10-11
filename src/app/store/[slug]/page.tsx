@@ -111,7 +111,6 @@ export async function generateMetadata({
           coupons: store.coupons.map((c) => ({ code: c.promocode.code, bonusName: c.promocode.bonusName })),
           couponCount: n,
           maxDiscount: maxDisc,
-       hasGiftOffer: hasGift,
            hasGiftOffer: hasGift,
           isFirstOrder: store.coupons.some((c) => c.promocode.isFirstOrderOnly),
           activeBloggers: store.activeBloggers,
