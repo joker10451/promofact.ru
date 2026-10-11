@@ -50,6 +50,7 @@ export function toCatalogCoupon(c: Coupon): CatalogCoupon {
       barcodeImage: p.barcodeImage ?? null,
       isFirstOrderOnly: p.isFirstOrderOnly,
       customerTypeLabel: p.customerTypeLabel,
+      group: p.group,
       region: p.region,
     },
     store: {
