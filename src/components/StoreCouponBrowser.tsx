@@ -5,6 +5,7 @@ import StoreIntentTabs, { type IntentFilter } from "@/components/StoreIntentTabs
 import CouponTicket from "@/components/CouponTicket";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
 import { isCouponActive, expiryTimestamp } from "@/lib/couponExpiry";
+import { getCouponAudience } from "@/lib/storeCouponAudience";
 
 interface StoreCouponBrowserProps {
   coupons: CatalogCoupon[];
@@ -77,11 +78,16 @@ export default function StoreCouponBrowser({
   }, [coupons, clientNow]);
 
   const firstOrderCoupons = useMemo(
-    () => activeCoupons.filter((c) => c.promocode.isFirstOrderOnly),
+    () => activeCoupons.filter((c) => getCouponAudience(c.promocode) === "first-order"),
     [activeCoupons],
   );
   const repeatOrderCoupons = useMemo(
-    () => activeCoupons.filter((c) => !c.promocode.isFirstOrderOnly),
+    () => activeCoupons.filter((c) => getCouponAudience(c.promocode) === "repeat-order"),
+    [activeCoupons],
+  );
+
+  const universalCoupons = useMemo(
+    () => activeCoupons.filter((c) => getCouponAudience(c.promocode) === "universal"),
     [activeCoupons],
   );
 
@@ -91,10 +97,12 @@ export default function StoreCouponBrowser({
         return firstOrderCoupons;
       case "repeat-order":
         return repeatOrderCoupons;
+      case "universal":
+        return universalCoupons;
       default:
         return activeCoupons;
     }
-  }, [activeFilter, activeCoupons, firstOrderCoupons, repeatOrderCoupons]);
+  }, [activeFilter, activeCoupons, firstOrderCoupons, repeatOrderCoupons, universalCoupons]);
 
   return (
     <>
@@ -103,6 +111,7 @@ export default function StoreCouponBrowser({
         allCount={activeCoupons.length}
         firstCount={firstOrderCoupons.length}
         repeatCount={repeatOrderCoupons.length}
+        universalCount={universalCoupons.length}
         onTabChange={setActiveFilter}
       />
 
