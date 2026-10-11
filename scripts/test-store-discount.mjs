@@ -77,5 +77,33 @@ assert.match(categorySource, /getMaxVerifiedDiscount\(list\)/);
 assert.match(relatedStoreSource, /getMaxVerifiedDiscount\(store\.coupons\)/);
 assert.doesNotMatch(categorySource, /до −30%/, "Never invent 30% discount for empty/offer-only categories");
 assert.doesNotMatch(relatedStoreSource, /function getStoreMaxDiscount/, "Do not fork discount parsing");
+const tastyInput = {
+  ...seoInput,
+  name: "Tasty Coffee",
+  category: "Продукты и напитки",
+  categorySlug: "produkty-i-napitki",
+  coupons: [{ code: "SAVE10", bonusName: "Скидка 10% на кофе" }],
+  couponCount: 1,
+  maxDiscount: "до 10%",
+  hasGiftOffer: false,
+};
+const tastyArticle = buildStoreArticle(tastyInput, "tasty-coffee").join(" ");
+const tastyDescription = buildStoreDescription(tastyInput);
+assert.match(tastyArticle, /кофе, чай и аксессуары/i);
+assert.match(tastyArticle, /условия актуальных промокодов/i);
+assert.doesNotMatch(tastyArticle, /электронику|мебель|маркетплейс/i);
+assert.match(tastyDescription, /Промокоды Tasty Coffee/i);
+assert.match(tastyDescription, /кофе, чай и аксессуары/i);
+assert.match(tastyDescription, /скидка до 10%/i);
+assert.ok(tastyDescription.length <= 160);
+const tastyWithoutDiscount = buildStoreDescription({
+  ...tastyInput,
+  maxDiscount: null,
+  hasGiftOffer: true,
+  coupons: [{ code: "GIFT", bonusName: "Подарок при заказе" }],
+});
+assert.doesNotMatch(tastyWithoutDiscount, /скидка до|скидки до/i);
+assert.match(tastyWithoutDiscount, /подарки к заказу/i);
+assert.match(tastyWithoutDiscount, /кофе, чай/i);
 console.log("✓ Store discount: gift minimum is not savings; real %/RUB discounts and SEO texts PASS");
 
