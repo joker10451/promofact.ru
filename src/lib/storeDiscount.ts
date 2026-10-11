@@ -3,7 +3,7 @@
  * An order minimum ("при заказе от 2 449 ₽") is NOT a saving.
  * Do not infer a monetary saving from gifts, cashback or an unlabeled sum.
  */
-type DiscountCoupon = { promocode: { bonusName: string | null } };
+type DiscountCoupon = { promocode: { bonusName: string | null; terms?: string | null } };
 
 const AMOUNT = String.raw`(\d[\d\s\u00a0\u202f]*(?:[.,]\d+)?)`;
 const CURRENCY = String.raw`(?:₽|руб(?:л[еяй]*)?\.?)`;
@@ -56,5 +56,9 @@ export function getMaxVerifiedDiscount(coupons: readonly DiscountCoupon[]): stri
 }
 
 export function hasGiftOffer(coupons: readonly DiscountCoupon[]): boolean {
-  return coupons.some((c) => /подар|бесплатн[а-яё]*\s+(?:товар|блюдо|ролл|десерт)/iu.test(c.promocode.bonusName || ""));
+  return coupons.some((c) =>
+    /подар|бесплатн[а-яё]*\s+(?:товар|блюдо|ролл|десерт)/iu.test(
+      `${c.promocode.bonusName || ""} ${c.promocode.terms || ""}`,
+    ),
+  );
 }

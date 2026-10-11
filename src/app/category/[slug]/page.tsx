@@ -12,6 +12,7 @@ import { getCategories, getCoupons, getUsesStats } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { plural } from "@/lib/format";
 import { canonicalCategorySlug, getCategoryDef } from "@/lib/categoryTaxonomy";
+import { getMaxVerifiedDiscount } from "@/lib/storeDiscount";
 
 const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
   month: "long",
@@ -146,23 +147,9 @@ export default async function CategoryPage({
   }
   const categoryStores = Array.from(categoryStoresMap.values());
 
-  // Вычисляем максимальную скидку
-  let maxPercent = 0;
-  let maxRub = 0;
-  for (const c of list) {
-    const text = c.promocode.bonusName || "";
-    const pMatch = text.match(/(\d+)\s*%/);
-    if (pMatch) {
-      const val = parseInt(pMatch[1], 10);
-      if (val > maxPercent && val <= 90) maxPercent = val;
-    }
-    const rMatch = text.match(/(\d+[\s\d]*)\s*(₽|р\b|руб)/i);
-    if (rMatch) {
-      const val = parseInt(rMatch[1].replace(/\s/g, ""), 10);
-      if (val > maxRub && val <= 50000) maxRub = val;
-    }
-  }
-  const maxDisc = maxPercent > 0 ? `до −${maxPercent}%` : maxRub > 0 ? `до −${maxRub.toLocaleString("ru-RU")} ₽` : "до −30%";
+  // Only advertise an actual discount; never convert the order minimum into savings.
+  const maxDisc = getMaxVerifiedDiscount(list);
+  const hasFirstOrderOffer = list.some((c) => c.promocode.isFirstOrderOnly);
 
   const faqItems = [
     {
@@ -171,7 +158,9 @@ export default async function CategoryPage({
     },
     {
       q: `Есть ли скидки на первый заказ в магазинах категории «${catName}»?`,
-      a: `Да! Большинство популярных магазинов категории (например, ${storeNames.slice(0, 3).join(", ") || "партнёры сети"}) предлагают специальную скидку на первый заказ. Ищите в каталоге купоны с отметкой «Новым» или переходите на страницу интересующего магазина.`,
+      a: hasFirstOrderOffer
+        ? `В категории «${catName}» есть предложения на первый заказ. Смотрите условия конкретных купонов с отметкой «Первый заказ».`
+        : `Сейчас в категории «${catName}» нет предложений, отмеченных как доступные исключительно на первый заказ. Другие акции могут подходить новым покупателям — проверяйте условия.`,
     },
     {
       q: `Суммируются ли промокоды с распродажами и акциями?`,
@@ -183,7 +172,7 @@ export default async function CategoryPage({
     },
     {
       q: `Как применить промокод при оформлении заказа?`,
-      a: `Нажмите кнопку «Копировать» на карточке купона, перейдите в магазин по нашей ссылке и вставьте промокод в поле «Промокод» или «Купон» в корзине до оплаты. Итоговая сумма автоматически уменьшится.`,
+      a: `Нажмите кнопку «Копировать» на карточке купона, перейдите в магазин по нашей ссылке и вставьте промокод в поле «Промокод» или «Купон» в корзине до оплаты. Условия скидки или подарка будут применены, если заказ соответствует требованиям акции.`,
     },
   ];
 
@@ -246,20 +235,20 @@ export default async function CategoryPage({
 
         <div className="mt-6">
           <h1 className="font-display text-2xl font-extrabold leading-tight text-ink sm:text-3xl md:text-4xl">
-            Промокоды и купоны: {catName} — скидки {maxDisc}
+            Промокоды и купоны: {catName}{maxDisc ? ` — скидки ${maxDisc}` : ""}
           </h1>
           {def?.blurb ? (
             <p className="mt-2 text-sm font-medium text-ink/75 max-w-3xl">{def.blurb}</p>
           ) : null}
           <p className="mt-2 text-xs sm:text-sm text-ink/65 max-w-3xl">
-            Собрали актуальные скидки на {MONTH_YEAR}: {list.length}{" "}
+            Собрали актуальные промокоды и акции на {MONTH_YEAR}: {list.length}{" "}
             {plural(list.length, "активный промокод", "активных промокода", "активных промокодов")} от {categoryStores.length}{" "}
             {plural(categoryStores.length, "магазина-партнёра", "магазинов-партнёров", "магазинов-партнёров")}.
           </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
-              Скидки {maxDisc}
+              {maxDisc ? `Скидки ${maxDisc}` : "Акции и купоны"}
             </span>
             <span className="rounded-full bg-red/10 border border-red/30 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/70">
               {list.length} {plural(list.length, "купон", "купона", "купонов")}

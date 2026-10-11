@@ -2,7 +2,7 @@ import Icon from "@/components/Icon";
 import Link from "next/link";
 import { getStores } from "@/lib/perfluence";
 import StoreLogo from "@/components/StoreLogo";
-import type { Coupon } from "@/lib/types";
+import { getMaxVerifiedDiscount } from "@/lib/storeDiscount";
 
 function plural(n: number, one: string, two: string, five: string): string {
   const mod10 = n % 10;
@@ -11,27 +11,6 @@ function plural(n: number, one: string, two: string, five: string): string {
   if (mod10 === 1) return one;
   if (mod10 >= 2 && mod10 <= 4) return two;
   return five;
-}
-
-function getStoreMaxDiscount(coupons: Coupon[]): string | null {
-  let maxPercent = 0;
-  let maxRub = 0;
-  for (const c of coupons) {
-    const text = c.promocode.bonusName || "";
-    const pMatch = text.match(/(\d+)\s*%/);
-    if (pMatch) {
-      const val = parseInt(pMatch[1], 10);
-      if (val > maxPercent && val <= 90) maxPercent = val;
-    }
-    const rMatch = text.match(/(\d+[\s\d]*)\s*(₽|р\b|руб)/i);
-    if (rMatch) {
-      const val = parseInt(rMatch[1].replace(/\s/g, ""), 10);
-      if (val > maxRub && val <= 50000) maxRub = val;
-    }
-  }
-  if (maxPercent > 0) return `до −${maxPercent}%`;
-  if (maxRub > 0) return `до −${maxRub.toLocaleString("ru-RU")} ₽`;
-  return null;
 }
 
 export default async function OtherStores({
@@ -97,7 +76,7 @@ export default async function OtherStores({
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {sameCategory.slice(0, 6).map((store) => {
-              const maxDiscount = getStoreMaxDiscount(store.coupons);
+              const maxDiscount = getMaxVerifiedDiscount(store.coupons);
               return (
                 <Link
                   key={store.slug}
@@ -163,7 +142,7 @@ export default async function OtherStores({
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {(sameCategory.length > 0 ? otherStores.slice(0, 6) : stores.slice(0, 9)).map(
             (store) => {
-              const maxDiscount = getStoreMaxDiscount(store.coupons);
+              const maxDiscount = getMaxVerifiedDiscount(store.coupons);
               return (
                 <Link
                   key={store.slug}

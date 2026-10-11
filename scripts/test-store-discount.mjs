@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 
 const { getMaxVerifiedDiscount, hasGiftOffer } = await import("../src/lib/storeDiscount.ts");
 const { buildStoreDescription, buildStoreArticle } = await import("../src/lib/storeSeoContent.ts");
@@ -12,6 +13,18 @@ const gifts = coupons(
 );
 assert.equal(getMaxVerifiedDiscount(gifts), null, "Order minimum must not become savings");
 assert.equal(hasGiftOffer(gifts), true);
+const actualAdmitadGift = [
+  {
+    promocode: {
+      bonusName: "При заказе от 1 999 ₽",
+      terms: "Подарок на выбор при заказе от 1999 рублей",
+    },
+  },
+];
+assert.equal(hasGiftOffer(actualAdmitadGift), true, "Gift in partner terms must be visible to SEO");
+assert.equal(getMaxVerifiedDiscount(actualAdmitadGift), null, "Order minimum must not become a saving");
+assert.equal(hasGiftOffer(coupons("При заказе от 1 999 ₽")), false, "No unsupported gift inference");
+
 assert.equal(getMaxVerifiedDiscount(coupons("Подарок 500 ₽ при заказе от 2 449 ₽")), null);
 assert.equal(getMaxVerifiedDiscount(coupons("Акция при заказе от 2 449 ₽")), null);
 assert.equal(getMaxVerifiedDiscount(coupons("Кэшбэк 10%")), null);
@@ -58,4 +71,11 @@ const realDiscountDescription = buildStoreDescription({
 });
 assert.match(realDiscountDescription, /скидка до 500 ₽/i);
 
+const categorySource = fs.readFileSync("src/app/category/[slug]/page.tsx", "utf8");
+const relatedStoreSource = fs.readFileSync("src/components/OtherStores.tsx", "utf8");
+assert.match(categorySource, /getMaxVerifiedDiscount\(list\)/);
+assert.match(relatedStoreSource, /getMaxVerifiedDiscount\(store\.coupons\)/);
+assert.doesNotMatch(categorySource, /до −30%/, "Never invent 30% discount for empty/offer-only categories");
+assert.doesNotMatch(relatedStoreSource, /function getStoreMaxDiscount/, "Do not fork discount parsing");
 console.log("✓ Store discount: gift minimum is not savings; real %/RUB discounts and SEO texts PASS");
+
