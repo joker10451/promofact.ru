@@ -1493,6 +1493,89 @@ console.log("===================================================================
   }
 }
 
+// 43. Тест: upsertAdmitadStaging гарантирует created_at и updated_at NOT NULL для смешанных пакетов
+{
+  const { upsertAdmitadStaging } = await import("../src/lib/admitadSupabase.ts");
+  const testSyncId = "sync_test_created_at_mixed_batch";
+
+  const originalCreatedAt = "2026-10-08T12:00:00.000Z";
+  const mixedBatch = [
+    // 1. Существующая запись с сохраненным created_at
+    {
+      id: "adm_existing_with_created_at",
+      code: "EXISTING_1",
+      store: "Existing Store",
+      store_slug: "existing-store",
+      discount: "10%",
+      category: "Доставка",
+      description: "Existing promo",
+      expires: "2027-01-01",
+      affiliate_url: "https://ad.admitad.com/g/111",
+      is_active: true,
+      created_at: originalCreatedAt,
+      updated_at: "2026-10-09T12:00:00.000Z",
+    },
+    // 2. Новая запись без created_at
+    {
+      id: "adm_new_without_created_at",
+      code: "NEW_1",
+      store: "New Store",
+      store_slug: "new-store",
+      discount: "20%",
+      category: "Доставка",
+      description: "New promo",
+      expires: "2027-01-01",
+      affiliate_url: "https://ad.admitad.com/g/222",
+      is_active: true,
+    },
+    // 3. Запись с created_at: null / undefined / пустая строка
+    {
+      id: "adm_new_with_empty_created_at",
+      code: "NEW_2",
+      store: "New Store 2",
+      store_slug: "new-store-2",
+      discount: "30%",
+      category: "Доставка",
+      description: "New promo 2",
+      expires: "2027-01-01",
+      affiliate_url: "https://ad.admitad.com/g/333",
+      is_active: true,
+      created_at: "",
+      updated_at: "",
+    },
+  ];
+
+  const written = await upsertAdmitadStaging(mixedBatch, testSyncId);
+  assert.strictEqual(written, 3, "Все 3 записи должны быть успешно обработаны staging");
+
+  const stagingFile = path.resolve(".next/cache/admitad_staging.json");
+  assert.ok(fs.existsSync(stagingFile), "Локальный staging файл должен существовать");
+  const stagingData = JSON.parse(fs.readFileSync(stagingFile, "utf8"));
+  const stagingRows = stagingData[testSyncId];
+  assert.ok(Array.isArray(stagingRows), "Поколение должно быть массивом строк");
+  assert.strictEqual(stagingRows.length, 3);
+
+  // Проверяем сохранение исходного created_at для существующей строки
+  const existingRow = stagingRows.find(r => r.id === "adm_existing_with_created_at");
+  assert.ok(existingRow, "Существующая строка найдена");
+  assert.strictEqual(existingRow.created_at, originalCreatedAt, "Исходный created_at должен быть строго сохранен");
+
+  // Проверяем установку timestamp для новых записей
+  const newRow1 = stagingRows.find(r => r.id === "adm_new_without_created_at");
+  assert.ok(newRow1, "Новая строка 1 найдена");
+  assert.ok(newRow1.created_at, "created_at не должен быть null/undefined");
+  assert.ok(!isNaN(Date.parse(newRow1.created_at)), "created_at должен быть валидным ISO timestamp");
+
+  const newRow2 = stagingRows.find(r => r.id === "adm_new_with_empty_created_at");
+  assert.ok(newRow2, "Новая строка 2 найдена");
+  assert.ok(newRow2.created_at, "created_at не должен быть пустым");
+  assert.ok(!isNaN(Date.parse(newRow2.created_at)), "created_at должен быть валидным ISO timestamp");
+  assert.ok(newRow2.updated_at, "updated_at не должен быть пустым");
+
+  passed++;
+  console.log("✓ Тест 43: upsertAdmitadStaging сохраняет existing created_at и устанавливает timestamp для новых записей (NOT NULL) (PASS)");
+}
+
 console.log("\n================================================================================");
-console.log(`🎉 ВСЕ ${passed}/42 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
+console.log(`🎉 ВСЕ ${passed}/46 ТЕСТОВ ADMITAD AUTOPILOT & METRIKA УСПЕШНО ПРОЙДЕНЫ!`);
 console.log("================================================================================");
