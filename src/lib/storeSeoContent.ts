@@ -20,7 +20,8 @@ export interface StoreArticleInput {
   /** Активные купоны: только коды/названия. */
   coupons: { code: string; bonusName: string | null }[];
   couponCount: number;
-  maxDiscount: string;
+  maxDiscount: string | null;
+  hasGiftOffer?: boolean;
   isFirstOrder: boolean;
   activeBloggers: number;
   monthYear: string;
@@ -167,7 +168,7 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
   const f: Fill = {
     name: input.name,
     category: input.category,
-    max: input.maxDiscount,
+    max: input.maxDiscount ?? "",
     monthYear,
     monthRu,
     todayRu: input.todayRu,
@@ -186,13 +187,17 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
   // абзацах подряд и в шапке страницы. Содержательная версия — в абзаце 5.
   let lead: string;
   if (input.couponCount > 0) {
-    lead = `На странице «Промокоды ${input.name}» собраны актуальные купоны на ${monthRu}. Скидка на ${input.category} сегодня достигает ${input.maxDiscount}, всего действует ${input.couponCount} ${countWord}.`;
+    lead = input.maxDiscount
+      ? `На странице «Промокоды ${input.name}» собраны актуальные купоны на ${monthRu}. Подтверждённая скидка — ${input.maxDiscount}, всего действует ${input.couponCount} ${countWord}.`
+      : `На странице «Промокоды ${input.name}» собраны актуальные купоны на ${monthRu}. ${input.hasGiftOffer ? 'Доступны подарки к заказу' : 'Доступны специальные предложения'}, всего действует ${input.couponCount} ${countWord}.`;
   } else {
     lead = `Страница «Промокоды ${input.name}» по категории «${input.category}». Сейчас действующих купонов нет, но подборку обновляем по мере старта партнёрских акций — новые коды появляются в день запуска.`;
   }
 
   // 2. Категорийный угол (выбирается по хэшу слоуга — два магазина одной категории различаются).
-  const angle = fill(pickAngle(input.categorySlug, slug), f);
+  const angle = input.hasGiftOffer && !input.maxDiscount
+    ? `Купоны ${input.name} позволяют получить подарок при выполнении условий акции. Минимальная сумма заказа — это условие получения подарка, а не размер скидки.`
+    : fill(pickAngle(input.categorySlug, slug), f);
 
   // 3. Коды / бонусы — реальные данные конкретного магазина. Абзац сознательно
   // оставлен голыми данными: пояснение про условия дублировало абзац 4.
@@ -232,12 +237,12 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   const best = input.coupons
     .map((c) => (c.bonusName || "").replace(/[.\s]+$/, ""))
     .find((b) => b.length >= 15);
-  const discount = input.maxDiscount === "скидки" ? "" : `, скидка ${input.maxDiscount}`;
+  const discount = input.maxDiscount ? `, скидка ${input.maxDiscount}` : "";
   const head =
     n > 0
       ? `Промокоды ${input.name} на ${input.monthRu}: ${n} ${word}${discount}.`
       : `Скидки и акции ${input.name} на ${input.monthRu}.`;
   const tail = ` Актуально на ${input.monthRu}.`;
-  const full = `${head}${best ? ` ${best}.` : ""}${tail}`;
+  const full = `${head}${input.hasGiftOffer && !input.maxDiscount ? " Подарки к заказу при выполнении условий." : ""}${best ? ` ${best}.` : ""}${tail}`;
   return full.length <= 160 ? full : head + tail;
 }
