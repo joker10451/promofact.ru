@@ -240,7 +240,7 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   const discount = input.maxDiscount ? `, скидка ${input.maxDiscount}` : "";
   const head =
     n > 0
-      ? `Промокоды ${input.name} на ${input.monthRu}: ${n} ${word}${discount}.`
+      ? `Промокоды ${input.name} на ${input.monthRu}: ${n} ${word}${discount}${input.hasGiftOffer && !input.maxDiscount ? ", подарки к заказу" : ""}.`
       : `Скидки и акции ${input.name} на ${input.monthRu}.`;
   const tail = ` Актуально на ${input.monthRu}.`;
   const full = `${head}${input.hasGiftOffer && !input.maxDiscount ? " Подарки к заказу при выполнении условий." : ""}${best ? ` ${best}.` : ""}${tail}`;
