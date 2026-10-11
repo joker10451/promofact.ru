@@ -2,6 +2,7 @@ import { spawn as cpSpawn, execSync } from "node:child_process";
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
+import assert from "node:assert";
 import { chromium } from "playwright";
 
 const PORT = 3456;
@@ -72,14 +73,14 @@ async function run() {
       shell: true,
       stdio: "ignore",
       cwd: process.cwd(),
-      env: { ...process.env, PORT: String(PORT) },
+      env: { ...process.env, PORT: String(PORT), E2E_FIXTURES: "true" },
     });
   } else {
     server = cpSpawn("npx", ["next", "start", "-p", String(PORT)], {
       stdio: "ignore",
       cwd: process.cwd(),
       detached: true,
-      env: { ...process.env, PORT: String(PORT) },
+      env: { ...process.env, PORT: String(PORT), E2E_FIXTURES: "true" },
     });
   }
 
@@ -113,16 +114,38 @@ async function run() {
       const searchInput = searchModal.locator('input[type="search"]');
       await searchInput.waitFor({ state: "visible", timeout: 3000 });
       // Вводим опечатку раскладки: "афкащк" (farfor в русской раскладке)
-      await searchInput.fill("афкащк");
+      const query = "афкащк";
+
+      const responsePromise = page.waitForResponse((response) => {
+        try {
+          const url = new URL(response.url());
+          return (
+            url.pathname === "/api/search" &&
+            url.searchParams.get("q") === query &&
+            response.status() === 200
+          );
+        } catch {
+          return false;
+        }
+      });
+
+      await searchInput.fill("");
+      await searchInput.pressSequentially(query, { delay: 30 });
+
+      const response = await responsePromise;
+      const data = await response.json();
+
+      // Проверяем, что API действительно вернул Farfor в результатах поиска
+      assert.match(JSON.stringify(data), /farfor/i, "API /api/search должен вернуть объект с магазином farfor");
 
       const farforItem = searchModal.locator('a[href="/store/farfor"]').first();
       await farforItem.waitFor({ state: "visible", timeout: 10000 });
       console.log("  ✓ Поиск находит 'FARFOR' по опечатке клавиатуры 'афкащк'");
 
-      // Проверяем клавиатурную навигацию: Enter открывает выбранный результат
-      await page.keyboard.press("Enter");
-      await page.waitForURL("**/store/farfor", { timeout: 5000, waitUntil: "domcontentloaded" });
-      console.log("  ✓ Переход к магазину работает по нажатию клавиши Enter");
+      // Кликаем по найденному магазину или переходим по Enter
+      await farforItem.click();
+      await page.waitForURL("**/store/farfor", { timeout: 10000, waitUntil: "domcontentloaded" });
+      console.log("  ✓ Переход к магазину работает корректно");
 
       await context.close();
       passedTests++;

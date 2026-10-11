@@ -220,6 +220,7 @@ export interface AdmitadRowInput {
   mapping_strategy?: string;
   legal_status?: string;
   erid_status?: string;
+  created_at?: string;
   updated_at?: string;
 }
 
@@ -231,6 +232,7 @@ export async function upsertAdmitadStaging(rows: AdmitadRowInput[], syncRunId: s
   const supabase = getSupabaseAdmin();
   if (rows.length === 0) return 0;
 
+  const nowIso = new Date().toISOString();
   const seen = new Set<string>();
   const stagingRows: AdmitadRowInput[] = [];
   for (const r of rows) {
@@ -239,6 +241,8 @@ export async function upsertAdmitadStaging(rows: AdmitadRowInput[], syncRunId: s
       stagingRows.push({
         ...r,
         sync_run_id: syncRunId,
+        created_at: r.created_at && String(r.created_at).trim() !== "" ? String(r.created_at) : nowIso,
+        updated_at: r.updated_at && String(r.updated_at).trim() !== "" ? String(r.updated_at) : nowIso,
       });
     }
   }

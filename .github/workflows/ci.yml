@@ -29,12 +29,16 @@ jobs:
       # Этот шаг гарантирует, что код компилируется и все страницы (вкл. SSG
       # /store, /category) успешно пререндерятся на мок-данных.
       - name: Build
+        env:
+          E2E_FIXTURES: "true"
         run: npm run build
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
       - name: End-to-End Scenarios (Playwright)
+        env:
+          E2E_FIXTURES: "true"
         run: npm run test:e2e
 
       - name: Dynamic SEO & Inventory Audit
