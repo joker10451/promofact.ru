@@ -25,6 +25,8 @@ export interface RawAdmitadCoupon {
   isTakeadsCoupon: boolean;
   trackingPromocode: boolean;
   hasAffiliateLink: boolean;
+  is_personal?: boolean;
+  isPersonal?: boolean;
   rawCampaignName?: string;
   rawCampaignSite?: string;
   rawCategoryId?: string;

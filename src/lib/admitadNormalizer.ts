@@ -558,7 +558,7 @@ export function normalizeAdmitadCoupon(raw: RawAdmitadCoupon): NormalizedOffer |
     dateEnd: raw.dateEnd && raw.dateEnd !== "None" ? raw.dateEnd.slice(0, 10) : null,
     isHit,
     isUniversal: true,
-    isPersonal: false,
+    isPersonal: Boolean(raw.is_personal ?? raw.isPersonal),
     affiliate: {
       url: (raw.gotolink || raw.rawCampaignSite || "").replace(/&amp;/g, "&"),
       ordMarker: erid,

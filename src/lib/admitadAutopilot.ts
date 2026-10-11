@@ -22,18 +22,18 @@ export const CATASTROPHIC_DROP_THRESHOLD = 0.35;
  * Safety allowlist проверенных кампаний (verified Admitad campaign IDs).
  * Включает только кандидатов «READY FOR FUTURE PUBLISH» из реального live dry-run площадки 2990501.
  *
+ * 26110:  Pizza Sushi Wok (pizzasushiwok)
  * 25224:  Яндекс Путешествия (yandeks-puteshestviya)
  * 1667:   YVES ROCHER (iv-roshe)
  * 141770: Яндекс Плюс (yandex-plus)
  * 118265: Отели в Т-Банке (t-puteshestviya-oteli)
- * 45863:  PREMIER (premier)
  */
 export const VERIFIED_CAMPAIGN_ALLOWLIST: readonly string[] = [
+  "26110",
   "25224",
   "1667",
   "141770",
   "118265",
-  "45863",
 ];
 
 /**
@@ -62,12 +62,15 @@ export type AdmitadPublicationStatus =
   | "READY_NOT_APPROVED"
   | "UNMAPPED"
   | "MISSING_ERID"
+  | "ERID_MISMATCH"
   | "MISSING_LEGAL_INFO"
   | "INVALID_AFFILIATE_URL"
   | "EXPIRED"
   | "FOREIGN_GEO"
   | "QUALITY_GATE_FAILED"
-  | "CAMPAIGN_INACTIVE";
+  | "CAMPAIGN_INACTIVE"
+  | "CAMPAIGN_MODERATION"
+  | "UNAUTHORIZED_PROMOCODE";
 
 export interface PublicationEvaluationResult {
   publishable: boolean;
@@ -77,13 +80,21 @@ export interface PublicationEvaluationResult {
 }
 
 export interface PublicationEvaluationContext {
-  campaign: Partial<AdmitadApiCampaign> & { id: number; status?: string; advertiser_legal_info?: string };
+  campaign: Partial<AdmitadApiCampaign> & {
+    id: number;
+    status?: string;
+    connection_status?: string;
+    advertiser_legal_info?: string;
+    moderation?: boolean;
+  };
   mapping?: StoreMappingResult;
   eridStatus?: string;
   legalInfoStatus?: string;
   eridValue?: string;
   advertiserLegalInfo?: string;
   allowlist?: readonly string[];
+  qualityGatePassed?: boolean;
+  qualityGateReasons?: string[];
 }
 
 export type CandidateLike =
@@ -96,6 +107,8 @@ export type CandidateLike =
       gotolink?: string;
       advcampaignId?: string;
       status?: string;
+      is_personal?: boolean;
+      is_unique?: boolean;
       affiliate?: { url?: string };
     };
 
@@ -109,7 +122,20 @@ export function isAdmitadPublishable(
   const allowlist = ctx.allowlist ?? getEffectiveCampaignAllowlist();
   const campId = String(ctx.campaign.id || ("advcampaignId" in coupon ? coupon.advcampaignId : "") || "");
 
-  // 1. Проверка активности кампании
+  // 0. Проверка результата Quality Gate (если передан)
+  if (ctx.qualityGatePassed === false) {
+    const qgReasons = ctx.qualityGateReasons || [];
+    const isPersonal = qgReasons.some((r) => r.includes("UNAUTHORIZED_PROMOCODE"));
+    const isConn = qgReasons.some((r) => r.includes("CONNECTION_INACTIVE") || r.includes("CAMPAIGN_MODERATION"));
+    return {
+      publishable: false,
+      status: isPersonal ? "UNAUTHORIZED_PROMOCODE" : isConn ? "CAMPAIGN_MODERATION" : "QUALITY_GATE_FAILED",
+      reason: qgReasons.join("; ") || "Quality Gate не пройден",
+      isApproved: false,
+    };
+  }
+
+  // 1. Проверка активности кампании рекламодателя в сети Admitad
   if (ctx.campaign.status && ctx.campaign.status !== "active") {
     return {
       publishable: false,
@@ -119,7 +145,21 @@ export function isAdmitadPublishable(
     };
   }
 
-  // 2. Проверка истечения срока действия
+  // 2. Проверка статуса подключения площадки (модерация рекламодателя)
+  // Fail-closed: требуем строго connection_status === "active"
+  const connStatus = ctx.campaign?.connection_status;
+  if (!connStatus || connStatus !== "active") {
+    return {
+      publishable: false,
+      status: "CAMPAIGN_MODERATION",
+      reason: connStatus === "pending"
+        ? "Площадка находится на модерации рекламодателя (connection_status: pending)"
+        : `Подключение площадки к программе не активно (connection_status: ${connStatus || "missing"})`,
+      isApproved: false,
+    };
+  }
+
+  // 3. Проверка истечения срока действия
   const isExpired =
     ("isExpired" in coupon && Boolean(coupon.isExpired)) ||
     ("status" in coupon && coupon.status === "expired");
@@ -132,7 +172,7 @@ export function isAdmitadPublishable(
     };
   }
 
-  // 3. Проверка географии (RU)
+  // 4. Проверка географии (RU)
   if ("isForeign" in coupon && Boolean(coupon.isForeign)) {
     return {
       publishable: false,
@@ -142,7 +182,20 @@ export function isAdmitadPublishable(
     };
   }
 
-  // 4. Проверка канонического сопоставления магазина PromoFact
+  // 5. Проверка прав на использование промокода (персональные промокоды без согласования блокируются)
+  const isPersonalPromo =
+    ("is_personal" in coupon && Boolean(coupon.is_personal)) ||
+    ("isPersonal" in coupon && Boolean(coupon.isPersonal));
+  if (isPersonalPromo) {
+    return {
+      publishable: false,
+      status: "UNAUTHORIZED_PROMOCODE",
+      reason: "Персональный промокод требует отдельного согласования рекламодателя (is_personal: true)",
+      isApproved: false,
+    };
+  }
+
+  // 6. Проверка канонического сопоставления магазина PromoFact
   if (!ctx.mapping || ctx.mapping.strategy === "UNMAPPED" || !ctx.mapping.canonicalSlug) {
     return {
       publishable: false,
@@ -152,7 +205,7 @@ export function isAdmitadPublishable(
     };
   }
 
-  // 5. Проверка партнерской ссылки
+  // 7. Проверка партнерской ссылки
   let link = "";
   if ("affiliate" in coupon && coupon.affiliate?.url) {
     link = coupon.affiliate.url;
@@ -160,6 +213,8 @@ export function isAdmitadPublishable(
     link = coupon.affiliateLink;
   } else if ("gotolink" in coupon && coupon.gotolink) {
     link = coupon.gotolink;
+  } else if ("goto_link" in coupon && coupon.goto_link) {
+    link = coupon.goto_link as string;
   }
 
   if (!link || (!link.startsWith("http://") && !link.startsWith("https://"))) {
@@ -171,7 +226,7 @@ export function isAdmitadPublishable(
     };
   }
 
-  // 6. Проверка ОРД (ERID)
+  // 8. Проверка ОРД (ERID)
   if (ctx.eridStatus !== "PRESENT" || !ctx.eridValue) {
     return {
       publishable: false,
@@ -181,7 +236,18 @@ export function isAdmitadPublishable(
     };
   }
 
-  // 7. Проверка реквизитов рекламодателя (Legal Info)
+  // 8b. Проверка целостности ERID: токен в ссылке перехода обязан строго совпадать с метаданными
+  const linkEridMatch = link.match(/[?&]erid=([a-zA-Z0-9_-]+)/i) || link.match(/erid=([a-zA-Z0-9_-]+)/i);
+  if (linkEridMatch && linkEridMatch[1] !== ctx.eridValue) {
+    return {
+      publishable: false,
+      status: "ERID_MISMATCH",
+      reason: `Расхождение ERID: в ссылке перехода (${linkEridMatch[1]}), в метаданных (${ctx.eridValue})`,
+      isApproved: false,
+    };
+  }
+
+  // 9. Проверка реквизитов рекламодателя (Legal Info)
   if (ctx.legalInfoStatus !== "PRESENT" || !ctx.advertiserLegalInfo?.trim()) {
     return {
       publishable: false,
@@ -191,7 +257,7 @@ export function isAdmitadPublishable(
     };
   }
 
-  // 8. Safety Allowlist (Section 12, 13)
+  // 10. Safety Allowlist (Section 12, 13)
   const isApproved = allowlist.includes(campId);
   if (!isApproved) {
     return {
