@@ -78,7 +78,6 @@ export async function generateMetadata({
   const countWord = n === 1 ? "код" : n >= 2 && n <= 4 ? "кода" : "кодов";
   const maxDisc = getMaxVerifiedDiscount(store.coupons);
   const hasGift = hasGiftOffer(store.coupons);
-  const hasGift = hasGiftOffer(store.coupons);
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
   const storeExtra = getStoreExtra(slug);
@@ -183,6 +182,7 @@ export default async function StorePage({
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
   const maxDisc = getMaxVerifiedDiscount(store.coupons);
+  const hasGift = hasGiftOffer(store.coupons);
 
   const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
 
