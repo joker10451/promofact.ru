@@ -29,7 +29,7 @@ import type { Coupon, Promocode, Store, Affiliate } from "@/lib/types";
 export type CatalogCoupon = Omit<Coupon, "promocode" | "store" | "affiliate" | "extraLinks"> & {
   promocode: Omit<
     Promocode,
-    "group" | "minimumOrder" | "isUniversal"
+    "minimumOrder" | "isUniversal"
   >;
   store: Omit<Store, "about" | "conditions" | "activeBloggers">;
   affiliate: Omit<Affiliate, "ordMarker">;
