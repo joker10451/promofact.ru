@@ -659,14 +659,16 @@ async function run() {
       const repeatOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Повторные заказы")');
       const repeatCountText = await repeatOrderBtn.locator("span:last-child").innerText();
       const repeatCount = parseInt(repeatCountText.trim(), 10);
+       const universalBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Для всех")');
+       const universalCount = parseInt((await universalBtn.locator("span:last-child").innerText()).trim(), 10);
 
-      if (isNaN(allCount) || isNaN(firstCount) || isNaN(repeatCount)) {
+      if (isNaN(allCount) || isNaN(firstCount) || isNaN(repeatCount) || isNaN(universalCount)) {
         throw new Error(`Не удалось распарсить бейджи счётчиков: all=${allCountText}, first=${firstCountText}, repeat=${repeatCountText}`);
       }
 
       // Инвариант: allCount === firstCount + repeatCount
-      if (allCount !== firstCount + repeatCount) {
-        throw new Error(`Инвариант нарушен: allCount (${allCount}) !== firstCount (${firstCount}) + repeatCount (${repeatCount})`);
+      if (allCount !== firstCount + repeatCount + universalCount) {
+        throw new Error(`Инвариант нарушен: allCount (${allCount}) !== firstCount (${firstCount}) + repeatCount (${repeatCount}) + universalCount (${universalCount})`);
       }
 
       // Карточки купонов в сетке (article с id^="coupon-")
@@ -734,6 +736,13 @@ async function run() {
           throw new Error(`Ожидалось ${repeatCount} купонов на повторный заказ, отображается: ${repeatCardsCount}`);
         }
         console.log(`  ✓ Фильтр 'Повторные заказы': отображается ${repeatCardsCount} карточек (ожидалось ${repeatCount})`);
+      }
+
+      // 3b. Универсальные предложения не относятся к повторным заказам.
+      await universalBtn.click();
+      await page.waitForTimeout(300);
+      if (await cards.count() !== universalCount) {
+        throw new Error(`Ожидалось ${universalCount} универсальных купонов, получено ${await cards.count()}`);
       }
 
       // 4. Клик "Все акции"
