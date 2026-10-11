@@ -14,6 +14,7 @@ import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { buildStoreArticle, buildStoreDescription } from "@/lib/storeSeoContent";
+import { getMaxVerifiedDiscount, hasGiftOffer } from "@/lib/storeDiscount";
 import { getStoreExtra, hasActiveRequiredCoupons } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
@@ -55,24 +56,6 @@ function getMonthRuPrep(): string {
   return `${monthsPrep[now.getMonth()]} ${now.getFullYear()}`;
 }
 
-function getMaxDiscount(coupons: { promocode: { bonusName: string | null } }[]): string {
-  let maxPercent = 0;
-  let maxRub = 0;
-  for (const c of coupons) {
-    const text = c.promocode.bonusName || "";
-    const p = text.match(/(\d+)\s*%/);
-    if (p && Number(p[1]) > maxPercent) maxPercent = Number(p[1]);
-    const r = text.match(/(\d+[\s\d]*)\s*(?:₽|руб)/i);
-    if (r) {
-      const val = Number(r[1].replace(/\s+/g, ""));
-      if (val > maxRub) maxRub = val;
-    }
-  }
-  if (maxPercent > 0) return `до ${maxPercent}%`;
-  if (maxRub > 0) return `до ${maxRub.toLocaleString("ru-RU")} ₽`;
-  return "скидки";
-}
-
 // Даты фиксируем на уровне модуля — стабильны для SSR и клиента
 const TODAY_ISO = new Date().toISOString();
 const TODAY_RU = new Date().toLocaleDateString("ru-RU", {
@@ -93,7 +76,9 @@ export async function generateMetadata({
   const pageUrl = `${SITE_URL}/store/${slug}`;
   const n = store.coupons.length;
   const countWord = n === 1 ? "код" : n >= 2 && n <= 4 ? "кода" : "кодов";
-  const maxDisc = getMaxDiscount(store.coupons);
+  const maxDisc = getMaxVerifiedDiscount(store.coupons);
+  const hasGift = hasGiftOffer(store.coupons);
+  const hasGift = hasGiftOffer(store.coupons);
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
   const storeExtra = getStoreExtra(slug);
@@ -110,7 +95,7 @@ export async function generateMetadata({
     useCustomMetadata && storeExtra?.customTitle
       ? storeExtra.customTitle(monthRu, monthYear)
       : n > 0
-        ? (maxDisc && maxDisc !== "скидки"
+        ? (maxDisc && maxDisc !== null
             ? `Промокоды ${store.name} на ${monthRu}: ${maxDisc}, ${n} ${countWord}`
             : `Промокоды и акции ${store.name} на ${monthRu}: ${n} ${countWord}`)
         : `Скидки и акции ${store.name} на ${monthYear}`;
@@ -127,6 +112,8 @@ export async function generateMetadata({
           coupons: store.coupons.map((c) => ({ code: c.promocode.code, bonusName: c.promocode.bonusName })),
           couponCount: n,
           maxDiscount: maxDisc,
+       hasGiftOffer: hasGift,
+           hasGiftOffer: hasGift,
           isFirstOrder: store.coupons.some((c) => c.promocode.isFirstOrderOnly),
           activeBloggers: store.activeBloggers,
           monthYear,
@@ -195,7 +182,7 @@ export default async function StorePage({
   const todayRu = TODAY_RU;
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
-  const maxDisc = getMaxDiscount(store.coupons);
+  const maxDisc = getMaxVerifiedDiscount(store.coupons);
 
   const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
 
@@ -280,11 +267,11 @@ export default async function StorePage({
         : `На данный момент большинство промокодов ${store.name} подходят как для новых, так и для постоянных клиентов. Проверьте условия в карточках купонов выше.`,
     },
     {
-      q: `Какой максимальный размер скидки в ${store.name} сейчас?`,
+      q: `Какие скидки и подарки есть в ${store.name} сейчас?`,
       a:
-        maxDisc && maxDisc !== "скидки"
+        maxDisc && maxDisc !== null
           ? `На ${monthYear} максимальная выгода по промокодам в ${store.name} составляет ${maxDisc}. Истёкшие коды убираются со страницы автоматически; перед заказом сверьте условия в карточке купона.`
-          : `На ${monthYear} для ${store.name} действуют актуальные акции и специальные предложения. Истёкшие предложения убираются со страницы автоматически; перед переходом сверьте условия в карточке купона.`,
+          : `На ${monthYear} для ${store.name} действуют ${hasGift ? "подарки к заказу и другие акции" : "акции и специальные предложения"}. Размер денежной скидки для таких акций не указан. Перед заказом сверьте условия в карточке купона.`,
     },
     {
       q: `Почему промокод ${store.name} может не сработать?`,
@@ -395,9 +382,9 @@ export default async function StorePage({
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">
-                {maxDisc && maxDisc !== "скидки"
+                {maxDisc && maxDisc !== null
                   ? `Промокоды ${store.name} на ${monthYear} — скидки ${maxDisc}`
-                  : `Промокоды и акции ${store.name} на ${monthYear}`}
+                  : `Промокоды и акции ${store.name} на ${monthYear}${hasGift ? " — подарки к заказу" : ""}`}
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
                 {store.coupons.length}{" "}
@@ -503,9 +490,9 @@ export default async function StorePage({
             <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-ink">{store.coupons.length}</div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Макс. выгода</div>
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">{maxDisc ? "Макс. скидка" : "Тип предложения"}</div>
             <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-red">
-              {maxDisc && maxDisc !== "скидки" ? maxDisc : "Акция"}
+              {maxDisc ? maxDisc : hasGift ? "Подарок" : "Акция"}
             </div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
@@ -534,7 +521,7 @@ export default async function StorePage({
 
         <article className="mt-12 max-w-3xl">
           <h2 className="font-display text-xl font-extrabold">
-            Промокод {store.name} — как получить максимальную скидку
+            {maxDisc ? `Промокод ${store.name} — как получить максимальную скидку` : `Промокоды ${store.name} — условия акций и подарков`}
           </h2>
           {storeArticle.map((paragraph, i) => (
             <p key={i} className="mt-3 leading-relaxed text-ink/70">
