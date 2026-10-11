@@ -1,12 +1,13 @@
 import Icon from "@/components/Icon";
 
-export type IntentFilter = "all" | "first-order" | "repeat-order";
+export type IntentFilter = "all" | "first-order" | "repeat-order" | "universal";
 
 interface StoreIntentTabsProps {
   activeTab: IntentFilter;
   allCount: number;
   firstCount: number;
   repeatCount: number;
+  universalCount: number;
   onTabChange: (tab: IntentFilter) => void;
 }
 
@@ -15,6 +16,7 @@ export default function StoreIntentTabs({
   allCount,
   firstCount,
   repeatCount,
+  universalCount,
   onTabChange,
 }: StoreIntentTabsProps) {
   return (
@@ -64,6 +66,22 @@ export default function StoreIntentTabs({
         >
           {firstCount}
         </span>
+      </button>
+
+      {/* Для всех: предложения без ограничений на тип заказа */}
+      <button
+        type="button"
+        aria-pressed={activeTab === "universal"}
+        onClick={() => onTabChange("universal")}
+        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+          activeTab === "universal"
+            ? "bg-ink text-white font-extrabold shadow-xs"
+            : "border border-line bg-white text-ink/70 hover:border-ink hover:text-ink"
+        }`}
+      >
+        <Icon name="check" size={14} />
+        <span>Для всех</span>
+        <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${activeTab === "universal" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>{universalCount}</span>
       </button>
 
       {/* 3. Повторные заказы */}
