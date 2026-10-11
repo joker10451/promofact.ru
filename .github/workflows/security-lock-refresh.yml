@@ -1,0 +1,48 @@
+name: SECURITY-1 temporary lockfile refresh
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'fix/security-nextjs-oct-2026'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/security-nextjs-oct-2026
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Baseline npm audit (summary only)
+        shell: bash
+        run: |
+          npm audit --json > /tmp/audit-before.json || true
+          node -e 'const a=require("/tmp/audit-before.json"); console.log("BASELINE AUDIT",JSON.stringify(a.metadata?.vulnerabilities)); for (const [n,v] of Object.entries(a.vulnerabilities||{})) console.log("ADVISORY",n,v.severity,JSON.stringify(v.range),JSON.stringify(v.fixAvailable),JSON.stringify((v.via||[]).filter(x=>typeof x==="object").map(x=>x.url)))'
+      - name: Resolve patched Next.js and ESLint config
+        run: npm install --package-lock-only --save-exact next@16.3.8 eslint-config-next@16.3.8 --ignore-scripts --no-audit --no-fund
+      - name: Audit patched lockfile (summary only)
+        shell: bash
+        run: |
+          npm audit --json > /tmp/audit-after.json || true
+          node -e 'const a=require("/tmp/audit-after.json"); console.log("AFTER AUDIT",JSON.stringify(a.metadata?.vulnerabilities)); for (const [n,v] of Object.entries(a.vulnerabilities||{})) console.log("AFTER ADVISORY",n,v.severity,JSON.stringify(v.range),JSON.stringify(v.fixAvailable))'
+          npm audit --omit=dev --json > /tmp/audit-prod.json || true
+          node -e 'const a=require("/tmp/audit-prod.json"); console.log("PRODUCTION AUDIT",JSON.stringify(a.metadata?.vulnerabilities)); for (const [n,v] of Object.entries(a.vulnerabilities||{})) console.log("PROD ADVISORY",n,v.severity,JSON.stringify(v.range),JSON.stringify(v.fixAvailable))'
+      - name: Commit regenerated lockfile only
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "fix(deps): patch Next.js 16.3.8 and lockfile"
+            git push origin HEAD:fix/security-nextjs-oct-2026
+          else
+            echo "Lockfile already current"
+          fi
