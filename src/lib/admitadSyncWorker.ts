@@ -272,6 +272,7 @@ export async function runAdmitadSafeSync(options: {
         mapping_strategy: mapping.strategy,
         legal_status: legal.legalInfoStatus,
         erid_status: legal.eridStatus,
+        created_at: existingActiveMap.get(rowId)?.created_at || nowIso,
         updated_at: nowIso,
       });
     }
