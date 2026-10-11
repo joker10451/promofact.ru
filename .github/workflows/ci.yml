@@ -22,6 +22,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Security gate: production libraries must not have high/critical advisories.
+      # Dev-only ESLint advisories are reported separately; never run audit --force.
+      - name: Production dependency security audit
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Unit & Regression Tests
         run: npm test
 
