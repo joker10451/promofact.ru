@@ -622,7 +622,13 @@ async function fetchBaseSourceBuckets(): Promise<BaseSourceBucket[]> {
     { source: "perfluence", coupons: perfluenceCoupons },
   ];
 
-  if (process.env.E2E_FIXTURES === "true") {
+  // E2E data is allowed only outside Vercel deployments. Never expose
+  // synthetic offers in Vercel Production, even if a flag is set by mistake.
+  if (
+    process.env.E2E_FIXTURES === "true" &&
+    process.env.VERCEL !== "1" &&
+    process.env.VERCEL_ENV !== "production"
+  ) {
     const { getE2EFixtureCoupons } = await import("@/lib/e2eFixtures");
     buckets.push({ source: "custom", coupons: getE2EFixtureCoupons() });
   }
@@ -636,7 +642,7 @@ const getCachedBaseSourceBuckets = unstable_cache(
     "promofact",
     "base-source-buckets",
     syncMeta.lastSuccessSync || "initial",
-    process.env.E2E_FIXTURES === "true" ? "e2e" : "prod",
+    process.env.E2E_FIXTURES === "true" && process.env.VERCEL !== "1" && process.env.VERCEL_ENV !== "production" ? "e2e" : "prod",
   ],
   { revalidate: false },
 );
