@@ -2,6 +2,7 @@ import { spawn as cpSpawn, execSync } from "node:child_process";
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
+import assert from "node:assert";
 import { chromium } from "playwright";
 
 const PORT = 3456;
@@ -113,7 +114,29 @@ async function run() {
       const searchInput = searchModal.locator('input[type="search"]');
       await searchInput.waitFor({ state: "visible", timeout: 3000 });
       // Вводим опечатку раскладки: "афкащк" (farfor в русской раскладке)
-      await searchInput.fill("афкащк");
+      const query = "афкащк";
+
+      const responsePromise = page.waitForResponse((response) => {
+        try {
+          const url = new URL(response.url());
+          return (
+            url.pathname === "/api/search" &&
+            url.searchParams.get("q") === query &&
+            response.status() === 200
+          );
+        } catch {
+          return false;
+        }
+      });
+
+      await searchInput.fill("");
+      await searchInput.pressSequentially(query, { delay: 30 });
+
+      const response = await responsePromise;
+      const data = await response.json();
+
+      // Проверяем, что API действительно вернул Farfor в результатах поиска
+      assert.match(JSON.stringify(data), /farfor/i, "API /api/search должен вернуть объект с магазином farfor");
 
       const farforItem = searchModal.locator('a[href="/store/farfor"]').first();
       await farforItem.waitFor({ state: "visible", timeout: 10000 });
