@@ -91,7 +91,7 @@ export function refineOffer(
 
   // 3. Подарки к заказу (Gift) — срабатывает если нет процентной скидки
   if (isGiftInText) {
-    let giftTitle = "Подарок к заказу";
+    let giftTitle = /подарок\s+на\s+выбор/iu.test(combined) ? "Подарок на выбор" : "Подарок к заказу";
 
     if (/фреш\s*ролл/i.test(title) || /ролл\s+с\s+креветкой/i.test(title) || /ролл\s+с\s+креветкой/i.test(terms)) {
       giftTitle = "Ролл с креветкой и авокадо в подарок";
