@@ -31,7 +31,7 @@ export default function CookieBanner() {
     >
       <div className="flex items-center gap-2 rounded-2xl bg-white/95 py-2 pl-3.5 pr-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)] ring-1 ring-black/5 backdrop-blur-sm">
         <p className="min-w-0 flex-1 text-xs leading-snug text-ink/75">
-          Cookie для аналитики и улучшения партнёрских переходов.{" "}
+          Cookie для аналитики. При переходе через Admitad с вашего согласия передаются IP и данные браузера.{" "}
           <a
             href="/cookie"
             className="font-semibold text-ink underline decoration-ink/30 underline-offset-2 transition-colors hover:decoration-ink"
