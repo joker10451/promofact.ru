@@ -625,7 +625,9 @@ async function run() {
           }
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
           if (pathUrl === "/") {
-            assert.match(await page.locator("h1").innerText(), /Хорошие скидки\\.\\s*Без лишних поисков\\./);
+            const heroHeadline = await page.locator("h1").innerText();
+            assert.ok(heroHeadline.includes("Хорошие скидки.") && heroHeadline.includes("Без лишних поисков."),
+              "Approved PromoFact 2.0 heading must be present at every breakpoint");
             assert.ok(await page.getByPlaceholder("Поиск магазина или промокода...").count(),
               "Live Hero search must remain visible at every breakpoint");
             assert.ok(await page.locator('section[id="catalog"]').count(),
