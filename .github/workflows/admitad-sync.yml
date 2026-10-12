@@ -33,6 +33,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Fail-closed campaign allowlist preflight (read-only)
+        env:
+          ADMITAD_APPROVED_CAMPAIGNS: ${{ github.event.inputs.approved_campaigns || vars.ADMITAD_APPROVED_CAMPAIGNS || '' }}
+          PRODUCTION_ALLOWLIST_PARITY_CONFIRMED: ${{ inputs.production_allowlist_confirmed }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/check-admitad-sync-preflight.mjs
+
       - name: Run Admitad Safe Sync
         env:
           ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
