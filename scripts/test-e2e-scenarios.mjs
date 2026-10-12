@@ -625,6 +625,11 @@ async function run() {
           }
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
           if (pathUrl === "/") {
+            assert.match(await page.locator("h1").innerText(), /Хорошие скидки\\.\\s*Без лишних поисков\\./);
+            assert.ok(await page.getByPlaceholder("Поиск магазина или промокода...").count(),
+              "Live Hero search must remain visible at every breakpoint");
+            assert.ok(await page.locator('section[id="catalog"]').count(),
+              "Coupon catalog must remain navigable after redesign");
             const cards = page.locator('section[aria-label="Популярные магазины"] a[href^="/store/"]');
             const visibleCount = await cards.evaluateAll((nodes) =>
               nodes.filter((node) => getComputedStyle(node).display !== "none").length,
@@ -649,12 +654,12 @@ async function run() {
               assert.ok(logoState, "No popular store should display a blank logo circle: " + (await visibleCards.nth(i).getAttribute("href")));
             }
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `ui-seo-1-1-home-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `v2-home-${res.width}.png`),
               fullPage: true,
               animations: "disabled",
             });
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `ui-seo-1-1-viewport-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `v2-viewport-${res.width}.png`),
               fullPage: false,
               animations: "disabled",
             });
