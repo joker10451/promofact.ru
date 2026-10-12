@@ -6,6 +6,11 @@ on:
       approved_campaigns:
         description: "Comma-separated Admitad campaign IDs to publish (e.g. 45863 for PREMIER pilot). REQUIRED — empty value blocks sync."
         required: true
+      production_allowlist_confirmed:
+        description: "Confirm Vercel PRODUCTION allowlist contains every existing campaign plus every newly approved campaign. Required to publish."
+        type: boolean
+        default: false
+        required: true
 
   # SCHEDULE CONFIGURED (каждые 3 часа UTC: 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 UTC).
   # По требованию ТЗ: сконфигурирован, но отключен до явного подтверждения (enabled only after manual approval).
@@ -27,6 +32,14 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Fail-closed campaign allowlist preflight (read-only)
+        env:
+          ADMITAD_APPROVED_CAMPAIGNS: ${{ github.event.inputs.approved_campaigns || vars.ADMITAD_APPROVED_CAMPAIGNS || '' }}
+          PRODUCTION_ALLOWLIST_PARITY_CONFIRMED: ${{ inputs.production_allowlist_confirmed }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node --loader ./scripts/ts-loader.mjs scripts/check-admitad-sync-preflight.mjs
 
       - name: Run Admitad Safe Sync
         env:
