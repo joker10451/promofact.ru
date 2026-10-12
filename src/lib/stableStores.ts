@@ -29,6 +29,67 @@ export interface StableStoreMeta {
 }
 
 export const STABLE_STORES: Record<string, StableStoreMeta> = {
+  // CATALOG-GROWTH-4: verified connected Admitad brands. Metadata only; empty pages stay noindex.
+  "internet-magazin-bilayn": {
+    id: -100024,
+    slug: "internet-magazin-bilayn",
+    name: "Интернет-магазин «билайн»",
+    logo: null,
+    category: "Электроника и техника",
+    categorySlug: "elektronika-i-tehnika",
+    about: "Интернет-магазин оператора билайн: смартфоны, аксессуары и другие товары. Условия акций проверяйте перед покупкой.",
+    conditions: "Проверяйте действительность предложения, ограничения и окончательную цену перед заказом.",
+    site: "https://beeline.ru/shop/",
+    activeBloggers: 0,
+  },
+  "foxford": {
+    id: -100025,
+    slug: "foxford",
+    name: "Фоксфорд",
+    logo: null,
+    category: "Онлайн-образование",
+    categorySlug: "onlayn-obrazovanie",
+    about: "Фоксфорд — платформа онлайн-обучения и подготовки к экзаменам. Акции зависят от выбранного курса и условий.",
+    conditions: "Проверяйте действительность предложения, ограничения и окончательную цену перед заказом.",
+    site: "https://foxford.ru/",
+    activeBloggers: 0,
+  },
+  "aravia": {
+    id: -100026,
+    slug: "aravia",
+    name: "Aravia",
+    logo: null,
+    category: "Косметика и парфюмерия",
+    categorySlug: "kosmetika-i-parfyumeriya",
+    about: "Aravia — бренд косметики и средств по уходу. Проверяйте ограничения для конкретного заказа.",
+    conditions: "Проверяйте действительность предложения, ограничения и окончательную цену перед заказом.",
+    site: "https://aravia.ru/",
+    activeBloggers: 0,
+  },
+  "love-republic": {
+    id: -100027,
+    slug: "love-republic",
+    name: "Love Republic",
+    logo: null,
+    category: "Одежда и обувь",
+    categorySlug: "odezhda-i-obuv",
+    about: "Love Republic — магазин одежды и аксессуаров. Сроки действия и условия предложений могут меняться.",
+    conditions: "Проверяйте действительность предложения, ограничения и окончательную цену перед заказом.",
+    site: "https://loverepublic.ru/",
+    activeBloggers: 0,
+  },
+  "skysmart-ru": {
+    id: -100028,
+    slug: "skysmart-ru",
+    name: "Skysmart",
+    logo: null,
+    category: "Онлайн-образование",
+    categorySlug: "onlayn-obrazovanie",
+    about: "Skysmart — платформа онлайн-занятий. Условия акций зависят от курса и категории учеников.",
+    conditions: "Проверяйте действительность предложения, ограничения и окончательную цену перед заказом.",
+    site: "https://skysmart.ru/",
+    activeBloggers: 0,
+  },
   // CATALOG-GROWTH-1: genuine historical Google-visible store URLs.
   // Metadata only. No coupon, discount, affiliate link or implied partner approval.
   // Stable fallbacks prevent an HTTP 404 while all offers are absent; those
