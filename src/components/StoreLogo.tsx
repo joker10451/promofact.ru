@@ -80,7 +80,7 @@ export default function StoreLogo({
         loading="lazy"
         onLoad={() => setHasLoaded(true)}
         onError={() => setHasError(true)}
-        className={`${className} relative transition-opacity duration-150 ${hasLoaded ? "opacity-100" : "opacity-0"}`}
+        className={`${className} relative ${hasLoaded ? "opacity-100" : "opacity-0"}`}
       />
     </span>
   );
