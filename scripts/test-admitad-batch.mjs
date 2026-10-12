@@ -105,6 +105,14 @@ try {
   }
   assert.deepEqual(duplicateCandidates,[],
     "Perfluence bundled feed has same-merchant matching codes: review before Admitad launch");
+  const runner=fs.readFileSync("scripts/admitad-batch-sync.mjs","utf8");
+  assert.match(runner,/ADMITAD_BATCH_PREVIEW_ONLY/);
+  assert.match(runner,/ADMITAD_FIVE_READ_ONLY_PREVIEW/);
+  assert.ok(runner.indexOf("if(previewOnly) {") < runner.indexOf("const applied=await runAdmitadSafeSync(opts)"),
+    "Read-only preview MUST return before database publishing");
+  const workflow=fs.readFileSync(".github/workflows/admitad-batch.yml","utf8");
+  assert.match(workflow,/preview_only:/);
+  assert.match(workflow,/ADMITAD_BATCH_PREVIEW_ONLY:/);
   console.log("Bundled Perfluence exact-code collision check PASS (not a live duplicate audit)");
   console.log("Five-program coupon approval and DB read-only preview PASS");
   console.log("Batch campaign register and strict Befree transition PASS");
