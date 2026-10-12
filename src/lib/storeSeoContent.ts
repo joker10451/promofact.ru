@@ -252,6 +252,10 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   const n = input.couponCount;
   const realCodes = input.coupons.filter((c) => isRealPromoCode(c.code)).length;
   const countLabel = formatStoreOfferCounts(realCodes, input.coupons.length - realCodes);
+  const codeFree = input.coupons.length - realCodes;
+  const kind = realCodes > 0
+    ? (codeFree > 0 ? "Промокоды и акции" : "Промокоды")
+    : "Акции";
   // Короткое «−30%» ничего не добавляет к «скидка до 30%» — берём развёрнутое.
   const best = input.coupons
     .map((c) => (c.bonusName || "").replace(/[.\s]+$/, ""))
@@ -259,7 +263,7 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   const discount = input.maxDiscount ? `, скидка ${input.maxDiscount}` : "";
   const head =
     n > 0
-      ? `Промокоды и акции ${input.name} на ${input.monthRu}: ${countLabel}${discount}${input.hasGiftOffer && !input.maxDiscount ? ", подарки к заказу" : ""}.`
+      ? `${kind} ${input.name} на ${input.monthRu}: ${countLabel}${discount}${input.hasGiftOffer && !input.maxDiscount ? ", подарки к заказу" : ""}.`
       : `Скидки и акции ${input.name} на ${input.monthRu}.`;
   // Конкретный контекст для посадочной страницы, которая уже получает показы по
   // запросу «tasty coffee промокод», но не клики (данные GSC).
