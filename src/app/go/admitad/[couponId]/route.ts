@@ -74,8 +74,9 @@ export async function GET(req: NextRequest, context: { params: Promise<{ couponI
   }
   const fetchSite = req.headers.get("sec-fetch-site");
   const fetchUser = req.headers.get("sec-fetch-user");
-  if ((fetchSite && fetchSite !== "same-origin") ||
-      (fetchUser && fetchUser !== "?1")) return fallback();
+  // Require explicit user activation from this origin. Browsers that do not
+  // send Fetch Metadata use the standard affiliate link, not a Teleport call.
+  if (fetchSite !== "same-origin" || fetchUser !== "?1") return fallback();
 
   const ua = req.headers.get("user-agent") || "";
   if (!ua || /bot|crawler|spider|headless/i.test(ua)) return fallback();
