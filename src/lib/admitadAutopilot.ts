@@ -48,13 +48,22 @@ export const VERIFIED_CAMPAIGN_ALLOWLIST: readonly string[] = [
  */
 export function getEffectiveCampaignAllowlist(): readonly string[] {
   const envVal = process.env.ADMITAD_APPROVED_CAMPAIGNS?.trim();
-  if (envVal && envVal !== "undefined") {
-    return envVal
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+  // Keep the historical fail-closed invariant: the pilot cannot enable a
+  // completely unconfigured production publisher.
+  if (!envVal || envVal === "undefined") return [];
+
+  const approved = new Set(
+    envVal.split(",").map((s) => s.trim()).filter(Boolean),
+  );
+  // Additional reversible publisher approval. We cannot safely rewrite the
+  // existing sensitive campaign allowlist (Vercel masks its value), so preserve
+  // every approved campaign and append only the verified Tasty Coffee pilot.
+  // Only one coupon may publish under this campaign, enforced separately by
+  // checkTastyCoffeePilot() and normal quality/legal/ERID checks.
+  if (process.env.ADMITAD_TASTY_PILOT_ENABLED?.trim() === "true") {
+    approved.add("17220");
   }
-  return [];
+  return [...approved];
 }
 
 /**
