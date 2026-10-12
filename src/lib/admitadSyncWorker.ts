@@ -246,7 +246,7 @@ export async function runAdmitadSafeSync(options: {
       );
       const newOfferBlocked = newOfferOutsideBatch || newFiveOfferNotReviewed;
       let isRowActive = false;
-      let syncStatus = newOfferBlocked ? "READY_NOT_APPROVED" : evalResult.status;
+      let syncStatus = newOfferBlocked && evalResult.publishable ? "READY_NOT_APPROVED" : evalResult.status;
 
       if (isApprovedInCurrentSync) {
         if (evalResult.publishable && !newOfferBlocked) {
