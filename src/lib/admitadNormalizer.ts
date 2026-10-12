@@ -368,6 +368,15 @@ export function resolveOfferDetails(
   if (pctMatch) {
     const val = parseInt(pctMatch[1], 10);
     let condition = cleanConditionText(cleanName, pctMatch[0]);
+    // "Скидка месяца" теряет слово "Скидка" при очистке и превращается
+    // в бессмысленное "на месяца". Восстанавливаем только подтверждённый
+    // смысл из исходных условий, не выдумывая процент или срок акции.
+    if (/^(?:на\s+)?месяца$/iu.test(condition) &&
+        /скидка\s+месяца/iu.test(combinedText)) {
+      condition = /индивидуальн[а-яё]*\s+подборк[а-яё]*/iu.test(combinedText)
+        ? "на индивидуальную подборку товаров"
+        : "по акции «Скидка месяца»";
+    }
     if (minOrder) {
       const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(cleanName) || /перв|1[-‑–—]?[ыое]?й/i.test(description);
       condition = isFirst
