@@ -74,5 +74,15 @@ The `skipDbWrite:true` worker path is now truly read-only, including status/
 failure diagnostics; do not run the separate auto-publishing workflow until
 advertiser permissions have been confirmed.
 
+**Safety follow-up (2026-10-12):** New five-program offers are now
+blocked in **every** sync mode, including ordinary cron/API synchronization,
+unless an exact coupon ID is explicitly reviewed. A campaign-wide environment
+allowlist by itself does **not** approve any new coupon.
+
+The previous diagnostic field `duplicates_vs_perfluence: 0` was a
+hardcoded placeholder, not a measured zero. It is now `null` until a
+live cross-network comparison is actually performed. Publisher-side
+permission and a live Perfluence comparison are still pending.
+
 **Review result:** 39 candidates discovered; 5 shortlisted; 34 excluded from
 the shortlist; **0 new offers published**.
