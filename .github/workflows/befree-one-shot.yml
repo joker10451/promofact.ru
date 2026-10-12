@@ -1,4 +1,4 @@
-name: One-shot Befree Publisher Preflight (NO DB WRITES)
+name: One-shot Befree Pilot - Controlled Sync
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node --loader ./scripts/ts-loader.mjs scripts/befree-one-shot-preflight.mjs
-      - name: Single-coupon Befree atomic publish and post-validation
+      - name: Single-coupon Befree atomic publish and post-validation (only new 942686)
         env:
           BEFREE_ONE_SHOT_EXECUTE: "YES"
           PRODUCTION_ALLOWLIST_PARITY_CONFIRMED: "true"
