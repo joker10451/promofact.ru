@@ -46,6 +46,17 @@ jobs:
           E2E_FIXTURES: "true"
         run: npm run test:e2e
 
+      # The screenshots are generated locally during Playwright (no Vercel
+      # Preview deployments). Download these from the pull request's CI run.
+      - name: Upload mobile UI audit screenshots (PR only)
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: promofact-ui-seo-1-1-mobile
+          path: audit-screenshots/after/ui-seo-1-1-*.png
+          if-no-files-found: warn
+          retention-days: 3
+
       - name: Dynamic SEO & Inventory Audit
         run: npm run test:seo
 

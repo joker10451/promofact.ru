@@ -28,13 +28,17 @@ export default function StoreLogo({
   const brandMeta = getBrandMeta(slug, name, site);
   const initialUrl = logo || brandMeta.logoUrl;
   const [hasError, setHasError] = useState(!initialUrl);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   // Картинка из серверного HTML может упасть раньше гидрации — тогда React
   // не услышит onError, и на месте логотипа останется пустой квадрат.
   useEffect(() => {
     const img = imgRef.current;
-    if (img && img.complete && img.naturalWidth === 0) setHasError(true);
+    if (img?.complete) {
+      if (img.naturalWidth === 0) setHasError(true);
+      else setHasLoaded(true);
+    }
   }, []);
 
   if (hasError || !initialUrl) {
@@ -51,19 +55,33 @@ export default function StoreLogo({
     );
   }
 
+  // Keep a visible brand initial until an external favicon has actually loaded.
+  // CSS behind an unloaded <img> is not enough: the previous markup showed
+  // white circles for slow/blocked remote logos in mobile screenshots.
+  const letter = name.replace(/[^\\p{L}\\p{N}]/gu, "").charAt(0).toUpperCase() || "•";
   return (
-    // Логотипы приходят от нескольких CPA-сетей с динамическими доменами;
-    // remotePatterns пришлось бы поддерживать для каждого партнёра.
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      ref={imgRef}
-      src={initialUrl}
-      alt={name}
-      width={size}
-      height={size}
-      loading="lazy"
-      onError={() => setHasError(true)}
-      className={className}
-    />
+    <span className="relative inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }}>
+      {!hasLoaded && (
+        <span
+          aria-hidden="true"
+          className={`absolute inset-0 flex items-center justify-center rounded-lg bg-gradient-to-br ${brandMeta.bgGradient} ${brandMeta.textColor} font-display text-sm font-black`}
+        >
+          {letter}
+        </span>
+      )}
+      {/* Assets originate from multiple CPA CDNs with dynamic domains. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        ref={imgRef}
+        src={initialUrl}
+        alt={name}
+        width={size}
+        height={size}
+        loading="lazy"
+        onLoad={() => setHasLoaded(true)}
+        onError={() => setHasError(true)}
+        className={`${className} relative ${hasLoaded ? "opacity-100" : "opacity-0"}`}
+      />
+    </span>
   );
 }

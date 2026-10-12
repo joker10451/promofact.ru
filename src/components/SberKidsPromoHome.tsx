@@ -34,7 +34,7 @@ export default function SberKidsPromoHome() {
             Смотреть условия →
           </span>
         </Link>
-        <p className="mt-3 border-t border-line/60 pt-2 text-[10px] leading-relaxed text-ink/55">
+        <p className="mt-3 border-t border-line/60 pt-3 text-xs leading-relaxed text-ink/75 [overflow-wrap:anywhere]">
           {campaign.ordText}
         </p>
       </article>

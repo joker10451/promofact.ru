@@ -95,7 +95,7 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 11;
+    const totalTests = 12;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
@@ -603,6 +603,8 @@ async function run() {
         "/store/farfor",
         "/category/dostavka-produktov",
         "/collections/first-order",
+        "/akcii/ulybatl-sber-185",
+        "/akcii/detskaya-sberkarta-10000-500",
       ];
 
       for (const res of resolutions) {
@@ -620,6 +622,70 @@ async function run() {
 
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
+          }
+          // Store visual references for a human mobile/design review; no Vercel Preview needed.
+          if (pathUrl === "/") {
+            const cards = page.locator('section[aria-label="Популярные магазины"] a[href^="/store/"]');
+            const visibleCount = await cards.evaluateAll((nodes) =>
+              nodes.filter((node) => getComputedStyle(node).display !== "none").length,
+            );
+            assert.equal(visibleCount, res.width < 640 ? 6 : 12,
+              "Compact mobile store showcase should show 6 brands and 12 on larger displays");
+
+            // Even when external logo CDNs stall, each brand must show an actual
+            // letter placeholder instead of an empty white circle.
+            const visibleCards = cards.filter({ visible: true });
+            for (let i = 0; i < await visibleCards.count(); i++) {
+              const logoState = await visibleCards.nth(i).evaluate((node) => {
+                const image = node.querySelector("img");
+                const initial = node.querySelector("span.absolute");
+                const fallback = node.querySelector('[role="img"]');
+                return Boolean(
+                  (image?.complete && image.naturalWidth > 0 && getComputedStyle(image).opacity === "1") ||
+                  (initial && initial.textContent?.trim()) ||
+                  (fallback && fallback.textContent?.trim()),
+                );
+              });
+              assert.ok(logoState, "No popular store should display a blank logo circle: " + (await visibleCards.nth(i).getAttribute("href")));
+            }
+            await page.screenshot({
+              path: path.join(afterScreenshotsDir, `ui-seo-1-1-home-${res.width}.png`),
+              fullPage: true,
+              animations: "disabled",
+            });
+            await page.screenshot({
+              path: path.join(afterScreenshotsDir, `ui-seo-1-1-viewport-${res.width}.png`),
+              fullPage: false,
+              animations: "disabled",
+            });
+          }
+
+
+          if (pathUrl === "/") {
+            const specials = page.locator('section[aria-labelledby="sber-specials-heading"]');
+            if (await specials.count() && await specials.isVisible()) {
+              const cards = specials.locator("article");
+              const total = await cards.count();
+              assert.ok(total > 0 && total <= 2, "Only currently active campaign teasers are present");
+              for (let i = 0; i < total; i++) {
+                const card = cards.nth(i);
+                const details = card.locator('a[href^="/akcii/"]').first();
+                assert.ok(await details.count(), "Campaign teaser must link to its own full page");
+                const legal = card.locator("p").last();
+                const metrics = await legal.evaluate((node) => ({
+                  fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
+                  scrollWidth: node.scrollWidth,
+                  clientWidth: node.clientWidth,
+                  text: node.textContent,
+                }));
+                assert.ok(metrics.fontSize >= 12, "Full ad disclosure must not be tiny on " + res.name);
+                assert.match(metrics.text || "", /erid:/, "Visible teaser must include real advertising ID");
+                assert.ok(metrics.scrollWidth <= metrics.clientWidth + 1,
+                  "Long ERID/advertiser address must wrap on " + res.name);
+              }
+              assert.equal(await specials.locator("img").count(), 0,
+                "Huge sponsored creative must stay on the campaign landing, not home");
+            }
           }
         }
 
@@ -847,6 +913,41 @@ async function run() {
       console.log(`  ✓ Счётчик таба 'Все акции' (${allCountText}) синхронизирован с карточками (${futureCount})`);
 
       await futureContext.close();
+      await context.close();
+      passedTests++;
+    }
+
+
+    // --- SCENARIO 12: Legacy store URLs have honest, noindex continuity pages ---
+    console.log("\\n[Test 12] Askona and POLZAru: no 404, no fabricated coupons, noindex until real offers");
+    {
+      const cases = [
+        { slug: "askona", merchant: "https://www.askona.ru/" },
+        { slug: "polzaru", merchant: "https://polza.ru/" },
+      ];
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const page = await context.newPage();
+      for (const item of cases) {
+        const url = `${BASE_URL}/store/${item.slug}`;
+        const response = await page.goto(url, { waitUntil: "domcontentloaded" });
+        assert.equal(response?.status(), 200, item.slug + ": legacy URL must resolve without a 404");
+        const robot = await page.locator('meta[name="robots"]').getAttribute("content");
+        assert.match(robot || "", /noindex/i, item.slug + ": empty stores must not be indexed");
+        const emptyHeading = page.getByRole("heading", { name: /Подтверждённых промокодов.*пока нет/ });
+        await emptyHeading.waitFor({ state: "visible" });
+        assert.equal(await page.locator('a[href="' + item.merchant + '"]').count() > 0, true,
+          item.slug + ": official merchant destination must be present");
+        const emptyCopy = await emptyHeading.locator("xpath=..").innerText();
+        assert.ok(!/скидки действуют|акции каталога действуют|гарантирован/i.test(emptyCopy),
+          "Do not imply an unverified promotion is live");
+        assert.ok(!(await page.locator('article[id^="coupon-"]').count()),
+          item.slug + ": do not fabricate coupons for historic URLs");
+        await page.screenshot({
+          path: path.join(afterScreenshotsDir, `ui-seo-1-1-${item.slug}-390.png`),
+          fullPage: false,
+          animations: "disabled",
+        });
+      }
       await context.close();
       passedTests++;
     }

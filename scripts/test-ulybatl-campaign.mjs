@@ -23,6 +23,10 @@ const teasers = fs.readFileSync("src/components/SberCampaignTeasers.tsx", "utf8"
 assert.ok(teasers.includes("<SberUlybatlHome />"));
 assert.ok(!home.includes("<Image"), "No giant original banner on homepage");
 assert.ok(home.includes("campaign.ordText"), "Original advertiser legal marking preserved");
+assert.ok(home.includes("text-xs leading-relaxed text-ink/75"), "Advertiser notice must remain comfortably readable");
+assert.ok(home.includes("[overflow-wrap:anywhere]"), "Legal ERID and address must wrap on narrow mobile screens");
+assert.ok(!home.includes("text-[10px]"), "Legal notice may not regress to tiny 10px text");
+
 assert.ok(homePage.indexOf("<CouponGrid") < homePage.indexOf("<SberCampaignTeasers />"), "Real coupons appear first");
 assert.ok(home.includes('href="/akcii/ulybatl-sber-185"'));
 assert.ok(page.includes("<PromoBanner banner={campaign} />"));

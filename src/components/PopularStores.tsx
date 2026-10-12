@@ -48,9 +48,9 @@ export default async function PopularStores() {
   }
 
   return (
-    <section aria-label="Популярные магазины" className="py-10 sm:py-14 border-b border-line bg-white">
+    <section aria-label="Популярные магазины" className="py-5 sm:py-14 border-b border-line bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 mb-6">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 mb-4 sm:mb-6">
           <div className="flex items-center gap-2">
             <Icon name="store" size={19} className="text-ink/50" />
             <div>
@@ -71,12 +71,12 @@ export default async function PopularStores() {
         </div>
 
         {/* Сетка популярных брендов в стиле Pikabu (круглые иконки, бейджи акций) */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-12 gap-3 sm:gap-4">
-          {top.map((s) => (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-12 gap-2 sm:gap-4">
+          {top.map((s, index) => (
             <Link
               key={s.slug}
               href={`/store/${s.slug}`}
-              className="group flex flex-col items-center justify-center rounded-2xl border border-line bg-paper/30 p-3 text-center shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-ink/25 hover:bg-white hover:shadow-xs"
+              className={`${index >= 6 ? "hidden sm:flex" : "flex"} group flex-col items-center justify-center rounded-2xl border border-line bg-paper/30 p-2 sm:p-3 text-center shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-ink/25 hover:bg-white hover:shadow-xs`}
             >
               <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-white p-2 border border-line shadow-2xs group-hover:scale-105 group-hover:border-red/40 transition-transform">
                 <StoreLogo
@@ -88,7 +88,7 @@ export default async function PopularStores() {
                   className="max-h-full max-w-full object-contain"
                 />
               </div>
-              <span className="mt-2.5 block font-display text-xs font-bold text-ink group-hover:text-red transition-colors truncate max-w-full">
+              <span className="mt-2 block font-display text-xs font-bold text-ink group-hover:text-red transition-colors truncate max-w-full">
                 {s.name}
               </span>
               <span className="mt-1 inline-block rounded-full bg-mint/10 px-2 py-0.5 text-[10px] font-bold text-mint-dark">

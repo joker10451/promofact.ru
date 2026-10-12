@@ -37,6 +37,10 @@ assert.ok(page.includes("от 2 000 ₽"), "Draw needs card funding");
 assert.ok(!home.includes("src={campaign.image}"), "Homepage should not repeat the large creative");
 assert.ok(!home.includes("<Image"), "Original creative only on dedicated campaign landing");
 assert.ok(home.includes("campaign.ordText"), "Homepage teaser retains advertiser legal marking");
+assert.ok(home.includes("text-xs leading-relaxed text-ink/75"), "Legal disclosure readable on phones");
+assert.ok(home.includes("[overflow-wrap:anywhere]"), "Full advertiser address wraps on phones");
+assert.ok(!home.includes("text-[10px]"), "Do not regress to 10px legal text");
+
 const teasers = fs.readFileSync("src/components/SberCampaignTeasers.tsx", "utf8");
 assert.ok(teasers.includes("<SberKidsPromoHome />"), "The new compact group includes the kids campaign");
 assert.ok(main.includes("<SberCampaignTeasers />"), "The compact sponsored group is wired");

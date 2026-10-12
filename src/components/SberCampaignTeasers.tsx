@@ -27,7 +27,7 @@ export default function SberCampaignTeasers() {
           <h2 id="sber-specials-heading" className="font-display text-base font-extrabold text-ink sm:text-lg">
             Специальные предложения
           </h2>
-          <span className="text-[11px] font-medium text-ink/50">Реклама</span>
+          <span className="text-xs font-semibold text-ink/75">Реклама</span>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <SberUlybatlHome />
