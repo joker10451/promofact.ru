@@ -57,6 +57,47 @@ export function getEffectiveCampaignAllowlist(): readonly string[] {
   return [];
 }
 
+/**
+ * Single-coupon, fail-closed pilot for Tasty Coffee.
+ * Facts verified against the publisher's connected Admitad account.
+ * Prevents an entire historical campaign (including 'Not required' placeholders)
+ * from being published when campaign 17220 is approved.
+ *
+ * This does not approve the campaign by itself: the environment allowlist,
+ * current API status, quality, expiry, ERID and legal gates still apply.
+ */
+export function checkTastyCoffeePilot(input: {
+  campaignId: string;
+  couponId: string;
+  promocode: string;
+  affiliateLink: string;
+  erid: string;
+}): { passed: boolean; reason?: string } {
+  if (input.campaignId !== "17220") return { passed: true };
+
+  if (input.couponId !== "942125" || input.promocode.trim() !== "TKPRDM-UYVG1GJO") {
+    return { passed: false, reason: "TASTY_PILOT_UNVERIFIED_COUPON" };
+  }
+  if (input.erid !== "MvGzQC98w3Z1gMq1mSxTgEET") {
+    return { passed: false, reason: "TASTY_PILOT_ERID_STALE_OR_CHANGED" };
+  }
+  try {
+    const url = new URL(input.affiliateLink);
+    if (
+      url.protocol !== "https:" ||
+      url.hostname !== "dkfrh.com" ||
+      url.pathname !== "/g/va69o33134c7dde8999c9ebcee8c5e/" ||
+      url.searchParams.get("i") !== "31" ||
+      url.searchParams.get("erid") !== input.erid
+    ) {
+      return { passed: false, reason: "TASTY_PILOT_AFFILIATE_LINK_MISMATCH" };
+    }
+  } catch {
+    return { passed: false, reason: "TASTY_PILOT_INVALID_AFFILIATE_URL" };
+  }
+  return { passed: true };
+}
+
 export type AdmitadPublicationStatus =
   | "PUBLISHABLE"
   | "READY_NOT_APPROVED"
