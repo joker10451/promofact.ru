@@ -5,6 +5,7 @@ import { proxiedLogo } from "@/lib/logoProxy";
 import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { getEffectiveCampaignAllowlist } from "@/lib/admitadAutopilot";
+import { isRealPromoCode } from "@/lib/dedupe";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -49,7 +50,7 @@ export function isNotExpired(expires: string | null): boolean {
 
 export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
   const rawCode = str(row.code);
-  const code = (rawCode && rawCode.toUpperCase() !== "НЕ НУЖЕН" && rawCode.toUpperCase() !== "НЕ ТРЕБУЕТСЯ") ? rawCode : "";
+  const code = isRealPromoCode(rawCode) ? rawCode : "";
   const storeName = str(row.store).replace(/[\u200B-\u200D\uFEFF]/g, "").trim() || "Магазин";
   const storeSlug = str(row.store_slug) ? translit(str(row.store_slug)) : translit(storeName) || "magazin";
 
