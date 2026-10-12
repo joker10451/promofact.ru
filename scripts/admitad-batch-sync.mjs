@@ -9,7 +9,7 @@
  * the existing atomic sync and catastrophic-drop protection.
  */
 import { getSupabaseAdmin } from "../src/lib/supabase.ts";
-import { getBatchCampaignAllowlist, getEffectiveCampaignAllowlist } from "../src/lib/admitadAutopilot.ts";
+import { getBatchCampaignAllowlist, getEffectiveCampaignAllowlist, parseReviewedFiveCouponIds, FIVE_NEW_CAMPAIGN_IDS, isFiveCouponExplicitlyReviewed } from "../src/lib/admitadAutopilot.ts";
 import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
 import { validateRetainsActiveCampaigns } from "./check-admitad-sync-preflight.mjs";
 
@@ -50,6 +50,12 @@ function verifyRows(rows,previous,batchSet,mode) {
   const added=rows.filter(r=>!previousIds.has(r.id));
   const foreign=added.filter(r=>!batchSet.has(String(r.source_campaign_id)));
   if(foreign.length)abort("NEW_OFFER_OUTSIDE_BATCH");
+  if (batchSet.size>3) {
+    const reviewed=parseReviewedFiveCouponIds(process.env.ADMITAD_BATCH_REVIEWED_COUPON_IDS||"");
+    if (added.some(r=>FIVE_NEW_CAMPAIGN_IDS.includes(String(r.source_campaign_id)) &&
+        !isFiveCouponExplicitlyReviewed(String(r.source_campaign_id),String(r.source_coupon_id),reviewed)))
+      abort("NEW_FIVE_OFFER_NOT_REVIEWED");
+  }
   if(mode==="initial" && previous.some(r=>!rows.some(now=>now.id===r.id)))
     abort("PREVIOUS_ACTIVE_OFFER_LOST");
   if(added.length>(mode==="initial"?MAX_FIRST_BATCH:MAX_RECURRING_NEW))
@@ -79,6 +85,14 @@ async function main() {
      (mode==="recurring" && csv!==PREVIOUS_BATCH && csv!==EXPANDED_BATCH) ||
      batch.join(",")!==csv.split(",").join(","))abort("BATCH_CAMPAIGNS_NOT_REVIEWED");
   if(process.env.ADMITAD_BATCH_RUN_APPROVED!=="true")abort("BATCH_RUN_NOT_APPROVED");
+  // Explicit publisher sign-off by coupon ID is required for any five-brand
+  // expansion. A GitHub Actions confirmation checkbox is not enough.
+  let reviewedFive=[];
+  try {
+    reviewedFive=parseReviewedFiveCouponIds(process.env.ADMITAD_BATCH_REVIEWED_COUPON_IDS||"");
+  } catch { abort("FIVE_COUPON_IDS_NOT_REVIEWED"); }
+  if(csv===EXPANDED_BATCH && reviewedFive.length===0)abort("FIVE_COUPON_APPROVALS_MISSING");
+
   const baseCsv=process.env.ADMITAD_APPROVED_CAMPAIGNS||"";
   const allApprovals=getEffectiveCampaignAllowlist();
   if(allApprovals.length!==5+batch.length || !batch.every(id=>allApprovals.includes(id)))
@@ -99,7 +113,8 @@ async function main() {
   const allowedNew=mode==="initial"?NEW_CAMPAIGNS:batch;
   const opts={
     onlyNewCampaignIds:allowedNew,maxNewOffers:mode==="initial"?MAX_FIRST_BATCH:MAX_RECURRING_NEW,
-    requireActiveRetention:mode==="initial"
+    requireActiveRetention:mode==="initial",
+    reviewedFiveCouponIds:csv===EXPANDED_BATCH?reviewedFive:undefined
   };
   const preview=await runAdmitadSafeSync({...opts,skipDbWrite:true});
   if(!preview.success)abort("BATCH_DRY_RUN_FAILED");
