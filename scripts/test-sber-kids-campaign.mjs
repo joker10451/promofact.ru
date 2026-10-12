@@ -34,10 +34,16 @@ assert.ok(page.includes("<CampaignExpiryGate endsAt={campaign.endsAt}>"), "Expir
 assert.ok(page.includes("${SITE_URL}${route}"), "Dynamic canonical follows actual path");
 assert.ok(page.includes("robots: { index: false, follow: true }"), "Short-lived promo landing is noindex");
 assert.ok(page.includes("от 2 000 ₽"), "Draw needs card funding");
-assert.ok(home.includes("src={campaign.image}"), "Homepage uses same original creative");
+assert.ok(!home.includes("src={campaign.image}"), "Homepage should not repeat the large creative");
+assert.ok(!home.includes("<Image"), "Original creative only on dedicated campaign landing");
+assert.ok(home.includes("campaign.ordText"), "Homepage teaser retains advertiser legal marking");
+const teasers = fs.readFileSync("src/components/SberCampaignTeasers.tsx", "utf8");
+assert.ok(teasers.includes("<SberKidsPromoHome />"), "The new compact group includes the kids campaign");
+assert.ok(main.includes("<SberCampaignTeasers />"), "The compact sponsored group is wired");
+assert.ok(main.indexOf("<CouponGrid") < main.indexOf("<SberCampaignTeasers />"), "Coupons appear before sponsored teaser");
 assert.ok(home.includes('href="/akcii/detskaya-sberkarta-10000-500"'), "Homepage teaser opens landing");
 assert.ok(home.includes("<CampaignExpiryGate endsAt={campaign.endsAt}>"), "Homepage expires client-side");
-assert.ok(main.includes("<SberKidsPromoHome />"), "Homepage placement is wired");
+
 for (const file of ["src/lib/customCoupons.ts", "src/lib/stableStores.ts"]) {
   assert.ok(!fs.readFileSync(file, "utf8").includes(campaignId), "Campaign must not create a fabricated coupon");
 }
