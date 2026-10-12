@@ -22,6 +22,12 @@ on:
   # schedule:
   #   - cron: "0 */3 * * *"
 
+# Prevent legacy manual sync and automated verified-batch sync from running
+# concurrently against the same authoritative Supabase snapshot.
+concurrency:
+  group: admitad-publisher
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
