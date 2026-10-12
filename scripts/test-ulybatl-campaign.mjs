@@ -19,7 +19,7 @@ for(const v of ["Главный приз — концерт Вани Дмитр�
 assert.ok(banners.includes('creativeOnly: true'));
 assert.ok(!banners.includes('code: "ULYBATL"'));
 assert.ok(homePage.includes("<SberUlybatlHome />"));
-assert.ok(home.includes('href="/akcii/sber-ulybatl-185"'));
+assert.ok(home.includes('href="/akcii/ulybatl-sber-185"'));
 assert.ok(page.includes("<PromoBanner banner={campaign} />"));
 assert.ok(page.includes('CampaignExpiryGate endsAt={campaign.endsAt}'));
 assert.ok(gate.includes("+03:00"));
