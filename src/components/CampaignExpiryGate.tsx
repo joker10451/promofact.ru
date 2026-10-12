@@ -8,7 +8,9 @@ export default function CampaignExpiryGate({ endsAt, children }: { endsAt: strin
   const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => setIsExpired(Date.now() > endMs), 30_000);
+    const checkExpiry = () => setIsExpired(Date.now() > endMs);
+    checkExpiry(); // Cached pages may already be past the campaign deadline.
+    const interval = setInterval(checkExpiry, 30_000);
     return () => clearInterval(interval);
   }, [endMs]);
 
