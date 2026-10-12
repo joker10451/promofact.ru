@@ -4,13 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "initial: preserve all 16 baseline offers; recurring: refresh validated batch"
+        description: "initial: extend 27-offer baseline; recurring: refresh existing verified programs"
         required: true
         type: choice
         options: [initial, recurring]
         default: recurring
+      batch:
+        description: "existing-three for normal refresh; expand-five only for first 5-program reviewed release"
+        type: choice
+        required: true
+        options: [existing-three, expand-five]
+        default: existing-three
       confirm:
-        description: "I authorize publication from exactly campaigns 28532, 14647, 22484"
+        description: "I authorize this reviewed program list (new five only in INITIAL mode)"
         type: boolean
         required: true
         default: false
@@ -28,7 +34,7 @@ concurrency:
 
 jobs:
   publish-verified-batch:
-    if: ${{ (github.event_name == 'schedule' && vars.ADMITAD_BATCH_AUTO_SYNC_ENABLED != 'false') || (github.event_name == 'workflow_dispatch' && inputs.confirm == true) }}
+    if: ${{ (github.event_name == 'schedule' && vars.ADMITAD_BATCH_AUTO_SYNC_ENABLED != 'false') || (github.event_name == 'workflow_dispatch' && inputs.confirm == true && ((inputs.batch == 'expand-five' && inputs.mode == 'initial') || (inputs.batch == 'existing-three' && inputs.mode == 'recurring'))) }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -44,7 +50,7 @@ jobs:
         env:
           ADMITAD_BATCH_MODE: ${{ github.event_name == 'schedule' && 'recurring' || inputs.mode }}
           ADMITAD_BATCH_RUN_APPROVED: 'true'
-          ADMITAD_BATCH_APPROVED_CAMPAIGNS: '28532,14647,22484'
+          ADMITAD_BATCH_APPROVED_CAMPAIGNS: ${{ github.event_name == 'workflow_dispatch' && inputs.batch == 'expand-five' && '28532,14647,22484,93978,11738,26032,14725,23485' || '28532,14647,22484' }}
           ADMITAD_APPROVED_CAMPAIGNS: '141770,1667,17220,25224,26110'
           ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
           ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
