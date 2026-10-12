@@ -614,7 +614,20 @@ async function fetchBaseSourceBuckets(): Promise<BaseSourceBucket[]> {
     (await import("@/lib/supabaseCoupons")).fetchSupabaseCoupons(),
   ]);
 
-  const customCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
+  // A temporarily pinned Perfluence placement must not override a newer
+  // approved live Perfluence offer for the *same* SberDevices promo code.
+  // Otherwise old manual attribution links might shadow updated partner links.
+  const liveSberDevicesCodes = new Set(
+    perfluenceCoupons
+      .filter((c) =>
+        /сбердевайс|sberdevices/iu.test(c.store.name) ||
+        /sberdevices\.ru/iu.test(c.store.site)
+      )
+      .map((c) => c.promocode.code.trim().toUpperCase()),
+  );
+  const customCoupons = (await import("@/lib/customCoupons")).getCustomCoupons()
+    .filter((c) => c.store.slug !== "sberdevaysy" ||
+      !liveSberDevicesCodes.has(c.promocode.code.trim().toUpperCase()));
 
   const buckets: BaseSourceBucket[] = [
     { source: "custom", coupons: customCoupons },
