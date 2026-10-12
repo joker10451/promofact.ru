@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
-import { OPERATOR, PRIVACY_POLICY_DATE, SITE_NAME, SITE_URL } from "@/lib/site";
+import { OPERATOR, SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Политика конфиденциальности"
-      lead={<>Редакция от {PRIVACY_POLICY_DATE}</>}
+      lead={<>Редакция от 12 октября 2026 г.</>}
     >
       <section>
         <h2>1. Кто обрабатывает данные</h2>
@@ -50,6 +50,13 @@ export default function PrivacyPage() {
             результат «Колеса скидок». Они хранятся только на вашем устройстве и нам не передаются.
           </li>
           <li>
+            <strong>Партнёрские переходы через Admitad Teleport (эксперимент)</strong> — только
+            после нового согласия на cookie и нажатия на партнёрскую ссылку сервер может передать
+            Admitad IP-адрес посетителя, User-Agent и домен PromoFact, чтобы зарегистрировать
+            переход и получить адрес сайта магазина. Ответ не кэшируется. Без согласия
+            используется обычная партнёрская ссылка.
+          </li>
+          <li>
             <strong>Письма</strong> — если вы пишете на {OPERATOR.email}, мы обрабатываем ваш адрес
             и текст письма, чтобы ответить.
           </li>
@@ -83,6 +90,12 @@ export default function PrivacyPage() {
         <h2>5. Кому передаются данные</h2>
         <ul>
           <li>
+            <strong>Admitad</strong> — партнёрские переходы и их учёт.
+            В пилотном режиме Teleport сервер передаёт IP-адрес, User-Agent и адрес сайта
+            исключительно при переходе по подтверждённому предложению и новом согласии
+            посетителя.
+          </li>
+          <li>
             <strong>ООО «Яндекс»</strong> — сервис Яндекс Метрика. Условия:{" "}
             <a href="https://yandex.ru/legal/metrica_termsofuse/" target="_blank" rel="noopener nofollow">
               yandex.ru/legal/metrica_termsofuse
@@ -97,7 +110,7 @@ export default function PrivacyPage() {
         </ul>
         <p>
           Когда вы переходите по ссылке в магазин, переход проходит через партнёрскую сеть
-          (Perfluence) и сайт магазина. Дальше данные обрабатываются
+          (Perfluence или Admitad) и сайт магазина. Дальше данные обрабатываются
           по правилам этих компаний — мы их не получаем и не контролируем.
         </p>
         <p>Мы не продаём данные и не передаём их для рассылок.</p>
