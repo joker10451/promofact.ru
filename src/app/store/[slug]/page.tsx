@@ -478,10 +478,10 @@ export default async function StorePage({
                 <Icon name="tag" size={24} />
               </div>
               <h3 className="font-display text-lg sm:text-xl font-bold text-ink">
-                Эксклюзивные промокоды для {store.name} обновляются
+                Подтверждённых промокодов для {store.name} пока нет
               </h3>
               <p className="mt-2 text-xs sm:text-sm text-ink/65 max-w-md mx-auto leading-relaxed">
-                Прямо сейчас прямые промокоды на паузе или исчерпаны, но в магазине действуют сезонные скидки и акции каталога.
+                На данный момент у нас нет подтверждённых действующих предложений этого магазина. Проверяйте ассортимент и цены на официальном сайте.
               </p>
               <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
                 {store.site && (
@@ -503,7 +503,7 @@ export default async function StorePage({
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="#0088cc" aria-hidden="true">
                     <path d="M21.94 4.4a1.5 1.5 0 0 0-2.05-.93L3.4 10.6c-.9.36-.85 1.67.07 1.96l4.14 1.3 1.72 5.29c.34 1.05 1.68 1.25 2.34.35l2.06-2.82a.5.5 0 0 1 .6-.13l4.66 2.16c.86.4 1.87-.2 1.88-1.1l.55-14.08a1 1 0 0 0-.44-.8Z" />
                   </svg>
-                  <span>Уведомить о новых кодах в Telegram</span>
+                  <span>Следить за новостями в Telegram</span>
                 </a>
               </div>
             </div>
