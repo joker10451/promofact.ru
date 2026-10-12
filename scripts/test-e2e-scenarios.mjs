@@ -603,6 +603,8 @@ async function run() {
         "/store/farfor",
         "/category/dostavka-produktov",
         "/collections/first-order",
+        "/akcii/ulybatl-sber-185",
+        "/akcii/detskaya-sberkarta-10000-500",
       ];
 
       for (const res of resolutions) {
@@ -620,6 +622,33 @@ async function run() {
 
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
+          }
+
+          if (pathUrl === "/") {
+            const specials = page.locator('section[aria-labelledby="sber-specials-heading"]');
+            if (await specials.count() && await specials.isVisible()) {
+              const cards = specials.locator("article");
+              const total = await cards.count();
+              assert.ok(total > 0 && total <= 2, "Only currently active campaign teasers are present");
+              for (let i = 0; i < total; i++) {
+                const card = cards.nth(i);
+                const details = card.locator('a[href^="/akcii/"]').first();
+                assert.ok(await details.count(), "Campaign teaser must link to its own full page");
+                const legal = card.locator("p").last();
+                const metrics = await legal.evaluate((node) => ({
+                  fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
+                  scrollWidth: node.scrollWidth,
+                  clientWidth: node.clientWidth,
+                  text: node.textContent,
+                }));
+                assert.ok(metrics.fontSize >= 12, "Full ad disclosure must not be tiny on " + res.name);
+                assert.match(metrics.text || "", /erid:/, "Visible teaser must include real advertising ID");
+                assert.ok(metrics.scrollWidth <= metrics.clientWidth + 1,
+                  "Long ERID/advertiser address must wrap on " + res.name);
+              }
+              assert.equal(await specials.locator("img").count(), 0,
+                "Huge sponsored creative must stay on the campaign landing, not home");
+            }
           }
         }
 
