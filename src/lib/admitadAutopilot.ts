@@ -59,6 +59,24 @@ export const BATCH_VERIFIED_CAMPAIGNS: Readonly<Record<string, string>> = Object
   "22484": "randewoo",
 });
 
+const BATCH_VERIFIED_OFFICIAL_HOSTS: Readonly<Record<string,string>> = Object.freeze({
+  "28532":"befree.ru",
+  "14647":"sportmaster.ru",
+  "22484":"randewoo.ru",
+});
+
+/** Exact program ID + official hostname, never a substring/name guess. */
+export function isVerifiedBatchCampaignOrigin(id: string, siteUrl: string): boolean {
+  const expected = BATCH_VERIFIED_OFFICIAL_HOSTS[id];
+  if (!expected || typeof siteUrl!=="string") return false;
+  try {
+    const url=new URL(siteUrl);
+    const host=url.hostname.toLowerCase().replace(/^www\\./,"");
+    return url.protocol==="https:" && host===expected &&
+      url.username==="" && url.password==="" && url.port==="";
+  } catch { return false; }
+}
+
 export function getBatchCampaignAllowlist(): readonly string[] {
   const value = process.env.ADMITAD_BATCH_APPROVED_CAMPAIGNS?.trim();
   if (!value) return [];
