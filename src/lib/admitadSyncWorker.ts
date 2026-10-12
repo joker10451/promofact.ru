@@ -238,11 +238,14 @@ export async function runAdmitadSafeSync(options: {
       // Unlike a campaign allowlist, this is an explicit coupon-level review.
       // Scoped to the five NEW campaigns so existing active offers and normal
       // recurring updates of the original three remain unchanged.
+      // This guard MUST run even on ordinary cron/API synchronization.
+      // The batch runner is not the only caller of runAdmitadSafeSync.
+      // No explicit reviewed IDs => no new five-program coupons, regardless
+      // of environment allowlists or workflow mode.
       const newFiveOfferNotReviewed = Boolean(
-        options.reviewedFiveCouponIds &&
         FIVE_NEW_CAMPAIGN_IDS.includes(String(campId)) &&
         !existingActiveMap.has(rowId) &&
-        !isFiveCouponExplicitlyReviewed(String(campId), couponId, options.reviewedFiveCouponIds)
+        !isFiveCouponExplicitlyReviewed(String(campId), couponId, options.reviewedFiveCouponIds ?? [])
       );
       const newOfferBlocked = newOfferOutsideBatch || newFiveOfferNotReviewed;
       let isRowActive = false;
@@ -465,7 +468,8 @@ export async function runAdmitadSafeSync(options: {
       legal_ready: legalReadyCount,
       publishable: publishableCount,
       ready_not_approved: readyNotApprovedCount,
-      duplicates_vs_perfluence: 0,
+      // No Perfluence comparison occurs in this worker. Report unknown, not 0.
+      duplicates_vs_perfluence: null,
       written,
       updated: written,
       deactivated: 0,
