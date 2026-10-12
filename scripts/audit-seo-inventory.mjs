@@ -178,7 +178,9 @@ async function runAudit() {
 
   for (const filePath of allHtmlFiles) {
     const rel = path.relative(APP_DIR, filePath).replace(/\\/g, "/");
-    let route = "/" + rel.replace(/\.html$/, "").replace(/\/index$/, "");
+    // Next.js may emit nested static routes as .../page.html rather than ...html.
+    // Both are the same public /route; don't report valid links as broken.
+    let route = "/" + rel.replace(/\.html$/, "").replace(/\/(?:index|page)$/, "");
     if (route === "/index") route = "/";
 
     const html = fs.readFileSync(filePath, "utf-8");
