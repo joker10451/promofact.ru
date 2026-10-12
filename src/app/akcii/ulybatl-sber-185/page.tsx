@@ -7,7 +7,7 @@ import CampaignExpiryGate from "@/components/CampaignExpiryGate";
 import { PROMO_BANNERS } from "@/lib/promoBanners";
 import { SITE_URL } from "@/lib/site";
 
-const campaign = PROMO_BANNERS.find((b) => b.id === "sber-ulybatl-185-2026");
+const campaign = PROMO_BANNERS.find((b) => b.id === "sber-ulybatl-185-2026")!;
 if (!campaign) throw new Error("Missing Ulybatl campaign configuration");
 
 export const metadata: Metadata = {
