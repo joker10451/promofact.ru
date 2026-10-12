@@ -87,6 +87,42 @@ export function isVerifiedBatchCampaignOrigin(id: string, siteUrl: string): bool
   } catch { return false; }
 }
 
+
+/**
+ * This is a candidate register, NOT proof of authorization to publish.
+ * IDs are the exact Admitad coupon IDs from the 2026-10-12 snapshot.
+ * Only explicitly reviewed coupon IDs may be added by the five-program batch.
+ * Code-free Love Republic offers are deliberately absent pending permission,
+ * freshness and duplicate checks.
+ */
+export const FIVE_REVIEW_CANDIDATES: Readonly<Record<string,string>> = Object.freeze({
+  "938019": "11738", // Foxford REP50
+  "896269": "11738", // Foxford FOXFORD5
+  "942802": "26032", // Aravia НОЧЬ
+  "938092": "23485", // Skysmart СМОГУ
+  "943834": "93978", // Beeline ХАЛВА
+});
+
+export const FIVE_NEW_CAMPAIGN_IDS: readonly string[] =
+  Object.freeze(["93978", "11738", "26032", "14725", "23485"]);
+
+/** Fail closed: no automatic approval from simply knowing an advertiser ID. */
+export function parseReviewedFiveCouponIds(value: string): readonly string[] {
+  if (!value.trim()) return [];
+  const ids = value.split(",").map((id) => id.trim());
+  if (new Set(ids).size !== ids.length ||
+      ids.some((id) => !/^[0-9]+$/.test(id) || !FIVE_REVIEW_CANDIDATES[id])) {
+    throw new Error("FIVE_COUPON_IDS_NOT_REVIEWED");
+  }
+  return ids;
+}
+
+export function isFiveCouponExplicitlyReviewed(
+  campaignId: string, couponId: string, reviewedIds: readonly string[]
+): boolean {
+  return FIVE_REVIEW_CANDIDATES[couponId] === campaignId && reviewedIds.includes(couponId);
+}
+
 export function getBatchCampaignAllowlist(): readonly string[] {
   const value = process.env.ADMITAD_BATCH_APPROVED_CAMPAIGNS?.trim();
   if (!value) return [];
