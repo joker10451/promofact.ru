@@ -13,11 +13,11 @@ if (!campaign) throw new Error("Missing Ulybatl campaign configuration");
 export const metadata: Metadata = {
   title: "Улыбатл Сбер 185 — розыгрыш призов за оплату улыбкой",
   description: "Улыбатл до 25 октября 2026: города соревнуются за концерт Вани Дмитриенко, а участники — за Chery Tiggo 9, iPhone 17 Pro Max и промокоды. Условия участия и регистрация.",
-  alternates: { canonical: `${SITE_URL}/akcii/sber-ulybatl-185` },
+  alternates: { canonical: `${SITE_URL}/akcii/ulybatl-sber-185` },
   openGraph: {
     title: "Улыбатл Сбер — розыгрыш призов за оплату улыбкой",
     description: "Соревнование городов до 25 октября. Условия, призы и регистрация.",
-    url: `${SITE_URL}/akcii/sber-ulybatl-185`,
+    url: `${SITE_URL}/akcii/ulybatl-sber-185`,
     type: "website",
     images: [{ url: `${SITE_URL}/images/sber-ulybatl-185.webp`, width: 1600, height: 1141, alt: campaign.imageAlt }],
   },
