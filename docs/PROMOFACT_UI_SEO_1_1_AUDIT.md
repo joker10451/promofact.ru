@@ -36,6 +36,30 @@
 - Mobile browser testing uses local Next.js Playwright fixtures in CI; it is **not** a visual inspection of remote production. Review screenshots before calling the mobile UI fully audited.
 - Chrome UX Report is unconfigured and Vercel Web Analytics reports `web_analytics_not_enabled`; do not invent field performance or traffic.
 
+## Screenshot-based mobile review (GitHub Actions run 38315882773)
+
+The 6 real Playwright screenshots were downloaded and visually inspected for 360px,
+390px, 768px and 1440px. The original CI fixtures are **not** production screenshots.
+
+- The initial mobile capture contained excessive whitespace at the top of the
+  homepage. Mobile-only hero padding, trust-bar spacing and popular-stores
+  spacing have been tightened; desktop spacing remains unchanged.
+- Numerous remote brand logos showed blank circles while third-party favicon
+  images were loading. `StoreLogo` now renders an actual initial-letter
+  gradient immediately, switching to the real image once loaded, including
+  after a fast cache hit or failed remote request.
+- For 360/390px, popular stores show the first 6 cards (2 rows); tablet and
+  desktop keep 12 cards. The `/promokody` link still exposes the entire catalog.
+- Follow-up CI screenshots now include **viewport-only** captures in addition
+  to full-page images, because the first full-page output was 416px wide even
+  when the browser viewport was 360/390px. The E2E no-horizontal-scroll check
+  still passes; the extra full-page capture width alone is insufficient evidence
+  of user-scrollable overflow. A human should check the viewport PNGs.
+- The Askona and POLZAru screenshots showed honest empty-state copy, official
+  outbound links, no coupon cards, and mobile bottom navigation.
+
+Keep this PR as draft until new CI is green and follow-up screenshots reviewed.
+
 ## Release guard / cost control
 
 - Work exclusively on `fix/promofact-ui-seo-1-1-batch`, open **one PR**, let GitHub Actions run once after final changes.
