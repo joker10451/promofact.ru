@@ -17,10 +17,18 @@
 2. On store landing JSON-LD, prefer merchant URL (`store.site`), not the PromoFact coupon page, when the merchant URL is already known. Include `store.logo` when the existing catalogue actually supplies a logo; **never fabricate one**. Coupons/Offers preserve code/no-code logic.
 3. Regression checks for exact seller-brand metadata, legal disclosure readability, and Playwright coverage of 360, 390, 768 and 1440px: horizontal overflow, sponsored CTA links and source ERID, campaign landing URLs. Existing coupon-copy/attribution E2E scenarios remain enabled.
 
+## Additional continuity fixes (same branch, no deployment)
+
+- Verified official websites: Askona at `https://www.askona.ru/`, POLZAru at `https://polza.ru/`.
+- Production and Search Console identified legacy URLs `/store/askona` and `/store/polzaru` returning 404. No active offers for either merchant were found in the published Perfluence feed or the Supabase manual/Admitad tables. Both now have honest **brand-only stable fallback pages** that return 200 after release, link to the official merchant without an affiliate code, and remain **noindex** until a real active offer exists. This helps visitors but does not pretend to preserve search indexation.
+- Store empty-state copy is corrected: no claims that unverified seasonal promotions are currently live. No change to existing live coupons.
+- CI now keeps short-lived Playwright screenshots for 360/390/768/1440px and two legacy store pages as a PR artifact; this does not use Vercel deployment quota.
+- E2E checks 200/noindex and lack of fabricated coupons for these restored URLs. Download screenshots from the successful CI run for visual review.
+
 ## Investigated, deliberately NOT 'fixed' without evidence
 
 - `/store/yandex-eda` and `/store/iv-roshe` currently return HTML `noindex` because the store-page code hides pages that have **zero live coupons**. This is intentionally safer than re-indexing empty affiliate pages. Confirm valid offers before removing `noindex`.
-- `/store/polzaru` and `/store/askona` return 404 yet still have GSC historical impressions (37 and 21, respectively, last settled window). No verified replacement store landing currently exists. **Do not add irrelevant generic redirects** or fictional coupons. Wait for a valid destination or leave the honest 404.
+- `/store/polzaru` and `/store/askona` previously returned 404; their exact-brand continuity pages are now in this PR. The fallback is strictly noindex when there are no genuine offers. No cross-brand redirects or fictitious coupons were introduced.
 - `/store/megafon` returned 404 on direct check, and existing Admitad mapping is blocked; do not create an empty landing merely to remove the status.
 - Some historic articles have no supplied publication date and/or image. Do not insert today's date or stock images as fake metadata; source-authored information must be checked first.
 - The audit's `Organization missing logo` warnings can recur when the merchant has no genuine logo. This patch adds *existing* brand images only.
