@@ -322,6 +322,35 @@ console.log("===================================================================
   console.log("✓ Test 7c: Strict Tasty Coffee coupon-scoped ERID, URL and separate approval gates (PASS)");
 }
 
+// CATALOG-GROWTH-1: verified staging campaign mapping does not authorize
+// publishing. No campaign in this batch is added to the publisher allowlist.
+{
+  const recoveries = [
+    { id: 28532, name: "Befree.ru", site_url: "https://befree.ru/", slug: "befree-ru", category: "odezhda-i-obuv" },
+    { id: 14647, name: "Спортмастер", site_url: "https://www.sportmaster.ru/", slug: "sportmaster", category: "sport-i-otdyh" },
+    { id: 22484, name: "Randewoo", site_url: "https://randewoo.ru/", slug: "randewoo", category: "kosmetika-i-parfyumeriya" },
+  ];
+  for (const campaign of recoveries) {
+    const mapping = matchCanonicalStore(campaign);
+    assert.equal(mapping.strategy, "EXACT MATCH");
+    assert.equal(mapping.canonicalSlug, campaign.slug);
+    assert.equal(STABLE_STORES[campaign.slug]?.categorySlug, campaign.category);
+    assert.ok(STABLE_STORES[campaign.slug]?.site?.startsWith("https://"));
+    assert.ok(!VERIFIED_CAMPAIGN_ALLOWLIST.includes(String(campaign.id)));
+    const notApproved = isAdmitadPublishable(
+      { isExpired: false, isForeign: false, affiliateLink: "https://ad.admitad.com/g/example/?erid=test", advcampaignId: String(campaign.id) },
+      { campaign: { id: campaign.id, status: "active", connection_status: "active" },
+        mapping, eridStatus: "PRESENT", legalInfoStatus: "PRESENT",
+        eridValue: "test", advertiserLegalInfo: "Тестовый рекламодатель",
+        allowlist: ["26110", "25224", "17220"] }
+    );
+    assert.equal(notApproved.publishable, false);
+    assert.equal(notApproved.status, "READY_NOT_APPROVED");
+  }
+  passed++;
+  console.log("✓ CATALOG-GROWTH-1: three mappings restore pages but cannot bypass publisher approval (PASS)");
+}
+
 // 8. Тест Сборка ORD текста без искажений
 {
   const ord = buildAdmitadOrdText(" ООО «Магазин» ", " 2RanyTest ");
