@@ -625,9 +625,35 @@ async function run() {
           }
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
           if (pathUrl === "/") {
+            const cards = page.locator('section[aria-label="Популярные магазины"] a[href^="/store/"]');
+            const visibleCount = await cards.evaluateAll((nodes) =>
+              nodes.filter((node) => getComputedStyle(node).display !== "none").length,
+            );
+            assert.equal(visibleCount, res.width < 640 ? 6 : 12,
+              "Compact mobile store showcase should show 6 brands and 12 on larger displays");
+
+            // Even when external logo CDNs stall, each brand must show an actual
+            // letter placeholder instead of an empty white circle.
+            const visibleCards = cards.filter({ visible: true });
+            for (let i = 0; i < await visibleCards.count(); i++) {
+              const logoState = await visibleCards.nth(i).locator("span.relative.inline-flex").first().evaluate((node) => {
+                const image = node.querySelector("img");
+                const initial = node.querySelector("span.absolute");
+                return Boolean(
+                  (image?.complete && image.naturalWidth > 0 && getComputedStyle(image).opacity === "1") ||
+                  (initial && initial.textContent?.trim()),
+                );
+              });
+              assert.ok(logoState, "No popular store should display a blank logo circle");
+            }
             await page.screenshot({
               path: path.join(afterScreenshotsDir, `ui-seo-1-1-home-${res.width}.png`),
               fullPage: true,
+              animations: "disabled",
+            });
+            await page.screenshot({
+              path: path.join(afterScreenshotsDir, `ui-seo-1-1-viewport-${res.width}.png`),
+              fullPage: false,
               animations: "disabled",
             });
           }
