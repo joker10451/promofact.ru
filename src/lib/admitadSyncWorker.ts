@@ -33,6 +33,8 @@ import {
   checkBefreePilot,
   getBatchCampaignAllowlist,
   isVerifiedBatchCampaignOrigin,
+  FIVE_NEW_CAMPAIGN_IDS,
+  isFiveCouponExplicitlyReviewed,
   type SyncAggregates,
 } from "@/lib/admitadAutopilot";
 import {
@@ -58,6 +60,8 @@ export async function runAdmitadSafeSync(options: {
   skipDbWrite?: boolean;
   /** For safe batch rollout, no NEW active rows outside the given campaigns. */
   onlyNewCampaignIds?: readonly string[];
+  /** Permit new five-program rows only if explicitly reviewed by coupon ID. */
+  reviewedFiveCouponIds?: readonly string[];
   /** Upper bound on added active offers; exceeded => abort before any staging/write. */
   maxNewOffers?: number;
   /** Abort before writes if any baseline active ID would be lost. */
@@ -70,7 +74,7 @@ export async function runAdmitadSafeSync(options: {
   const config = getAdmitadConfig();
   if (!config) {
     const error = "ADMITAD_CLIENT_ID или ADMITAD_CLIENT_SECRET не настроены";
-    await recordAdmitadSyncFailure({
+    if (!options.skipDbWrite) await recordAdmitadSyncFailure({
       status: "FAILED",
       errorCode: "AUTH_CONFIG_MISSING",
       duration_ms: Date.now() - startTime,
@@ -83,7 +87,7 @@ export async function runAdmitadSafeSync(options: {
   if (effectiveAllowlist.length === 0) {
     const error = "ALLOWLIST_NOT_CONFIGURED: ADMITAD_APPROVED_CAMPAIGNS не настроен или пуст. Публикация заблокирована, синхронизация остановлена без изменения каталога.";
     console.warn(`[admitad/sync] 🚨 ${error}`);
-    await recordAdmitadSyncFailure({
+    if (!options.skipDbWrite) await recordAdmitadSyncFailure({
       status: "FAILED",
       errorCode: "ALLOWLIST_NOT_CONFIGURED",
       duration_ms: Date.now() - startTime,
@@ -99,7 +103,7 @@ export async function runAdmitadSafeSync(options: {
 
     if (!websiteResult.website) {
       const error = websiteResult.error || "Площадка не найдена";
-      await recordAdmitadSyncFailure({
+      if (!options.skipDbWrite) await recordAdmitadSyncFailure({
         status: "FAILED",
         errorCode: websiteResult.resolution,
         duration_ms: Date.now() - startTime,
@@ -231,11 +235,24 @@ export async function runAdmitadSafeSync(options: {
         !existingActiveMap.has(rowId) &&
         !options.onlyNewCampaignIds.includes(String(campId))
       );
+      // Unlike a campaign allowlist, this is an explicit coupon-level review.
+      // Scoped to the five NEW campaigns so existing active offers and normal
+      // recurring updates of the original three remain unchanged.
+      // This guard MUST run even on ordinary cron/API synchronization.
+      // The batch runner is not the only caller of runAdmitadSafeSync.
+      // No explicit reviewed IDs => no new five-program coupons, regardless
+      // of environment allowlists or workflow mode.
+      const newFiveOfferNotReviewed = Boolean(
+        FIVE_NEW_CAMPAIGN_IDS.includes(String(campId)) &&
+        !existingActiveMap.has(rowId) &&
+        !isFiveCouponExplicitlyReviewed(String(campId), couponId, options.reviewedFiveCouponIds ?? [])
+      );
+      const newOfferBlocked = newOfferOutsideBatch || newFiveOfferNotReviewed;
       let isRowActive = false;
-      let syncStatus = newOfferOutsideBatch ? "READY_NOT_APPROVED" : evalResult.status;
+      let syncStatus = newOfferBlocked && evalResult.publishable ? "READY_NOT_APPROVED" : evalResult.status;
 
       if (isApprovedInCurrentSync) {
-        if (evalResult.publishable && !newOfferOutsideBatch) {
+        if (evalResult.publishable && !newOfferBlocked) {
           isRowActive = true;
           publishableCount++;
         } else {
@@ -406,7 +423,7 @@ export async function runAdmitadSafeSync(options: {
 
     if (!safetyCheck.safe) {
       console.warn(`[admitad/sync] 🚨 ${safetyCheck.reason}. Переход в режим SYNC_DEGRADED без изменения базы.`);
-      await recordAdmitadSyncFailure({
+      if (!options.skipDbWrite) await recordAdmitadSyncFailure({
         status: "DEGRADED",
         errorCode: "CATASTROPHIC_DROP",
         duration_ms: Date.now() - startTime,
@@ -451,7 +468,8 @@ export async function runAdmitadSafeSync(options: {
       legal_ready: legalReadyCount,
       publishable: publishableCount,
       ready_not_approved: readyNotApprovedCount,
-      duplicates_vs_perfluence: 0,
+      // No Perfluence comparison occurs in this worker. Report unknown, not 0.
+      duplicates_vs_perfluence: null,
       written,
       updated: written,
       deactivated: 0,
@@ -460,7 +478,7 @@ export async function runAdmitadSafeSync(options: {
     };
 
     // 8. Обновление диагностических метаданных (authoritative last_success_* уже записаны RPC, Section 9)
-    await updateAdmitadSyncDiagnostics({
+    if (!options.skipDbWrite) await updateAdmitadSyncDiagnostics({
       duration_ms: duration,
       details: aggregates as unknown as Record<string, unknown>,
     });
@@ -477,7 +495,7 @@ export async function runAdmitadSafeSync(options: {
   } catch (error) {
     const errorMsg = (error as Error).message;
     console.error("[admitad/sync] 🚨 Ошибка выполнения синхронизации:", errorMsg);
-    await recordAdmitadSyncFailure({
+    if (!options.skipDbWrite) await recordAdmitadSyncFailure({
       status: "FAILED",
       errorCode: "SYNC_EXCEPTION",
       duration_ms: Date.now() - startTime,

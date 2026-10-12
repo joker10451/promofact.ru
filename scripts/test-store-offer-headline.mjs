@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { isRealPromoCode } from "../src/lib/dedupe.ts";
 import { getStoreHeadlineOfferCounts,formatStoreOfferTitle,formatStoreOfferCounts,formatPriorityStoreTitle,pluralRu } from "../src/lib/storeOfferHeadline.ts";
+import { buildStoreArticle, buildStoreDescription } from "../src/lib/storeSeoContent.ts";
+import fs from "node:fs";
 
 const coupons = (codes) => codes.map(code=>({promocode:{code}}));
 assert.deepEqual(getStoreHeadlineOfferCounts(coupons(["ABC","NOT REQUIRED","НЕ НУЖЕН","","АКЦИЯ","REAL2"])),{offers:6,codes:2,codeFree:4});
@@ -27,4 +29,47 @@ assert.equal(formatPriorityStoreTitle({slug:"pyaterochka",month:"октябрь 
 assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:0,codeFree:3}),"Randewoo: 3 акции");
 assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:0,codeFree:0}),null);
 assert.equal(formatPriorityStoreTitle({slug:"some-other-store",month:"октябрь 2026",codes:2,codeFree:0}),null);
+const sportmaster = {
+  name: "Спортмастер",
+  category: "Спорт и отдых",
+  categorySlug: "sport-i-otdyh",
+  coupons: [
+    { code: "MOUNTAIN", bonusName: "Скидки на обувь" },
+    { code: "НЕ НУЖЕН", bonusName: "Скидка месяца на подборку товаров" },
+    { code: "NOT REQUIRED", bonusName: "Бонусы ко дню рождения" },
+  ],
+  couponCount: 3,
+  maxDiscount: "до 20%",
+  hasGiftOffer: false,
+  isFirstOrder: false,
+  activeBloggers: 0,
+  monthYear: "Октябрь 2026",
+  monthRu: "октябрь 2026",
+  todayRu: "12 октября 2026",
+};
+const sportArticle = buildStoreArticle(sportmaster, "sportmaster");
+assert.match(sportArticle[0], /1 промокод и 2 акции/);
+assert.doesNotMatch(sportArticle.join(" "), /3 рабочих промокода/);
+assert.match(sportArticle[2], /1 промокод/);
+assert.doesNotMatch(sportArticle[2], /НЕ НУЖЕН|NOT REQUIRED/);
+assert.match(buildStoreDescription(sportmaster), /1 промокод и 2 акции/);
+const onlyDeals = {
+  ...sportmaster,
+  coupons: sportmaster.coupons.slice(1),
+  couponCount: 2,
+};
+assert.match(buildStoreArticle(onlyDeals, "sportmaster")[0], /2 акции/);
+assert.match(buildStoreDescription(onlyDeals), /2 акции/);
+assert.doesNotMatch(buildStoreDescription(onlyDeals), /2 кода/);
+
+const storeSource = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
+assert.ok(storeSource.includes("const offerCountLabel = formatStoreOfferCounts(realCodeCount, codeFreeCount)"));
+assert.ok(storeSource.includes("{offerCountLabel}. Срок действия указан в карточке."));
+assert.ok(storeSource.includes("Предложений сегодня"));
+const browserSource = fs.readFileSync("src/components/StoreCouponBrowser.tsx", "utf8");
+assert.ok(browserSource.includes("formatStoreOfferCounts(codes, codeFree)"));
+const tableSource = fs.readFileSync("src/components/StoreSummaryTable.tsx", "utf8");
+assert.ok(tableSource.includes("isRealPromoCode(coupon.promocode.code)"));
+assert.ok(tableSource.includes("Сводная таблица промокодов и акций"));
+console.log("Sportmaster 1-code + 2-deals page, SEO copy and table labeling PASS");
 console.log("Real-code vs code-free SEO title tests PASS");

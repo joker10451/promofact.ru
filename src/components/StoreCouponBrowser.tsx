@@ -6,6 +6,7 @@ import CouponTicket from "@/components/CouponTicket";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
 import { isCouponActive, expiryTimestamp } from "@/lib/couponExpiry";
 import { getCouponAudience } from "@/lib/storeCouponAudience";
+import { getStoreHeadlineOfferCounts, formatStoreOfferCounts } from "@/lib/storeOfferHeadline";
 
 interface StoreCouponBrowserProps {
   coupons: CatalogCoupon[];
@@ -120,12 +121,12 @@ export default function StoreCouponBrowser({
           {storeName.length > 25 ? "Рабочие промокоды и акции" : `Рабочие промокоды и акции ${storeName}`}
         </h2>
         <span className="text-xs font-bold text-ink/50 bg-paper px-2.5 py-1 rounded-full border border-line">
-          {filteredCoupons.length}{" "}
-          {filteredCoupons.length === 1
-            ? "купон"
-            : filteredCoupons.length >= 2 && filteredCoupons.length <= 4
-              ? "купона"
-              : "купонов"}
+          {filteredCoupons.length === 0
+            ? "0 предложений"
+            : (() => {
+                const { codes, codeFree } = getStoreHeadlineOfferCounts(filteredCoupons);
+                return formatStoreOfferCounts(codes, codeFree);
+              })()}
         </span>
       </div>
 

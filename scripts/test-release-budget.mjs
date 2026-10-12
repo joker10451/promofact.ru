@@ -8,4 +8,10 @@ assert.match(workflow,/cron:\s*'5 3 \* \* 1'/,"Perfluence feed updates once a we
 assert.doesNotMatch(workflow,/5 21,3,9,15/,"Four daily deploy-triggering cron ticks must be absent");
 assert.match(workflow,/workflow_dispatch:/,"Urgent manual Perfluence sync remains available");
 assert.match(workflow,/git push origin main/,"Verified feed changes are still published; never silently drop them");
-console.log("Vercel Preview budget and Perfluence weekly cadence PASS");
+const admitad = fs.readFileSync(".github/workflows/admitad-batch.yml", "utf8");
+assert.ok(admitad.includes("cron: '17 */3 * * *'"), "Admitad schedule must avoid peak hour minute 0");
+assert.ok(!admitad.includes("cron: '0 */3 * * *'"), "Old peak-hour cron must remain absent");
+assert.match(admitad, /ADMITAD_BATCH_AUTO_SYNC_ENABLED/, "Admitad scheduled kill switch must remain available");
+assert.match(admitad, /group: admitad-publisher/, "Single-publisher concurrency guard must remain enabled");
+assert.match(admitad, /inputs\.batch == 'expand-five' && inputs\.mode == 'initial'/, "Manual expanded batch gate must remain protected");
+console.log("Vercel Preview, Perfluence cadence, and Admitad cron release budget PASS");

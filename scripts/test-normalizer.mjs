@@ -922,4 +922,46 @@ const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8"
   passed++;
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/35 ТЕСТОВ (23 Admitad + 12 Регрессий/Hotfix) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// Test 36: Спортмастер "Скидка месяца" не превращается в "на месяца".
+{
+  const terms =
+    "Скидка месяца — скидка на индивидуальную подборку товара. " +
+    "Чтобы увидеть подборку, откройте раздел «Мои скидки» в приложении Спортмастер.";
+  for (const name of ["Скидка месяца", "Скидка 15% месяца"]) {
+    const res = normalizeAdmitadCoupon({
+      id: 935878,
+      advcampaignId: "14647",
+      rawCampaignName: "Спортмастер",
+      rawCampaignSite: "https://www.sportmaster.ru",
+      name,
+      description: terms,
+      discount: "15%",
+      promocode: "Not required",
+      customerType: "all_customers",
+    });
+    assert.ok(res, "Спортмастер: нормализация должна пройти");
+    assert.strictEqual(res.shortDescription, "Скидка месяца на подборку товаров");
+    assert.ok(res.fullDescription.includes("индивидуальную подборку"));
+    assert.strictEqual(res.promoCode, null, "Не придумываем отсутствующий код");
+  }
+
+  const mountain = normalizeAdmitadCoupon({
+    id: 919725,
+    advcampaignId: "14647",
+    rawCampaignName: "Спортмастер",
+    rawCampaignSite: "https://www.sportmaster.ru",
+    name: "Скидки на обувь для горного туризма по промокоду",
+    description: "Скидка до 20% на обувь для горного туризма по промокоду MOUNTAIN",
+    discount: "20%",
+    promocode: "MOUNTAIN",
+    customerType: "all_customers",
+  });
+  assert.ok(mountain, "Спортмастер: скидка на обувь должна пройти нормализацию");
+  assert.ok(mountain.shortDescription.startsWith("Скидки на обувь"),
+    "Не добавлять «на» перед завершённым названием скидки");
+  assert.ok(!mountain.shortDescription.startsWith("на Скидки"));
+  console.log("✓ Test 36: Скидка месяца — короткое описание без обрывков (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/36 ТЕСТОВ (24 Admitad + 12 Регрессий/Hotfix) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);

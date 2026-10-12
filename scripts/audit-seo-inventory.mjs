@@ -178,7 +178,9 @@ async function runAudit() {
 
   for (const filePath of allHtmlFiles) {
     const rel = path.relative(APP_DIR, filePath).replace(/\\/g, "/");
-    let route = "/" + rel.replace(/\.html$/, "").replace(/\/index$/, "");
+    // Next.js may emit nested static routes as .../page.html rather than ...html.
+    // Both are the same public /route; don't report valid links as broken.
+    let route = "/" + rel.replace(/\.html$/, "").replace(/\/(?:index|page)$/, "");
     if (route === "/index") route = "/";
 
     const html = fs.readFileSync(filePath, "utf-8");
@@ -469,6 +471,10 @@ async function runAudit() {
     console.error("❌ ОБНАРУЖЕНЫ КРИТИЧЕСКИЕ ОШИБКИ:");
     for (const err of errors) {
       console.error(` - [${err.category}]: ${err.message}`);
+      if (err.category === "broken_internal_links") {
+        console.error("    Broken link paths:", JSON.stringify(err.details));
+        console.error("    Campaign build route candidates:", JSON.stringify([...buildRouteMap.keys()].filter((r) => r.includes("akcii") || r.includes("ulybatl"))));
+      }
     }
   }
 
