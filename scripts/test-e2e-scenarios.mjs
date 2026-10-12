@@ -646,7 +646,7 @@ async function run() {
                   (fallback && fallback.textContent?.trim()),
                 );
               });
-              assert.ok(logoState, "No popular store should display a blank logo circle");
+              assert.ok(logoState, "No popular store should display a blank logo circle: " + (await visibleCards.nth(i).getAttribute("href")));
             }
             await page.screenshot({
               path: path.join(afterScreenshotsDir, `ui-seo-1-1-home-${res.width}.png`),
