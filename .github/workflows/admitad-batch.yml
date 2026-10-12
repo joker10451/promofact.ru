@@ -50,6 +50,8 @@ jobs:
         env:
           ADMITAD_BATCH_MODE: ${{ github.event_name == 'schedule' && 'recurring' || inputs.mode }}
           ADMITAD_BATCH_RUN_APPROVED: 'true'
+          # Empty by default. Publisher must explicitly review coupon IDs before first 5-brand release.
+          ADMITAD_BATCH_REVIEWED_COUPON_IDS: ${{ vars.ADMITAD_BATCH_REVIEWED_COUPON_IDS }}
           ADMITAD_BATCH_APPROVED_CAMPAIGNS: ${{ github.event_name == 'workflow_dispatch' && inputs.batch == 'expand-five' && '28532,14647,22484,93978,11738,26032,14725,23485' || '28532,14647,22484' }}
           ADMITAD_APPROVED_CAMPAIGNS: '141770,1667,17220,25224,26110'
           ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
