@@ -26,6 +26,10 @@ assert.ok(coupons.includes('id="catalog"'), "Catalog anchor cannot be renamed");
 assert.ok(coupons.includes('onClick={() => setQuickFilter("first")}'), "Original first-order filter required");
 assert.ok(coupons.includes('onClick={() => setQuickFilter("discount_20")}'), "Thresholded deal filter required");
 assert.equal((coupons.match(/Быстрые смарт-фильтры/g) || []).length, 0, "Second duplicate smart filter removed");
+assert.ok(!coupons.includes("Левая колонка: Категории (Desktop sticky)"), "Old sidebar must not block content on desktop");
+assert.ok(coupons.includes('overflow-x-auto overscroll-x-contain'), "Category filter rail must be scrollable");
+assert.ok(featured.includes("grid-flow-col") && featured.includes("snap-x snap-mandatory"),
+  "All real expiring deals remain accessible through a mobile horizontal rail");
 assert.ok(home.indexOf("<PopularStores />") < home.indexOf("<CouponGrid"), "Shop browsing should precede coupon catalog");
 assert.ok(home.indexOf("<CouponGrid") < home.indexOf("<SberCampaignTeasers />"), "Real offers should precede advertising");
 assert.ok(home.includes("<SeoArticle />") && home.includes("<Faq />"), "SEO and helpful content must be preserved");
