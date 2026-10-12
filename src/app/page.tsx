@@ -4,6 +4,7 @@ import PopularStores from "@/components/PopularStores";
 import ExpiringDeals from "@/components/ExpiringDeals";
 import TeamBanner from "@/components/TeamBanner";
 import SberUlybatlHome from "@/components/SberUlybatlHome";
+import SberKidsPromoHome from "@/components/SberKidsPromoHome";
 import CouponGrid from "@/components/CouponGrid";
 import SavingsCalculator from "@/components/SavingsCalculator";
 import HowItWorks from "@/components/HowItWorks";
@@ -128,6 +129,9 @@ export default async function Home() {
             <TeamBanner />
           </Reveal>
         </div>
+
+        {/* Детская СберКарта: оригинальный креатив + отдельные условия, не купон каталога. */}
+        <SberKidsPromoHome />
 
         {/* 5. Скоро заканчиваются — коды с ближайшим реальным сроком, по одному от магазина.
             Раньше здесь было два блока «Спецпредложения дня» подряд. */}
