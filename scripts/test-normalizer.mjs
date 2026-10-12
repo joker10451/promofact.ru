@@ -922,4 +922,30 @@ const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8"
   passed++;
 }
 
-console.log(`\n🎉 ВСЕ ${passed}/35 ТЕСТОВ (23 Admitad + 12 Регрессий/Hotfix) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
+// Test 36: Спортмастер "Скидка месяца" не превращается в "на месяца".
+{
+  const terms =
+    "Скидка месяца — скидка на индивидуальную подборку товара. " +
+    "Чтобы увидеть подборку, откройте раздел «Мои скидки» в приложении Спортмастер.";
+  for (const name of ["Скидка месяца", "Скидка 15% месяца"]) {
+    const res = normalizeAdmitadCoupon({
+      id: 935878,
+      advcampaignId: "14647",
+      rawCampaignName: "Спортмастер",
+      rawCampaignSite: "https://www.sportmaster.ru",
+      name,
+      description: terms,
+      discount: "15%",
+      promocode: "Not required",
+      customerType: "all_customers",
+    });
+    assert.ok(res, "Спортмастер: нормализация должна пройти");
+    assert.strictEqual(res.shortDescription, "на индивидуальную подборку товаров");
+    assert.ok(res.fullDescription.includes("индивидуальную подборку"));
+    assert.strictEqual(res.promoCode, null, "Не придумываем отсутствующий код");
+  }
+  console.log("✓ Test 36: Скидка месяца — короткое описание без обрывков (PASS)");
+  passed++;
+}
+
+console.log(`\n🎉 ВСЕ ${passed}/36 ТЕСТОВ (24 Admitad + 12 Регрессий/Hotfix) УСПЕШНО ПРОЙДЕНЫ! (PASS)`);
