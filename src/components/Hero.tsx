@@ -122,7 +122,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-paper via-white to-paper pt-12 pb-14 sm:pt-18 sm:pb-20 border-b border-line">
+    <section className="relative overflow-hidden bg-gradient-to-b from-paper via-white to-paper pt-7 pb-7 sm:pt-18 sm:pb-20 border-b border-line">
       {/* Декоративные световые пятна с ограничением по ширине */}
       <div
         className="pointer-events-none absolute -left-20 top-10 h-72 w-72 max-w-full rounded-full bg-yellow/15 blur-3xl"
@@ -149,7 +149,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </p>
 
         {/* Главная поисковая строка */}
-        <div ref={containerRef} className="relative mx-auto mt-6 sm:mt-8 max-w-2xl">
+        <div ref={containerRef} className="relative mx-auto mt-4 sm:mt-8 max-w-2xl">
           <form onSubmit={handleSubmit} className="relative flex items-center">
             <div className="relative w-full">
               <span className="pointer-events-none absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-lg sm:text-xl text-ink/40">
@@ -263,7 +263,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </div>
 
         {/* Быстрые теги (реальные магазины) */}
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-ink/70">
+        <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-ink/70">
           <span className="text-ink/40">Популярное:</span>
           {REAL_POPULAR_TAGS.map((tag) => (
             <button
@@ -278,7 +278,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </div>
 
         {/* Блок доверия (Trust Indicators) */}
-        <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-6 border-t border-line/60">
+        <div className="mt-6 sm:mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-4 sm:pt-6 border-t border-line/60">
           <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
               <Icon name="check" size={14} />
