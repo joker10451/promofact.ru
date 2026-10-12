@@ -117,7 +117,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
             <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-red/15 bg-red/5 px-3 py-1.5 text-xs font-bold text-red">
               <Icon name="tag" size={13} /> Актуальные промокоды и купоны на скидку
             </p>
-            <h1 className="max-w-3xl font-display text-[clamp(1.7rem,4vw,3.6rem)] font-extrabold leading-[1.18] tracking-tight text-ink">
+            <h1 className="max-w-3xl font-display text-[clamp(1.7rem,3.2vw,3.15rem)] font-extrabold leading-[1.18] tracking-tight text-ink">
               Хорошие скидки.
               <span className="mt-1 block text-red">Без лишних поисков.</span>
             </h1>
