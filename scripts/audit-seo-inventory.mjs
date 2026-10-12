@@ -473,6 +473,7 @@ async function runAudit() {
       console.error(` - [${err.category}]: ${err.message}`);
       if (err.category === "broken_internal_links") {
         console.error("    Broken link paths:", JSON.stringify(err.details));
+        console.error("    Campaign build route candidates:", JSON.stringify([...buildRouteMap.keys()].filter((r) => r.includes("akcii") || r.includes("ulybatl"))));
       }
     }
   }
