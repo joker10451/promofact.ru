@@ -655,6 +655,11 @@ export interface StoreMappingResult {
  * Разрешены подтвержденные строковые алиасы брендов.
  */
 export const EXPLICIT_STORE_MAPPINGS: Record<string, { slug: string; name: string }> = {
+  // Matched to official program sites and existing canonical PromoFact slugs.
+  // Mapping does NOT authorize publication; allowlist/quality/legal gates remain.
+  "28532": { slug: "befree-ru", name: "Befree" },
+  "22484": { slug: "randewoo", name: "Randewoo" },
+  "14647": { slug: "sportmaster", name: "Спортмастер" },
   // Подтверждённые живым dry-run ID программ Admitad (площадка 2990501)
   "25224": { slug: "yandeks-puteshestviya", name: "Яндекс Путешествия" },
   "яндекс.путешествия": { slug: "yandeks-puteshestviya", name: "Яндекс Путешествия" },
