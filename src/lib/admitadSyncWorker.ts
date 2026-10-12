@@ -31,6 +31,8 @@ import {
   getEffectiveCampaignAllowlist,
   checkTastyCoffeePilot,
   checkBefreePilot,
+  getBatchCampaignAllowlist,
+  isVerifiedBatchCampaignOrigin,
   type SyncAggregates,
 } from "@/lib/admitadAutopilot";
 import {
@@ -186,9 +188,13 @@ export async function runAdmitadSafeSync(options: {
       };
       const tastyGate = checkTastyCoffeePilot(pilotInput);
       const befreeGate = checkBefreePilot(pilotInput);
+      const isInApprovedBatch = getBatchCampaignAllowlist().includes(String(campId));
+      const batchOriginValid = !isInApprovedBatch ||
+        isVerifiedBatchCampaignOrigin(String(campId), campaign.site_url || "");
       const pilotGate = {
-        passed: tastyGate.passed && befreeGate.passed,
-        reason: tastyGate.reason || befreeGate.reason,
+        passed: tastyGate.passed && befreeGate.passed && batchOriginValid,
+        reason: tastyGate.reason || befreeGate.reason ||
+          (batchOriginValid ? undefined : "BATCH_CAMPAIGN_ORIGIN_MISMATCH"),
       };
 
       // Проверка публикации через Publication Eligibility Gate
