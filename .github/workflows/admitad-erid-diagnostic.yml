@@ -1,0 +1,42 @@
+name: Admitad ERID Source Audit (Read Only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      campaign_id:
+        description: "Admitad campaign ID (e.g. 17220)"
+        type: string
+        required: true
+      coupon_id:
+        description: "Coupon ID shown by API (e.g. 942125)"
+        type: string
+        required: true
+      dashboard_erid:
+        description: "ERID copied from the Admitad publisher dashboard"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Compare API list and single-coupon ERIDs without publishing
+        env:
+          ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
+          ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
+          ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}
+          ADMITAD_WEBSITE_HOST: promofact.ru
+          AUDIT_CAMPAIGN_ID: ${{ inputs.campaign_id }}
+          AUDIT_COUPON_ID: ${{ inputs.coupon_id }}
+          AUDIT_DASHBOARD_ERID: ${{ inputs.dashboard_erid }}
+        run: node --loader ./scripts/ts-loader.mjs scripts/diagnose-admitad-erid.mjs
