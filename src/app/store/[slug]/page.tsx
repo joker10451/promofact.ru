@@ -93,7 +93,9 @@ export async function generateMetadata({
   const title =
     useCustomMetadata && storeExtra?.customTitle
       ? storeExtra.customTitle(monthRu, monthYear)
-      : n > 0
+      : n > 0 && slug === "tasty-coffee"
+        ? `Промокод Tasty Coffee на ${monthRu}: ${n} ${countWord}`
+        : n > 0
         ? (maxDisc && maxDisc !== null
             ? `Промокоды ${store.name} на ${monthRu}: ${maxDisc}, ${n} ${countWord}`
             : `Промокоды и акции ${store.name} на ${monthRu}: ${n} ${countWord}`)
