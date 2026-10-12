@@ -374,8 +374,8 @@ export function resolveOfferDetails(
     if (/^(?:на\s+)?месяца$/iu.test(condition) &&
         /скидка\s+месяца/iu.test(combinedText)) {
       condition = /индивидуальн[а-яё]*\s+подборк[а-яё]*/iu.test(combinedText)
-        ? "на индивидуальную подборку товаров"
-        : "по акции «Скидка месяца»";
+        ? "Скидка месяца на подборку товаров"
+        : "Скидка месяца";
     }
     if (minOrder) {
       const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(cleanName) || /перв|1[-‑–—]?[ыое]?й/i.test(description);
