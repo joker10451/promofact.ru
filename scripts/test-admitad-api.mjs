@@ -34,6 +34,28 @@ console.log("===================================================================
 
 let passed = 0;
 
+// CATALOG-GROWTH-1: verified campaign mappings must remain narrow and opt-in.
+for (const [campaignId, name, site_url, slug] of [
+  [28532, "Befree.ru", "https://befree.ru/", "befree-ru"],
+  [22484, "Randewoo", "https://randewoo.ru/", "randewoo"],
+  [14647, "Спортмастер", "https://www.sportmaster.ru/", "sportmaster"],
+]) {
+  const mapping = matchCanonicalStore({ id: campaignId, name, site_url });
+  assert.strictEqual(mapping.strategy, "EXACT MATCH");
+  assert.strictEqual(mapping.canonicalSlug, slug);
+  assert.strictEqual(EXPLICIT_STORE_MAPPINGS[String(campaignId)].slug, slug);
+  passed++;
+}
+{
+  const registry = fs.readFileSync(path.resolve("src/lib/stableStores.ts"), "utf-8");
+  for (const slug of ["befree-ru", "randewoo", "sportmaster"]) {
+    assert.ok(registry.includes(`"${slug}": {`), `Missing stable page for ${slug}`);
+  }
+  assert.ok(!registry.includes("adm_944039"));
+  passed++;
+}
+
+
 // Настройка тестовых переменных для окружения токена
 process.env.ADMITAD_CLIENT_ID = "test_client_id";
 process.env.ADMITAD_CLIENT_SECRET = "test_client_secret";
