@@ -1,0 +1,75 @@
+name: One-time Tasty Coffee Pilot Safe Sync
+
+on:
+  # This workflow runs once when it is first merged to main.
+  # Remove the file after verifying production data.
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/tasty-coffee-pilot-once.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admitad-tasty-coffee-pilot-one-time
+  cancel-in-progress: false
+
+jobs:
+  sync-once:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout safe pilot release
+        uses: actions/checkout@v4
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run safe Admitad snapshot sync with exact approved campaigns
+        env:
+          ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
+          ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
+          ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}
+          ADMITAD_WEBSITE_HOST: promofact.ru
+          ADMITAD_APPROVED_CAMPAIGNS: "26110,17220"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: node --loader ./scripts/ts-loader.mjs scripts/sync-admitad-snapshot.mjs
+      - name: Verify exactly one Tasty coupon and preserve 3 Pizza Sushi Wok
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          import { createClient } from "@supabase/supabase-js";
+          const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          assert.ok(url && key, "Supabase admin configuration missing");
+          const client = createClient(url, key, { auth: { persistSession: false } });
+          const { data, error } = await client.from("admitad_coupons")
+            .select("source_campaign_id,source_coupon_id,code,affiliate_link,ord_marker,is_active,store_slug,expires")
+            .in("source_campaign_id", ["17220", "26110"]);
+          if (error) throw new Error("Snapshot verification query failed: " + error.message);
+          const activeTasty = data.filter(row => row.source_campaign_id === "17220" && row.is_active);
+          const activePizza = data.filter(row => row.source_campaign_id === "26110" && row.is_active);
+          assert.equal(activeTasty.length, 1, "Expected exactly one active Tasty Coffee offer");
+          assert.equal(activePizza.length, 3, "Pizza Sushi Wok must retain three active offers");
+          const tasty = activeTasty[0];
+          assert.equal(tasty.source_coupon_id, "942125");
+          assert.equal(tasty.code, "TKPRDM-UYVG1GJO");
+          assert.equal(tasty.store_slug, "tasty-coffee");
+          assert.equal(tasty.expires, "2027-04-29");
+          const link = new URL(tasty.affiliate_link);
+          assert.equal(link.protocol, "https:");
+          assert.equal(link.hostname, "dkfrh.com");
+          assert.equal(link.pathname, "/g/va69o33134c7dde8999c9ebcee8c5e/");
+          assert.equal(link.searchParams.get("i"), "31");
+          assert.equal(link.searchParams.get("erid"), tasty.ord_marker, "ERID drift across source and legal marker");
+          console.log("PILOT_CHECK_PASS tasty_active=1 pizza_active=3 erid_matched=1");
+          NODE
