@@ -54,6 +54,8 @@ export interface SyncWorkerResult {
 export async function runAdmitadSafeSync(options: {
   customFetch?: typeof fetch;
   skipDbWrite?: boolean;
+  /** One-shot safety: no new active coupons except this exact adm_<id>. */
+  onlyNewCouponId?: string;
 } = {}): Promise<SyncWorkerResult> {
   const startTime = Date.now();
   const syncRunId = `sync_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -214,11 +216,16 @@ export async function runAdmitadSafeSync(options: {
       }
 
       const rowId = `adm_${couponId}`;
+      const outOfScopeNewCoupon = Boolean(
+        options.onlyNewCouponId &&
+        !existingActiveMap.has(rowId) &&
+        rowId !== options.onlyNewCouponId
+      );
       let isRowActive = false;
-      let syncStatus = evalResult.status;
+      let syncStatus = outOfScopeNewCoupon ? "READY_NOT_APPROVED" : evalResult.status;
 
       if (isApprovedInCurrentSync) {
-        if (evalResult.publishable) {
+        if (evalResult.publishable && !outOfScopeNewCoupon) {
           isRowActive = true;
           publishableCount++;
         } else {
