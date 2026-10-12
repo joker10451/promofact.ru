@@ -13,6 +13,7 @@ import {
   evaluateLegalGate,
   matchCanonicalStore,
 } from "../src/lib/admitadApi.ts";
+import { isRealPromoCode, normalizeCode } from "../src/lib/dedupe.ts";
 
 const targets = [
   { id: 28532, slug: "befree-ru", host: "befree.ru" },
@@ -94,8 +95,10 @@ async function main() {
       if (c.is_personal) personal++;
       if (!dated) futureOrExpired++;
       if (!hasLink) missingAffiliateLink++;
-      const normCode = (c.promocode || "").trim().toUpperCase();
-      if (normCode && normCode !== "NOT REQUIRED" && normCode !== "НЕ ТРЕБУЕТСЯ") {
+      const normCode = normalizeCode(c.promocode || "");
+      // Exclude every supported no-code marker (such as "НЕ НУЖЕН" and
+      // "АКЦИЯ") rather than treating placeholders as duplicate codes.
+      if (isRealPromoCode(normCode)) {
         if (seenCodes.has(normCode)) duplicateCodes++;
         else seenCodes.add(normCode);
       }
