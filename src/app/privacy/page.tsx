@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
-import { OPERATOR, PRIVACY_POLICY_DATE, SITE_NAME, SITE_URL } from "@/lib/site";
+import { OPERATOR, SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Политика конфиденциальности"
-      lead={<>Редакция от {PRIVACY_POLICY_DATE}</>}
+      lead={<>Редакция от 12 октября 2026 г.</>}
     >
       <section>
         <h2>1. Кто обрабатывает данные</h2>
