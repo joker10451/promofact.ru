@@ -111,7 +111,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
 
   return (
     <section className="pf-hero relative overflow-hidden border-b border-line bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-14 lg:py-20">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-14 lg:py-20">
         <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_410px]">
           <div className="min-w-0">
             <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-red/15 bg-red/5 px-3 py-1.5 text-xs font-bold text-red">
@@ -242,7 +242,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
 
             {/* Suggested search terms come exclusively from the real active store index. */}
             {stores.length > 0 && (
-              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-ink/60">
+              <div className="mt-4 flex flex-nowrap items-center gap-2 overflow-x-auto whitespace-nowrap no-scrollbar pb-1 text-xs text-ink/60 sm:flex-wrap">
                 <span className="font-semibold">Популярное:</span>
                 {stores.slice(0, 6).map((store) => (
                   <button
@@ -257,7 +257,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
               </div>
             )}
 
-            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-ink/60">
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-ink/60 sm:mt-6">
               <span className="inline-flex items-center gap-1.5">
                 <Icon name="check" size={14} className="text-mint-dark" /> {couponCount} активных предложений
               </span>
@@ -265,7 +265,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
                 <Icon name="shield" size={14} className="text-mint-dark" /> Бесплатно и без регистрации
               </span>
               {proofTotal > 0 && (
-                <span className="inline-flex items-center gap-1.5">
+                <span className="hidden items-center gap-1.5 sm:inline-flex">
                   <Icon name="sparkle" size={14} className="text-mint-dark" />
                   {proofTotal} {pluralOrders(proofTotal)} подтверждено
                 </span>
