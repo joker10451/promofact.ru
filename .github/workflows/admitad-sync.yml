@@ -7,7 +7,12 @@ on:
         description: "Comma-separated Admitad campaign IDs to publish (e.g. 45863 for PREMIER pilot). REQUIRED — empty value blocks sync."
         required: true
       production_allowlist_confirmed:
-        description: "Confirm Vercel PRODUCTION allowlist contains every existing campaign plus every newly approved campaign. Required to publish."
+        description: "Confirm all existing production approvals are preserved; when enabling Befree, check its scoped production flag too."
+        type: boolean
+        default: false
+        required: true
+      befree_pilot:
+        description: "Publish ONLY verified Befree coupon 942686 through scoped pilot, after enabling the production flag."
         type: boolean
         default: false
         required: true
@@ -48,6 +53,7 @@ jobs:
           ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}
           ADMITAD_WEBSITE_HOST: "promofact.ru"
           ADMITAD_APPROVED_CAMPAIGNS: ${{ github.event.inputs.approved_campaigns || vars.ADMITAD_APPROVED_CAMPAIGNS || '' }}
+          ADMITAD_BEFREE_PILOT_ENABLED: ${{ inputs.befree_pilot }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
