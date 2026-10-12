@@ -103,6 +103,35 @@ async function runSeoRegressionSuite() {
     assert(content.includes("relevantCoupons"), "Must match relevant coupons by topic");
   });
 
+  // SEO-GROWTH-2: targeted search-intent articles must not promise unverified deals.
+  test("Search-led guides avoid unverified subscription and grocery discounts", () => {
+    const articles = fs.readFileSync(path.resolve("src/lib/articles.ts"), "utf-8");
+    const grocery = articles.split('slug: "kak-vygodno-zakazyvat-v-pyaterochke"')[1]?.split('slug: "sekrety-ekonomii-v-otello"')[0] ?? "";
+    const streaming = articles.split('slug: "promokody-kinopoisk-yandex-plus"')[1]?.split('slug: "kak-vygodno-zakazyvat-v-pyaterochke"')[0] ?? "";
+    const travel = articles.split('slug: "sekrety-ekonomii-v-otello"')[1]?.split('slug: "kak-poluchit-skidku-na-tsvety"')[0] ?? "";
+    assert(grocery.includes("## Где получить промокод Пятёрочки Доставка"));
+    assert(grocery.includes("faq: ["));
+    assert(grocery.includes('href: "/store/pyaterochka"'));
+    assert(!grocery.includes("50–55%"));
+    assert(!grocery.includes("30–45 минут"));
+    assert(streaming.includes("## Бесплатный период и скидка"));
+    assert(!streaming.includes("60 дней бесплатно"));
+    assert(!streaming.includes("скидки 50%"));
+    assert(travel.includes('href: "/store/yandeks-puteshestviya"'));
+    assert(travel.includes("Сравнивайте конечную цену"));
+  });
+
+  test("Store FAQs and links use actual offers and on-topic guides", () => {
+    const page = fs.readFileSync(path.resolve("src/app/store/[slug]/page.tsx"), "utf-8");
+    assert(page.includes('slug === "tasty-coffee"'));
+    assert(page.includes('slug === "pyaterochka"'));
+    assert(page.includes('slug === "yandeks-puteshestviya"'));
+    assert(page.includes('a.related.some((link) => link.href === `/store/${store.slug}`)'));
+    assert(page.includes("if (storeArticles.length === 0) return null"));
+    assert(!page.includes("getArticles().slice(0, 2)"));
+    assert(page.includes("Сейчас для ${store.name} нет опубликованных действующих промокодов"));
+  });
+
   // 7. Проверка интерактивного калькулятора скидок
   test("Калькулятор экономии персонализирован по магазинам с реальными промокодами", () => {
     const calcPath = path.resolve("src/components/SavingsCalculator.tsx");
