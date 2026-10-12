@@ -104,6 +104,33 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     site: "https://skysmart.ru/",
     activeBloggers: 0,
   },
+  // Google-visible legacy stores: official destinations verified in October 2026.
+  // Metadata-only continuity pages; no affiliate authorisation, fake codes or discounts.
+  // The store route keeps robots noindex until genuine active offers are available.
+  "askona": {
+    id: -100029,
+    slug: "askona",
+    name: "Askona",
+    logo: null,
+    category: "Все для дома",
+    categorySlug: "vse-dlya-doma",
+    about: "Askona — производитель и магазин матрасов, кроватей, диванов и других товаров для сна и дома.",
+    conditions: "Подтверждённых действующих промокодов сейчас нет. Проверяйте условия и цены непосредственно в магазине.",
+    site: "https://www.askona.ru/",
+    activeBloggers: 0,
+  },
+  "polzaru": {
+    id: -100030,
+    slug: "polzaru",
+    name: "POLZAru",
+    logo: null,
+    category: "Здоровье и витамины",
+    categorySlug: "zdorove-i-vitaminy",
+    about: "POLZAru — интернет-аптека с каталогом лекарств, товаров для здоровья и ухода. Покупки и наличие зависят от региона.",
+    conditions: "Подтверждённых действующих промокодов сейчас нет. Актуальные условия проверяйте в интернет-аптеке.",
+    site: "https://polza.ru/",
+    activeBloggers: 0,
+  },
   // CATALOG-GROWTH-1: genuine historical Google-visible store URLs.
   // Metadata only. No coupon, discount, affiliate link or implied partner approval.
   // Stable fallbacks prevent an HTTP 404 while all offers are absent; those
