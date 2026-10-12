@@ -216,10 +216,10 @@ export default function CouponGrid({
   };
 
   const quickChipCls = (active: boolean) =>
-    `rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+    `rounded-full border border-transparent px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
       active
-        ? "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red"
-        : "bg-white border border-line text-ink/80 hover:border-ink/40 shadow-2xs"
+        ? "bg-red text-white"
+        : "bg-white border border-line text-ink/80 hover:border-red/35"
     }`;
 
   return (
@@ -227,8 +227,8 @@ export default function CouponGrid({
       {/* Заголовок секции */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
-            Купоны на сегодня
+          <h2 className="font-display text-xl sm:text-2xl font-extrabold text-ink">
+            Все предложения
           </h2>
           <p className="text-xs sm:text-sm text-ink/60 font-medium">
             {groupedStoreList.length} магазинов · {filteredCoupons.length} актуальных промокодов и акций
@@ -275,7 +275,7 @@ export default function CouponGrid({
       </div>
 
       {/* Быстрые интерактивные фильтры */}
-      <div className="flex flex-wrap items-center gap-2 mb-5">
+      <div className="flex flex-nowrap items-center gap-2 mb-5 overflow-x-auto no-scrollbar pb-1">
         <button
           type="button"
           onClick={() => setQuickFilter("all")}
@@ -349,9 +349,9 @@ export default function CouponGrid({
       </div>
 
       {/* Основной макет: Левый сайдбар категорий + Правая Masonry колоночная сетка */}
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Левая колонка: Категории (Desktop sticky) */}
-        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 space-y-1.5 bg-white border border-line rounded-2xl p-3 shadow-2xs">
+        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 space-y-1.5 bg-white border border-line rounded-2xl p-3">
           <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">
             Категории
           </div>
@@ -413,50 +413,6 @@ export default function CouponGrid({
             </div>
           )}
 
-          {/* Быстрые смарт-фильтры */}
-          <div className="flex flex-wrap items-center gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => setQuickFilter("all")}
-              className={quickChipCls(quickFilter === "all")}
-            >
-              <Icon name="sparkle" size={14} />
-              <span>Все купоны</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("hit")}
-              className={quickChipCls(quickFilter === "hit")}
-            >
-              <Icon name="flame" size={14} />
-              <span>Хиты</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("first")}
-              className={quickChipCls(quickFilter === "first")}
-            >
-              <Icon name="sparkle" size={14} />
-              <span>На первый заказ</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("repeat")}
-              className={quickChipCls(quickFilter === "repeat")}
-            >
-              <Icon name="repeat" size={14} />
-              <span>Для всех</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("discount_20")}
-              className={quickChipCls(quickFilter === "discount_20")}
-            >
-              <Icon name="coins" size={14} />
-              <span>Скидки от 20%</span>
-            </button>
-          </div>
-
           {/* Бесшовный Masonry-каталог купонов без пустот и перекосов */}
           {groupedStoreList.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
@@ -483,12 +439,12 @@ export default function CouponGrid({
             </div>
           ) : (
             <>
-              <div className="columns-1 md:columns-2 gap-6">
+              <div className="columns-1 md:columns-2 gap-4">
                 {groupedStoreList.slice(0, visibleLimit).map(({ store, primaryCoupon, otherCoupons }) => {
                   const isExpanded = !!expandedStores[store.id];
 
                   return (
-                    <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5 mb-6">
+                    <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5 mb-4">
                       {/* Главная карточка с лучшим предложением */}
                       <CouponTicket
                         coupon={primaryCoupon}
