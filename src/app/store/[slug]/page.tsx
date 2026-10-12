@@ -17,6 +17,7 @@ import { buildStoreArticle, buildStoreDescription } from "@/lib/storeSeoContent"
 import { getMaxVerifiedDiscount, hasGiftOffer } from "@/lib/storeDiscount";
 import { getStoreExtra, hasActiveRequiredCoupons } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
+import { formatStoreOfferTitle, getStoreHeadlineOfferCounts } from "@/lib/storeOfferHeadline";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -75,7 +76,7 @@ export async function generateMetadata({
   if (!store) return {};
   const pageUrl = `${SITE_URL}/store/${slug}`;
   const n = store.coupons.length;
-  const countWord = n === 1 ? "код" : n >= 2 && n <= 4 ? "кода" : "кодов";
+  const { codes: realCodeCount, codeFree: codeFreeCount } = getStoreHeadlineOfferCounts(store.coupons);
   const maxDisc = getMaxVerifiedDiscount(store.coupons);
   const hasGift = hasGiftOffer(store.coupons);
   const monthYear = getCapitalizedMonthYear();
@@ -90,16 +91,18 @@ export async function generateMetadata({
   // сам заголовок его не содержит — иначе в выдаче получалось «… | ПромоФакт
   // — ПромоФакт». А вот в OpenGraph и Twitter шаблон не применяется, туда
   // бренд подставляем явно.
-  const title =
-    useCustomMetadata && storeExtra?.customTitle
-      ? storeExtra.customTitle(monthRu, monthYear)
-      : n > 0 && slug === "tasty-coffee"
-        ? `Промокод Tasty Coffee на ${monthRu}: ${n} ${countWord}`
-        : n > 0
-        ? (maxDisc && maxDisc !== null
-            ? `Промокоды ${store.name} на ${monthRu}: ${maxDisc}, ${n} ${countWord}`
-            : `Промокоды и акции ${store.name} на ${monthRu}: ${n} ${countWord}`)
-        : `Скидки и акции ${store.name} на ${monthYear}`;
+  const title = useCustomMetadata && storeExtra?.customTitle
+    ? storeExtra.customTitle(monthRu, monthYear)
+    : n > 0
+      ? formatStoreOfferTitle({
+          name: store.name,
+          month: monthRu,
+          codes: realCodeCount,
+          codeFree: codeFreeCount,
+          maxDiscount: maxDisc,
+          searchBrandPromo: slug === "tasty-coffee",
+        })
+      : `Скидки и акции ${store.name} на ${monthYear}`;
   const titleWithBrand = `${title} | ${SITE_NAME}`;
   const description =
     useCustomMetadata && storeExtra?.customDescription
