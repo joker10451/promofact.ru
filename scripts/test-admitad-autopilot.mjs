@@ -177,6 +177,37 @@ console.log("===================================================================
   }
 }
 
+// 6c. Reversible Tasty pilot flag must never replace or bypass existing allowlist.
+{
+  const priorAllowlist = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  const priorFlag = process.env.ADMITAD_TASTY_PILOT_ENABLED;
+  try {
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "26110,25224";
+    process.env.ADMITAD_TASTY_PILOT_ENABLED = "false";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), ["26110", "25224"]);
+    process.env.ADMITAD_TASTY_PILOT_ENABLED = "true";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), ["26110", "25224", "17220"]);
+    // No duplicate if the new campaign was already approved explicitly.
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "26110,17220";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), ["26110", "17220"]);
+    // Fail closed if base campaigns are not configured, even with the flag set.
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), []);
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "undefined";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), []);
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "26110";
+    process.env.ADMITAD_TASTY_PILOT_ENABLED = "TRUE";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), ["26110"]);
+    passed++;
+    console.log("✓ Test 6c: Optional Tasty pilot preserves all approved campaigns and fails closed (PASS)");
+  } finally {
+    if (priorAllowlist === undefined) delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    else process.env.ADMITAD_APPROVED_CAMPAIGNS = priorAllowlist;
+    if (priorFlag === undefined) delete process.env.ADMITAD_TASTY_PILOT_ENABLED;
+    else process.env.ADMITAD_TASTY_PILOT_ENABLED = priorFlag;
+  }
+}
+
 // 7. Тест NON-ALLOWLISTED VALID OFFER -> READY_NOT_APPROVED
 {
   const evalResult = isAdmitadPublishable(
