@@ -58,6 +58,8 @@ export async function runAdmitadSafeSync(options: {
   onlyNewCampaignIds?: readonly string[];
   /** Upper bound on added active offers; exceeded => abort before any staging/write. */
   maxNewOffers?: number;
+  /** Abort before writes if any baseline active ID would be lost. */
+  requireActiveRetention?: boolean;
 } = {}): Promise<SyncWorkerResult> {
   const startTime = Date.now();
   const syncRunId = `sync_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -376,6 +378,12 @@ export async function runAdmitadSafeSync(options: {
 
     // Batch mode may not accidentally introduce new offers from other
     // already-approved programs or exceed its capped growth envelope.
+    if (options.requireActiveRetention) {
+      const proposedActiveIds = new Set(rowsToUpsert.filter((r) => r.is_active).map((r) => r.id));
+      if ([...existingActiveMap.keys()].some((id) => !proposedActiveIds.has(id))) {
+        throw new Error("BATCH_ACTIVE_COUPON_RETENTION_FAILED");
+      }
+    }
     if (options.maxNewOffers !== undefined) {
       if (!Number.isSafeInteger(options.maxNewOffers) || options.maxNewOffers < 0) {
         throw new Error("BATCH_INVALID_NEW_OFFER_CAP");
