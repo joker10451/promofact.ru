@@ -57,15 +57,15 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 lg:py-4">
         {/* Логотип */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 sm:gap-6">
           <Link
             href="/"
-            className="group flex items-center gap-2.5 font-display text-lg font-extrabold tracking-tight sm:text-xl shrink-0 text-ink"
+            className="group flex items-center gap-2 font-display sm:gap-2.5 text-sm font-extrabold tracking-tight sm:text-xl shrink-0 text-ink"
           >
-            <span className="relative grid h-10 w-10 place-items-center rounded-xl bg-red text-white transition-transform group-hover:scale-105">
-              <span className="font-display text-xl font-black leading-none text-white">%</span>
+            <span className="relative grid h-8 w-8 place-items-center rounded-xl sm:h-10 sm:w-10 bg-red text-white transition-transform group-hover:scale-105">
+              <span className="font-display text-base font-black leading-none text-white sm:text-xl">%</span>
             </span>
             <span className="font-display font-extrabold tracking-tight">
               Промо<span className="text-red">Факт</span>
