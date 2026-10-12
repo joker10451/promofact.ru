@@ -63,16 +63,19 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
         <p className="mt-1 text-sm font-medium text-ink/60">
           Промокоды с ближайшим сроком действия — по одному от каждого магазина.
         </p>
+        <p className="mt-2 text-xs font-medium text-ink/55 sm:hidden">
+          Листайте предложения в сторону →
+        </p>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-5 grid auto-cols-[minmax(270px,85vw)] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain pb-2 snap-x snap-mandatory sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
         {coupons.map((coupon) => {
           const isCopied = copiedCode === coupon.promocode.code;
           const expiry = expiryLabel(coupon.promocode.expires);
           return (
             <div
               key={`${coupon.store.slug}-${coupon.promocode.code}`}
-              className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-paper/30 p-4 transition-colors hover:border-red/35 hover:bg-white"
+              className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-paper/30 p-4 transition-colors hover:border-red/35 hover:bg-white snap-start"
             >
               <div>
                 <div className="flex items-center gap-2 min-w-0">
