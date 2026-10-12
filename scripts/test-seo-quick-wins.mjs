@@ -298,6 +298,7 @@ let passed = 0;
 {
   const articles = getArticles();
   const allStores = await getAllStores();
+
   const validStoreSlugs = new Set(allStores.map((s) => s.slug));
 
   let verifiedStoreLinksCount = 0;
@@ -751,11 +752,25 @@ let passed = 0;
   assert.ok(STABLE_STORES["tutu"], "Tutu обязан присутствовать в STABLE_STORES");
   assert.strictEqual(STABLE_STORES["tutu"].id, 3000);
   assert.strictEqual(STABLE_STORES["tutu"].slug, "tutu");
+  assert.ok(STABLE_STORES["tasty-coffee"], "Tasty Coffee should not 404 when offers expire");
+  assert.strictEqual(STABLE_STORES["tasty-coffee"].slug, "tasty-coffee");
+  assert.strictEqual(STABLE_STORES["tasty-coffee"].categorySlug, "produkty-i-napitki");
+  assert.ok(!("coupons" in STABLE_STORES["tasty-coffee"]), "Fallback must not embed fake coupons");
+  assert.ok(!("affiliate" in STABLE_STORES["tasty-coffee"]), "Fallback must not embed affiliate tracking");
+
 
   // 2. Generic Invariant: Проверка Sitemap для всех магазинов getAllStores()
   const sitemapEntries = await sitemapFn();
   const sitemapStoreUrls = new Set(sitemapEntries.filter((e) => e.url.includes("/store/")).map((e) => e.url));
   const allStores = await getAllStores();
+  const tastyStore = allStores.find((store) => store.slug === "tasty-coffee");
+  assert.ok(tastyStore, "Tasty Coffee must remain routable even without live partner offers");
+  if (tastyStore.coupons.length === 0) {
+    assert.ok(
+      !sitemapStoreUrls.has(`${SITE_URL}/store/tasty-coffee`),
+      "Empty Tasty Coffee page must stay out of XML sitemap",
+    );
+  }
 
   let liveStoresCount = 0;
   let zeroStoresCount = 0;

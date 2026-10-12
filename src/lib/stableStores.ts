@@ -473,6 +473,20 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://tanukifamily.ru",
     "activeBloggers": 8447
   },
+  // Keep an existing Google-indexed landing route available after Perfluence
+  // offers expire. This entry carries NO synthetic coupons or affiliate links.
+  "tasty-coffee": {
+    id: -100001, // Fallback-only identifier; live partner offers keep their real ID.
+    slug: "tasty-coffee",
+    name: "Tasty Coffee",
+    logo: null,
+    category: "Продукты и напитки",
+    categorySlug: "produkty-i-napitki",
+    about: "Tasty Coffee — интернет-магазин кофе, чая и аксессуаров для приготовления напитков.",
+    conditions: "Когда действующие промокоды доступны, их условия и сроки публикуются в карточках. Если предложений нет, не обещаем скидок или подарков.",
+    site: "https://shop.tastycoffee.ru/",
+    activeBloggers: 0,
+  },
   "tehnopark": {
     "id": 100010,
     "slug": "tehnopark",
