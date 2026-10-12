@@ -23,7 +23,8 @@ on:
   # Auto-refresh only verified programs; set repo Actions variable
   # ADMITAD_BATCH_AUTO_SYNC_ENABLED=false to stop without a code change.
   schedule:
-    - cron: '0 */3 * * *'
+    # GitHub may delay or drop scheduled jobs at minute 0 (hour-boundary load).
+    - cron: '17 */3 * * *'
 
 permissions:
   contents: read
