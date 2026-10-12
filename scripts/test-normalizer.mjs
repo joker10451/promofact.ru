@@ -944,6 +944,22 @@ const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8"
     assert.ok(res.fullDescription.includes("индивидуальную подборку"));
     assert.strictEqual(res.promoCode, null, "Не придумываем отсутствующий код");
   }
+
+  const mountain = normalizeAdmitadCoupon({
+    id: 919725,
+    advcampaignId: "14647",
+    rawCampaignName: "Спортмастер",
+    rawCampaignSite: "https://www.sportmaster.ru",
+    name: "Скидки на обувь для горного туризма по промокоду",
+    description: "Скидка до 20% на обувь для горного туризма по промокоду MOUNTAIN",
+    discount: "20%",
+    promocode: "MOUNTAIN",
+    customerType: "all_customers",
+  });
+  assert.ok(mountain, "Спортмастер: скидка на обувь должна пройти нормализацию");
+  assert.ok(mountain.shortDescription.startsWith("Скидки на обувь"),
+    "Не добавлять «на» перед завершённым названием скидки");
+  assert.ok(!mountain.shortDescription.startsWith("на Скидки"));
   console.log("✓ Test 36: Скидка месяца — короткое описание без обрывков (PASS)");
   passed++;
 }
