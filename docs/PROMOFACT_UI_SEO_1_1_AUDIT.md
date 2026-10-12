@@ -1,0 +1,41 @@
+# PromoFact UI/SEO 1.1 — verified audit + single-release plan
+
+**Prepared 2026-10-13. No production release from this branch.**
+
+## Confirmed from the published production site
+
+- Vercel production deployment `8b3448c7a62a80a7dbe3abeb1d398034c4f5222c` was `READY`.
+- The homepage, Sber campaign landings, Tasty Coffee, Randewoo and Pyaterochka returned HTTP 200 when crawled.
+- `robots.txt` and `sitemap.xml` returned HTTP 200; the GSC sitemap reported 0 warnings and 0 errors at that check.
+- Supabase: 27 active Admitad records, 63 `READY_NOT_APPROVED` records, 570 total. All 27 active records had HTTPS affiliate links, nonempty ERID and legal text, no expired active offers, and distinct coupon IDs.
+- Google's last settled 28-day reporting period showed 1,913 impressions and 20 clicks; 1,338 impressions were mobile (~69.9%). Search Console data lags production releases.
+- Sber campaigns use **authentic advertiser creatives** on the full pages, not on the new compact homepage teaser area. The offers have hard expiry gates.
+
+## Changes included in this batch
+
+1. Readable advertising disclosures on compact Sber homepage teasers: at least 12px, stronger contrast, and wrapping for legal/ERID strings. Sponsor names/INN/ERID, original images, affiliate links and expiry dates are unchanged.
+2. On store landing JSON-LD, prefer merchant URL (`store.site`), not the PromoFact coupon page, when the merchant URL is already known. Include `store.logo` when the existing catalogue actually supplies a logo; **never fabricate one**. Coupons/Offers preserve code/no-code logic.
+3. Regression checks for exact seller-brand metadata, legal disclosure readability, and Playwright coverage of 360, 390, 768 and 1440px: horizontal overflow, sponsored CTA links and source ERID, campaign landing URLs. Existing coupon-copy/attribution E2E scenarios remain enabled.
+
+## Investigated, deliberately NOT 'fixed' without evidence
+
+- `/store/yandex-eda` and `/store/iv-roshe` currently return HTML `noindex` because the store-page code hides pages that have **zero live coupons**. This is intentionally safer than re-indexing empty affiliate pages. Confirm valid offers before removing `noindex`.
+- `/store/polzaru` and `/store/askona` return 404 yet still have GSC historical impressions (37 and 21, respectively, last settled window). No verified replacement store landing currently exists. **Do not add irrelevant generic redirects** or fictional coupons. Wait for a valid destination or leave the honest 404.
+- `/store/megafon` returned 404 on direct check, and existing Admitad mapping is blocked; do not create an empty landing merely to remove the status.
+- Some historic articles have no supplied publication date and/or image. Do not insert today's date or stock images as fake metadata; source-authored information must be checked first.
+- The audit's `Organization missing logo` warnings can recur when the merchant has no genuine logo. This patch adds *existing* brand images only.
+- Real checkout application of coupons was not tested. Never claim a coupon was redeemed.
+- Mobile browser testing uses local Next.js Playwright fixtures in CI; it is **not** a visual inspection of remote production. Review screenshots before calling the mobile UI fully audited.
+- Chrome UX Report is unconfigured and Vercel Web Analytics reports `web_analytics_not_enabled`; do not invent field performance or traffic.
+
+## Release guard / cost control
+
+- Work exclusively on `fix/promofact-ui-seo-1-1-batch`, open **one PR**, let GitHub Actions run once after final changes.
+- Keep `vercel.json` `git.deploymentEnabled["*"] = false`: no automatic Preview deployments.
+- No manual `create_deployment`, no release to `main`, no DB mutations while this PR is under review.
+- When ready, merge **once** to `main`; permit **one** automatic production deployment. Verify `READY`, domain aliases and preservation of the 27 active offers.
+- Leave any unrelated Admitad offer onboarding behind manual advertiser permission and legal review.
+
+## Post-release checks
+
+Visit homepage and the two campaign landings at desktop and mobile sizes, validate visible labels and ERID, verify the fallback for expired promotions, follow internal CTAs (not paid conversions), and inspect production for errors before starting more SEO work.
