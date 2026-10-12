@@ -9,7 +9,7 @@
  * the existing atomic sync and catastrophic-drop protection.
  */
 import { getSupabaseAdmin } from "../src/lib/supabase.ts";
-import { getBatchCampaignAllowlist, getEffectiveCampaignAllowlist, parseReviewedFiveCouponIds, FIVE_NEW_CAMPAIGN_IDS, isFiveCouponExplicitlyReviewed } from "../src/lib/admitadAutopilot.ts";
+import { getBatchCampaignAllowlist, getEffectiveCampaignAllowlist, parseReviewedFiveCouponIds, FIVE_NEW_CAMPAIGN_IDS, isFiveCouponExplicitlyReviewed, FIVE_REVIEW_CANDIDATES } from "../src/lib/admitadAutopilot.ts";
 import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
 import { validateRetainsActiveCampaigns } from "./check-admitad-sync-preflight.mjs";
 
@@ -85,13 +85,17 @@ async function main() {
      (mode==="recurring" && csv!==PREVIOUS_BATCH && csv!==EXPANDED_BATCH) ||
      batch.join(",")!==csv.split(",").join(","))abort("BATCH_CAMPAIGNS_NOT_REVIEWED");
   if(process.env.ADMITAD_BATCH_RUN_APPROVED!=="true")abort("BATCH_RUN_NOT_APPROVED");
+  const previewOnly=process.env.ADMITAD_BATCH_PREVIEW_ONLY==="true";
+  if(previewOnly && (mode!=="initial" || csv!==EXPANDED_BATCH))
+    abort("BATCH_PREVIEW_MODE_INVALID");
+
   // Explicit publisher sign-off by coupon ID is required for any five-brand
   // expansion. A GitHub Actions confirmation checkbox is not enough.
   let reviewedFive=[];
   try {
     reviewedFive=parseReviewedFiveCouponIds(process.env.ADMITAD_BATCH_REVIEWED_COUPON_IDS||"");
   } catch { abort("FIVE_COUPON_IDS_NOT_REVIEWED"); }
-  if(csv===EXPANDED_BATCH && reviewedFive.length===0)abort("FIVE_COUPON_APPROVALS_MISSING");
+  if(csv===EXPANDED_BATCH && reviewedFive.length===0 && !previewOnly)abort("FIVE_COUPON_APPROVALS_MISSING");
 
   const baseCsv=process.env.ADMITAD_APPROVED_CAMPAIGNS||"";
   const allApprovals=getEffectiveCampaignAllowlist();
@@ -114,7 +118,7 @@ async function main() {
   const opts={
     onlyNewCampaignIds:allowedNew,maxNewOffers:mode==="initial"?MAX_FIRST_BATCH:MAX_RECURRING_NEW,
     requireActiveRetention:mode==="initial",
-    reviewedFiveCouponIds:csv===EXPANDED_BATCH?reviewedFive:undefined
+    reviewedFiveCouponIds:csv===EXPANDED_BATCH?(previewOnly?Object.keys(FIVE_REVIEW_CANDIDATES):reviewedFive):undefined
   };
   const preview=await runAdmitadSafeSync({...opts,skipDbWrite:true});
   if(!preview.success)abort("BATCH_DRY_RUN_FAILED");
@@ -127,6 +131,16 @@ async function main() {
     dbWrites:0
   }));
 
+  // Simulated approvals are used solely for a what-if preview. This branch
+  // exits before the atomic publish and never writes diagnostics or staging.
+  if(previewOnly) {
+    console.info("ADMITAD_FIVE_READ_ONLY_PREVIEW "+JSON.stringify({
+      previousActive:before.length,proposedActive:p,
+      simulatedCouponCandidates:Object.keys(FIVE_REVIEW_CANDIDATES).length,
+      dbWrites:0,permissionsApproved:false
+    }));
+    return;
+  }
   const justBefore=await activeRows(supa);
   if(justBefore.length!==before.length ||
      justBefore.some(x=>!before.some(y=>y.id===x.id)))
