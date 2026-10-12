@@ -52,12 +52,12 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
   if (coupons.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border-2 border-red/20 bg-gradient-to-br from-red-50/50 via-white to-amber-50/40 p-6 sm:p-8 shadow-[0_8px_30px_rgba(255,51,85,0.06)]">
+    <section className="relative rounded-3xl border border-line bg-white p-5 sm:p-7">
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-red/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-red">
+        <div className="inline-flex items-center gap-2 rounded-full bg-red/5 px-3 py-1 text-xs font-bold text-red">
           <Icon name="flame" size={12} /> Скоро заканчиваются
         </div>
-        <h2 className="mt-2 font-display text-2xl font-black tracking-tight text-ink sm:text-3xl">
+        <h2 className="mt-2 font-display text-xl font-extrabold tracking-tight text-ink sm:text-2xl">
           Успейте применить
         </h2>
         <p className="mt-1 text-sm font-medium text-ink/60">
@@ -65,14 +65,14 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
         </p>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {coupons.map((coupon) => {
           const isCopied = copiedCode === coupon.promocode.code;
           const expiry = expiryLabel(coupon.promocode.expires);
           return (
             <div
               key={`${coupon.store.slug}-${coupon.promocode.code}`}
-              className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-4 transition-all hover:-translate-y-1 hover:border-red/40 hover:shadow-lg"
+              className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-paper/30 p-4 transition-colors hover:border-red/35 hover:bg-white"
             >
               <div>
                 <div className="flex items-center gap-2 min-w-0">
@@ -108,7 +108,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                     type="button"
                     onClick={() => copy(coupon.promocode.code, coupon.store.name)}
                     className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all ${
-                      isCopied ? "bg-mint text-white" : "bg-yellow text-ink hover:bg-yellow/80"
+                      isCopied ? "bg-mint text-white" : "bg-white text-ink hover:bg-paper"
                     }`}
                   >
                     {isCopied ? <Icon name="check" size={12} /> : "Копия"}
@@ -125,13 +125,13 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                       store: coupon.store.name,
                     })
                   }
-                  className="block w-full rounded-xl bg-ink py-2 text-center text-xs font-bold text-white transition-all hover:bg-red"
+                  className="block w-full rounded-xl bg-red py-2.5 text-center text-xs font-bold text-white transition-colors hover:bg-red-dark"
                 >
                   В магазин →
                 </a>
 
                 {coupon.affiliate.ordText && (
-                  <p className="text-[10px] leading-snug text-ink/45">{coupon.affiliate.ordText}</p>
+                  <p className="text-xs leading-relaxed text-ink/70 [overflow-wrap:anywhere]">{coupon.affiliate.ordText}</p>
                 )}
               </div>
             </div>
