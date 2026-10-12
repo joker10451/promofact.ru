@@ -57,12 +57,22 @@ export const BATCH_VERIFIED_CAMPAIGNS: Readonly<Record<string, string>> = Object
   "28532": "befree-ru",
   "14647": "sportmaster",
   "22484": "randewoo",
+  "93978": "internet-magazin-bilayn",
+  "11738": "foxford",
+  "26032": "aravia",
+  "14725": "love-republic",
+  "23485": "skysmart-ru",
 });
 
 const BATCH_VERIFIED_OFFICIAL_HOSTS: Readonly<Record<string,string>> = Object.freeze({
   "28532":"befree.ru",
   "14647":"sportmaster.ru",
   "22484":"randewoo.ru",
+  "93978":"beeline.ru",
+  "11738":"foxford.ru",
+  "26032":"aravia.ru",
+  "14725":"loverepublic.ru",
+  "23485":"skysmart.ru",
 });
 
 /** Exact program ID + official hostname, never a substring/name guess. */

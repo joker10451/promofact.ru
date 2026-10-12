@@ -13,11 +13,15 @@ import { getBatchCampaignAllowlist, getEffectiveCampaignAllowlist } from "../src
 import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
 import { validateRetainsActiveCampaigns } from "./check-admitad-sync-preflight.mjs";
 
-const MAX_FIRST_BATCH = 11;
+const MAX_FIRST_BATCH = 40;
+const PREVIOUS_BATCH = "28532,14647,22484";
+const EXPANDED_BATCH = PREVIOUS_BATCH + ",93978,11738,26032,14725,23485";
+const NEW_CAMPAIGNS = ["93978","11738","26032","14725","23485"];
 const MAX_RECURRING_NEW = 25;
-const EXPECTED_FIRST_BASELINE = 16;
+const EXPECTED_FIRST_BASELINE = 27;
 const EXPECTED_BASELINE_CAMPAIGNS = Object.freeze({
-  "141770":2,"1667":3,"17220":1,"25224":6,"26110":3,"28532":1
+  "141770":2,"1667":3,"17220":1,"25224":6,"26110":3,"28532":6,
+  "14647":3,"22484":3
 });
 
 function abort(code) {const err=new Error(code);err.code=code;throw err;}
@@ -71,12 +75,13 @@ async function main() {
   if(!["initial","recurring"].includes(mode))abort("INVALID_BATCH_MODE");
   const csv=process.env.ADMITAD_BATCH_APPROVED_CAMPAIGNS||"";
   const batch=getBatchCampaignAllowlist();
-  if(batch.length!==3 || batch.join(",")!=="28532,14647,22484" ||
-     csv!=="28532,14647,22484")abort("BATCH_CAMPAIGNS_NOT_REVIEWED");
+  if((mode==="initial" && csv!==EXPANDED_BATCH) ||
+     (mode==="recurring" && csv!==PREVIOUS_BATCH && csv!==EXPANDED_BATCH) ||
+     batch.join(",")!==csv.split(",").join(","))abort("BATCH_CAMPAIGNS_NOT_REVIEWED");
   if(process.env.ADMITAD_BATCH_RUN_APPROVED!=="true")abort("BATCH_RUN_NOT_APPROVED");
   const baseCsv=process.env.ADMITAD_APPROVED_CAMPAIGNS||"";
   const allApprovals=getEffectiveCampaignAllowlist();
-  if(allApprovals.length!==8 || !batch.every(id=>allApprovals.includes(id)))
+  if(allApprovals.length!==5+batch.length || !batch.every(id=>allApprovals.includes(id)))
     abort("EFFECTIVE_ALLOWLIST_UNEXPECTED");
 
   const supa=getSupabaseAdmin();if(!supa)abort("DATABASE_NOT_CONFIGURED");
@@ -91,8 +96,9 @@ async function main() {
     before.map(x=>x.source_campaign_id),before.length,Number(meta.data.last_success_count));
   baselineCheck(before,mode);
 
+  const allowedNew=mode==="initial"?NEW_CAMPAIGNS:batch;
   const opts={
-    onlyNewCampaignIds:batch,maxNewOffers:mode==="initial"?MAX_FIRST_BATCH:MAX_RECURRING_NEW,
+    onlyNewCampaignIds:allowedNew,maxNewOffers:mode==="initial"?MAX_FIRST_BATCH:MAX_RECURRING_NEW,
     requireActiveRetention:mode==="initial"
   };
   const preview=await runAdmitadSafeSync({...opts,skipDbWrite:true});
@@ -113,7 +119,7 @@ async function main() {
   const applied=await runAdmitadSafeSync(opts);
   if(!applied.success)abort("BATCH_ATOMIC_SYNC_FAILED");
   const after=await activeRows(supa);
-  const added=verifyRows(after,before,new Set(batch),mode);
+  const added=verifyRows(after,before,new Set(allowedNew),mode);
   const {data:latest,error:metaError}=await supa.from("admitad_sync_meta")
     .select("last_status,last_success_count").eq("id","admitad_main").single();
   if(metaError || latest?.last_status!=="SUCCESS" || Number(latest.last_success_count)!==after.length)
