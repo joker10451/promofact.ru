@@ -666,6 +666,9 @@ export const EXPLICIT_STORE_MAPPINGS: Record<string, { slug: string; name: strin
   "яндекс плюс ru": { slug: "yandex-plus", name: "Яндекс Плюс" },
   "118265": { slug: "t-puteshestviya-oteli", name: "Т-Путешествия Отели" },
   "отели в т-банке ru": { slug: "t-puteshestviya-oteli", name: "Т-Путешествия Отели" },
+  // Verified staging snapshot (2026-10-11): Tasty Coffee, campaign 17220.
+  // Store mapping is NOT campaign approval; production remains gated by allowlist.
+  "17220": { slug: "tasty-coffee", name: "Tasty Coffee" },
   "26110": { slug: "pizzasushiwok", name: "Pizza Sushi Wok" },
   "pizzasushiwok": { slug: "pizzasushiwok", name: "Pizza Sushi Wok" },
   "pizza sushi wok": { slug: "pizzasushiwok", name: "Pizza Sushi Wok" },

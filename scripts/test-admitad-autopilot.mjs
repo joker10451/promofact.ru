@@ -196,6 +196,35 @@ console.log("===================================================================
   console.log("✓ Тест 7: Non-allowlisted valid offer -> READY_NOT_APPROVED (PASS)");
 }
 
+// 7b. Staged Tasty Coffee campaign is mapped, but not silently approved.
+// The real staging snapshot contains campaign 17220 with store Tasty Coffee.
+{
+  const mapping = matchCanonicalStore({
+    id: 17220,
+    name: "Tasty Coffee",
+    site_url: "https://shop.tastycoffee.ru/",
+  });
+  assert.strictEqual(mapping.canonicalSlug, "tasty-coffee");
+  assert.strictEqual(mapping.strategy, "EXACT MATCH");
+
+  const gated = isAdmitadPublishable(
+    { isExpired: false, isForeign: false, affiliateLink: "https://ad.admitad.com/g/test/?erid=TESTID", advcampaignId: "17220" },
+    {
+      campaign: { id: 17220, status: "active", connection_status: "active" },
+      mapping,
+      eridStatus: "PRESENT",
+      legalInfoStatus: "PRESENT",
+      eridValue: "TESTID",
+      advertiserLegalInfo: "Test advertiser legal details",
+      allowlist: ["26110"],
+    }
+  );
+  assert.strictEqual(gated.publishable, false, "Unapproved Tasty Coffee must never be published");
+  assert.strictEqual(gated.status, "READY_NOT_APPROVED");
+  passed++;
+  console.log("✓ Test 7b: Tasty Coffee 17220 mapped while allowlist remains strict (PASS)");
+}
+
 // 8. Тест Сборка ORD текста без искажений
 {
   const ord = buildAdmitadOrdText(" ООО «Магазин» ", " 2RanyTest ");
