@@ -256,24 +256,63 @@ export default async function StorePage({
           : []
         : storeExtra.faq;
 
+  // Narrow FAQs to the actual GSC search intent without promising unavailable coupons.
+  const searchIntentFaq = slug === "tasty-coffee"
+    ? [
+        {
+          q: "Где найти промокод Tasty Coffee на кофе?",
+          a: store.coupons.length > 0
+            ? "Действующие предложения Tasty Coffee перечислены в карточках выше. Перед заказом проверьте срок действия, минимальный чек и исключения."
+            : "Сейчас в каталоге нет подтверждённого действующего промокода Tasty Coffee. Проверяйте условия акций в магазине.",
+        },
+      ]
+    : slug === "pyaterochka"
+      ? [
+          {
+            q: "Где взять промокод Пятёрочки Доставка на повторный заказ?",
+            a: "Проверьте в карточке предложения, разрешено ли его использование постоянным покупателям. Код для первого заказа не обязательно подходит для повторного.",
+          },
+          {
+            q: "Промокод Пятёрочки даёт бесплатную доставку?",
+            a: "Скидка на товары и бесплатная доставка — разные условия. Итоговую стоимость доставки нужно проверить в корзине до оплаты.",
+          },
+        ]
+      : slug === "yandeks-puteshestviya"
+        ? [
+            {
+              q: "Есть ли промокод Яндекс Путешествий на первый заказ?",
+              a: firstOrderPromo
+                ? "Посмотрите действующее предложение для первого заказа в карточках выше: применимость зависит от дат, выбранного отеля и правил акции."
+                : "Подтверждённого предложения именно на первый заказ сейчас в карточках нет. Не рассчитывайте на скидку без проверки условий при бронировании.",
+            },
+            {
+              q: "Как проверить скидку при бронировании в Яндекс Путешествиях?",
+              a: "Сравните итоговую цену, включая обязательные сборы, и условия отмены до и после применения кода. Оформляйте заказ только после подтверждения суммы.",
+            },
+          ]
+        : [];
+
   const faqItems = [
     ...customFaqItems,
+    ...searchIntentFaq,
     {
       q: `Как применить промокод ${store.name}?`,
-      a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Скидка применится автоматически до оплаты.`,
+      a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Если условия выполнены, скидка отобразится в корзине до оплаты.`,
     },
     {
       q: `Есть ли промокод ${store.name} на первый заказ в ${monthRu}?`,
       a: firstOrderPromo
         ? `Да! Сейчас действует промокод «${firstOrderPromo.promocode.code}» — ${firstOrderPromo.promocode.bonusName || "скидка на первый заказ"}. Скопируйте его на этой странице и примените при оформлении первого заказа.`
-        : `На данный момент большинство промокодов ${store.name} подходят как для новых, так и для постоянных клиентов. Проверьте условия в карточках купонов выше.`,
+        : `Подтверждённого предложения специально для первого заказа сейчас нет. Наличие других действующих предложений и их условия указаны в карточках выше.`,
     },
     {
       q: `Какие скидки и подарки есть в ${store.name} сейчас?`,
       a:
         maxDisc && maxDisc !== null
           ? `На ${monthYear} максимальная выгода по промокодам в ${store.name} составляет ${maxDisc}. Истёкшие коды убираются со страницы автоматически; перед заказом сверьте условия в карточке купона.`
-          : `На ${monthYear} для ${store.name} действуют ${hasGift ? "подарки к заказу и другие акции" : "акции и специальные предложения"}. Размер денежной скидки для таких акций не указан. Перед заказом сверьте условия в карточке купона.`,
+          : store.coupons.length > 0
+            ? `Для ${store.name} есть ${store.coupons.length} действующих предложений. Размер выгоды не указан в виде фиксированной денежной скидки; проверьте условия в карточках.`
+            : `Сейчас для ${store.name} нет опубликованных действующих промокодов. Не используйте истёкшие коды без проверки на сайте магазина.`,
     },
     {
       q: `Почему промокод ${store.name} может не сработать?`,
@@ -622,15 +661,14 @@ export default async function StorePage({
 
         {/* Ссылки на статьи блога по теме магазина (Двунаправленный граф перелинковки) */}
         {(() => {
-          const storeArticles = getArticles().filter(
-            (a) =>
-              a.title.toLowerCase().includes(store.name.toLowerCase()) ||
-              a.description.toLowerCase().includes(store.name.toLowerCase()) ||
-              a.title.toLowerCase().includes(store.category.toLowerCase()) ||
-              a.description.toLowerCase().includes(store.category.toLowerCase())
-          ).slice(0, 2);
+          const storeArticles = getArticles().filter((a) =>
+            a.related.some((link) => link.href === `/store/${store.slug}`) ||
+            a.title.toLowerCase().includes(store.name.toLowerCase()) ||
+            a.description.toLowerCase().includes(store.name.toLowerCase())
+          ).slice(0, 3);
 
-          const list = storeArticles.length > 0 ? storeArticles : getArticles().slice(0, 2);
+          // Never inject unrelated blog articles just to fill a widget.
+          if (storeArticles.length === 0) return null;
 
           return (
             <section className="mt-10 max-w-3xl rounded-3xl border border-line bg-white p-6 shadow-xs">
@@ -639,7 +677,7 @@ export default async function StorePage({
                 <span>Полезные гиды и советы по покупкам в {store.name}</span>
               </h3>
               <div className="grid gap-2 sm:grid-cols-2">
-                {list.map((a) => (
+                {storeArticles.map((a) => (
                   <Link
                     key={a.slug}
                     href={`/sovety/${a.slug}`}
