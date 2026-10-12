@@ -1,0 +1,54 @@
+name: Admitad Verified Program Batch Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "initial: preserve all 16 baseline offers; recurring: refresh validated batch"
+        required: true
+        type: choice
+        options: [initial, recurring]
+        default: initial
+      confirm:
+        description: "I authorize publication from exactly campaigns 28532, 14647, 22484"
+        type: boolean
+        required: true
+        default: false
+  # Enable only AFTER successful bounded initial batch and production QA:
+  # schedule:
+  #   - cron: '0 */3 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admitad-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish-verified-batch:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Safe batch preview and atomic publish
+        env:
+          ADMITAD_BATCH_MODE: ${{ inputs.mode }}
+          ADMITAD_BATCH_RUN_APPROVED: 'true'
+          ADMITAD_BATCH_APPROVED_CAMPAIGNS: '28532,14647,22484'
+          ADMITAD_APPROVED_CAMPAIGNS: '141770,1667,17220,25224,26110'
+          ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
+          ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
+          ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}
+          ADMITAD_WEBSITE_HOST: promofact.ru
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node --loader ./scripts/ts-loader.mjs scripts/admitad-batch-sync.mjs
