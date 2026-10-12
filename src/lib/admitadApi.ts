@@ -655,6 +655,13 @@ export interface StoreMappingResult {
  * Разрешены подтвержденные строковые алиасы брендов.
  */
 export const EXPLICIT_STORE_MAPPINGS: Record<string, { slug: string; name: string }> = {
+  // Exact program IDs and official sites checked on 2026-10-12 via connected publisher API.
+  // Mapping does not authorize publication by itself.
+  "93978": { slug: "internet-magazin-bilayn", name: "Интернет-магазин «билайн»" },
+  "11738": { slug: "foxford", name: "Фоксфорд" },
+  "26032": { slug: "aravia", name: "Aravia" },
+  "14725": { slug: "love-republic", name: "Love Republic" },
+  "23485": { slug: "skysmart-ru", name: "Skysmart" },
   // Matched to official program sites and existing canonical PromoFact slugs.
   // Mapping does NOT authorize publication; allowlist/quality/legal gates remain.
   "28532": { slug: "befree-ru", name: "Befree" },
