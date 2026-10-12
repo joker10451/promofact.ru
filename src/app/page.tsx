@@ -113,7 +113,7 @@ export default async function Home() {
         <Hero search={searchIndex} couponCount={coupons.length} proofTotal={proofTotal} />
 
         {/* 3. Популярные магазины в стиле Пикабу — быстрый вход по круглым брендам */}
-        <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 pt-4 sm:pt-8">
           <Reveal>
             <PopularStores />
           </Reveal>
