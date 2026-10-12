@@ -60,6 +60,25 @@ codes like `НЕ НУЖЕН` as real entered codes.
 - [ ] Review deployment limit and CI; no Vercel deployment needed merely to
   review this branch.
 
+## Safe live Admitad WHAT-IF preview
+
+A manual GitHub Actions `Admitad Verified Program Batch Sync` run can be
+launched against this branch with `mode=initial`, `batch=expand-five`,
+`confirm=true` and `preview_only=true`. It uses the existing secrets to
+fetch the **current, site-scoped Admitad API** and compares the five
+shortlisted coupon IDs against the 27-row database baseline.
+
+The read-only script deliberately *simulates* exact ID approvals for these
+five candidates only to compute a proposed active count; this is **not**
+publisher authorization. It aborts/returns **before staging, publishing or
+sync diagnostics**, and logs `ADMITAD_FIVE_READ_ONLY_PREVIEW`,
+`dbWrites:0` and `permissionsApproved:false`.
+It does not make a current Perfluence API call; that remains a separate
+requirement.
+
+The normal `preview_only=false` path continues to require explicit
+`ADMITAD_BATCH_REVIEWED_COUPON_IDS` for any five-brand publication.
+
 ## Release control
 
 Existing `workflow_dispatch` `expand-five` is still **not** permission to
