@@ -30,6 +30,7 @@ import {
   buildAdmitadOrdText,
   getEffectiveCampaignAllowlist,
   checkTastyCoffeePilot,
+  checkBefreePilot,
   type SyncAggregates,
 } from "@/lib/admitadAutopilot";
 import {
@@ -170,13 +171,19 @@ export async function runAdmitadSafeSync(options: {
       // Admitad 17220 is an explicitly scoped single-coupon pilot; never publish
       // unrelated/placeholder coupons or a stale ERID from a previous snapshot.
       const couponId = String(raw.id || apiCoupon.id);
-      const pilotGate = checkTastyCoffeePilot({
+      const pilotInput = {
         campaignId: String(campId),
         couponId,
         promocode: raw.promocode || "",
         affiliateLink: normalized?.affiliate?.url || raw.gotolink || "",
         erid: legal.eridValue || "",
-      });
+      };
+      const tastyGate = checkTastyCoffeePilot(pilotInput);
+      const befreeGate = checkBefreePilot(pilotInput);
+      const pilotGate = {
+        passed: tastyGate.passed && befreeGate.passed,
+        reason: tastyGate.reason || befreeGate.reason,
+      };
 
       // Проверка публикации через Publication Eligibility Gate
       const isPersonal = Boolean(apiCoupon.is_personal || raw.is_personal || (normalized && normalized.isPersonal));
