@@ -142,11 +142,16 @@ export function checkBefreePilot(input: {
   }
   try {
     const u = new URL(input.affiliateLink);
+    const parts = u.pathname.split("/");
+    const validTrackingPath = parts.length === 4 && parts[0] === "" &&
+      parts[1] === "g" && parts[3] === "" &&
+      /^[a-zA-Z0-9_-]+$/.test(parts[2]);
+    const publisherId = u.searchParams.get("i") || "";
+    const validPublisherId = publisherId.length > 0 &&
+      [...publisherId].every((c) => c >= "0" && c <= "9");
     if (u.protocol !== "https:" || u.hostname !== "bednari.com" ||
-        u.port || u.username || u.password ||
-        !/^\\/g\\/[a-zA-Z0-9_-]+\\/$/.test(u.pathname) ||
-        !/^\\d+$/.test(u.searchParams.get("i") || "") ||
-        u.searchParams.get("erid") !== input.erid) {
+        u.port || u.username || u.password || !validTrackingPath ||
+        !validPublisherId || u.searchParams.get("erid") !== input.erid) {
       return { passed: false, reason: "BEFREE_PILOT_TRACKING_LINK_MISMATCH" };
     }
   } catch {
