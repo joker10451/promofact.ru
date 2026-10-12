@@ -1,0 +1,37 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const read = (path) => fs.readFileSync(path, "utf8");
+const home = read("src/app/page.tsx");
+const hero = read("src/components/Hero.tsx");
+const header = read("src/components/Header.tsx");
+const stores = read("src/components/PopularStores.tsx");
+const coupons = read("src/components/CouponGrid.tsx");
+const featured = read("src/components/ExpiringDeals.tsx");
+const css = read("src/app/globals.css");
+const regulations = read("src/components/SberCampaignTeasers.tsx");
+
+assert.ok(home.includes('className="pf-v2"'), "V2 design must be scoped to the homepage");
+assert.ok(css.includes(".pf-v2 {"), "Scoped design tokens required");
+assert.ok(hero.includes("Хорошие скидки.") && hero.includes("Без лишних поисков."), "Approved H1 must render");
+assert.ok(hero.includes('ref={containerRef}') && hero.includes("submitSearch(q)"), "Search behavior must remain wired");
+assert.ok(hero.includes('window.dispatchEvent(new CustomEvent("promo:search"'), "Hero-to-catalog search must be preserved");
+assert.ok(hero.includes("stores.slice(0, 6)"), "Quick tags must come from real active shop data");
+assert.ok(!hero.includes("REAL_POPULAR_TAGS"), "Do not imply static suggested shops have active coupons");
+assert.ok(stores.includes('aria-label="Популярные магазины"'), "Accessible live popular-stores section required");
+assert.ok(stores.includes('index >= 6 ? "hidden sm:flex"'), "Mobile popular-store cap remains six");
+assert.ok(header.includes("MegaMenu groups={groups}") && header.includes("MobileCatalogMenu groups={groups}"), "Do not break category menus");
+assert.ok(header.includes("<HeaderSearchTrigger />"), "Global search preserved");
+assert.ok(coupons.includes('id="catalog"'), "Catalog anchor cannot be renamed");
+assert.ok(coupons.includes('onClick={() => setQuickFilter("first")}'), "Original first-order filter required");
+assert.ok(coupons.includes('onClick={() => setQuickFilter("discount_20")}'), "Thresholded deal filter required");
+assert.equal((coupons.match(/Быстрые смарт-фильтры/g) || []).length, 0, "Second duplicate smart filter removed");
+assert.ok(home.indexOf("<PopularStores />") < home.indexOf("<CouponGrid"), "Shop browsing should precede coupon catalog");
+assert.ok(home.indexOf("<CouponGrid") < home.indexOf("<SberCampaignTeasers />"), "Real offers should precede advertising");
+assert.ok(home.includes("<SeoArticle />") && home.includes("<Faq />"), "SEO and helpful content must be preserved");
+assert.ok(home.includes("<SavingsCalculator />"), "Secondary calculator must still exist, just collapsed");
+assert.ok(regulations.includes("<SberKidsPromoHome />") && regulations.includes("<SberUlybatlHome />"), "Full advertiser pages remain linked");
+assert.ok(featured.includes("coupon.affiliate.ordText"), "Legal ad copy must remain visible");
+assert.ok(featured.includes("nofollow sponsored noopener"), "Affiliate relationship must remain disclosed");
+assert.ok(featured.includes("copy(coupon.promocode.code"), "Promo-copy logic must remain wired");
+console.log("PromoFact 2.0 scoped design/data/legal regression PASS");
