@@ -71,8 +71,8 @@ export function isVerifiedBatchCampaignOrigin(id: string, siteUrl: string): bool
   if (!expected || typeof siteUrl!=="string") return false;
   try {
     const url=new URL(siteUrl);
-    const host=url.hostname.toLowerCase().replace(/^www\\./,"");
-    return url.protocol==="https:" && host===expected &&
+    const host=url.hostname.toLowerCase();
+    return url.protocol==="https:" && (host===expected || host==="www."+expected) &&
       url.username==="" && url.password==="" && url.port==="";
   } catch { return false; }
 }
