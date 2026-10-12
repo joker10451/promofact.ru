@@ -232,14 +232,30 @@ console.log("===================================================================
     campaignId: "17220",
     couponId: "942125",
     promocode: "TKPRDM-UYVG1GJO",
-    erid: "MvGzQC98w3Z1gMq1mSxTgEET",
-    affiliateLink: "https://dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=31&erid=MvGzQC98w3Z1gMq1mSxTgEET",
+    erid: "2bL9aMPo2e49hMef4rrUCgKjJQ",
+    affiliateLink: "https://dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=31&erid=2bL9aMPo2e49hMef4rrUCgKjJQ",
   };
   assert.strictEqual(checkTastyCoffeePilot(official).passed, true);
-  assert.strictEqual(checkTastyCoffeePilot({ ...official, erid: "2bL9aMPo2e49hMef4rrUCgKjJQ" }).passed, false);
+  // An ERID issued in a later fresh coupon-specific API response may rotate.
+  // Gate still ties it to the HTTPS affiliate link instead of a static constant.
+  const futureErid = "FutureCouponCreativeErid2027abc";
+  const future = {
+    ...official,
+    erid: futureErid,
+    affiliateLink: `https://dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=31&erid=${futureErid}`,
+  };
+  assert.strictEqual(checkTastyCoffeePilot(future).passed, true);
+  assert.strictEqual(checkTastyCoffeePilot({ ...official, erid: "" }).passed, false);
+  assert.strictEqual(checkTastyCoffeePilot({ ...official, erid: "wrong" }).passed, false);
   assert.strictEqual(checkTastyCoffeePilot({
     ...official,
-    affiliateLink: "https://dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=31&erid=2bL9aMPo2e49hMef4rrUCgKjJQ",
+    affiliateLink: "https://user:pass@dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=31&erid=2bL9aMPo2e49hMef4rrUCgKjJQ",
+  }).passed, false);
+
+  assert.strictEqual(checkTastyCoffeePilot({ ...official, erid: "MvGzQC98w3Z1gMq1mSxTgEET" }).passed, false);
+  assert.strictEqual(checkTastyCoffeePilot({
+    ...official,
+    affiliateLink: "https://dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=31&erid=MvGzQC98w3Z1gMq1mSxTgEET",
   }).passed, false);
   assert.strictEqual(checkTastyCoffeePilot({ ...official, couponId: "678330", promocode: "Admitad" }).passed, false);
   assert.strictEqual(checkTastyCoffeePilot({ ...official, couponId: "462918", promocode: "не нужен" }).passed, false);
@@ -272,7 +288,7 @@ console.log("===================================================================
   assert.strictEqual(blocked.publishable, false);
   assert.strictEqual(blocked.status, "READY_NOT_APPROVED");
   passed++;
-  console.log("✓ Test 7c: Strict Tasty Coffee code, ERID, URL and separate approval gates (PASS)");
+  console.log("✓ Test 7c: Strict Tasty Coffee coupon-scoped ERID, URL and separate approval gates (PASS)");
 }
 
 // 8. Тест Сборка ORD текста без искажений

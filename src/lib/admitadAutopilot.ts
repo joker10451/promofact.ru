@@ -78,14 +78,21 @@ export function checkTastyCoffeePilot(input: {
   if (input.couponId !== "942125" || input.promocode.trim() !== "TKPRDM-UYVG1GJO") {
     return { passed: false, reason: "TASTY_PILOT_UNVERIFIED_COUPON" };
   }
-  if (input.erid !== "MvGzQC98w3Z1gMq1mSxTgEET") {
-    return { passed: false, reason: "TASTY_PILOT_ERID_STALE_OR_CHANGED" };
+  // Coupon-specific token comes from the currently connected publisher coupon
+  // API, which matches "Coupons and Promo Codes -> Get Code" in the account.
+  // The separate "Promo Code Programs" listing can expose a different creative
+  // ERID for the same offer; never hardcode that listing token into this gate.
+  if (!/^[a-zA-Z0-9_-]{12,80}$/.test(input.erid)) {
+    return { passed: false, reason: "TASTY_PILOT_MISSING_OR_INVALID_ERID" };
   }
   try {
     const url = new URL(input.affiliateLink);
     if (
       url.protocol !== "https:" ||
       url.hostname !== "dkfrh.com" ||
+      url.port !== "" ||
+      url.username !== "" ||
+      url.password !== "" ||
       url.pathname !== "/g/va69o33134c7dde8999c9ebcee8c5e/" ||
       url.searchParams.get("i") !== "31" ||
       url.searchParams.get("erid") !== input.erid
