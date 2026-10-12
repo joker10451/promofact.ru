@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const config=JSON.parse(fs.readFileSync("vercel.json","utf8"));
+assert.equal(config.git.deploymentEnabled["*"],false,"No automatic Preview deployments for short-lived work branches");
+assert.equal(config.git.deploymentEnabled.main,true,"Production main must remain enabled");
+const workflow=fs.readFileSync(".github/workflows/sync-catalog.yml","utf8");
+assert.match(workflow,/cron:\s*'5 3 \* \* 1'/,"Perfluence feed updates once a week");
+assert.doesNotMatch(workflow,/5 21,3,9,15/,"Four daily deploy-triggering cron ticks must be absent");
+assert.match(workflow,/workflow_dispatch:/,"Urgent manual Perfluence sync remains available");
+assert.match(workflow,/git push origin main/,"Verified feed changes are still published; never silently drop them");
+console.log("Vercel Preview budget and Perfluence weekly cadence PASS");

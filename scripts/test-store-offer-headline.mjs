@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { isRealPromoCode } from "../src/lib/dedupe.ts";
-import { getStoreHeadlineOfferCounts,formatStoreOfferTitle,formatStoreOfferCounts,pluralRu } from "../src/lib/storeOfferHeadline.ts";
+import { getStoreHeadlineOfferCounts,formatStoreOfferTitle,formatStoreOfferCounts,formatPriorityStoreTitle,pluralRu } from "../src/lib/storeOfferHeadline.ts";
 
 const coupons = (codes) => codes.map(code=>({promocode:{code}}));
 assert.deepEqual(getStoreHeadlineOfferCounts(coupons(["ABC","NOT REQUIRED","НЕ НУЖЕН","","АКЦИЯ","REAL2"])),{offers:6,codes:2,codeFree:4});
@@ -20,4 +20,11 @@ assert.equal(formatStoreOfferTitle({name:"Befree",month:"октябрь 2026",co
 assert.equal(formatStoreOfferTitle({name:"Sportmaster",month:"октябрь 2026",codes:0,codeFree:2}),"Акции Sportmaster на октябрь 2026: 2 акции");
 assert.equal(formatStoreOfferTitle({name:"Tasty Coffee",month:"октябрь 2026",codes:1,codeFree:0,searchBrandPromo:true}),"Промокод Tasty Coffee на октябрь 2026: 1 промокод");
 assert.equal(formatStoreOfferTitle({name:"Tasty Coffee",month:"октябрь 2026",codes:0,codeFree:0,searchBrandPromo:true}),"Скидки и акции Tasty Coffee на октябрь 2026");
+assert.equal(formatPriorityStoreTitle({slug:"tasty-coffee",month:"октябрь 2026",codes:1,codeFree:0}),"Tasty Coffee: 1 промокод — октябрь 2026");
+assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:1,codeFree:2}),"Randewoo: 1 промокод и 2 акции");
+assert.equal(formatPriorityStoreTitle({slug:"yandeks-puteshestviya",month:"октябрь 2026",codes:1,codeFree:0}),"Яндекс Путешествия: 1 промокод");
+assert.equal(formatPriorityStoreTitle({slug:"pyaterochka",month:"октябрь 2026",codes:2,codeFree:0}),"Пятёрочка Доставка: 2 промокода");
+assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:0,codeFree:3}),"Randewoo: 3 акции");
+assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:0,codeFree:0}),null);
+assert.equal(formatPriorityStoreTitle({slug:"some-other-store",month:"октябрь 2026",codes:2,codeFree:0}),null);
 console.log("Real-code vs code-free SEO title tests PASS");
