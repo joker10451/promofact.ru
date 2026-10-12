@@ -47,6 +47,27 @@ export const VERIFIED_CAMPAIGN_ALLOWLIST: readonly string[] = [
  * Никакого неявного отката к пяти кампаниям по умолчанию! Без явной конфигурации
  * публикация строго блокируется (fail-closed).
  */
+/**
+ * Batch publication is limited to independently verified program IDs. The
+ * env var is additive, not a replacement of ADMITAD_APPROVED_CAMPAIGNS.
+ * An unknown, duplicate, malformed or empty token invalidates the whole batch.
+ * Expanding this register is a reviewed code change, never inferred from a name.
+ */
+export const BATCH_VERIFIED_CAMPAIGNS: Readonly<Record<string, string>> = Object.freeze({
+  "28532": "befree-ru",
+  "14647": "sportmaster",
+  "22484": "randewoo",
+});
+
+export function getBatchCampaignAllowlist(): readonly string[] {
+  const value = process.env.ADMITAD_BATCH_APPROVED_CAMPAIGNS?.trim();
+  if (!value) return [];
+  const entries = value.split(",").map((id) => id.trim());
+  if (entries.some((id) => !/^[0-9]{1,12}$/.test(id) || !BATCH_VERIFIED_CAMPAIGNS[id])) return [];
+  if (new Set(entries).size !== entries.length) return [];
+  return entries;
+}
+
 export function getEffectiveCampaignAllowlist(): readonly string[] {
   const envVal = process.env.ADMITAD_APPROVED_CAMPAIGNS?.trim();
   // Keep the historical fail-closed invariant: the pilot cannot enable a
@@ -68,6 +89,9 @@ export function getEffectiveCampaignAllowlist(): readonly string[] {
   // never substitute a new list for the masked production configuration.
   if (process.env.ADMITAD_BEFREE_PILOT_ENABLED?.trim() === "true") {
     approved.add("28532");
+  }
+  for (const campaignId of getBatchCampaignAllowlist()) {
+    approved.add(campaignId);
   }
   return [...approved];
 }
@@ -134,6 +158,9 @@ export function checkBefreePilot(input: {
   erid: string;
 }): { passed: boolean; reason?: string } {
   if (input.campaignId !== "28532") return { passed: true };
+  // The strict one-coupon pilot remains the default. Program-level approval
+  // becomes possible only through the validated additive batch allowlist.
+  if (getBatchCampaignAllowlist().includes("28532")) return { passed: true };
   if (input.couponId !== "942686" || !isRealPromoCode(input.promocode)) {
     return { passed: false, reason: "BEFREE_PILOT_UNAPPROVED_COUPON" };
   }
