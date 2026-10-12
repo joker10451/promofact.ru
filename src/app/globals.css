@@ -450,3 +450,52 @@ body::before {
 .reveal-stagger.is-visible > *:nth-child(5) { transition-delay: 320ms; }
 .reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 400ms; }
 
+
+
+/* PromoFact 2.0. Scoped to the redesigned home; shop/affiliate landing
+   pages retain their existing contract and styles during this phase. */
+.pf-v2 {
+  --color-ink: #172033;
+  --color-ink-soft: #26354d;
+  --color-paper: #f7f8fa;
+  --color-red: #f43f5e;
+  --color-red-dark: #df2d50;
+  --color-yellow: #ffde81;
+  --color-yellow-dark: #f3c845;
+  --color-mint: #0f9a70;
+  --color-line: #e4e8ef;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.pf-v2 #popular-stores {
+  border: 1px solid var(--color-line);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.pf-v2 #catalog article[id^="coupon-"] {
+  border-radius: 20px;
+  border-color: var(--color-line);
+  box-shadow: 0 5px 24px rgba(23, 32, 51, 0.035);
+}
+
+.pf-v2 #catalog article[id^="coupon-"]:hover {
+  border-color: rgba(244, 63, 94, 0.35);
+  box-shadow: 0 12px 30px rgba(23, 32, 51, 0.065);
+}
+
+.pf-v2 :is(a, button, input, select, summary):focus-visible {
+  outline: 2px solid var(--color-red);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-v2 *,
+  .pf-v2 *::before,
+  .pf-v2 *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
