@@ -17,7 +17,7 @@ import { buildStoreArticle, buildStoreDescription } from "@/lib/storeSeoContent"
 import { getMaxVerifiedDiscount, hasGiftOffer } from "@/lib/storeDiscount";
 import { getStoreExtra, hasActiveRequiredCoupons } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
-import { formatStoreOfferTitle, getStoreHeadlineOfferCounts } from "@/lib/storeOfferHeadline";
+import { formatStoreOfferTitle, formatPriorityStoreTitle, getStoreHeadlineOfferCounts } from "@/lib/storeOfferHeadline";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -91,7 +91,10 @@ export async function generateMetadata({
   // сам заголовок его не содержит — иначе в выдаче получалось «… | ПромоФакт
   // — ПромоФакт». А вот в OpenGraph и Twitter шаблон не применяется, туда
   // бренд подставляем явно.
-  const title = useCustomMetadata && storeExtra?.customTitle
+  const priorityTitle = formatPriorityStoreTitle({
+    slug, month: monthRu, codes: realCodeCount, codeFree: codeFreeCount,
+  });
+  const title = priorityTitle ?? (useCustomMetadata && storeExtra?.customTitle
     ? storeExtra.customTitle(monthRu, monthYear)
     : n > 0
       ? formatStoreOfferTitle({
@@ -102,7 +105,7 @@ export async function generateMetadata({
           maxDiscount: maxDisc,
           searchBrandPromo: slug === "tasty-coffee",
         })
-      : `Скидки и акции ${store.name} на ${monthYear}`;
+      : `Скидки и акции ${store.name} на ${monthYear}`);
   const titleWithBrand = `${title} | ${SITE_NAME}`;
   const description =
     useCustomMetadata && storeExtra?.customDescription

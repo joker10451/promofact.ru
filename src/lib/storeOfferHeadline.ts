@@ -43,3 +43,24 @@ export function formatStoreOfferTitle(options: {
   if(codes === 0) return `Акции ${name} на ${month}: ${counts}`;
   return `Промокоды и акции ${name} на ${month}: ${counts}`;
 }
+
+/**
+ * High-intent store titles avoid truncation and only count actually entered
+ * promo codes. No claim of first-order eligibility, savings or free delivery
+ * is inferred from the search query alone.
+ */
+export function formatPriorityStoreTitle({
+  slug, month, codes, codeFree,
+}: {
+  slug: string; month: string; codes: number; codeFree: number;
+}): string | null {
+  if (codes + codeFree <= 0) return null;
+  const counts = formatStoreOfferCounts(codes, codeFree);
+  switch (slug) {
+    case "tasty-coffee": return `Tasty Coffee: ${counts} — ${month}`;
+    case "randewoo": return `Randewoo: ${counts}`;
+    case "yandeks-puteshestviya": return `Яндекс Путешествия: ${counts}`;
+    case "pyaterochka": return `Пятёрочка Доставка: ${counts}`;
+    default: return null;
+  }
+}
