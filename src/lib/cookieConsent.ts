@@ -34,6 +34,16 @@ export function setConsent(value: ConsentValue): void {
     // Приватный режим или заблокированное хранилище — выбор действует
     // до перезагрузки страницы, событие всё равно отправляем.
   }
+  // Separate, strictly opt-in cookie for server-side Teleport transfers.
+  // Previously accepted analytics localStorage choices are NOT silently upgraded:
+  // this is written only on a NEW consent action after the disclosure update.
+  try {
+    if (value === "accepted") {
+      document.cookie = "promofact_teleport_consent=yes; Path=/; Max-Age=15552000; SameSite=Lax; Secure";
+    } else {
+      document.cookie = "promofact_teleport_consent=; Path=/; Max-Age=0; SameSite=Lax; Secure";
+    }
+  } catch {}
   window.dispatchEvent(new CustomEvent(CONSENT_EVENT, { detail: value }));
 }
 
