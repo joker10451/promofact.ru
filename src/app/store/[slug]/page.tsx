@@ -17,6 +17,7 @@ import { buildStoreArticle, buildStoreDescription } from "@/lib/storeSeoContent"
 import { getMaxVerifiedDiscount, hasGiftOffer } from "@/lib/storeDiscount";
 import { getStoreExtra, hasActiveRequiredCoupons } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
+import { getOfferSchema, getOfferDisplayName } from "@/lib/seoOfferSchema";
 import { formatStoreOfferTitle, formatPriorityStoreTitle, getStoreHeadlineOfferCounts } from "@/lib/storeOfferHeadline";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -230,24 +231,9 @@ export default async function StorePage({
     ],
   };
 
-  const couponsJsonLd: Record<string, unknown>[] = store.coupons.map((c) => ({
-    "@context": "https://schema.org",
-    "@type": "Coupon",
-    name: c.promocode.bonusName || `Промокод ${c.promocode.code}`,
-    description: c.promocode.bonusName || store.name,
-    discountCode: c.promocode.code,
-    category: "Промокод",
-    validThrough: c.promocode.expires,
-    dateModified: todayIso,
-    url: c.affiliate.link || store.site,
-    seller: { "@type": "Organization", name: store.name },
-    offers: {
-      "@type": "Offer",
-      url: c.affiliate.link || store.site,
-      priceValidUntil: c.promocode.expires,
-      availability: "https://schema.org/InStock",
-    },
-  }));
+  const couponsJsonLd: Record<string, unknown>[] = store.coupons.map((c) =>
+    getOfferSchema(store.name, c.affiliate.link || store.site, c.promocode),
+  );
 
   const storeExtra = getStoreExtra(slug);
   // Offer-specific FAQ из StoreExtra фильтруем по сроку только если для магазина явно
@@ -301,10 +287,15 @@ export default async function StorePage({
   const faqItems = [
     ...customFaqItems,
     ...searchIntentFaq,
-    {
-      q: `Как применить промокод ${store.name}?`,
-      a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Если условия выполнены, скидка отобразится в корзине до оплаты.`,
-    },
+    realCodeCount > 0
+      ? {
+          q: `Как применить промокод ${store.name}?`,
+          a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Если условия выполнены, скидка отобразится в корзине до оплаты.`,
+        }
+      : {
+          q: `Как воспользоваться акцией ${store.name} без промокода?`,
+          a: `Откройте действующее предложение на этой странице, проверьте его условия и перейдите по ссылке в магазин ${store.name}. Для акций без кода вводить промокод не требуется.`,
+        },
     {
       q: `Есть ли промокод ${store.name} на первый заказ в ${monthRu}?`,
       a: firstOrderPromo
@@ -384,7 +375,7 @@ export default async function StorePage({
       position: i + 1,
       item: {
         "@type": "Offer",
-        name: `Промокод ${c.promocode.code || store.name}`,
+        name: getOfferDisplayName(store.name, c.promocode),
         description: c.promocode.bonusName || store.name,
         url: c.affiliate.link || pageUrl,
         priceValidUntil: c.promocode.expires,
@@ -398,7 +389,7 @@ export default async function StorePage({
     <main>
       <JsonLd data={breadcrumb} />
       <JsonLd data={faqJsonLd} />
-      <JsonLd data={howToJsonLd} />
+      {realCodeCount > 0 && <JsonLd data={howToJsonLd} />}
       <JsonLd data={itemListJsonLd} />
       <JsonLd data={organizationJsonLd} />
       {couponsJsonLd.map((c) => (
