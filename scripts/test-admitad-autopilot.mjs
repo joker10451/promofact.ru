@@ -9,6 +9,7 @@ import {
   generateClickId,
   decorateAdmitadUrl,
   getEffectiveCampaignAllowlist,
+  checkTastyCoffeePilot,
   VERIFIED_CAMPAIGN_ALLOWLIST,
 } from "../src/lib/admitadAutopilot.ts";
 import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
@@ -223,6 +224,55 @@ console.log("===================================================================
   assert.strictEqual(gated.status, "READY_NOT_APPROVED");
   passed++;
   console.log("✓ Test 7b: Tasty Coffee 17220 mapped while allowlist remains strict (PASS)");
+}
+
+// 7c. Tasty Coffee single approved coupon: reject stale metadata and unrelated promotions
+{
+  const official = {
+    campaignId: "17220",
+    couponId: "942125",
+    promocode: "TKPRDM-UYVG1GJO",
+    erid: "MvGzQC98w3Z1gMq1mSxTgEET",
+    affiliateLink: "https://dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=31&erid=MvGzQC98w3Z1gMq1mSxTgEET",
+  };
+  assert.strictEqual(checkTastyCoffeePilot(official).passed, true);
+  assert.strictEqual(checkTastyCoffeePilot({ ...official, erid: "2bL9aMPo2e49hMef4rrUCgKjJQ" }).passed, false);
+  assert.strictEqual(checkTastyCoffeePilot({
+    ...official,
+    affiliateLink: "https://dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=31&erid=2bL9aMPo2e49hMef4rrUCgKjJQ",
+  }).passed, false);
+  assert.strictEqual(checkTastyCoffeePilot({ ...official, couponId: "678330", promocode: "Admitad" }).passed, false);
+  assert.strictEqual(checkTastyCoffeePilot({ ...official, couponId: "462918", promocode: "не нужен" }).passed, false);
+  assert.strictEqual(checkTastyCoffeePilot({ ...official, couponId: "942125", promocode: "SOME_OTHER_CODE" }).passed, false);
+  assert.strictEqual(checkTastyCoffeePilot({
+    ...official,
+    affiliateLink: "https://dkfrh.com/g/other/?i=31&erid=MvGzQC98w3Z1gMq1mSxTgEET",
+  }).passed, false);
+  assert.strictEqual(checkTastyCoffeePilot({
+    ...official,
+    affiliateLink: "http://dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=31&erid=MvGzQC98w3Z1gMq1mSxTgEET",
+  }).passed, false);
+  // Existing verified Pizza Sushi Wok campaign remains unaffected.
+  assert.strictEqual(checkTastyCoffeePilot({ ...official, campaignId: "26110" }).passed, true);
+  // This check cannot bypass the separate publication allowlist.
+  const mapping = matchCanonicalStore({ id: 17220, name: "Tasty Coffee", site_url: "https://shop.tastycoffee.ru/" });
+  const blocked = isAdmitadPublishable(
+    { isExpired: false, isForeign: false, affiliateLink: official.affiliateLink, advcampaignId: "17220" },
+    {
+      campaign: { id: 17220, status: "active", connection_status: "active" },
+      mapping,
+      eridStatus: "PRESENT",
+      eridValue: official.erid,
+      legalInfoStatus: "PRESENT",
+      advertiserLegalInfo: "ООО Кофе с доставкой",
+      allowlist: ["26110"],
+      qualityGatePassed: checkTastyCoffeePilot(official).passed,
+    }
+  );
+  assert.strictEqual(blocked.publishable, false);
+  assert.strictEqual(blocked.status, "READY_NOT_APPROVED");
+  passed++;
+  console.log("✓ Test 7c: Strict Tasty Coffee code, ERID, URL and separate approval gates (PASS)");
 }
 
 // 8. Тест Сборка ORD текста без искажений
