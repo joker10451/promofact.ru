@@ -29,6 +29,7 @@ import {
   evaluateSnapshotSafety,
   buildAdmitadOrdText,
   getEffectiveCampaignAllowlist,
+  checkTastyCoffeePilot,
   type SyncAggregates,
 } from "@/lib/admitadAutopilot";
 import {
@@ -166,6 +167,17 @@ export async function runAdmitadSafeSync(options: {
       const hasErid = legal.eridStatus === "PRESENT";
       if (hasLegalInfo && hasErid) legalReadyCount++;
 
+      // Admitad 17220 is an explicitly scoped single-coupon pilot; never publish
+      // unrelated/placeholder coupons or a stale ERID from a previous snapshot.
+      const couponId = String(raw.id || apiCoupon.id);
+      const pilotGate = checkTastyCoffeePilot({
+        campaignId: String(campId),
+        couponId,
+        promocode: raw.promocode || "",
+        affiliateLink: normalized?.affiliate?.url || raw.gotolink || "",
+        erid: legal.eridValue || "",
+      });
+
       // Проверка публикации через Publication Eligibility Gate
       const isPersonal = Boolean(apiCoupon.is_personal || raw.is_personal || (normalized && normalized.isPersonal));
       const evalResult = isAdmitadPublishable(normalized || raw, {
@@ -176,15 +188,17 @@ export async function runAdmitadSafeSync(options: {
         eridValue: legal.eridValue || undefined,
         advertiserLegalInfo: program?.advertiser_legal_info || undefined,
         allowlist: effectiveAllowlist,
-        qualityGatePassed: qg.passed && !isPersonal,
-        qualityGateReasons: isPersonal ? ["UNAUTHORIZED_PROMOCODE: персональный промокод"] : qg.reasons,
+        qualityGatePassed: qg.passed && !isPersonal && pilotGate.passed,
+        qualityGateReasons: isPersonal ? ["UNAUTHORIZED_PROMOCODE: персональный промокод"] : [...qg.reasons, ...(pilotGate.reason ? [pilotGate.reason] : [])],
       });
 
       // Обязательный гейт: Quality Gate обязан быть пройден, а персональные промокоды строго отклонены
-      if (!qg.passed || isPersonal) {
+      if (!qg.passed || isPersonal || !pilotGate.passed) {
         evalResult.publishable = false;
         if (isPersonal) {
           evalResult.status = "UNAUTHORIZED_PROMOCODE";
+        } else if (!pilotGate.passed) {
+          evalResult.status = "QUALITY_GATE_FAILED";
         } else if (evalResult.status === "PUBLISHABLE") {
           evalResult.status = qg.reasons.some(r => r.includes("CAMPAIGN_MODERATION") || r.includes("CONNECTION_INACTIVE"))
             ? "CAMPAIGN_MODERATION"
@@ -192,7 +206,6 @@ export async function runAdmitadSafeSync(options: {
         }
       }
 
-      const couponId = String(raw.id || apiCoupon.id);
       const rowId = `adm_${couponId}`;
       let isRowActive = false;
       let syncStatus = evalResult.status;
