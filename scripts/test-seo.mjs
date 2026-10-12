@@ -132,6 +132,29 @@ async function runSeoRegressionSuite() {
     assert(page.includes("Сейчас для ${store.name} нет опубликованных действующих промокодов"));
   });
 
+  // CATALOG-GROWTH-1: recover real Google-visible brand URLs without
+  // inventing discounts, injecting partner links, or indexing zero-offer pages.
+  test("Recovered brand landings are stable, distinct and fail closed for SEO", () => {
+    const registry = fs.readFileSync(path.resolve("src/lib/stableStores.ts"), "utf-8");
+    const storePage = fs.readFileSync(path.resolve("src/app/store/[slug]/page.tsx"), "utf-8");
+    const sitemap = fs.readFileSync(path.resolve("src/app/sitemap.ts"), "utf-8");
+    const adm = fs.readFileSync(path.resolve("src/lib/admitadApi.ts"), "utf-8");
+    for (const [slug, id, campaignId] of [
+      ["befree-ru", -100021, "28532"],
+      ["randewoo", -100022, "22484"],
+      ["sportmaster", -100023, "14647"],
+    ]) {
+      assert(registry.includes(`"${slug}": {`), `Missing store ${slug}`);
+      assert(registry.includes(`id: ${id},`), `Missing stable ID ${id}`);
+      assert(adm.includes(`"${campaignId}": { slug: "${slug}"`), `Missing verified mapping ${campaignId}`);
+    }
+    assert(storePage.includes("index: n > 0"), "Noindex for zero-offer stores must remain");
+    assert(sitemap.includes("store.coupons.length > 0"), "Sitemap must exclude empty stores");
+    const block = registry.split('// CATALOG-GROWTH-1:')[1]?.split('"avito-puteshestviya"')[0] ?? "";
+    assert(!/erid:|prfl\.me|ad\.admitad\.com|\bpromocode\b\s*:|\bdiscount\b\s*:/.test(block),
+      "Fallback metadata must contain no synthetic offers or tracking URLs");
+  });
+
   // 7. Проверка интерактивного калькулятора скидок
   test("Калькулятор экономии персонализирован по магазинам с реальными промокодами", () => {
     const calcPath = path.resolve("src/components/SavingsCalculator.tsx");
