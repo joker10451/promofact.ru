@@ -10,6 +10,7 @@ import {
   decorateAdmitadUrl,
   getEffectiveCampaignAllowlist,
   checkTastyCoffeePilot,
+  checkBefreePilot,
   VERIFIED_CAMPAIGN_ALLOWLIST,
 } from "../src/lib/admitadAutopilot.ts";
 import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
@@ -320,6 +321,55 @@ console.log("===================================================================
   assert.strictEqual(blocked.status, "READY_NOT_APPROVED");
   passed++;
   console.log("✓ Test 7c: Strict Tasty Coffee coupon-scoped ERID, URL and separate approval gates (PASS)");
+}
+
+// 7d. Befree pilot uses one real publisher coupon and preserves base approvals.
+{
+  const beforeBase = process.env.ADMITAD_APPROVED_CAMPAIGNS;
+  const beforeBefree = process.env.ADMITAD_BEFREE_PILOT_ENABLED;
+  const beforeTasty = process.env.ADMITAD_TASTY_PILOT_ENABLED;
+  const valid = {
+    campaignId: "28532",
+    couponId: "942686",
+    promocode: "BEFREE-TEST1",
+    erid: "BefreeSampleErid2026xyz",
+    affiliateLink: "https://bednari.com/g/abc123/?i=31&erid=BefreeSampleErid2026xyz",
+  };
+  try {
+    delete process.env.ADMITAD_TASTY_PILOT_ENABLED;
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "26110,25224,141770";
+    process.env.ADMITAD_BEFREE_PILOT_ENABLED = "false";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), ["26110","25224","141770"]);
+    process.env.ADMITAD_BEFREE_PILOT_ENABLED = "true";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), ["26110","25224","141770","28532"]);
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "26110,28532";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), ["26110","28532"]);
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), []);
+    process.env.ADMITAD_APPROVED_CAMPAIGNS = "26110";
+    process.env.ADMITAD_BEFREE_PILOT_ENABLED = "TRUE";
+    assert.deepStrictEqual(getEffectiveCampaignAllowlist(), ["26110"]);
+    assert.strictEqual(checkBefreePilot(valid).passed, true);
+    assert.strictEqual(checkBefreePilot({...valid, couponId:"943201"}).passed, false);
+    assert.strictEqual(checkBefreePilot({...valid, promocode:"НЕ НУЖЕН"}).passed, false);
+    assert.strictEqual(checkBefreePilot({...valid, erid:"bad"}).passed, false);
+    assert.strictEqual(checkBefreePilot({...valid, affiliateLink:"https://evil.com/g/abc123/?i=31&erid=BefreeSampleErid2026xyz"}).passed, false);
+    assert.strictEqual(checkBefreePilot({...valid, affiliateLink:"https://bednari.com/g/abc123/?i=31&erid=wrong"}).passed, false);
+    assert.strictEqual(checkBefreePilot({...valid, affiliateLink:"https://bednari.com/g/abc123/?i=who&erid=BefreeSampleErid2026xyz"}).passed, false);
+    assert.strictEqual(checkBefreePilot({...valid, affiliateLink:"https://user:pass@bednari.com/g/abc123/?i=31&erid=BefreeSampleErid2026xyz"}).passed, false);
+    assert.strictEqual(checkBefreePilot({...valid, campaignId:"14647"}).passed, true);
+    const mapped = matchCanonicalStore({id:28532,name:"Befree.ru",site_url:"https://befree.ru/"});
+    assert.strictEqual(mapped.canonicalSlug, "befree-ru");
+  } finally {
+    if (beforeBase === undefined) delete process.env.ADMITAD_APPROVED_CAMPAIGNS;
+    else process.env.ADMITAD_APPROVED_CAMPAIGNS = beforeBase;
+    if (beforeBefree === undefined) delete process.env.ADMITAD_BEFREE_PILOT_ENABLED;
+    else process.env.ADMITAD_BEFREE_PILOT_ENABLED = beforeBefree;
+    if (beforeTasty === undefined) delete process.env.ADMITAD_TASTY_PILOT_ENABLED;
+    else process.env.ADMITAD_TASTY_PILOT_ENABLED = beforeTasty;
+  }
+  passed++;
+  console.log("✓ Test 7d: Befree strict one-offer gate and reversible additive approval (PASS)");
 }
 
 // 8. Тест Сборка ORD текста без искажений
