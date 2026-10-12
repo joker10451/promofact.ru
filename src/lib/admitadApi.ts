@@ -661,6 +661,12 @@ export const EXPLICIT_STORE_MAPPINGS: Record<string, { slug: string; name: strin
   "22484": { slug: "randewoo", name: "Randewoo" },
   "14647": { slug: "sportmaster", name: "Спортмастер" },
   // Подтверждённые живым dry-run ID программ Admitad (площадка 2990501)
+  // CATALOG-GROWTH-1: IDs and merchant sites cross-checked with the
+  // current Admitad staging snapshot. Mapping does NOT grant publication:
+  // the campaign must still be explicitly approved and pass all gates.
+  "28532": { slug: "befree-ru", name: "Befree" },
+  "14647": { slug: "sportmaster", name: "Спортмастер" },
+  "22484": { slug: "randewoo", name: "Randewoo" },
   "25224": { slug: "yandeks-puteshestviya", name: "Яндекс Путешествия" },
   "яндекс.путешествия": { slug: "yandeks-puteshestviya", name: "Яндекс Путешествия" },
   "яндекс путешествия": { slug: "yandeks-puteshestviya", name: "Яндекс Путешествия" },
