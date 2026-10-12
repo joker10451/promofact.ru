@@ -50,9 +50,11 @@ codes like `НЕ НУЖЕН` as real entered codes.
   exclusions; never promise a successful checkout without testing.
 - [ ] Verify HTTPS affiliate URL, matching live creative ERID, complete
   advertiser legal notice, and absence of redirects that strip attribution.
-- [ ] Compare the *current live* Perfluence coupon inventory and Admitad
-  candidate codes; the checked repository feed has no matching brand strings
-  for these five, but is **not** a live duplicate audit.
+- [x] Check the bundled Perfluence snapshot (2026-10-12 10:27 UTC): 45 projects,
+  79 promo codes. None of the five shortlisted codes appear under the
+  corresponding advertiser. An exact-code collision test is now in CI.
+- [ ] Compare the *current live* Perfluence inventory and Admitad candidates
+  immediately before release. The bundled snapshot is not a live duplicate audit.
 - [ ] Verify original 27 active coupon IDs and 8 campaign baseline counts are
   retained in the dry-run; ensure no stale/expired or extra offers are activated.
 - [ ] Review deployment limit and CI; no Vercel deployment needed merely to
