@@ -469,6 +469,9 @@ async function runAudit() {
     console.error("❌ ОБНАРУЖЕНЫ КРИТИЧЕСКИЕ ОШИБКИ:");
     for (const err of errors) {
       console.error(` - [${err.category}]: ${err.message}`);
+      if (err.category === "broken_internal_links") {
+        console.error("    Broken link paths:", JSON.stringify(err.details));
+      }
     }
   }
 
