@@ -60,6 +60,23 @@ async function runSeoRegressionSuite() {
     assert(content.includes("`/store/${slug}`"), "Must redirect to /store/[slug]");
   });
 
+  // 3b. Config redirect takes precedence over SSG/ISR dynamicParams=false.
+  // Indexed historical URLs such as /promokody/farfor must never return a build-time 404.
+  test("Legacy /promokody/:slug routes to canonical store before dynamic route matching", () => {
+    const config = fs.readFileSync(path.resolve("next.config.ts"), "utf-8");
+    assert(config.includes('source: "/promokody/:slug"'));
+    assert(config.includes('destination: "/store/:slug"'));
+    assert.match(config, /source: "\/promokody\/:slug",[\s\S]*?permanent: true/);
+  });
+
+  // 3c. Search-intent title for verified, active Tasty Coffee offer only.
+  test("Tasty Coffee title improves intent match only when active coupons exist", () => {
+    const page = fs.readFileSync(path.resolve("src/app/store/[slug]/page.tsx"), "utf-8");
+    assert(page.includes('n > 0 && slug === "tasty-coffee"'));
+    assert(page.includes('Промокод Tasty Coffee на'));
+    assert(page.includes("index: n > 0"), "Empty offers must remain noindex");
+  });
+
   // 4. Проверка канонических ссылок в каталоге /promokody
   test("Каталог /promokody ссылается напрямую на канонические /store/[slug]", () => {
     const promokodyPath = path.resolve("src/app/promokody/page.tsx");
