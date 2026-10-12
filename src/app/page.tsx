@@ -3,8 +3,7 @@ import Hero from "@/components/Hero";
 import PopularStores from "@/components/PopularStores";
 import ExpiringDeals from "@/components/ExpiringDeals";
 import TeamBanner from "@/components/TeamBanner";
-import SberUlybatlHome from "@/components/SberUlybatlHome";
-import SberKidsPromoHome from "@/components/SberKidsPromoHome";
+import SberCampaignTeasers from "@/components/SberCampaignTeasers";
 import CouponGrid from "@/components/CouponGrid";
 import SavingsCalculator from "@/components/SavingsCalculator";
 import HowItWorks from "@/components/HowItWorks";
@@ -120,19 +119,6 @@ export default async function Home() {
           </Reveal>
         </div>
 
-        {/* Рекламный спецпроект Сбера, НЕ промокод каталога. */}
-        <SberUlybatlHome />
-
-        {/* 4. Эксклюзивный баннер от команды (в стиле Пикабу) */}
-        <div className="pt-6">
-          <Reveal>
-            <TeamBanner />
-          </Reveal>
-        </div>
-
-        {/* Детская СберКарта: оригинальный креатив + отдельные условия, не купон каталога. */}
-        <SberKidsPromoHome />
-
         {/* 5. Скоро заканчиваются — коды с ближайшим реальным сроком, по одному от магазина.
             Раньше здесь было два блока «Спецпредложения дня» подряд. */}
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
@@ -150,6 +136,17 @@ export default async function Home() {
               proofsByStore={proofsByStore}
               excludeOfferKeys={hotDealKeys}
             />
+          </Reveal>
+        </div>
+
+        {/* Промокоды и магазины выше рекламных анонсов. Полные оригинальные макеты и
+            рекламный текст находятся только на отдельных страницах кампаний. */}
+        <SberCampaignTeasers />
+
+        {/* Небольшое редакционное пояснение — после каталога, не перед купонами. */}
+        <div className="pt-5">
+          <Reveal>
+            <TeamBanner />
           </Reveal>
         </div>
 
