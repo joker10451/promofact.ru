@@ -318,8 +318,8 @@ export default function CouponGrid({
         </button>
       </div>
 
-      {/* Мобильная полоса категорий */}
-      <div className="lg:hidden mb-4 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pb-1">
+      {/* Одна категория-линейка на всех экранах вместо тяжёлого сайдбара */}
+      <div className="mb-5 flex flex-nowrap gap-2 overflow-x-auto overscroll-x-contain pb-2 no-scrollbar">
         <button
           type="button"
           onClick={() => setFilter("all")}
@@ -348,53 +348,9 @@ export default function CouponGrid({
         ))}
       </div>
 
-      {/* Основной макет: Левый сайдбар категорий + Правая Masonry колоночная сетка */}
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* Левая колонка: Категории (Desktop sticky) */}
-        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 space-y-1.5 bg-white border border-line rounded-2xl p-3">
-          <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">
-            Категории
-          </div>
-          <button
-            type="button"
-            onClick={() => setFilter("all")}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              filter === "all"
-                ? "bg-ink text-white shadow-2xs"
-                : "text-ink/70 hover:bg-paper hover:text-ink"
-            }`}
-          >
-            <span className="flex items-center gap-1.5"><Icon name="tag" size={13} />Все направления</span>
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${filter === "all" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>
-              {coupons.length}
-            </span>
-          </button>
-          {cats.map(({ slug, name }) => {
-            const count = countByCat(slug);
-            return (
-              <button
-                key={slug}
-                type="button"
-                onClick={() => setFilter(slug)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  filter === slug
-                    ? "bg-ink text-white shadow-2xs"
-                    : "text-ink/70 hover:bg-paper hover:text-ink"
-                }`}
-              >
-                <span className="flex items-center gap-2 truncate">
-                  <Icon name={slug} size={15} className="shrink-0 text-ink/50" />
-                  <span className="truncate">{name}</span>
-                </span>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${filter === slug ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </aside>
-
-        {/* Правая часть: Фильтры и Masonry сетка купонов */}
+      {/* Единый каталог без отдельного сайдбара */}
+      <div className="w-full">
+        {/* Каталог карточек с неизменными действиями/атрибуцией */}
         <div className="w-full flex-1 min-w-0">
           {/* Статус поиска */}
           {query && (
