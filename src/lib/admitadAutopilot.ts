@@ -14,6 +14,7 @@
 
 import type { NormalizedOffer, RawAdmitadCoupon } from "@/lib/admitadTypes";
 import type { AdmitadApiCampaign, StoreMappingResult } from "@/lib/admitadApi";
+import { isRealPromoCode } from "@/lib/dedupe";
 
 /** Catastrophic drop protection threshold (35%) */
 export const CATASTROPHIC_DROP_THRESHOLD = 0.35;
@@ -63,6 +64,11 @@ export function getEffectiveCampaignAllowlist(): readonly string[] {
   if (process.env.ADMITAD_TASTY_PILOT_ENABLED?.trim() === "true") {
     approved.add("17220");
   }
+  // One verified Befree coupon only. Preserve every existing approval;
+  // never substitute a new list for the masked production configuration.
+  if (process.env.ADMITAD_BEFREE_PILOT_ENABLED?.trim() === "true") {
+    approved.add("28532");
+  }
   return [...approved];
 }
 
@@ -110,6 +116,41 @@ export function checkTastyCoffeePilot(input: {
     }
   } catch {
     return { passed: false, reason: "TASTY_PILOT_INVALID_AFFILIATE_URL" };
+  }
+  return { passed: true };
+}
+
+/**
+ * CATALOG-GROWTH-2: Single-coupon Befree pilot. Publisher-confirmed program
+ * 28532; offer 942686 is a real code ending 2026-10-31.
+ * A live upstream validation of availability, personal status, country, legal
+ * metadata and expiration still applies in the sync worker.
+ */
+export function checkBefreePilot(input: {
+  campaignId: string;
+  couponId: string;
+  promocode: string;
+  affiliateLink: string;
+  erid: string;
+}): { passed: boolean; reason?: string } {
+  if (input.campaignId !== "28532") return { passed: true };
+  if (input.couponId !== "942686" || !isRealPromoCode(input.promocode)) {
+    return { passed: false, reason: "BEFREE_PILOT_UNAPPROVED_COUPON" };
+  }
+  if (!/^[a-zA-Z0-9_-]{12,80}$/.test(input.erid)) {
+    return { passed: false, reason: "BEFREE_PILOT_ERID_INVALID" };
+  }
+  try {
+    const u = new URL(input.affiliateLink);
+    if (u.protocol !== "https:" || u.hostname !== "bednari.com" ||
+        u.port || u.username || u.password ||
+        !/^\\/g\\/[a-zA-Z0-9_-]+\\/$/.test(u.pathname) ||
+        !/^\\d+$/.test(u.searchParams.get("i") || "") ||
+        u.searchParams.get("erid") !== input.erid) {
+      return { passed: false, reason: "BEFREE_PILOT_TRACKING_LINK_MISMATCH" };
+    }
+  } catch {
+    return { passed: false, reason: "BEFREE_PILOT_TRACKING_LINK_INVALID" };
   }
   return { passed: true };
 }
