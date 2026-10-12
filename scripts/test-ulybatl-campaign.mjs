@@ -1,0 +1,28 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const banners = fs.readFileSync("src/lib/promoBanners.ts", "utf8");
+const page = fs.readFileSync("src/app/akcii/ulybatl-sber-185/page.tsx", "utf8");
+const home = fs.readFileSync("src/components/SberUlybatlHome.tsx", "utf8");
+const homePage = fs.readFileSync("src/app/page.tsx", "utf8");
+const gate = fs.readFileSync("src/components/CampaignExpiryGate.tsx", "utf8");
+const link = "https://sberbank1.prfl.me/sites/il6l82?erid=2RanynNhMEK";
+
+assert.equal((banners.match(/id: "sber-ulybatl-185-2026"/g)||[]).length, 1);
+assert.ok(banners.includes(link));
+assert.ok(banners.includes("ПАО Сбербанк"));
+assert.ok(banners.includes("7707083893"));
+assert.ok(banners.includes("2RanynNhMEK"));
+assert.ok(banners.includes("18+"));
+assert.ok(banners.includes('endsAt: "2026-10-25"'));
+for(const v of ["Главный приз — концерт Вани Дмитриенко.", "Chery Tiggo 9", "20 новеньких iPhone 17 Pro Max", "50 тысяч промокодов"]) assert.ok(banners.includes(v),v);
+assert.ok(banners.includes('creativeOnly: true'));
+assert.ok(!banners.includes('code: "ULYBATL"'));
+assert.ok(homePage.includes("<SberUlybatlHome />"));
+assert.ok(home.includes('href="/akcii/sber-ulybatl-185"'));
+assert.ok(page.includes("<PromoBanner banner={campaign} />"));
+assert.ok(page.includes('CampaignExpiryGate endsAt={campaign.endsAt}'));
+assert.ok(gate.includes("+03:00"));
+assert.ok(!fs.readFileSync("src/lib/customCoupons.ts","utf8").includes("ulybatl-sber-185"));
+assert.ok(!fs.readFileSync("src/lib/stableStores.ts","utf8").includes("ulybatl-sber-185"));
+console.log("Ulybatl campaign placement, legal attribution, full copy, no fictitious coupon and timed gating PASS");

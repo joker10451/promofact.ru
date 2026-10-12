@@ -45,6 +45,37 @@ export interface PromoBanner {
 
 export const PROMO_BANNERS: PromoBanner[] = [
   {
+    id: "sber-ulybatl-185-2026",
+    storeSlug: "sberbank",
+    storeSlugs: ["sberprime", "sberbank-detskaya-karta"],
+    label: "Спецпроект Сбера",
+    title: "Улыбатл — розыгрыш призов за оплату улыбкой",
+    subtitle: "Соревнование городов России и личные призы за оплату улыбкой.",
+    badge: "До 25 октября",
+    note: "Правила и ограничения участия уточняйте у организатора.",
+    cta: "Участвовать в Улыбатле",
+    link: "https://sberbank1.prfl.me/sites/il6l82?erid=2RanynNhMEK",
+    image: "/images/sber-ulybatl-185.webp",
+    imageAlt: "Оригинальный баннер Сбер 185 Улыбатл: автомобиль Chery Tiggo 9, смартфон и розыгрыш призов за оплату улыбкой",
+    imageWidth: 1600,
+    imageHeight: 1141,
+    creativeOnly: true,
+    maxDisplayWidth: 950,
+    exactCopy: `🎤 Улыбатл пройдёт по всем городам России до 25 октября
+
+Главный приз — концерт Вани Дмитриенко.
+
+Сбер проводит «Улыбатл» – большое соревнование за звание самого улыбающегося города. Каждая оплата улыбкой приближает город к главному призу.
+Пока города соревнуются между собой, у участников идёт своя борьба – за личные призы. В списке: Chery Tiggo 9, 20 новеньких iPhone 17 Pro Max и 50 тысяч промокодов.
+Чем больше улыбок, тем больше шансов победить.
+
+Регистрируйся в Улыбатле https://sberbank1.prfl.me/sites/il6l82?erid=2RanynNhMEK , плати улыбкой, и выигрывай!`,
+    ordText: "Реклама. Рекламодатель — ПАО Сбербанк, ИНН: 7707083893. Генеральная лицензия Банка России № 1481 от 11.08.2015 г. 18+. erid: 2RanynNhMEK",
+    startsAt: "2026-10-12",
+    endsAt: "2026-10-25",
+  },
+
+  {
     id: "sberprime-rozygrysh-2026",
     storeSlug: "sberprime",
     label: "Розыгрыш",

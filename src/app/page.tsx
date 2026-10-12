@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import PopularStores from "@/components/PopularStores";
 import ExpiringDeals from "@/components/ExpiringDeals";
 import TeamBanner from "@/components/TeamBanner";
+import SberUlybatlHome from "@/components/SberUlybatlHome";
 import CouponGrid from "@/components/CouponGrid";
 import SavingsCalculator from "@/components/SavingsCalculator";
 import HowItWorks from "@/components/HowItWorks";
@@ -117,6 +118,9 @@ export default async function Home() {
             <PopularStores />
           </Reveal>
         </div>
+
+        {/* Рекламный спецпроект Сбера, НЕ промокод каталога. */}
+        <SberUlybatlHome />
 
         {/* 4. Эксклюзивный баннер от команды (в стиле Пикабу) */}
         <div className="pt-6">
