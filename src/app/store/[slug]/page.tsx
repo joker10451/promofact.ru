@@ -18,6 +18,7 @@ import { getMaxVerifiedDiscount, hasGiftOffer } from "@/lib/storeDiscount";
 import { getStoreExtra, hasActiveRequiredCoupons } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
 import { getOfferSchema, getOfferDisplayName } from "@/lib/seoOfferSchema";
+import { isRealPromoCode } from "@/lib/dedupe";
 import { formatStoreOfferTitle, formatPriorityStoreTitle, getStoreHeadlineOfferCounts } from "@/lib/storeOfferHeadline";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -184,6 +185,7 @@ export default async function StorePage({
   if (!store) notFound();
 
   const pageUrl = `${SITE_URL}/store/${slug}`;
+  const { codes: realCodeCount } = getStoreHeadlineOfferCounts(store.coupons);
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const todayIso = TODAY_ISO;
   const todayRu = TODAY_RU;
@@ -192,7 +194,9 @@ export default async function StorePage({
   const maxDisc = getMaxVerifiedDiscount(store.coupons);
   const hasGift = hasGiftOffer(store.coupons);
 
-  const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
+  const firstOrderPromo = store.coupons.find((c) =>
+    c.promocode.isFirstOrderOnly && isRealPromoCode(c.promocode.code)
+  );
 
 
   // Уникальный SEO-текст: собирается из реальных фактов магазина, а не шаблона.
