@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {
   BATCH_VERIFIED_CAMPAIGNS,getBatchCampaignAllowlist,getEffectiveCampaignAllowlist,
   isVerifiedBatchCampaignOrigin,
-  checkBefreePilot
+  checkBefreePilot, parseReviewedFiveCouponIds, isFiveCouponExplicitlyReviewed, FIVE_NEW_CAMPAIGN_IDS
 } from "../src/lib/admitadAutopilot.ts";
 
 const before={
@@ -54,6 +54,26 @@ try {
   process.env.ADMITAD_BATCH_APPROVED_CAMPAIGNS="28532,14647,22484";
   process.env.ADMITAD_APPROVED_CAMPAIGNS="";
   assert.deepEqual(getEffectiveCampaignAllowlist(),[],"Base allowlist is mandatory");
+
+  assert.deepEqual(parseReviewedFiveCouponIds(""),[]);
+  assert.deepEqual(parseReviewedFiveCouponIds("938019,896269,942802,938092,943834"),
+    ["938019","896269","942802","938092","943834"]);
+  assert.equal(FIVE_NEW_CAMPAIGN_IDS.length,5);
+  assert.equal(isFiveCouponExplicitlyReviewed("11738","938019",["938019"]),true);
+  assert.equal(isFiveCouponExplicitlyReviewed("26032","938019",["938019"]),false);
+  assert.equal(isFiveCouponExplicitlyReviewed("14725","938019",["938019"]),false);
+  for(const ids of ["938019,938019","938019,unknown","942123","938019,","938019;942802"]) {
+    assert.throws(()=>parseReviewedFiveCouponIds(ids),/FIVE_COUPON_IDS_NOT_REVIEWED/,ids);
+  }
+  const fs=(await import("node:fs")).default;
+  const worker=fs.readFileSync("src/lib/admitadSyncWorker.ts","utf8");
+  assert.equal((worker.match(/if \(!options\.skipDbWrite\) await recordAdmitadSyncFailure\(/g)||[]).length,5,
+    "All five preview failure paths must be DB read-only");
+  assert.equal((worker.match(/if \(!options\.skipDbWrite\) await updateAdmitadSyncDiagnostics\(/g)||[]).length,1,
+    "Successful preview must not change authoritative sync diagnostics");
+  assert.match(worker,/newFiveOfferNotReviewed/);
+  assert.match(worker,/!newOfferBlocked/);
+  console.log("Five-program coupon approval and DB read-only preview PASS");
   console.log("Batch campaign register and strict Befree transition PASS");
 } finally {
   restore("ADMITAD_APPROVED_CAMPAIGNS",before.base);
