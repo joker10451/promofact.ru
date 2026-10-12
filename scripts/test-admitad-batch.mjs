@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   BATCH_VERIFIED_CAMPAIGNS,getBatchCampaignAllowlist,getEffectiveCampaignAllowlist,
+  isVerifiedBatchCampaignOrigin,
   checkBefreePilot
 } from "../src/lib/admitadAutopilot.ts";
 
@@ -18,6 +19,12 @@ try {
     affiliateLink:"https://bednari.com/g/abcdef/?i=31&erid=BefreeValidCouponErid2026"
   };
   assert.deepEqual(Object.keys(BATCH_VERIFIED_CAMPAIGNS).sort(),["14647","22484","28532"]);
+  assert.equal(isVerifiedBatchCampaignOrigin("28532","https://befree.ru/"),true);
+  assert.equal(isVerifiedBatchCampaignOrigin("14647","https://www.sportmaster.ru/"),true);
+  assert.equal(isVerifiedBatchCampaignOrigin("22484","https://randewoo.ru/"),true);
+  for(const bad of ["https://fakebefree.ru/","https://befree.ru.attacker.org/","http://befree.ru/","https://u:p@befree.ru/"]) {
+    assert.equal(isVerifiedBatchCampaignOrigin("28532",bad),false,bad);
+  }
   process.env.ADMITAD_APPROVED_CAMPAIGNS="141770,1667,17220,25224,26110";
   process.env.ADMITAD_TASTY_PILOT_ENABLED="false";
   process.env.ADMITAD_BEFREE_PILOT_ENABLED="false";
