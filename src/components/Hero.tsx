@@ -280,7 +280,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
               Выгода рядом
             </div>
             <div className="absolute right-5 top-12 rotate-12 rounded-2xl border border-red/10 bg-white p-3 text-red shadow-xl shadow-red/5">
-              <Icon name="heart" size={24} />
+              <Icon name="gift" size={24} />
             </div>
             <div className="relative flex h-56 w-52 -rotate-6 items-center justify-center rounded-[44px] border-[10px] border-[#e82f53] bg-gradient-to-br from-[#ff6580] via-[#f43f5e] to-[#d91f45] shadow-[18px_25px_35px_rgba(244,63,94,0.22)]">
               <div className="absolute -top-14 h-24 w-28 rounded-t-full border-[15px] border-b-0 border-[#e82f53]" />
