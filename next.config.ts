@@ -69,6 +69,14 @@ const nextConfig: NextConfig = {
         destination: "/akcii/:slug",
         permanent: true,
       },
+      // Indexed legacy /promokody/:slug URLs must redirect even when the
+      // dynamic route's build-time generateStaticParams omitted that store.
+      // A Next config redirect runs before route matching and avoids 404s.
+      {
+        source: "/promokody/:slug",
+        destination: "/store/:slug",
+        permanent: true,
+      },
       // Статья держалась на одном промокоде, который Пятёрочка сняла, а
       // аккаунт сайта в этом проекте не одобрен — рекламировать нечего.
       // Постоянный редирект сохраняет вес адреса в поиске.
