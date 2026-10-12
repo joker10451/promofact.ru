@@ -67,6 +67,7 @@ assert.match(source,/cache: "no-store"/);
 assert.match(source,/redirect: "manual"/);
 assert.match(source,/AbortSignal.timeout/);
 assert.match(source,/getTeleportVisitorIp/);
+assert.match(source,/fetchSite !== "same-origin" \|\| fetchUser !== "\?1"/);
 assert.match(ticket,/NEXT_PUBLIC_ADMITAD_TELEPORT_PILOT_ENABLED/);
 assert.match(ticket,/getConsent\(\)/);
 assert.match(ticket,/toPilot \? "noopener" : "noopener,noreferrer"/); // preserve referer for same-origin pilot
