@@ -636,12 +636,14 @@ async function run() {
             // letter placeholder instead of an empty white circle.
             const visibleCards = cards.filter({ visible: true });
             for (let i = 0; i < await visibleCards.count(); i++) {
-              const logoState = await visibleCards.nth(i).locator("span.relative.inline-flex").first().evaluate((node) => {
+              const logoState = await visibleCards.nth(i).evaluate((node) => {
                 const image = node.querySelector("img");
                 const initial = node.querySelector("span.absolute");
+                const fallback = node.querySelector('[role="img"]');
                 return Boolean(
                   (image?.complete && image.naturalWidth > 0 && getComputedStyle(image).opacity === "1") ||
-                  (initial && initial.textContent?.trim()),
+                  (initial && initial.textContent?.trim()) ||
+                  (fallback && fallback.textContent?.trim()),
                 );
               });
               assert.ok(logoState, "No popular store should display a blank logo circle");
