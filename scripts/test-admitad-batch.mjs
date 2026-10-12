@@ -79,6 +79,33 @@ try {
   assert.match(worker,/!newOfferBlocked/);
   assert.match(worker,/duplicates_vs_perfluence: null/,
     "Don't report fabricated 0 duplicates without querying Perfluence");
+  // Snapshot check (not a claim about the live Perfluence widget):
+  // do not release coupon IDs if today's bundled partner feed contains
+  // the same code for the same merchant. Cross-merchant matches are irrelevant.
+  const feed=JSON.parse(fs.readFileSync("src/data/perfluence-feed.json","utf8"));
+  const candidateBrandCodes=[
+    {brand:"фоксфорд",codes:["REP50","FOXFORD5"]},
+    {brand:"foxford",codes:["REP50","FOXFORD5"]},
+    {brand:"aravia",codes:["НОЧЬ"]},
+    {brand:"skysmart",codes:["СМОГУ"]},
+    {brand:"билайн",codes:["ХАЛВА"]},
+    {brand:"beeline",codes:["ХАЛВА"]}
+  ];
+  const duplicateCandidates=[];
+  for(const entry of feed.data||[]) {
+    const brand=String(entry.project?.name||"").trim().toLocaleLowerCase("ru-RU");
+    const matching=candidateBrandCodes.filter(x=>brand.includes(x.brand));
+    if(!matching.length)continue;
+    for(const group of entry.groups||[]) {
+      for(const promo of [...(group.promocodes||[]),...(group.widget_subscriber_codes||[])]) {
+        const code=String(promo.code||"").trim().toLocaleUpperCase("ru-RU");
+        if(matching.some(x=>x.codes.includes(code)))duplicateCandidates.push({brand,code});
+      }
+    }
+  }
+  assert.deepEqual(duplicateCandidates,[],
+    "Perfluence bundled feed has same-merchant matching codes: review before Admitad launch");
+  console.log("Bundled Perfluence exact-code collision check PASS (not a live duplicate audit)");
   console.log("Five-program coupon approval and DB read-only preview PASS");
   console.log("Batch campaign register and strict Befree transition PASS");
 } finally {
