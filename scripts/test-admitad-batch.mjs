@@ -72,7 +72,13 @@ try {
   assert.equal((worker.match(/if \(!options\.skipDbWrite\) await updateAdmitadSyncDiagnostics\(/g)||[]).length,1,
     "Successful preview must not change authoritative sync diagnostics");
   assert.match(worker,/newFiveOfferNotReviewed/);
+  assert.match(worker,/options\.reviewedFiveCouponIds \?\? \[\]/,
+    "Default sync without an explicit review must block new five-program coupon IDs");
+  assert.doesNotMatch(worker,/options\.reviewedFiveCouponIds &&/,
+    "Never guard coupon-level approval behind the presence of an optional argument");
   assert.match(worker,/!newOfferBlocked/);
+  assert.match(worker,/duplicates_vs_perfluence: null/,
+    "Don't report fabricated 0 duplicates without querying Perfluence");
   console.log("Five-program coupon approval and DB read-only preview PASS");
   console.log("Batch campaign register and strict Befree transition PASS");
 } finally {
