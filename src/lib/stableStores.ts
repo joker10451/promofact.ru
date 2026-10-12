@@ -29,6 +29,46 @@ export interface StableStoreMeta {
 }
 
 export const STABLE_STORES: Record<string, StableStoreMeta> = {
+  // CATALOG-GROWTH-1: genuine historical Google-visible store URLs.
+  // Metadata only. No coupon, discount, affiliate link or implied partner approval.
+  // Stable fallbacks prevent an HTTP 404 while all offers are absent; those
+  // empty pages remain noindex and are excluded from the generated sitemap.
+  "befree-ru": {
+    id: -100021,
+    slug: "befree-ru",
+    name: "Befree",
+    logo: null,
+    category: "Одежда и обувь",
+    categorySlug: "odezhda-i-obuv",
+    about: "Befree — магазин одежды и аксессуаров. Доступность и условия промокодов зависят от действующих предложений.",
+    conditions: "Если действующие промокоды опубликованы, проверяйте срок, минимальный чек и исключения в карточке предложения.",
+    site: "https://befree.ru/",
+    activeBloggers: 0,
+  },
+  "randewoo": {
+    id: -100022,
+    slug: "randewoo",
+    name: "Randewoo",
+    logo: null,
+    category: "Косметика и парфюмерия",
+    categorySlug: "kosmetika-i-parfyumeriya",
+    about: "Randewoo — интернет-магазин парфюмерии и косметики. Предложения и ограничения могут меняться.",
+    conditions: "Промокоды доступны только при наличии подтверждённых действующих предложений; проверяйте ограничения до покупки.",
+    site: "https://randewoo.ru/",
+    activeBloggers: 0,
+  },
+  "sportmaster": {
+    id: -100023,
+    slug: "sportmaster",
+    name: "Спортмастер",
+    logo: null,
+    category: "Спорт и отдых",
+    categorySlug: "sport-i-otdyh",
+    about: "Спортмастер — магазин спортивной одежды, обуви и товаров для спорта и активного отдыха.",
+    conditions: "При наличии действующих купонов их условия, сроки и применимость указаны в карточках предложений.",
+    site: "https://www.sportmaster.ru/",
+    activeBloggers: 0,
+  },
   "avito-puteshestviya": {
     "id": 3161,
     "slug": "avito-puteshestviya",
