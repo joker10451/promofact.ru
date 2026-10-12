@@ -22,9 +22,19 @@ assert.equal(promo.validThrough, "2026-11-05");
 assert.equal(promo.offers.priceValidUntil, "2026-11-05");
 assert.equal(getOfferSchema("Магазин", url, { code: "NOT REQUIRED" })["@type"], "Offer");
 assert.equal(getOfferSchema("Магазин", url, { code: "" })["@type"], "Offer");
+const realLogo = "https://assets.example.com/merchant-logo.png";
+const withLogo = getOfferSchema("Магазин", url, { code: "SAVE10" }, realLogo);
+assert.deepEqual(withLogo.seller, { "@type": "Organization", name: "Магазин", logo: realLogo });
+const withoutLogo = getOfferSchema("Магазин", url, { code: "SAVE10" });
+assert.ok(!("logo" in withoutLogo.seller), "No invented logo on stores without trusted image");
+
 
 const store = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
 assert.ok(store.includes("getOfferSchema(store.name"));
+assert.ok(store.includes("c.promocode, store.logo"), "Existing store logo is passed to Offer/Coupon JSON-LD");
+assert.ok(store.includes("...(store.site ? { url: store.site } : {})"), "Merchant schema URL must be the merchant's site, not our own store landing");
+assert.ok(store.includes("...(store.logo ? { logo: store.logo } : {})"), "Merchant logo must use an existing source only");
+
 assert.ok(store.includes("realCodeCount > 0 && <JsonLd data={howToJsonLd} />"));
 assert.ok(store.includes("Как воспользоваться акцией"));
 assert.ok(store.includes("getOfferDisplayName(store.name"));
