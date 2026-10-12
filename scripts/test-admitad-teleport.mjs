@@ -69,6 +69,7 @@ assert.match(source,/AbortSignal.timeout/);
 assert.match(source,/getTeleportVisitorIp/);
 assert.match(ticket,/NEXT_PUBLIC_ADMITAD_TELEPORT_PILOT_ENABLED/);
 assert.match(ticket,/getConsent\(\)/);
+assert.match(ticket,/toPilot \? "noopener" : "noopener,noreferrer"/); // preserve referer for same-origin pilot
 assert.match(privacy,/IP-адрес посетителя/);
 assert.match(consent,/document.cookie = "promofact_teleport_consent=yes/);
 assert.doesNotMatch(source,/searchParams.get\("url"\)/);
