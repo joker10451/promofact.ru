@@ -583,7 +583,8 @@ export interface SyncAggregates {
   legal_ready: number;
   publishable: number;
   ready_not_approved: number;
-  duplicates_vs_perfluence: number;
+  /** null means no live Perfluence comparison was performed; never infer zero. */
+  duplicates_vs_perfluence: number | null;
   written: number;
   updated: number;
   deactivated: number;
