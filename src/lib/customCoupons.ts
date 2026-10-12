@@ -10,7 +10,76 @@ import type { Coupon } from "@/lib/types";
  * Ручные копии перебивали их при дедупе и уводили заказы на публикацию
  * Telegram-канала — результаты засчитывались не тому аккаунту.
  */
+
+// PERFLUENCE / SberDevices: temporary approved PromoFact site placement.
+// Both codes were supplied from the approved project; do not invent restrictions.
+// The official site is informational; all outward CTA links MUST use the updated
+// project-specific Perfluence tracking URL with the same approved ERID.
+const SBERDEVICES_LINK = "https://sberdevaysy1.prfl.me/sites/fq4aly?erid=2RanymNsVkw";
+const SBERDEVICES_ERID = "2RanymNsVkw";
+const SBERDEVICES_STORE: Coupon["store"] = {
+  id: 5067,
+  name: "СберДевайсы",
+  slug: "sberdevaysy",
+  logo: null,
+  category: "Электроника и техника",
+  categorySlug: "elektronika-i-tehnika",
+  about: "SberDevices — официальный интернет-магазин телевизоров, умных колонок, медиаприставок и устройств для умного дома.",
+  conditions: "Проверяйте ограничения конкретного промокода и итоговую цену в корзине магазина.",
+  site: "https://sberdevices.ru/",
+  activeBloggers: 0,
+};
+const SBERDEVICES_AFFILIATE: Coupon["affiliate"] = {
+  link: SBERDEVICES_LINK,
+  landingLink: SBERDEVICES_LINK,
+  ordMarker: SBERDEVICES_ERID,
+  ordText: "Реклама. Рекламодатель — ООО «САЛЮТДЕВАЙСЫ», ИНН: 7730253720. erid: 2RanymNsVkw",
+};
+
 export const CUSTOM_COUPONS: Coupon[] = [
+  {
+    id: 50671,
+    promocode: {
+      id: 50671,
+      code: "Sberdv171",
+      bonusName: "Скидка 6% по промокоду Sberdv171",
+      terms: "Промокод Sberdv171: скидка 6% по условиям проекта «СберДевайсы». Сверьте применимость к выбранным товарам, возможные исключения и сочетание с другими акциями в корзине официального магазина. До 31 октября 2026 года, 23:59 по Москве.",
+      expires: "2026-10-31",
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Условия уточняйте в магазине",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: SBERDEVICES_STORE,
+    affiliate: SBERDEVICES_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 50672,
+    promocode: {
+      id: 50672,
+      code: "Sberdv71",
+      bonusName: "Скидка 5% по промокоду Sberdv71",
+      terms: "Промокод Sberdv71: скидка 5% по условиям проекта «СберДевайсы». Сверьте применимость к выбранным товарам, возможные исключения и сочетание с другими акциями в корзине официального магазина. До 31 октября 2026 года, 23:59 по Москве.",
+      expires: "2026-10-31",
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Условия уточняйте в магазине",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: SBERDEVICES_STORE,
+    affiliate: SBERDEVICES_AFFILIATE,
+    extraLinks: [],
+  },
+
   {
     id: 50030,
     promocode: {

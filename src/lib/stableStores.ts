@@ -29,6 +29,20 @@ export interface StableStoreMeta {
 }
 
 export const STABLE_STORES: Record<string, StableStoreMeta> = {
+  // Approved SberDevices Perfluence partner. Evergreen metadata only;
+  // expiring offer codes, affiliate link and ERID belong outside this registry.
+  "sberdevaysy": {
+    id: 5067,
+    slug: "sberdevaysy",
+    name: "СберДевайсы",
+    logo: null,
+    category: "Электроника и техника",
+    categorySlug: "elektronika-i-tehnika",
+    about: "SberDevices — официальный интернет-магазин умных колонок, телевизоров, медиаприставок и устройств для умного дома.",
+    conditions: "Проверяйте актуальные предложения и ограничения на сайте магазина.",
+    site: "https://sberdevices.ru/",
+  },
+
   // CATALOG-GROWTH-4: verified connected Admitad brands. Metadata only; empty pages stay noindex.
   "internet-magazin-bilayn": {
     id: -100024,

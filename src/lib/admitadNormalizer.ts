@@ -368,6 +368,15 @@ export function resolveOfferDetails(
   if (pctMatch) {
     const val = parseInt(pctMatch[1], 10);
     let condition = cleanConditionText(cleanName, pctMatch[0]);
+    // "Скидка месяца" теряет слово "Скидка" при очистке и превращается
+    // в бессмысленное "на месяца". Восстанавливаем только подтверждённый
+    // смысл из исходных условий, не выдумывая процент или срок акции.
+    if (/^(?:на\s+)?месяца$/iu.test(condition) &&
+        /скидка\s+месяца/iu.test(combinedText)) {
+      condition = /индивидуальн[а-яё]*\s+подборк[а-яё]*/iu.test(combinedText)
+        ? "Скидка месяца на подборку товаров"
+        : "Скидка месяца";
+    }
     if (minOrder) {
       const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(cleanName) || /перв|1[-‑–—]?[ыое]?й/i.test(description);
       condition = isFirst
@@ -382,7 +391,7 @@ export function resolveOfferDetails(
         .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)(?=[\s,.:;!?-]|$)/gi, "$2")
         .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
         .trim();
-      if (!/^(?:на|в|во|при|для|от|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(condition)) {
+      if (!/^(?:на|в|во|при|для|от|свыше|\+|скидк[аиуы]?|акци[яи])(?:[\s,.:;!?-]|$)/i.test(condition)) {
         condition = `на ${condition}`;
       }
     }
@@ -424,7 +433,7 @@ export function resolveOfferDetails(
         .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]*\s*(на|при|в|для|от)(?=[\s,.:;!?-]|$)/gi, "$2")
         .replace(/^(на|при|в|для|от)\s+[.,:;!?\s\-–—/|•·*]+\s*/gi, "$1 ")
         .trim();
-      if (!/^(?:на|в|во|при|для|от|свыше|\+)(?:[\s,.:;!?-]|$)/i.test(condition)) {
+      if (!/^(?:на|в|во|при|для|от|свыше|\+|скидк[аиуы]?|акци[яи])(?:[\s,.:;!?-]|$)/i.test(condition)) {
         condition = `на ${condition}`;
       }
     }

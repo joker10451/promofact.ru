@@ -4,6 +4,7 @@ import Icon from "@/components/Icon";
 import { useState } from "react";
 import type { Coupon } from "@/lib/types";
 import { refineOffer } from "@/lib/offerRefiner";
+import { isRealPromoCode } from "@/lib/dedupe";
 
 interface StoreSummaryTableProps {
   coupons: Coupon[];
@@ -91,7 +92,7 @@ export default function StoreSummaryTable({
   const monthYear = now.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
   const capitalizedMonthYear = monthYear.charAt(0).toUpperCase() + monthYear.slice(1);
 
-  const headingText = title || `Сводная таблица промокодов ${storeName} на ${capitalizedMonthYear}`;
+  const headingText = title || `Сводная таблица промокодов и акций ${storeName} на ${capitalizedMonthYear}`;
   const subText = subtitle || `Сравните выгоду, минимальную сумму заказа и условия применения всех предложений.`;
 
   return (
@@ -124,7 +125,7 @@ export default function StoreSummaryTable({
           <thead className="border-b border-line bg-paper text-[11px] font-extrabold uppercase tracking-wider text-ink/55">
             <tr>
               <th scope="col" className="px-4 sm:px-5 py-3">Скидка / Акция</th>
-              <th scope="col" className="px-4 sm:px-5 py-3">Промокод</th>
+              <th scope="col" className="px-4 sm:px-5 py-3">Промокод / акция</th>
               <th scope="col" className="px-4 sm:px-5 py-3">Условия</th>
               <th scope="col" className="px-4 sm:px-5 py-3">Для кого</th>
               <th scope="col" className="px-4 sm:px-5 py-3">Срок</th>
@@ -133,7 +134,7 @@ export default function StoreSummaryTable({
           </thead>
           <tbody className="divide-y divide-line">
             {coupons.map((coupon) => {
-              const code = coupon.promocode.code;
+              const code = isRealPromoCode(coupon.promocode.code) ? coupon.promocode.code : "";
               const isFirst = coupon.promocode.isFirstOrderOnly;
               const refined = refineOffer(
                 coupon.promocode.bonusName || "",

@@ -17,7 +17,9 @@ import { buildStoreArticle, buildStoreDescription } from "@/lib/storeSeoContent"
 import { getMaxVerifiedDiscount, hasGiftOffer } from "@/lib/storeDiscount";
 import { getStoreExtra, hasActiveRequiredCoupons } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
-import { formatStoreOfferTitle, formatPriorityStoreTitle, getStoreHeadlineOfferCounts } from "@/lib/storeOfferHeadline";
+import { getOfferSchema, getOfferDisplayName } from "@/lib/seoOfferSchema";
+import { isRealPromoCode } from "@/lib/dedupe";
+import { formatStoreOfferTitle, formatPriorityStoreTitle, getStoreHeadlineOfferCounts, formatStoreOfferCounts } from "@/lib/storeOfferHeadline";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -183,6 +185,8 @@ export default async function StorePage({
   if (!store) notFound();
 
   const pageUrl = `${SITE_URL}/store/${slug}`;
+  const { codes: realCodeCount, codeFree: codeFreeCount } = getStoreHeadlineOfferCounts(store.coupons);
+  const offerCountLabel = formatStoreOfferCounts(realCodeCount, codeFreeCount);
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const todayIso = TODAY_ISO;
   const todayRu = TODAY_RU;
@@ -191,7 +195,9 @@ export default async function StorePage({
   const maxDisc = getMaxVerifiedDiscount(store.coupons);
   const hasGift = hasGiftOffer(store.coupons);
 
-  const firstOrderPromo = store.coupons.find((c) => c.promocode.isFirstOrderOnly);
+  const firstOrderPromo = store.coupons.find((c) =>
+    c.promocode.isFirstOrderOnly && isRealPromoCode(c.promocode.code)
+  );
 
 
   // Уникальный SEO-текст: собирается из реальных фактов магазина, а не шаблона.
@@ -230,24 +236,9 @@ export default async function StorePage({
     ],
   };
 
-  const couponsJsonLd: Record<string, unknown>[] = store.coupons.map((c) => ({
-    "@context": "https://schema.org",
-    "@type": "Coupon",
-    name: c.promocode.bonusName || `Промокод ${c.promocode.code}`,
-    description: c.promocode.bonusName || store.name,
-    discountCode: c.promocode.code,
-    category: "Промокод",
-    validThrough: c.promocode.expires,
-    dateModified: todayIso,
-    url: c.affiliate.link || store.site,
-    seller: { "@type": "Organization", name: store.name },
-    offers: {
-      "@type": "Offer",
-      url: c.affiliate.link || store.site,
-      priceValidUntil: c.promocode.expires,
-      availability: "https://schema.org/InStock",
-    },
-  }));
+  const couponsJsonLd: Record<string, unknown>[] = store.coupons.map((c) =>
+    getOfferSchema(store.name, c.affiliate.link || store.site, c.promocode),
+  );
 
   const storeExtra = getStoreExtra(slug);
   // Offer-specific FAQ из StoreExtra фильтруем по сроку только если для магазина явно
@@ -301,10 +292,15 @@ export default async function StorePage({
   const faqItems = [
     ...customFaqItems,
     ...searchIntentFaq,
-    {
-      q: `Как применить промокод ${store.name}?`,
-      a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Если условия выполнены, скидка отобразится в корзине до оплаты.`,
-    },
+    realCodeCount > 0
+      ? {
+          q: `Как применить промокод ${store.name}?`,
+          a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Если условия выполнены, скидка отобразится в корзине до оплаты.`,
+        }
+      : {
+          q: `Как воспользоваться акцией ${store.name} без промокода?`,
+          a: `Откройте действующее предложение на этой странице, проверьте его условия и перейдите по ссылке в магазин ${store.name}. Для акций без кода вводить промокод не требуется.`,
+        },
     {
       q: `Есть ли промокод ${store.name} на первый заказ в ${monthRu}?`,
       a: firstOrderPromo
@@ -384,7 +380,7 @@ export default async function StorePage({
       position: i + 1,
       item: {
         "@type": "Offer",
-        name: `Промокод ${c.promocode.code || store.name}`,
+        name: getOfferDisplayName(store.name, c.promocode),
         description: c.promocode.bonusName || store.name,
         url: c.affiliate.link || pageUrl,
         priceValidUntil: c.promocode.expires,
@@ -398,7 +394,7 @@ export default async function StorePage({
     <main>
       <JsonLd data={breadcrumb} />
       <JsonLd data={faqJsonLd} />
-      <JsonLd data={howToJsonLd} />
+      {realCodeCount > 0 && <JsonLd data={howToJsonLd} />}
       <JsonLd data={itemListJsonLd} />
       <JsonLd data={organizationJsonLd} />
       {couponsJsonLd.map((c) => (
@@ -429,18 +425,10 @@ export default async function StorePage({
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">
-                {maxDisc && maxDisc !== null
-                  ? `Промокоды ${store.name} на ${monthYear} — скидки ${maxDisc}`
-                  : `Промокоды и акции ${store.name} на ${monthYear}${hasGift ? " — подарки к заказу" : ""}`}
+                {`${realCodeCount > 0 ? (codeFreeCount > 0 ? "Промокоды и акции" : "Промокоды") : "Акции"} ${store.name} на ${monthYear}${maxDisc ? ` — скидки ${maxDisc}` : (hasGift ? " — подарки к заказу" : "")}`}
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
-                {store.coupons.length}{" "}
-                {store.coupons.length === 1
-                  ? "рабочий промокод"
-                  : store.coupons.length >= 2 && store.coupons.length <= 4
-                    ? "рабочих промокода"
-                    : "рабочих промокодов"}
-                . Срок действия указан в карточке.
+                {offerCountLabel}. Срок действия указан в карточке.
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
@@ -533,7 +521,7 @@ export default async function StorePage({
         {/* 2. Быстрая сводка (Quick Facts) для SEO и сниппетов */}
         <div className="mt-8 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Купонов сегодня</div>
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Предложений сегодня</div>
             <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-ink">{store.coupons.length}</div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
@@ -568,7 +556,7 @@ export default async function StorePage({
 
         <article className="mt-12 max-w-3xl">
           <h2 className="font-display text-xl font-extrabold">
-            {maxDisc ? `Промокод ${store.name} — как получить максимальную скидку` : `Промокоды ${store.name} — условия акций и подарков`}
+            {maxDisc ? `Предложения ${store.name} — условия максимальной скидки` : `Промокоды и акции ${store.name} — условия и подарки`}
           </h2>
           {storeArticle.map((paragraph, i) => (
             <p key={i} className="mt-3 leading-relaxed text-ink/70">

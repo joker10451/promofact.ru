@@ -41,6 +41,14 @@ export async function generateMetadata({
       type: "article",
       locale: "ru_RU",
       siteName: SITE_NAME,
+      ...(article.image ? {
+        images: [{
+          url: new URL(article.image, SITE_URL).toString(),
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        }],
+      } : {}),
     },
   };
 }
@@ -94,10 +102,15 @@ export default async function ArticlePage({
     "@type": "Article",
     headline: article.title,
     description: article.description,
-    datePublished: article.published ?? new Date().toISOString(),
-    dateModified: article.published ?? new Date().toISOString(),
+    ...(article.published ? { datePublished: article.published, dateModified: article.published } : {}),
+    ...(article.image ? { image: new URL(article.image, SITE_URL).toString() } : {}),
     author: { "@type": "Organization", name: SITE_NAME },
-    publisher: { "@type": "Organization", name: SITE_NAME },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/icon.png` },
+    },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
 
