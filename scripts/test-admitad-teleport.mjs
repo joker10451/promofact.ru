@@ -74,4 +74,22 @@ assert.match(ticket,/toPilot \? "noopener" : "noopener,noreferrer"/); // preserv
 assert.match(privacy,/IP-адрес посетителя/);
 assert.match(consent,/document.cookie = "promofact_teleport_consent=yes/);
 assert.doesNotMatch(source,/searchParams.get\("url"\)/);
+assert.match(source, /event: "admitad_teleport"/);
+assert.match(source, /recordTeleportOutcome\("success", "valid_merchant_redirect"\)/);
+for (const reason of [
+  "feature_disabled", "no_consent", "missing_referer", "different_origin",
+  "no_user_activation", "invalid_visitor_ip", "teleport_http_error",
+  "oversized_response", "invalid_json", "classic_response", "invalid_destination",
+  "teleport_timeout", "teleport_request_error",
+]) {
+  assert.ok(source.includes(`fallback("${reason}")`) ||
+    source.includes(`? "${reason}"`) ||
+    source.includes(`: "${reason}"`),
+    `Missing fallback diagnostic: ${reason}`);
+}
+const recorder = source.match(/function recordTeleportOutcome\([\s\S]*?\n}\n/);
+assert.ok(recorder, "Structured event recorder missing");
+assert.doesNotMatch(recorder[0], /req\.|headers|cookie|ip_addr|user_agent|clickId|couponId|\.toString\(/);
+assert.match(source, /reason: string/);
+
 console.log("✓ Admitad Teleport opt-in: safe request, coupon-only route, consent, fallback, ERID/SubID and malicious responses PASS");

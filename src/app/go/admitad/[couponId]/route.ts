@@ -21,6 +21,30 @@ const PLACEMENTS = new Set([
   "geo_category_coupon", "coupon_detail", "unknown",
 ]);
 
+/**
+ * QA-only aggregate-friendly event. Deliberately never log request headers,
+ * IP, user-agent, full URLs, query parameters, coupon IDs or click IDs.
+ * Counts can be grouped by outcome/reason in Vercel runtime logs.
+ */
+function recordTeleportOutcome(outcome: "success" | "fallback", reason: string): void {
+  console.info(JSON.stringify({
+    event: "admitad_teleport",
+    store: "tasty-coffee",
+    outcome,
+    reason,
+  }));
+}
+
+function isClassicTeleportResponse(body: unknown): boolean {
+  if (!Array.isArray(body) || body.length !== 1 || typeof body[0] !== "string") return false;
+  try {
+    const url = new URL(body[0]);
+    return url.protocol === "https:" && url.hostname === "dkfrh.com" && url.pathname.startsWith("/g/");
+  } catch {
+    return false;
+  }
+}
+
 function redirectNoStore(destination: string, variant: "teleport" | "classic") {
   const response = NextResponse.redirect(destination, 302);
   response.headers.set("Cache-Control", "private, no-store, max-age=0");
@@ -58,30 +82,33 @@ export async function GET(req: NextRequest, context: { params: Promise<{ couponI
     ...( /^[0-9a-f]{8}-[0-9a-f-]{27,38}$/i.test(clickId) ? { clickId } : {}),
   });
 
-  const fallback = () => redirectNoStore(url, "classic");
-  if (process.env.ADMITAD_TELEPORT_PILOT_ENABLED !== "true" ||
-      process.env.VERCEL !== "1" ||
-      req.cookies.get("promofact_teleport_consent")?.value !== "yes") return fallback();
+  const fallback = (reason: string) => {
+    recordTeleportOutcome("fallback", reason);
+    return redirectNoStore(url, "classic");
+  };
+  if (process.env.ADMITAD_TELEPORT_PILOT_ENABLED !== "true") return fallback("feature_disabled");
+  if (process.env.VERCEL !== "1") return fallback("not_vercel");
+  if (req.cookies.get("promofact_teleport_consent")?.value !== "yes") return fallback("no_consent");
 
   // Teleport performs a server-side disclosure of the visitor IP and UA.
   // Only accept genuine user navigations initiated from PromoFact.
   const origin = req.headers.get("referer");
-  if (!origin) return fallback();
+  if (!origin) return fallback("missing_referer");
   try {
-    if (new URL(origin).origin !== new URL(SITE_URL).origin) return fallback();
+    if (new URL(origin).origin !== new URL(SITE_URL).origin) return fallback("different_origin");
   } catch {
-    return fallback();
+    return fallback("invalid_referer");
   }
   const fetchSite = req.headers.get("sec-fetch-site");
   const fetchUser = req.headers.get("sec-fetch-user");
   // Require explicit user activation from this origin. Browsers that do not
   // send Fetch Metadata use the standard affiliate link, not a Teleport call.
-  if (fetchSite !== "same-origin" || fetchUser !== "?1") return fallback();
+  if (fetchSite !== "same-origin" || fetchUser !== "?1") return fallback("no_user_activation");
 
   const ua = req.headers.get("user-agent") || "";
-  if (!ua || /bot|crawler|spider|headless/i.test(ua)) return fallback();
+  if (!ua || /bot|crawler|spider|headless/i.test(ua)) return fallback("invalid_user_agent");
   const ip = getTeleportVisitorIp(req.headers.get("x-forwarded-for"));
-  if (!ip) return fallback();
+  if (!ip) return fallback("invalid_visitor_ip");
 
   const country = req.headers.get("x-vercel-ip-country");
   const apiUrl = makeTeleportUrl(url, {
@@ -90,7 +117,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ couponI
     referer: new URL(SITE_URL).origin,
     country,
   });
-  if (!apiUrl) return fallback();
+  if (!apiUrl) return fallback("invalid_teleport_url");
 
   try {
     const response = await fetch(apiUrl, {
@@ -100,13 +127,21 @@ export async function GET(req: NextRequest, context: { params: Promise<{ couponI
       signal: AbortSignal.timeout(2500),
       headers: { Accept: "application/json" },
     });
-    if (!response.ok) return fallback();
+    if (!response.ok) return fallback("teleport_http_error");
     const text = await response.text();
-    if (text.length > 8192) return fallback();
-    const destination = parseTeleportDestination(JSON.parse(text));
-    if (!destination) return fallback();
+    if (text.length > 8192) return fallback("oversized_response");
+    let body: unknown;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      return fallback("invalid_json");
+    }
+    const destination = parseTeleportDestination(body);
+    if (!destination) return fallback(isClassicTeleportResponse(body) ? "classic_response" : "invalid_destination");
+    recordTeleportOutcome("success", "valid_merchant_redirect");
     return redirectNoStore(destination, "teleport");
-  } catch {
-    return fallback();
+  } catch (error) {
+    return fallback(error instanceof Error && error.name === "TimeoutError"
+      ? "teleport_timeout" : "teleport_request_error");
   }
 }
