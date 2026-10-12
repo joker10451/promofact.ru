@@ -940,7 +940,7 @@ const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8"
       customerType: "all_customers",
     });
     assert.ok(res, "Спортмастер: нормализация должна пройти");
-    assert.strictEqual(res.shortDescription, "на индивидуальную подборку товаров");
+    assert.strictEqual(res.shortDescription, "Скидка месяца на подборку товаров");
     assert.ok(res.fullDescription.includes("индивидуальную подборку"));
     assert.strictEqual(res.promoCode, null, "Не придумываем отсутствующий код");
   }
