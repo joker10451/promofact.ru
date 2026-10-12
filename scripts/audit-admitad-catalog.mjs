@@ -64,8 +64,10 @@ async function main() {
     const siteMatch = program ? hostOf(program.site_url || "") === target.host : false;
     const mapping = program ? matchCanonicalStore(program) : null;
     const mappingMatch = mapping?.strategy === "EXACT MATCH" && mapping.canonicalSlug === target.slug;
+    // A program may require moderation of new sites but still have an
+    // ACTIVE approval for this publisher. Only connection_status determines it.
     const connectionActive = program?.status === "active" &&
-      program.connection_status === "active" && program.moderation !== true;
+      program.connection_status === "active";
     let qualityPassed = 0;
     let marked = 0;
     let eligibleForManualReview = 0;
@@ -108,6 +110,7 @@ async function main() {
       publisher_connected: Boolean(program),
       program_status: program?.status || "NOT_FOUND",
       connection_status: program?.connection_status || "NOT_FOUND",
+      program_has_moderation_process: program?.moderation === true,
       site_match: siteMatch, exact_mapping: mappingMatch,
       coupons_seen: offers.length, quality_passed: qualityPassed,
       erid_and_legal_present: marked, personal,
