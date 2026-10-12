@@ -12,7 +12,7 @@ export function getOfferDisplayName(storeName: string, offer: OfferSchemaInput):
   return isRealPromoCode(code) ? `Промокод ${code}` : `Акция ${storeName}`;
 }
 
-export function getOfferSchema(storeName: string, href: string, offer: OfferSchemaInput): Record<string, unknown> {
+export function getOfferSchema(storeName: string, href: string, offer: OfferSchemaInput, verifiedLogo?: string | null): Record<string, unknown> {
   const code = offer.code?.trim() || "";
   const valid = isRealPromoCode(code);
   const expires = offer.expires?.trim() || "";
@@ -22,7 +22,7 @@ export function getOfferSchema(storeName: string, href: string, offer: OfferSche
     name: getOfferDisplayName(storeName, offer),
     description: offer.bonusName?.trim() || storeName,
     url: href,
-    seller: { "@type": "Organization", name: storeName },
+    seller: { "@type": "Organization", name: storeName, ...(verifiedLogo ? { logo: verifiedLogo } : {}) },
   };
   if (!valid) return {
     ...base,
