@@ -83,7 +83,7 @@ async function main() {
   const baselineIds=new Set(previous.map(r=>r.id));
 
   // API dry-run must conservatively retain 15 old + exactly one vetted new.
-  const preview=await runAdmitadSafeSync({skipDbWrite:true});
+  const preview=await runAdmitadSafeSync({skipDbWrite:true,onlyNewCouponId:targetId});
   if(!preview.success || preview.aggregates?.publishable!==16) {
     fail("DRY_RUN_EXPECTED_SIXTEEN_FAILED");
   }
@@ -94,7 +94,7 @@ async function main() {
   const immediatelyBefore=await getActive(supa);
   validateActive(immediatelyBefore,false);
   if(immediatelyBefore.some(r=>!baselineIds.has(r.id))) fail("BASELINE_CHANGED_DURING_PREFLIGHT");
-  const live=await runAdmitadSafeSync();
+  const live=await runAdmitadSafeSync({onlyNewCouponId:targetId});
   if(!live.success || live.aggregates?.publishable!==16)
     fail("SYNC_NOT_SUCCESS_OR_COUNT_MISMATCH");
 
