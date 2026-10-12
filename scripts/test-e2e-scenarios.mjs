@@ -632,6 +632,17 @@ async function run() {
               "Live Hero search must remain visible at every breakpoint");
             assert.ok(await page.locator('section[id="catalog"]').count(),
               "Coupon catalog must remain navigable after redesign");
+            if (res.width <= 390) {
+              const searchButton = page.locator('header button[aria-label="Поиск по магазинам и купонам"]').first();
+              const searchBounds = await searchButton.boundingBox();
+              assert.ok(searchBounds && searchBounds.x + searchBounds.width <= res.width,
+                "Header search button must not be clipped on " + res.name);
+
+              const popularSection = page.locator('section[aria-label="Популярные магазины"]');
+              const popularBounds = await popularSection.boundingBox();
+              assert.ok(popularBounds && popularBounds.y < res.height - 60,
+                "Real popular stores should start within the first mobile viewport");
+            }
             const cards = page.locator('section[aria-label="Популярные магазины"] a[href^="/store/"]');
             const visibleCount = await cards.evaluateAll((nodes) =>
               nodes.filter((node) => getComputedStyle(node).display !== "none").length,
