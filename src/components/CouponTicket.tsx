@@ -12,6 +12,7 @@ import { CheckIcon } from "@/components/CheckIcon";
 import { refineOffer } from "@/lib/offerRefiner";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
 import { decorateAdmitadUrl, generateClickId } from "@/lib/admitadAutopilot";
+import { getConsent } from "@/lib/cookieConsent";
 import BarcodeEan13 from "@/components/BarcodeEan13";
 
 const SBER_MED_WARNING = "ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА";
@@ -220,6 +221,25 @@ export default function CouponTicket({
     }
   };
 
+  // Experimental server redirect only for the verified Tasty Coffee coupon.
+  // Never send visitor IP to Teleport without a current consent cookie.
+  // Otherwise continue the existing direct affiliate navigation unchanged.
+  const withTeleportPilot = (classicUrl: string, clickId: string): string => {
+    if (
+      process.env.NEXT_PUBLIC_ADMITAD_TELEPORT_PILOT_ENABLED !== "true" ||
+      !isAdmitad ||
+      store.slug !== "tasty-coffee" ||
+      promocode.code !== "TKPRDM-UYVG1GJO" ||
+      getConsent() !== "accepted"
+    ) return classicUrl;
+
+    const params = new URLSearchParams({
+      placement: placement || "unknown",
+      click_id: clickId,
+    });
+    return `/go/admitad/${coupon.id}?${params.toString()}`;
+  };
+
   const handleAffiliateClick = () => {
     ymReachGoal("affiliate_click", getAnalyticsContext());
   };
@@ -229,12 +249,13 @@ export default function CouponTicket({
       e.preventDefault();
       const clickId = generateClickId();
       activeClickIdRef.current = clickId;
-      const finalUrl = decorateAdmitadUrl(targetUrl, {
+      const classicUrl = decorateAdmitadUrl(targetUrl, {
         placement,
         pageType: getPageTypeFromPlacement(placement),
         couponId: coupon.id,
         clickId,
       });
+      const finalUrl = withTeleportPilot(classicUrl, clickId);
       handleAffiliateClick();
       activeClickIdRef.current = undefined;
       if (typeof window !== "undefined" && finalUrl && finalUrl !== "#") {
@@ -257,12 +278,12 @@ export default function CouponTicket({
     const clickId = isAdmitad ? generateClickId() : undefined;
     activeClickIdRef.current = clickId;
     const finalUrl = isAdmitad
-      ? decorateAdmitadUrl(url, {
+      ? withTeleportPilot(decorateAdmitadUrl(url, {
           placement,
           pageType: getPageTypeFromPlacement(placement),
           couponId: coupon.id,
           clickId,
-        })
+        }), clickId!)
       : url;
 
     // 1. Открытие партнёрской ссылки непосредственно в синхронном контексте пользовательского клика
