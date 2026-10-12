@@ -10,6 +10,9 @@
  * чтобы два магазина одной категории не звучали одинаково.
  */
 
+import { isRealPromoCode } from "@/lib/dedupe";
+import { formatStoreOfferCounts } from "@/lib/storeOfferHeadline";
+
 export interface StoreArticleInput {
   name: string;
   category: string;
@@ -155,7 +158,7 @@ function pickAngle(categorySlug: string, slug: string): string {
 
 /** Число активных купонов и названия кодов в тексте. */
 function codesSentence(input: StoreArticleInput): string {
-  const active = input.coupons.filter((c) => c.code);
+  const active = input.coupons.filter((c) => isRealPromoCode(c.code));
   if (active.length === 0) {
     return `Сейчас активных промокодов ${input.name} нет — новые коды появляются на этой странице по мере запуска партнёрских акций. Заглядывайте позже или подпишитесь, чтобы не пропустить свежую скидку.`;
   }
@@ -185,12 +188,9 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
     bloggers: input.activeBloggers,
   };
 
-  const countWord =
-    input.couponCount === 1
-      ? "рабочий промокод"
-      : input.couponCount >= 2 && input.couponCount <= 4
-        ? "рабочих промокода"
-        : "рабочих промокодов";
+  const realCodes = input.coupons.filter((c) => isRealPromoCode(c.code)).length;
+  const noCodeDeals = input.coupons.length - realCodes;
+  const offerCounts = formatStoreOfferCounts(realCodes, noCodeDeals);
 
   // 1. Лид — уникальный за счёт числа скидок, месяца и максимальной выгоды.
   // Про проверку кодов здесь намеренно не пишем: та же мысль звучала в трёх
@@ -198,18 +198,20 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
   let lead: string;
   if (input.couponCount > 0) {
     lead = input.maxDiscount
-      ? `На странице «Промокоды ${input.name}» собраны актуальные купоны на ${monthRu}. Подтверждённая скидка — ${input.maxDiscount}, всего действует ${input.couponCount} ${countWord}.`
-      : `На странице «Промокоды ${input.name}» собраны актуальные купоны на ${monthRu}. ${input.hasGiftOffer ? 'Доступны подарки к заказу' : 'Доступны специальные предложения'}, всего действует ${input.couponCount} ${countWord}.`;
+      ? `На странице ${input.name} собраны актуальные предложения на ${monthRu}. Максимальная указанная скидка — ${input.maxDiscount}. Доступно ${offerCounts}.`
+      : `На странице ${input.name} собраны актуальные предложения на ${monthRu}. ${input.hasGiftOffer ? "Есть подарки при выполнении условий" : "Условия указаны в карточках"}; доступно ${offerCounts}.`;
   } else {
     lead = `Страница «Промокоды ${input.name}» по категории «${input.category}». Сейчас действующих купонов нет, но подборку обновляем по мере старта партнёрских акций — новые коды появляются в день запуска.`;
   }
 
   // 2. Категорийный угол (выбирается по хэшу слоуга — два магазина одной категории различаются).
-  const angle = STORE_ANGLES[slug]
-    ? fill(STORE_ANGLES[slug], f)
-    : input.hasGiftOffer && !input.maxDiscount
-      ? `Купоны ${input.name} позволяют получить подарок при выполнении условий акции. Минимальная сумма заказа — это условие получения подарка, а не размер скидки.`
-      : fill(pickAngle(input.categorySlug, slug), f);
+  const angle = realCodes === 0 && noCodeDeals > 0
+    ? `Акции ${input.name} действуют по указанным в карточках условиям: проверьте ограничения, сроки и итоговую выгоду перед покупкой. Вводить промокод для этих предложений не нужно.`
+    : STORE_ANGLES[slug]
+      ? fill(STORE_ANGLES[slug], f)
+      : input.hasGiftOffer && !input.maxDiscount
+        ? `Предложения ${input.name} позволяют получить подарок при выполнении условий акции. Минимальная сумма заказа — это условие получения подарка, а не размер скидки.`
+        : fill(pickAngle(input.categorySlug, slug), f);
 
   // 3. Коды / бонусы — реальные данные конкретного магазина. Абзац сознательно
   // оставлен голыми данными: пояснение про условия дублировало абзац 4.
@@ -217,17 +219,19 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
 
   // 4. Первый заказ / условия.
   let order: string;
-  if (input.isFirstOrder && input.couponCount > 0) {
-    order = `Обратите внимание: часть промокодов ${input.name} действует только на первый заказ — такие коды помечены в карточке. Другие условия (минимальная сумма, категория товаров) описаны под каждым купоном.`;
+  if (realCodes === 0) {
+    order = `Для акций ${input.name} без кода проверяйте требования к заказу и способ получения скидки на стороне магазина. Условия индивидуальных предложений могут отличаться.`;
+  } else if (input.isFirstOrder) {
+    order = `Некоторые промокоды ${input.name} предназначены для первого заказа. Проверяйте отметку в карточке, минимальную сумму и ограничения по товарам перед применением.`;
   } else {
-    order = `Большинство промокодов ${input.name} подходят как новым, так и постоянным клиентам. Если код не сработал, проверьте минимальную сумму заказа и ограничения по категории товаров — они указаны в условиях акции.`;
+    order = `Проверяйте условия каждого промокода ${input.name}: ограничения по товарам и заказу могут различаться. Акции без кода не требуют ввода комбинации в корзине.`;
   }
 
   // 5. Доверие (ссылка на сайт магазина ставится отдельным якорем в странице).
   const bloggers = input.activeBloggers
     ? ` Подборку рекомендуют ${input.activeBloggers} блогеров.`
     : "";
-  const trust = `Мы показываем только коды с действующим сроком: истёкшие исчезают со страницы автоматически.${bloggers} ПромоФакт зарабатывает на партнёрских комиссиях, поэтому для вас купоны полностью бесплатны.`;
+  const trust = `Мы показываем предложения с действующим сроком: истёкшие скрываются автоматически.${bloggers} ПромоФакт может получать партнёрскую комиссию, но использование предложений на сайте бесплатно.`;
 
   return [lead, angle, codes, order, trust];
 }
@@ -244,7 +248,8 @@ export function buildStoreArticle(input: StoreArticleInput, slug: string): strin
  */
 export function buildStoreDescription(input: StoreArticleInput): string {
   const n = input.couponCount;
-  const word = n === 1 ? "код" : n >= 2 && n <= 4 ? "кода" : "кодов";
+  const realCodes = input.coupons.filter((c) => isRealPromoCode(c.code)).length;
+  const countLabel = formatStoreOfferCounts(realCodes, input.coupons.length - realCodes);
   // Короткое «−30%» ничего не добавляет к «скидка до 30%» — берём развёрнутое.
   const best = input.coupons
     .map((c) => (c.bonusName || "").replace(/[.\s]+$/, ""))
@@ -252,7 +257,7 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   const discount = input.maxDiscount ? `, скидка ${input.maxDiscount}` : "";
   const head =
     n > 0
-      ? `Промокоды ${input.name} на ${input.monthRu}: ${n} ${word}${discount}${input.hasGiftOffer && !input.maxDiscount ? ", подарки к заказу" : ""}.`
+      ? `Промокоды и акции ${input.name} на ${input.monthRu}: ${countLabel}${discount}${input.hasGiftOffer && !input.maxDiscount ? ", подарки к заказу" : ""}.`
       : `Скидки и акции ${input.name} на ${input.monthRu}.`;
   // Конкретный контекст для посадочной страницы, которая уже получает показы по
   // запросу «tasty coffee промокод», но не клики (данные GSC).
