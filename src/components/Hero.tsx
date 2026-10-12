@@ -30,18 +30,6 @@ function pluralOrders(n: number): string {
   return "заказов";
 }
 
-// Реальные актуальные магазины нашего сайта (в стиле топ-категорий Пикабу)
-const REAL_POPULAR_TAGS = [
-  "SUNLIGHT",
-  "Пятёрочка",
-  "Яндекс Цветы",
-  "Отелло",
-  "Кинопоиск",
-  "Ив Роше",
-  "Важная Рыба",
-  "Fix Price",
-];
-
 export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroProps) {
   const stores = search?.stores ?? [];
   const coupons = search?.coupons ?? [];
@@ -122,34 +110,23 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-paper via-white to-paper pt-7 pb-7 sm:pt-18 sm:pb-20 border-b border-line">
-      {/* Декоративные световые пятна с ограничением по ширине */}
-      <div
-        className="pointer-events-none absolute -left-20 top-10 h-72 w-72 max-w-full rounded-full bg-yellow/15 blur-3xl"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute right-0 top-20 h-72 w-72 max-w-full rounded-full bg-red/10 blur-3xl"
-        aria-hidden="true"
-      />
-
-      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 relative z-10">
-        {/* Заголовок */}
-        <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-ink sm:leading-[1.1]">
-          Найдите скидку. <br />
-          <span className="text-red">Заплатите меньше.</span>
-          <span className="mt-2 sm:mt-3 block text-base sm:text-xl md:text-2xl font-semibold tracking-normal text-ink/80">
-            Актуальные промокоды и купоны на скидку
-          </span>
-        </h1>
-
-        {/* Подзаголовок */}
-        <p className="mx-auto mt-3.5 max-w-2xl text-sm sm:text-base md:text-lg text-ink/70">
-          Промокоды и акции магазинов и сервисов в одном месте. Показываем только коды с действующим сроком — истёкшие уходят сами.
-        </p>
+    <section className="pf-hero relative overflow-hidden border-b border-line bg-white">
+      <div className="mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-14 lg:py-20">
+        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_410px]">
+          <div className="min-w-0">
+            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-red/15 bg-red/5 px-3 py-1.5 text-xs font-bold text-red">
+              <Icon name="tag" size={13} /> Промокоды и акции популярных магазинов
+            </p>
+            <h1 className="max-w-3xl font-display text-[clamp(1.7rem,4vw,3.6rem)] font-extrabold leading-[1.18] tracking-tight text-ink">
+              Хорошие скидки.
+              <span className="mt-1 block text-red">Без лишних поисков.</span>
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink/65 sm:text-base">
+              Найдите магазин, сравните действующие предложения и получите промокод — бесплатно, без регистрации.
+            </p>
 
         {/* Главная поисковая строка */}
-        <div ref={containerRef} className="relative mx-auto mt-4 sm:mt-8 max-w-2xl">
+        <div ref={containerRef} className="relative mt-6 sm:mt-8 max-w-2xl">
           <form onSubmit={handleSubmit} className="relative flex items-center">
             <div className="relative w-full">
               <span className="pointer-events-none absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-lg sm:text-xl text-ink/40">
@@ -166,11 +143,11 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
                   setSelectedIndex(0);
                 }}
                 placeholder="Поиск магазина или промокода..."
-                className="h-14 sm:h-16 w-full rounded-2xl border-2 border-ink/15 bg-white pl-12 sm:pl-14 pr-24 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
+                className="h-14 sm:h-16 w-full rounded-2xl border border-line bg-white pl-12 sm:pl-14 pr-24 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_14px_42px_rgba(23,32,51,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
               />
               <button
                 type="submit"
-                className="absolute right-2 sm:right-2.5 top-2 sm:top-2.5 bottom-2 sm:bottom-2.5 flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-red to-red-dark px-3.5 sm:px-5 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:brightness-105 active:scale-[0.98] transition-all cursor-pointer"
+                className="absolute right-2 sm:right-2.5 top-2 sm:top-2.5 bottom-2 sm:bottom-2.5 flex items-center justify-center gap-1 rounded-xl bg-red px-3.5 sm:px-5 text-xs sm:text-sm font-bold text-white shadow-xs hover:brightness-105 active:scale-[0.98] transition-all cursor-pointer"
               >
                 <span>Найти</span>
                 <span>→</span>
@@ -262,50 +239,56 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
           )}
         </div>
 
-        {/* Быстрые теги (реальные магазины) */}
-        <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-ink/70">
-          <span className="text-ink/40">Популярное:</span>
-          {REAL_POPULAR_TAGS.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => submitSearch(tag)}
-              className="rounded-lg bg-white border border-line px-2.5 py-1 text-ink/80 hover:border-ink/40 hover:text-ink transition-colors cursor-pointer"
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
 
-        {/* Блок доверия (Trust Indicators) */}
-        <div className="mt-6 sm:mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-4 sm:pt-6 border-t border-line/60">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
-              <Icon name="check" size={14} />
-            </span>
-            <span>
-              {proofTotal > 0
-                ? `${proofTotal} ${pluralOrders(proofTotal)} подтверждено`
-                : "Срок действия у каждого кода"}
-            </span>
+            {/* Suggested search terms come exclusively from the real active store index. */}
+            {stores.length > 0 && (
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-ink/60">
+                <span className="font-semibold">Популярное:</span>
+                {stores.slice(0, 6).map((store) => (
+                  <button
+                    key={store.slug}
+                    type="button"
+                    onClick={() => submitSearch(store.name)}
+                    className="rounded-full border border-line bg-paper/40 px-3 py-1.5 font-semibold text-ink/80 transition-colors hover:border-red/40 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red"
+                  >
+                    {store.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-ink/60">
+              <span className="inline-flex items-center gap-1.5">
+                <Icon name="check" size={14} className="text-mint-dark" /> {couponCount} активных предложений
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Icon name="shield" size={14} className="text-mint-dark" /> Бесплатно и без регистрации
+              </span>
+              {proofTotal > 0 && (
+                <span className="inline-flex items-center gap-1.5">
+                  <Icon name="sparkle" size={14} className="text-mint-dark" />
+                  {proofTotal} {pluralOrders(proofTotal)} подтверждено
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow/40 text-ink text-[11px]">
-              <Icon name="sparkle" size={14} />
-            </span>
-            <span>{couponCount} активных акций</span>
-          </div>
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
-              <Icon name="shield" size={14} />
-            </span>
-            <span>Коды из партнёрских программ магазинов</span>
-          </div>
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red/15 text-red text-[11px]">
-              0₽
-            </span>
-            <span>Бесплатно и без регистрации</span>
+
+          {/* Decorative illustration, not an advertised discount or a product. */}
+          <div className="relative hidden min-h-[335px] items-center justify-center lg:flex" aria-hidden="true">
+            <div className="absolute h-[315px] w-[315px] rounded-full bg-[#fff0f3]" />
+            <div className="absolute left-5 top-12 -rotate-12 rounded-2xl border border-red/10 bg-white px-5 py-3 text-sm font-bold text-red shadow-xl shadow-red/5">
+              Выгода рядом
+            </div>
+            <div className="absolute right-5 top-12 rotate-12 rounded-2xl border border-red/10 bg-white p-3 text-red shadow-xl shadow-red/5">
+              <Icon name="heart" size={24} />
+            </div>
+            <div className="relative flex h-56 w-52 -rotate-6 items-center justify-center rounded-[44px] border-[10px] border-[#e82f53] bg-gradient-to-br from-[#ff6580] via-[#f43f5e] to-[#d91f45] shadow-[18px_25px_35px_rgba(244,63,94,0.22)]">
+              <div className="absolute -top-14 h-24 w-28 rounded-t-full border-[15px] border-b-0 border-[#e82f53]" />
+              <span className="font-display text-8xl font-black text-white">%</span>
+            </div>
+            <div className="absolute bottom-6 right-2 rotate-6 rounded-2xl border border-line bg-white px-5 py-3 text-sm font-bold text-ink shadow-lg">
+              Без переплат
+            </div>
           </div>
         </div>
       </div>
