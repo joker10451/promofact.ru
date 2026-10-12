@@ -260,7 +260,10 @@ export default function CouponTicket({
       activeClickIdRef.current = undefined;
       if (typeof window !== "undefined" && finalUrl && finalUrl !== "#") {
         try {
-          const win = window.open(finalUrl, "_blank", "noopener,noreferrer");
+          // The same-origin Teleport endpoint needs our own site Referer.
+          // Legacy external links keep noreferrer; both modes keep noopener.
+          const toPilot = finalUrl.startsWith("/go/admitad/");
+          const win = window.open(finalUrl, "_blank", toPilot ? "noopener" : "noopener,noreferrer");
           if (win) {
             try {
               win.opener = null;
