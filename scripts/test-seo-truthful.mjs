@@ -39,6 +39,19 @@ assert.ok(store.includes("realCodeCount > 0 && <JsonLd data={howToJsonLd} />"));
 assert.ok(store.includes("Как воспользоваться акцией"));
 assert.ok(store.includes("getOfferDisplayName(store.name"));
 
+
+const stableRegistry = fs.readFileSync("src/lib/stableStores.ts", "utf8");
+for (const slug of ["askona", "polzaru"]) {
+  assert.ok(stableRegistry.includes(`"${slug}": {`), `${slug}: stable legacy destination exists`);
+}
+for (const originalWebsite of ["https://www.askona.ru/", "https://polza.ru/"]) {
+  assert.ok(stableRegistry.includes(`site: "${originalWebsite}"`), "Uses verified official merchant destination");
+}
+assert.ok(!stableRegistry.includes('code: "ASKONA"'), "Do not fabricate an Askona promo code");
+assert.ok(store.includes("index: n > 0"), "Never index a store without live offers");
+assert.ok(store.includes("Подтверждённых промокодов для {store.name} пока нет"), "Empty-state text must be truthful");
+assert.ok(!store.includes("в магазине действуют сезонные скидки"), "Do not imply unverified promotions exist");
+
 const article = fs.readFileSync("src/app/sovety/[slug]/page.tsx", "utf8");
 assert.ok(article.includes("article.image ? { image: new URL(article.image, SITE_URL).toString() }"));
 assert.ok(article.includes("logo: {"));
