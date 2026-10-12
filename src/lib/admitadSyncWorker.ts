@@ -54,6 +54,10 @@ export interface SyncWorkerResult {
 export async function runAdmitadSafeSync(options: {
   customFetch?: typeof fetch;
   skipDbWrite?: boolean;
+  /** For safe batch rollout, no NEW active rows outside the given campaigns. */
+  onlyNewCampaignIds?: readonly string[];
+  /** Upper bound on added active offers; exceeded => abort before any staging/write. */
+  maxNewOffers?: number;
 } = {}): Promise<SyncWorkerResult> {
   const startTime = Date.now();
   const syncRunId = `sync_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -214,11 +218,16 @@ export async function runAdmitadSafeSync(options: {
       }
 
       const rowId = `adm_${couponId}`;
+      const newOfferOutsideBatch = Boolean(
+        options.onlyNewCampaignIds &&
+        !existingActiveMap.has(rowId) &&
+        !options.onlyNewCampaignIds.includes(String(campId))
+      );
       let isRowActive = false;
-      let syncStatus = evalResult.status;
+      let syncStatus = newOfferOutsideBatch ? "READY_NOT_APPROVED" : evalResult.status;
 
       if (isApprovedInCurrentSync) {
-        if (evalResult.publishable) {
+        if (evalResult.publishable && !newOfferOutsideBatch) {
           isRowActive = true;
           publishableCount++;
         } else {
@@ -362,6 +371,18 @@ export async function runAdmitadSafeSync(options: {
           // last_seen_at НЕ обновляется — запись не была получена из API в этом цикле
         });
         publishableCount++;
+      }
+    }
+
+    // Batch mode may not accidentally introduce new offers from other
+    // already-approved programs or exceed its capped growth envelope.
+    if (options.maxNewOffers !== undefined) {
+      if (!Number.isSafeInteger(options.maxNewOffers) || options.maxNewOffers < 0) {
+        throw new Error("BATCH_INVALID_NEW_OFFER_CAP");
+      }
+      const newActive = rowsToUpsert.filter((r) => r.is_active && !existingActiveMap.has(r.id));
+      if (newActive.length > options.maxNewOffers) {
+        throw new Error("BATCH_NEW_OFFER_CAP_EXCEEDED");
       }
     }
 
