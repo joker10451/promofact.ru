@@ -1,0 +1,33 @@
+name: One-shot Befree Publisher Preflight (NO DB WRITES)
+
+on:
+  push:
+    branches: [ops/befree-one-shot-20261012]
+    paths:
+      - 'scripts/befree-one-shot-preflight.mjs'
+      - '.github/workflows/befree-one-shot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Confirm live publisher coupon, unchanged baseline and no write
+        env:
+          ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
+          ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
+          ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}
+          ADMITAD_WEBSITE_HOST: promofact.ru
+          ADMITAD_APPROVED_CAMPAIGNS: "141770,1667,17220,25224,26110"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node --loader ./scripts/ts-loader.mjs scripts/befree-one-shot-preflight.mjs
