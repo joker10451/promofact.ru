@@ -10,6 +10,7 @@ const coupons = read("src/components/CouponGrid.tsx");
 const featured = read("src/components/ExpiringDeals.tsx");
 const css = read("src/app/globals.css");
 const regulations = read("src/components/SberCampaignTeasers.tsx");
+const storeLogo = read("src/components/StoreLogo.tsx");
 
 assert.ok(home.includes('className="pf-v3"'), "Editorial design must be scoped to the homepage");
 assert.ok(css.includes(".pf-v3 {"), "Scoped design tokens required");
@@ -44,3 +45,8 @@ assert.ok(!hero.includes("border-[10px]"), "Decorative fake shopping bag removed
 assert.ok(hero.includes("Ваш путь к выгоде"), "Editorial desktop sidebar explains real user flow");
 assert.ok(css.includes(".pf3-serif"), "Serif typography in editorial design system");
 assert.ok(coupons.includes("Все категории") && coupons.includes("Сбросить категорию"), "Category controls usable without hidden rail");
+
+assert.ok(storeLogo.includes(String.raw`name.replace(/[^\p{L}\p{N}]/gu`),
+  "Brand fallback must recognize Unicode letters (including Cyrillic)");
+assert.equal("Пятёрочка".replace(/[^\p{L}\p{N}]/gu, "").charAt(0).toUpperCase(), "П",
+  "Unicode monogram for Russian brand must display its letter");
