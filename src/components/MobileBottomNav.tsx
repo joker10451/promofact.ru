@@ -110,20 +110,6 @@ export default function MobileBottomNav() {
             </div>
           );
 
-          if (item.isExternal) {
-            return (
-              <a
-                key={item.label}
-                href={item.href}
-                target="_blank"
-                rel="noopener nofollow"
-                className="w-full select-none min-h-[44px] flex items-center justify-center"
-              >
-                {content}
-              </a>
-            );
-          }
-
           return (
             <Link
               key={item.label}
