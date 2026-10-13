@@ -5,6 +5,7 @@ const hero = fs.readFileSync("src/components/Hero.tsx", "utf8");
 const shops = fs.readFileSync("src/components/PopularStores.tsx", "utf8");
 const home = fs.readFileSync("src/app/page.tsx", "utf8");
 const ticket = fs.readFileSync("src/components/CouponTicket.tsx", "utf8");
+const logo = fs.readFileSync("src/components/StoreLogo.tsx", "utf8");
 const adTeasers = fs.readFileSync("src/components/SberCampaignTeasers.tsx", "utf8");
 
 assert.ok(hero.includes("Найдите скидку.") && hero.includes("Заплатите меньше."),
@@ -37,3 +38,8 @@ assert.ok(ticket.includes("const { promocode, store, affiliate } = coupon") && t
 assert.ok(adTeasers.includes("SberKidsPromoHome") && adTeasers.includes("SberUlybatlHome"),
   "Preserve legal advertiser landings and disclosures");
 console.log("PromoFact polish-current: UX/data/legal regressions PASS");
+
+assert.ok(logo.includes(String.raw`name.replace(/[^\p{L}\p{N}]/gu`),
+  "Brand fallback must preserve Cyrillic and Latin letters, not show placeholder dots");
+assert.equal("Пятёрочка".replace(/[^\p{L}\p{N}]/gu,"").charAt(0).toUpperCase(),"П",
+  "Cyrillic logo fallback must render the real initial");
