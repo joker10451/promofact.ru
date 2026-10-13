@@ -144,3 +144,16 @@ assert.ok(sitemap.includes("url: `${SITE_URL}/guide`") &&
           guide.includes('alternates: { canonical: `${SITE_URL}/guide` }'),
   "New guide must have a canonical and sitemap entry");
 console.log("PromoFact editorial cleanup: concise homepage and dedicated help route PASS");
+
+
+const storeLanding = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
+const storeCouponBrowserPos = storeLanding.indexOf("<StoreCouponBrowser");
+const storeBannerPos = storeLanding.indexOf("getActivePromoBanners({ storeSlug: store.slug })");
+assert.ok(storeCouponBrowserPos !== -1 && storeBannerPos !== -1 && storeCouponBrowserPos < storeBannerPos,
+  "Store coupon cards must be displayed before any large affiliate banners");
+const storeBannerSources = fs.readFileSync("src/lib/promoBanners.ts", "utf8");
+const otpEntry = storeBannerSources.split('id: "otp-bank-debet-card-2026"')[1]?.split("startsAt:")[0] ?? "";
+assert.ok(otpEntry.includes('storeSlug: "otp-bank"') &&
+          !otpEntry.includes('storeSlugs:'),
+  "OTP creative is strictly restricted to its own bank page");
+console.log("Store landing UX: merchant coupon priority and OTP cross-brand isolation PASS");
