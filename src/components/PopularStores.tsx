@@ -48,17 +48,17 @@ export default async function PopularStores() {
   }
 
   return (
-    <section id="popular-stores" aria-label="Популярные магазины" className="py-5 sm:py-10 bg-white">
+    <section id="popular-stores" aria-label="Популярные магазины" className="py-6 sm:py-8 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 mb-4 sm:mb-6">
           <div className="flex items-center gap-2">
             <Icon name="store" size={19} className="text-ink/50" />
             <div>
-              <h2 className="font-display text-lg sm:text-xl md:text-2xl font-extrabold text-ink">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink">
                 Популярные магазины
               </h2>
               <p className="text-xs text-ink/60 font-medium">
-                Быстрый вход к скидкам любимых брендов
+                Выберите магазин — покажем доступные предложения
               </p>
             </div>
           </div>
@@ -71,14 +71,14 @@ export default async function PopularStores() {
         </div>
 
         {/* Real active shops only; compact navigation cards, no fabricated discounts. */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-12 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3">
           {top.map((s, index) => (
             <Link
               key={s.slug}
               href={`/store/${s.slug}`}
-              className={`${index >= 6 ? "hidden sm:flex" : "flex"} group flex-col items-center justify-center rounded-2xl border border-line bg-white p-3 text-center transition-colors hover:border-red/35 hover:bg-paper/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red`}
+              className={`${index >= 6 ? "hidden sm:flex" : "flex"} group flex-col items-center justify-center rounded-xl border border-line bg-white p-3 text-center transition-colors hover:border-red/35 hover:bg-[#fffaf8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red`}
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-paper/60 p-1.5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f7f5f1] p-1.5">
                 <StoreLogo
                   slug={s.slug}
                   name={s.name}
