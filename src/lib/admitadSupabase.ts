@@ -4,7 +4,7 @@ import { translit } from "@/lib/translit";
 import { proxiedLogo } from "@/lib/logoProxy";
 import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 import { STABLE_STORES } from "@/lib/stableStores";
-import { getEffectiveCampaignAllowlist } from "@/lib/admitadAutopilot";
+import { isPublicAdmitadRow } from "@/lib/admitadPublicVisibility";
 import { isRealPromoCode } from "@/lib/dedupe";
 import fs from "node:fs";
 import path from "node:path";
@@ -121,15 +121,12 @@ const LOCAL_META_PATH = path.join(process.cwd(), "src/data/admitad-sync-meta.jso
 /**
  * Чтение активных и валидных купонов Admitad из снимка Supabase.
  * Runtime путь: читает ТОЛЬКО Supabase, никогда не делает прямых запросов к Admitad API.
- * Безопасность пилота (ADMITAD-4): выдаются только купоны кампаний из getEffectiveCampaignAllowlist().
+ * В публичную выдачу попадают лишь ACTIVE/PUBLISHABLE записи последнего
+ * атомарного снапшота, прошедшие повторную проверку маркировки и срока.
+ * Старый pilot allowlist управляет ПУБЛИКАЦИЕЙ в sync worker, не ЧТЕНИЕМ уже
+ * опубликованных предложений. Иначе 437 опубликованных купонов невидимы.
  */
 export async function fetchAdmitadCouponsCached(): Promise<Coupon[]> {
-  const allowlist = getEffectiveCampaignAllowlist();
-  if (process.env.NODE_ENV === "production" && allowlist.length === 0) {
-    // Безопасность: в продакшене без явной конфигурации ADMITAD_APPROVED_CAMPAIGNS купоны не выдаются
-    return [];
-  }
-
   const supabase = getSupabase();
   if (!supabase) {
     if (process.env.NODE_ENV === "production") {
@@ -141,9 +138,7 @@ export async function fetchAdmitadCouponsCached(): Promise<Coupon[]> {
         const raw = JSON.parse(fs.readFileSync(LOCAL_SNAPSHOT_PATH, "utf8")) as Record<string, unknown>[];
         const out: Coupon[] = [];
         for (const row of raw) {
-          if (row.is_active) {
-            const campId = str(row.source_campaign_id);
-            if (allowlist.length > 0 && !allowlist.includes(campId)) continue;
+          if (isPublicAdmitadRow(row)) {
             const c = rowToCoupon(row);
             if (c && isNotExpired(c.promocode.expires)) {
               out.push(c);
@@ -173,8 +168,7 @@ export async function fetchAdmitadCouponsCached(): Promise<Coupon[]> {
 
     const out: Coupon[] = [];
     for (const row of data as Record<string, unknown>[]) {
-      const campId = str(row.source_campaign_id);
-      if (allowlist.length > 0 && !allowlist.includes(campId)) continue;
+      if (!isPublicAdmitadRow(row)) continue;
       const c = rowToCoupon(row);
       if (c && isNotExpired(c.promocode.expires)) {
         out.push(c);

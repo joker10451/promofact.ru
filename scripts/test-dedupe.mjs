@@ -88,6 +88,7 @@ const noCode = dedupeCoupons([
 assert.deepEqual(noCode.coupons.map((c) => c.id), [10, 11, 12]);
 assert(noCode.coupons.every((c) => c.affiliate.ordText.includes(c.affiliate.ordMarker)));
 assert.strictEqual(isRealPromoCode("NO_CODE"), false);
+assert.strictEqual(isRealPromoCode("NOT REQUIRE"), false);
 assert.strictEqual(isRealPromoCode(" НЕ НУЖЕН "), false);
 assert.strictEqual(isRealPromoCode("SALE10"), true);
 assert.strictEqual(normalizeCode(" sale10 "), "SALE10");
