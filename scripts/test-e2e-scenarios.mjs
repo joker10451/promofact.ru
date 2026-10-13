@@ -642,6 +642,12 @@ async function run() {
               const popularBounds = await popularSection.boundingBox();
               assert.ok(popularBounds && popularBounds.y < res.height - 60,
                 "Real popular stores should start within the first mobile viewport");
+              const firstStore = popularSection.locator('a[href^="/store/"]').first();
+              const cardBounds = await firstStore.boundingBox();
+              const headingBounds = await popularSection.getByRole("heading", { name: "Популярные магазины" }).boundingBox();
+              assert.ok(cardBounds && headingBounds && cardBounds.y - (headingBounds.y + headingBounds.height) < 120,
+                "The all-stores link must not create large blank space before store cards");
+
             }
             const cards = page.locator('section[aria-label="Популярные магазины"] a[href^="/store/"]');
             const visibleCount = await cards.evaluateAll((nodes) =>
