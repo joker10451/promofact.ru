@@ -348,8 +348,9 @@ https://www.sberbank.ru/common/img/uploaded/cards/sberkarta_kids/pravila_akcii_b
   },
   {
     id: "otp-bank-debet-card-2026",
+    // Card application is a banking offer, not a grocery/cosmetics coupon.
+    // Keep it on the OTP Bank page only, regardless of gift-card merchants.
     storeSlug: "otp-bank",
-    storeSlugs: ["otp-bank", "goldapple", "pyaterochka"],
     creativeOnly: true,
     link: "https://otpsert.prfl.me/sites/q3n058?erid=2RanynrNE1y",
     image: "/images/otp-bank-debet-card.png",

@@ -466,12 +466,6 @@ export default async function StorePage({
 
         {/* 1. ГЛАВНЫЙ БЛОК: АКТИВНЫЕ КУПОНЫ И ПРОМОКОДЫ (СРАЗУ НА 1-М ЭКРАНЕ) */}
         <div className="mt-6">
-          {getActivePromoBanners({ storeSlug: store.slug }).map((banner) => (
-            <div key={banner.id} className="mb-6">
-              <PromoBanner banner={banner} />
-            </div>
-          ))}
-
           {store.coupons.length === 0 ? (
             <div className="rounded-3xl border border-line bg-white p-6 sm:p-10 text-center shadow-xs">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-paper border border-line mb-3 text-ink/40">
@@ -518,6 +512,14 @@ export default async function StorePage({
             />
           )}
         </div>
+
+        {/* Купоны конкретного магазина всегда выше партнёрского креатива.
+            Баннеры показываем только для явно соответствующей страницы. */}
+        {getActivePromoBanners({ storeSlug: store.slug }).map((banner) => (
+          <div key={banner.id} className="mt-6">
+            <PromoBanner banner={banner} />
+          </div>
+        ))}
 
         {/* 2. Быстрая сводка (Quick Facts) для SEO и сниппетов */}
         <div className="mt-8 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
