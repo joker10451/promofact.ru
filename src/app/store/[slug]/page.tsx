@@ -1,4 +1,6 @@
 import Icon from "@/components/Icon";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -392,7 +394,9 @@ export default async function StorePage({
   };
 
   return (
-    <main>
+    <div className="pf3-detail">
+      <Header />
+      <main className="min-h-screen">
       <JsonLd data={breadcrumb} />
       <JsonLd data={faqJsonLd} />
       {realCodeCount > 0 && <JsonLd data={howToJsonLd} />}
@@ -412,7 +416,7 @@ export default async function StorePage({
           className="mb-2"
         />
 
-        <div className="mt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="pf3-detail-hero mt-6 flex flex-col justify-between gap-4 px-5 py-7 sm:px-8 sm:py-9 md:flex-row md:items-end">
           <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
             <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-1 shadow-2xs">
               <StoreLogo
@@ -425,7 +429,8 @@ export default async function StorePage({
               />
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">
+              <p className="pf3-kicker mb-2 text-[11px] font-bold text-red">Скидки и условия магазина</p>
+              <h1 className="pf3-serif text-[clamp(1.75rem,3vw,2.6rem)] font-bold leading-[1.16] tracking-tight text-ink break-words">
                 {`${realCodeCount > 0 ? (codeFreeCount > 0 ? "Промокоды и акции" : "Промокоды") : "Акции"} ${store.name} на ${monthYear}${maxDisc ? ` — скидки ${maxDisc}` : (hasGift ? " — подарки к заказу" : "")}`}
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
@@ -691,6 +696,8 @@ export default async function StorePage({
           );
         })()}
       </div>
-    </main>
+      </main>
+      <Footer />
+    </div>
   );
 }
