@@ -110,23 +110,25 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
   };
 
   return (
-    <section className="pf-hero relative overflow-hidden border-b border-line bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-14 lg:py-20">
-        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_410px]">
+    <section className="pf3-hero mx-auto max-w-7xl px-4 pt-5 sm:px-6 sm:pt-8">
+      <div className="relative overflow-hidden rounded-[22px] border border-line bg-[#fffaf7] px-5 py-8 sm:rounded-[28px] sm:px-10 sm:py-12 lg:px-14 lg:py-14">
+        <div className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-[#f6e7e1]/70 blur-3xl" aria-hidden="true" />
+        <div className="relative grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_290px] xl:grid-cols-[minmax(0,1fr)_315px]">
           <div className="min-w-0">
-            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-red/15 bg-red/5 px-3 py-1.5 text-xs font-bold text-red">
-              <Icon name="tag" size={13} /> Актуальные промокоды и купоны на скидку
+            <p className="pf3-kicker text-xs font-bold text-red">
+              Актуальные промокоды и купоны на скидку
             </p>
-            <h1 className="max-w-3xl font-display text-[clamp(1.7rem,3.2vw,3.15rem)] font-extrabold leading-[1.18] tracking-tight text-ink">
-              Хорошие скидки.
-              <span className="mt-1 block text-red">Без лишних поисков.</span>
+            <h1 className="pf3-serif mt-4 max-w-3xl text-[clamp(2.15rem,4vw,4.1rem)] font-bold leading-[1.08] tracking-[-0.038em] text-ink">
+              Скидки, которые
+              <span className="block text-red">легко найти.</span>
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink/65 sm:text-base">
-              Найдите магазин, сравните действующие предложения и получите промокод — бесплатно, без регистрации.
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-ink/70 sm:text-base">
+              Ищите магазин, сравнивайте условия и выбирайте подходящее предложение.
+              Только реальные промокоды и акции из нашего каталога.
             </p>
 
         {/* Главная поисковая строка */}
-        <div ref={containerRef} className="relative mt-6 sm:mt-8 max-w-2xl">
+        <div ref={containerRef} className="relative mt-6 max-w-2xl">
           <form onSubmit={handleSubmit} className="relative flex items-center">
             <div className="relative w-full">
               <span className="pointer-events-none absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-lg sm:text-xl text-ink/40">
@@ -143,7 +145,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
                   setSelectedIndex(0);
                 }}
                 placeholder="Поиск магазина или промокода..."
-                className="h-14 sm:h-16 w-full rounded-2xl border border-line bg-white pl-12 sm:pl-14 pr-24 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_14px_42px_rgba(23,32,51,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
+                className="h-14 sm:h-16 w-full rounded-[14px] border border-line bg-white pl-12 sm:pl-14 pr-24 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_10px_32px_rgba(23,35,56,0.07)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
               />
               <button
                 type="submit"
@@ -240,16 +242,17 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </div>
 
 
-            {/* Suggested search terms come exclusively from the real active store index. */}
+
+            {/* Search suggestions use current stores only, never hard-coded offers. */}
             {stores.length > 0 && (
-              <div className="mt-4 flex flex-nowrap items-center gap-2 overflow-x-auto whitespace-nowrap no-scrollbar pb-1 text-xs text-ink/60 sm:flex-wrap">
-                <span className="font-semibold">Популярное:</span>
+              <div className="mt-4 flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 text-xs text-ink/65 sm:flex-wrap">
+                <span className="shrink-0 font-semibold">Часто ищут</span>
                 {stores.slice(0, 6).map((store) => (
                   <button
                     key={store.slug}
                     type="button"
                     onClick={() => submitSearch(store.name)}
-                    className="rounded-full border border-line bg-paper/40 px-3 py-1.5 font-semibold text-ink/80 transition-colors hover:border-red/40 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red"
+                    className="shrink-0 whitespace-nowrap rounded-full border border-line bg-white/75 px-3 py-1.5 font-semibold text-ink/75 transition-colors hover:border-red/40 hover:text-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red"
                   >
                     {store.name}
                   </button>
@@ -257,41 +260,48 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
               </div>
             )}
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-ink/60 sm:mt-6">
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-ink/65">
               <span className="inline-flex items-center gap-1.5">
-                <Icon name="check" size={14} className="text-mint-dark" /> {couponCount} активных предложений
+                <Icon name="check" size={15} className="text-mint-dark" /> {couponCount} актуальных предложений
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Icon name="shield" size={14} className="text-mint-dark" /> Бесплатно и без регистрации
+                <Icon name="shield" size={15} className="text-mint-dark" /> Бесплатно, без регистрации
               </span>
               {proofTotal > 0 && (
-                <span className="hidden items-center gap-1.5 sm:inline-flex">
-                  <Icon name="sparkle" size={14} className="text-mint-dark" />
+                <span className="inline-flex items-center gap-1.5">
+                  <Icon name="star" size={15} className="text-mint-dark" />
                   {proofTotal} {pluralOrders(proofTotal)} подтверждено
                 </span>
               )}
             </div>
           </div>
 
-          {/* Decorative illustration, not an advertised discount or a product. */}
-          <div className="relative hidden min-h-[335px] items-center justify-center lg:flex" aria-hidden="true">
-            <div className="absolute h-[315px] w-[315px] rounded-full bg-[#fff0f3]" />
-            <div className="absolute left-5 top-12 -rotate-12 rounded-2xl border border-red/10 bg-white px-5 py-3 text-sm font-bold text-red shadow-xl shadow-red/5">
-              Выгода рядом
+          {/* Real user journey instead of fictional percentages or decorative shopping objects. */}
+          <aside aria-label="Как получить скидку" className="hidden rounded-[22px] border border-[#e9ddd5] bg-white/80 p-6 shadow-[0_22px_55px_rgba(60,37,27,0.07)] lg:block">
+            <p className="pf3-kicker text-[11px] font-bold text-red">Ваш путь к выгоде</p>
+            <p className="pf3-serif mt-3 text-3xl font-bold leading-[1.12] text-ink">Всё просто.</p>
+            <div className="mt-6 space-y-0">
+              {[
+                ["01", "Найдите магазин", "Поиск по названию или промокоду"],
+                ["02", "Сравните условия", "Срок, минимальный заказ, ограничения"],
+                ["03", "Получите скидку", "Скопируйте код или откройте акцию"],
+              ].map(([step, title, description]) => (
+                <div key={step} className="flex gap-3 border-t border-line/70 py-4">
+                  <span className="pf3-serif shrink-0 text-2xl font-bold text-red/65">{step}</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-ink">{title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-ink/55">{description}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="absolute right-5 top-12 rotate-12 rounded-2xl border border-red/10 bg-white p-3 text-red shadow-xl shadow-red/5">
-              <Icon name="gift" size={24} />
-            </div>
-            <div className="relative flex h-56 w-52 -rotate-6 items-center justify-center rounded-[44px] border-[10px] border-[#e82f53] bg-gradient-to-br from-[#ff6580] via-[#f43f5e] to-[#d91f45] shadow-[18px_25px_35px_rgba(244,63,94,0.22)]">
-              <div className="absolute -top-14 h-24 w-28 rounded-t-full border-[15px] border-b-0 border-[#e82f53]" />
-              <span className="font-display text-8xl font-black text-white">%</span>
-            </div>
-            <div className="absolute bottom-6 right-2 rotate-6 rounded-2xl border border-line bg-white px-5 py-3 text-sm font-bold text-ink shadow-lg">
-              Без переплат
-            </div>
-          </div>
+            <a href="#catalog" className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-red hover:text-red-dark">
+              Смотреть предложения <span aria-hidden="true">↗</span>
+            </a>
+          </aside>
         </div>
       </div>
     </section>
   );
+}
 }
