@@ -33,7 +33,7 @@ export default function SovetyPage() {
   const articles = [...getArticles()].reverse();
 
   return (
-    <>
+    <div className="pf3-detail">
       <Header />
 
       <main className="min-h-screen bg-paper/40 py-10 sm:py-14 border-b border-line">
@@ -53,13 +53,13 @@ export default function SovetyPage() {
             </span>
           </nav>
 
-          <div className="mt-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-line">
+          <div className="pf3-detail-hero mt-6 flex flex-col justify-between gap-4 px-5 py-7 sm:flex-row sm:items-end sm:px-8 sm:py-9">
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow/40 px-3 py-1 text-[11px] font-bold text-ink mb-2">
                 <Icon name="clipboard" size={17} />
                 <span>База знаний ПромоФакта</span>
               </div>
-              <h1 className="font-display text-3xl sm:text-4xl font-black leading-tight text-ink">
+              <h1 className="pf3-serif text-[clamp(1.9rem,3.5vw,3.15rem)] font-bold leading-tight text-ink">
                 Советы по экономии и шопингу
               </h1>
               <p className="mt-2 max-w-2xl text-sm sm:text-base text-ink/65 font-medium">
@@ -80,7 +80,7 @@ export default function SovetyPage() {
               <Link
                 key={a.slug}
                 href={`/sovety/${a.slug}`}
-                className="group flex flex-col justify-between rounded-2xl border border-line bg-white p-6 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-ink/25 hover:shadow-md"
+                className="pf3-store-card group flex flex-col justify-between rounded-2xl border border-line bg-white p-6 transition-colors hover:border-red/30"
               >
                 <div>
                   <ArticleCover slug={a.slug} title={a.title} className="mb-4 h-24 w-full" />
@@ -88,7 +88,7 @@ export default function SovetyPage() {
                     <span className="uppercase tracking-wider">Инструкция</span>
                     <span>⏱ 3–4 мин</span>
                   </div>
-                  <h2 className="font-display text-base sm:text-lg font-bold leading-snug text-ink group-hover:text-red transition-colors">
+                  <h2 className="text-base sm:text-lg font-bold leading-snug text-ink group-hover:text-red transition-colors">
                     {a.title}
                   </h2>
                   <p className="mt-3 text-xs sm:text-sm leading-relaxed text-ink/60 line-clamp-3">
@@ -117,6 +117,6 @@ export default function SovetyPage() {
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }
