@@ -604,6 +604,7 @@ async function run() {
         "/catalog?q=farfor",
         "/category",
         "/calculator",
+        "/guide",
         "/store/farfor",
         "/category/dostavka-produktov",
         "/collections/first-order",
@@ -643,6 +644,14 @@ async function run() {
             assert.equal(await page.getByRole("button", { name: "Хиты", exact: true }).count(), 1,
               "Quick filters must not be duplicated");
           }
+          if (pathUrl === "/guide") {
+            assert.ok(await page.getByRole("heading", { name: "Как пользоваться промокодами" }).count(),
+              "Dedicated help route must show an accessible H1");
+            assert.ok(await page.locator('section#faq button[aria-expanded]').count() > 0,
+              "FAQ accordion must remain functional on the guide page");
+            assert.ok(await page.locator('script[type="application/ld+json"]').count() > 0,
+              "Guide must expose FAQPage structured data");
+          }
           if (pathUrl === "/calculator") {
             assert.ok(await page.getByRole("heading", { name: "Калькулятор скидок" }).count(),
               "Calculator must have its own H1");
@@ -660,6 +669,12 @@ async function run() {
               "Home must preview actual offers and link to the full catalogue");
             assert.equal(await page.locator('section#catalog').count(), 0,
               "Home must no longer download the full interactive catalogue");
+            assert.ok(await page.locator('section[aria-labelledby="home-resources-heading"] a[href="/guide"]').count(),
+              "Home must link to the full instructions and FAQ");
+            assert.equal(await page.locator('section#faq').count(), 0,
+              "Long FAQ must not appear on home");
+            assert.equal(await page.locator('section#subscribe').count(), 0,
+              "Full-width subscribe panel must not repeat the footer Telegram CTA");
             assert.ok(await page.locator('a[href="/category"]').count() > 0,
               "Home category preview must link to the hub");
             assert.ok((await page.locator("h1").innerText()).includes("Найдите скидку."),

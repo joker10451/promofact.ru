@@ -171,6 +171,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     { url: `${SITE_URL}/about`, changeFrequency: "monthly" as const, priority: 0.3 },
     { url: `${SITE_URL}/calculator`, changeFrequency: "monthly" as const, priority: 0.4 },
+    { url: `${SITE_URL}/guide`, changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${SITE_URL}/contacts`, changeFrequency: "monthly" as const, priority: 0.3 },
     { url: `${SITE_URL}/privacy`, changeFrequency: "monthly" as const, priority: 0.2 },
     { url: `${SITE_URL}/partner/netprint`, changeFrequency: "monthly" as const, priority: 0.4 },

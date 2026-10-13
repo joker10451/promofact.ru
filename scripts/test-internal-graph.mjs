@@ -115,7 +115,12 @@ async function runInternalGraphSuite() {
     assert(homePage.includes("<HomeOffersPreview"), "Home must link to a real offer preview");
     assert(offerPreview.includes('href="/catalog#catalog"'), "Preview must link to full catalogue");
     assert(fullCatalog.includes("<CouponGrid"), "Full catalogue must retain filters and real coupons");
-    assert(homePage.includes("<LatestTips"), "Home must link to articles");
+    const resources = fs.readFileSync(path.resolve("src/components/HomeResourcesPreview.tsx"), "utf-8");
+    const guidePage = fs.readFileSync(path.resolve("src/app/guide/page.tsx"), "utf-8");
+    assert(homePage.includes("<HomeResourcesPreview"), "Home must preview resource links");
+    assert(resources.includes('href: "/sovety"'), "Home resource preview must link to articles");
+    assert(resources.includes('href: "/guide"') && guidePage.includes("<Faq />"),
+      "Guide and FAQ must remain reachable from the homepage");
     assert(homePage.includes("<CategoryPreview />"), "Home must display compact category preview");
     assert(preview.includes('href="/category"'), "Preview must open the category index");
     assert(preview.includes('href={`/category/${category.slug}`}'), "Preview must link to live categories");

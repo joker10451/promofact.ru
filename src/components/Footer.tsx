@@ -62,6 +62,12 @@ export default async function Footer() {
             >
               Советы по экономии →
             </Link>
+            <Link
+              href="/guide"
+              className="mt-3 block font-semibold text-white/70 transition-colors hover:text-white"
+            >
+              Как применять промокоды →
+            </Link>
           </nav>
         )}
 

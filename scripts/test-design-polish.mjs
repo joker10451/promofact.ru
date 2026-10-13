@@ -31,8 +31,18 @@ assert.ok(home.indexOf("<PopularStores />") < home.indexOf("<ExpiringDeals"),
   "Show real shops promptly, before urgent deals");
 assert.ok(home.indexOf("<HomeOffersPreview") < home.indexOf("<SberCampaignTeasers"),
   "Real offer preview must precede sponsor advertisements");
-assert.ok(home.includes("<SeoArticle />") && home.includes("<Faq />"),
-  "Preserve helpful SEO content");
+const guide = fs.readFileSync("src/app/guide/page.tsx", "utf8");
+const faqs = fs.readFileSync("src/lib/faqContent.ts", "utf8");
+const faqComponent = fs.readFileSync("src/components/Faq.tsx", "utf8");
+assert.ok(!home.includes("<SeoArticle />") && !home.includes("<Faq />") &&
+          guide.includes("<SeoArticle />") && guide.includes("<Faq />") &&
+          guide.includes("<HowItWorks />") && guide.includes("<Subscribe />"),
+  "Move helpful instructions and full FAQ to a dedicated canonical landing");
+assert.ok(guide.includes('"@type": "FAQPage"') &&
+          guide.includes("FAQ_ITEMS.map((item)") &&
+          faqComponent.includes('import { FAQ_ITEMS } from "@/lib/faqContent"') &&
+          faqs.includes("export const FAQ_ITEMS"),
+  "FAQ schema and visible answers must share one data source");
 assert.ok(ticket.includes("const { promocode, store, affiliate } = coupon") && ticket.includes("copyAndOpen") && ticket.includes("handleDirectCtaClick"),
   "Leave commission/clipboard flows in the original coupon component");
 assert.ok(adTeasers.includes("SberKidsPromoHome") && adTeasers.includes("SberUlybatlHome"),
@@ -89,8 +99,10 @@ assert.ok(categoryPreviewUpdated.includes("grid-flow-col") &&
           categoryPreviewUpdated.includes("overflow-x-auto") &&
           categoryPreviewUpdated.includes("snap-start"),
   "Keep mobile category preview to one horizontally scrollable row");
+const homeResources = fs.readFileSync("src/components/HomeResourcesPreview.tsx", "utf8");
 assert.ok(!home.includes("<SavingsCalculator />") &&
-          home.includes('href="/calculator"') &&
+          home.includes("<HomeResourcesPreview />") &&
+          homeResources.includes('href: "/calculator"') &&
           calculatorPage.includes("<SavingsCalculator />") &&
           sitemap.includes("url: `${SITE_URL}/calculator`"),
   "Large calculator must live on a dedicated linked, indexable route");
@@ -119,3 +131,16 @@ assert.ok(header.includes('href="/catalog#catalog"') &&
           sitemap.includes("url: `${SITE_URL}/catalog`"),
   "Main menu, bottom navigation and sitemap must link to new catalogue");
 console.log("PromoFact dedicated catalog and homepage preview regressions PASS");
+
+assert.ok(homeResources.includes('href: "/guide"') &&
+          homeResources.includes('href: "/sovety"') &&
+          !home.includes("<HowItWorks />") &&
+          !home.includes("<LatestTips />") &&
+          !home.includes("<Subscribe />") &&
+          !home.includes("<TeamBanner />") &&
+          !home.includes("FAQ_JSONLD"),
+  "Homepage must show short resource links rather than redundant long content blocks");
+assert.ok(sitemap.includes("url: `${SITE_URL}/guide`") &&
+          guide.includes('alternates: { canonical: `${SITE_URL}/guide` }'),
+  "New guide must have a canonical and sitemap entry");
+console.log("PromoFact editorial cleanup: concise homepage and dedicated help route PASS");
