@@ -113,6 +113,16 @@ try {
   const workflow=fs.readFileSync(".github/workflows/admitad-batch.yml","utf8");
   assert.match(workflow,/preview_only:/);
   assert.match(workflow,/ADMITAD_BATCH_PREVIEW_ONLY:/);
+
+  // The recurring batch job must not undo personal/site-scoped coupons
+  // published through the separate, explicitly confirmed full-catalog workflow.
+  assert.match(workflow,/ADMITAD_PUBLISH_WEBSITE_COUPONS:/);
+  assert.match(workflow,/inputs\.mode == 'recurring' && inputs\.batch == 'existing-three'/);
+  assert.match(workflow,/github\.event_name == 'schedule'/);
+  assert.match(runner,/PUBLISHER_REFRESH_SCOPE_INVALID/);
+  assert.match(runner,/mode!=="recurring" \|\| csv!==PREVIOUS_BATCH/);
+  console.log("Publisher site-scoped post-release recurring refresh guard PASS");
+
   console.log("Bundled Perfluence exact-code collision check PASS (not a live duplicate audit)");
   console.log("Five-program coupon approval and DB read-only preview PASS");
   console.log("Batch campaign register and strict Befree transition PASS");
