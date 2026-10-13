@@ -142,7 +142,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </h1>
 
         {/* Подзаголовок */}
-        <p className="mx-auto mt-2.5 max-w-2xl text-[13px] leading-[1.55] sm:mt-3 sm:text-base text-ink/70">
+        <p className="mx-auto mt-2.5 hidden max-w-2xl text-[13px] leading-[1.55] text-ink/70 sm:mt-3 sm:block sm:text-base">
           Сравнивайте предложения магазинов и находите действующие промокоды с понятными условиями.
         </p>
 
@@ -261,14 +261,14 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </div>
 
         {/* Быстрые теги (реальные магазины) */}
-        <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-ink/70">
+        <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs font-semibold text-ink/70">
           <span className="hidden text-ink/40 sm:inline">Популярное:</span>
           {suggestions.map((store, index) => (
             <button
               key={store.slug}
               type="button"
               onClick={() => submitSearch(store.name)}
-              className={`${index >= 3 ? "hidden sm:inline-flex" : "inline-flex"} min-h-8 items-center rounded-lg bg-white border border-line px-3 py-1 text-ink/80 hover:border-red/30 hover:text-red transition-colors cursor-pointer`}
+              className={`${index >= 2 ? "hidden sm:inline-flex" : "inline-flex"} min-h-8 items-center rounded-lg bg-white border border-line px-3 py-1 text-ink/80 hover:border-red/30 hover:text-red transition-colors cursor-pointer`}
             >
               {store.name}
             </button>
