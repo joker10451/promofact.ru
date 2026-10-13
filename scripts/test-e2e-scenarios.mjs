@@ -632,6 +632,7 @@ async function run() {
               const popularSection = page.locator('section[aria-label="Популярные магазины"]');
               const firstStore = popularSection.locator('a[href^="/store/"]').first();
               const bounds = await firstStore.boundingBox();
+              console.log(`[visual] ${res.name} first store card at y=${Math.round(bounds?.y ?? -1)}, viewport=${res.height}`);
               assert.ok(bounds && bounds.y < res.height - 50,
                 "First useful store tile must appear before the end of the first mobile viewport");
             }
