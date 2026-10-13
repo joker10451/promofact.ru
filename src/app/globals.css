@@ -496,7 +496,7 @@ body::before {
   overflow: hidden;
   background: #fff;
 }
-.pf-v3 #popular-stores a {
+.pf-v3 #popular-stores a[href^="/store/"] {
   min-height: 112px;
 }
 .pf-v3 .pf3-featured {
@@ -531,7 +531,7 @@ body::before {
   background: #fffdf9;
 }
 @media (max-width: 640px) {
-  .pf-v3 #popular-stores a { min-height: 94px; }
+  .pf-v3 #popular-stores a[href^="/store/"] { min-height: 94px; }
   .pf-v3 .pf3-hero h1 { overflow-wrap: anywhere; }
 }
 @media (prefers-reduced-motion: reduce) {
