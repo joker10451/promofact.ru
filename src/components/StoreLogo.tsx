@@ -58,7 +58,7 @@ export default function StoreLogo({
   // Keep a visible brand initial until an external favicon has actually loaded.
   // CSS behind an unloaded <img> is not enough: the previous markup showed
   // white circles for slow/blocked remote logos in mobile screenshots.
-  const letter = name.replace(/[^\\p{L}\\p{N}]/gu, "").charAt(0).toUpperCase() || "•";
+  const letter = name.replace(/[^\p{L}\p{N}]/gu, "").charAt(0).toUpperCase() || "•";
   return (
     <span className="relative inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }}>
       {!hasLoaded && (

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 import MegaMenu, { type MegaMenuGroup } from "@/components/MegaMenu";
 import MobileCatalogMenu from "@/components/MobileCatalogMenu";
@@ -14,6 +13,7 @@ import {
 // Прямые ссылки, которым не место в каталоге категорий.
 const NAV = [
   { href: "/promokody", label: "Магазины" },
+  { href: "/#catalog", label: "Лучшие предложения" },
   { href: "/sovety", label: "Советы" },
 ];
 
@@ -56,25 +56,19 @@ export default async function Header() {
   const groups = await buildGroups();
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-line shadow-xs">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 lg:py-4">
         {/* Логотип */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-2 sm:gap-6">
           <Link
             href="/"
-            className="group flex items-center gap-2.5 font-display text-lg font-extrabold tracking-tight sm:text-xl shrink-0 text-ink"
+            className="group flex items-center gap-2 font-display sm:gap-2.5 text-sm font-extrabold tracking-tight sm:text-xl shrink-0 text-ink"
           >
-            <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-red via-red-dark to-yellow shadow-[0_4px_12px_-2px_rgba(255,51,85,0.4)] transition-transform group-hover:scale-105">
-              <Image
-                src="/icon.svg"
-                alt=""
-                width={20}
-                height={20}
-                className="h-5 w-5 brightness-0 invert"
-              />
+            <span className="relative grid h-8 w-8 place-items-center rounded-xl sm:h-10 sm:w-10 bg-red text-white transition-transform group-hover:scale-105">
+              <span className="font-display text-base font-black leading-none text-white sm:text-xl">%</span>
             </span>
             <span className="font-display font-extrabold tracking-tight">
-              ПРОМО<span className="text-red">·</span>ФАКТ
+              Промо<span className="text-red">Факт</span>
             </span>
           </Link>
 
@@ -82,7 +76,7 @@ export default async function Header() {
           <MegaMenu groups={groups} />
           <MobileCatalogMenu groups={groups} />
 
-          <nav className="hidden lg:flex items-center gap-5 text-sm font-bold text-ink/70">
+          <nav className="hidden xl:flex items-center gap-5 text-sm font-medium text-ink/75">
             {NAV.map((item) => (
               <Link
                 key={item.href}
@@ -103,7 +97,7 @@ export default async function Header() {
             href="https://t.me/smart_zakupka"
             target="_blank"
             rel="noopener nofollow"
-            className="hidden lg:flex items-center gap-2 rounded-full bg-paper border border-line px-3.5 py-2 text-xs font-bold text-ink/80 hover:text-ink hover:border-ink/40 transition-all"
+            className="hidden lg:flex items-center gap-2 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-semibold text-ink/75 hover:text-ink hover:border-ink/40 transition-all"
           >
             <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" className="text-[#2AABEE]">
               <path d="M21.94 4.4a1.5 1.5 0 0 0-2.05-.93L3.4 10.6c-.9.36-.85 1.67.07 1.96l4.14 1.3 1.72 5.29c.34 1.05 1.68 1.25 2.34.35l2.06-2.82a.5.5 0 0 1 .6-.13l4.66 2.16c.86.4 1.87-.2 1.88-1.1l.55-14.08a1 1 0 0 0-.44-.8Z" />
@@ -113,9 +107,9 @@ export default async function Header() {
 
           <Link
             href="/#catalog"
-            className="hidden sm:flex items-center gap-1.5 rounded-full bg-gradient-to-r from-red to-red-dark px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
+            className="hidden sm:flex items-center gap-1.5 rounded-xl bg-red px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-red-dark transition-colors"
           >
-            <span>Все купоны →</span>
+            <span>Найти промокод →</span>
           </Link>
         </div>
       </div>

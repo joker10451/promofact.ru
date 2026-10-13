@@ -1,4 +1,6 @@
 import Icon from "@/components/Icon";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -219,7 +221,9 @@ export default async function CategoryPage({
   };
 
   return (
-    <main>
+    <div className="pf3-detail">
+      <Header />
+      <main className="min-h-screen">
       <JsonLd data={breadcrumb} />
       <JsonLd data={faqJsonLd} />
       <JsonLd data={listing} />
@@ -233,8 +237,9 @@ export default async function CategoryPage({
           className="mb-2"
         />
 
-        <div className="mt-6">
-          <h1 className="font-display text-2xl font-extrabold leading-tight text-ink sm:text-3xl md:text-4xl">
+        <div className="pf3-detail-hero mt-6 px-5 py-7 sm:px-8 sm:py-9">
+          <p className="pf3-kicker mb-3 text-[11px] font-bold text-red">Промокоды по категориям</p>
+          <h1 className="pf3-serif text-[clamp(1.8rem,3.4vw,2.8rem)] font-bold leading-[1.16] tracking-tight text-ink">
             Промокоды и купоны: {catName}{maxDisc ? ` — скидки ${maxDisc}` : ""}
           </h1>
           {def?.blurb ? (
@@ -346,6 +351,8 @@ export default async function CategoryPage({
           </div>
         </section>
       </div>
-    </main>
+      </main>
+      <Footer />
+    </div>
   );
 }

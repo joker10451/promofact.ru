@@ -326,7 +326,7 @@ export default function CouponTicket({
     // растягивало её шире экрана телефона (горизонтальный скролл страницы).
     <article
       id={`coupon-${coupon.id}`}
-      className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-xs scroll-mt-24"
+      className="pf3-offer group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-white p-5 shadow-2xs transition-all duration-200 hover:border-red/30 hover:shadow-xs scroll-mt-24"
     >
       {/* 1. Верхняя строка: Логотип + Название + Бейджи */}
       <div>
@@ -423,7 +423,7 @@ export default function CouponTicket({
             /* Тип: percent / rub / default — стандартный */
             <>
               <div
-                className={`font-display ${discountSizeClass} ${getDiscountStyles(offer.type)}`}
+                className={`pf3-discount font-display ${discountSizeClass} ${getDiscountStyles(offer.type)}`}
               >
                 {offer.discount}
               </div>

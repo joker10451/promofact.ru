@@ -52,27 +52,30 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
   if (coupons.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border-2 border-red/20 bg-gradient-to-br from-red-50/50 via-white to-amber-50/40 p-6 sm:p-8 shadow-[0_8px_30px_rgba(255,51,85,0.06)]">
+    <section className="pf3-featured relative rounded-[22px] border border-line bg-white p-5 sm:p-8">
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-red/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-red">
+        <div className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-red">
           <Icon name="flame" size={12} /> Скоро заканчиваются
         </div>
-        <h2 className="mt-2 font-display text-2xl font-black tracking-tight text-ink sm:text-3xl">
-          Успейте применить
+        <h2 className="mt-3 font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+          Предложения с ближайшим сроком
         </h2>
         <p className="mt-1 text-sm font-medium text-ink/60">
-          Промокоды с ближайшим сроком действия — по одному от каждого магазина.
+          Точные сроки указаны в каждой карточке.
+        </p>
+        <p className="mt-2 text-xs font-medium text-ink/55 sm:hidden">
+          Листайте предложения в сторону →
         </p>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-5 grid auto-cols-[minmax(270px,85vw)] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain pb-2 snap-x snap-mandatory sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
         {coupons.map((coupon) => {
           const isCopied = copiedCode === coupon.promocode.code;
           const expiry = expiryLabel(coupon.promocode.expires);
           return (
             <div
               key={`${coupon.store.slug}-${coupon.promocode.code}`}
-              className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-4 transition-all hover:-translate-y-1 hover:border-red/40 hover:shadow-lg"
+              className="group relative flex min-w-0 flex-col justify-between rounded-[16px] border border-line bg-[#fffdfa] p-4 transition-colors hover:border-red/30 hover:bg-white snap-start"
             >
               <div>
                 <div className="flex items-center gap-2 min-w-0">
@@ -86,7 +89,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                   <span className="truncate text-xs font-extrabold text-ink/70">{coupon.store.name}</span>
                 </div>
 
-                <div className="mt-3 font-display text-sm font-black leading-snug text-ink line-clamp-2">
+                <div className="mt-3 text-sm font-bold leading-snug text-ink line-clamp-2">
                   {coupon.promocode.bonusName}
                 </div>
 
@@ -108,10 +111,10 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                     type="button"
                     onClick={() => copy(coupon.promocode.code, coupon.store.name)}
                     className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all ${
-                      isCopied ? "bg-mint text-white" : "bg-yellow text-ink hover:bg-yellow/80"
+                      isCopied ? "bg-mint text-white" : "bg-white text-ink hover:bg-paper"
                     }`}
                   >
-                    {isCopied ? <Icon name="check" size={12} /> : "Копия"}
+                    {isCopied ? <Icon name="check" size={12} /> : "Копировать"}
                   </button>
                 </div>
 
@@ -125,13 +128,13 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                       store: coupon.store.name,
                     })
                   }
-                  className="block w-full rounded-xl bg-ink py-2 text-center text-xs font-bold text-white transition-all hover:bg-red"
+                  className="block w-full rounded-xl bg-red py-2.5 text-center text-xs font-bold text-white transition-colors hover:bg-red-dark"
                 >
                   В магазин →
                 </a>
 
                 {coupon.affiliate.ordText && (
-                  <p className="text-[10px] leading-snug text-ink/45">{coupon.affiliate.ordText}</p>
+                  <p className="text-xs leading-relaxed text-ink/70 [overflow-wrap:anywhere]">{coupon.affiliate.ordText}</p>
                 )}
               </div>
             </div>

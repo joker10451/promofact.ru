@@ -106,14 +106,15 @@ export default async function Home() {
       />
 
       {/* 1. Хедер с лаконичной навигацией */}
+      <div className="pf-v3">
       <Header />
 
-      <main className="min-h-screen">
+      <main className="min-h-screen bg-paper">
         {/* 2. Hero + ЕДИНСТВЕННЫЙ крупный поиск + Trust bar */}
         <Hero search={searchIndex} couponCount={coupons.length} proofTotal={proofTotal} />
 
         {/* 3. Популярные магазины в стиле Пикабу — быстрый вход по круглым брендам */}
-        <div className="mx-auto max-w-7xl px-4 pt-4 sm:pt-8">
+        <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 sm:pt-7">
           <Reveal>
             <PopularStores />
           </Reveal>
@@ -121,14 +122,14 @@ export default async function Home() {
 
         {/* 5. Скоро заканчиваются — коды с ближайшим реальным сроком, по одному от магазина.
             Раньше здесь было два блока «Спецпредложения дня» подряд. */}
-        <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-9">
           <Reveal>
             <ExpiringDeals coupons={hotDeals} />
           </Reveal>
         </div>
 
         {/* 7. Купоны на сегодня — сгруппированный каталог (лучший промокод + аккордеон) */}
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
           <Reveal>
             <CouponGrid
               coupons={catalogCoupons}
@@ -143,33 +144,9 @@ export default async function Home() {
             рекламный текст находятся только на отдельных страницах кампаний. */}
         <SberCampaignTeasers />
 
-        {/* Небольшое редакционное пояснение — после каталога, не перед купонами. */}
-        <div className="pt-5">
-          <Reveal>
-            <TeamBanner />
-          </Reveal>
-        </div>
-
-        {/* 6. Как это работает — 4 понятных шага применения */}
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
-          <Reveal>
-            <HowItWorks />
-          </Reveal>
-        </div>
-
-        {/* 7. 💰 Калькулятор выгоды */}
-        <Reveal>
-          <SavingsCalculator />
-        </Reveal>
-
         {/* 8. Скидки по категориям — быстрый переход */}
         <Reveal>
           <VisualCategoryTiles />
-        </Reveal>
-
-        {/* 9. Почему ПромоФакт? — гарантия и прозрачность */}
-        <Reveal>
-          <WhyUs />
         </Reveal>
 
         {/* 10. FAQ — частые вопросы */}
@@ -183,6 +160,20 @@ export default async function Home() {
         <Reveal>
           <LatestTips />
         </Reveal>
+
+        {/* Secondary learning tools remain accessible, but no longer push live offers
+            several screens down or compete with the catalog visually. */}
+        <details className="pf3-muted-block mx-auto mt-8 max-w-7xl rounded-2xl px-4 sm:px-6">
+          <summary className="cursor-pointer list-none rounded-2xl border border-line bg-white px-5 py-4 text-sm font-bold text-ink transition-colors hover:border-red/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red">
+            Как пользоваться промокодами и экономить <span aria-hidden="true" className="float-right text-red">＋</span>
+          </summary>
+          <div className="space-y-6 py-6">
+            <Reveal><TeamBanner /></Reveal>
+            <Reveal><HowItWorks /></Reveal>
+            <Reveal><SavingsCalculator /></Reveal>
+            <Reveal><WhyUs /></Reveal>
+          </div>
+        </details>
 
         {/* 12. SEO-статья под спойлером */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
@@ -199,6 +190,7 @@ export default async function Home() {
 
       {/* 13. Футер */}
       <Footer />
+      </div>
     </>
   );
 }

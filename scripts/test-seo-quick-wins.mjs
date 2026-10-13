@@ -280,8 +280,8 @@ let passed = 0;
 {
   const heroCode = fs.readFileSync("src/components/Hero.tsx", "utf-8");
   assert.ok(
-    heroCode.includes("Найдите скидку.") && heroCode.includes("Заплатите меньше."),
-    "H1 должен содержать слоган «Найдите скидку. Заплатите меньше.»"
+    heroCode.includes("Скидки, которые") && heroCode.includes("легко найти."),
+    "H1 главной должен содержать слоган ПромоФакт Editorial 3.0"
   );
   assert.ok(
     heroCode.includes("Актуальные промокоды и купоны на скидку"),

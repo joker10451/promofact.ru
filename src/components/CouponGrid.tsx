@@ -216,19 +216,19 @@ export default function CouponGrid({
   };
 
   const quickChipCls = (active: boolean) =>
-    `rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+    `rounded-full border border-transparent px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
       active
-        ? "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red"
-        : "bg-white border border-line text-ink/80 hover:border-ink/40 shadow-2xs"
+        ? "bg-red text-white"
+        : "bg-white border border-line text-ink/80 hover:border-red/35"
     }`;
 
   return (
     <section id="catalog" className="scroll-mt-20">
       {/* Заголовок секции */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
-            Купоны на сегодня
+          <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink">
+            Все предложения
           </h2>
           <p className="text-xs sm:text-sm text-ink/60 font-medium">
             {groupedStoreList.length} магазинов · {filteredCoupons.length} актуальных промокодов и акций
@@ -275,7 +275,7 @@ export default function CouponGrid({
       </div>
 
       {/* Быстрые интерактивные фильтры */}
-      <div className="flex flex-wrap items-center gap-2 mb-5">
+      <div className="mb-5 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setQuickFilter("all")}
@@ -318,83 +318,39 @@ export default function CouponGrid({
         </button>
       </div>
 
-      {/* Мобильная полоса категорий */}
-      <div className="lg:hidden mb-4 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pb-1">
-        <button
-          type="button"
-          onClick={() => setFilter("all")}
-          className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
-            filter === "all"
-              ? "bg-ink text-white"
-              : "bg-white border border-line text-ink/70"
-          }`}
-        >
-          Все · {coupons.length}
-        </button>
-        {cats.map(({ slug, name }) => (
-          <button
-            key={slug}
-            type="button"
-            onClick={() => setFilter(slug)}
-            className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
-              filter === slug
-                ? "bg-ink text-white"
-                : "bg-white border border-line text-ink/70"
-            }`}
+      {/* All categories remain accessible without hidden horizontal scrolling. */}
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-white px-4 py-3 sm:gap-4 sm:px-5">
+        <label htmlFor="pf3-category" className="shrink-0 text-sm font-semibold text-ink">
+          Категория
+        </label>
+        <div className="min-w-0 flex-1 sm:max-w-sm">
+          <select
+            id="pf3-category"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            aria-label="Категория промокодов"
+            className="min-h-11 w-full min-w-0 rounded-xl border border-line bg-[#fffdfa] px-3 text-sm font-medium text-ink focus:border-red"
           >
-            <Icon name={slug} size={14} className="shrink-0" />
-            <span>{name} · {countByCat(slug)}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Основной макет: Левый сайдбар категорий + Правая Masonry колоночная сетка */}
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        {/* Левая колонка: Категории (Desktop sticky) */}
-        <aside className="hidden lg:block w-64 shrink-0 sticky top-20 space-y-1.5 bg-white border border-line rounded-2xl p-3 shadow-2xs">
-          <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">
-            Категории
-          </div>
+            <option value="all">Все категории · {coupons.length}</option>
+            {cats.map(({ slug, name }) => (
+              <option key={slug} value={slug}>{name} · {countByCat(slug)}</option>
+            ))}
+          </select>
+        </div>
+        {filter !== "all" && (
           <button
             type="button"
             onClick={() => setFilter("all")}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              filter === "all"
-                ? "bg-ink text-white shadow-2xs"
-                : "text-ink/70 hover:bg-paper hover:text-ink"
-            }`}
+            className="min-h-11 rounded-xl border border-line bg-white px-3 text-sm font-semibold text-red hover:border-red/40"
           >
-            <span className="flex items-center gap-1.5"><Icon name="tag" size={13} />Все направления</span>
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${filter === "all" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>
-              {coupons.length}
-            </span>
+            Сбросить категорию
           </button>
-          {cats.map(({ slug, name }) => {
-            const count = countByCat(slug);
-            return (
-              <button
-                key={slug}
-                type="button"
-                onClick={() => setFilter(slug)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  filter === slug
-                    ? "bg-ink text-white shadow-2xs"
-                    : "text-ink/70 hover:bg-paper hover:text-ink"
-                }`}
-              >
-                <span className="flex items-center gap-2 truncate">
-                  <Icon name={slug} size={15} className="shrink-0 text-ink/50" />
-                  <span className="truncate">{name}</span>
-                </span>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${filter === slug ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </aside>
+        )}
+      </div>
 
-        {/* Правая часть: Фильтры и Masonry сетка купонов */}
+      {/* Единый каталог без отдельного сайдбара */}
+      <div className="w-full">
+        {/* Каталог карточек с неизменными действиями/атрибуцией */}
         <div className="w-full flex-1 min-w-0">
           {/* Статус поиска */}
           {query && (
@@ -412,50 +368,6 @@ export default function CouponGrid({
               </button>
             </div>
           )}
-
-          {/* Быстрые смарт-фильтры */}
-          <div className="flex flex-wrap items-center gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => setQuickFilter("all")}
-              className={quickChipCls(quickFilter === "all")}
-            >
-              <Icon name="sparkle" size={14} />
-              <span>Все купоны</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("hit")}
-              className={quickChipCls(quickFilter === "hit")}
-            >
-              <Icon name="flame" size={14} />
-              <span>Хиты</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("first")}
-              className={quickChipCls(quickFilter === "first")}
-            >
-              <Icon name="sparkle" size={14} />
-              <span>На первый заказ</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("repeat")}
-              className={quickChipCls(quickFilter === "repeat")}
-            >
-              <Icon name="repeat" size={14} />
-              <span>Для всех</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("discount_20")}
-              className={quickChipCls(quickFilter === "discount_20")}
-            >
-              <Icon name="coins" size={14} />
-              <span>Скидки от 20%</span>
-            </button>
-          </div>
 
           {/* Бесшовный Masonry-каталог купонов без пустот и перекосов */}
           {groupedStoreList.length === 0 ? (
@@ -476,19 +388,19 @@ export default function CouponGrid({
                   setSortBy("hits");
                   setSelectedRegion("all");
                 }}
-                className="mt-5 rounded-full bg-yellow text-ink px-5 py-2.5 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition-all"
+                className="mt-5 rounded-xl bg-red px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red-dark"
               >
                 Сбросить фильтры
               </button>
             </div>
           ) : (
             <>
-              <div className="columns-1 md:columns-2 gap-6">
+              <div className="columns-1 gap-4 lg:columns-2">
                 {groupedStoreList.slice(0, visibleLimit).map(({ store, primaryCoupon, otherCoupons }) => {
                   const isExpanded = !!expandedStores[store.id];
 
                   return (
-                    <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5 mb-6">
+                    <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5 mb-4">
                       {/* Главная карточка с лучшим предложением */}
                       <CouponTicket
                         coupon={primaryCoupon}

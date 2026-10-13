@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import StoreLogo from "@/components/StoreLogo";
 import { getStores } from "@/lib/perfluence";
@@ -47,7 +49,9 @@ export default async function PromokodyIndexPage() {
   };
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+    <div className="pf3-detail">
+      <Header />
+      <main className="mx-auto min-h-screen max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <JsonLd data={breadcrumbJsonLd} />
 
       <nav
@@ -63,13 +67,16 @@ export default async function PromokodyIndexPage() {
         <span aria-current="page">Промокоды</span>
       </nav>
 
-      <h1 className="mt-6 max-w-3xl font-display text-2xl font-extrabold leading-tight sm:text-3xl">
+      <div className="pf3-detail-hero mt-6 px-5 py-7 sm:px-8 sm:py-9">
+        <p className="pf3-kicker text-[11px] font-bold text-red">Каталог магазинов</p>
+        <h1 className="pf3-serif mt-3 max-w-4xl text-[clamp(1.8rem,3.2vw,2.8rem)] font-bold leading-tight">
         Промокоды всех магазинов на {monthYear}
       </h1>
       <p className="mt-3 max-w-2xl text-ink/60">
         {sorted.length} магазинов с актуальными промокодами. Выберите магазин
-        — внутри таблица кодов, инструкция и FAQ.
+        — внутри действующие купоны, условия и инструкции.
       </p>
+      </div>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sorted.map((store) => {
@@ -80,7 +87,7 @@ export default async function PromokodyIndexPage() {
             <Link
               key={store.slug}
               href={`/store/${store.slug}`}
-              className="group flex items-start gap-4 rounded-2xl border border-line bg-white p-5 transition-all hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(11,16,43,0.08)]"
+              className="pf3-store-card group flex items-start gap-4 rounded-2xl border border-line bg-white p-5 transition-colors hover:border-red/30"
             >
               <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl border border-line/50 bg-white p-1 shadow-2xs">
                 <StoreLogo
@@ -93,13 +100,13 @@ export default async function PromokodyIndexPage() {
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="truncate font-display text-base font-extrabold group-hover:text-red transition-colors">
+                <h2 className="truncate text-base font-bold group-hover:text-red transition-colors">
                   {store.name}
                 </h2>
                 <p className="mt-1 text-xs text-ink/45">{store.category}</p>
                 <div className="mt-2 flex items-center gap-2">
-                  <span className="rounded-full bg-yellow/80 px-2.5 py-1 text-xs font-bold">
-                    {n} {n === 1 ? "код" : n >= 2 && n <= 4 ? "кода" : "кодов"}
+                  <span className="rounded-full bg-[#fff0f3] px-2.5 py-1 text-xs font-semibold text-red">
+                    {n} {n === 1 ? "предложение" : n >= 2 && n <= 4 ? "предложения" : "предложений"}
                   </span>
                   <span className="text-xs font-semibold text-ink/50">
                     {disc}
@@ -113,6 +120,8 @@ export default async function PromokodyIndexPage() {
           );
         })}
       </div>
-    </main>
+      </main>
+      <Footer />
+    </div>
   );
 }

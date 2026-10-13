@@ -600,6 +600,7 @@ async function run() {
       const pagesToTest = [
         "/",
         "/promokody",
+        "/sovety",
         "/store/farfor",
         "/category/dostavka-produktov",
         "/collections/first-order",
@@ -623,8 +624,68 @@ async function run() {
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
           }
+          // Keep the visual language continuous when opening a real store/category.
+          if (pathUrl === "/store/farfor" || pathUrl === "/category/dostavka-produktov") {
+            const routeType = pathUrl.startsWith("/store/") ? "store" : "category";
+            assert.equal(await page.locator(".pf3-detail").count(), 1,
+              routeType + " must render inside Editorial visual shell");
+            assert.equal(await page.locator("header").count(), 1,
+              routeType + " must have exactly one accessible site header");
+            assert.ok(await page.locator("footer").count(),
+              routeType + " must include a site footer");
+            assert.ok(await page.locator("h1").count(),
+              routeType + " must preserve its SEO heading");
+            assert.ok(await page.locator("article[id^='coupon-']").count() > 0,
+              routeType + " must render real coupon cards");
+            await page.screenshot({
+              path: path.join(afterScreenshotsDir, `editorial-${routeType}-${res.width}.png`),
+              fullPage: false,
+              animations: "disabled",
+            });
+          }
+          if (pathUrl === "/promokody" || pathUrl === "/sovety" || pathUrl === "/collections/first-order") {
+            const routeType = pathUrl === "/promokody" ? "directory" :
+              pathUrl === "/sovety" ? "advice" : "collection";
+            assert.equal(await page.locator(".pf3-detail").count(), 1,
+              routeType + " should use the Editorial design shell");
+            assert.equal(await page.locator("header").count(), 1,
+              routeType + " should show one site header");
+            assert.ok(await page.locator("footer").count(),
+              routeType + " should have footer navigation");
+            if (res.width === 390 || res.width === 1440) {
+              await page.screenshot({
+                path: path.join(afterScreenshotsDir, `editorial-${routeType}-${res.width}.png`),
+                fullPage: false,
+                animations: "disabled",
+              });
+            }
+          }
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
           if (pathUrl === "/") {
+            const heroHeadline = await page.locator("h1").innerText();
+            assert.ok(heroHeadline.includes("Скидки, которые") && heroHeadline.includes("легко найти."),
+              "Editorial heading must be present at every breakpoint");
+            assert.ok(await page.getByPlaceholder("Магазин или код").count(),
+              "Live Hero search must remain visible at every breakpoint");
+            assert.ok(await page.locator('section[id="catalog"]').count(),
+              "Coupon catalog must remain navigable after redesign");
+            if (res.width <= 390) {
+              const searchButton = page.locator('header button[aria-label="Поиск по магазинам и купонам"]').first();
+              const searchBounds = await searchButton.boundingBox();
+              assert.ok(searchBounds && searchBounds.x + searchBounds.width <= res.width,
+                "Header search button must not be clipped on " + res.name);
+
+              const popularSection = page.locator('section[aria-label="Популярные магазины"]');
+              const popularBounds = await popularSection.boundingBox();
+              assert.ok(popularBounds && popularBounds.y < res.height - 60,
+                "Real popular stores should start within the first mobile viewport");
+              const firstStore = popularSection.locator('a[href^="/store/"]').first();
+              const cardBounds = await firstStore.boundingBox();
+              const headingBounds = await popularSection.getByRole("heading", { name: "Популярные магазины" }).boundingBox();
+              assert.ok(cardBounds && headingBounds && cardBounds.y - (headingBounds.y + headingBounds.height) < 120,
+                "The all-stores link must not create large blank space before store cards");
+
+            }
             const cards = page.locator('section[aria-label="Популярные магазины"] a[href^="/store/"]');
             const visibleCount = await cards.evaluateAll((nodes) =>
               nodes.filter((node) => getComputedStyle(node).display !== "none").length,
@@ -649,12 +710,12 @@ async function run() {
               assert.ok(logoState, "No popular store should display a blank logo circle: " + (await visibleCards.nth(i).getAttribute("href")));
             }
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `ui-seo-1-1-home-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `editorial-home-${res.width}.png`),
               fullPage: true,
               animations: "disabled",
             });
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `ui-seo-1-1-viewport-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `editorial-viewport-${res.width}.png`),
               fullPage: false,
               animations: "disabled",
             });
