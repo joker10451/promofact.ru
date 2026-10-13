@@ -30,6 +30,12 @@ export default function CouponGrid({
       (c) => !excluded.has(`${c.store.slug}::${(c.promocode.code || "").trim().toUpperCase()}`),
     );
   }, [allCoupons, excludeOfferKeys]);
+  // Featured coupons are not duplicated in the grid, but stay part of the total.
+  const featuredCount = allCoupons.length - coupons.length;
+  const totalStoreCount = useMemo(
+    () => new Set(allCoupons.map((coupon) => coupon.store.slug)).size,
+    [allCoupons],
+  );
   const [filter, setFilter] = useState<string>("all");
   const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20">("all");
   const [sortBy, setSortBy] = useState<SortOrder>("hits");
@@ -215,6 +221,9 @@ export default function CouponGrid({
     }));
   };
 
+  const isFiltered = filter !== "all" || quickFilter !== "all" ||
+    selectedRegion !== "all" || query.trim().length > 0;
+
   const quickChipCls = (active: boolean) =>
     `rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
       active
@@ -230,8 +239,17 @@ export default function CouponGrid({
           <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
             Купоны на сегодня
           </h2>
-          <p className="text-xs sm:text-sm text-ink/60 font-medium">
-            {groupedStoreList.length} магазинов · {filteredCoupons.length} актуальных промокодов и акций
+          <p className="mt-1 text-xs font-semibold text-ink/70 sm:text-sm">
+            Всего на сайте: {allCoupons.length} предложений от {totalStoreCount} магазинов
+          </p>
+          <p className="mt-1 text-xs text-ink/55" aria-live="polite">
+            {isFiltered ? "По выбранным фильтрам: " : "В каталоге ниже: "}
+            {filteredCoupons.length} предложений от {groupedStoreList.length} магазинов
+            {featuredCount > 0 && (
+              <> · <a href="#expiring" className="font-semibold text-red hover:underline">
+                ещё {featuredCount} в подборке выше
+              </a></>
+            )}
           </p>
         </div>
 

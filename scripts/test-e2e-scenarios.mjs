@@ -600,6 +600,7 @@ async function run() {
       const pagesToTest = [
         "/",
         "/promokody",
+        "/category",
         "/store/farfor",
         "/category/dostavka-produktov",
         "/collections/first-order",
@@ -623,7 +624,15 @@ async function run() {
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
           }
+          if (pathUrl === "/category") {
+            assert.ok(await page.getByRole("heading", { name: "Каталог скидок по категориям" }).count(),
+              "Category hub must render its own H1");
+            assert.ok(await page.locator('a[href^="/category/"]').count() > 0,
+              "Category hub must link to real category pages");
+          }
           if (pathUrl === "/") {
+            assert.ok(await page.locator('a[href="/category"]').count() > 0,
+              "Home category preview must link to the hub");
             assert.ok((await page.locator("h1").innerText()).includes("Найдите скидку."),
               "Brand headline must remain prominent");
             assert.ok(await page.getByPlaceholder("Магазин или промокод").count(),

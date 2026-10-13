@@ -64,3 +64,17 @@ assert.ok(categoryIndex.includes("<VisualCategoryTiles />") &&
 assert.ok(sitemap.includes("url: `${SITE_URL}/category`"),
   "Category index must be discoverable in sitemap");
 console.log("PromoFact category discovery: homepage preview, full route and sitemap PASS");
+
+const couponGrid = fs.readFileSync("src/components/CouponGrid.tsx", "utf8");
+const urgentDeals = fs.readFileSync("src/components/ExpiringDeals.tsx", "utf8");
+const mobileNav = fs.readFileSync("src/components/MobileBottomNav.tsx", "utf8");
+assert.ok(couponGrid.includes("allCoupons.length} предложений от {totalStoreCount} магазинов") &&
+          couponGrid.includes("featuredCount = allCoupons.length - coupons.length") &&
+          couponGrid.includes('href="#expiring"'),
+  "Site-wide totals must reconcile with the non-duplicated coupon grid");
+assert.ok(urgentDeals.includes('id="expiring"') && urgentDeals.includes("Скопировать") &&
+          urgentDeals.includes("nofollow sponsored noopener"),
+  "Featured offers must be copyable, linked and marked as sponsored");
+assert.ok(mobileNav.includes('href: "/category"') && mobileNav.includes('active: pathname.startsWith("/category")'),
+  "Mobile bottom navigation must link to the full category catalogue");
+console.log("PromoFact discovery UX: truthful totals, featured links and mobile navigation PASS");

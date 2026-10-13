@@ -68,15 +68,17 @@ export default function MobileBottomNav() {
       active: pathname.startsWith("/sovety"),
     },
     {
-      label: "Telegram",
-      href: "https://t.me/smart_zakupka",
-      isExternal: true,
+      label: "Категории",
+      href: "/category",
       icon: (
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-          <path d="M21.94 4.4a1.5 1.5 0 0 0-2.05-.93L3.4 10.6c-.9.36-.85 1.67.07 1.96l4.14 1.3 1.72 5.29c.34 1.05 1.68 1.25 2.34.35l2.06-2.82a.5.5 0 0 1 .6-.13l4.66 2.16c.86.4 1.87-.2 1.88-1.1l.55-14.08a1 1 0 0 0-.44-.8Z" />
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
         </svg>
       ),
-      active: false,
+      active: pathname.startsWith("/category"),
     },
   ];
 
@@ -127,6 +129,7 @@ export default function MobileBottomNav() {
               key={item.label}
               href={item.href}
               onClick={item.onClick}
+              aria-current={item.active ? "page" : undefined}
               className="w-full select-none min-h-[44px] flex items-center justify-center"
             >
               {content}
