@@ -601,6 +601,7 @@ async function run() {
         "/",
         "/promokody",
         "/catalog",
+        "/catalog?q=farfor",
         "/category",
         "/calculator",
         "/store/farfor",
@@ -625,6 +626,14 @@ async function run() {
 
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
+          }
+          if (pathUrl === "/catalog?q=farfor") {
+            await page.waitForFunction(
+              () => document.querySelector("section#catalog")?.textContent?.includes("По выбранным фильтрам"),
+              { timeout: 5000 },
+            );
+            assert.ok(await page.locator('section#catalog [id^="coupon-"]').count() > 0,
+              "A searched catalog deep link must show real matching coupon cards");
           }
           if (pathUrl === "/catalog") {
             assert.ok(await page.getByRole("heading", { name: "Каталог купонов и промокодов" }).count(),

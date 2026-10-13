@@ -43,6 +43,13 @@ export default function CouponGrid({
   const [sortBy, setSortBy] = useState<SortOrder>("hits");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [query, setQuery] = useState(initialQuery);
+
+  // Keep /catalog statically prerendered and indexable; URL search is restored
+  // after hydration without making the whole route dynamically rendered.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) queueMicrotask(() => setQuery(q.trim().slice(0, 100)));
+  }, []);
   const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>({});
   const [visibleLimit, setVisibleLimit] = useState(12);
 

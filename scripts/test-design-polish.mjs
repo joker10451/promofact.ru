@@ -107,7 +107,7 @@ const header = fs.readFileSync("src/components/Header.tsx", "utf8");
 assert.ok(!home.includes("<CouponGrid") && home.includes("<HomeOffersPreview"),
   "Keep large, fully interactive catalogue off the homepage");
 assert.ok(catalogPage.includes("<CouponGrid") && catalogPage.includes("coupons.map(toCatalogCoupon)") &&
-          catalogPage.includes("initialQuery={initialQuery}") &&
+          couponGrid.includes('new URLSearchParams(window.location.search).get("q")') &&
           catalogPage.includes('alternates: { canonical: `${SITE_URL}/catalog` }'),
   "Preserve full active coupon feed, functionality and indexable canonical route");
 assert.ok(homePreview.includes('href="/catalog#catalog"') &&

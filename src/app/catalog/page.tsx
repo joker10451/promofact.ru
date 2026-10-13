@@ -24,13 +24,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function CatalogPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string | string[] }>;
-}) {
-  const params = await searchParams;
-  const initialQuery = (typeof params.q === "string" ? params.q : "").trim().slice(0, 100);
+export default async function CatalogPage() {
   const [coupons, uses] = await Promise.all([getCoupons(), getUsesStats()]);
   const proofsByCode = Object.fromEntries(uses.usesByCode);
   const proofsByStore = Object.fromEntries(uses.usesByStore);
@@ -60,11 +54,9 @@ export default async function CatalogPage({
         </div>
         <div className="mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-12">
           <CouponGrid
-            key={initialQuery}
             coupons={coupons.map(toCatalogCoupon)}
             proofsByCode={proofsByCode}
             proofsByStore={proofsByStore}
-            initialQuery={initialQuery}
           />
         </div>
       </main>
