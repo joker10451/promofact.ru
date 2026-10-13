@@ -431,7 +431,7 @@ export default function CouponGrid({
             </div>
           )}
 
-          {/* Бесшовный Masonry-каталог купонов без пустот и перекосов */}}
+          {/* Бесшовный Masonry-каталог купонов без пустот и перекосов */}
           {groupedStoreList.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
               <div className="font-display text-5xl font-extrabold text-ink/15">
