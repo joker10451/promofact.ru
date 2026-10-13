@@ -11,9 +11,9 @@ const featured = read("src/components/ExpiringDeals.tsx");
 const css = read("src/app/globals.css");
 const regulations = read("src/components/SberCampaignTeasers.tsx");
 
-assert.ok(home.includes('className="pf-v2"'), "V2 design must be scoped to the homepage");
-assert.ok(css.includes(".pf-v2 {"), "Scoped design tokens required");
-assert.ok(hero.includes("Хорошие скидки.") && hero.includes("Без лишних поисков."), "Approved H1 must render");
+assert.ok(home.includes('className="pf-v3"'), "Editorial design must be scoped to the homepage");
+assert.ok(css.includes(".pf-v3 {"), "Scoped design tokens required");
+assert.ok(hero.includes("Скидки, которые") && hero.includes("легко найти."), "Editorial H1 must render");
 assert.ok(hero.includes('ref={containerRef}') && hero.includes("submitSearch(q)"), "Search behavior must remain wired");
 assert.ok(hero.includes('window.dispatchEvent(new CustomEvent("promo:search"'), "Hero-to-catalog search must be preserved");
 assert.ok(hero.includes("stores.slice(0, 6)"), "Quick tags must come from real active shop data");
@@ -27,7 +27,7 @@ assert.ok(coupons.includes('onClick={() => setQuickFilter("first")}'), "Original
 assert.ok(coupons.includes('onClick={() => setQuickFilter("discount_20")}'), "Thresholded deal filter required");
 assert.equal((coupons.match(/Быстрые смарт-фильтры/g) || []).length, 0, "Second duplicate smart filter removed");
 assert.ok(!coupons.includes("Левая колонка: Категории (Desktop sticky)"), "Old sidebar must not block content on desktop");
-assert.ok(coupons.includes('overflow-x-auto overscroll-x-contain'), "Category filter rail must be scrollable");
+assert.ok(coupons.includes('id="pf3-category"') && coupons.includes('onChange={(e) => setFilter(e.target.value)}'), "All categories require a keyboard-accessible selector");
 assert.ok(featured.includes("grid-flow-col") && featured.includes("snap-x snap-mandatory"),
   "All real expiring deals remain accessible through a mobile horizontal rail");
 assert.ok(home.indexOf("<PopularStores />") < home.indexOf("<CouponGrid"), "Shop browsing should precede coupon catalog");
@@ -38,4 +38,9 @@ assert.ok(regulations.includes("<SberKidsPromoHome />") && regulations.includes(
 assert.ok(featured.includes("coupon.affiliate.ordText"), "Legal ad copy must remain visible");
 assert.ok(featured.includes("nofollow sponsored noopener"), "Affiliate relationship must remain disclosed");
 assert.ok(featured.includes("copy(coupon.promocode.code"), "Promo-copy logic must remain wired");
-console.log("PromoFact 2.0 scoped design/data/legal regression PASS");
+console.log("PromoFact Editorial 3.0 design/data/legal regression PASS");
+
+assert.ok(!hero.includes("border-[10px]"), "Decorative fake shopping bag removed");
+assert.ok(hero.includes("Ваш путь к выгоде"), "Editorial desktop sidebar explains real user flow");
+assert.ok(css.includes(".pf3-serif"), "Serif typography in editorial design system");
+assert.ok(coupons.includes("Все категории") && coupons.includes("Сбросить категорию"), "Category controls usable without hidden rail");
