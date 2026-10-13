@@ -22,7 +22,9 @@ import { isRealPromoCode } from "@/lib/dedupe";
 import { formatStoreOfferTitle, formatPriorityStoreTitle, getStoreHeadlineOfferCounts, formatStoreOfferCounts } from "@/lib/storeOfferHeadline";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const dynamicParams = false;
+// New site-scoped Admitad stores arrive after deployment. Do not 404 on
+// slugs absent from generateStaticParams at build time.
+export const dynamicParams = true;
 export const revalidate = 600;
 
 export async function generateStaticParams() {

@@ -60,6 +60,8 @@ const NO_CODE_MARKERS = new Set([
   "NO CODE",
   "NOT REQUIRED",
   "NOT_REQUIRED",
+  "NOT REQUIRE",
+  "NOT_REQUIRE",
   "NOT NEEDED",
   "NOT_NEEDED",
   "НЕТ",

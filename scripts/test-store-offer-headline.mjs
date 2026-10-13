@@ -6,7 +6,7 @@ import fs from "node:fs";
 
 const coupons = (codes) => codes.map(code=>({promocode:{code}}));
 assert.deepEqual(getStoreHeadlineOfferCounts(coupons(["ABC","NOT REQUIRED","НЕ НУЖЕН","","АКЦИЯ","REAL2"])),{offers:6,codes:2,codeFree:4});
-for (const placeholder of ["NOT REQUIRED","Not needed","NO CODE","НЕ НУЖЕН","БЕЗ ПРОМОКОДА","АКЦИЯ"]) {
+for (const placeholder of ["NOT REQUIRED","NOT REQUIRE","Not needed","NO CODE","НЕ НУЖЕН","БЕЗ ПРОМОКОДА","АКЦИЯ"]) {
   assert.equal(isRealPromoCode(placeholder),false,placeholder);
 }
 assert.equal(isRealPromoCode("CODE20"),true);
