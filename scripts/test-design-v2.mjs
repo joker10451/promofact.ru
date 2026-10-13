@@ -11,6 +11,8 @@ const featured = read("src/components/ExpiringDeals.tsx");
 const css = read("src/app/globals.css");
 const regulations = read("src/components/SberCampaignTeasers.tsx");
 const storeLogo = read("src/components/StoreLogo.tsx");
+const storePage = read("src/app/store/[slug]/page.tsx");
+const categoryPage = read("src/app/category/[slug]/page.tsx");
 
 assert.ok(home.includes('className="pf-v3"'), "Editorial design must be scoped to the homepage");
 assert.ok(css.includes(".pf-v3 {"), "Scoped design tokens required");
@@ -50,3 +52,14 @@ assert.ok(storeLogo.includes(String.raw`name.replace(/[^\p{L}\p{N}]/gu`),
   "Brand fallback must recognize Unicode letters (including Cyrillic)");
 assert.equal("Пятёрочка".replace(/[^\p{L}\p{N}]/gu, "").charAt(0).toUpperCase(), "П",
   "Unicode monogram for Russian brand must display its letter");
+
+for (const [name, route] of [["store", storePage], ["category", categoryPage]]) {
+  assert.ok(route.includes('className="pf3-detail"'), `${name} must use Editorial styles`);
+  assert.ok(route.includes("<Header />") && route.includes("<Footer />"), `${name} must have complete navigation`);
+  assert.ok(route.includes("generateMetadata") && route.includes("canonical"), `${name} must preserve SEO metadata`);
+}
+assert.ok(storePage.includes("StoreCouponBrowser") && storePage.includes("getOfferSchema"),
+  "Merchant page must preserve real offers and their schema");
+assert.ok(categoryPage.includes('placement="category_coupon"') && categoryPage.includes("getCoupons"),
+  "Category page must retain offers and affiliate tracking");
+assert.ok(css.includes(".pf3-detail {"), "Editorial sitewide detail-page tokens required");
