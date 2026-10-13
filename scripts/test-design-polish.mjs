@@ -32,7 +32,7 @@ assert.ok(home.indexOf("<CouponGrid") < home.indexOf("<SberCampaignTeasers"),
   "Real offers must precede sponsor advertisements");
 assert.ok(home.includes("<SeoArticle />") && home.includes("<Faq />"),
   "Preserve helpful SEO content");
-assert.ok(ticket.includes('coupon.affiliate') && ticket.includes("copyAndOpen"),
+assert.ok(ticket.includes("const { promocode, store, affiliate } = coupon") && ticket.includes("copyAndOpen") && ticket.includes("handleDirectCtaClick"),
   "Leave commission/clipboard flows in the original coupon component");
 assert.ok(adTeasers.includes("SberKidsPromoHome") && adTeasers.includes("SberUlybatlHome"),
   "Preserve legal advertiser landings and disclosures");
