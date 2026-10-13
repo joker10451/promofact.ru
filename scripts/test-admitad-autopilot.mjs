@@ -640,6 +640,18 @@ console.log("===================================================================
   console.log("✓ Тест 16: Click ID Cryptographic Safety (RFC4122 v4 UUID, no Math.random) (PASS)");
 }
 
+// Sample records must be legally publishable even in a local staging fixture.
+// The public reader deliberately rejects legacy incomplete/quarantined rows.
+const testPublishedMeta = (campaignId, suffix) => ({
+  source_campaign_id: campaignId,
+  sync_status: "PUBLISHABLE",
+  legal_status: "PRESENT",
+  erid_status: "PRESENT",
+  ord_marker: "TEST_ERID_" + suffix,
+  ord_text: "Реклама. ООО «Тест», ИНН 1234567890. erid: TEST_ERID_" + suffix,
+  affiliate_link: "https://affiliate.example/g/coupon/?erid=TEST_ERID_" + suffix,
+});
+
 // 17. Тест: Staging Isolation (Phase B, E)
 {
   const { upsertAdmitadStaging, fetchAdmitadCouponsCached, publishAdmitadSnapshot } = await import("../src/lib/admitadSupabase.ts");
@@ -649,6 +661,7 @@ console.log("===================================================================
   const rowsA = [
     {
       id: "test_gen_a_1",
+       ...testPublishedMeta("141770","GEN_A_1"),
       store: "PREMIER",
       store_slug: "premier",
       code: "GEN_A_1",
@@ -661,6 +674,7 @@ console.log("===================================================================
     },
     {
       id: "test_gen_a_2",
+       ...testPublishedMeta("1667","GEN_A_2"),
       store: "Ив Роше",
       store_slug: "iv-roshe",
       code: "GEN_A_2",
@@ -691,6 +705,7 @@ console.log("===================================================================
   const rowsB = [
     {
       id: "test_gen_b_1",
+       ...testPublishedMeta("141770","GEN_B_NEW"),
       store: "PREMIER",
       store_slug: "premier",
       code: "GEN_B_NEW",
