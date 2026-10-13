@@ -602,3 +602,13 @@ body::before {
     transition-duration:.01ms!important;
   }
 }
+
+/* Merchant browsing and editorial guides share calm, equal-height cards. */
+.pf3-detail .pf3-store-card {
+  border-color: var(--color-line);
+  box-shadow: 0 3px 16px rgba(23,35,56,.025);
+}
+.pf3-detail .pf3-store-card:hover {
+  border-color: rgba(237,61,88,.3);
+  box-shadow: 0 8px 24px rgba(23,35,56,.06);
+}
