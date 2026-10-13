@@ -68,9 +68,7 @@ export default function SovetyPage() {
             </div>
 
             <div className="flex items-center gap-2 text-xs font-bold text-ink/70">
-              <span className="rounded-full bg-mint/20 px-3 py-1 text-mint-dark">
-                <Icon name="check" size={11} className="inline" /> Обновлено в 2026
-              </span>
+              <span className="rounded-full bg-[#fff0f3] px-3 py-1 text-red">{articles.length} материалов</span>
             </div>
           </div>
 
@@ -86,7 +84,7 @@ export default function SovetyPage() {
                   <ArticleCover slug={a.slug} title={a.title} className="mb-4 h-24 w-full" />
                   <div className="flex items-center justify-between text-[11px] font-bold text-ink/40 mb-3">
                     <span className="uppercase tracking-wider">Инструкция</span>
-                    <span>⏱ 3–4 мин</span>
+
                   </div>
                   <h2 className="text-base sm:text-lg font-bold leading-snug text-ink group-hover:text-red transition-colors">
                     {a.title}
@@ -100,9 +98,7 @@ export default function SovetyPage() {
                   <span className="text-xs font-bold text-red group-hover:underline">
                     Читать статью →
                   </span>
-                  <span className="text-[11px] font-semibold text-mint-dark">
-                    <Icon name="check" size={11} className="inline" /> Актуально
-                  </span>
+
                 </div>
               </Link>
             ))}
