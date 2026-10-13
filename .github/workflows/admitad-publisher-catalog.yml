@@ -1,6 +1,13 @@
 
 name: Admitad Publisher Website Coupon Catalog
 on:
+  # Same-repository PR only: automatic READ-ONLY preview with connected secrets.
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/lib/admitadPublisherCatalog.ts'
+      - 'src/lib/admitadSyncWorker.ts'
+      - '.github/workflows/admitad-publisher-catalog.yml'
   workflow_dispatch:
     inputs:
       mode:
@@ -23,7 +30,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publisher-coupon-sync:
-    if: ${{ inputs.mode == 'preview' || inputs.confirm == true }}
+    if: ${{ github.event_name == 'pull_request' || inputs.mode == 'preview' || inputs.confirm == true }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -44,7 +51,7 @@ jobs:
           ADMITAD_APPROVED_CAMPAIGNS: '141770,1667,17220,25224,26110'
           ADMITAD_BATCH_APPROVED_CAMPAIGNS: '28532,14647,22484'
           ADMITAD_PUBLISH_WEBSITE_COUPONS: 'true'
-          ADMITAD_PUBLISHER_CATALOG_DRY_RUN: ${{ inputs.mode == 'publish' && 'false' || 'true' }}
+          ADMITAD_PUBLISHER_CATALOG_DRY_RUN: ${{ github.event_name == 'pull_request' && 'true' || (inputs.mode == 'publish' && 'false' || 'true') }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node --loader ./scripts/ts-loader.mjs scripts/sync-admitad-snapshot.mjs
