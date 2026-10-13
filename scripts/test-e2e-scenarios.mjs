@@ -623,6 +623,25 @@ async function run() {
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
           }
+          // Keep the visual language continuous when opening a real store/category.
+          if (pathUrl === "/store/farfor" || pathUrl === "/category/dostavka-produktov") {
+            const routeType = pathUrl.startsWith("/store/") ? "store" : "category";
+            assert.equal(await page.locator(".pf3-detail").count(), 1,
+              routeType + " must render inside Editorial visual shell");
+            assert.equal(await page.locator("header").count(), 1,
+              routeType + " must have exactly one accessible site header");
+            assert.ok(await page.locator("footer").count(),
+              routeType + " must include a site footer");
+            assert.ok(await page.locator("h1").count(),
+              routeType + " must preserve its SEO heading");
+            assert.ok(await page.locator("article[id^='coupon-']").count() > 0,
+              routeType + " must render real coupon cards");
+            await page.screenshot({
+              path: path.join(afterScreenshotsDir, `editorial-${routeType}-${res.width}.png`),
+              fullPage: false,
+              animations: "disabled",
+            });
+          }
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
           if (pathUrl === "/") {
             const heroHeadline = await page.locator("h1").innerText();
