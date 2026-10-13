@@ -170,12 +170,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
     { url: `${SITE_URL}/about`, changeFrequency: "monthly" as const, priority: 0.3 },
+    { url: `${SITE_URL}/calculator`, changeFrequency: "monthly" as const, priority: 0.4 },
+    { url: `${SITE_URL}/guide`, changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${SITE_URL}/contacts`, changeFrequency: "monthly" as const, priority: 0.3 },
     { url: `${SITE_URL}/privacy`, changeFrequency: "monthly" as const, priority: 0.2 },
     { url: `${SITE_URL}/partner/netprint`, changeFrequency: "monthly" as const, priority: 0.4 },
   ];
 
   const promokodyMap: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE_URL}/category`,
+      ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
+      changeFrequency: "daily" as const,
+      priority: 0.75,
+    },
+    {
+      url: `${SITE_URL}/catalog`,
+      ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
+      changeFrequency: "daily" as const,
+      priority: 0.85,
+    },
     {
       url: `${SITE_URL}/promokody`,
       ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),

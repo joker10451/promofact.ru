@@ -102,13 +102,31 @@ async function runInternalGraphSuite() {
     assert(ticketFile.includes('id={`coupon-${coupon.id}`}'), "CouponTicket must have id matching coupon-${coupon.id}");
   });
 
-  // 6. Проверка Crawl Depth: главная страница ссылается на каталог, категории и статьи
-  test("Crawl Depth: с главной страницы в 1 клик доступны все магазины, категории и статьи", () => {
+  // Crawl depth stays <=2: home -> /category -> canonical category.
+  test("Crawl Depth: все категории доступны с главной через индекс за два клика", () => {
     const homePage = fs.readFileSync(path.resolve("src/app/page.tsx"), "utf-8");
-    assert(homePage.includes("<PopularStores"), "Home must link to popular stores");
-    assert(homePage.includes("<CouponGrid"), "Home must embed store catalog");
-    assert(homePage.includes("<VisualCategoryTiles"), "Home must link to categories");
-    assert(homePage.includes("<LatestTips"), "Home must link to blog articles");
+    const preview = fs.readFileSync(path.resolve("src/components/CategoryPreview.tsx"), "utf-8");
+    const hub = fs.readFileSync(path.resolve("src/app/category/page.tsx"), "utf-8");
+    const tiles = fs.readFileSync(path.resolve("src/components/VisualCategoryTiles.tsx"), "utf-8");
+    const sitemap = fs.readFileSync(path.resolve("src/app/sitemap.ts"), "utf-8");
+    assert(homePage.includes("<PopularStores"), "Home must link to active stores");
+    const fullCatalog = fs.readFileSync(path.resolve("src/app/catalog/page.tsx"), "utf-8");
+    const offerPreview = fs.readFileSync(path.resolve("src/components/HomeOffersPreview.tsx"), "utf-8");
+    assert(homePage.includes("<HomeOffersPreview"), "Home must link to a real offer preview");
+    assert(offerPreview.includes('href="/catalog#catalog"'), "Preview must link to full catalogue");
+    assert(fullCatalog.includes("<CouponGrid"), "Full catalogue must retain filters and real coupons");
+    const resources = fs.readFileSync(path.resolve("src/components/HomeResourcesPreview.tsx"), "utf-8");
+    const guidePage = fs.readFileSync(path.resolve("src/app/guide/page.tsx"), "utf-8");
+    assert(homePage.includes("<HomeResourcesPreview"), "Home must preview resource links");
+    assert(resources.includes('href: "/sovety"'), "Home resource preview must link to articles");
+    assert(resources.includes('href: "/guide"') && guidePage.includes("<Faq />"),
+      "Guide and FAQ must remain reachable from the homepage");
+    assert(homePage.includes("<CategoryPreview />"), "Home must display compact category preview");
+    assert(preview.includes('href="/category"'), "Preview must open the category index");
+    assert(preview.includes('href={`/category/${category.slug}`}'), "Preview must link to live categories");
+    assert(hub.includes("<VisualCategoryTiles />"), "Index must render full category taxonomy");
+    assert(tiles.includes('href={`/category/${c.slug}`}'), "Index must render canonical category links");
+    assert(sitemap.includes("url: `${SITE_URL}/category`"), "Category index must be discoverable in sitemap");
   });
 
   console.log("\n================================================================================");

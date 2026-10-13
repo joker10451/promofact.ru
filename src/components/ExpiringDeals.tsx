@@ -52,7 +52,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
   if (coupons.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border-2 border-red/20 bg-gradient-to-br from-red-50/50 via-white to-amber-50/40 p-6 sm:p-8 shadow-[0_8px_30px_rgba(255,51,85,0.06)]">
+    <section id="expiring" aria-label="Скоро заканчиваются" className="scroll-mt-24 relative overflow-hidden rounded-3xl border-2 border-red/20 bg-gradient-to-br from-red-50/50 via-white to-amber-50/40 p-6 sm:p-8 shadow-[0_8px_30px_rgba(255,51,85,0.06)]">
       <div>
         <div className="inline-flex items-center gap-2 rounded-full bg-red/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-red">
           <Icon name="flame" size={12} /> Скоро заканчиваются
@@ -110,8 +110,9 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                     className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all ${
                       isCopied ? "bg-mint text-white" : "bg-yellow text-ink hover:bg-yellow/80"
                     }`}
+                  aria-label={isCopied ? "Промокод скопирован" : `Скопировать промокод ${coupon.store.name}`}
                   >
-                    {isCopied ? <Icon name="check" size={12} /> : "Копия"}
+                    {isCopied ? <Icon name="check" size={12} /> : "Скопировать"}
                   </button>
                 </div>
 

@@ -28,8 +28,7 @@ export default function HowItWorks() {
         Как это работает
       </h2>
       <p className="mx-auto mt-3 max-w-xl text-center text-ink/60">
-        Три клика — и скидка твоя. Вот как выглядит твой путь от промокода до
-        экономии.
+        Четыре простых шага: от поиска промокода до скидки при оформлении заказа.
       </p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

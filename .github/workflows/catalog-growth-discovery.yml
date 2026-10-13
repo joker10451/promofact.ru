@@ -1,0 +1,31 @@
+name: Admitad All-Program Discovery (Read Only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: catalog-growth-audit
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Publisher-scoped read-only inventory audit
+        env:
+          CATALOG_GROWTH_READ_ONLY: 'true'
+          ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
+          ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
+          ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}
+          ADMITAD_WEBSITE_HOST: promofact.ru
+          ADMITAD_APPROVED_CAMPAIGNS: ${{ vars.ADMITAD_APPROVED_CAMPAIGNS }}
+          ADMITAD_BATCH_APPROVED_CAMPAIGNS: ${{ vars.ADMITAD_BATCH_APPROVED_CAMPAIGNS }}
+        run: node --loader ./scripts/ts-loader.mjs scripts/catalog-growth-discovery.mjs

@@ -52,8 +52,8 @@ jobs:
         if: ${{ always() && github.event_name == 'pull_request' }}
         uses: actions/upload-artifact@v4
         with:
-          name: promofact-ui-seo-1-1-mobile
-          path: audit-screenshots/after/ui-seo-1-1-*.png
+          name: promofact-polish-mobile
+          path: audit-screenshots/after/polish-*.png
           if-no-files-found: warn
           retention-days: 3
 

@@ -13,8 +13,10 @@ export default function CouponGrid({
   proofsByCode,
   proofsByStore,
   excludeOfferKeys,
+  initialQuery = "",
 }: {
   coupons: CatalogCoupon[];
+  initialQuery?: string;
   proofsByCode?: Record<string, number>;
   proofsByStore?: Record<number, number>;
   excludeOfferKeys?: string[];
@@ -30,11 +32,24 @@ export default function CouponGrid({
       (c) => !excluded.has(`${c.store.slug}::${(c.promocode.code || "").trim().toUpperCase()}`),
     );
   }, [allCoupons, excludeOfferKeys]);
+  // Featured coupons are not duplicated in the grid, but stay part of the total.
+  const featuredCount = allCoupons.length - coupons.length;
+  const totalStoreCount = useMemo(
+    () => new Set(allCoupons.map((coupon) => coupon.store.slug)).size,
+    [allCoupons],
+  );
   const [filter, setFilter] = useState<string>("all");
   const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20">("all");
   const [sortBy, setSortBy] = useState<SortOrder>("hits");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
+
+  // Keep /catalog statically prerendered and indexable; URL search is restored
+  // after hydration without making the whole route dynamically rendered.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) queueMicrotask(() => setQuery(q.trim().slice(0, 100)));
+  }, []);
   const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>({});
   const [visibleLimit, setVisibleLimit] = useState(12);
 
@@ -215,6 +230,9 @@ export default function CouponGrid({
     }));
   };
 
+  const isFiltered = filter !== "all" || quickFilter !== "all" ||
+    selectedRegion !== "all" || query.trim().length > 0;
+
   const quickChipCls = (active: boolean) =>
     `rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
       active
@@ -230,8 +248,17 @@ export default function CouponGrid({
           <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink">
             Купоны на сегодня
           </h2>
-          <p className="text-xs sm:text-sm text-ink/60 font-medium">
-            {groupedStoreList.length} магазинов · {filteredCoupons.length} актуальных промокодов и акций
+          <p className="mt-1 text-xs font-semibold text-ink/70 sm:text-sm">
+            Всего на сайте: {allCoupons.length} предложений от {totalStoreCount} магазинов
+          </p>
+          <p className="mt-1 text-xs text-ink/55" aria-live="polite">
+            {isFiltered ? "По выбранным фильтрам: " : "В каталоге ниже: "}
+            {filteredCoupons.length} предложений от {groupedStoreList.length} магазинов
+            {featuredCount > 0 && (
+              <> · <a href="#expiring" className="font-semibold text-red hover:underline">
+                ещё {featuredCount} в подборке выше
+              </a></>
+            )}
           </p>
         </div>
 
@@ -412,50 +439,6 @@ export default function CouponGrid({
               </button>
             </div>
           )}
-
-          {/* Быстрые смарт-фильтры */}
-          <div className="flex flex-wrap items-center gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => setQuickFilter("all")}
-              className={quickChipCls(quickFilter === "all")}
-            >
-              <Icon name="sparkle" size={14} />
-              <span>Все купоны</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("hit")}
-              className={quickChipCls(quickFilter === "hit")}
-            >
-              <Icon name="flame" size={14} />
-              <span>Хиты</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("first")}
-              className={quickChipCls(quickFilter === "first")}
-            >
-              <Icon name="sparkle" size={14} />
-              <span>На первый заказ</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("repeat")}
-              className={quickChipCls(quickFilter === "repeat")}
-            >
-              <Icon name="repeat" size={14} />
-              <span>Для всех</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("discount_20")}
-              className={quickChipCls(quickFilter === "discount_20")}
-            >
-              <Icon name="coins" size={14} />
-              <span>Скидки от 20%</span>
-            </button>
-          </div>
 
           {/* Бесшовный Masonry-каталог купонов без пустот и перекосов */}
           {groupedStoreList.length === 0 ? (

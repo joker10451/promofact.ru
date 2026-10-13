@@ -600,6 +600,11 @@ async function run() {
       const pagesToTest = [
         "/",
         "/promokody",
+        "/catalog",
+        "/catalog?q=farfor",
+        "/category",
+        "/calculator",
+        "/guide",
         "/store/farfor",
         "/category/dostavka-produktov",
         "/collections/first-order",
@@ -622,6 +627,68 @@ async function run() {
 
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
+          }
+          if (pathUrl === "/catalog?q=farfor") {
+            await page.waitForFunction(
+              () => document.querySelector("section#catalog")?.textContent?.includes("По выбранным фильтрам"),
+              { timeout: 5000 },
+            );
+            assert.ok(await page.locator('section#catalog [id^="coupon-"]').count() > 0,
+              "A searched catalog deep link must show real matching coupon cards");
+          }
+          if (pathUrl === "/catalog") {
+            assert.ok(await page.getByRole("heading", { name: "Каталог купонов и промокодов" }).count(),
+              "Full catalog needs its own H1");
+            assert.ok(await page.locator('section#catalog').count(),
+              "Full catalog must retain the working CouponGrid");
+            assert.equal(await page.getByRole("button", { name: "Хиты", exact: true }).count(), 1,
+              "Quick filters must not be duplicated");
+          }
+          if (pathUrl === "/guide") {
+            assert.ok(await page.getByRole("heading", { name: "Как пользоваться промокодами" }).count(),
+              "Dedicated help route must show an accessible H1");
+            assert.ok(await page.locator('section#faq button[aria-expanded]').count() > 0,
+              "FAQ accordion must remain functional on the guide page");
+            assert.ok(await page.locator('script[type="application/ld+json"]').count() > 0,
+              "Guide must expose FAQPage structured data");
+          }
+          if (pathUrl === "/calculator") {
+            assert.ok(await page.getByRole("heading", { name: "Калькулятор скидок" }).count(),
+              "Calculator must have its own H1");
+            assert.ok(await page.locator('input[id="calculator-cart-amount"]').count(),
+              "Honest arithmetic calculator must accept purchase amount");
+          }
+          if (pathUrl === "/category") {
+            assert.ok(await page.getByRole("heading", { name: "Каталог скидок по категориям" }).count(),
+              "Category hub must render its own H1");
+            assert.ok(await page.locator('a[href^="/category/"]').count() > 0,
+              "Category hub must link to real category pages");
+          }
+          if (pathUrl === "/") {
+            assert.ok(await page.locator('section[aria-labelledby="home-offers-heading"] a[href="/catalog#catalog"]').count() > 0,
+              "Home must preview actual offers and link to the full catalogue");
+            assert.equal(await page.locator('section#catalog').count(), 0,
+              "Home must no longer download the full interactive catalogue");
+            assert.ok(await page.locator('section[aria-labelledby="home-resources-heading"] a[href="/guide"]').count(),
+              "Home must link to the full instructions and FAQ");
+            assert.equal(await page.locator('section#faq').count(), 0,
+              "Long FAQ must not appear on home");
+            assert.equal(await page.locator('section#subscribe').count(), 0,
+              "Full-width subscribe panel must not repeat the footer Telegram CTA");
+            assert.ok(await page.locator('a[href="/category"]').count() > 0,
+              "Home category preview must link to the hub");
+            assert.ok((await page.locator("h1").innerText()).includes("Найдите скидку."),
+              "Brand headline must remain prominent");
+            assert.ok(await page.getByPlaceholder("Магазин или промокод").count(),
+              "Mobile-friendly search must remain available");
+            if (res.width <= 390) {
+              const popularSection = page.locator('section[aria-label="Популярные магазины"]');
+              const firstStore = popularSection.locator('a[href^="/store/"]').first();
+              const bounds = await firstStore.boundingBox();
+              console.log(`[visual] ${res.name} first store card at y=${Math.round(bounds?.y ?? -1)}, viewport=${res.height}`);
+              assert.ok(bounds && bounds.y < res.height - 50,
+                "First useful store tile must appear before the end of the first mobile viewport");
+            }
           }
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
           if (pathUrl === "/") {
@@ -649,12 +716,12 @@ async function run() {
               assert.ok(logoState, "No popular store should display a blank logo circle: " + (await visibleCards.nth(i).getAttribute("href")));
             }
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `ui-seo-1-1-home-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `polish-home-${res.width}.png`),
               fullPage: true,
               animations: "disabled",
             });
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `ui-seo-1-1-viewport-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `polish-viewport-${res.width}.png`),
               fullPage: false,
               animations: "disabled",
             });
