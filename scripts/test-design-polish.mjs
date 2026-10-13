@@ -154,6 +154,6 @@ assert.ok(storeCouponBrowserPos !== -1 && storeBannerPos !== -1 && storeCouponBr
 const storeBannerSources = fs.readFileSync("src/lib/promoBanners.ts", "utf8");
 const otpEntry = storeBannerSources.split('id: "otp-bank-debet-card-2026"')[1]?.split("startsAt:")[0] ?? "";
 assert.ok(otpEntry.includes('storeSlug: "otp-bank"') &&
-          !/storeSlugs:\\s*\\[[^\\]]*(?:pyaterochka|goldapple)/.test(otpEntry),
+          !otpEntry.includes('storeSlugs:'),
   "OTP creative is strictly restricted to its own bank page");
 console.log("Store landing UX: merchant coupon priority and OTP cross-brand isolation PASS");
