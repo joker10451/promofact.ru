@@ -600,6 +600,7 @@ async function run() {
       const pagesToTest = [
         "/",
         "/promokody",
+        "/sovety",
         "/store/farfor",
         "/category/dostavka-produktov",
         "/collections/first-order",
@@ -641,6 +642,23 @@ async function run() {
               fullPage: false,
               animations: "disabled",
             });
+          }
+          if (pathUrl === "/promokody" || pathUrl === "/sovety" || pathUrl === "/collections/first-order") {
+            const routeType = pathUrl === "/promokody" ? "directory" :
+              pathUrl === "/sovety" ? "advice" : "collection";
+            assert.equal(await page.locator(".pf3-detail").count(), 1,
+              routeType + " should use the Editorial design shell");
+            assert.equal(await page.locator("header").count(), 1,
+              routeType + " should show one site header");
+            assert.ok(await page.locator("footer").count(),
+              routeType + " should have footer navigation");
+            if (res.width === 390 || res.width === 1440) {
+              await page.screenshot({
+                path: path.join(afterScreenshotsDir, `editorial-${routeType}-${res.width}.png`),
+                fullPage: false,
+                animations: "disabled",
+              });
+            }
           }
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
           if (pathUrl === "/") {
