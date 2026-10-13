@@ -52,16 +52,16 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
   if (coupons.length === 0) return null;
 
   return (
-    <section className="relative rounded-3xl border border-line bg-white p-5 sm:p-7">
+    <section className="pf3-featured relative rounded-[22px] border border-line bg-white p-5 sm:p-8">
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-red/5 px-3 py-1 text-xs font-bold text-red">
+        <div className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-red">
           <Icon name="flame" size={12} /> Скоро заканчиваются
         </div>
-        <h2 className="mt-2 font-display text-xl font-extrabold tracking-tight text-ink sm:text-2xl">
-          Успейте применить
+        <h2 className="mt-3 font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+          Предложения с ближайшим сроком
         </h2>
         <p className="mt-1 text-sm font-medium text-ink/60">
-          Промокоды с ближайшим сроком действия — по одному от каждого магазина.
+          Точные сроки указаны в каждой карточке.
         </p>
         <p className="mt-2 text-xs font-medium text-ink/55 sm:hidden">
           Листайте предложения в сторону →
@@ -75,7 +75,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
           return (
             <div
               key={`${coupon.store.slug}-${coupon.promocode.code}`}
-              className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-paper/30 p-4 transition-colors hover:border-red/35 hover:bg-white snap-start"
+              className="group relative flex min-w-0 flex-col justify-between rounded-[16px] border border-line bg-[#fffdfa] p-4 transition-colors hover:border-red/30 hover:bg-white snap-start"
             >
               <div>
                 <div className="flex items-center gap-2 min-w-0">
@@ -89,7 +89,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                   <span className="truncate text-xs font-extrabold text-ink/70">{coupon.store.name}</span>
                 </div>
 
-                <div className="mt-3 font-display text-sm font-black leading-snug text-ink line-clamp-2">
+                <div className="mt-3 text-sm font-bold leading-snug text-ink line-clamp-2">
                   {coupon.promocode.bonusName}
                 </div>
 
@@ -114,7 +114,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                       isCopied ? "bg-mint text-white" : "bg-white text-ink hover:bg-paper"
                     }`}
                   >
-                    {isCopied ? <Icon name="check" size={12} /> : "Копия"}
+                    {isCopied ? <Icon name="check" size={12} /> : "Копировать"}
                   </button>
                 </div>
 
