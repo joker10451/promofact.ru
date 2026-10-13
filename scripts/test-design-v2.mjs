@@ -13,6 +13,9 @@ const regulations = read("src/components/SberCampaignTeasers.tsx");
 const storeLogo = read("src/components/StoreLogo.tsx");
 const storePage = read("src/app/store/[slug]/page.tsx");
 const categoryPage = read("src/app/category/[slug]/page.tsx");
+const merchantIndex = read("src/app/promokody/page.tsx");
+const adviceIndex = read("src/app/sovety/page.tsx");
+const collectionsPage = read("src/app/collections/[slug]/page.tsx");
 
 assert.ok(home.includes('className="pf-v3"'), "Editorial design must be scoped to the homepage");
 assert.ok(css.includes(".pf-v3 {"), "Scoped design tokens required");
@@ -63,3 +66,12 @@ assert.ok(storePage.includes("StoreCouponBrowser") && storePage.includes("getOff
 assert.ok(categoryPage.includes('placement="category_coupon"') && categoryPage.includes("getCoupons"),
   "Category page must retain offers and affiliate tracking");
 assert.ok(css.includes(".pf3-detail {"), "Editorial sitewide detail-page tokens required");
+
+for (const [name, route] of [["all shops", merchantIndex], ["articles", adviceIndex], ["collections", collectionsPage]]) {
+  assert.ok(route.includes('className="pf3-detail"'), `${name} must use Editorial styles`);
+  assert.ok(route.includes("<Header />") && route.includes("<Footer />"), `${name} must preserve complete navigation`);
+}
+assert.ok(merchantIndex.includes("getStores") && merchantIndex.includes("store.coupons.length"),
+  "Shop directory must only display real active shops");
+assert.ok(collectionsPage.includes("collection_coupon") && collectionsPage.includes("getCoupons"),
+  "Collections must preserve real coupon data");
