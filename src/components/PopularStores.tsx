@@ -48,7 +48,7 @@ export default async function PopularStores() {
   }
 
   return (
-    <section aria-label="Популярные магазины" className="rounded-[22px] border border-line bg-white py-5 sm:rounded-[28px] sm:py-8">
+    <section aria-label="Популярные магазины" className="rounded-[22px] border border-line bg-white py-4 sm:rounded-[28px] sm:py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3 sm:mb-6">
           <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ export default async function PopularStores() {
               <h2 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold text-ink">
                 Популярные магазины
               </h2>
-              <p className="text-xs text-ink/60 font-medium">
+              <p className="hidden text-xs text-ink/60 font-medium sm:block">
                 Быстрый вход к скидкам любимых брендов
               </p>
             </div>
