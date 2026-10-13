@@ -421,11 +421,25 @@ export async function runAdmitadSafeSync(options: {
 
     // Batch mode may not accidentally introduce new offers from other
     // already-approved programs or exceed its capped growth envelope.
-    if (options.requireActiveRetention) {
-      const proposedActiveIds = new Set(rowsToUpsert.filter((r) => r.is_active).map((r) => r.id));
-      if ([...existingActiveMap.keys()].some((id) => !proposedActiveIds.has(id))) {
-        throw new Error("BATCH_ACTIVE_COUPON_RETENTION_FAILED");
+    const proposedActiveIds = new Set(rowsToUpsert.filter((r) => r.is_active).map((r) => r.id));
+    const missingBaselineRows = [...existingActiveMap.entries()]
+      .filter(([id]) => !proposedActiveIds.has(id))
+      .map(([, row]) => row);
+    if (publisherScoped) {
+      const lossByCampaign: Record<string, number> = {};
+      for (const row of missingBaselineRows) {
+        const id = String(row.source_campaign_id || "UNKNOWN");
+        lossByCampaign[id] = (lossByCampaign[id] || 0) + 1;
       }
+      // Diagnostic includes aggregate campaign IDs only; never coupon codes,
+      // affiliate URLs, ERIDs or raw offer data.
+      console.log("[publisher/retention] baseline=" + existingActiveMap.size +
+        " proposed_active=" + proposedActiveIds.size +
+        " baseline_missing=" + missingBaselineRows.length +
+        " missing_by_campaign=" + JSON.stringify(lossByCampaign));
+    }
+    if (options.requireActiveRetention && missingBaselineRows.length > 0) {
+      throw new Error("BATCH_ACTIVE_COUPON_RETENTION_FAILED");
     }
     if (options.maxNewOffers !== undefined) {
       if (!Number.isSafeInteger(options.maxNewOffers) || options.maxNewOffers < 0) {

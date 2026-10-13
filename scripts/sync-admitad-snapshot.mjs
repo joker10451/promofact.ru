@@ -42,7 +42,8 @@ async function main() {
   const publisherMode = process.env.ADMITAD_PUBLISH_WEBSITE_COUPONS === "true";
   const options = publisherMode ? {
     skipDbWrite: process.env.ADMITAD_PUBLISHER_CATALOG_DRY_RUN !== "false",
-    requireActiveRetention: true,
+    // First run reports legacy losses without writing; publish remains fail-closed.
+    requireActiveRetention: process.env.ADMITAD_PUBLISHER_CATALOG_DRY_RUN === "false",
     maxNewOffers: 500,
   } : {};
   const result = await runAdmitadSafeSync(options);
