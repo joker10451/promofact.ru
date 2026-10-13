@@ -13,6 +13,7 @@ import {
 
 // Прямые ссылки, которым не место в каталоге категорий.
 const NAV = [
+  { href: "/catalog", label: "Купоны" },
   { href: "/promokody", label: "Магазины" },
   { href: "/sovety", label: "Советы" },
 ];
@@ -112,7 +113,7 @@ export default async function Header() {
           </a>
 
           <Link
-            href="/#catalog"
+            href="/catalog#catalog"
             className="hidden sm:flex items-center gap-1.5 rounded-full bg-gradient-to-r from-red to-red-dark px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
           >
             <span>Все купоны →</span>

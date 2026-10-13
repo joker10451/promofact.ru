@@ -600,6 +600,7 @@ async function run() {
       const pagesToTest = [
         "/",
         "/promokody",
+        "/catalog",
         "/category",
         "/calculator",
         "/store/farfor",
@@ -625,6 +626,14 @@ async function run() {
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
           }
+          if (pathUrl === "/catalog") {
+            assert.ok(await page.getByRole("heading", { name: "Каталог купонов и промокодов" }).count(),
+              "Full catalog needs its own H1");
+            assert.ok(await page.locator('section#catalog').count(),
+              "Full catalog must retain the working CouponGrid");
+            assert.equal(await page.getByRole("button", { name: "Хиты", exact: true }).count(), 1,
+              "Quick filters must not be duplicated");
+          }
           if (pathUrl === "/calculator") {
             assert.ok(await page.getByRole("heading", { name: "Калькулятор скидок" }).count(),
               "Calculator must have its own H1");
@@ -638,6 +647,10 @@ async function run() {
               "Category hub must link to real category pages");
           }
           if (pathUrl === "/") {
+            assert.ok(await page.locator('section[aria-labelledby="home-offers-heading"] a[href="/catalog#catalog"]').count() > 0,
+              "Home must preview actual offers and link to the full catalogue");
+            assert.equal(await page.locator('section#catalog').count(), 0,
+              "Home must no longer download the full interactive catalogue");
             assert.ok(await page.locator('a[href="/category"]').count() > 0,
               "Home category preview must link to the hub");
             assert.ok((await page.locator("h1").innerText()).includes("Найдите скидку."),

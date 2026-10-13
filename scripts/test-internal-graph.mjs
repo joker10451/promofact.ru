@@ -110,7 +110,11 @@ async function runInternalGraphSuite() {
     const tiles = fs.readFileSync(path.resolve("src/components/VisualCategoryTiles.tsx"), "utf-8");
     const sitemap = fs.readFileSync(path.resolve("src/app/sitemap.ts"), "utf-8");
     assert(homePage.includes("<PopularStores"), "Home must link to active stores");
-    assert(homePage.includes("<CouponGrid"), "Home must contain its coupon catalogue");
+    const fullCatalog = fs.readFileSync(path.resolve("src/app/catalog/page.tsx"), "utf-8");
+    const offerPreview = fs.readFileSync(path.resolve("src/components/HomeOffersPreview.tsx"), "utf-8");
+    assert(homePage.includes("<HomeOffersPreview"), "Home must link to a real offer preview");
+    assert(offerPreview.includes('href="/catalog#catalog"'), "Preview must link to full catalogue");
+    assert(fullCatalog.includes("<CouponGrid"), "Full catalogue must retain filters and real coupons");
     assert(homePage.includes("<LatestTips"), "Home must link to articles");
     assert(homePage.includes("<CategoryPreview />"), "Home must display compact category preview");
     assert(preview.includes('href="/category"'), "Preview must open the category index");

@@ -3,6 +3,7 @@
 import Icon from "@/components/Icon";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import type { Coupon } from "@/lib/types";
 import type { SearchIndex } from "@/lib/searchIndex";
@@ -31,6 +32,7 @@ function pluralOrders(n: number): string {
 }
 
 export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroProps) {
+  const router = useRouter();
   const stores = search?.stores ?? [];
   const coupons = search?.coupons ?? [];
   // Suggested shops must really exist in our live index; no stale static names.
@@ -97,8 +99,9 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
     setIsOpen(false);
     setQ(v);
     ymReachGoal("search_used", { source: "hero" });
-    window.dispatchEvent(new CustomEvent("promo:search", { detail: v }));
-    document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
+    // Каталог теперь живёт на отдельной странице; передаём запрос через URL,
+    // чтобы его можно было открыть повторно, а поиск не зависел от скрытого компонента на главной.
+    router.push(v ? `/catalog?q=${encodeURIComponent(v)}#catalog` : "/catalog#catalog");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

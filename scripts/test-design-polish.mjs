@@ -19,8 +19,8 @@ assert.ok(hero.includes("suggestions.map((store, index)") &&
   "All shortcut shops must come from the real store index");
 assert.ok(!hero.includes("REAL_POPULAR_TAGS"),
   "Do not suggest shops with no actual active promotions");
-assert.ok(hero.includes('window.dispatchEvent(new CustomEvent("promo:search"'),
-  "Do not disconnect hero from live coupon search");
+assert.ok(hero.includes('router.push(v ? `/catalog?q=${encodeURIComponent(v)}#catalog`'),
+  "Hero search must navigate to the full catalog and preserve its search term");
 assert.ok(hero.includes('ref={containerRef}'),
   "Preserve keyboard/search autocomplete behavior");
 assert.ok(shops.includes('section aria-label="Популярные магазины"') &&
@@ -29,8 +29,8 @@ assert.ok(shops.includes('section aria-label="Популярные магази�
   "Keep all real shop logos/counts; cap mobile display to six");
 assert.ok(home.indexOf("<PopularStores />") < home.indexOf("<ExpiringDeals"),
   "Show real shops promptly, before urgent deals");
-assert.ok(home.indexOf("<CouponGrid") < home.indexOf("<SberCampaignTeasers"),
-  "Real offers must precede sponsor advertisements");
+assert.ok(home.indexOf("<HomeOffersPreview") < home.indexOf("<SberCampaignTeasers"),
+  "Real offer preview must precede sponsor advertisements");
 assert.ok(home.includes("<SeoArticle />") && home.includes("<Faq />"),
   "Preserve helpful SEO content");
 assert.ok(ticket.includes("const { promocode, store, affiliate } = coupon") && ticket.includes("copyAndOpen") && ticket.includes("handleDirectCtaClick"),
@@ -50,7 +50,7 @@ const sitemap = fs.readFileSync("src/app/sitemap.ts", "utf8");
 
 assert.ok(home.includes("<CategoryPreview />") &&
           home.indexOf("<PopularStores />") < home.indexOf("<CategoryPreview />") &&
-          home.indexOf("<CategoryPreview />") < home.indexOf("<CouponGrid") &&
+          home.indexOf("<CategoryPreview />") < home.indexOf("<HomeOffersPreview") &&
           !home.includes("<VisualCategoryTiles />"),
   "Home must preview categories before coupon cards, not render a second full catalogue");
 assert.ok(categoryPreview.includes(".slice(0, 6)") &&
@@ -100,3 +100,22 @@ assert.ok(!calculator.includes("FEATURED_CALC_STORES") &&
           calculator.includes("примерный математический расчёт"),
   "Calculator must not fabricate live voucher validity or copy stale hard-coded promo codes");
 console.log("PromoFact compact home and honest calculator regressions PASS");
+
+const homePreview = fs.readFileSync("src/components/HomeOffersPreview.tsx", "utf8");
+const catalogPage = fs.readFileSync("src/app/catalog/page.tsx", "utf8");
+const header = fs.readFileSync("src/components/Header.tsx", "utf8");
+assert.ok(!home.includes("<CouponGrid") && home.includes("<HomeOffersPreview"),
+  "Keep large, fully interactive catalogue off the homepage");
+assert.ok(catalogPage.includes("<CouponGrid") && catalogPage.includes("coupons.map(toCatalogCoupon)") &&
+          catalogPage.includes("initialQuery={initialQuery}") &&
+          catalogPage.includes('alternates: { canonical: `${SITE_URL}/catalog` }'),
+  "Preserve full active coupon feed, functionality and indexable canonical route");
+assert.ok(homePreview.includes('href="/catalog#catalog"') &&
+          homePreview.includes('href={`/store/${coupon.store.slug}#coupon-${coupon.id}`}') &&
+          homePreview.includes("coupon.affiliate.ordText"),
+  "Preview links to genuine store coupons and preserves advertising disclosures");
+assert.ok(header.includes('href="/catalog#catalog"') &&
+          mobileNav.includes('href: "/catalog"') &&
+          sitemap.includes("url: `${SITE_URL}/catalog`"),
+  "Main menu, bottom navigation and sitemap must link to new catalogue");
+console.log("PromoFact dedicated catalog and homepage preview regressions PASS");

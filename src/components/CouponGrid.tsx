@@ -13,8 +13,10 @@ export default function CouponGrid({
   proofsByCode,
   proofsByStore,
   excludeOfferKeys,
+  initialQuery = "",
 }: {
   coupons: CatalogCoupon[];
+  initialQuery?: string;
   proofsByCode?: Record<string, number>;
   proofsByStore?: Record<number, number>;
   excludeOfferKeys?: string[];
@@ -40,7 +42,7 @@ export default function CouponGrid({
   const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20">("all");
   const [sortBy, setSortBy] = useState<SortOrder>("hits");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>({});
   const [visibleLimit, setVisibleLimit] = useState(12);
 

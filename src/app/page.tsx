@@ -4,7 +4,7 @@ import PopularStores from "@/components/PopularStores";
 import ExpiringDeals from "@/components/ExpiringDeals";
 import TeamBanner from "@/components/TeamBanner";
 import SberCampaignTeasers from "@/components/SberCampaignTeasers";
-import CouponGrid from "@/components/CouponGrid";
+import HomeOffersPreview from "@/components/HomeOffersPreview";
 import Link from "next/link";
 import HowItWorks from "@/components/HowItWorks";
 import CategoryPreview from "@/components/CategoryPreview";
@@ -18,7 +18,7 @@ import Reveal from "@/components/Reveal";
 import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickExpiringDeals, offerKey } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
-import { toCatalogCoupon } from "@/lib/catalogCoupon";
+
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const revalidate = false; // 12 часов — защита лимита ISR Writes на Vercel
@@ -66,24 +66,21 @@ export default async function Home() {
   ]);
 
   const proofsByCode = Object.fromEntries(uses.usesByCode);
-  const proofsByStore = Object.fromEntries(uses.usesByStore);
   const proofTotal = Object.values(proofsByCode).reduce((a, b) => a + b, 0);
 
-  // Купоны из блока «Спецпредложения дня» исключаем из ленты каталога ниже,
-  // чтобы топ-3 не повторялись первыми тремя карточками. Ключ «магазин + код»,
-  // а не id: убирает и дубли того же оффера с другим id (разные источники).
+  // Главная — короткая витрина, а не вторая копия полноценного каталога.
+  // Не повторяем горящие коды и не показываем несколько карт одного магазина.
   const hotDeals = pickExpiringDeals(coupons, 4);
-  const hotDealKeys = hotDeals.map(offerKey);
+  const excludedOffers = new Set(hotDeals.map(offerKey));
+  const excludedStores = new Set(hotDeals.map((c) => c.store.slug));
+  const featuredCoupons = coupons.filter((c) => c.promocode.code && !excludedOffers.has(offerKey(c)) && !excludedStores.has(c.store.slug))
+    .filter((c, index, list) => list.findIndex((item) => item.store.slug === c.store.slug) === index)
+    .slice(0, 4);
 
   // Поиск в шапке работает на клиенте, поэтому получает лёгкий индекс, а не
   // полные объекты купонов и магазинов: иначе весь каталог уезжает в RSC-поток
   // и скачивается вместе с HTML каждым посетителем и каждым роботом.
   const searchIndex = buildSearchIndex(stores, coupons);
-
-  // Каталог тоже клиентский: отдаём ему купоны без полей, которых он не
-  // показывает. Объект магазина повторяется в каждом купоне, поэтому описания
-  // и условия дублировались столько раз, сколько у магазина промокодов.
-  const catalogCoupons = coupons.map(toCatalogCoupon);
 
   return (
     <>
@@ -133,15 +130,10 @@ export default async function Home() {
           </Reveal>
         </div>
 
-        {/* 7. Купоны на сегодня — сгруппированный каталог (лучший промокод + аккордеон) */}
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+        {/* Короткая подборка реальных купонов, полный каталог — на /catalog. */}
+        <div className="mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-12">
           <Reveal>
-            <CouponGrid
-              coupons={catalogCoupons}
-              proofsByCode={proofsByCode}
-              proofsByStore={proofsByStore}
-              excludeOfferKeys={hotDealKeys}
-            />
+            <HomeOffersPreview coupons={featuredCoupons} totalCount={coupons.length} />
           </Reveal>
         </div>
 
