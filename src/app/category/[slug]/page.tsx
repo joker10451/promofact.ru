@@ -238,7 +238,7 @@ export default async function CategoryPage({
         />
 
         <div className="pf3-detail-hero mt-6 px-5 py-7 sm:px-8 sm:py-9">
-          <p className="pf3-kicker mb-3 text-[11px] font-bold text-red">Каталог проверяемых предложений</p>
+          <p className="pf3-kicker mb-3 text-[11px] font-bold text-red">Промокоды по категориям</p>
           <h1 className="pf3-serif text-[clamp(1.8rem,3.4vw,2.8rem)] font-bold leading-[1.16] tracking-tight text-ink">
             Промокоды и купоны: {catName}{maxDisc ? ` — скидки ${maxDisc}` : ""}
           </h1>
