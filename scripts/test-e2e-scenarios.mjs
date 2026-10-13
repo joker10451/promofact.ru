@@ -601,6 +601,7 @@ async function run() {
         "/",
         "/promokody",
         "/category",
+        "/calculator",
         "/store/farfor",
         "/category/dostavka-produktov",
         "/collections/first-order",
@@ -623,6 +624,12 @@ async function run() {
 
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
+          }
+          if (pathUrl === "/calculator") {
+            assert.ok(await page.getByRole("heading", { name: "Калькулятор скидок" }).count(),
+              "Calculator must have its own H1");
+            assert.ok(await page.locator('input[id="calculator-cart-amount"]').count(),
+              "Honest arithmetic calculator must accept purchase amount");
           }
           if (pathUrl === "/category") {
             assert.ok(await page.getByRole("heading", { name: "Каталог скидок по категориям" }).count(),

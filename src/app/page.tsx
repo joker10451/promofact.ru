@@ -5,10 +5,9 @@ import ExpiringDeals from "@/components/ExpiringDeals";
 import TeamBanner from "@/components/TeamBanner";
 import SberCampaignTeasers from "@/components/SberCampaignTeasers";
 import CouponGrid from "@/components/CouponGrid";
-import SavingsCalculator from "@/components/SavingsCalculator";
+import Link from "next/link";
 import HowItWorks from "@/components/HowItWorks";
 import CategoryPreview from "@/components/CategoryPreview";
-import WhyUs from "@/components/WhyUs";
 import Faq from "@/components/Faq";
 import LatestTips from "@/components/LatestTips";
 import SeoArticle from "@/components/SeoArticle";
@@ -164,15 +163,21 @@ export default async function Home() {
           </Reveal>
         </div>
 
-        {/* 7. 💰 Калькулятор выгоды */}
-        <Reveal>
-          <SavingsCalculator />
-        </Reveal>
-
-        {/* 9. Почему ПромоФакт? — гарантия и прозрачность */}
-        <Reveal>
-          <WhyUs />
-        </Reveal>
+        {/* Короткий вход к калькулятору вместо длинного виджета на главной. */}
+        <div className="mx-auto max-w-7xl px-4 pb-8 sm:px-6">
+          <Reveal>
+            <section className="flex flex-col gap-5 rounded-[26px] border border-line bg-white px-5 py-6 shadow-[0_12px_32px_-28px_rgba(11,16,43,0.35)] sm:flex-row sm:items-center sm:justify-between sm:px-8">
+              <div>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-red">Инструмент</span>
+                <h2 className="mt-2 font-display text-lg font-extrabold text-ink sm:text-xl">Посчитайте выгоду до покупки</h2>
+                <p className="mt-1 max-w-xl text-sm text-ink/65">Введите сумму и скидку, чтобы оценить экономию. Без выдуманных промокодов и обещаний.</p>
+              </div>
+              <Link href="/calculator" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-ink px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red">
+                Калькулятор скидки <span className="ml-2" aria-hidden="true">→</span>
+              </Link>
+            </section>
+          </Reveal>
+        </div>
 
         {/* 10. FAQ — частые вопросы */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">

@@ -431,51 +431,7 @@ export default function CouponGrid({
             </div>
           )}
 
-          {/* Быстрые смарт-фильтры */}
-          <div className="flex flex-wrap items-center gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => setQuickFilter("all")}
-              className={quickChipCls(quickFilter === "all")}
-            >
-              <Icon name="sparkle" size={14} />
-              <span>Все купоны</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("hit")}
-              className={quickChipCls(quickFilter === "hit")}
-            >
-              <Icon name="flame" size={14} />
-              <span>Хиты</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("first")}
-              className={quickChipCls(quickFilter === "first")}
-            >
-              <Icon name="sparkle" size={14} />
-              <span>На первый заказ</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("repeat")}
-              className={quickChipCls(quickFilter === "repeat")}
-            >
-              <Icon name="repeat" size={14} />
-              <span>Для всех</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setQuickFilter("discount_20")}
-              className={quickChipCls(quickFilter === "discount_20")}
-            >
-              <Icon name="coins" size={14} />
-              <span>Скидки от 20%</span>
-            </button>
-          </div>
-
-          {/* Бесшовный Masonry-каталог купонов без пустот и перекосов */}
+          {/* Бесшовный Masonry-каталог купонов без пустот и перекосов */}}
           {groupedStoreList.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
               <div className="font-display text-5xl font-extrabold text-ink/15">

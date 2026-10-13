@@ -78,3 +78,25 @@ assert.ok(urgentDeals.includes('id="expiring"') && urgentDeals.includes("Ско�
 assert.ok(mobileNav.includes('href: "/category"') && mobileNav.includes('active: pathname.startsWith("/category")'),
   "Mobile bottom navigation must link to the full category catalogue");
 console.log("PromoFact discovery UX: truthful totals, featured links and mobile navigation PASS");
+
+const calculator = fs.readFileSync("src/components/SavingsCalculator.tsx", "utf8");
+const calculatorPage = fs.readFileSync("src/app/calculator/page.tsx", "utf8");
+const categoryPreviewUpdated = fs.readFileSync("src/components/CategoryPreview.tsx", "utf8");
+assert.ok(!couponGrid.includes("Быстрые смарт-фильтры") &&
+          couponGrid.includes("Быстрые интерактивные фильтры"),
+  "Do not render duplicate filter controls for the same quickFilter state");
+assert.ok(categoryPreviewUpdated.includes("grid-flow-col") &&
+          categoryPreviewUpdated.includes("overflow-x-auto") &&
+          categoryPreviewUpdated.includes("snap-start"),
+  "Keep mobile category preview to one horizontally scrollable row");
+assert.ok(!home.includes("<SavingsCalculator />") &&
+          home.includes('href="/calculator"') &&
+          calculatorPage.includes("<SavingsCalculator />") &&
+          sitemap.includes("url: `${SITE_URL}/calculator`"),
+  "Large calculator must live on a dedicated linked, indexable route");
+assert.ok(!calculator.includes("FEATURED_CALC_STORES") &&
+          !calculator.includes("affiliateUrl") &&
+          !calculator.includes("navigator.clipboard") &&
+          calculator.includes("примерный математический расчёт"),
+  "Calculator must not fabricate live voucher validity or copy stale hard-coded promo codes");
+console.log("PromoFact compact home and honest calculator regressions PASS");

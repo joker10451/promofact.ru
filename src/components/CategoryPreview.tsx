@@ -52,12 +52,13 @@ export default async function CategoryPreview() {
         </Link>
       </div>
 
-      <div className="relative grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+      <p className="relative mb-2 text-[11px] font-medium text-white/55 sm:hidden">Листайте категории →</p>
+      <div className="relative grid grid-flow-col auto-cols-[minmax(158px,66%)] gap-2.5 overflow-x-auto overscroll-x-contain pb-3 snap-x snap-mandatory no-scrollbar sm:grid-flow-row sm:grid-cols-3 sm:overflow-visible sm:pb-0 lg:grid-cols-6">
         {featured.map((category) => (
           <Link
             key={category.slug}
             href={`/category/${category.slug}`}
-            className="group flex min-h-32 min-w-0 flex-col items-start rounded-2xl border border-white/15 bg-white/10 p-3.5 transition-all hover:-translate-y-0.5 hover:border-yellow/70 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow sm:p-4"
+            className="group flex min-h-32 min-w-0 snap-start flex-col items-start rounded-2xl border border-white/15 bg-white/10 p-3.5 transition-all hover:-translate-y-0.5 hover:border-yellow/70 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow sm:p-4"
           >
             <span className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-yellow transition-colors group-hover:bg-yellow group-hover:text-ink">
               <Icon name={category.slug} size={19} />
