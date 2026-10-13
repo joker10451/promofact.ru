@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { notFound } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
@@ -186,7 +188,9 @@ export default async function CollectionPage({
   };
 
   return (
-    <main>
+    <div className="pf3-detail">
+      <Header />
+      <main className="min-h-screen">
       <JsonLd data={breadcrumb} />
       <JsonLd data={collectionJsonLd} />
       <JsonLd data={faqJsonLd} />
@@ -206,13 +210,16 @@ export default async function CollectionPage({
           <span aria-current="page">{col.name}</span>
         </nav>
 
-        <h1 className="mt-6 max-w-3xl font-display text-2xl font-extrabold leading-tight sm:text-3xl">
+        <div className="pf3-detail-hero mt-6 px-5 py-7 sm:px-8 sm:py-9">
+          <p className="pf3-kicker text-[11px] font-bold text-red">Подборка скидок</p>
+          <h1 className="pf3-serif mt-3 max-w-4xl text-[clamp(1.8rem,3.2vw,2.8rem)] font-bold leading-tight">
           Промокоды и купоны: {col.name}
         </h1>
         <p className="mt-3 max-w-2xl text-ink/60">
           {list.length} {list.length === 1 ? "промокод" : "промокодов"} в
-          подборке «{col.name.toLowerCase()}». Обновляем ежедневно.
+          подборке «{col.name.toLowerCase()}». Проверяйте условия в карточках.
         </p>
+        </div>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {list.map((coupon) => (
@@ -270,6 +277,8 @@ export default async function CollectionPage({
           </div>
         </section>
       </div>
-    </main>
+      </main>
+      <Footer />
+    </div>
   );
 }
