@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {verifiedPublisherWebsite,resolvePublisherStore,validPublisherAffiliateLink} from "../src/lib/admitadPublisherCatalog.ts";
+import {verifiedPublisherWebsite,resolvePublisherStore,validPublisherAffiliateLink,baselineStillEligible} from "../src/lib/admitadPublisherCatalog.ts";
 import {evaluateQualityGate} from "../src/lib/admitadApi.ts";
 import {isAdmitadPublishable} from "../src/lib/admitadAutopilot.ts";
 const site={id:2990501,name:"ПромоФакт",status:"active",site_url:"https://promofact.ru/"};
@@ -35,3 +35,12 @@ assert.equal(isAdmitadPublishable(candidate,{...ctx,verifiedPublisherScope:true}
 assert.equal(isAdmitadPublishable(candidate,{...ctx,verifiedPublisherScope:true,allowlist:[]}).publishable,false);
 assert.equal(isAdmitadPublishable(candidate,{...ctx,verifiedPublisherScope:true,campaign:{...program,connection_status:"pending"}}).publishable,false);
 console.log("Publisher-scoped Admitad coupon: correct website, Davines, geo, personal grant, ERID and permission checks PASS");
+
+// Expired offer from old snapshot must not block new publisher catalog.
+const now=Date.parse("2026-10-14T12:00:00Z");
+assert.equal(baselineStillEligible("2026-10-13",now),false);
+assert.equal(baselineStillEligible("2026-10-14",now),true);
+assert.equal(baselineStillEligible("2026-10-15",now),true);
+assert.equal(baselineStillEligible(null,now),true);
+assert.equal(baselineStillEligible("not-a-date",now),true);
+console.log("Publisher-scope retention: expired records can drop, unexpired and undated records protected PASS");

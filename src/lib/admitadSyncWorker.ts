@@ -24,7 +24,7 @@ import {
   normalizeAdmitadCoupon,
 } from "@/lib/admitadNormalizer";
 import { STABLE_STORES } from "@/lib/stableStores";
-import { verifiedPublisherWebsite, resolvePublisherStore, validPublisherAffiliateLink } from "@/lib/admitadPublisherCatalog";
+import { verifiedPublisherWebsite, resolvePublisherStore, validPublisherAffiliateLink, baselineStillEligible } from "@/lib/admitadPublisherCatalog";
 import {
   isAdmitadPublishable,
   evaluateSnapshotSafety,
@@ -438,7 +438,15 @@ export async function runAdmitadSafeSync(options: {
         " baseline_missing=" + missingBaselineRows.length +
         " missing_by_campaign=" + JSON.stringify(lossByCampaign));
     }
-    if (options.requireActiveRetention && missingBaselineRows.length > 0) {
+    // An already-expired legacy offer must not block a safe snapshot forever.
+    // Retain every baseline row that is still valid OR has an unknown expiry.
+    const missingStillEligible = missingBaselineRows.filter(row =>
+      baselineStillEligible(row.expires, Date.now()));
+    if (publisherScoped) console.log("[publisher/retention] missing_valid=" +
+      missingStillEligible.length + " expired_baseline_allowed_to_deactivate=" +
+      (missingBaselineRows.length - missingStillEligible.length));
+    if (options.requireActiveRetention &&
+        (publisherScoped ? missingStillEligible.length : missingBaselineRows.length) > 0) {
       throw new Error("BATCH_ACTIVE_COUPON_RETENTION_FAILED");
     }
     if (options.maxNewOffers !== undefined) {
