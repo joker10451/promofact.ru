@@ -470,10 +470,7 @@ body::before {
   isolation: isolate;
 }
 .pf-v3 .pf3-serif,
-.pf-v3 #popular-stores h2,
-.pf-v3 #catalog h2,
-.pf-v3 .pf3-featured h2,
-.pf-v3 .pf3-categories h2 {
+.pf-v3 main h2 {
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
   letter-spacing: -0.035em;
