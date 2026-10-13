@@ -111,8 +111,10 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
 
   return (
     <section className="pf3-hero mx-auto max-w-7xl px-4 pt-5 sm:px-6 sm:pt-8">
-      <div className="relative overflow-hidden rounded-[22px] border border-line bg-[#fffaf7] px-5 py-8 sm:rounded-[28px] sm:px-10 sm:py-12 lg:px-14 lg:py-14">
-        <div className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-[#f6e7e1]/70 blur-3xl" aria-hidden="true" />
+      <div className="relative rounded-[22px] border border-line bg-[#fffaf7] px-5 py-8 sm:rounded-[28px] sm:px-10 sm:py-12 lg:px-14 lg:py-14">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]" aria-hidden="true">
+          <div className="absolute -right-24 -top-32 h-80 w-80 rounded-full bg-[#f6e7e1]/70 blur-3xl" />
+        </div>
         <div className="relative grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_290px] xl:grid-cols-[minmax(0,1fr)_315px]">
           <div className="min-w-0">
             <p className="pf3-kicker text-xs font-bold text-red">
