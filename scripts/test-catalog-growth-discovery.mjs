@@ -55,3 +55,47 @@ const empty=summarizePublisherInventory({programs:[],coupons:[offer(77,"TEST")],
 assert.equal(empty.unknown_campaign_offers,1);
 assert.equal(empty.top_programs.length,0);
 console.log("Catalog growth: classification, review-only, expiry, ERID, mapping, no-leak PASS");
+
+import { matchesOfficialOrigin, prioritizePublicPrograms, PRIORITY_CANDIDATES } from "./catalog-growth-priority.mjs";
+assert.equal(PRIORITY_CANDIDATES.length,3);
+assert.equal(matchesOfficialOrigin("https://shop.megafon.ru/",["shop.megafon.ru"]),true);
+assert.equal(matchesOfficialOrigin("https://shop.megafon.ru.evil.example/",["shop.megafon.ru"]),false);
+assert.equal(matchesOfficialOrigin("http://shop.megafon.ru/",["shop.megafon.ru"]),false);
+assert.equal(matchesOfficialOrigin("https://user:pass@shop.megafon.ru/",["shop.megafon.ru"]),false);
+assert.equal(matchesOfficialOrigin("https://shop.megafon.ru:444/",["shop.megafon.ru"]),false);
+assert.equal(matchesOfficialOrigin("https://www.globus.ru/",["globus.ru","www.globus.ru"]),true);
+const latest=new Date("2026-10-13T13:00:00Z");
+const connected=[
+  {id:2402,status:"active",connection_status:"active",site_url:"https://shop.megafon.ru/"},
+  {id:19773,status:"active",connection_status:"pending",site_url:"https://korston.ru/"},
+  {id:19328,status:"active",connection_status:"active",site_url:"https://www.globus.ru/"}
+];
+const offers=[
+  {campaign:{id:2402},promocode:"A",date_end:"2026-10-14",goto_link:"https://secret.example/click?erid=SENSITIVE"},
+  {campaign:{id:2402},promocode:"A",date_end:"2026-10-12"},
+  {campaign:{id:2402},promocode:"B",date_end:null},
+  {campaign:{id:19773},promocode:"K",date_end:"2026-10-14"},
+  {campaign:{id:19328},promocode:"G",date_end:"2026-10-13"},
+];
+const priority=prioritizePublicPrograms(connected,offers,latest);
+assert.equal(priority[0].source_offers,3);
+assert.equal(priority[0].date_end_not_past,1);
+assert.equal(priority[0].no_expiry_date,1);
+assert.equal(priority[0].unique_raw_code_values,2);
+assert.equal(priority[0].official_origin_match,true);
+assert.equal(priority[0].publisher_connected,true);
+assert.equal(priority[0].publishable_now,0);
+assert.equal(priority[1].publisher_connected,false);
+assert.equal(priority[1].official_origin_match,true);
+assert.equal(priority[2].date_end_not_past,1);
+assert.equal(priority.every(p=>p.mapping_approved===false&&p.advertiser_coupon_placement_approved===false&&p.individual_coupon_ids_reviewed===false),true);
+const wrongOrigin=prioritizePublicPrograms([
+  {...connected[0],site_url:"https://shop.megafon.ru.evil.example"},
+],offers,latest);
+assert.equal(wrongOrigin[0].official_origin_match,false);
+assert.equal(wrongOrigin[0].publishable_now,0);
+const priorityJson=JSON.stringify(priority);
+assert(!priorityJson.includes("secret.example"));
+assert(!priorityJson.includes("SENSITIVE"));
+assert(!priorityJson.includes("promocode"));
+console.log("Priority program review: exact origin, date counts and no automatic approval PASS");

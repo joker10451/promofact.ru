@@ -5,6 +5,7 @@
  */
 import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
+import { prioritizePublicPrograms } from "./catalog-growth-priority.mjs";
 
 export const HOLD_REASONS = Object.freeze([
   "CONNECTION_INACTIVE", "QUALITY_GATE", "PERSONAL_OR_EXCLUSIVE",
@@ -121,6 +122,7 @@ async function main() {
     storeMapping:api.matchCanonicalStore,
     configuredAllowlist:autopilot.getEffectiveCampaignAllowlist(),
   });
+  report.priority_programs=prioritizePublicPrograms(programs,coupons);
   console.log("PROMOFACT_GROWTH_READ_ONLY "+JSON.stringify(report));
   console.log("GROWTH_RELEASE_GUARD needs_coupon_specific_permission_and_live_cross_network_dedupe");
 }

@@ -47,3 +47,37 @@ duplicate codes are held from this queue.
 
 The new audit has not been launched with live Admitad credentials by
 this commit. An offline classifier unit test guards the fail-closed logic.
+
+## Targeted origin review — Megafon, Korston, Globus (13 Oct 2026)
+
+The following were checked against live **read-only** Supabase aggregates,
+not the current advertiser-connection/placement permission screen:
+
+| Campaign | Site in Admitad rows | Rows | End date not past | No end date | HTTPS+matching link ERID | Distinct raw code values |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 2402 — МегаФон | https://shop.megafon.ru/ | 30 | 25 | 5 | 30 | 2 |
+| 19773 — Korston | https://korston.ru/ | 23 | 20 | 3 | 23 | 2 |
+| 19328 — Globus RU | https://www.globus.ru/ | 13 | 11 | 2 | 13 | 11 |
+
+Official domain identity was independently corroborated with each public
+merchant presence. The registered campaign's **current live API site_url** must
+still match that exact origin, and the actual site-scoped publisher
+connection/placement rights must be verified in Admitad.
+
+**Warning:** 66 offers are NOT 66 independent verified promocodes. In the
+stored feed 53 rows from Megafon/Korston share only four distinct raw code
+values in aggregate; some may represent no-code deals or placeholders. Do not
+publish repeated code values as unique coupons or treat an unstated expiry as
+perpetual validity. Read-only SQL confirms matching ERID in stored affiliate
+links, not that a click or purchase was successfully attributed.
+
+A strictly read-only candidate-origin module
+`scripts/catalog-growth-priority.mjs` now summarizes these three programs in
+the general API audit. **It does not modify** `EXPLICIT_STORE_MAPPINGS`,
+`STABLE_STORES`, the Supabase database, advertiser allowlists or the list of
+published coupons. `publishable_now` stays zero until individual approval.
+
+Before implementing store mappings and requesting publication, obtain the
+program connection status, coupon-channel permissions, current code conditions,
+live Perfluence collision check and then reviewed coupon-ID approval. Keep the
+baseline 29 active Admitad records unaffected.
