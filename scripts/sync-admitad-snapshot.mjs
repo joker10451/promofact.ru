@@ -39,7 +39,15 @@ async function main() {
 
   const { runAdmitadSafeSync } = await import("../src/lib/admitadSyncWorker.ts");
 
-  const result = await runAdmitadSafeSync();
+  const publisherMode = process.env.ADMITAD_PUBLISH_WEBSITE_COUPONS === "true";
+  const options = publisherMode ? {
+    skipDbWrite: process.env.ADMITAD_PUBLISHER_CATALOG_DRY_RUN !== "false",
+    // First run reports legacy losses without writing; publish remains fail-closed.
+    requireActiveRetention: process.env.ADMITAD_PUBLISHER_CATALOG_DRY_RUN === "false",
+    maxNewOffers: 500,
+  } : {};
+  const result = await runAdmitadSafeSync(options);
+  if (publisherMode) console.log("[publisher] mode=" + (options.skipDbWrite ? "PREVIEW_NO_WRITES" : "ATOMIC_PUBLISH"));
 
   if (!result.success) {
     console.error(`\n🚨 Синхронизация завершилась со статусом [${result.status}]: ${result.error || "Неизвестная ошибка"}`);
@@ -65,7 +73,9 @@ async function main() {
   console.log(`Duration:                 ${ag.duration_ms} ms`);
   console.log("================================================================================\n");
 
-  console.log("🎉 СИНХРОНИЗАЦИЯ УСПЕШНО ЗАВЕРШЕНА! Last-known-good snapshot обновлён.");
+  console.log(publisherMode && options.skipDbWrite
+    ? "✓ READ ONLY PREVIEW: no production DB writes."
+    : "🎉 СИНХРОНИЗАЦИЯ УСПЕШНО ЗАВЕРШЕНА! Last-known-good snapshot обновлён.");
   process.exit(0);
 }
 

@@ -1,0 +1,65 @@
+import type { AdmitadApiCampaign, AdmitadApiWebsite, StoreMappingResult } from "./admitadApi";
+
+/** Only site-scoped GET /coupons/website/{id}/ can enable this mode. */
+export function verifiedPublisherWebsite(site: AdmitadApiWebsite | null | undefined): boolean {
+  if (!site || !Number.isSafeInteger(site.id) || site.id <= 0 || site.status !== "active") return false;
+  try {
+    const url = new URL(site.site_url || "");
+    return url.protocol === "https:" && !url.username && !url.password && !url.port &&
+      url.hostname.toLowerCase().replace(/^www\./, "") === "promofact.ru";
+  } catch { return false; }
+}
+
+function advertiserHost(value: string): string | null {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.username || url.password || url.port) return null;
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+    return /^[a-z0-9.-]{4,190}$/.test(host) ? host : null;
+  } catch { return null; }
+}
+const PINNED: Record<string,{ hosts: readonly string[]; slug:string; name:string }> = {
+  "23573": {hosts:["davines.ru"],slug:"davines",name:"Davines"},
+  "2402": {hosts:["shop.megafon.ru"],slug:"megafon",name:"МегаФон"},
+  "19328": {hosts:["globus.ru"],slug:"globus",name:"Globus"},
+  "19773": {hosts:["korston.ru"],slug:"korston",name:"Korston"},
+};
+
+/** Avoid fuzzy cross-store matches; derive collision-proof slugs for genuinely new programs. */
+export function resolvePublisherStore(program: AdmitadApiCampaign, usual: StoreMappingResult): StoreMappingResult {
+  const id=String(program?.id ?? "");
+  const host=advertiserHost(program?.site_url || "");
+  const pin=PINNED[id];
+  const unmapped: StoreMappingResult={strategy:"UNMAPPED",canonicalSlug:"",storeName:program?.name || "Unknown",confidence:"none"};
+  if (pin) return host && pin.hosts.includes(host)
+    ? {strategy:"EXACT MATCH",canonicalSlug:pin.slug,storeName:pin.name,confidence:"high"}
+    : unmapped;
+  if (!host || !/^[1-9][0-9]{0,11}$/.test(id)) return unmapped;
+  if (usual.strategy==="EXACT MATCH" &&
+      /^[a-z0-9][a-z0-9-]{0,89}$/.test(usual.canonicalSlug)) return usual;
+  const parts=host.split(".");
+  if (parts.length < 2 || parts.some(x=>!x || !/^[a-z0-9-]+$/.test(x))) return unmapped;
+  const suffix=parts[parts.length-1],label=parts[parts.length-2];
+  if (!/^(ru|com|net|org|shop)$/.test(suffix) ||
+      !/^[a-z][a-z0-9-]{1,35}$/.test(label) ||
+      ["com","www","shop","online","login","admin","net"].includes(label)) return unmapped;
+  const name=String(program?.name || "").trim();
+  if (!name || name.length>100 || /[<>]/.test(name)) return unmapped;
+  return {strategy:"DOMAIN MATCH",canonicalSlug:"admitad-"+id+"-"+label,storeName:name,confidence:"medium"};
+}
+
+export function validPublisherAffiliateLink(value: string, marker: string | null | undefined): boolean {
+  try {
+    const u=new URL(value);
+    return u.protocol==="https:" && !u.username && !u.password && !u.port &&
+      u.hostname.includes(".") && Boolean(marker) && u.searchParams.get("erid")===marker;
+  }catch{return false}
+}
+
+/** Retain a baseline active offer unless its dated expiry is provably past in Moscow time. */
+export function baselineStillEligible(expires: string | null | undefined, atMs = Date.now()): boolean {
+  if (!expires) return true;
+  if (!/^\d{4}-\d{2}-\d{2}/.test(expires)) return true;
+  const end = Date.parse(expires.slice(0,10) + "T23:59:59+03:00");
+  return !Number.isFinite(end) || end >= atMs;
+}

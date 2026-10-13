@@ -289,6 +289,7 @@ export interface PublicationEvaluationContext {
   allowlist?: readonly string[];
   qualityGatePassed?: boolean;
   qualityGateReasons?: string[];
+  verifiedPublisherScope?: boolean;
 }
 
 export type CandidateLike =
@@ -380,7 +381,7 @@ export function isAdmitadPublishable(
   const isPersonalPromo =
     ("is_personal" in coupon && Boolean(coupon.is_personal)) ||
     ("isPersonal" in coupon && Boolean(coupon.isPersonal));
-  if (isPersonalPromo) {
+  if (isPersonalPromo && !ctx.verifiedPublisherScope) {
     return {
       publishable: false,
       status: "UNAUTHORIZED_PROMOCODE",

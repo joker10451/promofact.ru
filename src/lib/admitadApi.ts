@@ -792,7 +792,8 @@ export interface QualityGateResult {
 
 export function evaluateQualityGate(
   coupon: AdmitadApiCoupon,
-  campaign?: AdmitadApiCampaign
+  campaign?: AdmitadApiCampaign,
+  options: { verifiedPublisherScope?: boolean } = {}
 ): QualityGateResult {
   const reasons: string[] = [];
 
@@ -802,7 +803,7 @@ export function evaluateQualityGate(
   }
 
   // 1b. Проверка прав на использование промокода (персональные промокоды без согласования)
-  if (coupon.is_personal) {
+  if (coupon.is_personal && !options.verifiedPublisherScope) {
     reasons.push("UNAUTHORIZED_PROMOCODE: персональный промокод не авторизован для открытой публикации");
   }
 

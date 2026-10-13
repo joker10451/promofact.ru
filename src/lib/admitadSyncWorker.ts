@@ -24,6 +24,7 @@ import {
   normalizeAdmitadCoupon,
 } from "@/lib/admitadNormalizer";
 import { STABLE_STORES } from "@/lib/stableStores";
+import { verifiedPublisherWebsite, resolvePublisherStore, validPublisherAffiliateLink, baselineStillEligible } from "@/lib/admitadPublisherCatalog";
 import {
   isAdmitadPublishable,
   evaluateSnapshotSafety,
@@ -112,6 +113,9 @@ export async function runAdmitadSafeSync(options: {
     }
 
     const website = websiteResult.website;
+    const publisherRequested = process.env.ADMITAD_PUBLISH_WEBSITE_COUPONS === "true";
+    const publisherScoped = publisherRequested && verifiedPublisherWebsite(website);
+    if (publisherRequested && !publisherScoped) throw new Error("WEBSITE_SCOPE_MISMATCH");
 
     // 3. Загрузка партнерских программ и купонов площадки
     const [programs, apiCoupons] = await Promise.all([
@@ -123,6 +127,13 @@ export async function runAdmitadSafeSync(options: {
     for (const p of programs) {
       programMap.set(p.id, p);
     }
+    // Explicit opt-in: all active programs returned for THIS website, never
+    // all publisher programs or an unrelated product feed.
+    const publisherAllowlist = publisherScoped
+      ? [...new Set([...effectiveAllowlist, ...programs
+        .filter(p => p.status === "active" && p.connection_status === "active" && p.id !== 45863)
+        .map(p => String(p.id))])]
+      : effectiveAllowlist;
 
     // 4. Нормализация, Quality Gates, ОРД и классификация пригодности к публикации
     const existingActiveRows = await getExistingActiveSnapshotRows();
@@ -144,7 +155,7 @@ export async function runAdmitadSafeSync(options: {
 
     for (const apiCoupon of apiCoupons) {
       const campId = apiCoupon.campaign?.id || 0;
-      const isApprovedInCurrentSync = effectiveAllowlist.includes(String(campId));
+      const isApprovedInCurrentSync = publisherAllowlist.includes(String(campId));
       const program = programMap.get(campId);
       const raw = mapApiCouponToRaw(apiCoupon);
 
@@ -168,11 +179,12 @@ export async function runAdmitadSafeSync(options: {
       const normalized = normalizeAdmitadCoupon(raw);
       if (normalized) normalizedCount++;
 
-      const qg = evaluateQualityGate(apiCoupon, program);
+      const qg = evaluateQualityGate(apiCoupon, program, {verifiedPublisherScope: publisherScoped});
       if (qg.passed) qualityPassCount++;
 
       const fallbackTarget = program || (apiCoupon.campaign ? { ...apiCoupon.campaign, site_url: apiCoupon.campaign.site_url || "" } : { id: campId, name: raw.name, site_url: "" });
-      const mapping = matchCanonicalStore(fallbackTarget);
+      const existingMapping = matchCanonicalStore(fallbackTarget);
+      const mapping = publisherScoped && program ? resolvePublisherStore(program, existingMapping) : existingMapping;
       if (mapping.strategy !== "UNMAPPED") mappedCount++;
 
       const legal = evaluateLegalGate(apiCoupon, program);
@@ -195,9 +207,14 @@ export async function runAdmitadSafeSync(options: {
       const isInApprovedBatch = getBatchCampaignAllowlist().includes(String(campId));
       const batchOriginValid = !isInApprovedBatch ||
         isVerifiedBatchCampaignOrigin(String(campId), campaign.site_url || "");
+      const publisherLinkValid = !publisherScoped ||
+        validPublisherAffiliateLink(normalized?.affiliate?.url || raw.gotolink || "", legal.eridValue);
       const pilotGate = {
-        passed: tastyGate.passed && befreeGate.passed && batchOriginValid,
-        reason: tastyGate.reason || befreeGate.reason ||
+        passed: (publisherScoped || (tastyGate.passed && befreeGate.passed && batchOriginValid)) &&
+          publisherLinkValid && !(publisherScoped && campId === 45863),
+        reason: !publisherLinkValid ? "PUBLISHER_AFFILIATE_ERID_MISMATCH" :
+          publisherScoped && campId === 45863 ? "PREMIER_REVIEW_REQUIRED" :
+          tastyGate.reason || befreeGate.reason ||
           (batchOriginValid ? undefined : "BATCH_CAMPAIGN_ORIGIN_MISMATCH"),
       };
 
@@ -210,15 +227,18 @@ export async function runAdmitadSafeSync(options: {
         legalInfoStatus: legal.legalInfoStatus,
         eridValue: legal.eridValue || undefined,
         advertiserLegalInfo: program?.advertiser_legal_info || undefined,
-        allowlist: effectiveAllowlist,
-        qualityGatePassed: qg.passed && !isPersonal && pilotGate.passed,
-        qualityGateReasons: isPersonal ? ["UNAUTHORIZED_PROMOCODE: персональный промокод"] : [...qg.reasons, ...(pilotGate.reason ? [pilotGate.reason] : [])],
+        allowlist: publisherAllowlist,
+        verifiedPublisherScope: publisherScoped,
+        qualityGatePassed: qg.passed && (!isPersonal || publisherScoped) && pilotGate.passed,
+        qualityGateReasons: isPersonal && !publisherScoped
+          ? ["UNAUTHORIZED_PROMOCODE: персональный промокод"]
+          : [...qg.reasons, ...(pilotGate.passed ? [] : [pilotGate.reason || "PILOT_GATE_FAILED"])],
       });
 
       // Обязательный гейт: Quality Gate обязан быть пройден, а персональные промокоды строго отклонены
-      if (!qg.passed || isPersonal || !pilotGate.passed) {
+      if (!qg.passed || (isPersonal && !publisherScoped) || !pilotGate.passed) {
         evalResult.publishable = false;
-        if (isPersonal) {
+        if (isPersonal && !publisherScoped) {
           evalResult.status = "UNAUTHORIZED_PROMOCODE";
         } else if (!pilotGate.passed) {
           evalResult.status = "QUALITY_GATE_FAILED";
@@ -243,7 +263,7 @@ export async function runAdmitadSafeSync(options: {
       // No explicit reviewed IDs => no new five-program coupons, regardless
       // of environment allowlists or workflow mode.
       const newFiveOfferNotReviewed = Boolean(
-        FIVE_NEW_CAMPAIGN_IDS.includes(String(campId)) &&
+        !publisherScoped && FIVE_NEW_CAMPAIGN_IDS.includes(String(campId)) &&
         !existingActiveMap.has(rowId) &&
         !isFiveCouponExplicitlyReviewed(String(campId), couponId, options.reviewedFiveCouponIds ?? [])
       );
@@ -401,11 +421,33 @@ export async function runAdmitadSafeSync(options: {
 
     // Batch mode may not accidentally introduce new offers from other
     // already-approved programs or exceed its capped growth envelope.
-    if (options.requireActiveRetention) {
-      const proposedActiveIds = new Set(rowsToUpsert.filter((r) => r.is_active).map((r) => r.id));
-      if ([...existingActiveMap.keys()].some((id) => !proposedActiveIds.has(id))) {
-        throw new Error("BATCH_ACTIVE_COUPON_RETENTION_FAILED");
+    const proposedActiveIds = new Set(rowsToUpsert.filter((r) => r.is_active).map((r) => r.id));
+    const missingBaselineRows = [...existingActiveMap.entries()]
+      .filter(([id]) => !proposedActiveIds.has(id))
+      .map(([, row]) => row);
+    if (publisherScoped) {
+      const lossByCampaign: Record<string, number> = {};
+      for (const row of missingBaselineRows) {
+        const id = String(row.source_campaign_id || "UNKNOWN");
+        lossByCampaign[id] = (lossByCampaign[id] || 0) + 1;
       }
+      // Diagnostic includes aggregate campaign IDs only; never coupon codes,
+      // affiliate URLs, ERIDs or raw offer data.
+      console.log("[publisher/retention] baseline=" + existingActiveMap.size +
+        " proposed_active=" + proposedActiveIds.size +
+        " baseline_missing=" + missingBaselineRows.length +
+        " missing_by_campaign=" + JSON.stringify(lossByCampaign));
+    }
+    // An already-expired legacy offer must not block a safe snapshot forever.
+    // Retain every baseline row that is still valid OR has an unknown expiry.
+    const missingStillEligible = missingBaselineRows.filter(row =>
+      baselineStillEligible(row.expires, Date.now()));
+    if (publisherScoped) console.log("[publisher/retention] missing_valid=" +
+      missingStillEligible.length + " expired_baseline_allowed_to_deactivate=" +
+      (missingBaselineRows.length - missingStillEligible.length));
+    if (options.requireActiveRetention &&
+        (publisherScoped ? missingStillEligible.length : missingBaselineRows.length) > 0) {
+      throw new Error("BATCH_ACTIVE_COUPON_RETENTION_FAILED");
     }
     if (options.maxNewOffers !== undefined) {
       if (!Number.isSafeInteger(options.maxNewOffers) || options.maxNewOffers < 0) {
