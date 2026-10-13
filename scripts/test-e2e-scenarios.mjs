@@ -626,8 +626,8 @@ async function run() {
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
           if (pathUrl === "/") {
             const heroHeadline = await page.locator("h1").innerText();
-            assert.ok(heroHeadline.includes("Хорошие скидки.") && heroHeadline.includes("Без лишних поисков."),
-              "Approved PromoFact 2.0 heading must be present at every breakpoint");
+            assert.ok(heroHeadline.includes("Скидки, которые") && heroHeadline.includes("легко найти."),
+              "Editorial heading must be present at every breakpoint");
             assert.ok(await page.getByPlaceholder("Поиск магазина или промокода...").count(),
               "Live Hero search must remain visible at every breakpoint");
             assert.ok(await page.locator('section[id="catalog"]').count(),
@@ -667,12 +667,12 @@ async function run() {
               assert.ok(logoState, "No popular store should display a blank logo circle: " + (await visibleCards.nth(i).getAttribute("href")));
             }
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `v2-home-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `editorial-home-${res.width}.png`),
               fullPage: true,
               animations: "disabled",
             });
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `v2-viewport-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `editorial-viewport-${res.width}.png`),
               fullPage: false,
               animations: "disabled",
             });
