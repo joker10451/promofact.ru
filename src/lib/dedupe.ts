@@ -27,9 +27,6 @@ export const SOURCE_PRIORITY: readonly CouponSource[] = [
   "admitad",
 ];
 
-/** Ручные источники: их коды глушат дубли из фидов независимо от магазина. */
-const MANUAL_SOURCES: readonly CouponSource[] = ["custom", "supabase"];
-
 export interface SourceBucket {
   source: CouponSource;
   coupons: Coupon[];
@@ -112,31 +109,20 @@ export function dedupeCoupons(buckets: SourceBucket[]): {
     total += bucket.coupons.length;
   }
 
-  // Коды из ручных источников: перебивают тот же код в любом фиде,
-  // даже если магазин там назван иначе (случай Кинопоиска).
-  const manualCodes = new Set<string>();
-  for (const source of MANUAL_SOURCES) {
-    for (const c of bySource.get(source) ?? []) {
-      if (isRealPromoCode(c.promocode.code)) {
-        const code = normalizeCode(c.promocode.code);
-        if (code) manualCodes.add(code);
-      }
-    }
-  }
+  // Важно: один и тот же промокод (например SALE10) может быть выдан разным
+  // магазинам. Нельзя подавлять его глобально из-за наличия ручной публикации.
+  // couponKey уже содержит store.slug; приоритет источников сохраняется
+  // обходом SOURCE_PRIORITY, поэтому внутри магазина побеждает custom/supabase.
 
   const seen = new Set<string>();
   const coupons: Coupon[] = [];
   const droppedBySource: Partial<Record<CouponSource, number>> = {};
 
   for (const source of SOURCE_PRIORITY) {
-    const isManual = MANUAL_SOURCES.includes(source);
     for (const c of bySource.get(source) ?? []) {
-      const hasRealCode = isRealPromoCode(c.promocode.code);
-      const code = hasRealCode ? normalizeCode(c.promocode.code) : "";
-      const shadowedByManual = !isManual && hasRealCode && code !== "" && manualCodes.has(code);
       const key = couponKey(c);
 
-      if (shadowedByManual || seen.has(key)) {
+      if (seen.has(key)) {
         droppedBySource[source] = (droppedBySource[source] ?? 0) + 1;
         continue;
       }
