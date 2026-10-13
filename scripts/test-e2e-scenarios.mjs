@@ -623,6 +623,19 @@ async function run() {
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
           }
+          if (pathUrl === "/") {
+            assert.ok((await page.locator("h1").innerText()).includes("Найдите скидку."),
+              "Brand headline must remain prominent");
+            assert.ok(await page.getByPlaceholder("Магазин или промокод").count(),
+              "Mobile-friendly search must remain available");
+            if (res.width <= 390) {
+              const popularSection = page.locator('section[aria-label="Популярные магазины"]');
+              const firstStore = popularSection.locator('a[href^="/store/"]').first();
+              const bounds = await firstStore.boundingBox();
+              assert.ok(bounds && bounds.y < res.height - 50,
+                "First useful store tile must appear before the end of the first mobile viewport");
+            }
+          }
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
           if (pathUrl === "/") {
             const cards = page.locator('section[aria-label="Популярные магазины"] a[href^="/store/"]');
@@ -649,12 +662,12 @@ async function run() {
               assert.ok(logoState, "No popular store should display a blank logo circle: " + (await visibleCards.nth(i).getAttribute("href")));
             }
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `ui-seo-1-1-home-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `polish-home-${res.width}.png`),
               fullPage: true,
               animations: "disabled",
             });
             await page.screenshot({
-              path: path.join(afterScreenshotsDir, `ui-seo-1-1-viewport-${res.width}.png`),
+              path: path.join(afterScreenshotsDir, `polish-viewport-${res.width}.png`),
               fullPage: false,
               animations: "disabled",
             });
