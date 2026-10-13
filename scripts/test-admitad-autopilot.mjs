@@ -993,6 +993,7 @@ const testPublishedMeta = (campaignId, suffix) => ({
     const existingRows = [
       {
         id: "adm_pilot_premier",
+        ...testPublishedMeta("45863","PILOT"),
         store: "PREMIER",
         store_slug: "premier",
         code: "PREMIER_PILOT",
@@ -1008,6 +1009,7 @@ const testPublishedMeta = (campaignId, suffix) => ({
     for (let i = 1; i <= 14; i++) {
       existingRows.push({
         id: `adm_other_camp_${i}`,
+        ...testPublishedMeta("25224","YANDEX_"+i),
         store: "Яндекс Путешествия",
         store_slug: "yandeks-puteshestviya",
         code: `YANDEX_${i}`,
@@ -1030,16 +1032,16 @@ const testPublishedMeta = (campaignId, suffix) => ({
     const safety = evaluateSnapshotSafety(15, 15);
     assert.strictEqual(safety.safe, true, "15 из 15 не должно вызывать CATASTROPHIC_DROP");
 
-    // Включаем строгую пилотную изоляцию в рантайме: ТОЛЬКО PREMIER
+    // Read-time pilot allowlist cannot hide coupons already marked PUBLISHABLE
+    // by the trusted, atomic publisher snapshot.
     process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863";
     const runtimeCoupons = await fetchAdmitadCouponsCached();
-    assert.strictEqual(runtimeCoupons.length, 1, "При ADMITAD_APPROVED_CAMPAIGNS='45863' рантайм должен отдавать ровно 1 оффер PREMIER");
-    assert.strictEqual(runtimeCoupons[0].promocode.code, "PREMIER_PILOT");
+    assert.strictEqual(runtimeCoupons.length, 15, "All 15 published and marked rows must be visible");
+    assert.ok(runtimeCoupons.some(c=>c.promocode.code==="PREMIER_PILOT"));
 
-    // Расширяем allowlist до двух кампаний: должны стать видны и PREMIER, и Яндекс Путешествия
     process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863,25224";
     const runtimeMulti = await fetchAdmitadCouponsCached();
-    assert.strictEqual(runtimeMulti.length, 15, "При расширении allowlist должны стать видны все 15 купонов");
+    assert.strictEqual(runtimeMulti.length, 15, "Changing legacy publisher allowlist must not hide active PUBLISHABLE rows");
 
     passed++;
     console.log("✓ Тест 28: Блокер 2 — Сохранение снимка и контролируемая видимость пилота (PASS)");
@@ -1075,6 +1077,7 @@ const testPublishedMeta = (campaignId, suffix) => ({
         last_seen_at: "2026-09-01T00:00:00Z",
         ord_marker: "erid_test",
         ord_text: "Реклама. ООО Тест",
+        ...testPublishedMeta("25224","VALID_CODE"),
       },
       {
         id: "adm_expired_yandex",
@@ -1091,6 +1094,7 @@ const testPublishedMeta = (campaignId, suffix) => ({
         last_seen_at: "2024-01-01T00:00:00Z",
         ord_marker: "erid_test2",
         ord_text: "Реклама. ООО Тест 2",
+        ...testPublishedMeta("25224","EXPIRED_CODE"),
       },
       {
         id: "adm_premier_pilot_exp",
@@ -1106,18 +1110,20 @@ const testPublishedMeta = (campaignId, suffix) => ({
         sync_run_id: testSyncId,
         ord_marker: "erid_premier",
         ord_text: "Реклама. ООО ПРЕМЬЕР",
+        ...testPublishedMeta("45863","PREMIER_EXP"),
       },
     ];
 
     await upsertAdmitadStaging(rows, testSyncId);
     await publishAdmitadSnapshot(testSyncId, 3, 0);
 
-    // Теперь ставим пилот только на PREMIER
+    // Regardless of old allowlist, both valid PUBLISHABLE offers are visible;
+    // the expired coupon must still be rejected.
     process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863";
     const runtime = await fetchAdmitadCouponsCached();
-    // Должен быть виден только 1 PREMIER
-    assert.strictEqual(runtime.length, 1, "Рантайм при пилоте PREMIER должен отдавать только 1 оффер");
-    assert.strictEqual(runtime[0].promocode.code, "PREMIER_EXP");
+    assert.strictEqual(runtime.length, 2, "Only two unexpired legal offers must be visible");
+    assert.ok(runtime.some(c=>c.promocode.code==="PREMIER_EXP"));
+    assert.ok(runtime.some(c=>c.promocode.code==="VALID_CODE"));
 
     // Расширяем на обе кампании — просроченный не должен пройти фильтр isNotExpired
     process.env.ADMITAD_APPROVED_CAMPAIGNS = "45863,25224";
@@ -1207,6 +1213,7 @@ const testPublishedMeta = (campaignId, suffix) => ({
         sync_run_id: testSyncId,
         ord_marker: "erid_valid",
         ord_text: "Реклама. ООО ПРЕМЬЕР",
+        ...testPublishedMeta("45863","WITH_ORD"),
       },
       {
         id: "adm_no_ord",
@@ -1233,11 +1240,10 @@ const testPublishedMeta = (campaignId, suffix) => ({
     const runtime = await fetchAdmitadCouponsCached();
     const codes = runtime.map(c => c.promocode.code);
     assert.ok(codes.includes("WITH_ORD"), "Оффер с ОРД должен быть виден");
-    // NO_ORD может быть видно в рантайме (rowToCoupon создаёт fallback ord_text),
-    // но при синхронизации (sync worker) записи без ОРД деактивируются.
-    // Тест верифицирует, что rowToCoupon создаёт хотя бы fallback ОРД.
+    // A missing ERID/ORD marker must be blocked even when legacy status is active.
+    assert.ok(!codes.includes("NO_ORD"), "Missing legal marking must fail closed at runtime");
     for (const c of runtime) {
-      assert.ok(c.affiliate?.ordText || c.store?.site, "Каждый рантайм-купон должен иметь ОРД-маркировку или fallback");
+      assert.ok(c.affiliate?.ordText, "Every published coupon must display legal marking");
     }
 
     passed++;
