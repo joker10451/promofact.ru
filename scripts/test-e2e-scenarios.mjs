@@ -628,7 +628,7 @@ async function run() {
             const heroHeadline = await page.locator("h1").innerText();
             assert.ok(heroHeadline.includes("Скидки, которые") && heroHeadline.includes("легко найти."),
               "Editorial heading must be present at every breakpoint");
-            assert.ok(await page.getByPlaceholder("Поиск магазина или промокода...").count(),
+            assert.ok(await page.getByPlaceholder("Магазин или код").count(),
               "Live Hero search must remain visible at every breakpoint");
             assert.ok(await page.locator('section[id="catalog"]').count(),
               "Coupon catalog must remain navigable after redesign");
