@@ -30,21 +30,19 @@ function pluralOrders(n: number): string {
   return "заказов";
 }
 
-// Реальные актуальные магазины нашего сайта (в стиле топ-категорий Пикабу)
-const REAL_POPULAR_TAGS = [
-  "SUNLIGHT",
-  "Пятёрочка",
-  "Яндекс Цветы",
-  "Отелло",
-  "Кинопоиск",
-  "Ив Роше",
-  "Важная Рыба",
-  "Fix Price",
-];
-
 export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroProps) {
   const stores = search?.stores ?? [];
   const coupons = search?.coupons ?? [];
+  // Suggested shops must really exist in our live index; no stale static names.
+  const preferredSlugs = ["sunlight-ru", "pyaterochka", "ivi", "otello", "kinopoisk", "farfor"];
+  const preferred = preferredSlugs
+    .map((slug) => stores.find((store) => store.slug === slug))
+    .filter((store): store is (typeof stores)[number] => Boolean(store));
+  const suggestions = [
+    ...preferred,
+    ...stores.filter((store) => !preferred.some((item) => item.slug === store.slug)),
+  ].slice(0, 6);
+
   const [q, setQ] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -122,34 +120,34 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-paper via-white to-paper pt-7 pb-7 sm:pt-18 sm:pb-20 border-b border-line">
+    <section className="relative bg-gradient-to-b from-paper via-white to-paper pt-6 pb-6 sm:pt-12 sm:pb-12 border-b border-line">
       {/* Декоративные световые пятна с ограничением по ширине */}
       <div
-        className="pointer-events-none absolute -left-20 top-10 h-72 w-72 max-w-full rounded-full bg-yellow/15 blur-3xl"
+        className="pointer-events-none absolute -left-20 top-10 h-56 w-56 max-w-full rounded-full bg-yellow/15 blur-3xl"
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute right-0 top-20 h-72 w-72 max-w-full rounded-full bg-red/10 blur-3xl"
+        className="pointer-events-none absolute right-0 top-12 h-56 w-56 max-w-full rounded-full bg-red/10 blur-3xl"
         aria-hidden="true"
       />
 
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 relative z-10">
         {/* Заголовок */}
-        <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-ink sm:leading-[1.1]">
+        <h1 className="font-display text-[clamp(1.65rem,7.4vw,2.1rem)] leading-[1.13] sm:text-5xl md:text-[3.55rem] font-extrabold tracking-tight text-ink sm:leading-[1.12]">
           Найдите скидку. <br />
           <span className="text-red">Заплатите меньше.</span>
-          <span className="mt-2 sm:mt-3 block text-base sm:text-xl md:text-2xl font-semibold tracking-normal text-ink/80">
+          <span className="mt-3 block text-sm sm:text-lg md:text-xl font-semibold tracking-normal text-ink/80">
             Актуальные промокоды и купоны на скидку
           </span>
         </h1>
 
         {/* Подзаголовок */}
-        <p className="mx-auto mt-3.5 max-w-2xl text-sm sm:text-base md:text-lg text-ink/70">
-          Промокоды и акции магазинов и сервисов в одном месте. Показываем только коды с действующим сроком — истёкшие уходят сами.
+        <p className="mx-auto mt-2.5 max-w-2xl text-[13px] leading-[1.55] sm:mt-3 sm:text-base text-ink/70">
+          Сравнивайте предложения магазинов и находите действующие промокоды с понятными условиями.
         </p>
 
         {/* Главная поисковая строка */}
-        <div ref={containerRef} className="relative mx-auto mt-4 sm:mt-8 max-w-2xl">
+        <div ref={containerRef} className="relative mx-auto mt-4 sm:mt-6 max-w-2xl">
           <form onSubmit={handleSubmit} className="relative flex items-center">
             <div className="relative w-full">
               <span className="pointer-events-none absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-lg sm:text-xl text-ink/40">
@@ -165,7 +163,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
                   setIsOpen(true);
                   setSelectedIndex(0);
                 }}
-                placeholder="Поиск магазина или промокода..."
+                placeholder="Магазин или промокод"
                 className="h-14 sm:h-16 w-full rounded-2xl border-2 border-ink/15 bg-white pl-12 sm:pl-14 pr-24 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
               />
               <button
@@ -263,50 +261,36 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </div>
 
         {/* Быстрые теги (реальные магазины) */}
-        <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-ink/70">
-          <span className="text-ink/40">Популярное:</span>
-          {REAL_POPULAR_TAGS.map((tag) => (
+        <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-ink/70">
+          <span className="hidden text-ink/40 sm:inline">Популярное:</span>
+          {suggestions.map((store, index) => (
             <button
-              key={tag}
+              key={store.slug}
               type="button"
-              onClick={() => submitSearch(tag)}
-              className="rounded-lg bg-white border border-line px-2.5 py-1 text-ink/80 hover:border-ink/40 hover:text-ink transition-colors cursor-pointer"
+              onClick={() => submitSearch(store.name)}
+              className={`${index >= 3 ? "hidden sm:inline-flex" : "inline-flex"} min-h-8 items-center rounded-lg bg-white border border-line px-3 py-1 text-ink/80 hover:border-red/30 hover:text-red transition-colors cursor-pointer`}
             >
-              {tag}
+              {store.name}
             </button>
           ))}
         </div>
 
-        {/* Блок доверия (Trust Indicators) */}
-        <div className="mt-6 sm:mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-4 sm:pt-6 border-t border-line/60">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
-              <Icon name="check" size={14} />
+        {/* Real, useful product facts; no decorative or unverified trust badges. */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-line/60 pt-3 text-xs font-semibold text-ink/70 sm:mt-7 sm:pt-4">
+          <span className="inline-flex items-center gap-1.5">
+            <Icon name="tag" size={14} className="text-red" />
+            {couponCount} актуальных предложений
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Icon name="check" size={14} className="text-mint-dark" />
+            Бесплатно, без регистрации
+          </span>
+          {proofTotal > 0 && (
+            <span className="hidden items-center gap-1.5 sm:inline-flex">
+              <Icon name="shield" size={14} className="text-mint-dark" />
+              {proofTotal} {pluralOrders(proofTotal)} подтверждено
             </span>
-            <span>
-              {proofTotal > 0
-                ? `${proofTotal} ${pluralOrders(proofTotal)} подтверждено`
-                : "Срок действия у каждого кода"}
-            </span>
-          </div>
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow/40 text-ink text-[11px]">
-              <Icon name="sparkle" size={14} />
-            </span>
-            <span>{couponCount} активных акций</span>
-          </div>
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint/20 text-mint-dark text-[11px]">
-              <Icon name="shield" size={14} />
-            </span>
-            <span>Коды из партнёрских программ магазинов</span>
-          </div>
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-ink/80">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red/15 text-red text-[11px]">
-              0₽
-            </span>
-            <span>Бесплатно и без регистрации</span>
-          </div>
+          )}
         </div>
       </div>
     </section>
