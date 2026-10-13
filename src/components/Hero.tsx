@@ -304,4 +304,3 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
     </section>
   );
 }
-}
