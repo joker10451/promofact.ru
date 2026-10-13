@@ -225,9 +225,9 @@ export default function CouponGrid({
   return (
     <section id="catalog" className="scroll-mt-20">
       {/* Заголовок секции */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="font-display text-xl sm:text-2xl font-extrabold text-ink">
+          <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink">
             Все предложения
           </h2>
           <p className="text-xs sm:text-sm text-ink/60 font-medium">
@@ -275,7 +275,7 @@ export default function CouponGrid({
       </div>
 
       {/* Быстрые интерактивные фильтры */}
-      <div className="flex flex-nowrap items-center gap-2 mb-5 overflow-x-auto no-scrollbar pb-1">
+      <div className="mb-5 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setQuickFilter("all")}
@@ -318,34 +318,34 @@ export default function CouponGrid({
         </button>
       </div>
 
-      {/* Одна категория-линейка на всех экранах вместо тяжёлого сайдбара */}
-      <div className="mb-5 flex flex-nowrap gap-2 overflow-x-auto overscroll-x-contain pb-2 no-scrollbar">
-        <button
-          type="button"
-          onClick={() => setFilter("all")}
-          className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
-            filter === "all"
-              ? "bg-ink text-white"
-              : "bg-white border border-line text-ink/70"
-          }`}
-        >
-          Все · {coupons.length}
-        </button>
-        {cats.map(({ slug, name }) => (
-          <button
-            key={slug}
-            type="button"
-            onClick={() => setFilter(slug)}
-            className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
-              filter === slug
-                ? "bg-ink text-white"
-                : "bg-white border border-line text-ink/70"
-            }`}
+      {/* All categories remain accessible without hidden horizontal scrolling. */}
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-white px-4 py-3 sm:gap-4 sm:px-5">
+        <label htmlFor="pf3-category" className="shrink-0 text-sm font-semibold text-ink">
+          Категория
+        </label>
+        <div className="min-w-0 flex-1 sm:max-w-sm">
+          <select
+            id="pf3-category"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            aria-label="Категория промокодов"
+            className="min-h-11 w-full min-w-0 rounded-xl border border-line bg-[#fffdfa] px-3 text-sm font-medium text-ink focus:border-red"
           >
-            <Icon name={slug} size={14} className="shrink-0" />
-            <span>{name} · {countByCat(slug)}</span>
+            <option value="all">Все категории · {coupons.length}</option>
+            {cats.map(({ slug, name }) => (
+              <option key={slug} value={slug}>{name} · {countByCat(slug)}</option>
+            ))}
+          </select>
+        </div>
+        {filter !== "all" && (
+          <button
+            type="button"
+            onClick={() => setFilter("all")}
+            className="min-h-11 rounded-xl border border-line bg-white px-3 text-sm font-semibold text-red hover:border-red/40"
+          >
+            Сбросить категорию
           </button>
-        ))}
+        )}
       </div>
 
       {/* Единый каталог без отдельного сайдбара */}
@@ -388,14 +388,14 @@ export default function CouponGrid({
                   setSortBy("hits");
                   setSelectedRegion("all");
                 }}
-                className="mt-5 rounded-full bg-yellow text-ink px-5 py-2.5 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition-all"
+                className="mt-5 rounded-xl bg-red px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red-dark"
               >
                 Сбросить фильтры
               </button>
             </div>
           ) : (
             <>
-              <div className="columns-1 md:columns-2 gap-4">
+              <div className="columns-1 gap-4 lg:columns-2">
                 {groupedStoreList.slice(0, visibleLimit).map(({ store, primaryCoupon, otherCoupons }) => {
                   const isExpanded = !!expandedStores[store.id];
 
