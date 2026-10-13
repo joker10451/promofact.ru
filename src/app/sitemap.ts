@@ -177,6 +177,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const promokodyMap: MetadataRoute.Sitemap = [
     {
+      url: `${SITE_URL}/category`,
+      ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
+      changeFrequency: "daily" as const,
+      priority: 0.75,
+    },
+    {
       url: `${SITE_URL}/promokody`,
       ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
       changeFrequency: "daily" as const,

@@ -43,3 +43,24 @@ assert.ok(logo.includes(String.raw`name.replace(/[^\p{L}\p{N}]/gu`),
   "Brand fallback must preserve Cyrillic and Latin letters, not show placeholder dots");
 assert.equal("Пятёрочка".replace(/[^\p{L}\p{N}]/gu,"").charAt(0).toUpperCase(),"П",
   "Cyrillic logo fallback must render the real initial");
+
+const categoryPreview = fs.readFileSync("src/components/CategoryPreview.tsx", "utf8");
+const categoryIndex = fs.readFileSync("src/app/category/page.tsx", "utf8");
+const sitemap = fs.readFileSync("src/app/sitemap.ts", "utf8");
+
+assert.ok(home.includes("<CategoryPreview />") &&
+          home.indexOf("<PopularStores />") < home.indexOf("<CategoryPreview />") &&
+          home.indexOf("<CategoryPreview />") < home.indexOf("<CouponGrid") &&
+          !home.includes("<VisualCategoryTiles />"),
+  "Home must preview categories before coupon cards, not render a second full catalogue");
+assert.ok(categoryPreview.includes(".slice(0, 6)") &&
+          categoryPreview.includes("getCategories()") &&
+          categoryPreview.includes("canonicalCategorySlug") &&
+          categoryPreview.includes('href="/category"'),
+  "Homepage shows only six real active categories and links to the full index");
+assert.ok(categoryIndex.includes("<VisualCategoryTiles />") &&
+          categoryIndex.includes('alternates: { canonical: `${SITE_URL}/category` }'),
+  "Full category route must retain the full canonical category catalogue");
+assert.ok(sitemap.includes("url: `${SITE_URL}/category`"),
+  "Category index must be discoverable in sitemap");
+console.log("PromoFact category discovery: homepage preview, full route and sitemap PASS");

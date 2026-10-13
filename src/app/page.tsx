@@ -7,7 +7,7 @@ import SberCampaignTeasers from "@/components/SberCampaignTeasers";
 import CouponGrid from "@/components/CouponGrid";
 import SavingsCalculator from "@/components/SavingsCalculator";
 import HowItWorks from "@/components/HowItWorks";
-import VisualCategoryTiles from "@/components/VisualCategoryTiles";
+import CategoryPreview from "@/components/CategoryPreview";
 import WhyUs from "@/components/WhyUs";
 import Faq from "@/components/Faq";
 import LatestTips from "@/components/LatestTips";
@@ -119,6 +119,13 @@ export default async function Home() {
           </Reveal>
         </div>
 
+        {/* Короткая витрина реальных категорий. Полный каталог открыт на /category. */}
+        <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 sm:pt-8">
+          <Reveal>
+            <CategoryPreview />
+          </Reveal>
+        </div>
+
         {/* 5. Скоро заканчиваются — коды с ближайшим реальным сроком, по одному от магазина.
             Раньше здесь было два блока «Спецпредложения дня» подряд. */}
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
@@ -160,11 +167,6 @@ export default async function Home() {
         {/* 7. 💰 Калькулятор выгоды */}
         <Reveal>
           <SavingsCalculator />
-        </Reveal>
-
-        {/* 8. Скидки по категориям — быстрый переход */}
-        <Reveal>
-          <VisualCategoryTiles />
         </Reveal>
 
         {/* 9. Почему ПромоФакт? — гарантия и прозрачность */}
