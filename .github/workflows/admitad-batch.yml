@@ -61,6 +61,10 @@ jobs:
           ADMITAD_BATCH_REVIEWED_COUPON_IDS: ${{ vars.ADMITAD_BATCH_REVIEWED_COUPON_IDS }}
           ADMITAD_BATCH_APPROVED_CAMPAIGNS: ${{ github.event_name == 'workflow_dispatch' && inputs.batch == 'expand-five' && '28532,14647,22484,93978,11738,26032,14725,23485' || '28532,14647,22484' }}
           ADMITAD_APPROVED_CAMPAIGNS: '141770,1667,17220,25224,26110'
+          # Keep previously published site-scoped smart/personal coupons active on scheduled refresh.
+          # Restricted to recurring existing-three; INITIAL reviewed-five still uses old fail-closed gate.
+          # New additions outside the three verified recurring programs remain blocked by onlyNewCampaignIds.
+          ADMITAD_PUBLISH_WEBSITE_COUPONS: ${{ (github.event_name == 'schedule' || (inputs.mode == 'recurring' && inputs.batch == 'existing-three')) && 'true' || 'false' }}
           ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
           ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
           ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}

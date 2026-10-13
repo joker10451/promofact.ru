@@ -84,6 +84,11 @@ async function main() {
   if((mode==="initial" && csv!==EXPANDED_BATCH) ||
      (mode==="recurring" && csv!==PREVIOUS_BATCH && csv!==EXPANDED_BATCH) ||
      batch.join(",")!==csv.split(",").join(","))abort("BATCH_CAMPAIGNS_NOT_REVIEWED");
+  // First-time five-brand approval must retain its explicit coupon-level gate.
+  // Publisher-scoped refresh is only allowed for recurring existing-three runs.
+  if(process.env.ADMITAD_PUBLISH_WEBSITE_COUPONS==="true" &&
+     (mode!=="recurring" || csv!==PREVIOUS_BATCH))
+    abort("PUBLISHER_REFRESH_SCOPE_INVALID");
   if(process.env.ADMITAD_BATCH_RUN_APPROVED!=="true")abort("BATCH_RUN_NOT_APPROVED");
   const previewOnly=process.env.ADMITAD_BATCH_PREVIEW_ONLY==="true";
   if(previewOnly && (mode!=="initial" || csv!==EXPANDED_BATCH))
