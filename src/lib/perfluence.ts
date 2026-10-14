@@ -614,23 +614,10 @@ async function fetchBaseSourceBuckets(): Promise<BaseSourceBucket[]> {
     (await import("@/lib/supabaseCoupons")).fetchSupabaseCoupons(),
   ]);
 
-  // A temporarily pinned Perfluence placement must not override a newer
-  // approved live Perfluence offer for the *same* SberDevices promo code.
-  // Otherwise old manual attribution links might shadow updated partner links.
-  const liveSberDevicesCodes = new Set(
-    perfluenceCoupons
-      .filter((c) =>
-        /сбердевайс|sberdevices/iu.test(c.store.name) ||
-        /sberdevices\.ru/iu.test(c.store.site)
-      )
-      .map((c) => c.promocode.code.trim().toUpperCase()),
-  );
-  const customCoupons = (await import("@/lib/customCoupons")).getCustomCoupons()
-    .filter((c) => c.store.slug !== "sberdevaysy" ||
-      !liveSberDevicesCodes.has(c.promocode.code.trim().toUpperCase()));
-
+  // Static snapshots may be cached. Current editorial/partner offers are
+  // intentionally merged OUTSIDE this cache (see getCombinedCoupons).
+  // This avoids persisted cached pages silently dropping freshly added codes.
   const buckets: BaseSourceBucket[] = [
-    { source: "custom", coupons: customCoupons },
     { source: "supabase", coupons: supabaseCoupons },
     { source: "perfluence", coupons: perfluenceCoupons },
   ];
@@ -653,7 +640,7 @@ const getCachedBaseSourceBuckets = unstable_cache(
   fetchBaseSourceBuckets,
   [
     "promofact",
-    "base-source-buckets",
+    "base-source-buckets-no-custom-v2",
     syncMeta.lastSuccessSync || "initial",
     process.env.E2E_FIXTURES === "true" && process.env.VERCEL !== "1" && process.env.VERCEL_ENV !== "production" ? "e2e" : "prod",
   ],
@@ -689,10 +676,20 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   const baseBuckets = await getCachedBaseSourceBuckets();
   const { dedupeCoupons } = await import("@/lib/dedupe");
 
-  const sources: import("@/lib/dedupe").SourceBucket[] = baseBuckets.map((b) => ({
-    source: b.source,
-    coupons: b.coupons,
-  }));
+  // Custom partner offers must always come from the CURRENT server bundle.
+  // Historical unstable_cache snapshots can outlive code deployments on Vercel.
+  const liveSberDevicesCodes = new Set(
+    baseBuckets.flatMap((bucket) => bucket.source === "perfluence" ? bucket.coupons : [])
+      .filter((c) => /сбердевайс|sberdevices/iu.test(c.store.name) || /sberdevices\\.ru/iu.test(c.store.site))
+      .map((c) => c.promocode.code.trim().toUpperCase()),
+  );
+  const freshCustomCoupons = (await import("@/lib/customCoupons")).getCustomCoupons()
+    .filter((c) => c.store.slug !== "sberdevaysy" ||
+      !liveSberDevicesCodes.has(c.promocode.code.trim().toUpperCase()));
+  const sources: import("@/lib/dedupe").SourceBucket[] = [
+    { source: "custom", coupons: freshCustomCoupons },
+    ...baseBuckets.map((b) => ({ source: b.source, coupons: b.coupons })),
+  ];
 
   if (process.env.ADMITAD_CATALOG_ENABLED === "true") {
     try {
