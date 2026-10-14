@@ -89,7 +89,7 @@ export default async function PopularStores() {
                   className="max-h-full max-w-full object-contain"
                 />
               </div>
-              <span className="mt-2 block w-full truncate text-xs font-extrabold text-ink group-hover:text-red transition-colors">
+              <span className="mt-2 block w-full break-words [overflow-wrap:anywhere] text-[11px] leading-snug font-extrabold text-ink group-hover:text-red transition-colors sm:text-xs">
                 {s.name}
               </span>
               <span className="mt-1 inline-block rounded-full bg-mint/10 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-mint-dark">
