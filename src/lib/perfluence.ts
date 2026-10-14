@@ -383,6 +383,8 @@ export function parsePayload(payloadJson: string): Coupon[] {
 
 let cache: Coupon[] | null = null;
 let cacheFailed = false;
+let cacheFilledAt = 0;
+const SOURCE_MEMORY_TTL_MS = 15 * 60 * 1000;
 
 function topLevelCount(payload: string): number {
   try {
@@ -452,7 +454,7 @@ export async function getPerfluenceCoupons(): Promise<Coupon[]> {
 }
 
 async function fetchData(): Promise<Coupon[]> {
-  if (cache && !cacheFailed) return cache;
+  if (cache && !cacheFailed && Date.now() - cacheFilledAt < SOURCE_MEMORY_TTL_MS) return cache;
   if (pendingPromise) return pendingPromise;
   // Недавно упали: не заставляем каждую страницу ждать таймаута заново.
   if (failedAt && Date.now() - failedAt < RETRY_AFTER_MS) return cache ?? [];
@@ -466,6 +468,7 @@ async function fetchData(): Promise<Coupon[]> {
           if (bundledCoupons.length > 0) {
             console.log(`[perfluence] WIDGET_URL не задан, использован локальный фид: ${bundledCoupons.length} купонов`);
             cache = bundledCoupons;
+            cacheFilledAt = Date.now();
             return cache;
           }
         } catch (err) {
@@ -518,6 +521,7 @@ async function fetchData(): Promise<Coupon[]> {
         return devMockFallback("API вернул пустой список купонов");
 
       cache = coupons;
+      cacheFilledAt = Date.now();
       cacheFailed = false;
       console.log(`[perfluence] реальные данные: ${coupons.length}`);
       return cache;
@@ -534,6 +538,7 @@ async function fetchData(): Promise<Coupon[]> {
           if (bundledCoupons.length > 0) {
             console.log(`[perfluence] использован бандленный фид: ${bundledCoupons.length} купонов`);
             cache = bundledCoupons;
+            cacheFilledAt = Date.now();
             return cache;
           }
         } catch (parseErr) {
@@ -545,6 +550,7 @@ async function fetchData(): Promise<Coupon[]> {
       const snapshot = await fetchSnapshot();
       if (snapshot.length > 0) {
         cache = snapshot;
+        cacheFilledAt = Date.now();
         return cache;
       }
       return devMockFallback("запрос упал: " + (e as Error).message);
@@ -640,11 +646,12 @@ const getCachedBaseSourceBuckets = unstable_cache(
   fetchBaseSourceBuckets,
   [
     "promofact",
-    "base-source-buckets-no-custom-v2",
+    "base-source-buckets-no-custom-v3-periodic",
     syncMeta.lastSuccessSync || "initial",
     process.env.E2E_FIXTURES === "true" && process.env.VERCEL !== "1" && process.env.VERCEL_ENV !== "production" ? "e2e" : "prod",
   ],
-  { revalidate: false },
+  // Refresh approved partner offers rather than pinning an old snapshot forever.
+  { revalidate: 900 },
 );
 
 /**
