@@ -196,3 +196,10 @@ assert.ok(rotated.includes("25GFC1TL4") &&
   promoRegistry.includes('PAUSED_PROMO_BANNER_IDS'),
   "Preserve Magnit and partner compliance rules");
 console.log("October 13 visual rollback + current publisher campaigns and fresh custom coupon cache PASS");
+
+const pausedStorePage = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
+assert.ok(pausedStorePage.includes('slug === "m-kosmetik"') &&
+  pausedStorePage.includes("Акции М.Косметик временно приостановлены") &&
+  pausedStorePage.includes("нет подтверждения возобновления"),
+  "Paused M.Kosmetik merchant page must explain why its vouchers are unavailable");
+console.log("Paused M.Kosmetik store messaging PASS");
