@@ -168,3 +168,11 @@ assert.ok(couponGrid.includes("grid grid-cols-1 gap-4 md:grid-cols-2") &&
           !couponGrid.includes("columns-1 md:columns-2"),
   "Coupon catalog must use predictable two-column grid");
 console.log("PromoFact design pass: eligibility labels and responsive grid PASS");
+
+assert.ok(homePreview.includes("Промокоды, с которых стоит начать") &&
+          homePreview.includes('coupon.promocode.code ? "Есть промокод" : "Акция магазина"') &&
+          homePreview.includes('coupon.promocode.code ? "Посмотреть промокод" : "Условия акции"'),
+  "Homepage cards must distinguish code offers from direct deals");
+assert.ok(shops.includes('s.coupons.length % 100 !== 11'),
+  "Shop offer labels must handle Russian 11-14 plural exceptions");
+console.log("PromoFact home visual and copy checks PASS");
