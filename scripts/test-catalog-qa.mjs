@@ -59,3 +59,13 @@ assert.ok(!noCodeCopy.includes('скидка применится автомат
 const storeHeading = fs.readFileSync("src/app/store/[slug]/page.tsx","utf8");
 assert.ok(!storeHeading.includes('hasGift ? " — подарки к заказу"'));
 console.log("Source-backed store headings and no-code gift claims PASS");
+
+const subscriptionUnknown = refineOffer("Подписка Яндекс Плюс", "Специальные условия подписки", "", "Яндекс Плюс", false);
+assert.equal(subscriptionUnknown.type, "subscription");
+assert.doesNotMatch(subscriptionUnknown.discount, /(?:30|60) дней за 1 ₽/);
+const subscriptionDays = refineOffer("30 дней доступа", "Подписка за 99 ₽", "CODE", "Иви", true);
+assert.equal(subscriptionDays.discount, "30 дней за 99 ₽");
+assert.equal(subscriptionDays.condition, "для новых пользователей");
+const subscriptionDaysNoPrice = refineOffer("60 дней подписки", "", "", "Кинопоиск", false);
+assert.equal(subscriptionDaysNoPrice.discount, "60 дней доступа");
+console.log("CATALOG-QA-3: subscription prices, durations and audiences source-backed PASS");
