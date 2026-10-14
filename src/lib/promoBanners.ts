@@ -44,7 +44,7 @@ export interface PromoBanner {
 }
 
 /** Perfluence notice 13 October 2026: Ulybatl campaign temporarily paused. */
-export const PAUSED_PROMO_BANNER_IDS = new Set(["sber-ulybatl-185-2026"]);
+export const PAUSED_PROMO_BANNER_IDS = new Set(["sber-ulybatl-185-2026", "winlab-rozygrysh-2026"]);
 
 export const PROMO_BANNERS: PromoBanner[] = [
   {
