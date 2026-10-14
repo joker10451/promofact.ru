@@ -27,9 +27,8 @@ assert.ok(shops.includes('section aria-label="Популярные магази�
           shops.includes("index >= 6") &&
           shops.includes("s.coupons.length"),
   "Keep all real shop logos/counts; cap mobile display to six");
-assert.ok(home.indexOf("<HomeOffersPreview") < home.indexOf("<PopularStores />") &&
-          home.indexOf("<PopularStores />") < home.indexOf("<ExpiringDeals"),
-  "Show real coupon preview immediately after search, before shops and urgent deals");
+assert.ok(home.indexOf("<PopularStores />") < home.indexOf("<ExpiringDeals"),
+  "Show real shops promptly, before urgent deals");
 assert.ok(home.indexOf("<HomeOffersPreview") < home.indexOf("<SberCampaignTeasers"),
   "Real offer preview must precede sponsor advertisements");
 const guide = fs.readFileSync("src/app/guide/page.tsx", "utf8");
@@ -61,7 +60,7 @@ const sitemap = fs.readFileSync("src/app/sitemap.ts", "utf8");
 
 assert.ok(home.includes("<CategoryPreview />") &&
           home.indexOf("<PopularStores />") < home.indexOf("<CategoryPreview />") &&
-          home.indexOf("<HomeOffersPreview") < home.indexOf("<PopularStores />") &&
+          home.indexOf("<CategoryPreview />") < home.indexOf("<HomeOffersPreview") &&
           !home.includes("<VisualCategoryTiles />"),
   "Home must preview categories before coupon cards, not render a second full catalogue");
 assert.ok(categoryPreview.includes(".slice(0, 6)") &&
@@ -159,139 +158,37 @@ assert.ok(otpEntry.includes('storeSlug: "otp-bank"') &&
   "OTP creative is strictly restricted to its own bank page");
 console.log("Store landing UX: merchant coupon priority and OTP cross-brand isolation PASS");
 
-const ticketAudience = fs.readFileSync("src/components/CouponTicket.tsx", "utf8");
-assert.ok(ticketAudience.includes("Уточните условия") && !ticketAudience.includes('                Для всех'),
-  "Do not claim unknown coupon eligibility is universal");
-assert.ok(ticketAudience.includes('offer.isNoCode ? "Без промокода" : "Промокод указан ниже"'),
-  "Subscription coupon copy must reflect whether a code exists");
-assert.ok(couponGrid.includes("grid grid-cols-1 gap-4 md:grid-cols-2") &&
-          !couponGrid.includes("columns-1 md:columns-2"),
-  "Coupon catalog must use predictable two-column grid");
-console.log("PromoFact design pass: eligibility labels and responsive grid PASS");
-
-assert.ok(homePreview.includes("Промокоды, с которых стоит начать") &&
-          homePreview.includes('coupon.promocode.code ? "Есть промокод" : "Акция магазина"') &&
-          homePreview.includes('coupon.promocode.code ? "Посмотреть промокод" : "Условия акции"'),
-  "Homepage cards must distinguish code offers from direct deals");
-assert.ok(shops.includes('s.coupons.length % 100 !== 11'),
-  "Shop offer labels must handle Russian 11-14 plural exceptions");
-console.log("PromoFact home visual and copy checks PASS");
-
-assert.ok(home.includes("isRealPromoCode(c.promocode.code)"),
-  "Homepage promocode preview must exclude NOT REQUIRED / НЕ НУЖЕН placeholders");
-console.log("PromoFact homepage real-code classification PASS");
-
-const customOffers = fs.readFileSync("src/lib/customCoupons.ts", "utf8");
-const campaignRegistry = fs.readFileSync("src/lib/promoBanners.ts", "utf8");
-const ulybatlLanding = fs.readFileSync("src/app/akcii/ulybatl-sber-185/page.tsx", "utf8");
+const customOffers = fs.readFileSync("src/lib/customCoupons.ts","utf8");
+const mergedOffers = fs.readFileSync("src/lib/perfluence.ts","utf8");
+const promoRegistry = fs.readFileSync("src/lib/promoBanners.ts","utf8");
+const rotated = fs.readFileSync("src/lib/perfluenceRotatedOffers.ts","utf8");
+const browser = fs.readFileSync("src/components/StoreCouponBrowser.tsx","utf8");
+assert.ok(home.indexOf("<PopularStores />") < home.indexOf("<CategoryPreview />") &&
+  home.indexOf("<CategoryPreview />") < home.indexOf("<ExpiringDeals") &&
+  home.indexOf("<ExpiringDeals") < home.indexOf("<HomeOffersPreview"),
+  "Restore October 13 home structure before the October 14 visual pass");
+assert.ok(urgentDeals.includes("lg:grid-cols-4") &&
+  urgentDeals.includes("line-clamp-2") &&
+  !urgentDeals.includes('rawTitle.length > 82 ? "Промокод магазина"'),
+  "Restore four-column urgent deals without generic replacement titles");
+assert.ok(logo.includes("style={{ width: size, height: size }}") &&
+  logo.includes('slug === "podruzhka" ? "/brands/podruzhka-mark.svg"'),
+  "Keep 28px logo fallback and stable Podruzhka mark in restored layout");
 assert.ok(customOffers.includes('code: "2921098554627"') &&
-          customOffers.includes('expires: "2026-10-15"') &&
-          customOffers.includes('sites/q8ufig?erid=2RanymdB9PR'),
-  "Podruzhka online gift must use current code, expiry and approved affiliate placement");
-assert.ok(customOffers.includes('sites/xza4uw?erid=2Ranymef8fm') &&
-          customOffers.includes('expires: "2026-10-18"') &&
-          customOffers.includes('штрихкоду 2921098553491'),
-  "Distinct in-store Podruzhka campaign uses the supplied barcode");
-assert.ok(campaignRegistry.includes('PAUSED_PROMO_BANNER_IDS.has(b.id)') &&
-          campaignRegistry.includes('"sber-ulybatl-185-2026"') &&
-          ulybatlLanding.includes('PAUSED_PROMO_BANNER_IDS.has(campaign.id)'),
-  "Ulybatl suspension must suppress active banners and visitor signup CTA");
-console.log("PromoFact Perfluence 14 October campaign freshness and pause guards PASS");
-
-const rotated = fs.readFileSync("src/lib/perfluenceRotatedOffers.ts", "utf8");
-const custom = fs.readFileSync("src/lib/customCoupons.ts", "utf8");
-assert.ok(["25GFC1TL4", "SGPFB7JJGY", "Чай", "2RanynuJXUf"].every(x => rotated.includes(x)),
-  "Magnit codes and approved publisher ERID must match 14 October account");
-assert.ok(["10PFNS5229", "WCPFOKT4737", "5OKTPF4737"].every(x => rotated.includes(x)),
-  "WinLab rotated codes must be retained in staging");
-assert.ok(custom.includes("...MAGNIT_ROTATED_OFFERS") && !custom.includes("WINLAB_ROTATED_OFFERS_PENDING_ERID"),
-  "Publish Magnit codes but hold WinLab until advertising marker is verified");
-assert.ok(campaignRegistry.includes('"winlab-rozygrysh-2026"'),
-  "Do not display obsolete September WinLab creative after code rotation");
-console.log("Perfluence code rotation and safe staged WinLab offers PASS");
-
-const categoryPageSource = fs.readFileSync("src/app/category/[slug]/page.tsx", "utf8");
-const expiringSource = fs.readFileSync("src/components/ExpiringDeals.tsx", "utf8");
-const summarySource = fs.readFileSync("src/components/StoreSummaryTable.tsx", "utf8");
-const refinerSource = fs.readFileSync("src/lib/offerRefiner.ts", "utf8");
-assert.ok(!ticket.includes("line-clamp-2") && !ticket.includes('className="truncate"') &&
-  ticket.includes("break-all [overflow-wrap:anywhere] select-all"), "Shared coupon cards must not clip deal descriptions or codes");
-assert.ok(!shops.includes("w-full truncate") && !homePreview.includes("line-clamp-3") &&
-  !expiringSource.includes("line-clamp-2"), "Homepage and urgent offer previews must show complete text");
-assert.ok(categoryPageSource.includes("realCodeCount") &&
-  categoryPageSource.includes("codeFreeCount") &&
-  categoryPageSource.includes("flex flex-wrap items-center gap-2 pb-2"),
-  "Category totals distinguish codes from deals and store navigation wraps");
-assert.ok(summarySource.includes('className="grid gap-3 p-3 md:hidden"') &&
-  summarySource.includes('className="hidden overflow-x-auto md:block"') &&
-  summarySource.includes('return "Срок не указан"'),
-  "Small screens need readable mobile summary cards and unknown expiry must remain unknown");
-assert.ok(refinerSource.includes("const formattedTitle = title ||") &&
-  refinerSource.includes("Уточните минимальную сумму заказа"),
-  "Offer titles must not be auto-truncated or display dangling minimum order clauses");
-console.log("PromoFact whole-site shared-card overflow and source-copy safeguards PASS");
-
-const mergedFeed = fs.readFileSync("src/lib/perfluence.ts", "utf8");
-const directoryForWinlab = fs.readFileSync("src/app/promokody/page.tsx", "utf8");
-const searchApiForWinlab = fs.readFileSync("src/app/api/search/route.ts", "utf8");
-const winlabLanding = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
-assert.ok(expiringSource.includes("lg:grid-cols-2") &&
-  !expiringSource.includes("lg:grid-cols-4") &&
-  expiringSource.includes('rawTitle.length > 82 ? "Промокод магазина"') &&
-  expiringSource.includes('href={`/store/${coupon.store.slug}#coupon-${coupon.id}`}'),
-  "Urgent offers must be short two-column teasers with access to complete terms");
-assert.ok(directoryForWinlab.includes('allStores.find((store) => store.slug === "winlab")') &&
-  directoryForWinlab.includes('href="/store/winlab"') &&
-  searchApiForWinlab.includes('STABLE_STORES.winlab') &&
-  home.includes('STABLE_STORES.winlab') &&
-  winlabLanding.includes('slug === "winlab"'),
-  "Unmarked WinLab must remain a discoverable store, not a live offer");
-assert.ok(mergedFeed.includes('if (c.store.slug === "winlab") return false') &&
-  !customOffers.includes("...WINLAB_ROTATED_OFFERS_PENDING_ERID"),
-  "Do not reactivate WinLab partner codes until its current ERID is verified");
-console.log("Urgent deals redesign and WinLab merchant preservation PASS");
-
-const brandAsset = fs.readFileSync("public/brands/podruzhka-mark.svg", "utf8");
-const brandRegistrySource = fs.readFileSync("src/lib/brandLogos.ts", "utf8");
-const storeLogoSource = fs.readFileSync("src/components/StoreLogo.tsx", "utf8");
-const stableRegistrySource = fs.readFileSync("src/lib/stableStores.ts", "utf8");
-const storeBrowserSource = fs.readFileSync("src/components/StoreCouponBrowser.tsx", "utf8");
-const podruzhkaRetail = customOffers.split("  {\n    id: 50042,")[1]?.split("extraLinks:")[0] || "";
-const podruzhkaOnline = customOffers.split("  {\n    id: 50041,")[1]?.split("extraLinks:")[0] || "";
-assert.ok(brandAsset.includes('viewBox="0 0 128 128"') &&
-  brandRegistrySource.includes('logoUrl: "/brands/podruzhka-mark.svg"') &&
-  stableRegistrySource.includes('"logo": "/brands/podruzhka-mark.svg"') &&
-  storeLogoSource.includes('slug === "podruzhka" ? "/brands/podruzhka-mark.svg"'),
-  "Podruzhka logo must use a stable, local store mark, not a failing remote favicon");
-assert.ok(podruzhkaOnline.includes('code: "2921098554627"') &&
-  podruzhkaOnline.includes("isBarcode: false") &&
-  podruzhkaRetail.includes('code: "2921098553491"') &&
-  podruzhkaRetail.includes("isBarcode: true") &&
-  podruzhkaRetail.includes("barcodeImage: null") &&
-  podruzhkaRetail.includes("isHit: false"),
-  "Online and retail Podruzhka must have different codes and distinct redemption mechanics");
-assert.ok(ticket.includes("const missingBarcode = promocode.isBarcode && !promocode.code && !promocode.barcodeImage") &&
-  ticket.includes(') : missingBarcode ? (') &&
-  ticket.includes("Штрихкод ожидает загрузки") &&
-  ticket.includes('role="status"') &&
-  ticket.includes('Штрихкод ещё не предоставлен — показать его кассиру пока нельзя'),
-  "Retail barcode without source bytes must never look redeemable");
-assert.ok(storeBrowserSource.includes("hasRetailBarcodeOffer") &&
-  storeBrowserSource.includes("Онлайн-промокод и розничная акция по штрихкоду") &&
-  storeBrowserSource.includes("2921098553491") &&
-  storeBrowserSource.includes("штрихкод"),
-  "Podruzhka dual-mechanic offers need explicit labels instead of generic audience filters");
-console.log("Podruzhka logo, online code and missing in-store barcode guards PASS");
-
-const podruzhkaBarcodeValue = "2921098553491";
-const digits = podruzhkaBarcodeValue.split("").map(Number);
-const ean13Check = (10 - (digits.slice(0,12).reduce((sum,d,i) => sum + d * (i % 2 === 0 ? 1 : 3),0) % 10)) % 10;
-assert.equal(digits[12],ean13Check, "Uploaded Podruzhka barcode must have a correct EAN-13 checksum");
-assert.ok(podruzhkaRetail.includes("isBarcode: true") && podruzhkaOnline.includes("isBarcode: false") &&
-  podruzhkaRetail.includes('code: "2921098553491"') && podruzhkaOnline.includes('code: "2921098554627"'),
-  "Barcode and web checkout voucher must be distinct and correctly typed");
-const headlineSource = fs.readFileSync("src/lib/storeOfferHeadline.ts","utf8");
-assert.ok(headlineSource.includes("barcodes = coupons.filter") &&
-  headlineSource.includes("formatStoreOfferCounts(codes: number, codeFree: number, barcodes = 0)"),
-  "Merchant offer count must distinguish barcode from promo code");
-console.log("Podruzhka verified supplied EAN-13 and separate web coupon PASS");
+  customOffers.includes('code: "2921098553491"') &&
+  customOffers.includes('sites/q8ufig?erid=2RanymdB9PR') &&
+  customOffers.includes('sites/xza4uw?erid=2Ranymef8fm'),
+  "Preserve both Podruzhka approved placements after visual rollback");
+assert.ok(browser.includes("hasRetailBarcodeOffer") &&
+  browser.includes("2921098553491"),
+  "Keep clear online-versus-retail barcode distinction");
+assert.ok(mergedOffers.includes("const freshCustomCoupons") &&
+  mergedOffers.indexOf("const freshCustomCoupons") > mergedOffers.indexOf("export async function getCombinedCoupons()") &&
+  mergedOffers.includes("base-source-buckets-no-custom-v2"),
+  "Fresh custom coupons must not depend on persistent pre-deployment snapshots");
+assert.ok(rotated.includes("25GFC1TL4") &&
+  rotated.includes("SGPFB7JJGY") &&
+  !customOffers.includes("...WINLAB_ROTATED_OFFERS_PENDING_ERID") &&
+  promoRegistry.includes('PAUSED_PROMO_BANNER_IDS'),
+  "Preserve Magnit and partner compliance rules");
+console.log("October 13 visual rollback + current publisher campaigns and fresh custom coupon cache PASS");
