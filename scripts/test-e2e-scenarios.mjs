@@ -610,6 +610,7 @@ async function run() {
         "/category/kosmetika-i-parfyumeriya",
         "/store/hollyshop",
         "/store/magnit-dostavka",
+        "/store/m-kosmetik",
         "/store/podruzhka",
         "/store/winlab",
         "/collections/first-order",
@@ -658,6 +659,20 @@ async function run() {
                 animations: "disabled",
               });
             }
+          }
+          if (pathUrl === "/store/m-kosmetik") {
+            const expected = ["Чай", "PK4GMWJUK", "PF21K0T5LF"];
+            for (const code of expected) {
+              assert.ok((await page.locator('article[id^="coupon-"]').allInnerTexts())
+                .some((content) => content.includes(code)),
+                `Missing current M.Kosmetik code ${code} at ${res.width}px`);
+            }
+            const merchantCodes = page.locator('article[id^="coupon-"]');
+            assert.ok((await merchantCodes.count()) >= 3,
+              "M.Kosmetik page must contain all three approved current coupons");
+            const publisherDisclosure = page.getByText(/2Ranymz3211/);
+            assert.ok(await publisherDisclosure.count() >= 3,
+              "Every M.Kosmetik offer must display current Perfluence ERID");
           }
           if (pathUrl === "/store/podruzhka") {
             const retailCard = page.locator("#coupon-50042");
