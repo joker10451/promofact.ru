@@ -515,6 +515,7 @@ export default function CouponTicket({
                 <div className="w-full flex justify-center py-1 bg-white rounded-lg">
                   <BarcodeEan13 code={promocode.code} />
                 </div>
+                <span className="mt-1 select-all font-mono text-xs font-bold tracking-wider text-ink">{promocode.code}</span>
                 <div className="mt-1 flex items-center justify-between w-full px-1 text-[11px] font-bold">
                   <span className="text-ink/60 flex items-center gap-1">
                     <Icon name="copy" size={12} className={copied ? "text-mint-dark" : "text-ink/40"} />
