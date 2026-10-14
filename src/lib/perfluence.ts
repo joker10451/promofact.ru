@@ -680,7 +680,7 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // Historical unstable_cache snapshots can outlive code deployments on Vercel.
   const liveSberDevicesCodes = new Set(
     baseBuckets.flatMap((bucket) => bucket.source === "perfluence" ? bucket.coupons : [])
-      .filter((c) => /сбердевайс|sberdevices/iu.test(c.store.name) || /sberdevices\\.ru/iu.test(c.store.site))
+      .filter((c) => /сбердевайс|sberdevices/iu.test(c.store.name) || /sberdevices\.ru/iu.test(c.store.site))
       .map((c) => c.promocode.code.trim().toUpperCase()),
   );
   const freshCustomCoupons = (await import("@/lib/customCoupons")).getCustomCoupons()
