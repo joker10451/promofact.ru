@@ -180,8 +180,12 @@ assert.ok(customOffers.includes('code: "2921098554627"') &&
   customOffers.includes('sites/xza4uw?erid=2Ranymef8fm'),
   "Preserve both Podruzhka approved placements after visual rollback");
 assert.ok(browser.includes("hasRetailBarcodeOffer") &&
-  browser.includes("2921098553491"),
-  "Keep clear online-versus-retail barcode distinction");
+  browser.includes("hasOnlinePromoOffer") &&
+  browser.includes("grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:gap-5") &&
+  browser.includes("Промокод для сайта и штрихкод для магазина") &&
+  !browser.includes("mb-4 grid gap-2 rounded-2xl border border-violet-200") &&
+  !browser.includes("sm:grid-cols-2 sm:p-4"),
+  "Podruzhka keeps distinct redemption methods in two full-width, compact and unstretched cards");
 assert.ok(mergedOffers.includes("const freshCustomCoupons") &&
   mergedOffers.indexOf("const freshCustomCoupons") > mergedOffers.indexOf("export async function getCombinedCoupons()") &&
   mergedOffers.includes("base-source-buckets-no-custom-v2"),

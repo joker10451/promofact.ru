@@ -98,6 +98,7 @@ export default function StoreCouponBrowser({
   );
 
   const hasRetailBarcodeOffer = storeName === "Подружка" && activeCoupons.some((c) => c.promocode.isBarcode);
+  const hasOnlinePromoOffer = hasRetailBarcodeOffer && activeCoupons.some((c) => !c.promocode.isBarcode && !!c.promocode.code);
 
   const filteredCoupons = useMemo(() => {
     switch (activeFilter) {
@@ -114,18 +115,7 @@ export default function StoreCouponBrowser({
 
   return (
     <>
-      {hasRetailBarcodeOffer ? (
-        <div className="mb-4 grid gap-2 rounded-2xl border border-violet-200 bg-violet-50/70 p-3 text-xs font-semibold text-violet-900 sm:grid-cols-2 sm:p-4">
-          <div className="rounded-xl bg-white/80 p-3">
-            <span className="block font-extrabold">Онлайн-покупка</span>
-            <span className="mt-1 block leading-relaxed">Введите промокод при оформлении заказа на сайте.</span>
-          </div>
-          <div className="rounded-xl bg-white/80 p-3">
-            <span className="block font-extrabold">Покупка в магазине</span>
-            <span className="mt-1 block leading-relaxed">Покажите штрихкод 2921098553491 кассиру до оплаты. Онлайн-код для этой акции не подходит.</span>
-          </div>
-        </div>
-      ) : (
+      {!hasRetailBarcodeOffer && (
         <StoreIntentTabs
           activeTab={activeFilter}
           allCount={activeCoupons.length}
@@ -139,7 +129,9 @@ export default function StoreCouponBrowser({
       <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-display text-base sm:text-lg font-extrabold text-ink">
           {hasRetailBarcodeOffer
-            ? "Онлайн-промокод и розничная акция по штрихкоду"
+            ? hasOnlinePromoOffer
+              ? "Промокод для сайта и штрихкод для магазина"
+              : "Штрихкод для покупки в магазине"
             : storeName.length > 25 ? "Рабочие промокоды и акции" : `Рабочие промокоды и акции ${storeName}`}
         </h2>
         <span className="text-xs font-bold text-ink/50 bg-paper px-2.5 py-1 rounded-full border border-line">
@@ -157,6 +149,12 @@ export default function StoreCouponBrowser({
         </span>
       </div>
 
+      {hasRetailBarcodeOffer && hasOnlinePromoOffer && (
+        <p className="mb-4 text-xs leading-relaxed text-ink/60 sm:text-sm">
+          Онлайн — введите промокод при оформлении заказа. В магазине — покажите отдельный штрихкод на кассе.
+        </p>
+      )}
+
       {filteredCoupons.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
           <p className="font-bold text-ink/70">Сейчас предложений этого типа нет.</p>
@@ -170,7 +168,9 @@ export default function StoreCouponBrowser({
         </div>
       ) : (
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className={hasRetailBarcodeOffer
+            ? "grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:gap-5"
+            : "grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"}>
             {filteredCoupons.slice(0, visibleLimit).map((coupon) => (
               <CouponTicket
                 key={`${coupon.id}-${coupon.promocode.code}`}

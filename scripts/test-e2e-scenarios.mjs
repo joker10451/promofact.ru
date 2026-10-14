@@ -673,6 +673,25 @@ async function run() {
               assert.equal(await retailCard.getByRole("link", { name: /Перейти к предложению/ }).count(), 0,
                 "Retail barcode is presented on the card instead of generic code-free offer link");
             }
+            if (res.width >= 768) {
+              const retailBounds = await retailCard.boundingBox();
+              const onlineBounds = await onlineCard.boundingBox();
+              assert.ok(retailBounds && onlineBounds &&
+                retailBounds.x > onlineBounds.x &&
+                Math.abs(retailBounds.y - onlineBounds.y) < 4,
+                "Podruzhka must use two side-by-side cards rather than leave a third empty grid slot");
+              if (res.width >= 1200) {
+                assert.ok(onlineBounds.width > 400 && retailBounds.width > 400,
+                  "Podruzhka cards must fill both halves of the store coupon section on desktop");
+              }
+            }
+            const conditionsButton = onlineCard.getByRole("button", { name: "Условия акции" });
+            const copyCodeControl = onlineCard.locator('div[role="button"]').first();
+            const conditionsBounds = await conditionsButton.boundingBox();
+            const copyBounds = await copyCodeControl.boundingBox();
+            assert.ok(conditionsBounds && copyBounds &&
+              copyBounds.y - (conditionsBounds.y + conditionsBounds.height) < 85,
+              "Podruzhka online code should follow terms without a tall blank gap");
             assert.equal(await onlineCard.count(), 1, "Podruzhka online coupon must be present in the local published feed");
             {
               assert.ok((await onlineCard.innerText()).includes("2921098554627"),
