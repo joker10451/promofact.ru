@@ -42,14 +42,14 @@ export default function HomeOffersPreview({
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line bg-paper/50 p-1">
                   <StoreLogo slug={coupon.store.slug} name={coupon.store.name} logo={coupon.store.logo} site={coupon.store.site} size={34} />
                 </span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-extrabold text-ink">{coupon.store.name}</p>
-                  <p className="truncate text-xs text-ink/50">{coupon.store.category}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="break-words [overflow-wrap:anywhere] text-sm font-extrabold leading-snug text-ink">{coupon.store.name}</p>
+                  <p className="break-words [overflow-wrap:anywhere] text-xs text-ink/60">{coupon.store.category}</p>
                 </div>
               </div>
               <span className="mt-4 inline-flex w-fit rounded-md bg-mint/10 px-2 py-1 text-[11px] font-bold text-mint-dark">{coupon.promocode.code ? "Есть промокод" : "Акция магазина"}</span>
-              <h3 className="mt-3 line-clamp-3 min-h-12 text-sm font-extrabold leading-snug text-ink sm:text-base">
-                {coupon.promocode.bonusName || "Действующий промокод магазина"}
+              <h3 className="mt-3 min-h-12 break-words [overflow-wrap:anywhere] text-sm font-extrabold leading-snug text-ink sm:text-base">
+                {coupon.promocode.bonusName || (coupon.promocode.code ? "Промокод магазина" : "Акция магазина")}
               </h3>
               <p className="mt-2 text-xs text-ink/60">
                 {coupon.promocode.isFirstOrderOnly ? "Для первого заказа" : "Условия и ограничения — на странице предложения"}
