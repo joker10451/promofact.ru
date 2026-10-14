@@ -13,6 +13,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { plural } from "@/lib/format";
 import { canonicalCategorySlug, getCategoryDef } from "@/lib/categoryTaxonomy";
 import { getMaxVerifiedDiscount } from "@/lib/storeDiscount";
+import { isRealPromoCode } from "@/lib/dedupe";
 
 const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
   month: "long",
@@ -86,7 +87,7 @@ function seoText(
       ? storeNames.slice(0, 5).join(", ")
       : "скидки на популярные бренды";
   return [
-    `Подборка действующих промокодов для категории «${catName}»: сейчас в ней ${couponCount} ${plural(
+    `Подборка скидок и акций в категории «${catName}»: сейчас в ней ${couponCount} ${plural(
       couponCount,
       "актуальный купон",
       "актуальных купона",
@@ -96,8 +97,8 @@ function seoText(
       "магазина-партнёра",
       "магазинов-партнёров",
       "магазинов-партнёров",
-    )}. Собрали актуальные коды, которые участвуют в акциях и распродажах: ${shopList}. Все предложения получены от официальных партнерских программ с прозрачными условиями.`,
-    `Как применить промокод: скопируйте код кнопкой «Копировать», перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Условия у каждого купона свои: где-то нужна минимальная сумма заказа, где-то промокод действует только для новых клиентов. Обязательно читайте описание перед переходом в магазин — так скидка применится с первого раза.`,
+    )}. Предложения магазинов: ${shopList}. Проверяйте срок действия и ограничения конкретной акции.`,
+    `Если у предложения есть промокод, скопируйте его и введите в корзине магазина. Акции без кода могут действовать по отдельной ссылке или при выполнении условий магазина. Сроки и ограничения проверяйте до оплаты.`,
     `Новые скидки в категории «${catName}» появляются по мере поступления офферов от партнеров. Подпишитесь на уведомления, чтобы не пропустить ${
       top.length > 0 ? `новые акции ${top.join(", ")}` : "выгодные предложения"
     } и специальные предложения недели.`,
@@ -131,6 +132,8 @@ export default async function CategoryPage({
   const catName = def?.label ?? cat.name;
 
   const list = all.filter((c) => c.store.categorySlug === slug);
+  const realCodeCount = list.filter((c) => isRealPromoCode(c.promocode.code)).length;
+  const codeFreeCount = list.length - realCodeCount;
   const storeNames = [...new Set(list.map((c) => c.store.name))];
   const paragraphs = seoText(catName, storeNames, storeNames.length, list.length);
   const pageUrl = `${SITE_URL}/category/${slug}`;
@@ -208,7 +211,7 @@ export default async function CategoryPage({
       position: i + 1,
       item: {
         "@type": "Offer",
-        name: `Промокод ${c.promocode.code}`,
+        name: isRealPromoCode(c.promocode.code) ? `Промокод ${c.promocode.code}` : `Акция ${c.store.name}`,
         description: c.promocode.bonusName || c.store.name,
         url: c.affiliate.link,
         priceValidUntil: c.promocode.expires,
@@ -242,7 +245,7 @@ export default async function CategoryPage({
           ) : null}
           <p className="mt-2 text-xs sm:text-sm text-ink/65 max-w-3xl">
             Собрали актуальные промокоды и акции на {MONTH_YEAR}: {list.length}{" "}
-            {plural(list.length, "активный промокод", "активных промокода", "активных промокодов")} от {categoryStores.length}{" "}
+            {plural(list.length, "предложение", "предложения", "предложений")} ({realCodeCount} {plural(realCodeCount, "промокод", "промокода", "промокодов")} и {codeFreeCount} {plural(codeFreeCount, "акция", "акции", "акций")}) от {categoryStores.length}{" "}
             {plural(categoryStores.length, "магазина-партнёра", "магазинов-партнёров", "магазинов-партнёров")}.
           </p>
 
@@ -262,12 +265,12 @@ export default async function CategoryPage({
                 <Icon name="store" size={16} />
                 <span>Магазины в категории «{catName}»:</span>
               </div>
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <div className="flex flex-wrap items-center gap-2 pb-2">
                 {categoryStores.map(({ store, count }) => (
                   <Link
                     key={store.slug}
                     href={`/store/${store.slug}`}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-1.5 text-xs font-bold text-ink shadow-2xs hover:border-ink hover:shadow-xs transition-all shrink-0 group"
+                    className="inline-flex min-w-0 max-w-full items-center gap-2 rounded-2xl border border-line bg-white px-3 py-1.5 text-xs font-bold text-ink shadow-2xs hover:border-ink hover:shadow-xs transition-all group"
                   >
                     <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-line/60 bg-paper p-0.5">
                       <StoreLogo
@@ -278,7 +281,7 @@ export default async function CategoryPage({
                         size={18}
                       />
                     </div>
-                    <span className="group-hover:text-red transition-colors">{store.name}</span>
+                    <span className="min-w-0 break-words [overflow-wrap:anywhere] group-hover:text-red transition-colors">{store.name}</span>
                     <span className="rounded-full bg-paper px-1.5 py-0.2 text-[10px] font-mono text-ink/60">
                       {count}
                     </span>
@@ -310,7 +313,7 @@ export default async function CategoryPage({
 
         <article className="mt-14 max-w-3xl rounded-3xl border border-line bg-white p-6 sm:p-8">
           <h2 className="font-display text-xl font-extrabold text-ink">
-            Купоны на {catName.toLowerCase()} — что учесть перед покупкой
+            Купоны в категории «{catName}» — что учесть перед покупкой
           </h2>
           <div className="mt-4 space-y-3 text-sm text-ink/70 leading-relaxed">
             {paragraphs.map((p, i) => (
@@ -324,7 +327,7 @@ export default async function CategoryPage({
         {/* Интерактивный FAQ с разметкой Schema.org FAQPage */}
         <section className="mt-12 max-w-3xl" aria-label="Частые вопросы">
           <h2 className="font-display text-xl font-extrabold text-ink">
-            Частые вопросы про скидки и купоны {catName.toLowerCase()}
+            Частые вопросы о скидках в категории «{catName}»
           </h2>
           <div className="mt-5 space-y-3">
             {faqItems.map((item) => (
