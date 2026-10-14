@@ -180,3 +180,20 @@ console.log("PromoFact home visual and copy checks PASS");
 assert.ok(home.includes("isRealPromoCode(c.promocode.code)"),
   "Homepage promocode preview must exclude NOT REQUIRED / НЕ НУЖЕН placeholders");
 console.log("PromoFact homepage real-code classification PASS");
+
+const customOffers = fs.readFileSync("src/lib/customCoupons.ts", "utf8");
+const campaignRegistry = fs.readFileSync("src/lib/promoBanners.ts", "utf8");
+const ulybatlLanding = fs.readFileSync("src/app/akcii/ulybatl-sber-185/page.tsx", "utf8");
+assert.ok(customOffers.includes('code: "2921098554627"') &&
+          customOffers.includes('expires: "2026-10-15"') &&
+          customOffers.includes('sites/q8ufig?erid=2RanymdB9PR'),
+  "Podruzhka online gift must use current code, expiry and approved affiliate placement");
+assert.ok(customOffers.includes('sites/xza4uw?erid=2Ranymef8fm') &&
+          customOffers.includes('expires: "2026-10-18"') &&
+          customOffers.includes('Сам штрихкод в предоставленных данных отсутствует'),
+  "Distinct in-store Podruzhka campaign must not fabricate missing barcode");
+assert.ok(campaignRegistry.includes('PAUSED_PROMO_BANNER_IDS.has(b.id)') &&
+          campaignRegistry.includes('"sber-ulybatl-185-2026"') &&
+          ulybatlLanding.includes('PAUSED_PROMO_BANNER_IDS.has(campaign.id)'),
+  "Ulybatl suspension must suppress active banners and visitor signup CTA");
+console.log("PromoFact Perfluence 14 October campaign freshness and pause guards PASS");
