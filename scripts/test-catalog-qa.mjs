@@ -48,3 +48,13 @@ const storeBrowser = (await import("node:fs")).readFileSync("src/components/Stor
 assert.match(storeBrowser, /filteredCoupons\.slice\(0, visibleLimit\)/);
 assert.match(storeBrowser, /Показать ещё/);
 console.log("CATALOG-QA-2: missing-code honesty and progressive reveal PASS");
+
+// A code-free gift must never instruct users to apply a non-existent code.
+const noCodeGift = refineOffer("Подарок к заказу", "Подарок при заказе от 3000 ₽", "", "Davines", false);
+assert.equal(noCodeGift.isNoCode, true);
+assert.doesNotMatch(noCodeGift.condition,/по промокоду/i);
+const noCodeCopy = fs.readFileSync("src/lib/offerRefiner.ts","utf8");
+assert.ok(!noCodeCopy.includes('скидка применится автоматически в корзине.'));
+const storeHeading = fs.readFileSync("src/app/store/[slug]/page.tsx","utf8");
+assert.ok(!storeHeading.includes('hasGift ? " — подарки к заказу"'));
+console.log("Source-backed store headings and no-code gift claims PASS");

@@ -127,7 +127,7 @@ export function refineOffer(
       ? `При заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
       : isFirstOrder
       ? "на первый заказ"
-      : "по промокоду при оформлении заказа";
+      : isNoCode ? "подарок по условиям акции на сайте" : "по промокоду при оформлении заказа";
 
     return {
       type: "gift",
@@ -251,7 +251,7 @@ export function refineOffer(
       type: "default",
       discount: formattedTitle,
       condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : "Условия акции смотрите у магазина",
-      fullTerms: terms || "Перейдите в магазин по кнопке, скидка применится автоматически в корзине.",
+      fullTerms: terms || "Перейдите на страницу предложения и уточните условия акции у магазина.",
       isNoCode: true,
     };
   }
