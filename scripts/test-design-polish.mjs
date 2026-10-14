@@ -190,8 +190,8 @@ assert.ok(customOffers.includes('code: "2921098554627"') &&
   "Podruzhka online gift must use current code, expiry and approved affiliate placement");
 assert.ok(customOffers.includes('sites/xza4uw?erid=2Ranymef8fm') &&
           customOffers.includes('expires: "2026-10-18"') &&
-          customOffers.includes('Изображение и номер этого штрихкода партнёр пока не передал'),
-  "Distinct in-store Podruzhka campaign must not fabricate missing barcode");
+          customOffers.includes('штрихкоду 2921098553491'),
+  "Distinct in-store Podruzhka campaign uses the supplied barcode");
 assert.ok(campaignRegistry.includes('PAUSED_PROMO_BANNER_IDS.has(b.id)') &&
           campaignRegistry.includes('"sber-ulybatl-185-2026"') &&
           ulybatlLanding.includes('PAUSED_PROMO_BANNER_IDS.has(campaign.id)'),
