@@ -80,7 +80,7 @@ export async function generateMetadata({
   if (!store) return {};
   const pageUrl = `${SITE_URL}/store/${slug}`;
   const n = store.coupons.length;
-  const { codes: realCodeCount, codeFree: codeFreeCount } = getStoreHeadlineOfferCounts(store.coupons);
+  const { codes: realCodeCount, codeFree: codeFreeCount, barcodes: barcodeCount } = getStoreHeadlineOfferCounts(store.coupons);
   const maxDisc = getMaxVerifiedDiscount(store.coupons);
   const hasGift = hasGiftOffer(store.coupons);
   const monthYear = getCapitalizedMonthYear();
@@ -106,6 +106,7 @@ export async function generateMetadata({
           month: monthRu,
           codes: realCodeCount,
           codeFree: codeFreeCount,
+          barcodes: barcodeCount,
           maxDiscount: maxDisc,
           searchBrandPromo: slug === "tasty-coffee",
         })
@@ -187,8 +188,8 @@ export default async function StorePage({
   if (!store) notFound();
 
   const pageUrl = `${SITE_URL}/store/${slug}`;
-  const { codes: realCodeCount, codeFree: codeFreeCount } = getStoreHeadlineOfferCounts(store.coupons);
-  const offerCountLabel = formatStoreOfferCounts(realCodeCount, codeFreeCount);
+  const { codes: realCodeCount, codeFree: codeFreeCount, barcodes: barcodeCount } = getStoreHeadlineOfferCounts(store.coupons);
+  const offerCountLabel = formatStoreOfferCounts(realCodeCount, codeFreeCount, barcodeCount);
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const todayIso = TODAY_ISO;
   const todayRu = TODAY_RU;
@@ -428,7 +429,7 @@ export default async function StorePage({
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">
-                {`${realCodeCount > 0 ? (codeFreeCount > 0 ? "Промокоды и акции" : "Промокоды") : "Акции"} ${store.name} на ${monthYear}${maxDisc ? ` — скидки ${maxDisc}` : ""}`}
+                {`${barcodeCount > 0 ? "Промокоды и штрихкоды" : realCodeCount > 0 ? (codeFreeCount > 0 ? "Промокоды и акции" : "Промокоды") : "Акции"} ${store.name} на ${monthYear}${maxDisc ? ` — скидки ${maxDisc}` : ""}`}
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
                 {offerCountLabel}. Срок действия указан в карточке.
