@@ -12,6 +12,7 @@ import Reveal from "@/components/Reveal";
 import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickExpiringDeals, offerKey } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
+import { isRealPromoCode } from "@/lib/dedupe";
 
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -32,7 +33,7 @@ export default async function Home() {
   const hotDeals = pickExpiringDeals(coupons, 4);
   const excludedOffers = new Set(hotDeals.map(offerKey));
   const excludedStores = new Set(hotDeals.map((c) => c.store.slug));
-  const featuredCoupons = coupons.filter((c) => c.promocode.code && !excludedOffers.has(offerKey(c)) && !excludedStores.has(c.store.slug))
+  const featuredCoupons = coupons.filter((c) => isRealPromoCode(c.promocode.code) && !excludedOffers.has(offerKey(c)) && !excludedStores.has(c.store.slug))
     .filter((c, index, list) => list.findIndex((item) => item.store.slug === c.store.slug) === index)
     .slice(0, 4);
 
