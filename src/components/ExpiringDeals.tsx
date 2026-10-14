@@ -83,10 +83,10 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                     size={28}
                     className="h-7 w-7 shrink-0 rounded-md object-contain border border-line p-0.5"
                   />
-                  <span className="truncate text-xs font-extrabold text-ink/70">{coupon.store.name}</span>
+                  <span className="min-w-0 break-words [overflow-wrap:anywhere] text-xs font-extrabold text-ink/70">{coupon.store.name}</span>
                 </div>
 
-                <div className="mt-3 font-display text-sm font-black leading-snug text-ink line-clamp-2">
+                <div className="mt-3 break-words [overflow-wrap:anywhere] font-display text-sm font-black leading-snug text-ink">
                   {coupon.promocode.bonusName}
                 </div>
 
@@ -102,8 +102,8 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
               </div>
 
               <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between rounded-xl border border-dashed border-ink/20 bg-paper p-1.5">
-                  <code className="truncate px-2 font-mono text-xs font-bold text-ink">{coupon.promocode.code}</code>
+                <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-xl border border-dashed border-ink/20 bg-paper p-1.5">
+                  <code className="min-w-0 flex-1 break-all px-2 font-mono text-xs font-bold text-ink">{coupon.promocode.code}</code>
                   <button
                     type="button"
                     onClick={() => copy(coupon.promocode.code, coupon.store.name)}
@@ -132,7 +132,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                 </a>
 
                 {coupon.affiliate.ordText && (
-                  <p className="text-[10px] leading-snug text-ink/45">{coupon.affiliate.ordText}</p>
+                  <p className="break-words [overflow-wrap:anywhere] text-[11px] leading-relaxed text-ink/60">{coupon.affiliate.ordText}</p>
                 )}
               </div>
             </div>

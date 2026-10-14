@@ -714,7 +714,18 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     );
   }
 
-  return coupons.map((c) => {
+  // Source snapshots still contain pre-14 October coupons. Do not let them
+  // reappear when code rotations require fresh publisher credentials.
+  const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ЧАЙ"]);
+  return coupons.filter((c) => {
+    if (c.store.slug === "magnit-dostavka") {
+      return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase());
+    }
+    // Current WinLab publisher URL lacks an ERID in the supplied account view.
+    // Suppress legacy codes until the current token is supplied and checked.
+    if (c.store.slug === "winlab") return false;
+    return true;
+  }).map((c) => {
     const logo = proxiedLogo(c.store.logo);
     const ordText = withErid(c.affiliate.ordText, c.affiliate.ordMarker);
     if (logo === c.store.logo && ordText === c.affiliate.ordText) return c;

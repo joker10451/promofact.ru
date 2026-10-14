@@ -12,6 +12,7 @@ import Reveal from "@/components/Reveal";
 import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickExpiringDeals, offerKey } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
+import { isRealPromoCode } from "@/lib/dedupe";
 
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -32,7 +33,7 @@ export default async function Home() {
   const hotDeals = pickExpiringDeals(coupons, 4);
   const excludedOffers = new Set(hotDeals.map(offerKey));
   const excludedStores = new Set(hotDeals.map((c) => c.store.slug));
-  const featuredCoupons = coupons.filter((c) => c.promocode.code && !excludedOffers.has(offerKey(c)) && !excludedStores.has(c.store.slug))
+  const featuredCoupons = coupons.filter((c) => isRealPromoCode(c.promocode.code) && !excludedOffers.has(offerKey(c)) && !excludedStores.has(c.store.slug))
     .filter((c, index, list) => list.findIndex((item) => item.store.slug === c.store.slug) === index)
     .slice(0, 4);
 
@@ -60,32 +61,30 @@ export default async function Home() {
         {/* 2. Hero + ЕДИНСТВЕННЫЙ крупный поиск + Trust bar */}
         <Hero search={searchIndex} couponCount={coupons.length} proofTotal={proofTotal} />
 
-        {/* 3. Популярные магазины в стиле Пикабу — быстрый вход по круглым брендам */}
+        {/* Главная ценность сервиса: реальные промокоды сразу после поиска. */}
+        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10">
+          <Reveal>
+            <HomeOffersPreview coupons={featuredCoupons} totalCount={coupons.length} />
+          </Reveal>
+        </div>
+
+        {/* Быстрый доступ к магазинам и категориям после подборки кодов. */}
         <div className="mx-auto max-w-7xl px-4 pt-4 sm:pt-8">
           <Reveal>
             <PopularStores />
           </Reveal>
         </div>
 
-        {/* Короткая витрина реальных категорий. Полный каталог открыт на /category. */}
         <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 sm:pt-8">
           <Reveal>
             <CategoryPreview />
           </Reveal>
         </div>
 
-        {/* 5. Скоро заканчиваются — коды с ближайшим реальным сроком, по одному от магазина.
-            Раньше здесь было два блока «Спецпредложения дня» подряд. */}
+        {/* Срочные предложения сохраняются отдельно от редакционной подборки. */}
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
           <Reveal>
             <ExpiringDeals coupons={hotDeals} />
-          </Reveal>
-        </div>
-
-        {/* Короткая подборка реальных купонов, полный каталог — на /catalog. */}
-        <div className="mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-12">
-          <Reveal>
-            <HomeOffersPreview coupons={featuredCoupons} totalCount={coupons.length} />
           </Reveal>
         </div>
 

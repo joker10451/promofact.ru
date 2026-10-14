@@ -466,12 +466,12 @@ export default function CouponGrid({
             </div>
           ) : (
             <>
-              <div className="columns-1 md:columns-2 gap-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 items-start">
                 {groupedStoreList.slice(0, visibleLimit).map(({ store, primaryCoupon, otherCoupons }) => {
                   const isExpanded = !!expandedStores[store.id];
 
                   return (
-                    <div key={store.id} className="break-inside-avoid flex flex-col gap-2.5 mb-6">
+                    <div key={store.id} className="flex min-w-0 flex-col gap-2.5">
                       {/* Главная карточка с лучшим предложением */}
                       <CouponTicket
                         coupon={primaryCoupon}
@@ -494,7 +494,7 @@ export default function CouponGrid({
                                 {isExpanded
                                   ? `Скрыть другие промокоды (${otherCoupons.length})`
                                   : `Ещё ${otherCoupons.length} ${
-                                      otherCoupons.length === 1 ? "промокод" : "промокода"
+                                      otherCoupons.length % 10 === 1 && otherCoupons.length % 100 !== 11 ? "промокод" : otherCoupons.length % 10 >= 2 && otherCoupons.length % 10 <= 4 && (otherCoupons.length % 100 < 12 || otherCoupons.length % 100 > 14) ? "промокода" : "промокодов"
                                     } ${store.name}`}
                               </span>
                             </span>

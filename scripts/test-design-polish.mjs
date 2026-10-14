@@ -27,8 +27,9 @@ assert.ok(shops.includes('section aria-label="Популярные магази�
           shops.includes("index >= 6") &&
           shops.includes("s.coupons.length"),
   "Keep all real shop logos/counts; cap mobile display to six");
-assert.ok(home.indexOf("<PopularStores />") < home.indexOf("<ExpiringDeals"),
-  "Show real shops promptly, before urgent deals");
+assert.ok(home.indexOf("<HomeOffersPreview") < home.indexOf("<PopularStores />") &&
+          home.indexOf("<PopularStores />") < home.indexOf("<ExpiringDeals"),
+  "Show real coupon preview immediately after search, before shops and urgent deals");
 assert.ok(home.indexOf("<HomeOffersPreview") < home.indexOf("<SberCampaignTeasers"),
   "Real offer preview must precede sponsor advertisements");
 const guide = fs.readFileSync("src/app/guide/page.tsx", "utf8");
@@ -60,7 +61,7 @@ const sitemap = fs.readFileSync("src/app/sitemap.ts", "utf8");
 
 assert.ok(home.includes("<CategoryPreview />") &&
           home.indexOf("<PopularStores />") < home.indexOf("<CategoryPreview />") &&
-          home.indexOf("<CategoryPreview />") < home.indexOf("<HomeOffersPreview") &&
+          home.indexOf("<HomeOffersPreview") < home.indexOf("<PopularStores />") &&
           !home.includes("<VisualCategoryTiles />"),
   "Home must preview categories before coupon cards, not render a second full catalogue");
 assert.ok(categoryPreview.includes(".slice(0, 6)") &&
@@ -157,3 +158,75 @@ assert.ok(otpEntry.includes('storeSlug: "otp-bank"') &&
           !otpEntry.includes('storeSlugs:'),
   "OTP creative is strictly restricted to its own bank page");
 console.log("Store landing UX: merchant coupon priority and OTP cross-brand isolation PASS");
+
+const ticketAudience = fs.readFileSync("src/components/CouponTicket.tsx", "utf8");
+assert.ok(ticketAudience.includes("Уточните условия") && !ticketAudience.includes('                Для всех'),
+  "Do not claim unknown coupon eligibility is universal");
+assert.ok(ticketAudience.includes('offer.isNoCode ? "Без промокода" : "Промокод указан ниже"'),
+  "Subscription coupon copy must reflect whether a code exists");
+assert.ok(couponGrid.includes("grid grid-cols-1 gap-4 md:grid-cols-2") &&
+          !couponGrid.includes("columns-1 md:columns-2"),
+  "Coupon catalog must use predictable two-column grid");
+console.log("PromoFact design pass: eligibility labels and responsive grid PASS");
+
+assert.ok(homePreview.includes("Промокоды, с которых стоит начать") &&
+          homePreview.includes('coupon.promocode.code ? "Есть промокод" : "Акция магазина"') &&
+          homePreview.includes('coupon.promocode.code ? "Посмотреть промокод" : "Условия акции"'),
+  "Homepage cards must distinguish code offers from direct deals");
+assert.ok(shops.includes('s.coupons.length % 100 !== 11'),
+  "Shop offer labels must handle Russian 11-14 plural exceptions");
+console.log("PromoFact home visual and copy checks PASS");
+
+assert.ok(home.includes("isRealPromoCode(c.promocode.code)"),
+  "Homepage promocode preview must exclude NOT REQUIRED / НЕ НУЖЕН placeholders");
+console.log("PromoFact homepage real-code classification PASS");
+
+const customOffers = fs.readFileSync("src/lib/customCoupons.ts", "utf8");
+const campaignRegistry = fs.readFileSync("src/lib/promoBanners.ts", "utf8");
+const ulybatlLanding = fs.readFileSync("src/app/akcii/ulybatl-sber-185/page.tsx", "utf8");
+assert.ok(customOffers.includes('code: "2921098554627"') &&
+          customOffers.includes('expires: "2026-10-15"') &&
+          customOffers.includes('sites/q8ufig?erid=2RanymdB9PR'),
+  "Podruzhka online gift must use current code, expiry and approved affiliate placement");
+assert.ok(customOffers.includes('sites/xza4uw?erid=2Ranymef8fm') &&
+          customOffers.includes('expires: "2026-10-18"') &&
+          customOffers.includes('Сам штрихкод в предоставленных данных отсутствует'),
+  "Distinct in-store Podruzhka campaign must not fabricate missing barcode");
+assert.ok(campaignRegistry.includes('PAUSED_PROMO_BANNER_IDS.has(b.id)') &&
+          campaignRegistry.includes('"sber-ulybatl-185-2026"') &&
+          ulybatlLanding.includes('PAUSED_PROMO_BANNER_IDS.has(campaign.id)'),
+  "Ulybatl suspension must suppress active banners and visitor signup CTA");
+console.log("PromoFact Perfluence 14 October campaign freshness and pause guards PASS");
+
+const rotated = fs.readFileSync("src/lib/perfluenceRotatedOffers.ts", "utf8");
+const custom = fs.readFileSync("src/lib/customCoupons.ts", "utf8");
+assert.ok(["25GFC1TL4", "SGPFB7JJGY", "Чай", "2RanynuJXUf"].every(x => rotated.includes(x)),
+  "Magnit codes and approved publisher ERID must match 14 October account");
+assert.ok(["10PFNS5229", "WCPFOKT4737", "5OKTPF4737"].every(x => rotated.includes(x)),
+  "WinLab rotated codes must be retained in staging");
+assert.ok(custom.includes("...MAGNIT_ROTATED_OFFERS") && !custom.includes("WINLAB_ROTATED_OFFERS_PENDING_ERID"),
+  "Publish Magnit codes but hold WinLab until advertising marker is verified");
+assert.ok(campaignRegistry.includes('"winlab-rozygrysh-2026"'),
+  "Do not display obsolete September WinLab creative after code rotation");
+console.log("Perfluence code rotation and safe staged WinLab offers PASS");
+
+const categoryPageSource = fs.readFileSync("src/app/category/[slug]/page.tsx", "utf8");
+const expiringSource = fs.readFileSync("src/components/ExpiringDeals.tsx", "utf8");
+const summarySource = fs.readFileSync("src/components/StoreSummaryTable.tsx", "utf8");
+const refinerSource = fs.readFileSync("src/lib/offerRefiner.ts", "utf8");
+assert.ok(!ticket.includes("line-clamp-2") && !ticket.includes('className="truncate"') &&
+  ticket.includes("break-all [overflow-wrap:anywhere] select-all"), "Shared coupon cards must not clip deal descriptions or codes");
+assert.ok(!shops.includes("w-full truncate") && !homePreview.includes("line-clamp-3") &&
+  !expiringSource.includes("line-clamp-2"), "Homepage and urgent offer previews must show complete text");
+assert.ok(categoryPageSource.includes("realCodeCount") &&
+  categoryPageSource.includes("codeFreeCount") &&
+  categoryPageSource.includes("flex flex-wrap items-center gap-2 pb-2"),
+  "Category totals distinguish codes from deals and store navigation wraps");
+assert.ok(summarySource.includes('className="grid gap-3 p-3 md:hidden"') &&
+  summarySource.includes('className="hidden overflow-x-auto md:block"') &&
+  summarySource.includes('return "Срок не указан"'),
+  "Small screens need readable mobile summary cards and unknown expiry must remain unknown");
+assert.ok(refinerSource.includes("const formattedTitle = title ||") &&
+  refinerSource.includes("Уточните минимальную сумму заказа"),
+  "Offer titles must not be auto-truncated or display dangling minimum order clauses");
+console.log("PromoFact whole-site shared-card overflow and source-copy safeguards PASS");

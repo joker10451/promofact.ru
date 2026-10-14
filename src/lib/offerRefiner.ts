@@ -55,25 +55,23 @@ export function refineOffer(
   // 1. Фиксированные спец-предложения и подписки (Иви, СберПрайм, Яндекс Плюс, Start.ru, Premier)
   const daysMatch = title.match(/(\d+)\s*(?:дней|дня|день)/i);
   if (
-    (daysMatch || /подписк\w*\s+(плюс|кинопоиск|яндекс|сбер|иви|ivi|start|premier|okko)/i.test(title)) &&
+    (daysMatch || /подписк/i.test(title)) &&
     !/(\d+)\s*%/.test(title) &&
     /подписк|доступ|пробн|бесплатн|кинотеатр/i.test(combined)
   ) {
-    const isSber = /сбер/i.test(combined) || /сбер/i.test(storeName);
-    const days = daysMatch ? daysMatch[1] : isSber ? "60" : "30";
-    let disc = `${days} дней за 1 ₽`;
-    if (/бесплатн|за\s*0\s*₽/i.test(combined)) {
-      disc = `${days} дней бесплатно`;
-    }
+    // Не выводим цену, срок или аудиторию, которых нет в данных рекламодателя.
+    const priceMatch = combined.match(/(?:за|по цене)\s*(\d[\d\s]*)\s*(₽|руб(?:лей|ля|\.)?)/i);
+    const explicitlyFree = /(?:бесплатн|за\s*0\s*₽)/i.test(combined);
+    const duration = daysMatch?.[1];
+    const price = priceMatch ? `${Number(priceMatch[1].replace(/\s/g, "")).toLocaleString("ru-RU")} ₽` : null;
+    const disc = duration
+      ? `${duration} дней${explicitlyFree ? " бесплатно" : price ? ` за ${price}` : " доступа"}`
+      : cleanTruncate(title || terms || `Подписка ${storeName}`, 55);
     return {
       type: "subscription",
       discount: disc,
-      condition: `подписка ${storeName} для новых пользователей`,
-      fullTerms:
-        terms ||
-        (isSber
-          ? "Оформите пробный период СберПрайм 60 дней за 1 ₽ при переходе по ссылке."
-          : `${days} дней доступа к подписке ${storeName}. Только для новых пользователей при активации промокода.`),
+      condition: isFirstOrder ? "для новых пользователей" : "Условия подписки уточняйте у магазина",
+      fullTerms: terms || title || "Уточните условия подписки у магазина.",
       isNoCode,
     };
   }
@@ -246,7 +244,7 @@ export function refineOffer(
 
   // 7. Дефолтный переход по ссылке без кода
   if (isNoCode) {
-    const formattedTitle = title.length > 38 ? cleanTruncate(title, 36) : title || "Скидка";
+    const formattedTitle = title || "Условия предложения";
     return {
       type: "default",
       discount: formattedTitle,
@@ -256,7 +254,7 @@ export function refineOffer(
     };
   }
 
-  const formattedTitle = title.length > 38 ? cleanTruncate(title, 36) : title || "Скидка";
+  const formattedTitle = title || "Условия предложения";
   return {
     type: "default",
     discount: formattedTitle,
@@ -321,7 +319,9 @@ function formatConditionPrefix(str: string): string {
     .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
     .trim();
 
-  if (!trimmed) return "на заказ";
+  if (!trimmed) return "Уточните условия у магазина";
+  if (/(?:при\s+заказе|заказ|покупк[а-яё]*|от\s+чека)\s+от\s*$/i.test(trimmed)) return "Уточните минимальную сумму заказа";
+  if (/^(?:приобретайте|покупайте|получите|оформите|закажите|скидки|акции|акция|распродажа|специальные условия|повышенный кэшбэк|повышенный кешбэк)(?:\s|$)/i.test(trimmed)) return trimmed;
 
   // Убираем случайные дублированные предлоги и разделители вроде «на . на», «на на», «при на»
   trimmed = trimmed
