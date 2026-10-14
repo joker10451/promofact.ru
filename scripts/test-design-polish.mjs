@@ -158,3 +158,13 @@ assert.ok(otpEntry.includes('storeSlug: "otp-bank"') &&
           !otpEntry.includes('storeSlugs:'),
   "OTP creative is strictly restricted to its own bank page");
 console.log("Store landing UX: merchant coupon priority and OTP cross-brand isolation PASS");
+
+const ticketAudience = fs.readFileSync("src/components/CouponTicket.tsx", "utf8");
+assert.ok(ticketAudience.includes("Уточните условия") && !ticketAudience.includes('                Для всех'),
+  "Do not claim unknown coupon eligibility is universal");
+assert.ok(ticketAudience.includes('offer.isNoCode ? "Без промокода" : "Промокод доступен ниже"'),
+  "Subscription coupon copy must reflect whether a code exists");
+assert.ok(couponGrid.includes("grid grid-cols-1 gap-4 md:grid-cols-2") &&
+          !couponGrid.includes("columns-1 md:columns-2"),
+  "Coupon catalog must use predictable two-column grid");
+console.log("PromoFact design pass: eligibility labels and responsive grid PASS");
