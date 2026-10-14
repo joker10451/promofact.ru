@@ -230,3 +230,23 @@ assert.ok(refinerSource.includes("const formattedTitle = title ||") &&
   refinerSource.includes("Уточните минимальную сумму заказа"),
   "Offer titles must not be auto-truncated or display dangling minimum order clauses");
 console.log("PromoFact whole-site shared-card overflow and source-copy safeguards PASS");
+
+const mergedFeed = fs.readFileSync("src/lib/perfluence.ts", "utf8");
+const directoryForWinlab = fs.readFileSync("src/app/promokody/page.tsx", "utf8");
+const searchApiForWinlab = fs.readFileSync("src/app/api/search/route.ts", "utf8");
+const winlabLanding = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
+assert.ok(expiringSource.includes("lg:grid-cols-2") &&
+  !expiringSource.includes("lg:grid-cols-4") &&
+  expiringSource.includes('rawTitle.length > 82 ? "Промокод магазина"') &&
+  expiringSource.includes('href={`/store/${coupon.store.slug}#coupon-${coupon.id}`}'),
+  "Urgent offers must be short two-column teasers with access to complete terms");
+assert.ok(directoryForWinlab.includes('allStores.find((store) => store.slug === "winlab")') &&
+  directoryForWinlab.includes('href="/store/winlab"') &&
+  searchApiForWinlab.includes('STABLE_STORES.winlab') &&
+  home.includes('STABLE_STORES.winlab') &&
+  winlabLanding.includes('slug === "winlab"'),
+  "Unmarked WinLab must remain a discoverable store, not a live offer");
+assert.ok(mergedFeed.includes('if (c.store.slug === "winlab") return false') &&
+  !customOffers.includes("...WINLAB_ROTATED_OFFERS_PENDING_ERID"),
+  "Do not reactivate WinLab partner codes until its current ERID is verified");
+console.log("Urgent deals redesign and WinLab merchant preservation PASS");

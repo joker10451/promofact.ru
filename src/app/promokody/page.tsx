@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
 import StoreLogo from "@/components/StoreLogo";
-import { getStores } from "@/lib/perfluence";
+import { getStores, getAllStores } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { currentMonthYear, getMaxDiscount } from "@/lib/seoArticles";
 
@@ -26,7 +26,12 @@ export const metadata: Metadata = {
 };
 
 export default async function PromokodyIndexPage() {
-  const stores = await getStores();
+  const [stores, allStores] = await Promise.all([getStores(), getAllStores()]);
+  // Keep a genuine merchant entry discoverable while its rotated partner
+  // vouchers await fresh advertising registration. This is NOT an offer.
+  const pendingWinlab = !stores.some((store) => store.slug === "winlab")
+    ? allStores.find((store) => store.slug === "winlab")
+    : undefined;
 
   const sorted = [...stores].sort(
     (a, b) => b.coupons.length - a.coupons.length
@@ -70,6 +75,26 @@ export default async function PromokodyIndexPage() {
         {sorted.length} магазинов с актуальными промокодами. Выберите магазин
         — внутри таблица кодов, инструкция и FAQ.
       </p>
+
+      {pendingWinlab && (
+        <section aria-label="Магазин с предложениями на проверке" className="mt-6 rounded-2xl border border-line bg-white p-4 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-ink/60">Магазин в каталоге</p>
+              <h2 className="mt-1 font-display text-base font-extrabold text-ink">
+                {pendingWinlab.name}
+              </h2>
+              <p className="mt-1 max-w-xl text-sm leading-relaxed text-ink/70">
+                Новые промокоды получены, но рекламная маркировка для обновлённого размещения ещё проверяется. Старые коды скрыты.
+              </p>
+            </div>
+            <Link href="/store/winlab"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ink/20 px-4 text-sm font-bold text-ink hover:border-red hover:text-red">
+              Страница магазина →
+            </Link>
+          </div>
+        </section>
+      )}
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sorted.map((store) => {
