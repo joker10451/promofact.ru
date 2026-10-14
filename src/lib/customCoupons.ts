@@ -36,6 +36,19 @@ const SBERDEVICES_AFFILIATE: Coupon["affiliate"] = {
   ordText: "Реклама. Рекламодатель — ООО «САЛЮТДЕВАЙСЫ», ИНН: 7730253720. erid: 2RanymNsVkw",
 };
 
+const PODRUZHKA_STORE: Coupon["store"] = {
+      id: 5040,
+      name: "Подружка",
+      slug: "podruzhka",
+      logo: "https://favicon.yandex.net/favicon/v2/podrygka.ru?size=120",
+      category: "Косметика и парфюмерия",
+      categorySlug: "kosmetika-i-parfyumeriya",
+      about: "«Подружка» — сеть магазинов косметики, парфюмерии, средств по уходу за собой и аксессуаров. В каталоге представлены популярные бренды декоративной и уходовой косметики по выгодным ценам.",
+      conditions: "Онлайн-подарок по промокоду до 15 октября 2026 года. Отдельная акция с подарком при предъявлении штрихкода в розничном магазине действует до 18 октября.",
+      site: "https://www.podrygka.ru",
+      activeBloggers: 3120,
+    };
+
 export const CUSTOM_COUPONS: Coupon[] = [
   {
     id: 50671,
@@ -133,18 +146,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
       barcodeImage: null,
       group: "perfluence",
     },
-    store: {
-      id: 5040,
-      name: "Подружка",
-      slug: "podruzhka",
-      logo: "https://favicon.yandex.net/favicon/v2/podrygka.ru?size=120",
-      category: "Косметика и парфюмерия",
-      categorySlug: "kosmetika-i-parfyumeriya",
-      about: "«Подружка» — сеть магазинов косметики, парфюмерии, средств по уходу за собой и аксессуаров. В каталоге представлены популярные бренды декоративной и уходовой косметики по выгодным ценам.",
-      conditions: "Онлайн-подарок по промокоду до 15 октября 2026 года. Отдельная акция с подарком при предъявлении штрихкода в розничном магазине действует до 18 октября.",
-      site: "https://www.podrygka.ru",
-      activeBloggers: 3120,
-    },
+    store: PODRUZHKA_STORE,
     affiliate: {
       link: "https://podrygka.prfl.me/sites/q8ufig?erid=2RanymdB9PR",
       landingLink: "https://podrygka.prfl.me/sites/q8ufig?erid=2RanymdB9PR",
@@ -170,7 +172,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
       barcodeImage: null,
       group: "perfluence",
     },
-    store: CUSTOM_COUPONS.find((c) => c.id === 50041)!.store,
+    store: PODRUZHKA_STORE,
     affiliate: {
       link: "https://podrygka.prfl.me/sites/xza4uw?erid=2Ranymef8fm",
       landingLink: "https://podrygka.prfl.me/sites/xza4uw?erid=2Ranymef8fm",
