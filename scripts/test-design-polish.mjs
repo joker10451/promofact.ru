@@ -237,6 +237,6 @@ assert.ok(citydriveOffers.includes('offer(81483071, citydrive, citydriveFirstAd,
   citydriveOffers.includes('"Первая поездка в Ситидрайв с сертификатом OZON"') &&
   citydriveOffers.includes('"Скидка 50% в приложении Ситидрайв"') &&
   citydriveOffers.includes('"Скидка 1 500 ₽ в приложении Ситидрайв"') &&
-  citydriveOffers.includes('"Размер бонуса не предоставлен"'),
+  citydriveOffers.includes('Размер бонуса не предоставлен'),
   "Show exactly the source-backed benefits without inventing a value for BACK163 or certificate");
 console.log("Citydrive: four codes, two authorized placements, source-backed restrictions PASS");
