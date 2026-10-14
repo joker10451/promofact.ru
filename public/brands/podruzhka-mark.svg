@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+<title id="title">Подружка — значок магазина</title>
+<desc id="desc">Декоративная косметическая эмблема с сердцем и сиянием, локальная замена недоступного значка</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#aa46e9"/>
+    <stop offset=".55" stop-color="#9524d8"/>
+    <stop offset="1" stop-color="#6b13b4"/>
+  </linearGradient>
+  <linearGradient id="heart" x1=".15" y1="0" x2=".8" y2="1">
+    <stop offset="0" stop-color="#ffffff"/>
+    <stop offset="1" stop-color="#f8d8ff"/>
+  </linearGradient>
+</defs>
+<rect x="0" y="0" width="128" height="128" rx="28" fill="url(#bg)"/>
+<path d="M64 100c-8-8-35-27-35-46 0-11 8-20 19-20 8 0 13 4 16 10 4-6 10-10 17-10 11 0 19 9 19 20 0 19-27 38-36 46Z" fill="url(#heart)"/>
+<path d="M64 89c-7-7-26-20-26-34 0-6 4-11 11-11 7 0 11 5 15 11 4-6 8-11 15-11 7 0 11 5 11 11 0 14-19 27-26 34Z" fill="#7f24c6" opacity=".9"/>
+<path d="M64 63c-3 5-6 8-10 10 5 3 8 6 10 11 2-5 5-8 10-11-5-2-8-5-10-10Z" fill="#ffffff"/>
+<path d="M99 14l3 10 10 3-10 3-3 10-3-10-10-3 10-3 3-10Z" fill="#fff4c9"/>
+<circle cx="25" cy="87" r="3" fill="#f2d7ff"/><circle cx="100" cy="96" r="2.5" fill="#f2d7ff"/>
+</svg>

@@ -127,6 +127,10 @@ export default function CouponTicket({
     promocode.isFirstOrderOnly
   );
 
+  // A retail barcode is not an online promo code. Never render an unprovided
+  // barcode as a usable voucher or offer a misleading redemption button.
+  const missingBarcode = promocode.isBarcode && !promocode.code && !promocode.barcodeImage;
+
   const activeClickIdRef = useRef<string | undefined>(undefined);
 
   const getAnalyticsContext = () => {
@@ -370,7 +374,7 @@ export default function CouponTicket({
             )}
             {promocode.isBarcode ? (
               <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-[10px] font-extrabold text-blue-700 flex items-center gap-1 shadow-2xs">
-                Штрихкод
+                {missingBarcode ? "Штрихкод пока недоступен" : "Штрихкод"}
               </span>
             ) : promocode.customerTypeLabel ? (
               <span className={`max-w-full break-words rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -454,7 +458,7 @@ export default function CouponTicket({
           ) : (
             <span className="inline-flex items-center gap-1.5 font-semibold text-ink/65 text-[11px] sm:text-xs">
               <span className="inline-block h-2 w-2 rounded-full bg-mint" />
-              Официальное предложение
+              {missingBarcode ? "Условия розничной акции" : "Официальное предложение"}
             </span>
           )}
           <button
@@ -593,6 +597,22 @@ export default function CouponTicket({
             >
               <span>Перейти на сайт {store.name} →</span>
             </a>
+          </div>
+        ) : missingBarcode ? (
+          <div className="space-y-2" aria-label="Для акции нужен штрихкод, который ещё не предоставлен">
+            <div className="rounded-xl border border-violet-200 bg-violet-50/70 p-3 text-left">
+              <div className="flex items-center gap-2 text-sm font-extrabold text-violet-900">
+                <Icon name="gift" size={16} />
+                Штрихкод для кассы
+              </div>
+              <p className="mt-1.5 text-xs leading-relaxed text-violet-900/80">
+                Для подарка нужен отдельный штрихкод, который предъявляют кассиру.
+                Его изображение и номер пока не получены от партнёра.
+              </p>
+            </div>
+            <p role="status" className="rounded-xl border border-line bg-paper px-3 py-3 text-center text-xs font-bold text-ink/65">
+              Штрихкод ожидает загрузки — получить подарок по этой карточке пока нельзя
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -770,6 +790,11 @@ export default function CouponTicket({
               </div>
 
               <div className="mt-6 flex gap-2">
+                {missingBarcode ? (
+                  <div role="status" className="w-full rounded-2xl border border-violet-200 bg-violet-50 p-3 text-center text-sm font-bold text-violet-900">
+                    Штрихкод ещё не предоставлен — показать его кассиру пока нельзя
+                  </div>
+                ) : (
                 <button
                   type="button"
                   onClick={() => {
@@ -784,6 +809,7 @@ export default function CouponTicket({
                       : `Скопировать ${promocode.code} и перейти →`
                     : `Перейти в магазин →`}
                 </button>
+                )}
               </div>
             </div>
           </div>,

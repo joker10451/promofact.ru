@@ -12,6 +12,13 @@ export interface BrandMeta {
 }
 
 export const BRAND_REGISTRY: Record<string, BrandMeta> = {
+  "podruzhka": {
+    logoUrl: "/brands/podruzhka-mark.svg",
+    emoji: "💜",
+    bgGradient: "from-violet-500 to-fuchsia-700",
+    textColor: "text-white",
+    domain: "podrygka.ru",
+  },
   "pyaterochka": {
     logoUrl: "https://favicon.yandex.net/favicon/v2/5ka.ru?size=120",
     emoji: "🛒",

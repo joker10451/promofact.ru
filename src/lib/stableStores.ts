@@ -463,7 +463,7 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "id": 5040,
     "slug": "podruzhka",
     "name": "Подружка",
-    "logo": "https://favicon.yandex.net/favicon/v2/podrygka.ru?size=120",
+    "logo": "/brands/podruzhka-mark.svg",
     "category": "Косметика и парфюмерия",
     "categorySlug": "kosmetika-i-parfyumeriya",
     "about": "«Подружка» — сеть магазинов косметики, парфюмерии, средств по уходу за собой и аксессуаров. В каталоге представлены тысячи оригинальных бьюти-товаров популярных мировых и корейских брендов.",
