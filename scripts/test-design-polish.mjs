@@ -197,3 +197,15 @@ assert.ok(campaignRegistry.includes('PAUSED_PROMO_BANNER_IDS.has(b.id)') &&
           ulybatlLanding.includes('PAUSED_PROMO_BANNER_IDS.has(campaign.id)'),
   "Ulybatl suspension must suppress active banners and visitor signup CTA");
 console.log("PromoFact Perfluence 14 October campaign freshness and pause guards PASS");
+
+const rotated = fs.readFileSync("src/lib/perfluenceRotatedOffers.ts", "utf8");
+const custom = fs.readFileSync("src/lib/customCoupons.ts", "utf8");
+assert.ok(["25GFC1TL4", "SGPFB7JJGY", "Чай", "2RanynuJXUf"].every(x => rotated.includes(x)),
+  "Magnit codes and approved publisher ERID must match 14 October account");
+assert.ok(["10PFNS5229", "WCPFOKT4737", "5OKTPF4737"].every(x => rotated.includes(x)),
+  "WinLab rotated codes must be retained in staging");
+assert.ok(custom.includes("...MAGNIT_ROTATED_OFFERS") && !custom.includes("WINLAB_ROTATED_OFFERS_PENDING_ERID"),
+  "Publish Magnit codes but hold WinLab until advertising marker is verified");
+assert.ok(campaignRegistry.includes('"winlab-rozygrysh-2026"'),
+  "Do not display obsolete September WinLab creative after code rotation");
+console.log("Perfluence code rotation and safe staged WinLab offers PASS");
