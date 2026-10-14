@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PromoBanner from "@/components/PromoBanner";
 import CampaignExpiryGate from "@/components/CampaignExpiryGate";
-import { PROMO_BANNERS } from "@/lib/promoBanners";
+import { PROMO_BANNERS, PAUSED_PROMO_BANNER_IDS } from "@/lib/promoBanners";
 import { SITE_URL } from "@/lib/site";
 
 const campaign = PROMO_BANNERS.find((b) => b.id === "sber-ulybatl-185-2026")!;
@@ -44,9 +44,15 @@ export default function SberUlybatlPage() {
             </p>
           </div>
 
-          <CampaignExpiryGate endsAt={campaign.endsAt}>
-            <PromoBanner banner={campaign} />
-          </CampaignExpiryGate>
+          {PAUSED_PROMO_BANNER_IDS.has(campaign.id) ? (
+            <div role="status" className="mx-auto max-w-[950px] rounded-2xl border border-amber-300 bg-amber-50 px-5 py-6 text-center text-sm font-semibold text-amber-950">
+              Акция временно приостановлена по уведомлению партнёрской сети от 13 октября 2026 года. Регистрация по рекламной ссылке сейчас недоступна на ПромоФакте.
+            </div>
+          ) : (
+            <CampaignExpiryGate endsAt={campaign.endsAt}>
+              <PromoBanner banner={campaign} />
+            </CampaignExpiryGate>
+          )}
 
           <div className="mx-auto mt-8 max-w-[950px] rounded-2xl border border-line bg-white px-5 py-4 text-sm leading-relaxed text-ink/65">
             <p>Участие и вручение призов регулируются официальными правилами акции. Наличие оплаты улыбкой само по себе не гарантирует выигрыш. Подробные требования и сроки уточняйте на странице организатора.</p>
