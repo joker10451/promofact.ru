@@ -1,3 +1,4 @@
+import { MAGNIT_ROTATED_OFFERS } from "@/lib/perfluenceRotatedOffers";
 import type { Coupon } from "@/lib/types";
 
 /**
@@ -50,6 +51,7 @@ const PODRUZHKA_STORE: Coupon["store"] = {
     };
 
 export const CUSTOM_COUPONS: Coupon[] = [
+  ...MAGNIT_ROTATED_OFFERS,
   {
     id: 50671,
     promocode: {
