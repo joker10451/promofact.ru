@@ -4,8 +4,8 @@ import { STABLE_STORES } from "@/lib/stableStores";
 /** Perfluence: account-approved PromoFact links copied from 14 October 2026. */
 const MAGNIT_LINK = "https://mgntgm.prfl.me/sites/vjjrfu?erid=2RanynuJXUf";
 const WINLAB_LINK = "https://winelab.prfl.me/sites/ujkqzr";
-const magnit = STABLE_STORES["magnit-dostavka"];
-const winlab = STABLE_STORES["winlab"];
+const magnit: Coupon["store"] = { ...STABLE_STORES["magnit-dostavka"], activeBloggers: STABLE_STORES["magnit-dostavka"].activeBloggers ?? 0 };
+const winlab: Coupon["store"] = { ...STABLE_STORES["winlab"], activeBloggers: STABLE_STORES["winlab"].activeBloggers ?? 0 };
 const magnitAd = {
   link: MAGNIT_LINK,
   landingLink: MAGNIT_LINK,
