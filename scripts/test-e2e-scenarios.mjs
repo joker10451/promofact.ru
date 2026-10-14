@@ -607,6 +607,11 @@ async function run() {
         "/guide",
         "/store/farfor",
         "/category/dostavka-produktov",
+        "/category/kosmetika-i-parfyumeriya",
+        "/store/hollyshop",
+        "/store/magnit-dostavka",
+        "/store/podruzhka",
+        "/store/winlab",
         "/collections/first-order",
         "/akcii/ulybatl-sber-185",
         "/akcii/detskaya-sberkarta-10000-500",
@@ -627,6 +632,38 @@ async function run() {
 
           if (scrollInfo.scrollWidth > scrollInfo.innerWidth + 1) {
             throw new Error(`[ОШИБКА] На ${res.name} страница ${pathUrl} имеет горизонтальный скролл: scrollWidth=${scrollInfo.scrollWidth} > innerWidth=${scrollInfo.innerWidth}`);
+          }
+          // Layout checks protect actual readability, not only the absence
+          // of page-level horizontal scrolling. Shared coupon cards render on
+          // category, store, collection and catalogue pages.
+          const textClipping = await page.locator('article[id^="coupon-"]').evaluateAll((cards) => {
+            const failures = [];
+            for (const card of cards.slice(0, 12)) {
+              const rect = card.getBoundingClientRect();
+              if (rect.width > 0 && (rect.left < -2 || rect.right > innerWidth + 2)) {
+                failures.push("card beyond viewport: " + card.id);
+              }
+              for (const child of card.querySelectorAll("p, h2, h3, a, span, code")) {
+                const style = getComputedStyle(child);
+                const clamp = Number.parseInt(style.webkitLineClamp, 10);
+                if (clamp > 0 ||
+                    (style.textOverflow === "ellipsis" && child.scrollWidth > child.clientWidth + 2)) {
+                  failures.push("text clipped: " + card.id + " " + (child.textContent || "").slice(0, 55));
+                }
+              }
+            }
+            return failures.slice(0, 8);
+          });
+          assert.deepEqual(textClipping, [], `No truncated coupon content on ${pathUrl} at ${res.name}: ${textClipping.join("; ")}`);
+
+          if (pathUrl === "/category/kosmetika-i-parfyumeriya" && res.width <= 390) {
+            const firstCard = page.locator('article[id^="coupon-"]').first();
+            if (await firstCard.count()) {
+              await firstCard.screenshot({
+                path: path.join(afterScreenshotsDir, `polish-cosmetics-card-${res.width}.png`),
+                animations: "disabled",
+              });
+            }
           }
           if (pathUrl === "/catalog?q=farfor") {
             await page.waitForFunction(
