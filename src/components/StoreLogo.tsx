@@ -26,7 +26,8 @@ export default function StoreLogo({
   className = "max-h-full max-w-full object-contain",
 }: StoreLogoProps) {
   const brandMeta = getBrandMeta(slug, name, site);
-  const initialUrl = logo || brandMeta.logoUrl;
+  // Keep the Podruzhka mark local: the external Yandex favicon is blocked or unavailable on some clients.
+  const initialUrl = slug === "podruzhka" ? "/brands/podruzhka-mark.svg" : logo || brandMeta.logoUrl;
   const [hasError, setHasError] = useState(!initialUrl);
   const [hasLoaded, setHasLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
