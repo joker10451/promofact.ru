@@ -162,7 +162,7 @@ console.log("Store landing UX: merchant coupon priority and OTP cross-brand isol
 const ticketAudience = fs.readFileSync("src/components/CouponTicket.tsx", "utf8");
 assert.ok(ticketAudience.includes("Уточните условия") && !ticketAudience.includes('                Для всех'),
   "Do not claim unknown coupon eligibility is universal");
-assert.ok(ticketAudience.includes('offer.isNoCode ? "Без промокода" : "Промокод доступен ниже"'),
+assert.ok(ticketAudience.includes('offer.isNoCode ? "Без промокода" : "Промокод указан ниже"'),
   "Subscription coupon copy must reflect whether a code exists");
 assert.ok(couponGrid.includes("grid grid-cols-1 gap-4 md:grid-cols-2") &&
           !couponGrid.includes("columns-1 md:columns-2"),
@@ -209,3 +209,24 @@ assert.ok(custom.includes("...MAGNIT_ROTATED_OFFERS") && !custom.includes("WINLA
 assert.ok(campaignRegistry.includes('"winlab-rozygrysh-2026"'),
   "Do not display obsolete September WinLab creative after code rotation");
 console.log("Perfluence code rotation and safe staged WinLab offers PASS");
+
+const categoryPageSource = fs.readFileSync("src/app/category/[slug]/page.tsx", "utf8");
+const expiringSource = fs.readFileSync("src/components/ExpiringDeals.tsx", "utf8");
+const summarySource = fs.readFileSync("src/components/StoreSummaryTable.tsx", "utf8");
+const refinerSource = fs.readFileSync("src/lib/offerRefiner.ts", "utf8");
+assert.ok(!ticket.includes("line-clamp-2") && !ticket.includes('className="truncate"') &&
+  ticket.includes("break-all [overflow-wrap:anywhere] select-all"), "Shared coupon cards must not clip deal descriptions or codes");
+assert.ok(!shops.includes("w-full truncate") && !homePreview.includes("line-clamp-3") &&
+  !expiringSource.includes("line-clamp-2"), "Homepage and urgent offer previews must show complete text");
+assert.ok(categoryPageSource.includes("realCodeCount") &&
+  categoryPageSource.includes("codeFreeCount") &&
+  categoryPageSource.includes("flex flex-wrap items-center gap-2 pb-2"),
+  "Category totals distinguish codes from deals and store navigation wraps");
+assert.ok(summarySource.includes('className="grid gap-3 p-3 md:hidden"') &&
+  summarySource.includes('className="hidden overflow-x-auto md:block"') &&
+  summarySource.includes('return "Срок не указан"'),
+  "Small screens need readable mobile summary cards and unknown expiry must remain unknown");
+assert.ok(refinerSource.includes("const formattedTitle = title ||") &&
+  refinerSource.includes("Уточните минимальную сумму заказа"),
+  "Offer titles must not be auto-truncated or display dangling minimum order clauses");
+console.log("PromoFact whole-site shared-card overflow and source-copy safeguards PASS");
