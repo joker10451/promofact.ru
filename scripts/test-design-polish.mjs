@@ -176,3 +176,7 @@ assert.ok(homePreview.includes("Промокоды, с которых стоит
 assert.ok(shops.includes('s.coupons.length % 100 !== 11'),
   "Shop offer labels must handle Russian 11-14 plural exceptions");
 console.log("PromoFact home visual and copy checks PASS");
+
+assert.ok(home.includes("isRealPromoCode(c.promocode.code)"),
+  "Homepage promocode preview must exclude NOT REQUIRED / НЕ НУЖЕН placeholders");
+console.log("PromoFact homepage real-code classification PASS");
