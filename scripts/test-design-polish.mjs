@@ -188,7 +188,7 @@ assert.ok(browser.includes("hasRetailBarcodeOffer") &&
   "Podruzhka keeps distinct redemption methods in two full-width, compact and unstretched cards");
 assert.ok(mergedOffers.includes("const freshCustomCoupons") &&
   mergedOffers.indexOf("const freshCustomCoupons") > mergedOffers.indexOf("export async function getCombinedCoupons()") &&
-  mergedOffers.includes("base-source-buckets-no-custom-v2"),
+  mergedOffers.includes("base-source-buckets-no-custom-v3-periodic"),
   "Fresh custom coupons must not depend on persistent pre-deployment snapshots");
 assert.ok(rotated.includes("25GFC1TL4") &&
   rotated.includes("SGPFB7JJGY") &&
@@ -196,3 +196,19 @@ assert.ok(rotated.includes("25GFC1TL4") &&
   promoRegistry.includes('PAUSED_PROMO_BANNER_IDS'),
   "Preserve Magnit and partner compliance rules");
 console.log("October 13 visual rollback + current publisher campaigns and fresh custom coupon cache PASS");
+
+const mKosmetikEntries = rotated.split("export const M_KOSMETIK_ROTATED_OFFERS: Coupon[] = [")[1]?.split("\n];")[0] ?? "";
+assert.ok(mKosmetikEntries.includes('"Чай", "Скидка 41%') &&
+  mKosmetikEntries.includes('"PK4GMWJUK", "Скидка 36%') &&
+  mKosmetikEntries.includes('"PF21K0T5LF", "Скидка 21%') &&
+  mKosmetikEntries.includes('"2026-10-22"') &&
+  mKosmetikEntries.includes('"2026-10-31"') &&
+  rotated.includes('https://mgntksm1.prfl.me/sites/1sq4qx?erid=2Ranymz3211') &&
+  rotated.includes('Реклама. АО "Тандер", ИНН 2310031475. erid: 2Ranymz3211') &&
+  customOffers.includes("...M_KOSMETIK_ROTATED_OFFERS"),
+  "Reinstate all three new M.Kosmetik Perfluence codes with verified affiliate URL, ERID and precise expiration dates");
+assert.ok(mergedOffers.includes("SOURCE_MEMORY_TTL_MS = 15 * 60 * 1000") &&
+  mergedOffers.includes("Date.now() - cacheFilledAt < SOURCE_MEMORY_TTL_MS") &&
+  mergedOffers.includes("{ revalidate: 900 }"),
+  "Perfluence source caches must refresh so fresh valid vouchers cannot disappear permanently");
+console.log("M.Kosmetik restored partner offers and renewable source caches PASS");
