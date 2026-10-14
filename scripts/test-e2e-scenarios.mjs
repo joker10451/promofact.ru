@@ -669,12 +669,14 @@ async function run() {
             const retailCard = page.locator("#coupon-50042");
             const onlineCard = page.locator("#coupon-50041");
             if (await retailCard.count()) {
-              assert.ok((await retailCard.innerText()).includes("Штрихкод для кассы"),
-                "Podruzhka retail must explicitly require a cashier barcode");
-              assert.ok((await retailCard.innerText()).includes("Штрихкод ожидает загрузки"),
-                "Missing retail barcode must be displayed as unavailable, not redeemable");
+              assert.equal(await retailCard.getByRole("img", { name: "Штрихкод 2921098553491" }).count(), 1,
+                "Podruzhka retail EAN-13 graphic must match the supplied barcode");
+              assert.ok((await retailCard.innerText()).includes("2921098553491"),
+                "Retail barcode number must be visible to the customer");
+              assert.ok(!(await retailCard.innerText()).includes("Штрихкод ожидает загрузки"),
+                "Verified retail barcode must no longer show a missing-barcode placeholder");
               assert.equal(await retailCard.getByRole("link", { name: /Перейти к предложению/ }).count(), 0,
-                "Missing barcode cannot have a misleading redemption link");
+                "Retail barcode is presented on the card instead of generic code-free offer link");
             }
             if (await onlineCard.count()) {
               assert.ok((await onlineCard.innerText()).includes("2921098554627"),
