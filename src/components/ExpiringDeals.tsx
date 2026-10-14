@@ -2,7 +2,6 @@
 
 import Icon from "@/components/Icon";
 import { useState } from "react";
-import Link from "next/link";
 import StoreLogo from "@/components/StoreLogo";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import type { Coupon } from "@/lib/types";
@@ -53,7 +52,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
   if (coupons.length === 0) return null;
 
   return (
-    <section id="expiring" aria-label="Скоро заканчиваются" className="scroll-mt-24 rounded-3xl border border-line bg-white/70 p-4 shadow-sm sm:p-7">
+    <section id="expiring" aria-label="Скоро заканчиваются" className="scroll-mt-24 relative overflow-hidden rounded-3xl border-2 border-red/20 bg-gradient-to-br from-red-50/50 via-white to-amber-50/40 p-6 sm:p-8 shadow-[0_8px_30px_rgba(255,51,85,0.06)]">
       <div>
         <div className="inline-flex items-center gap-2 rounded-full bg-red/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-red">
           <Icon name="flame" size={12} /> Скоро заканчиваются
@@ -66,18 +65,14 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
         </p>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {coupons.map((coupon) => {
           const isCopied = copiedCode === coupon.promocode.code;
           const expiry = expiryLabel(coupon.promocode.expires);
-          const rawTitle = (coupon.promocode.bonusName || "").trim();
-          // A teaser should not print a full multi-paragraph campaign brief.
-          // The complete, unabridged terms remain in the merchant coupon card.
-          const teaserTitle = rawTitle.length > 82 ? "Промокод магазина" : (rawTitle || "Промокод магазина");
           return (
             <div
               key={`${coupon.store.slug}-${coupon.promocode.code}`}
-              className="group relative flex min-w-0 flex-col rounded-2xl border border-line bg-white p-4 transition-[border-color,box-shadow] hover:border-ink/25 hover:shadow-sm sm:p-5"
+              className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-4 transition-all hover:-translate-y-1 hover:border-red/40 hover:shadow-lg"
             >
               <div>
                 <div className="flex items-center gap-2 min-w-0">
@@ -88,18 +83,12 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                     size={28}
                     className="h-7 w-7 shrink-0 rounded-md object-contain border border-line p-0.5"
                   />
-                  <span className="min-w-0 break-words [overflow-wrap:anywhere] text-xs font-extrabold text-ink/70">{coupon.store.name}</span>
+                  <span className="truncate text-xs font-extrabold text-ink/70">{coupon.store.name}</span>
                 </div>
 
-                <div className="mt-2 break-words [overflow-wrap:anywhere] font-display text-sm font-bold leading-snug text-ink sm:text-base">
-                  {teaserTitle}
+                <div className="mt-3 font-display text-sm font-black leading-snug text-ink line-clamp-2">
+                  {coupon.promocode.bonusName}
                 </div>
-
-                {rawTitle.length > 82 && (
-                  <Link href={`/store/${coupon.store.slug}#coupon-${coupon.id}`} className="mt-1 inline-block text-xs font-semibold text-red hover:underline">
-                    Полные условия предложения →
-                  </Link>
-                )}
 
                 {expiry && (
                   <div
@@ -112,9 +101,9 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                 )}
               </div>
 
-              <div className="mt-auto space-y-2 pt-4">
-                <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-xl border border-dashed border-ink/20 bg-paper p-1.5">
-                  <code className="min-w-0 flex-1 break-all px-2 font-mono text-xs font-bold text-ink">{coupon.promocode.code}</code>
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between rounded-xl border border-dashed border-ink/20 bg-paper p-1.5">
+                  <code className="truncate px-2 font-mono text-xs font-bold text-ink">{coupon.promocode.code}</code>
                   <button
                     type="button"
                     onClick={() => copy(coupon.promocode.code, coupon.store.name)}
@@ -137,13 +126,13 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                       store: coupon.store.name,
                     })
                   }
-                  className="block w-full rounded-xl bg-ink py-2.5 text-center text-xs font-bold text-white transition-colors hover:bg-red"
+                  className="block w-full rounded-xl bg-ink py-2 text-center text-xs font-bold text-white transition-all hover:bg-red"
                 >
                   В магазин →
                 </a>
 
                 {coupon.affiliate.ordText && (
-                  <p className="break-words [overflow-wrap:anywhere] text-[11px] leading-relaxed text-ink/60">{coupon.affiliate.ordText}</p>
+                  <p className="text-[10px] leading-snug text-ink/45">{coupon.affiliate.ordText}</p>
                 )}
               </div>
             </div>
