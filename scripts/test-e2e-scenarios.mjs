@@ -272,8 +272,8 @@ async function run() {
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
       // Находим первую карточку купона
-      const firstCard = page.locator("article").first();
-      const codeElement = firstCard.locator('div[role="button"] span.truncate');
+      const firstCard = page.locator('article[id^="coupon-"]').first();
+      const codeElement = firstCard.locator('div[role="button"] span.select-all');
       const expectedCode = (await codeElement.innerText()).trim();
 
       const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
