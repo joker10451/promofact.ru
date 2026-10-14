@@ -22,10 +22,10 @@ export default function HomeOffersPreview({
             Выбрано из актуального каталога
           </span>
           <h2 id="home-offers-heading" className="mt-1 font-display text-2xl font-extrabold text-ink sm:text-3xl">
-            Хорошие предложения — сразу к делу
+            Промокоды, с которых стоит начать
           </h2>
           <p className="mt-2 text-sm text-ink/60">
-            Небольшая подборка из {totalCount} действующих предложений. Полный каталог — с поиском и фильтрами.
+            Показываем несколько предложений из {totalCount} в каталоге. Перед покупкой проверьте условия применения.
           </p>
         </div>
         <Link href="/catalog#catalog"
@@ -35,9 +35,9 @@ export default function HomeOffersPreview({
       </div>
 
       {coupons.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {coupons.map((coupon) => (
-            <article key={`${coupon.store.slug}-${coupon.id}`} className="group flex min-w-0 flex-col rounded-[22px] border border-line bg-white p-4 shadow-[0_8px_30px_-25px_rgba(11,16,43,0.25)] transition-all hover:-translate-y-0.5 hover:border-red/40 hover:shadow-[0_16px_32px_-24px_rgba(11,16,43,0.3)] sm:p-5">
+            <article key={`${coupon.store.slug}-${coupon.id}`} className="group flex min-w-0 flex-col rounded-2xl border border-line bg-white p-4 shadow-sm transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-md focus-within:border-ink/30 sm:p-5">
               <div className="flex items-center gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line bg-paper/50 p-1">
                   <StoreLogo slug={coupon.store.slug} name={coupon.store.name} logo={coupon.store.logo} site={coupon.store.site} size={34} />
@@ -47,7 +47,8 @@ export default function HomeOffersPreview({
                   <p className="truncate text-xs text-ink/50">{coupon.store.category}</p>
                 </div>
               </div>
-              <h3 className="mt-4 line-clamp-3 min-h-12 text-sm font-extrabold leading-snug text-ink sm:text-base">
+              <span className="mt-4 inline-flex w-fit rounded-md bg-mint/10 px-2 py-1 text-[11px] font-bold text-mint-dark">{coupon.promocode.code ? "Есть промокод" : "Акция магазина"}</span>
+              <h3 className="mt-3 line-clamp-3 min-h-12 text-sm font-extrabold leading-snug text-ink sm:text-base">
                 {coupon.promocode.bonusName || "Действующий промокод магазина"}
               </h3>
               <p className="mt-2 text-xs text-ink/60">
@@ -56,7 +57,7 @@ export default function HomeOffersPreview({
               <div className="mt-auto pt-4">
                 <Link href={`/store/${coupon.store.slug}#coupon-${coupon.id}`}
                   className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-ink px-3 py-2.5 text-xs font-extrabold text-white transition-colors group-hover:bg-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red sm:text-sm">
-                  Смотреть промокод <span className="ml-2" aria-hidden="true">→</span>
+                  {coupon.promocode.code ? "Посмотреть промокод" : "Условия акции"} <span className="ml-2" aria-hidden="true">→</span>
                 </Link>
                 {coupon.affiliate.ordText && (
                   <p className="mt-3 break-words text-[11px] leading-relaxed text-ink/50">
