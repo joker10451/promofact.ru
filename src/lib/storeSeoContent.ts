@@ -21,7 +21,7 @@ export interface StoreArticleInput {
   about?: string | null;
   conditions?: string | null;
   /** Активные купоны: только коды/названия. */
-  coupons: { code: string; bonusName: string | null }[];
+  coupons: { code: string; bonusName: string | null; isBarcode?: boolean }[];
   couponCount: number;
   maxDiscount: string | null;
   hasGiftOffer?: boolean;
@@ -158,7 +158,8 @@ function pickAngle(categorySlug: string, slug: string): string {
 
 /** Число активных купонов и названия кодов в тексте. */
 function codesSentence(input: StoreArticleInput): string {
-  const active = input.coupons.filter((c) => isRealPromoCode(c.code));
+  const active = input.coupons.filter((c) => !c.isBarcode && isRealPromoCode(c.code));
+  const barcodes = input.coupons.filter((c) => c.isBarcode && isRealPromoCode(c.code));
   if (active.length === 0) {
     return `Сейчас активных промокодов ${input.name} нет — новые коды появляются на этой странице по мере запуска партнёрских акций. Заглядывайте позже или подпишитесь, чтобы не пропустить свежую скидку.`;
   }
@@ -172,7 +173,7 @@ function codesSentence(input: StoreArticleInput): string {
       : active.length >= 2 && active.length <= 4
         ? "промокода"
         : "промокодов";
-  return `Сейчас у ${input.name} действует ${active.length} ${countWord}${tops ? `: ${tops}` : ""}.`;
+  return `Сейчас у ${input.name} действует ${active.length} ${countWord}${tops ? `: ${tops}` : ""}.${barcodes.length ? ` Для покупки в магазине предусмотрено ${barcodes.length} ${barcodes.length === 1 ? "отдельный штрихкод" : "отдельных штрихкодов"} для предъявления на кассе.` : ""}`;
 }
 
 function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
@@ -188,9 +189,10 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
     bloggers: input.activeBloggers,
   };
 
-  const realCodes = input.coupons.filter((c) => isRealPromoCode(c.code)).length;
-  const noCodeDeals = input.coupons.length - realCodes;
-  const offerCounts = formatStoreOfferCounts(realCodes, noCodeDeals);
+  const realCodes = input.coupons.filter((c) => !c.isBarcode && isRealPromoCode(c.code)).length;
+  const barcodes = input.coupons.filter((c) => c.isBarcode && isRealPromoCode(c.code)).length;
+  const noCodeDeals = input.coupons.length - realCodes - barcodes;
+  const offerCounts = formatStoreOfferCounts(realCodes, noCodeDeals, barcodes);
 
   // 1. Лид — уникальный за счёт числа скидок, месяца и максимальной выгоды.
   // Про проверку кодов здесь намеренно не пишем: та же мысль звучала в трёх
@@ -250,10 +252,11 @@ export function buildStoreArticle(input: StoreArticleInput, slug: string): strin
  */
 export function buildStoreDescription(input: StoreArticleInput): string {
   const n = input.couponCount;
-  const realCodes = input.coupons.filter((c) => isRealPromoCode(c.code)).length;
-  const countLabel = formatStoreOfferCounts(realCodes, input.coupons.length - realCodes);
-  const codeFree = input.coupons.length - realCodes;
-  const kind = realCodes > 0
+  const realCodes = input.coupons.filter((c) => !c.isBarcode && isRealPromoCode(c.code)).length;
+  const barcodes = input.coupons.filter((c) => c.isBarcode && isRealPromoCode(c.code)).length;
+  const codeFree = input.coupons.length - realCodes - barcodes;
+  const countLabel = formatStoreOfferCounts(realCodes, codeFree, barcodes);
+  const kind = barcodes > 0 ? "Промокоды и штрихкоды" : realCodes > 0
     ? (codeFree > 0 ? "Промокоды и акции" : "Промокоды")
     : "Акции";
   // Короткое «−30%» ничего не добавляет к «скидка до 30%» — берём развёрнутое.
