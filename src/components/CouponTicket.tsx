@@ -597,7 +597,9 @@ export default function CouponTicket({
         ) : (
           <div className="space-y-2">
             <div className="rounded-xl bg-blue-50/60 border border-blue-100 px-3 py-1.5 text-center text-[11px] font-bold text-blue-700">
-              Промокод не требуется — скидка применится по ссылке
+              {offer.missingCodeClaim
+                ? "В описании упомянут промокод, но код не указан — уточните условия"
+                : "Акция без кода — ознакомьтесь с условиями у магазина"}
             </div>
             <a
               href={outgoingUrl}

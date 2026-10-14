@@ -32,3 +32,19 @@ assert.equal(light.promocode.group,"admitad","Admitad origin must survive lightw
 assert.equal(light.affiliate.link,full.affiliate.link);
 assert.equal(light.affiliate.ordText,full.affiliate.ordText);
 console.log("CATALOG-QA-1: audience, gift and source preservation PASS");
+
+const missingCode = refineOffer("по промокоду", "Первый урок бесплатно", "", "Яндекс Практикум", false);
+assert.equal(missingCode.missingCodeClaim, true);
+assert.match(missingCode.discount, /Первый урок бесплатно/);
+assert.doesNotMatch(missingCode.discount, /по промокоду/i);
+assert.doesNotMatch(missingCode.condition, /скидка применится/i);
+const missingCodeLong = refineOffer("по промокоду при оформлении",
+  "Второй продукт в подарок при покупке первого", "", "hollyshop", false);
+assert.equal(missingCodeLong.type, "default");
+assert.match(missingCodeLong.discount, /Второй продукт/);
+const workingCode = refineOffer("скидка 10% по промокоду", "от 1000 рублей", "REAL10", "Davines", false);
+assert.equal(workingCode.missingCodeClaim, undefined);
+const storeBrowser = (await import("node:fs")).readFileSync("src/components/StoreCouponBrowser.tsx","utf8");
+assert.match(storeBrowser, /filteredCoupons\.slice\(0, visibleLimit\)/);
+assert.match(storeBrowser, /Показать ещё/);
+console.log("CATALOG-QA-2: missing-code honesty and progressive reveal PASS");
