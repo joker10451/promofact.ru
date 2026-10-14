@@ -190,7 +190,7 @@ assert.ok(customOffers.includes('code: "2921098554627"') &&
   "Podruzhka online gift must use current code, expiry and approved affiliate placement");
 assert.ok(customOffers.includes('sites/xza4uw?erid=2Ranymef8fm') &&
           customOffers.includes('expires: "2026-10-18"') &&
-          customOffers.includes('Сам штрихкод в предоставленных данных отсутствует'),
+          customOffers.includes('Изображение и номер этого штрихкода партнёр пока не передал'),
   "Distinct in-store Podruzhka campaign must not fabricate missing barcode");
 assert.ok(campaignRegistry.includes('PAUSED_PROMO_BANNER_IDS.has(b.id)') &&
           campaignRegistry.includes('"sber-ulybatl-185-2026"') &&
@@ -250,3 +250,35 @@ assert.ok(mergedFeed.includes('if (c.store.slug === "winlab") return false') &&
   !customOffers.includes("...WINLAB_ROTATED_OFFERS_PENDING_ERID"),
   "Do not reactivate WinLab partner codes until its current ERID is verified");
 console.log("Urgent deals redesign and WinLab merchant preservation PASS");
+
+const brandAsset = fs.readFileSync("public/brands/podruzhka-mark.svg", "utf8");
+const brandRegistrySource = fs.readFileSync("src/lib/brandLogos.ts", "utf8");
+const storeLogoSource = fs.readFileSync("src/components/StoreLogo.tsx", "utf8");
+const stableRegistrySource = fs.readFileSync("src/lib/stableStores.ts", "utf8");
+const storeBrowserSource = fs.readFileSync("src/components/StoreCouponBrowser.tsx", "utf8");
+const podruzhkaRetail = customOffers.split("id: 50042,")[1]?.split("extraLinks:")[0] || "";
+const podruzhkaOnline = customOffers.split("id: 50041,")[1]?.split("extraLinks:")[0] || "";
+assert.ok(brandAsset.includes('viewBox="0 0 128 128"') &&
+  brandRegistrySource.includes('logoUrl: "/brands/podruzhka-mark.svg"') &&
+  stableRegistrySource.includes('"logo": "/brands/podruzhka-mark.svg"') &&
+  storeLogoSource.includes('slug === "podruzhka" ? "/brands/podruzhka-mark.svg"'),
+  "Podruzhka logo must use a stable, local store mark, not a failing remote favicon");
+assert.ok(podruzhkaOnline.includes('code: "2921098554627"') &&
+  podruzhkaOnline.includes("isBarcode: false") &&
+  podruzhkaRetail.includes('code: ""') &&
+  podruzhkaRetail.includes("isBarcode: true") &&
+  podruzhkaRetail.includes("barcodeImage: null") &&
+  podruzhkaRetail.includes("isHit: false"),
+  "Online and retail Podruzhka offers must have different mechanics and no invented barcode");
+assert.ok(ticket.includes("const missingBarcode = promocode.isBarcode && !promocode.code && !promocode.barcodeImage") &&
+  ticket.includes(') : missingBarcode ? (') &&
+  ticket.includes("Штрихкод ожидает загрузки") &&
+  ticket.includes('role="status"') &&
+  ticket.includes('Штрихкод ещё не предоставлен — показать его кассиру пока нельзя'),
+  "Retail barcode without source bytes must never look redeemable");
+assert.ok(storeBrowserSource.includes("hasRetailBarcodeOffer") &&
+  storeBrowserSource.includes("Онлайн-промокод и розничная акция по штрихкоду") &&
+  storeBrowserSource.includes("Штрихкод ожидается") === false &&
+  storeBrowserSource.includes("штрихкод ожидается"),
+  "Podruzhka dual-mechanic offers need explicit labels instead of generic audience filters");
+console.log("Podruzhka logo, online code and missing in-store barcode guards PASS");
