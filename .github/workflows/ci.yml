@@ -46,6 +46,22 @@ jobs:
           E2E_FIXTURES: "true"
         run: npm run test:e2e
 
+      # Real production QA: READ-ONLY. This checks current public pages rather
+      # than only the dev fixture server and never follows affiliate links.
+      # External network problems are reported but do not break code CI.
+      - name: Live production store pages and mobile QA
+        continue-on-error: true
+        run: node scripts/audit-production-pages.mjs
+
+      - name: Upload live QA screenshots (PR only)
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: promofact-live-store-mobile
+          path: audit-screenshots/live/*.png
+          if-no-files-found: warn
+          retention-days: 3
+
       # The screenshots are generated locally during Playwright (no Vercel
       # Preview deployments). Download these from the pull request's CI run.
       - name: Upload mobile UI audit screenshots (PR only)
