@@ -231,6 +231,7 @@ assert.ok(refinerSource.includes("const formattedTitle = title ||") &&
   "Offer titles must not be auto-truncated or display dangling minimum order clauses");
 console.log("PromoFact whole-site shared-card overflow and source-copy safeguards PASS");
 
+const mergedFeed = fs.readFileSync("src/lib/perfluence.ts", "utf8");
 const directoryForWinlab = fs.readFileSync("src/app/promokody/page.tsx", "utf8");
 const searchApiForWinlab = fs.readFileSync("src/app/api/search/route.ts", "utf8");
 const winlabLanding = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
