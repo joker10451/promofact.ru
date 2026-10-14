@@ -665,6 +665,32 @@ async function run() {
               });
             }
           }
+          if (pathUrl === "/store/podruzhka") {
+            const retailCard = page.locator("#coupon-50042");
+            const onlineCard = page.locator("#coupon-50041");
+            if (await retailCard.count()) {
+              assert.ok((await retailCard.innerText()).includes("Штрихкод для кассы"),
+                "Podruzhka retail must explicitly require a cashier barcode");
+              assert.ok((await retailCard.innerText()).includes("Штрихкод ожидает загрузки"),
+                "Missing retail barcode must be displayed as unavailable, not redeemable");
+              assert.equal(await retailCard.getByRole("link", { name: /Перейти к предложению/ }).count(), 0,
+                "Missing barcode cannot have a misleading redemption link");
+            }
+            if (await onlineCard.count()) {
+              assert.ok((await onlineCard.innerText()).includes("2921098554627"),
+                "The working online promo must remain visible and copyable");
+              assert.equal(await onlineCard.getByRole("button", { name: /Скопировать промокод/ }).count(), 1,
+                "Online promo must retain its copy action");
+            }
+            assert.ok(await page.locator('img[src="/brands/podruzhka-mark.svg"]').count() > 0,
+              "Podruzhka store mark must be local and not depend on an external favicon");
+            if (res.width === 390) {
+              await page.screenshot({
+                path: path.join(afterScreenshotsDir, "polish-podruzhka-390.png"),
+                fullPage: true, animations: "disabled",
+              });
+            }
+          }
           if (pathUrl === "/catalog?q=farfor") {
             await page.waitForFunction(
               () => document.querySelector("section#catalog")?.textContent?.includes("По выбранным фильтрам"),
