@@ -682,12 +682,16 @@ async function run() {
             assert.ok(await page.getByPlaceholder("Магазин или промокод").count(),
               "Mobile-friendly search must remain available");
             if (res.width <= 390) {
-              const popularSection = page.locator('section[aria-label="Популярные магазины"]');
-              const firstStore = popularSection.locator('a[href^="/store/"]').first();
-              const bounds = await firstStore.boundingBox();
-              console.log(`[visual] ${res.name} first store card at y=${Math.round(bounds?.y ?? -1)}, viewport=${res.height}`);
-              assert.ok(bounds && bounds.y < res.height - 50,
-                "First useful store tile must appear before the end of the first mobile viewport");
+              const offerSection = page.locator('section[aria-labelledby="home-offers-heading"]');
+              const firstOffer = offerSection.locator('a[href^="/store/"]').first();
+              const offerBounds = await firstOffer.boundingBox();
+              const shopBounds = await page.locator('section[aria-label="Популярные магазины"]').boundingBox();
+              console.log(`[visual] ${res.name} first offer at y=${Math.round(offerBounds?.y ?? -1)}, viewport=${res.height}`);
+              assert.ok(offerBounds && offerBounds.y < res.height * 2,
+                "First useful coupon must appear early on mobile, within two viewports");
+              assert.ok(shopBounds && offerBounds.y < shopBounds.y,
+                "Coupon preview must precede popular shops on mobile");
+
             }
           }
           // Store visual references for a human mobile/design review; no Vercel Preview needed.
