@@ -244,7 +244,7 @@ export function refineOffer(
 
   // 7. Дефолтный переход по ссылке без кода
   if (isNoCode) {
-    const formattedTitle = title.length > 38 ? cleanTruncate(title, 36) : title || "Скидка";
+    const formattedTitle = title || "Условия предложения";
     return {
       type: "default",
       discount: formattedTitle,
@@ -254,7 +254,7 @@ export function refineOffer(
     };
   }
 
-  const formattedTitle = title.length > 38 ? cleanTruncate(title, 36) : title || "Скидка";
+  const formattedTitle = title || "Условия предложения";
   return {
     type: "default",
     discount: formattedTitle,
@@ -319,7 +319,9 @@ function formatConditionPrefix(str: string): string {
     .replace(/[.,:;!?\s\-–—/|•·*]+$/g, "")
     .trim();
 
-  if (!trimmed) return "на заказ";
+  if (!trimmed) return "Уточните условия у магазина";
+  if (/(?:при\s+заказе|заказ|покупк[а-яё]*|от\s+чека)\s+от\s*$/i.test(trimmed)) return "Уточните минимальную сумму заказа";
+  if (/^(?:приобретайте|покупайте|получите|оформите|закажите|скидки|акции|акция|распродажа|специальные условия|повышенный кэшбэк|повышенный кешбэк)(?:\s|$)/i.test(trimmed)) return trimmed;
 
   // Убираем случайные дублированные предлоги и разделители вроде «на . на», «на на», «при на»
   trimmed = trimmed
