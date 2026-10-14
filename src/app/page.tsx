@@ -13,6 +13,7 @@ import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickExpiringDeals, offerKey } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
 import { isRealPromoCode } from "@/lib/dedupe";
+import { STABLE_STORES } from "@/lib/stableStores";
 
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -40,7 +41,10 @@ export default async function Home() {
   // Поиск в шапке работает на клиенте, поэтому получает лёгкий индекс, а не
   // полные объекты купонов и магазинов: иначе весь каталог уезжает в RSC-поток
   // и скачивается вместе с HTML каждым посетителем и каждым роботом.
-  const searchIndex = buildSearchIndex(stores, coupons);
+  const searchStores = stores.some((store) => store.slug === "winlab")
+    ? stores
+    : [...stores, { ...STABLE_STORES.winlab, activeBloggers: STABLE_STORES.winlab.activeBloggers ?? 0 }];
+  const searchIndex = buildSearchIndex(searchStores, coupons);
 
   return (
     <>
