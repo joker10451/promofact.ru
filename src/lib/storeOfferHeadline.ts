@@ -1,11 +1,12 @@
 import { isRealPromoCode } from "@/lib/dedupe";
 
-/** Search metadata must distinguish entered codes from code-free deals. */
-export function getStoreHeadlineOfferCounts(coupons: readonly { promocode: { code: string | null | undefined } }[]) {
+/** Search metadata distinguishes online codes, checkout barcodes and code-free deals. */
+export function getStoreHeadlineOfferCounts(coupons: readonly { promocode: { code: string | null | undefined; isBarcode?: boolean } }[]) {
   const offers = coupons.length;
-  const codes = coupons.filter((coupon) => isRealPromoCode(coupon.promocode.code)).length;
-  const codeFree = offers - codes;
-  return { offers, codes, codeFree };
+  const barcodes = coupons.filter((coupon) => coupon.promocode.isBarcode && isRealPromoCode(coupon.promocode.code)).length;
+  const codes = coupons.filter((coupon) => !coupon.promocode.isBarcode && isRealPromoCode(coupon.promocode.code)).length;
+  const codeFree = offers - codes - barcodes;
+  return { offers, codes, codeFree, barcodes };
 }
 
 export function pluralRu(n: number, one: string, few: string, many: string): string {
@@ -16,10 +17,11 @@ export function pluralRu(n: number, one: string, few: string, many: string): str
     : last === 1 ? one : last >= 2 && last <= 4 ? few : many;
 }
 
-export function formatStoreOfferCounts(codes: number, codeFree: number): string {
+export function formatStoreOfferCounts(codes: number, codeFree: number, barcodes = 0): string {
   const codeText = codes > 0 ? `${codes} ${pluralRu(codes, "промокод", "промокода", "промокодов")}` : "";
   const dealText = codeFree > 0 ? `${codeFree} ${pluralRu(codeFree, "акция", "акции", "акций")}` : "";
-  return [codeText, dealText].filter(Boolean).join(" и ");
+  const barcodeText = barcodes > 0 ? `${barcodes} ${pluralRu(barcodes, "штрихкод", "штрихкода", "штрихкодов")}` : "";
+  return [codeText, barcodeText, dealText].filter(Boolean).join(" и ");
 }
 
 export function formatStoreOfferTitle(options: {
@@ -27,13 +29,15 @@ export function formatStoreOfferTitle(options: {
   month: string;
   codes: number;
   codeFree: number;
+  barcodes?: number;
   maxDiscount?: string | null;
   searchBrandPromo?: boolean;
 }): string {
-  const { name, month, codes, codeFree, maxDiscount, searchBrandPromo } = options;
-  const total = codes + codeFree;
+  const { name, month, codes, codeFree, barcodes = 0, maxDiscount, searchBrandPromo } = options;
+  const total = codes + codeFree + barcodes;
   if(total <= 0) return `Скидки и акции ${name} на ${month}`;
-  const counts = formatStoreOfferCounts(codes,codeFree);
+  const counts = formatStoreOfferCounts(codes,codeFree,barcodes);
+  if (barcodes > 0) return `Промокоды и штрихкоды ${name} на ${month}: ${counts}`;
   if(codeFree === 0) {
     if(searchBrandPromo) return `Промокод ${name} на ${month}: ${counts}`;
     return maxDiscount
