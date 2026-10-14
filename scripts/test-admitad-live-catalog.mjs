@@ -45,3 +45,8 @@ const storePage=fs.readFileSync("src/app/store/[slug]/page.tsx","utf8");
 assert.match(storePage,/export const dynamicParams = true;/,
   "New post-deployment site-scoped stores must resolve rather than 404");
 console.log("Admitad live catalog: 437 site-approved rows visible, quarantines hidden, code-free placeholders, new store routes PASS");
+
+const offline={...ok,terms:"Акция проходит только в розничных магазинах"};
+assert.equal(isPublicAdmitadRow(offline,now),false);
+assert.equal(isPublicAdmitadRow({...ok,terms:"Возможна доставка из розничных магазинов"},now),true);
+console.log("Online catalog must not claim that offline-only deals work via an affiliate CTA PASS");

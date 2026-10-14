@@ -13,6 +13,8 @@ export interface RefinedOffer {
   condition: string;
   fullTerms: string;
   isNoCode: boolean;
+  /** Advertiser mentions a promo code but supplies none in the partner feed. */
+  missingCodeClaim?: boolean;
 }
 
 export function refineOffer(
@@ -32,6 +34,20 @@ export function refineOffer(
     .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
     .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
   const isNoCode = !code || code.trim() === "";
+  // Admitad sometimes supplies a campaign title "по промокоду", while the
+  // actual coupon field says "НЕ НУЖЕН". Never present that as a guaranteed
+  // discount by link or as a copyable code. Prefer the specific source terms.
+  const missingCodeClaim = isNoCode && /(?:^|\s)по\s+промокод[а-яё]*/i.test(title);
+  if (missingCodeClaim) {
+    return {
+      type: "default",
+      discount: cleanTruncate(terms || "Уточните условия предложения", 55),
+      condition: "В источнике промокод не указан",
+      fullTerms: terms || "Уточните условия у магазина перед оформлением заказа.",
+      isNoCode: true,
+      missingCodeClaim: true,
+    };
+  }
   const combined = `${title} ${terms}`;
 
   const minOrder = extractMinimumOrder(combined);
@@ -111,7 +127,7 @@ export function refineOffer(
       ? `При заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
       : isFirstOrder
       ? "на первый заказ"
-      : "по промокоду при оформлении заказа";
+      : isNoCode ? "подарок по условиям акции на сайте" : "по промокоду при оформлении заказа";
 
     return {
       type: "gift",
@@ -234,8 +250,8 @@ export function refineOffer(
     return {
       type: "default",
       discount: formattedTitle,
-      condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : "акция действует по ссылке без ввода кода",
-      fullTerms: terms || "Перейдите в магазин по кнопке, скидка применится автоматически в корзине.",
+      condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : "Условия акции смотрите у магазина",
+      fullTerms: terms || "Перейдите на страницу предложения и уточните условия акции у магазина.",
       isNoCode: true,
     };
   }

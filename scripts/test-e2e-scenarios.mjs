@@ -447,7 +447,7 @@ async function run() {
 
       // Проверяем страницу с предложением без промокода
       await page.goto(`${BASE_URL}/store/sberprime`, { waitUntil: "domcontentloaded" });
-      const noCodeBadge = page.locator("text=Промокод не требуется — скидка применится по ссылке").first();
+      const noCodeBadge = page.locator("text=Акция без кода — ознакомьтесь с условиями у магазина").first();
       await noCodeBadge.waitFor({ state: "visible", timeout: 3000 });
       console.log("  ✓ Предложения без промокодов корректно маркированы бейджем без имитации кода");
 

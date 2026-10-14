@@ -19,6 +19,10 @@ export function isPublicAdmitadRow(row: Record<string, unknown>, nowMs = Date.no
     if (url.protocol !== "https:" || url.username || url.password || url.port ||
         !url.hostname.includes(".") || url.searchParams.get("erid") !== marker) return false;
   } catch { return false; }
+  // Online coupon links cannot fulfill explicitly offline-only promotions.
+  // Do not silently turn "only in physical stores" into an online checkout CTA.
+  const text = String(row.terms || row.description || "").toLowerCase();
+  if (/только\s+в\s+розничных\s+магазинах|только\s+офлайн|исключительно\s+в\s+магазинах|в\s+офлайн-магазинах/i.test(text)) return false;
   const expires = row.expires;
   if (expires != null && String(expires).trim() !== "") {
     const value = String(expires).slice(0, 10);

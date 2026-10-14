@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { getCouponAudience } from "../src/lib/storeCouponAudience.ts";
 import { refineOffer } from "../src/lib/offerRefiner.ts";
 import { toCatalogCoupon } from "../src/lib/catalogCoupon.ts";
@@ -32,3 +33,29 @@ assert.equal(light.promocode.group,"admitad","Admitad origin must survive lightw
 assert.equal(light.affiliate.link,full.affiliate.link);
 assert.equal(light.affiliate.ordText,full.affiliate.ordText);
 console.log("CATALOG-QA-1: audience, gift and source preservation PASS");
+
+const missingCode = refineOffer("по промокоду", "Первый урок бесплатно", "", "Яндекс Практикум", false);
+assert.equal(missingCode.missingCodeClaim, true);
+assert.match(missingCode.discount, /Первый урок бесплатно/);
+assert.doesNotMatch(missingCode.discount, /по промокоду/i);
+assert.doesNotMatch(missingCode.condition, /скидка применится/i);
+const missingCodeLong = refineOffer("по промокоду при оформлении",
+  "Второй продукт в подарок при покупке первого", "", "hollyshop", false);
+assert.equal(missingCodeLong.type, "default");
+assert.match(missingCodeLong.discount, /Второй продукт/);
+const workingCode = refineOffer("скидка 10% по промокоду", "от 1000 рублей", "REAL10", "Davines", false);
+assert.equal(workingCode.missingCodeClaim, undefined);
+const storeBrowser = (await import("node:fs")).readFileSync("src/components/StoreCouponBrowser.tsx","utf8");
+assert.match(storeBrowser, /filteredCoupons\.slice\(0, visibleLimit\)/);
+assert.match(storeBrowser, /Показать ещё/);
+console.log("CATALOG-QA-2: missing-code honesty and progressive reveal PASS");
+
+// A code-free gift must never instruct users to apply a non-existent code.
+const noCodeGift = refineOffer("Подарок к заказу", "Подарок при заказе от 3000 ₽", "", "Davines", false);
+assert.equal(noCodeGift.isNoCode, true);
+assert.doesNotMatch(noCodeGift.condition,/по промокоду/i);
+const noCodeCopy = fs.readFileSync("src/lib/offerRefiner.ts","utf8");
+assert.ok(!noCodeCopy.includes('скидка применится автоматически в корзине.'));
+const storeHeading = fs.readFileSync("src/app/store/[slug]/page.tsx","utf8");
+assert.ok(!storeHeading.includes('hasGift ? " — подарки к заказу"'));
+console.log("Source-backed store headings and no-code gift claims PASS");

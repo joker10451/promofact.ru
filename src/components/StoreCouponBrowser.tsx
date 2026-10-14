@@ -25,6 +25,11 @@ export default function StoreCouponBrowser({
   storeProofCount,
 }: StoreCouponBrowserProps) {
   const [activeFilter, setActiveFilter] = useState<IntentFilter>("all");
+  const [visibleLimit, setVisibleLimit] = useState(9);
+  const handleFilterChange = (next: IntentFilter) => {
+    setActiveFilter(next);
+    setVisibleLimit(9);
+  };
 
   // null во время SSR и initial client render во избежание hydration mismatch.
   // Заполняется текущим временем сразу после монтирования.
@@ -113,7 +118,7 @@ export default function StoreCouponBrowser({
         firstCount={firstOrderCoupons.length}
         repeatCount={repeatOrderCoupons.length}
         universalCount={universalCoupons.length}
-        onTabChange={setActiveFilter}
+        onTabChange={handleFilterChange}
       />
 
       <div className="flex items-center justify-between mb-3.5">
@@ -135,23 +140,39 @@ export default function StoreCouponBrowser({
           <p className="font-bold text-ink/70">Сейчас предложений этого типа нет.</p>
           <button
             type="button"
-            onClick={() => setActiveFilter("all")}
+            onClick={() => handleFilterChange("all")}
             className="mt-3 inline-block font-bold text-red underline cursor-pointer"
           >
             Показать все акции
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredCoupons.map((coupon) => (
-            <CouponTicket
-              key={`${coupon.id}-${coupon.promocode.code}`}
-              coupon={coupon}
-              placement="store_coupon"
-              proofCount={usesMap[coupon.promocode.code] ?? 0}
-              storeProofCount={storeProofCount}
-            />
-          ))}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredCoupons.slice(0, visibleLimit).map((coupon) => (
+              <CouponTicket
+                key={`${coupon.id}-${coupon.promocode.code}`}
+                coupon={coupon}
+                placement="store_coupon"
+                proofCount={usesMap[coupon.promocode.code] ?? 0}
+                storeProofCount={storeProofCount}
+              />
+            ))}
+          </div>
+          {filteredCoupons.length > visibleLimit && (
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <span className="text-xs font-medium text-ink/55">
+                Показано {visibleLimit} из {filteredCoupons.length} предложений
+              </span>
+              <button
+                type="button"
+                onClick={() => setVisibleLimit((n) => n + 9)}
+                className="rounded-xl border border-line bg-white px-6 py-3 text-sm font-bold text-ink transition-colors hover:border-red hover:text-red"
+              >
+                Показать ещё {Math.min(9, filteredCoupons.length - visibleLimit)} предложений
+              </button>
+            </div>
+          )}
         </div>
       )}
     </>
