@@ -45,14 +45,16 @@ export default function StoreLogo({
   if (hasError || !initialUrl) {
     const letter = name.replace(/[^\p{L}\p{N}]/gu, "").charAt(0).toUpperCase() || "•";
     return (
-      <div
-        className={`flex h-full w-full items-center justify-center rounded-lg bg-gradient-to-br ${brandMeta.bgGradient} ${brandMeta.textColor} font-display text-base font-black shadow-2xs select-none`}
-        title={name}
-        aria-label={name}
-        role="img"
-      >
-        <span>{letter}</span>
-      </div>
+      <span className="inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }}>
+        <span
+          className={`flex h-full w-full items-center justify-center rounded-lg bg-gradient-to-br ${brandMeta.bgGradient} ${brandMeta.textColor} font-display text-base font-black shadow-2xs select-none`}
+          title={name}
+          aria-label={name}
+          role="img"
+        >
+          <span>{letter}</span>
+        </span>
+      </span>
     );
   }
 
