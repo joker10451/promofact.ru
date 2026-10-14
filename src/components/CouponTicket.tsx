@@ -326,7 +326,7 @@ export default function CouponTicket({
     // растягивало её шире экрана телефона (горизонтальный скролл страницы).
     <article
       id={`coupon-${coupon.id}`}
-      className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-xs scroll-mt-24"
+      className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-white p-4 sm:p-5 shadow-2xs transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-md focus-within:border-ink/30 focus-within:shadow-md scroll-mt-24"
     >
       {/* 1. Верхняя строка: Логотип + Название + Бейджи */}
       <div>
@@ -388,7 +388,7 @@ export default function CouponTicket({
               </span>
             ) : (
               <span className="rounded-full bg-paper border border-line px-2 py-0.5 text-[10px] font-bold text-ink/60">
-                Для всех
+                Уточните условия
               </span>
             )}
           </div>
@@ -396,7 +396,7 @@ export default function CouponTicket({
 
         {/* 2. Главный акцент — визуально разный для каждого типа */}
         <div className="mt-3.5 mb-2.5 min-h-[68px] flex flex-col justify-center">
-          {/* Тип: subscription — синяя плашка, «<Icon name="sparkle" size={11} /> Промокод не требуется» */}
+          {/* Тип: subscription — синяя плашка, «<Icon name="sparkle" size={11} /> {offer.isNoCode ? "Без промокода" : "Промокод доступен ниже"}» */}
           {offer.type === "subscription" ? (
             <div className="rounded-xl bg-blue-50 border border-blue-200 px-3 py-2.5">
               <div className={`font-display ${discountSizeClass} text-[#1a56db] font-black`}>
