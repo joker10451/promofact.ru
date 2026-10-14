@@ -43,8 +43,8 @@ function TableCopyButton({ code }: { code: string }) {
   };
 
   return (
-    <div className="flex items-center gap-1.5">
-      <code className="rounded-lg bg-yellow/30 border border-yellow px-2 py-1 font-mono text-xs font-extrabold text-ink tracking-wide">
+    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+      <code className="min-w-0 break-all rounded-lg bg-yellow/30 border border-yellow px-2 py-1 font-mono text-xs font-extrabold text-ink tracking-wide">
         {code}
       </code>
       <button
@@ -73,10 +73,7 @@ function formatExpiryDate(rawExpires: string | null | undefined): string {
       // fallback below
     }
   }
-  const now = new Date();
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const monthName = now.toLocaleDateString("ru-RU", { month: "short" });
-  return `до ${lastDay} ${monthName}`;
+  return "Срок не указан";
 }
 
 export default function StoreSummaryTable({
@@ -113,13 +110,48 @@ export default function StoreSummaryTable({
             </p>
           </div>
           <span className="self-start sm:self-auto rounded-full bg-mint/15 border border-mint/30 px-2.5 py-0.5 text-[11px] font-bold text-mint-dark">
-            Обновлено сегодня
+            Проверяйте условия
           </span>
         </div>
       </div>
 
-      {/* Табличная часть с горизонтальным скроллом на мобильных */}
-      <div className="overflow-x-auto">
+      {/* Mobile: native stacked offer cards. Desktop keeps semantic comparison table. */}
+      <div className="grid gap-3 p-3 md:hidden">
+        {coupons.map((coupon) => {
+          const code = isRealPromoCode(coupon.promocode.code) ? coupon.promocode.code : "";
+          const refined = refineOffer(
+            coupon.promocode.bonusName || "",
+            coupon.promocode.terms || "",
+            code,
+            storeName,
+            coupon.promocode.isFirstOrderOnly,
+          );
+          const audience = coupon.promocode.customerTypeLabel ||
+            (coupon.promocode.isFirstOrderOnly ? "Первый заказ" : "Уточните условия");
+          const affLink = coupon.affiliate.link || coupon.store.site || `/store/${storeSlug}`;
+          return (
+            <article key={`mobile-${coupon.id}-${code}`} className="min-w-0 space-y-3 rounded-xl border border-line bg-white p-3">
+              <div className="break-words [overflow-wrap:anywhere] font-display text-base font-extrabold leading-snug text-ink">{refined.discount}</div>
+              <p className="break-words [overflow-wrap:anywhere] text-xs leading-relaxed text-ink/75">{refined.condition}</p>
+              <TableCopyButton code={code} />
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink/60">
+                <span>{audience}</span>
+                <span>{formatExpiryDate(coupon.promocode.expires)}</span>
+              </div>
+              <a href={affLink} target="_blank" rel="nofollow sponsored noopener"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-red px-3 py-2 text-sm font-bold text-white">
+                Перейти в магазин →
+              </a>
+              {coupon.affiliate.ordText && (
+                <p className="break-words [overflow-wrap:anywhere] text-[11px] leading-relaxed text-ink/60">{coupon.affiliate.ordText}</p>
+              )}
+            </article>
+          );
+        })}
+      </div>
+
+      {/* Full comparison grid only when the columns fit. */}
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[680px] text-left text-sm border-collapse">
           <caption className="sr-only">{headingText}</caption>
           <thead className="border-b border-line bg-paper text-[11px] font-extrabold uppercase tracking-wider text-ink/55">
@@ -144,7 +176,7 @@ export default function StoreSummaryTable({
                 isFirst
               );
 
-              const customerLabel = coupon.promocode.customerTypeLabel || (isFirst ? "Первый заказ" : "Для всех");
+              const customerLabel = coupon.promocode.customerTypeLabel || (isFirst ? "Первый заказ" : "Уточните условия");
               const isRepeat = /повтор/i.test(customerLabel);
               const isOnlyNew = /перв/i.test(customerLabel) && !isRepeat;
 
@@ -172,7 +204,7 @@ export default function StoreSummaryTable({
                   </td>
 
                   {/* 3. Условия */}
-                  <td className="px-4 sm:px-5 py-3.5 text-xs text-ink/75 max-w-xs">
+                  <td className="max-w-xs break-words [overflow-wrap:anywhere] px-4 sm:px-5 py-3.5 text-xs text-ink/75">
                     {refined.condition}
                   </td>
 
@@ -191,7 +223,7 @@ export default function StoreSummaryTable({
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full bg-paper border border-line px-2 py-0.5 text-[11px] font-bold text-ink/65">
                         <Icon name="check" size={14} />
-                        <span>Для всех</span>
+                        <span>Уточните условия</span>
                       </span>
                     )}
                   </td>
