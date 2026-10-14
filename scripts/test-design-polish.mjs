@@ -256,8 +256,8 @@ const brandRegistrySource = fs.readFileSync("src/lib/brandLogos.ts", "utf8");
 const storeLogoSource = fs.readFileSync("src/components/StoreLogo.tsx", "utf8");
 const stableRegistrySource = fs.readFileSync("src/lib/stableStores.ts", "utf8");
 const storeBrowserSource = fs.readFileSync("src/components/StoreCouponBrowser.tsx", "utf8");
-const podruzhkaRetail = customOffers.split("id: 50042,")[1]?.split("extraLinks:")[0] || "";
-const podruzhkaOnline = customOffers.split("id: 50041,")[1]?.split("extraLinks:")[0] || "";
+const podruzhkaRetail = customOffers.split("  {\n    id: 50042,")[1]?.split("extraLinks:")[0] || "";
+const podruzhkaOnline = customOffers.split("  {\n    id: 50041,")[1]?.split("extraLinks:")[0] || "";
 assert.ok(brandAsset.includes('viewBox="0 0 128 128"') &&
   brandRegistrySource.includes('logoUrl: "/brands/podruzhka-mark.svg"') &&
   stableRegistrySource.includes('"logo": "/brands/podruzhka-mark.svg"') &&
