@@ -273,7 +273,7 @@ async function run() {
 
       // Находим первую карточку купона
       const firstCard = page.locator('article[id^="coupon-"]').first();
-      const codeElement = firstCard.locator('div[role="button"] span.select-all');
+      const codeElement = firstCard.locator('div[role="button"] span.truncate');
       const expectedCode = (await codeElement.innerText()).trim();
 
       const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
@@ -643,18 +643,12 @@ async function run() {
               if (rect.width > 0 && (rect.left < -2 || rect.right > innerWidth + 2)) {
                 failures.push("card beyond viewport: " + card.id);
               }
-              for (const child of card.querySelectorAll("p, h2, h3, a, span, code")) {
-                const style = getComputedStyle(child);
-                const clamp = Number.parseInt(style.webkitLineClamp, 10);
-                if (clamp > 0 ||
-                    (style.textOverflow === "ellipsis" && child.scrollWidth > child.clientWidth + 2)) {
-                  failures.push("text clipped: " + card.id + " " + (child.textContent || "").slice(0, 55));
-                }
-              }
+              // The restored historical card design intentionally uses short
+              // two-line previews. Full terms remain available on the coupon.
             }
             return failures.slice(0, 8);
           });
-          assert.deepEqual(textClipping, [], `No truncated coupon content on ${pathUrl} at ${res.name}: ${textClipping.join("; ")}`);
+          assert.deepEqual(textClipping, [], `No horizontally overflowing coupon cards on ${pathUrl} at ${res.name}: ${textClipping.join("; ")}`);
 
           if (pathUrl === "/category/kosmetika-i-parfyumeriya" && res.width <= 390) {
             const firstCard = page.locator('article[id^="coupon-"]').first();
@@ -668,7 +662,8 @@ async function run() {
           if (pathUrl === "/store/podruzhka") {
             const retailCard = page.locator("#coupon-50042");
             const onlineCard = page.locator("#coupon-50041");
-            if (await retailCard.count()) {
+            assert.equal(await retailCard.count(), 1, "Podruzhka retail barcode must be present in the local published feed");
+            {
               assert.equal(await retailCard.getByRole("img", { name: "Штрихкод 2921098553491" }).count(), 1,
                 "Podruzhka retail EAN-13 graphic must match the supplied barcode");
               assert.ok((await retailCard.innerText()).includes("2921098553491"),
@@ -678,7 +673,8 @@ async function run() {
               assert.equal(await retailCard.getByRole("link", { name: /Перейти к предложению/ }).count(), 0,
                 "Retail barcode is presented on the card instead of generic code-free offer link");
             }
-            if (await onlineCard.count()) {
+            assert.equal(await onlineCard.count(), 1, "Podruzhka online coupon must be present in the local published feed");
+            {
               assert.ok((await onlineCard.innerText()).includes("2921098554627"),
                 "The working online promo must remain visible and copyable");
               assert.equal(await onlineCard.getByRole("button", { name: /Скопировать промокод/ }).count(), 1,
@@ -747,15 +743,12 @@ async function run() {
             assert.ok(await page.getByPlaceholder("Магазин или промокод").count(),
               "Mobile-friendly search must remain available");
             if (res.width <= 390) {
-              const offerSection = page.locator('section[aria-labelledby="home-offers-heading"]');
-              const firstOffer = offerSection.locator('a[href^="/store/"]').first();
-              const offerBounds = await firstOffer.boundingBox();
+              const offerBounds = await page.locator('section[aria-labelledby="home-offers-heading"]').boundingBox();
               const shopBounds = await page.locator('section[aria-label="Популярные магазины"]').boundingBox();
-              console.log(`[visual] ${res.name} first offer at y=${Math.round(offerBounds?.y ?? -1)}, viewport=${res.height}`);
-              assert.ok(offerBounds && offerBounds.y < res.height * 2,
-                "First useful coupon must appear early on mobile, within two viewports");
-              assert.ok(shopBounds && offerBounds.y < shopBounds.y,
-                "Coupon preview must precede popular shops on mobile");
+              const expiringBounds = await page.locator('#expiring').boundingBox();
+              assert.ok(shopBounds && expiringBounds && offerBounds &&
+                shopBounds.y < expiringBounds.y && expiringBounds.y < offerBounds.y,
+                "Restore October 13 layout: popular shops, expiring deals, then coupon preview");
 
             }
           }
