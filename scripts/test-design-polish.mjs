@@ -27,8 +27,9 @@ assert.ok(shops.includes('section aria-label="Популярные магази�
           shops.includes("index >= 6") &&
           shops.includes("s.coupons.length"),
   "Keep all real shop logos/counts; cap mobile display to six");
-assert.ok(home.indexOf("<PopularStores />") < home.indexOf("<ExpiringDeals"),
-  "Show real shops promptly, before urgent deals");
+assert.ok(home.indexOf("<HomeOffersPreview") < home.indexOf("<PopularStores />") &&
+          home.indexOf("<PopularStores />") < home.indexOf("<ExpiringDeals"),
+  "Show real coupon preview immediately after search, before shops and urgent deals");
 assert.ok(home.indexOf("<HomeOffersPreview") < home.indexOf("<SberCampaignTeasers"),
   "Real offer preview must precede sponsor advertisements");
 const guide = fs.readFileSync("src/app/guide/page.tsx", "utf8");
@@ -60,7 +61,7 @@ const sitemap = fs.readFileSync("src/app/sitemap.ts", "utf8");
 
 assert.ok(home.includes("<CategoryPreview />") &&
           home.indexOf("<PopularStores />") < home.indexOf("<CategoryPreview />") &&
-          home.indexOf("<CategoryPreview />") < home.indexOf("<HomeOffersPreview") &&
+          home.indexOf("<HomeOffersPreview") < home.indexOf("<PopularStores />") &&
           !home.includes("<VisualCategoryTiles />"),
   "Home must preview categories before coupon cards, not render a second full catalogue");
 assert.ok(categoryPreview.includes(".slice(0, 6)") &&
