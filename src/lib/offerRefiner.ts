@@ -55,7 +55,7 @@ export function refineOffer(
   // 1. Фиксированные спец-предложения и подписки (Иви, СберПрайм, Яндекс Плюс, Start.ru, Premier)
   const daysMatch = title.match(/(\d+)\s*(?:дней|дня|день)/i);
   if (
-    (daysMatch || /подписк\w*\s+(плюс|кинопоиск|яндекс|сбер|иви|ivi|start|premier|okko)/i.test(title)) &&
+    (daysMatch || /подписк/i.test(title)) &&
     !/(\d+)\s*%/.test(title) &&
     /подписк|доступ|пробн|бесплатн|кинотеатр/i.test(combined)
   ) {
