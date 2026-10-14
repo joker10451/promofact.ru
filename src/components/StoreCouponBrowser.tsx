@@ -97,6 +97,8 @@ export default function StoreCouponBrowser({
     [activeCoupons],
   );
 
+  const hasRetailBarcodeOffer = storeName === "Подружка" && activeCoupons.some((c) => c.promocode.isBarcode);
+
   const filteredCoupons = useMemo(() => {
     switch (activeFilter) {
       case "first-order":
@@ -112,24 +114,43 @@ export default function StoreCouponBrowser({
 
   return (
     <>
-      <StoreIntentTabs
-        activeTab={activeFilter}
-        allCount={activeCoupons.length}
-        firstCount={firstOrderCoupons.length}
-        repeatCount={repeatOrderCoupons.length}
-        universalCount={universalCoupons.length}
-        onTabChange={handleFilterChange}
-      />
+      {hasRetailBarcodeOffer ? (
+        <div className="mb-4 grid gap-2 rounded-2xl border border-violet-200 bg-violet-50/70 p-3 text-xs font-semibold text-violet-900 sm:grid-cols-2 sm:p-4">
+          <div className="rounded-xl bg-white/80 p-3">
+            <span className="block font-extrabold">Онлайн-покупка</span>
+            <span className="mt-1 block leading-relaxed">Введите промокод при оформлении заказа на сайте.</span>
+          </div>
+          <div className="rounded-xl bg-white/80 p-3">
+            <span className="block font-extrabold">Покупка в магазине</span>
+            <span className="mt-1 block leading-relaxed">Нужен отдельный штрихкод для кассы. Он пока не предоставлен.</span>
+          </div>
+        </div>
+      ) : (
+        <StoreIntentTabs
+          activeTab={activeFilter}
+          allCount={activeCoupons.length}
+          firstCount={firstOrderCoupons.length}
+          repeatCount={repeatOrderCoupons.length}
+          universalCount={universalCoupons.length}
+          onTabChange={handleFilterChange}
+        />
+      )}
 
-      <div className="flex items-center justify-between mb-3.5">
+      <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-display text-base sm:text-lg font-extrabold text-ink">
-          {storeName.length > 25 ? "Рабочие промокоды и акции" : `Рабочие промокоды и акции ${storeName}`}
+          {hasRetailBarcodeOffer
+            ? "Онлайн-промокод и розничная акция по штрихкоду"
+            : storeName.length > 25 ? "Рабочие промокоды и акции" : `Рабочие промокоды и акции ${storeName}`}
         </h2>
         <span className="text-xs font-bold text-ink/50 bg-paper px-2.5 py-1 rounded-full border border-line">
           {filteredCoupons.length === 0
             ? "0 предложений"
             : (() => {
                 const { codes, codeFree } = getStoreHeadlineOfferCounts(filteredCoupons);
+                if (hasRetailBarcodeOffer) {
+                  const pendingBarcodes = filteredCoupons.filter((c) => c.promocode.isBarcode && !c.promocode.code && !c.promocode.barcodeImage).length;
+                  return `${codes} промокод · ${pendingBarcodes} штрихкод ожидается`;
+                }
                 return formatStoreOfferCounts(codes, codeFree);
               })()}
         </span>
