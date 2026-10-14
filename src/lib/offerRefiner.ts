@@ -59,21 +59,19 @@ export function refineOffer(
     !/(\d+)\s*%/.test(title) &&
     /подписк|доступ|пробн|бесплатн|кинотеатр/i.test(combined)
   ) {
-    const isSber = /сбер/i.test(combined) || /сбер/i.test(storeName);
-    const days = daysMatch ? daysMatch[1] : isSber ? "60" : "30";
-    let disc = `${days} дней за 1 ₽`;
-    if (/бесплатн|за\s*0\s*₽/i.test(combined)) {
-      disc = `${days} дней бесплатно`;
-    }
+    // Не выводим цену, срок или аудиторию, которых нет в данных рекламодателя.
+    const priceMatch = combined.match(/(?:за|по цене)\s*(\d[\d\s]*)\s*(₽|руб(?:лей|ля|\.)?)/i);
+    const explicitlyFree = /(?:бесплатн|за\s*0\s*₽)/i.test(combined);
+    const duration = daysMatch?.[1];
+    const price = priceMatch ? `${Number(priceMatch[1].replace(/\s/g, "")).toLocaleString("ru-RU")} ₽` : null;
+    const disc = duration
+      ? `${duration} дней${explicitlyFree ? " бесплатно" : price ? ` за ${price}` : " доступа"}`
+      : cleanTruncate(title || terms || `Подписка ${storeName}`, 55);
     return {
       type: "subscription",
       discount: disc,
-      condition: `подписка ${storeName} для новых пользователей`,
-      fullTerms:
-        terms ||
-        (isSber
-          ? "Оформите пробный период СберПрайм 60 дней за 1 ₽ при переходе по ссылке."
-          : `${days} дней доступа к подписке ${storeName}. Только для новых пользователей при активации промокода.`),
+      condition: isFirstOrder ? "для новых пользователей" : "Условия подписки уточняйте у магазина",
+      fullTerms: terms || title || "Уточните условия подписки у магазина.",
       isNoCode,
     };
   }
