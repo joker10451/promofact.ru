@@ -14,7 +14,7 @@ interface StoreSummaryTableProps {
   subtitle?: string;
 }
 
-function TableCopyButton({ code }: { code: string }) {
+function TableCopyButton({ code, isBarcode = false }: { code: string; isBarcode?: boolean }) {
   const [copied, setCopied] = useState(false);
 
   if (!code) {
@@ -49,7 +49,7 @@ function TableCopyButton({ code }: { code: string }) {
       </code>
       <button
         onClick={handleCopy}
-        title="Скопировать промокод"
+        title={isBarcode ? "Скопировать номер штрихкода" : "Скопировать промокод"}
         className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all shrink-0 ${
           copied
             ? "bg-mint text-ink shadow-2xs"
@@ -133,7 +133,7 @@ export default function StoreSummaryTable({
             <article key={`mobile-${coupon.id}-${code}`} className="min-w-0 space-y-3 rounded-xl border border-line bg-white p-3">
               <div className="break-words [overflow-wrap:anywhere] font-display text-base font-extrabold leading-snug text-ink">{refined.discount}</div>
               <p className="break-words [overflow-wrap:anywhere] text-xs leading-relaxed text-ink/75">{refined.condition}</p>
-              <TableCopyButton code={code} />
+              <div className="space-y-1">{coupon.promocode.isBarcode && <span className="block text-[11px] font-bold text-violet-700">Штрихкод для кассы</span>}<TableCopyButton code={code} isBarcode={coupon.promocode.isBarcode} /></div>
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink/60">
                 <span>{audience}</span>
                 <span>{formatExpiryDate(coupon.promocode.expires)}</span>
@@ -200,7 +200,7 @@ export default function StoreSummaryTable({
 
                   {/* 2. Промокод с копированием */}
                   <td className="px-4 sm:px-5 py-3.5">
-                    <TableCopyButton code={code} />
+                    <div className="space-y-1">{coupon.promocode.isBarcode && <span className="block text-[11px] font-bold text-violet-700">Штрихкод для кассы</span>}<TableCopyButton code={code} isBarcode={coupon.promocode.isBarcode} /></div>
                   </td>
 
                   {/* 3. Условия */}
