@@ -273,7 +273,7 @@ async function run() {
 
       // Находим первую карточку купона
       const firstCard = page.locator('article[id^="coupon-"]').first();
-      const codeElement = firstCard.locator('div[role="button"] span.select-all');
+      const codeElement = firstCard.locator('div[role="button"] span.truncate');
       const expectedCode = (await codeElement.innerText()).trim();
 
       const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
