@@ -611,6 +611,7 @@ async function run() {
         "/store/hollyshop",
         "/store/magnit-dostavka",
         "/store/m-kosmetik",
+        "/store/citydrive",
         "/store/podruzhka",
         "/store/winlab",
         "/collections/first-order",
@@ -658,6 +659,24 @@ async function run() {
                 path: path.join(afterScreenshotsDir, `polish-cosmetics-card-${res.width}.png`),
                 animations: "disabled",
               });
+            }
+          }
+          if (pathUrl === "/store/citydrive") {
+            const offers = page.locator('article[id^="coupon-"]');
+            assert.ok((await offers.count()) >= 4,
+              "Citydrive must show at least four publisher-approved codes");
+            const expected = [
+              ["PERFCITY107", "2Ranykexfns"],
+              ["SAVE1480", "2RanykbzhEB"],
+              ["1500DRIVE202", "2RanykbzhEB"],
+              ["BACK163", "2RanykbzhEB"],
+            ];
+            for (const [code, erid] of expected) {
+              const card = page.locator('article[id^="coupon-"]').filter({ hasText: code }).first();
+              assert.equal(await card.count(), 1,
+                `Missing Citydrive coupon ${code} at ${res.width}px`);
+              assert.ok((await card.innerText()).includes(erid),
+                `Incorrect Citydrive publishing ERID for ${code}`);
             }
           }
           if (pathUrl === "/store/m-kosmetik") {

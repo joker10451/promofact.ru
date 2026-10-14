@@ -212,3 +212,31 @@ assert.ok(mergedOffers.includes("SOURCE_MEMORY_TTL_MS = 15 * 60 * 1000") &&
   mergedOffers.includes("{ revalidate: 900 }"),
   "Perfluence source caches must refresh so fresh valid vouchers cannot disappear permanently");
 console.log("M.Kosmetik restored partner offers and renewable source caches PASS");
+
+const citydriveOffers = rotated.split("export const CITYDRIVE_APPROVED_OFFERS: Coupon[] = [")[1]?.split("\n];")[0] ?? "";
+const citydriveFirstPlacement = rotated.split('const citydriveFirstAd: Coupon["affiliate"] = {')[1]?.split("\n};")[0] ?? "";
+const citydriveAppPlacement = rotated.split('const citydriveAppAd: Coupon["affiliate"] = {')[1]?.split("\n};")[0] ?? "";
+for (const code of ["PERFCITY107", "SAVE1480", "1500DRIVE202", "BACK163"]) {
+  assert.ok(citydriveOffers.includes('"' + code + '"'),
+    `Every approved Citydrive code must appear: ${code}`);
+}
+assert.ok(customOffers.includes("...CITYDRIVE_APPROVED_OFFERS") &&
+  citydriveOffers.includes('"2026-10-31"') &&
+  citydriveFirstPlacement.includes("CITYDRIVE_FIRST_LINK") &&
+  citydriveFirstPlacement.includes('2Ranykexfns') &&
+  citydriveAppPlacement.includes("CITYDRIVE_APP_LINK") &&
+  citydriveAppPlacement.includes('2RanykbzhEB') &&
+  rotated.includes("https://citydrive.prfl.me/sites/tnp7jq?erid=2Ranykexfns") &&
+  rotated.includes("https://citydrive.prfl.me/sites/pqng58?erid=2RanykbzhEB") &&
+  rotated.includes("ИНН 7704314221, ОГРН 1157746368999"),
+  "Citydrive placements must preserve the separate approved links, tokens, legal advertiser and expiration");
+assert.ok(citydriveOffers.includes('offer(81483071, citydrive, citydriveFirstAd, "PERFCITY107"') &&
+  citydriveOffers.includes('offer(81483072, citydrive, citydriveAppAd, "SAVE1480"') &&
+  citydriveOffers.includes('offer(81483073, citydrive, citydriveAppAd, "1500DRIVE202"') &&
+  citydriveOffers.includes('offer(81483074, citydrive, citydriveAppAd, "BACK163"') &&
+  citydriveOffers.includes('"Первая поездка в Ситидрайв с сертификатом OZON"') &&
+  citydriveOffers.includes('"Скидка 50% в приложении Ситидрайв"') &&
+  citydriveOffers.includes('"Скидка 1 500 ₽ в приложении Ситидрайв"') &&
+  citydriveOffers.includes('Размер бонуса не предоставлен'),
+  "Show exactly the source-backed benefits without inventing a value for BACK163 or certificate");
+console.log("Citydrive: four codes, two authorized placements, source-backed restrictions PASS");
