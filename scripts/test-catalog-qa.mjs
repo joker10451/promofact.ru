@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { getCouponAudience } from "../src/lib/storeCouponAudience.ts";
 import { refineOffer } from "../src/lib/offerRefiner.ts";
 import { toCatalogCoupon } from "../src/lib/catalogCoupon.ts";
