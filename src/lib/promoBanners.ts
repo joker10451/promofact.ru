@@ -43,6 +43,9 @@ export interface PromoBanner {
   exactCopy?: string;
 }
 
+/** Perfluence notice 13 October 2026: Ulybatl campaign temporarily paused. */
+export const PAUSED_PROMO_BANNER_IDS = new Set(["sber-ulybatl-185-2026"]);
+
 export const PROMO_BANNERS: PromoBanner[] = [
   {
     id: "sber-kids-card-10000-500-2026",
@@ -398,6 +401,7 @@ export function getActivePromoBanners(opts: { storeSlug?: string; now?: number }
   const now = opts.now ?? Date.now();
   return PROMO_BANNERS.filter(
     (b) =>
+      !PAUSED_PROMO_BANNER_IDS.has(b.id) &&
       now >= bannerStartMs(b) - PREFETCH_MS &&
       now <= mskDayEnd(b.endsAt) &&
       (!opts.storeSlug ||
