@@ -190,8 +190,8 @@ assert.ok(customOffers.includes('code: "2921098554627"') &&
   "Podruzhka online gift must use current code, expiry and approved affiliate placement");
 assert.ok(customOffers.includes('sites/xza4uw?erid=2Ranymef8fm') &&
           customOffers.includes('expires: "2026-10-18"') &&
-          customOffers.includes('Изображение и номер этого штрихкода партнёр пока не передал'),
-  "Distinct in-store Podruzhka campaign must not fabricate missing barcode");
+          customOffers.includes('штрихкоду 2921098553491'),
+  "Distinct in-store Podruzhka campaign uses the supplied barcode");
 assert.ok(campaignRegistry.includes('PAUSED_PROMO_BANNER_IDS.has(b.id)') &&
           campaignRegistry.includes('"sber-ulybatl-185-2026"') &&
           ulybatlLanding.includes('PAUSED_PROMO_BANNER_IDS.has(campaign.id)'),
@@ -265,11 +265,11 @@ assert.ok(brandAsset.includes('viewBox="0 0 128 128"') &&
   "Podruzhka logo must use a stable, local store mark, not a failing remote favicon");
 assert.ok(podruzhkaOnline.includes('code: "2921098554627"') &&
   podruzhkaOnline.includes("isBarcode: false") &&
-  podruzhkaRetail.includes('code: ""') &&
+  podruzhkaRetail.includes('code: "2921098553491"') &&
   podruzhkaRetail.includes("isBarcode: true") &&
   podruzhkaRetail.includes("barcodeImage: null") &&
   podruzhkaRetail.includes("isHit: false"),
-  "Online and retail Podruzhka offers must have different mechanics and no invented barcode");
+  "Online and retail Podruzhka must have different codes and distinct redemption mechanics");
 assert.ok(ticket.includes("const missingBarcode = promocode.isBarcode && !promocode.code && !promocode.barcodeImage") &&
   ticket.includes(') : missingBarcode ? (') &&
   ticket.includes("Штрихкод ожидает загрузки") &&
@@ -278,7 +278,20 @@ assert.ok(ticket.includes("const missingBarcode = promocode.isBarcode && !promoc
   "Retail barcode without source bytes must never look redeemable");
 assert.ok(storeBrowserSource.includes("hasRetailBarcodeOffer") &&
   storeBrowserSource.includes("Онлайн-промокод и розничная акция по штрихкоду") &&
-  storeBrowserSource.includes("Штрихкод ожидается") === false &&
-  storeBrowserSource.includes("штрихкод ожидается"),
+  storeBrowserSource.includes("2921098553491") &&
+  storeBrowserSource.includes("штрихкод"),
   "Podruzhka dual-mechanic offers need explicit labels instead of generic audience filters");
 console.log("Podruzhka logo, online code and missing in-store barcode guards PASS");
+
+const podruzhkaBarcodeValue = "2921098553491";
+const digits = podruzhkaBarcodeValue.split("").map(Number);
+const ean13Check = (10 - (digits.slice(0,12).reduce((sum,d,i) => sum + d * (i % 2 === 0 ? 1 : 3),0) % 10)) % 10;
+assert.equal(digits[12],ean13Check, "Uploaded Podruzhka barcode must have a correct EAN-13 checksum");
+assert.ok(podruzhkaRetail.includes("isBarcode: true") && podruzhkaOnline.includes("isBarcode: false") &&
+  podruzhkaRetail.includes('code: "2921098553491"') && podruzhkaOnline.includes('code: "2921098554627"'),
+  "Barcode and web checkout voucher must be distinct and correctly typed");
+const headlineSource = fs.readFileSync("src/lib/storeOfferHeadline.ts","utf8");
+assert.ok(headlineSource.includes("barcodes = coupons.filter") &&
+  headlineSource.includes("formatStoreOfferCounts(codes: number, codeFree: number, barcodes = 0)"),
+  "Merchant offer count must distinguish barcode from promo code");
+console.log("Podruzhka verified supplied EAN-13 and separate web coupon PASS");

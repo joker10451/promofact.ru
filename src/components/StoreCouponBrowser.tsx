@@ -122,7 +122,7 @@ export default function StoreCouponBrowser({
           </div>
           <div className="rounded-xl bg-white/80 p-3">
             <span className="block font-extrabold">Покупка в магазине</span>
-            <span className="mt-1 block leading-relaxed">Нужен отдельный штрихкод для кассы. Он пока не предоставлен.</span>
+            <span className="mt-1 block leading-relaxed">Покажите штрихкод 2921098553491 кассиру до оплаты. Онлайн-код для этой акции не подходит.</span>
           </div>
         </div>
       ) : (
@@ -148,8 +148,9 @@ export default function StoreCouponBrowser({
             : (() => {
                 const { codes, codeFree } = getStoreHeadlineOfferCounts(filteredCoupons);
                 if (hasRetailBarcodeOffer) {
-                  const pendingBarcodes = filteredCoupons.filter((c) => c.promocode.isBarcode && !c.promocode.code && !c.promocode.barcodeImage).length;
-                  return `${codes} промокод · ${pendingBarcodes} штрихкод ожидается`;
+                  const barcodeCount = filteredCoupons.filter((c) => c.promocode.isBarcode && !!c.promocode.code).length;
+                  const onlineCodeCount = filteredCoupons.filter((c) => !c.promocode.isBarcode && !!c.promocode.code).length;
+                  return `${onlineCodeCount} промокод · ${barcodeCount} штрихкод`;
                 }
                 return formatStoreOfferCounts(codes, codeFree);
               })()}

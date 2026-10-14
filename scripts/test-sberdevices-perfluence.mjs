@@ -8,7 +8,7 @@ import { getStoreHeadlineOfferCounts } from "../src/lib/storeOfferHeadline.ts";
 const coupons = CUSTOM_COUPONS.filter(c => c.store.slug === "sberdevaysy");
 assert.equal(coupons.length, 2, "Approved SberDevices placement requires exactly two codes");
 assert.deepEqual(coupons.map(c => c.promocode.code).sort(), ["Sberdv171", "Sberdv71"].sort());
-assert.deepEqual(getStoreHeadlineOfferCounts(coupons), { offers: 2, codes: 2, codeFree: 0 });
+assert.deepEqual(getStoreHeadlineOfferCounts(coupons), { offers: 2, codes: 2, codeFree: 0, barcodes: 0 });
 const pct = new Map([["Sberdv171", 6], ["Sberdv71", 5]]);
 const link = "https://sberdevaysy1.prfl.me/sites/fq4aly?erid=2RanymNsVkw";
 for (const coupon of coupons) {
