@@ -612,6 +612,7 @@ async function run() {
         "/store/magnit-dostavka",
         "/store/m-kosmetik",
         "/store/citydrive",
+        "/store/ivi",
         "/store/podruzhka",
         "/store/winlab",
         "/collections/first-order",
@@ -660,6 +661,26 @@ async function run() {
                 animations: "disabled",
               });
             }
+          }
+          if (pathUrl === "/store/ivi") {
+            const cards = page.locator('article[id^="coupon-"]');
+            assert.equal(await cards.filter({ hasText: "begrnta7swiz" }).count(), 1,
+              "Ivi must display exactly one new approved coupon instead of old FILM35");
+            assert.equal(await cards.filter({ hasText: "FILM35" }).count(), 0,
+              "Ivi must not resurrect its former October 2026 promo code");
+            const artwork = page.locator('img[src*="ivi-35-days-oct2026.webp"]');
+            assert.equal(await artwork.count(), 1, "Show the exact uploaded Ivi promo artwork");
+            const image = await artwork.evaluate(async (el) => {
+              await el.decode();
+              return { w: el.naturalWidth, h: el.naturalHeight };
+            });
+            assert.deepEqual(image, { w: 1100, h: 785 },
+              "Ivi original creative must load as an optimized landscape image");
+            const publisherLink = page.locator('a[href="https://ivi1.prfl.me/sites/xpmis8?erid=2RanynVXhiB"]');
+            assert.ok(await publisherLink.count() >= 2,
+              "Coupon and creative must use the new publisher URL");
+            assert.ok((await page.getByText(/автоматическое продление подписки/i).count()) >= 1,
+              "Ivi free trial must clearly disclose automatic subscription renewal");
           }
           if (pathUrl === "/store/citydrive") {
             const offers = page.locator('article[id^="coupon-"]');

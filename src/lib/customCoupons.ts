@@ -1,5 +1,6 @@
 import { MAGNIT_ROTATED_OFFERS, M_KOSMETIK_ROTATED_OFFERS, CITYDRIVE_APPROVED_OFFERS } from "@/lib/perfluenceRotatedOffers";
 import type { Coupon } from "@/lib/types";
+import { STABLE_STORES } from "@/lib/stableStores";
 
 /**
  * Ручные купоны от рекламодателей и партнёрских сетей.
@@ -51,6 +52,34 @@ const PODRUZHKA_STORE: Coupon["store"] = {
     };
 
 export const CUSTOM_COUPONS: Coupon[] = [
+  // Updated Ivi Perfluence placement for promofact.ru, 15 October 2026.
+  // Do not reuse the old FILM35 coupon or old tracking link.
+  {
+    id: 82430035,
+    promocode: {
+      id: 82430035,
+      code: "begrnta7swiz",
+      bonusName: "35 дней подписки Иви бесплатно по промокоду",
+      terms: "Промокод begrnta7swiz активируется до 31 декабря 2026 года включительно только для новых пользователей на территории РФ по специальной ссылке. 35 дней бесплатного пробного доступа. Требуется привязка банковской карты; при проверке карты возможно временное удержание с последующим возвратом. После окончания пробного периода подписка автоматически продлевается на 30 дней с оплатой согласно условиям Иви. Сервис 18+. Условия: www.ivi.ru/info/agreement.",
+      expires: "2026-12-31",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Только новые пользователи в РФ",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: { ...STABLE_STORES["ivi"], activeBloggers: STABLE_STORES["ivi"].activeBloggers ?? 0 },
+    affiliate: {
+      link: "https://ivi1.prfl.me/sites/xpmis8?erid=2RanynVXhiB",
+      landingLink: "https://ivi1.prfl.me/sites/xpmis8?erid=2RanynVXhiB",
+      ordMarker: "2RanynVXhiB",
+      ordText: "Реклама. ivi.ru. erid: 2RanynVXhiB. Сервис 18+.",
+    },
+    extraLinks: [],
+  },
   ...MAGNIT_ROTATED_OFFERS,
   ...M_KOSMETIK_ROTATED_OFFERS,
   ...CITYDRIVE_APPROVED_OFFERS,
