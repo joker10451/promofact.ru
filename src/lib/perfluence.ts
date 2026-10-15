@@ -728,6 +728,13 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     // Current WinLab publisher URL lacks an ERID in the supplied account view.
     // Suppress legacy codes until the current token is supplied and checked.
     if (c.store.slug === "winlab") return false;
+    // This site's Yandex Travel placement was rotated on 15 Oct 2026.
+    // Suppress the old Perfluence snapshot code / old tracking URL.
+    // MTS Music is prohibited as a co-promotion by the publisher.
+    if (c.store.slug === "yandeks-puteshestviya") {
+      return ["PF-ALLIOOO-EGGTH", "BOLSHE", "SHARJAH26"]
+        .includes(c.promocode.code.trim().toUpperCase());
+    }
     // Ivi rotated the 35-day code and approved placement on 15 Oct 2026.
     // Never show legacy FILM35 or an outdated tracking/ERID URL alongside the current offer.
     if (c.store.slug === "ivi") {
