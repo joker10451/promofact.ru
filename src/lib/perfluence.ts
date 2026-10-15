@@ -728,6 +728,11 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     // Current WinLab publisher URL lacks an ERID in the supplied account view.
     // Suppress legacy codes until the current token is supplied and checked.
     if (c.store.slug === "winlab") return false;
+    // Ivi rotated the 35-day code and approved placement on 15 Oct 2026.
+    // Never show legacy FILM35 or an outdated tracking/ERID URL alongside the current offer.
+    if (c.store.slug === "ivi") {
+      return c.promocode.code.trim().toLowerCase() === "begrnta7swiz";
+    }
     return true;
   }).map((c) => {
     const logo = proxiedLogo(c.store.logo);
