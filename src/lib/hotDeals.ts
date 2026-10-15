@@ -24,7 +24,7 @@ export function isPromoHighlightEligible(c: Coupon, now = Date.now()): boolean {
   if (!c.affiliate.ordText?.trim()) return false;
 
   const declared = c.affiliate.ordMarker?.trim() || "";
-  const textErid = c.affiliate.ordText.match(/\\berid\\s*[:=]\\s*([a-zA-Z0-9]{8,40})\\b/i)?.[1] || "";
+  const textErid = c.affiliate.ordText.match(/\berid\s*[:=]\s*([a-zA-Z0-9]{8,40})\b/i)?.[1] || "";
   if (!declared && !textErid) return false;
   if (declared && textErid && declared !== textErid) return false;
   try {
