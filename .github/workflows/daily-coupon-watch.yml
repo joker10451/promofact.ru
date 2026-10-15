@@ -61,7 +61,9 @@ jobs:
           fi
 
       - name: Save last inventory baseline
-        if: ${{ always() && steps.audit.outcome == 'success' }}
+        # Preserve a successful snapshot and failure counters even if today's
+        # audit exits nonzero because it detected a real incident.
+        if: ${{ always() && hashFiles('audit-results/coupon-watch-state.json') != '' }}
         uses: actions/cache/save@v4
         with:
           path: audit-results/coupon-watch-state.json
