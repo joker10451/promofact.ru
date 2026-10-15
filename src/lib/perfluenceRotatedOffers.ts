@@ -8,6 +8,8 @@ const M_KOSMETIK_LINK = "https://mgntksm1.prfl.me/sites/1sq4qx?erid=2Ranymz3211"
 const CITYDRIVE_FIRST_LINK = "https://citydrive.prfl.me/sites/tnp7jq?erid=2Ranykexfns";
 const CITYDRIVE_APP_LINK = "https://citydrive.prfl.me/sites/pqng58?erid=2RanykbzhEB";
 const YANDEX_TRAVEL_LINK = "https://travelyandex.prfl.me/sites/k9msuz?erid=2RanykJ47QF";
+// Separately renewed promofact.ru publisher placement, supplied 15 October 2026.
+const YANDEX_TRAVEL_NEW_LINK = "https://yandextravel.prfl.me/sites/t21yi1?erid=2RanynSc5X1";
 const magnit: Coupon["store"] = { ...STABLE_STORES["magnit-dostavka"], activeBloggers: STABLE_STORES["magnit-dostavka"].activeBloggers ?? 0 };
 const mKosmetik: Coupon["store"] = { ...STABLE_STORES["m-kosmetik"], activeBloggers: STABLE_STORES["m-kosmetik"].activeBloggers ?? 0 };
 const winlab: Coupon["store"] = { ...STABLE_STORES["winlab"], activeBloggers: STABLE_STORES["winlab"].activeBloggers ?? 0 };
@@ -43,6 +45,12 @@ const yandexTravelAd: Coupon["affiliate"] = {
   landingLink: YANDEX_TRAVEL_LINK,
   ordMarker: "2RanykJ47QF",
   ordText: 'Реклама. ООО "ЯНДЕКС.ВЕРТИКАЛИ", ИНН 7704340327. erid: 2RanykJ47QF',
+};
+const yandexTravelNewAd: Coupon["affiliate"] = {
+  link: YANDEX_TRAVEL_NEW_LINK,
+  landingLink: YANDEX_TRAVEL_NEW_LINK,
+  ordMarker: "2RanynSc5X1",
+  ordText: 'Реклама. ООО "ЯНДЕКС.ВЕРТИКАЛИ", ИНН 7704340327. erid: 2RanynSc5X1',
 };
 const winlabAd = {
   link: WINLAB_LINK,
@@ -140,6 +148,12 @@ export const YANDEX_TRAVEL_ROTATED_OFFERS: Coupon[] = [
     "2026-10-31T23:59:59+03:00",
     "По условиям акции",
     "Промокод SHARJAH26 указан в согласованной публикации до 31 октября 2026 года, 23:59 по Москве. Размер скидки или бонуса в предоставленных данных не указан. Проверьте выгоду, направления и другие ограничения при бронировании."),
+  // Renewed approved link for the 2,500 RUB voucher; the earlier three offers retain their distinct placement.
+  offer(82511354, yandexTravel, yandexTravelNewAd, "PF-PREMIUMPRO-B66N2",
+    "Скидка 2 500 ₽ на бронирование отеля из подборки",
+    "2026-10-16T10:59:00+03:00",
+    "Отели из подборки · по условиям предложения",
+    "Промокод PF-PREMIUMPRO-B66N2: скидка 2 500 ₽ при бронировании отеля из подборки. Действует до 16 октября 2026 года, 10:59 по московскому времени. Подходящие отели, минимальную сумму и прочие ограничения уточняйте при бронировании."),
 ];
 
  /**

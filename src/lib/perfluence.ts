@@ -728,12 +728,17 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     // Current WinLab publisher URL lacks an ERID in the supplied account view.
     // Suppress legacy codes until the current token is supplied and checked.
     if (c.store.slug === "winlab") return false;
-    // This site's Yandex Travel placement was rotated on 15 Oct 2026.
-    // Suppress the old Perfluence snapshot code / old tracking URL.
-    // MTS Music is prohibited as a co-promotion by the publisher.
+    // Only the newly approved affiliate URL/ERID can revive the previously
+    // suppressed 2,500 RUB code. An outdated Perfluence snapshot remains blocked.
+    // MTS Music co-promotion is prohibited elsewhere in publisherPlacementRules.
     if (c.store.slug === "yandeks-puteshestviya") {
-      return ["PF-ALLIOOO-EGGTH", "BOLSHE", "SHARJAH26"]
-        .includes(c.promocode.code.trim().toUpperCase());
+      const code = c.promocode.code.trim().toUpperCase();
+      if (code === "PF-PREMIUMPRO-B66N2") {
+        return c.affiliate.link === "https://yandextravel.prfl.me/sites/t21yi1?erid=2RanynSc5X1" &&
+          c.affiliate.ordMarker === "2RanynSc5X1" &&
+          c.affiliate.ordText.includes("erid: 2RanynSc5X1");
+      }
+      return ["PF-ALLIOOO-EGGTH", "BOLSHE", "SHARJAH26"].includes(code);
     }
     // Ivi rotated the 35-day code and approved placement on 15 Oct 2026.
     // Never show legacy FILM35 or an outdated tracking/ERID URL alongside the current offer.
