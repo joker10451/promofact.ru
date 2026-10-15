@@ -115,4 +115,8 @@ const expiryCardSource = fs.readFileSync("src/components/ExpiringDeals.tsx", "ut
 assert.ok(expiryCardSource.includes("const end = expiryTimestamp(expires)") &&
   !expiryCardSource.includes("new Date(`${expires}T23:59:59+03:00`)"),
   "Urgent offer labels must honor full ISO expiry timestamps");
+for (const marker of ["НЕ НУЖЕН", "NOT REQUIRE", "NO_CODE"]) {
+  const noCodeOffer = refineOffer("Скидка 10% без кода", "Условия рекламодателя", marker, "Магазин", false);
+  assert.equal(noCodeOffer.isNoCode, true, `Refiner must treat ${marker} as code-free, not copyable`);
+}
 console.log("CATALOG-QA-4: safe highlights, ERID matching, expiry and ISR freshness PASS");
