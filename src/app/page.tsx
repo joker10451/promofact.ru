@@ -10,14 +10,14 @@ import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import Reveal from "@/components/Reveal";
 import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
-import { pickExpiringDeals, offerKey } from "@/lib/hotDeals";
+import { pickExpiringDeals, offerKey, isPromoHighlightEligible } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
 import { isRealPromoCode } from "@/lib/dedupe";
 import { STABLE_STORES } from "@/lib/stableStores";
 
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const revalidate = false; // 12 часов — защита лимита ISR Writes на Vercel
+export const revalidate = 3600; // Обновление раз в час: актуальные акции не ждут следующего деплоя.
 
 export default async function Home() {
   const [coupons, stores, uses] = await Promise.all([
@@ -34,7 +34,7 @@ export default async function Home() {
   const hotDeals = pickExpiringDeals(coupons, 4);
   const excludedOffers = new Set(hotDeals.map(offerKey));
   const excludedStores = new Set(hotDeals.map((c) => c.store.slug));
-  const featuredCoupons = coupons.filter((c) => isRealPromoCode(c.promocode.code) && !excludedOffers.has(offerKey(c)) && !excludedStores.has(c.store.slug))
+  const featuredCoupons = coupons.filter((c) => isRealPromoCode(c.promocode.code) && isPromoHighlightEligible(c) && !excludedOffers.has(offerKey(c)) && !excludedStores.has(c.store.slug))
     .filter((c, index, list) => list.findIndex((item) => item.store.slug === c.store.slug) === index)
     .slice(0, 4);
 
