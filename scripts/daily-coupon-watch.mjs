@@ -7,7 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { getCustomCoupons } from "../src/lib/customCoupons.ts";
-import { inspectCoupons, compareInventories } from "./coupon-watch-core.mjs";
+import { inspectCoupons, compareInventories, checkSourceCompleteness } from "./coupon-watch-core.mjs";
 
 const OUTPUT = path.resolve("audit-results");
 const STATE_PATH = path.join(OUTPUT, "coupon-watch-state.json");
@@ -44,6 +44,7 @@ async function fetchJson(url) {
   if (!response.ok) throw new Error("HTTP " + response.status);
   const data = await response.json();
   if (!Array.isArray(data)) throw new Error("Неверный формат JSON: ожидался список");
+  if (data.length === 0) throw new Error("Пустой ответ Perfluence, последний успешный снимок сохранён");
   return data;
 }
 
@@ -63,6 +64,7 @@ async function getPublishedAdmitad() {
     rows.push(...(data || []));
     if ((data || []).length < 500) break;
   }
+  if (rows.length === 0) throw new Error("Нулевой опубликованный каталог Admitad — источник нужно проверить");
   return rows.map((row) => ({
     id: row.id,
     store: { slug: row.store_slug || row.store || "unknown" },
@@ -91,6 +93,12 @@ async function inspectSource(name, producer) {
     }
     const result = inspectCoupons(raw, name, now);
     const prior = previous.sources[name];
+    const completeness = checkSourceCompleteness(prior, result, name, now);
+    if (!completeness.ok) {
+      const anomaly = new Error(completeness.detail);
+      anomaly.sourceAnomaly = true;
+      throw anomaly;
+    }
     if (prior?.records) changes.push(...compareInventories(prior, result, now));
     findings.push(...result.findings);
     expiring.push(...result.expiring);
@@ -105,9 +113,10 @@ async function inspectSource(name, producer) {
     // Preserve the previous successful snapshot, never turn a temporary API
     // outage into the misleading disappearance of every coupon.
     state.sources[name] = { ...(previous.sources[name] || {}), consecutiveFailures };
-    const message = error instanceof Error ? error.message.slice(0, 150) : "Ошибка соединения";
-    sourceReports.push({ source: name, status: "unavailable", consecutiveFailures, message });
-    errors.push({ source: name, consecutiveFailures, message });
+    const message = error instanceof Error ? error.message.slice(0, 220) : "Ошибка соединения";
+    const anomaly = Boolean(error?.sourceAnomaly);
+    sourceReports.push({ source: name, status: anomaly ? "anomaly" : "unavailable", consecutiveFailures, message });
+    errors.push({ source: name, consecutiveFailures, message, anomaly });
   }
 }
 
@@ -118,12 +127,12 @@ await inspectSource("admitad", getPublishedAdmitad);
 const critical = findings.filter((f) => f.severity === "critical");
 const majorChanges = changes.filter((c) => ["removed", "changed"].includes(c.type));
 const newOffers = changes.filter((c) => c.type === "new");
-const outages = errors.filter((e) => e.consecutiveFailures >= 2);
+const outages = errors.filter((e) => e.consecutiveFailures >= 2 || e.anomaly);
 const attention = [
   ...critical.map(getMessageLine),
   ...majorChanges.map(getMessageLine),
   ...newOffers.map(getMessageLine),
-  ...outages.map((e) => "- **" + e.source + "** — источник недоступен " + e.consecutiveFailures + " дней подряд"),
+  ...outages.map((e) => "- **" + e.source + "** — " + (e.anomaly ? e.message : "источник недоступен " + e.consecutiveFailures + " запуска подряд")),
   ...expiring.filter((e) => e.remainingHours <= 24).map(
     (e) => "- **" + e.slug + " / " + e.code + "** — заканчивается в ближайшие 24 часа: " + e.expires),
 ].slice(0, 75);

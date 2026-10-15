@@ -100,3 +100,35 @@ export function compareInventories(previous, current, now = Date.now()) {
   }
   return changes.slice(0, 200);
 }
+
+
+/**
+ * Reject obviously incomplete remote data rather than announcing that hundreds
+ * of still-valid offers disappeared. Check only still-active previous offers:
+ * planned expirations are not "source loss". Manual entries are versioned.
+ */
+export function checkSourceCompleteness(previous, current, source, now = Date.now()) {
+  if (source === "manual") return { ok: true };
+  const old = Object.values(previous?.records || {}).filter((r) =>
+    isCouponActive(r.expires || null, now));
+  const currentRecords = current?.records || {};
+  const freshCount = Object.keys(currentRecords).length;
+  const lostCount = old.filter((r) => !currentRecords[r.key]).length;
+  if (old.length >= 10 && lostCount >= Math.max(8, Math.ceil(old.length * 0.5))) {
+    return {
+      ok: false,
+      detail: "Резкое сокращение " + source + ": исчезли " + lostCount +
+        " из " + old.length + " ещё действующих предложений. Предыдущий успешный снимок сохранён.",
+      previousActive: old.length, lost: lostCount, current: freshCount,
+    };
+  }
+  if (old.length && freshCount === 0) {
+    return {
+      ok: false,
+      detail: "Пустой ответ " + source + " при " + old.length +
+        " ранее действующих предложениях. Предыдущий снимок сохранён.",
+      previousActive: old.length, lost: lostCount, current: 0,
+    };
+  }
+  return { ok: true };
+}
