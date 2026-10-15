@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { inspectCoupons, compareInventories } from "./coupon-watch-core.mjs";
+import { inspectCoupons, compareInventories, checkSourceCompleteness } from "./coupon-watch-core.mjs";
 
 function coupon(id, code, expires = "2026-10-31", options = {}) {
   const erid = options.erid || "2RanykEXAMPLE";
@@ -75,11 +75,36 @@ const equal = inspectCoupons([valid], "manual", timestamp);
 assert.equal(compareInventories(base, equal, timestamp).length, 0);
 assert.equal(compareInventories({ records: {} }, equal, timestamp)[0].type, "new");
 
+
+const fullRemote = inspectCoupons(Array.from({ length: 25 }, (_, i) => coupon(
+  i + 100, "SALE" + (i + 100))), "perfluence", timestamp);
+const partialRemote = inspectCoupons(Array.from({ length: 5 }, (_, i) => coupon(
+  i + 100, "SALE" + (i + 100))), "perfluence", timestamp);
+const drop = checkSourceCompleteness(fullRemote, partialRemote, "perfluence", timestamp);
+assert.equal(drop.ok, false, "Major drop must be treated as an unreliable partner response");
+assert.equal(drop.lost, 20);
+assert(checkSourceCompleteness(fullRemote, fullRemote, "perfluence", timestamp).ok);
+assert(checkSourceCompleteness(fullRemote, partialRemote, "manual", timestamp).ok,
+  "Intentional manual removals are version-controlled and must not be marked as source outages");
+const blankRemote = inspectCoupons([], "perfluence", timestamp);
+assert.equal(checkSourceCompleteness(fullRemote, blankRemote, "perfluence", timestamp).ok, false,
+  "An empty response must never purge the remote successful baseline");
+const previouslyExpired = inspectCoupons(Array.from({ length: 20 }, (_, i) =>
+  coupon(i + 200, "EXP" + i, "2026-10-14")).concat(
+  Array.from({ length: 5 }, (_, i) => coupon(i + 300, "ACTIVE" + i))),
+  "perfluence", new Date("2026-10-14T12:00:00+03:00").getTime());
+const stillActive = inspectCoupons(Array.from({ length: 5 }, (_, i) =>
+  coupon(i + 300, "ACTIVE" + i)), "perfluence", timestamp);
+assert(checkSourceCompleteness(previouslyExpired, stillActive, "perfluence", timestamp).ok,
+  "Planned expiration of old offers must not look like a partner data outage");
+
 const workflow = fs.readFileSync(".github/workflows/daily-coupon-watch.yml", "utf8");
 assert(workflow.includes('cron: "10 5 * * *"'));
 assert(workflow.includes("permissions:\n  contents: read\n  issues: write"));
 assert(workflow.includes("actions/cache/restore@v4"));
 assert(workflow.includes("actions/cache/save@v4"));
+assert(workflow.includes("hashFiles('audit-results/coupon-watch-state.json')"),
+  "Do not lose last successful source snapshot or failure counters when today reports an incident");
 assert(!workflow.includes("git push") && !workflow.includes("vercel deploy"),
   "Daily read-only monitoring must never trigger a repo push or Vercel build");
 console.log("COUPON-WATCH: expiry, attribution, changes, outages safety and daily workflow PASS");
