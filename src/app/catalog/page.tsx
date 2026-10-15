@@ -8,7 +8,7 @@ import { toCatalogCoupon } from "@/lib/catalogCoupon";
 import { SITE_URL } from "@/lib/site";
 
 // Always share the same live active offers with the homepage and store pages.
-export const revalidate = false;
+export const revalidate = 3600; // Обновление раз в час: актуальные акции не ждут следующего деплоя.
 
 export const metadata: Metadata = {
   title: "Все промокоды и купоны — каталог скидок",
