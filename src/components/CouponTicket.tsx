@@ -326,15 +326,16 @@ export default function CouponTicket({
     // растягивало её шире экрана телефона (горизонтальный скролл страницы).
     <article
       id={`coupon-${coupon.id}`}
-      className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-xs scroll-mt-24"
+      className="group relative flex min-w-0 self-start flex-col rounded-2xl border border-line bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-md scroll-mt-24 sm:p-5"
     >
       {/* 1. Верхняя строка: Логотип + Название + Бейджи */}
       <div>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="space-y-3">
+          {/* Название всегда получает ширину карточки: бейджи не могут его сжимать. */}
+          <div className="flex min-w-0 items-start gap-3">
             <Link
               href={`/store/${store.slug}`}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line/60 bg-white p-1 shadow-2xs hover:border-ink/30 transition-all"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line/60 bg-white p-1 shadow-2xs transition-colors hover:border-ink/30"
               title={`Все промокоды ${store.name}`}
             >
               <StoreLogo
@@ -345,49 +346,49 @@ export default function CouponTicket({
                 size={36}
               />
             </Link>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1 pt-0.5">
               <Link
                 href={`/store/${store.slug}`}
-                className="line-clamp-1 sm:line-clamp-2 font-display text-sm sm:text-base font-bold text-ink hover:text-red transition-colors block leading-tight"
+                className="block break-words font-sans text-base font-extrabold leading-snug text-ink transition-colors hover:text-red"
                 title={`Все промокоды ${store.name}`}
               >
                 {store.name}
               </Link>
               <Link
                 href={`/category/${store.categorySlug || "all"}`}
-                className="text-xs text-ink/45 truncate font-medium hover:text-ink transition-colors block"
+                className="mt-1 block break-words text-xs font-medium leading-snug text-ink/65 transition-colors hover:text-ink"
               >
                 {store.category}
               </Link>
             </div>
           </div>
-
-          <div className="flex items-center gap-1.5 shrink-0">
+          {/* Длинные условия переносятся на свою строку вместо сдавливания бренда. */}
+          <div className="flex min-w-0 flex-wrap items-start gap-1.5">
             {promocode.isHit && (
-              <span className="rounded-full bg-red/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-red">
+              <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-red/10 px-2.5 py-1 text-[11px] font-bold text-red">
                 <Icon name="flame" size={11} /> Хит
               </span>
             )}
             {promocode.isBarcode ? (
-              <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-[10px] font-extrabold text-blue-700 flex items-center gap-1 shadow-2xs">
+              <span className="inline-flex max-w-full items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-700">
                 Штрихкод
               </span>
             ) : promocode.customerTypeLabel ? (
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              <span className={`inline-flex max-w-full break-words rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-snug ${
                 promocode.customerTypeLabel.includes("года")
-                  ? "bg-purple-100 text-purple-800 border border-purple-200"
+                  ? "border-purple-200 bg-purple-100 text-purple-800"
                   : promocode.customerTypeLabel.includes("Обедомания")
-                  ? "bg-amber-100 text-amber-800 border border-amber-200"
-                  : "bg-paper border border-line text-ink/70"
+                  ? "border-amber-200 bg-amber-100 text-amber-800"
+                  : "border-line bg-paper text-ink/75"
               }`}>
                 {promocode.customerTypeLabel}
               </span>
             ) : promocode.isFirstOrderOnly ? (
-              <span className="rounded-full bg-yellow/30 border border-yellow/50 px-2 py-0.5 text-[10px] font-bold text-ink/80">
+              <span className="inline-flex max-w-full rounded-full border border-yellow/50 bg-yellow/30 px-2.5 py-1 text-[11px] font-semibold text-ink/80">
                 1-й заказ
               </span>
             ) : (
-              <span className="rounded-full bg-paper border border-line px-2 py-0.5 text-[10px] font-bold text-ink/60">
+              <span className="inline-flex max-w-full rounded-full border border-line bg-paper px-2.5 py-1 text-[11px] font-semibold text-ink/75">
                 Для всех
               </span>
             )}
@@ -395,7 +396,7 @@ export default function CouponTicket({
         </div>
 
         {/* 2. Главный акцент — визуально разный для каждого типа */}
-        <div className="mt-3.5 mb-2.5 min-h-[68px] flex flex-col justify-center">
+        <div className="mt-4 mb-1 flex flex-col justify-center">
           {/* Тип: subscription — синяя плашка, «<Icon name="sparkle" size={11} /> Промокод не требуется» */}
           {offer.type === "subscription" ? (
             <div className="rounded-xl bg-blue-50 border border-blue-200 px-3 py-2.5">
@@ -427,7 +428,7 @@ export default function CouponTicket({
               >
                 {offer.discount}
               </div>
-              <p className="mt-1.5 text-xs sm:text-sm font-medium text-ink/75 line-clamp-2 leading-relaxed">
+              <p className="mt-1.5 text-sm font-medium text-ink/75 line-clamp-3 leading-relaxed">
                 {offer.condition}
               </p>
             </>
@@ -444,7 +445,7 @@ export default function CouponTicket({
             Раньше здесь были сгенерированные «N раз сегодня», «Проверен 4 часа
             назад» и «Надёжность 98%» — за ними не стояло никаких данных. */}
         <div
-          className="mt-3 flex items-center justify-between gap-2 text-xs rounded-xl bg-paper/80 px-3 py-2 border border-line/50"
+          className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl border border-line/60 bg-paper/70 px-3 py-2.5 text-xs"
         >
           {proofCount > 0 ? (
             <span className="flex items-center gap-1.5 font-bold text-ink/80 text-[11px] sm:text-xs">
@@ -452,7 +453,7 @@ export default function CouponTicket({
               {proofCount} {pluralOrders(proofCount)} по коду
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 font-semibold text-ink/65 text-[11px] sm:text-xs">
+            <span className="inline-flex min-w-0 items-center gap-1.5 text-xs font-semibold text-ink/75">
               <span className="inline-block h-2 w-2 rounded-full bg-mint" />
               Официальное предложение
             </span>
@@ -463,7 +464,7 @@ export default function CouponTicket({
               setShowDetailsModal(true);
               ymReachGoal("coupon_terms_open", getAnalyticsContext());
             }}
-            className="inline-flex items-center gap-1 text-[11px] font-bold text-ink/60 hover:text-red transition-colors underline cursor-pointer shrink-0 py-1"
+            className="inline-flex shrink-0 cursor-pointer items-center gap-1 py-1 text-xs font-semibold text-ink/75 underline underline-offset-2 transition-colors hover:text-red"
           >
             Условия акции
           </button>
@@ -471,7 +472,7 @@ export default function CouponTicket({
       </div>
 
       {/* 4. Нижний блок: Код + Кнопка One-Click */}
-      <div className="mt-4 pt-3.5 border-t border-line/60">
+      <div className="mt-4 border-t border-line/60 pt-4">
         {!offer.isNoCode && promocode.code ? (
           <div className="space-y-2.5">
             {/* Сообщение об ошибке буфера и ручное выделение кода */}
@@ -523,27 +524,21 @@ export default function CouponTicket({
                 </div>
               </div>
             ) : (
-              <div
+              <button
+                type="button"
                 onClick={() => copyCode(promocode.code)}
-                className="flex cursor-pointer items-center justify-between rounded-xl border-2 border-dashed border-ink/20 bg-paper px-3.5 py-2.5 font-mono text-xs sm:text-sm font-bold tracking-wider text-ink transition-all hover:border-red hover:bg-red/5 active:scale-[0.99]"
+                className="flex w-full min-w-0 items-center gap-2.5 rounded-xl border-2 border-dashed border-ink/20 bg-paper px-3 py-3 text-left transition-all hover:border-red hover:bg-red/5 active:scale-[0.99]"
                 title="Нажмите, чтобы скопировать промокод"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    copyCode(promocode.code);
-                  }
-                }}
+                aria-label={`Скопировать промокод ${promocode.code}`}
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Icon name="copy" size={14} className={copied ? "text-mint-dark" : "text-ink/40"} />
-                  <span className="truncate">{promocode.code}</span>
-                </div>
-                <span className={`font-sans text-[11px] font-bold shrink-0 transition-colors ${copied ? "text-mint-dark font-extrabold" : "text-ink/40"}`}>
-                  {copied ? "скопировано!" : copyError ? "нажмите для повтора" : "нажмите для копирования"}
+                <Icon name="copy" size={16} className={copied ? "shrink-0 text-mint-dark" : "shrink-0 text-ink/60"} />
+                <span className="min-w-0 flex-1 break-all font-mono text-xs font-bold tracking-normal text-ink sm:text-sm">
+                  {promocode.code}
                 </span>
-              </div>
+                <span className={`shrink-0 text-[11px] font-semibold ${copied ? "text-mint-dark" : "text-ink/70"}`}>
+                  {copied ? "Скопировано" : "Копировать"}
+                </span>
+              </button>
             )}
 
             {/* Основная кнопка действия */}
@@ -590,7 +585,7 @@ export default function CouponTicket({
               target="_blank"
               rel="noopener sponsored nofollow"
               onClick={handleDirectCtaClick}
-              className="text-[11px] sm:text-xs font-semibold text-ink/50 hover:text-red hover:underline flex items-center justify-center gap-1 py-1 transition-colors"
+              className="flex items-center justify-center gap-1 py-1.5 text-center text-xs font-semibold leading-snug text-ink/70 transition-colors hover:text-red hover:underline"
             >
               <span>Перейти на сайт {store.name} →</span>
             </a>
@@ -615,13 +610,15 @@ export default function CouponTicket({
         )}
 
         {/* 5. Мета-данные и реклама */}
-        <div className="mt-2.5 flex items-center justify-between text-[10px] text-ink/40 font-medium">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-1 text-[11px] font-medium leading-relaxed text-ink/65">
           <span>
             {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Первый заказ" : "Для всех")} · RU
           </span>
           <span>
             {promocode.expires
-              ? `до ${formatExpires(promocode.expires)}`
+              ? `до ${promocode.expires.includes("T")
+                  ? `${new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Moscow" }).format(new Date(promocode.expires))} МСК`
+                  : formatExpires(promocode.expires)}`
               : "срок не указан"}
           </span>
         </div>
@@ -629,15 +626,15 @@ export default function CouponTicket({
         {affiliate.ordText && (() => {
           const { legalText, medicalWarning } = parseOrdAndWarning(affiliate.ordText);
           return medicalWarning ? (
-            <div className="mt-2 space-y-1 text-center border-t border-line/30 pt-1.5">
-              <p className="text-[10px] sm:text-[11px] leading-tight text-ink/45 select-all break-words">{legalText}</p>
+            <div className="mt-3 space-y-1 border-t border-line/40 pt-2">
+              <p className="select-all break-words text-[11px] leading-relaxed text-ink/65">{legalText}</p>
               <p className="text-[10px] font-bold uppercase tracking-wider text-ink/70">
                 {medicalWarning}
               </p>
             </div>
           ) : (
-            <div className="mt-2 text-center border-t border-line/30 pt-1.5">
-              <p className="text-[10px] sm:text-[11px] leading-tight text-ink/45 select-all break-words">
+            <div className="mt-3 border-t border-line/40 pt-2">
+              <p className="select-all break-words text-[11px] leading-relaxed text-ink/65">
                 {affiliate.ordText}
               </p>
             </div>

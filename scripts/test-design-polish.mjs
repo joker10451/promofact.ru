@@ -240,3 +240,24 @@ assert.ok(citydriveOffers.includes('offer(81483071, citydrive, citydriveFirstAd,
   citydriveOffers.includes('Размер бонуса не предоставлен'),
   "Show exactly the source-backed benefits without inventing a value for BACK163 or certificate");
 console.log("Citydrive: four codes, two authorized placements, source-backed restrictions PASS");
+
+
+// Store coupon card layout and legally significant expiry formatting.
+assert.ok(ticket.includes("self-start flex-col rounded-2xl") &&
+  !ticket.includes("flex-col justify-between rounded-2xl"),
+  "Cards must not stretch an empty region between offer and coupon");
+assert.ok(ticket.includes("Название всегда получает ширину карточки") &&
+  ticket.includes("min-w-0 flex-1 pt-0.5") &&
+  !ticket.includes("line-clamp-1 sm:line-clamp-2"),
+  "Merchant names must have their own width; badges must wrap below");
+assert.ok(ticket.includes("break-all font-mono text-xs") &&
+  ticket.includes("aria-label={`Скопировать промокод ${promocode.code}`}"),
+  "Long codes must wrap and remain keyboard-copyable");
+assert.ok(ticket.includes('text-[11px] leading-relaxed text-ink/65') &&
+  ticket.includes('timeZone: "Europe/Moscow"'),
+  "ERID disclosure must remain readable, precise cut-off should show Moscow time");
+assert.ok(browser.includes("filteredCoupons.length === 4") &&
+  browser.includes("sm:grid-cols-2 xl:grid-cols-3") &&
+  browser.includes("grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:gap-5"),
+  "Four offers should form balanced two-column rows at desktop widths");
+console.log("PromoFact responsive coupon ticket: legibility, disclosure and balanced grid PASS");

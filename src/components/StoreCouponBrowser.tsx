@@ -170,7 +170,9 @@ export default function StoreCouponBrowser({
         <div>
           <div className={hasRetailBarcodeOffer
             ? "grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:gap-5"
-            : "grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"}>
+            : filteredCoupons.length === 4
+              ? "grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:gap-5"
+              : "grid grid-cols-1 items-start gap-4 sm:grid-cols-2 xl:grid-cols-3 lg:gap-5"}>
             {filteredCoupons.slice(0, visibleLimit).map((coupon) => (
               <CouponTicket
                 key={`${coupon.id}-${coupon.promocode.code}`}
