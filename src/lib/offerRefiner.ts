@@ -1,4 +1,5 @@
 import { extractMinimumOrder } from "@/lib/admitadNormalizer";
+import { isRealPromoCode } from "@/lib/dedupe";
 
 /**
  * Модуль семантической очистки и обогащения условий акций (Offer Refiner).
@@ -33,7 +34,7 @@ export function refineOffer(
   const terms = (rawTerms || "").trim()
     .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
     .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
-  const isNoCode = !code || code.trim() === "";
+  const isNoCode = !isRealPromoCode(code);
   // Admitad sometimes supplies a campaign title "по промокоду", while the
   // actual coupon field says "НЕ НУЖЕН". Never present that as a guaranteed
   // discount by link or as a copyable code. Prefer the specific source terms.
