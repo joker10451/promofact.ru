@@ -8,7 +8,7 @@
  * Never infer a percentage from a minimum-order amount or unlabelled "99%":
  * percentage of the assortment is not necessarily a consumer discount.
  */
-const CONDITION_ONLY = /^(?:при\s+(?:заказе|покупке|оформлении)|(?:заказ|покупка)\s+от|на\s+заказ\s+от|от\s+[\d\s]+(?:₽|руб))\b/iu;
+const CONDITION_ONLY = /^(?:при\s+(?:заказе|покупке|оформлении)|(?:заказ|покупка)\s+от|на\s+заказ\s+от|от\s+[\d\s]+(?:₽|руб))(?=$|[\s,.:;!?])/iu;
 const HAS_BENEFIT = /(?:[−-]\s*\d{1,3}\s*%|скидк[а-яё]*\s*(?:до\s*)?\d{1,3}\s*%|[−-]\s*[\d\s]+\s*₽|бесплатн[а-яё]*\s+достав|подар|к[еэ]шб[еэ]к|бонус)/iu;
 
 export function isConditionOnlyOfferTitle(value: string): boolean {
