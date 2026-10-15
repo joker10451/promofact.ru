@@ -1,5 +1,6 @@
 import type { Coupon } from "@/lib/types";
 import { isRealPromoCode } from "@/lib/dedupe";
+import { hasBenefitHeadline } from "@/lib/admitadOfferHeadline";
 import { expiryTimestamp, isCouponActive } from "@/lib/couponExpiry";
 
 /**
@@ -49,7 +50,7 @@ export function pickExpiringDeals(coupons: Coupon[], count = 4): Coupon[] {
   const expiresTs = (c: Coupon) => expiryTimestamp(c.promocode.expires);
   const now = Date.now();
   const sorted = [...coupons]
-    .filter((c) => c.promocode.expires && isPromoHighlightEligible(c, now))
+    .filter((c) => c.promocode.expires && isPromoHighlightEligible(c, now) && hasBenefitHeadline(c.promocode.bonusName))
     .sort((a, b) => expiresTs(a) - expiresTs(b) || (b.promocode.isHit ? 1 : 0) - (a.promocode.isHit ? 1 : 0));
 
   const seenStores = new Set<string>();
@@ -68,7 +69,7 @@ export function pickHotDeals(coupons: Coupon[], count = 3): Coupon[] {
   const res: Coupon[] = [];
   const now = Date.now();
   const sorted = [...coupons]
-    .filter((c) => isPromoHighlightEligible(c, now))
+    .filter((c) => isPromoHighlightEligible(c, now) && hasBenefitHeadline(c.promocode.bonusName))
     .sort((a, b) => (b.promocode.isHit ? 1 : 0) - (a.promocode.isHit ? 1 : 0));
 
   for (const c of sorted) {

@@ -6,6 +6,7 @@ import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { isPublicAdmitadRow } from "@/lib/admitadPublicVisibility";
 import { isRealPromoCode } from "@/lib/dedupe";
+import { resolveAdmitadOfferHeadline } from "@/lib/admitadOfferHeadline";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -67,8 +68,12 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
   const categorySlug = stableMeta?.categorySlug || (str(row.category_slug) ? translit(str(row.category_slug)) : translit(category) || "drugoe");
 
   const expires = str(row.expires) ? str(row.expires).slice(0, 10) : null;
-  const bonusName = str(row.bonus_name || row.discount) || null;
   const terms = str(row.terms || row.description) || null;
+  // Published rows often store only a basket threshold in bonus_name and the
+  // actual discount in the separate discount column. Keep both in the title.
+  const bonusName = resolveAdmitadOfferHeadline(
+    str(row.bonus_name), str(row.discount), terms,
+  );
   const rawSourceId = str(row.source_coupon_id || row.id);
   const id = num(row.id) || (rawSourceId ? hash(rawSourceId) : hash(String(row.code ? `${storeSlug}::${row.code}` : `${storeSlug}::${row.affiliate_link || row.affiliate_url || row.description}`)));
   const ordMarker = str(row.ord_marker);

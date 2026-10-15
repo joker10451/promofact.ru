@@ -75,6 +75,7 @@ const futureCode = structuredClone(full);
 futureCode.id = 7001;
 futureCode.promocode.id = 7001;
 futureCode.promocode.code = "SALE10";
+futureCode.promocode.bonusName = "−25% · при заказе от 4 000 ₽";
 futureCode.promocode.expires = "2099-10-31";
 futureCode.affiliate.link = "https://publisher.prfl.me/sites/example?erid=2RanykEXAMPLE";
 futureCode.affiliate.landingLink = futureCode.affiliate.link;
