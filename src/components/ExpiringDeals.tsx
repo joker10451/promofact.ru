@@ -5,6 +5,7 @@ import { useState } from "react";
 import StoreLogo from "@/components/StoreLogo";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import type { Coupon } from "@/lib/types";
+import { expiryTimestamp } from "@/lib/couponExpiry";
 
 interface ExpiringDealsProps {
   /** Уже отобранные купоны — см. pickExpiringDeals: ближайший срок, по одному от магазина. */
@@ -19,12 +20,18 @@ const MONTHS = [
 /** Срок действия словами и сколько дней осталось — по реальной дате кода. */
 function expiryLabel(expires: string | null): { text: string; urgent: boolean } | null {
   if (!expires) return null;
-  const [y, m, d] = expires.split("-").map(Number);
-  const end = new Date(`${expires}T23:59:59+03:00`).getTime();
-  const days = Math.ceil((end - Date.now()) / 86400000);
-  const date = `до ${d} ${MONTHS[m - 1] ?? ""}${y !== new Date().getFullYear() ? ` ${y}` : ""}`;
-  if (days <= 1) return { text: `${date} · последний день`, urgent: true };
-  if (days <= 3) return { text: `${date} · осталось ${days} дня`, urgent: true };
+  // Some Perfluence offers specify 00:59, not 23:59 on their final day.
+  // Respect that clock time instead of appending another time to a full ISO date.
+  const end = expiryTimestamp(expires);
+  if (!Number.isFinite(end) || end < Date.now()) return null;
+  const [y, m, d] = expires.slice(0, 10).split("-").map(Number);
+  const moscowNow = new Date(Date.now() + 3 * 60 * 60 * 1000);
+  const todayUtc = Date.UTC(moscowNow.getUTCFullYear(), moscowNow.getUTCMonth(), moscowNow.getUTCDate());
+  const expiryUtc = Date.UTC(y, m - 1, d);
+  const days = Math.ceil((expiryUtc - todayUtc) / 86400000);
+  const date = `до ${d} ${MONTHS[m - 1] ?? ""}${y !== moscowNow.getUTCFullYear() ? ` ${y}` : ""}`;
+  if (days <= 0) return { text: `${date} · последний день`, urgent: true };
+  if (days <= 3) return { text: `${date} · осталось ${days} дн.`, urgent: true };
   return { text: date, urgent: false };
 }
 
