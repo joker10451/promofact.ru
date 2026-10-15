@@ -7,10 +7,12 @@ const WINLAB_LINK = "https://winelab.prfl.me/sites/ujkqzr";
 const M_KOSMETIK_LINK = "https://mgntksm1.prfl.me/sites/1sq4qx?erid=2Ranymz3211";
 const CITYDRIVE_FIRST_LINK = "https://citydrive.prfl.me/sites/tnp7jq?erid=2Ranykexfns";
 const CITYDRIVE_APP_LINK = "https://citydrive.prfl.me/sites/pqng58?erid=2RanykbzhEB";
+const YANDEX_TRAVEL_LINK = "https://travelyandex.prfl.me/sites/k9msuz?erid=2RanykJ47QF";
 const magnit: Coupon["store"] = { ...STABLE_STORES["magnit-dostavka"], activeBloggers: STABLE_STORES["magnit-dostavka"].activeBloggers ?? 0 };
 const mKosmetik: Coupon["store"] = { ...STABLE_STORES["m-kosmetik"], activeBloggers: STABLE_STORES["m-kosmetik"].activeBloggers ?? 0 };
 const winlab: Coupon["store"] = { ...STABLE_STORES["winlab"], activeBloggers: STABLE_STORES["winlab"].activeBloggers ?? 0 };
 const citydrive: Coupon["store"] = { ...STABLE_STORES.citydrive, activeBloggers: STABLE_STORES.citydrive.activeBloggers ?? 0 };
+const yandexTravel: Coupon["store"] = { ...STABLE_STORES["yandeks-puteshestviya"], activeBloggers: STABLE_STORES["yandeks-puteshestviya"].activeBloggers ?? 0 };
 const magnitAd = {
   link: MAGNIT_LINK,
   landingLink: MAGNIT_LINK,
@@ -35,6 +37,12 @@ const citydriveAppAd: Coupon["affiliate"] = {
   landingLink: CITYDRIVE_APP_LINK,
   ordMarker: "2RanykbzhEB",
   ordText: `${citydriveLegal} erid: 2RanykbzhEB`,
+};
+const yandexTravelAd: Coupon["affiliate"] = {
+  link: YANDEX_TRAVEL_LINK,
+  landingLink: YANDEX_TRAVEL_LINK,
+  ordMarker: "2RanykJ47QF",
+  ordText: 'Реклама. ООО "ЯНДЕКС.ВЕРТИКАЛИ", ИНН 7704340327. erid: 2RanykJ47QF',
 };
 const winlabAd = {
   link: WINLAB_LINK,
@@ -109,6 +117,32 @@ export const CITYDRIVE_APPROVED_OFFERS: Coupon[] = [
 ];
 
 /**
+ * Perfluence approved site placement for promofact.ru on 15 October 2026.
+ * PF-ALLIOOO-EGGTH expires at precisely 10:59 Moscow time on 16 Oct:
+ * never extend it to the end of that day.
+ * The amount/eligibility of SHARJAH26 is not supplied by the publisher;
+ * do not infer a 26% discount from its name.
+ * The partner prohibits placing Yandex Travel in a selection alongside MTS Music.
+ */
+export const YANDEX_TRAVEL_ROTATED_OFFERS: Coupon[] = [
+  offer(82511351, yandexTravel, yandexTravelAd, "PF-ALLIOOO-EGGTH",
+    "Скидка 1 000 ₽ на бронирование в Яндекс Путешествиях",
+    "2026-10-16T10:59:00+03:00",
+    "Отели из подборки · по условиям предложения",
+    "Промокод PF-ALLIOOO-EGGTH: скидка 1 000 ₽ при бронировании по условиям рекламодателя. Срок действия — до 16 октября 2026 года, 10:59 по Москве. Конкретные отели, возможный минимальный чек и другие ограничения проверьте до оплаты."),
+  offer(82511352, yandexTravel, yandexTravelAd, "BOLSHE",
+    "Скидка 5 000 ₽ на бронирование в Яндекс Путешествиях",
+    "2026-10-31T23:59:59+03:00",
+    "Отели из подборки · по условиям предложения",
+    "Промокод BOLSHE: скидка 5 000 ₽ по условиям рекламодателя. Срок действия — до 31 октября 2026 года, 23:59 по Москве. Неизвестны минимальная сумма бронирования, подходящие отели и иные ограничения; проверьте их до оплаты."),
+  offer(82511353, yandexTravel, yandexTravelAd, "SHARJAH26",
+    "Промокод SHARJAH26 для бронирования через Яндекс Путешествия",
+    "2026-10-31T23:59:59+03:00",
+    "По условиям акции",
+    "Промокод SHARJAH26 указан в согласованной публикации до 31 октября 2026 года, 23:59 по Москве. Размер скидки или бонуса в предоставленных данных не указан. Проверьте выгоду, направления и другие ограничения при бронировании."),
+];
+
+ /**
  * The provided WinLab placement has no ERID. Keep codes in staging until a
  * current advertising token is confirmed; never silently reuse an old token.
  * WinLab is also prohibited from joint promotions with Ukids.

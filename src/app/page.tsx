@@ -14,6 +14,7 @@ import { pickExpiringDeals, offerKey, isPromoHighlightEligible } from "@/lib/hot
 import { buildSearchIndex } from "@/lib/searchIndex";
 import { isRealPromoCode } from "@/lib/dedupe";
 import { STABLE_STORES } from "@/lib/stableStores";
+import { withoutForbiddenTravelCoPromotion } from "@/lib/publisherPlacementRules";
 
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -31,10 +32,12 @@ export default async function Home() {
 
   // Главная — короткая витрина, а не вторая копия полноценного каталога.
   // Не повторяем горящие коды и не показываем несколько карт одного магазина.
-  const hotDeals = pickExpiringDeals(coupons, 4);
+  // Publisher rule: never pair Yandex Travel and MTS Music in editorial selections.
+  const curatedCoupons = withoutForbiddenTravelCoPromotion(coupons);
+  const hotDeals = pickExpiringDeals(curatedCoupons, 4);
   const excludedOffers = new Set(hotDeals.map(offerKey));
   const excludedStores = new Set(hotDeals.map((c) => c.store.slug));
-  const featuredCoupons = coupons.filter((c) => isRealPromoCode(c.promocode.code) && isPromoHighlightEligible(c) && !excludedOffers.has(offerKey(c)) && !excludedStores.has(c.store.slug))
+  const featuredCoupons = curatedCoupons.filter((c) => isRealPromoCode(c.promocode.code) && isPromoHighlightEligible(c) && !excludedOffers.has(offerKey(c)) && !excludedStores.has(c.store.slug))
     .filter((c, index, list) => list.findIndex((item) => item.store.slug === c.store.slug) === index)
     .slice(0, 4);
 

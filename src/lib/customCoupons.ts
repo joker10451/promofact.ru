@@ -1,4 +1,4 @@
-import { MAGNIT_ROTATED_OFFERS, M_KOSMETIK_ROTATED_OFFERS, CITYDRIVE_APPROVED_OFFERS } from "@/lib/perfluenceRotatedOffers";
+import { MAGNIT_ROTATED_OFFERS, M_KOSMETIK_ROTATED_OFFERS, CITYDRIVE_APPROVED_OFFERS, YANDEX_TRAVEL_ROTATED_OFFERS } from "@/lib/perfluenceRotatedOffers";
 import type { Coupon } from "@/lib/types";
 import { STABLE_STORES } from "@/lib/stableStores";
 
@@ -83,6 +83,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
   ...MAGNIT_ROTATED_OFFERS,
   ...M_KOSMETIK_ROTATED_OFFERS,
   ...CITYDRIVE_APPROVED_OFFERS,
+  ...YANDEX_TRAVEL_ROTATED_OFFERS,
   {
     id: 50671,
     promocode: {
