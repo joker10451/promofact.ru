@@ -69,3 +69,50 @@ assert.equal(subscriptionDays.condition, "для новых пользовате
 const subscriptionDaysNoPrice = refineOffer("60 дней подписки", "", "", "Кинопоиск", false);
 assert.equal(subscriptionDaysNoPrice.discount, "60 дней доступа");
 console.log("CATALOG-QA-3: subscription prices, durations and audiences source-backed PASS");
+
+const { isPromoHighlightEligible, pickExpiringDeals, pickHotDeals } = await import("../src/lib/hotDeals.ts");
+const futureCode = structuredClone(full);
+futureCode.id = 7001;
+futureCode.promocode.id = 7001;
+futureCode.promocode.code = "SALE10";
+futureCode.promocode.expires = "2099-10-31";
+futureCode.affiliate.link = "https://publisher.prfl.me/sites/example?erid=2RanykEXAMPLE";
+futureCode.affiliate.landingLink = futureCode.affiliate.link;
+futureCode.affiliate.ordMarker = "2RanykEXAMPLE";
+futureCode.affiliate.ordText = "Реклама. Рекламодатель: пример. erid: 2RanykEXAMPLE";
+assert.ok(isPromoHighlightEligible(futureCode), "Current code with matching ERID is eligible");
+const placeholders = ["НЕ НУЖЕН", "NOT REQUIRE", "БЕЗ ПРОМОКОДА", "NO_CODE"];
+for (const code of placeholders) {
+  assert.equal(isPromoHighlightEligible({ ...futureCode, promocode: { ...futureCode.promocode, code } }), false,
+    `Placeholder ${code} must not be advertised as a promo code`);
+}
+assert.equal(isPromoHighlightEligible({ ...futureCode, promocode: { ...futureCode.promocode, isBarcode: true } }), false,
+  "Retail barcodes must not appear in online promo highlights");
+assert.equal(isPromoHighlightEligible({ ...futureCode, promocode: { ...futureCode.promocode, expires: "2026-10-10" } }), false,
+  "Expired voucher must not be featured");
+assert.equal(isPromoHighlightEligible({ ...futureCode, affiliate: { ...futureCode.affiliate, ordMarker: "", ordText: "Реклама. Токен erid не предоставлен" } }), false,
+  "Disclosure containing the word erid but no actual token must not pass");
+assert.equal(isPromoHighlightEligible({ ...futureCode, affiliate: { ...futureCode.affiliate, ordText: "Реклама. erid: 2RanykOTHER" } }), false,
+  "Conflicting ad text vs marker is not safe for promotion");
+assert.equal(isPromoHighlightEligible({ ...futureCode, affiliate: { ...futureCode.affiliate, link: "https://publisher.prfl.me/sites/example?erid=2RanykOTHER" } }), false,
+  "Tracking URL and disclosure must not disagree");
+assert.equal(isPromoHighlightEligible({ ...futureCode, affiliate: { ...futureCode.affiliate, link: "javascript:alert(1)" } }), false,
+  "Only HTTP(S) affiliate links allowed in highlights");
+const beforeExactExpiry = new Date("2026-10-31T00:58:00+03:00").getTime();
+const afterExactExpiry = new Date("2026-10-31T01:00:00+03:00").getTime();
+const exactExpiryCode = { ...futureCode, promocode: { ...futureCode.promocode, expires: "2026-10-31T00:59:00+03:00" } };
+assert.equal(isPromoHighlightEligible(exactExpiryCode, beforeExactExpiry), true);
+assert.equal(isPromoHighlightEligible(exactExpiryCode, afterExactExpiry), false,
+  "A 00:59 Moscow expiry cannot be interpreted as 23:59");
+assert.deepEqual(pickExpiringDeals([futureCode, { ...futureCode, id: 7002, promocode: { ...futureCode.promocode, code: "НЕ НУЖЕН" } }], 4).map(c => c.id), [7001]);
+assert.deepEqual(pickHotDeals([futureCode, { ...futureCode, id: 7003, promocode: { ...futureCode.promocode, code: "NO_CODE" } }], 3).map(c => c.id), [7001]);
+for (const path of ["src/app/page.tsx", "src/app/catalog/page.tsx", "src/app/promokody/page.tsx", "src/app/category/[slug]/page.tsx"]) {
+  const page = fs.readFileSync(path, "utf8");
+  assert.ok(page.includes("export const revalidate = 3600;"),
+    `${path} must refresh live inventory, not cache a build-time snapshot forever`);
+}
+const expiryCardSource = fs.readFileSync("src/components/ExpiringDeals.tsx", "utf8");
+assert.ok(expiryCardSource.includes("const end = expiryTimestamp(expires)") &&
+  !expiryCardSource.includes("new Date(`${expires}T23:59:59+03:00`)"),
+  "Urgent offer labels must honor full ISO expiry timestamps");
+console.log("CATALOG-QA-4: safe highlights, ERID matching, expiry and ISR freshness PASS");
