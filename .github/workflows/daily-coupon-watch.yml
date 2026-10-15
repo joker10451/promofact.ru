@@ -1,0 +1,122 @@
+name: Daily Coupon Health Watch (read-only)
+
+on:
+  schedule:
+    # 08:10 Moscow (UTC+03), a best-effort GitHub Actions schedule.
+    - cron: "10 5 * * *"
+  workflow_dispatch:
+
+# No repository writes, feed synchronization, purchases or Vercel builds.
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: daily-coupon-watch
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Verify live coupons & partner attribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # A unique key per run and prefix restore avoid immutable-cache collisions.
+      - name: Restore previous successful inventory
+        uses: actions/cache/restore@v4
+        with:
+          path: audit-results/coupon-watch-state.json
+          key: coupon-watch-${{ github.run_id }}
+          restore-keys: |
+            coupon-watch-
+
+      - name: Inspect live coupons
+        id: audit
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node --loader ./scripts/ts-loader.mjs scripts/daily-coupon-watch.mjs
+
+      - name: Write GitHub Actions summary
+        if: always()
+        run: |
+          if [ -f audit-results/coupon-watch-report.md ]; then
+            cat audit-results/coupon-watch-report.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Daily coupon audit could not produce a report." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Save last inventory baseline
+        if: ${{ always() && steps.audit.outcome == 'success' }}
+        uses: actions/cache/save@v4
+        with:
+          path: audit-results/coupon-watch-state.json
+          key: coupon-watch-${{ github.run_id }}
+
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coupon-watch-${{ github.run_number }}
+          path: |
+            audit-results/coupon-watch-report.md
+            audit-results/coupon-watch-report.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      # One persistent issue, not daily noisy new issues.
+      - name: Open or update coupon monitor issue
+        if: always()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const file = 'audit-results/coupon-watch-report.json';
+            if (!fs.existsSync(file)) return;
+            const report = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const { owner, repo } = context.repo;
+            const title = '[Каталог] Требуется проверка промокодов';
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', per_page: 100
+            });
+            const existing = open.find(i => !i.pull_request && i.title === title);
+            if (report.requiresAttention) {
+              const lines = report.attention.slice(0, 50);
+              const body = [
+                'Автоматический ежедневный контроль каталога. Последняя проверка: ' + report.generatedAt,
+                '',
+                '**Внимание:** это отчёт о данных и маркировке, а не результат ввода кода в корзине.',
+                '',
+                ...lines,
+                '',
+                'Полный JSON и Markdown: [последний запуск GitHub Actions](https://github.com/' +
+                  owner + '/' + repo + '/actions/workflows/daily-coupon-watch.yml).',
+                '',
+                'Исправления и подтверждения от партнёра вносить вручную. Автоматической публикации нет.'
+              ].join('\n');
+              if (existing) {
+                await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+              } else {
+                await github.rest.issues.create({ owner, repo, title, body });
+              }
+            } else if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number,
+                state: 'closed', state_reason: 'completed',
+                body: 'Последний ежедневный аудит не обнаружил новых проблем. Закрыто автоматически. ' +
+                  report.generatedAt });
+            }
