@@ -31,7 +31,7 @@ function benefitFromTerms(terms: string): string | null {
   const explicitRub = terms.match(/скидк[а-яё]*\s*(?:до\s*)?[−-]?\s*([\d\s]+)\s*(?:₽|руб(?:лей|ля|\.?)?)/iu);
   if (explicitRub) {
     const amount = Number(explicitRub[1].replace(/\s/g, ""));
-    if (amount > 0 && amount <= 100000) return "−" + amount.toLocaleString("ru-RU") + " ₽";
+    if (amount > 0 && amount <= 100000) return "−" + amount.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽";
   }
   if (/подар|дарим|вручени[ея]\s+подар/iu.test(terms))
     return /на\s+выбор/iu.test(terms) ? "Подарок на выбор" : "Подарок к заказу";
@@ -45,7 +45,7 @@ function benefitFromDiscount(discount: string): string | null {
   const rub = value.match(/^[−–-]\s*([\d\s\u00a0]+)\s*₽$/u);
   if (rub) {
     const amount = Number(rub[1].replace(/\s/g, ""));
-    if (amount > 0 && amount <= 100000) return "−" + amount.toLocaleString("ru-RU") + " ₽";
+    if (amount > 0 && amount <= 100000) return "−" + amount.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽";
   }
   if (/^.{0,3}бесплатн[а-яё]*\s+достав/iu.test(value)) return "Бесплатная доставка";
   return null;
