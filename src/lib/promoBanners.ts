@@ -190,8 +190,8 @@ https://www.sberbank.ru/common/img/uploaded/cards/sberkarta_kids/pravila_akcii_b
     link: "https://ivi1.prfl.me/sites/xpmis8?erid=2RanynVXhiB",
     image: "/images/ivi-35-days-oct2026.webp",
     imageAlt: "Оригинальный рекламный макет Иви с персонажами сериала «Околоточный»: 35 дней подписки бесплатно, 18+",
-    imageWidth: 2048,
-    imageHeight: 1461,
+    imageWidth: 1100,
+    imageHeight: 785,
     creativeOnly: true,
     maxDisplayWidth: 1100,
     exactCopy: `🔥 Осторожно: планы на вечер могут измениться!
