@@ -612,6 +612,7 @@ async function run() {
         "/store/magnit-dostavka",
         "/store/m-kosmetik",
         "/store/citydrive",
+        "/store/yandeks-puteshestviya",
         "/store/ivi",
         "/store/podruzhka",
         "/store/winlab",
@@ -681,6 +682,32 @@ async function run() {
               "Coupon and creative must use the new publisher URL");
             assert.ok((await page.getByText(/автоматическое продление подписки/i).count()) >= 1,
               "Ivi free trial must clearly disclose automatic subscription renewal");
+          }
+          if (pathUrl === "/store/yandeks-puteshestviya") {
+            const expected = [
+              ["PF-ALLIOOO-EGGTH", "2026-10-16T10:59:00+03:00"],
+              ["BOLSHE", "2026-10-31T23:59:59+03:00"],
+              ["SHARJAH26", "2026-10-31T23:59:59+03:00"],
+            ];
+            const cards = page.locator('article[id^="coupon-"]');
+            for (const [code, expires] of expected) {
+              const matches = cards.filter({ hasText: code });
+              if (new Date(expires).getTime() >= Date.now()) {
+                assert.equal(await matches.count(), 1,
+                  `Active travel code ${code} must be shown once at ${res.width}px`);
+                const card = matches.first();
+                assert.ok((await card.innerText()).includes("2RanykJ47QF"),
+                  `Wrong ERID for travel code ${code}`);
+                const link = card.locator('a[href="https://travelyandex.prfl.me/sites/k9msuz?erid=2RanykJ47QF"]');
+                assert.ok(await link.count() >= 1,
+                  `Wrong Perfluence publisher URL for ${code}`);
+              } else {
+                assert.equal(await matches.count(), 0,
+                  `Expired travel code ${code} must disappear after its exact cutoff`);
+              }
+            }
+            assert.equal(await cards.filter({ hasText: "PF-PREMIUMPRO-B66N2" }).count(), 0,
+              "Rotated old travel coupon must not resurface from cached Perfluence");
           }
           if (pathUrl === "/store/citydrive") {
             const offers = page.locator('article[id^="coupon-"]');
