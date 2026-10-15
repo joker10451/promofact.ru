@@ -71,7 +71,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
       barcodeImage: null,
       group: "perfluence",
     },
-    store: { ...STABLE_STORES["ivi"] },
+    store: { ...STABLE_STORES["ivi"], activeBloggers: STABLE_STORES["ivi"].activeBloggers ?? 0 },
     affiliate: {
       link: "https://ivi1.prfl.me/sites/xpmis8?erid=2RanynVXhiB",
       landingLink: "https://ivi1.prfl.me/sites/xpmis8?erid=2RanynVXhiB",
