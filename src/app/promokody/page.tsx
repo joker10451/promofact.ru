@@ -6,7 +6,7 @@ import { getStores, getAllStores } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { currentMonthYear, getMaxDiscount } from "@/lib/seoArticles";
 
-export const revalidate = false;
+export const revalidate = 3600; // Обновление раз в час: актуальные акции не ждут следующего деплоя.
 
 const monthYear = currentMonthYear();
 
