@@ -7,6 +7,7 @@ import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 import { CATEGORIES } from "@/lib/categoryTaxonomy";
 import { isCouponActive } from "@/lib/couponExpiry";
 import { STABLE_STORES } from "@/lib/stableStores";
+import { isPausedPublisherStore, withoutPausedPublisherOffers } from "@/lib/publisherPauses";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
 
@@ -450,7 +451,8 @@ async function fetchSnapshot(): Promise<Coupon[]> {
 
 /** Только купоны Perfluence, без Admitad и прочих фидов — для /api/perfluence-snapshot. */
 export async function getPerfluenceCoupons(): Promise<Coupon[]> {
-  return fetchData();
+  // Block the halted advertiser even in direct API snapshots and stale cache.
+  return withoutPausedPublisherOffers(await fetchData());
 }
 
 async function fetchData(): Promise<Coupon[]> {
@@ -721,7 +723,7 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // Source snapshots still contain pre-14 October coupons. Do not let them
   // reappear when code rotations require fresh publisher credentials.
   const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ЧАЙ"]);
-  return coupons.filter((c) => {
+  return withoutPausedPublisherOffers(coupons).filter((c) => {
     if (c.store.slug === "magnit-dostavka") {
       return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase());
     }
@@ -864,7 +866,7 @@ export async function getStores(): Promise<StoreInfo[]> {
 export const CORE_FALLBACK_STORES = STABLE_STORES;
 
 export async function getAllStores(): Promise<StoreInfo[]> {
-  const list = await getCachedMergedCoupons();
+  const list = withoutPausedPublisherOffers(await getCachedMergedCoupons());
   const map = new Map<string, StoreInfo>();
   for (const c of list) {
     const key = c.store.slug;
@@ -890,6 +892,8 @@ export async function getAllStores(): Promise<StoreInfo[]> {
 
   // Гарантируем, что бренды из стабильного реестра (включая цели внутренних ссылок статей) не дают 404 при временном окончании купонов
   for (const [slug, meta] of Object.entries(STABLE_STORES)) {
+    // Halted campaigns must not reappear via evergreen/SEO fallback entries.
+    if (isPausedPublisherStore(slug)) continue;
     if (!map.has(slug)) {
       map.set(slug, {
         id: meta.id,

@@ -2,6 +2,7 @@ import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { isPausedPublisherStore } from "@/lib/publisherPauses";
 import PromoBanner from "@/components/PromoBanner";
 import { getActivePromoBanners } from "@/lib/promoBanners";
 import HowToApply from "@/components/HowToApply";
@@ -75,6 +76,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  if (isPausedPublisherStore(slug)) notFound();
   const stores = await getAllStores();
   const store = stores.find((s) => s.slug === slug);
   if (!store) return {};
@@ -183,6 +185,7 @@ export default async function StorePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (isPausedPublisherStore(slug)) notFound();
   const [stores, uses] = await Promise.all([getAllStores(), getUsesStats()]);
   const store = stores.find((s) => s.slug === slug);
   if (!store) notFound();

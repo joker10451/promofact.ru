@@ -207,18 +207,6 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://citydrive.ru/",
     "activeBloggers": 7105
   },
-  "delimobil": {
-    "id": 112,
-    "slug": "delimobil",
-    "name": "Делимобиль",
-    "logo": "https://favicon.yandex.net/favicon/v2/delimobil.ru?size=120",
-    "category": "Путешествия и туризм",
-    "categorySlug": "puteshestviya-i-turizm",
-    "about": "Делимобиль - крупнейший онлайн-сервис каршеринга в России, работает в 16 городах. В парке почти 30 тысяч авто: от привычных Polo и Solaris, веселых Smart и MINI, спортивного Stinger, и до презентабельных Audi, BMW, Mercedes.",
-    "conditions": "Реклама. Делимобиль - сервис каршеринга. Промокод на 2000 бонусов на первую поездку для новых пользователей. Нужно активировать до 30.09.2026 г. Промокод на 200 бонусов для пользователей, не совершавших аренды более 60 дней. Нужно активировать до 30.09.2026 г. Не является публичной офертой. Скидки применяются согласно условиям на сайте",
-    "site": "https://delimobil.ru",
-    "activeBloggers": 4164
-  },
   "detskie-platezhnye-aksessuary-ot-sbera": {
     "id": 4025,
     "slug": "detskie-platezhnye-aksessuary-ot-sbera",
