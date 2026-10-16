@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import PopularStores from "@/components/PopularStores";
+import PrioritySearchLinks from "@/components/PrioritySearchLinks";
 import ExpiringDeals from "@/components/ExpiringDeals";
 import SberCampaignTeasers from "@/components/SberCampaignTeasers";
 import HomeOffersPreview from "@/components/HomeOffersPreview";
@@ -74,6 +75,11 @@ export default async function Home() {
           <Reveal>
             <PopularStores />
           </Reveal>
+        </div>
+
+        {/* Internal links to GSC-proven entry points; only stores with real active offers. */}
+        <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 sm:pt-6">
+          <PrioritySearchLinks stores={stores} />
         </div>
 
         {/* Короткая витрина реальных категорий. Полный каталог открыт на /category. */}
