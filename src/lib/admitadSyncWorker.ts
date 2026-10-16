@@ -250,6 +250,12 @@ export async function runAdmitadSafeSync(options: {
       }
 
       const rowId = `adm_${couponId}`;
+      // A source coupon ID belongs to exactly one approved campaign. Never
+      // transfer an already active row to a newly introduced merchant.
+      const originalCampaign = existingActiveMap.get(rowId)?.source_campaign_id;
+      if (originalCampaign && String(originalCampaign) !== String(campId)) {
+        throw new Error("PUBLISHER_COUPON_ID_CAMPAIGN_CHANGED");
+      }
       const newOfferOutsideBatch = Boolean(
         options.onlyNewCampaignIds &&
         !existingActiveMap.has(rowId) &&

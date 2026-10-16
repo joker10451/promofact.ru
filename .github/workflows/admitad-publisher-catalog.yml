@@ -1,36 +1,42 @@
-
 name: Admitad Publisher Website Coupon Catalog
+
 on:
-  # Same-repository PR only: automatic READ-ONLY preview with connected secrets.
   pull_request:
     branches: [main]
     paths:
-      - 'src/lib/admitadPublisherCatalog.ts'
+      - 'scripts/catalog-1-guards.mjs'
+      - 'scripts/catalog-1-refresh.mjs'
+      - 'scripts/test-catalog-1-refresh.mjs'
       - 'src/lib/admitadSyncWorker.ts'
       - '.github/workflows/admitad-publisher-catalog.yml'
+  # Every six hours: monitor only. Scheduled runs can NEVER write.
+  schedule:
+    - cron: '27 */6 * * *'
   workflow_dispatch:
     inputs:
       mode:
-        description: "preview (no database writes), or publish approved publisher-scoped coupons"
+        description: "preview: read-only; publish: explicitly approved atomic refresh"
         type: choice
         required: true
         default: preview
-        options:
-          - preview
-          - publish
+        options: [preview, publish]
       confirm:
-        description: "I authorize publishing coupons issued to my Admitad website"
+        description: "I authorize the current existing-program catalog refresh (publish only)"
         type: boolean
         required: true
         default: false
+
 permissions:
   contents: read
+
 concurrency:
   group: admitad-publisher
   cancel-in-progress: false
+
 jobs:
   publisher-coupon-sync:
-    if: ${{ github.event_name == 'pull_request' || inputs.mode == 'preview' || inputs.confirm == true }}
+    # Forked PRs never receive publisher/database credentials.
+    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (github.event_name != 'workflow_dispatch' || inputs.mode != 'publish' || inputs.confirm == true) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -42,7 +48,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Preview or atomically publish current website-scoped coupons
+      - name: Test CATALOG-1 safety and authorization
+        run: node scripts/test-catalog-1-refresh.mjs
+      - name: Preview first; write only on explicitly approved manual publish
         env:
           ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
           ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
@@ -51,7 +59,8 @@ jobs:
           ADMITAD_APPROVED_CAMPAIGNS: '141770,1667,17220,25224,26110'
           ADMITAD_BATCH_APPROVED_CAMPAIGNS: '28532,14647,22484'
           ADMITAD_PUBLISH_WEBSITE_COUPONS: 'true'
-          ADMITAD_PUBLISHER_CATALOG_DRY_RUN: ${{ github.event_name == 'pull_request' && 'true' || (inputs.mode == 'publish' && 'false' || 'true') }}
+          ADMITAD_PUBLISHER_CATALOG_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true && 'false' || 'true' }}
+          ADMITAD_CATALOG_PUBLISH_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true && 'true' || 'false' }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node --loader ./scripts/ts-loader.mjs scripts/sync-admitad-snapshot.mjs
+        run: node --loader ./scripts/ts-loader.mjs scripts/catalog-1-refresh.mjs
