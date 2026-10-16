@@ -33,6 +33,9 @@ export default async function AdminPage() {
           <Link href="/stats" className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-bold hover:border-ink">
             Статистика
           </Link>
+          <Link href="/admin/revenue" className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-bold hover:border-ink">
+            Доходы
+          </Link>
           <Link href="/" className="rounded-xl bg-yellow px-4 py-2 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition">
             На сайт →
           </Link>
