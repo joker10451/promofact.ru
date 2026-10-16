@@ -725,6 +725,15 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     if (c.store.slug === "magnit-dostavka") {
       return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase());
     }
+    // New site-specific Tanuki publication supersedes the stale widget URL and
+    // historical ERID. Deny unknown/historical codes until reviewed.
+    if (c.store.slug === "tanukifamily") {
+      const code = c.promocode.code.trim().toUpperCase();
+      return ["20FU1416", "15FU1416", "FU1417", "ZB1177"].includes(code) &&
+        c.affiliate.link === "https://tanuki.prfl.me/sites/wyy3z6?erid=2RanymqYc6X" &&
+        c.affiliate.ordMarker === "2RanymqYc6X" &&
+        c.affiliate.ordText.includes("erid: 2RanymqYc6X");
+    }
     // Current WinLab publisher URL lacks an ERID in the supplied account view.
     // Suppress legacy codes until the current token is supplied and checked.
     if (c.store.slug === "winlab") return false;

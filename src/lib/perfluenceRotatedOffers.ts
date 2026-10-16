@@ -15,6 +15,7 @@ const mKosmetik: Coupon["store"] = { ...STABLE_STORES["m-kosmetik"], activeBlogg
 const winlab: Coupon["store"] = { ...STABLE_STORES["winlab"], activeBloggers: STABLE_STORES["winlab"].activeBloggers ?? 0 };
 const citydrive: Coupon["store"] = { ...STABLE_STORES.citydrive, activeBloggers: STABLE_STORES.citydrive.activeBloggers ?? 0 };
 const yandexTravel: Coupon["store"] = { ...STABLE_STORES["yandeks-puteshestviya"], activeBloggers: STABLE_STORES["yandeks-puteshestviya"].activeBloggers ?? 0 };
+const tanuki: Coupon["store"] = { ...STABLE_STORES["tanukifamily"], activeBloggers: STABLE_STORES["tanukifamily"].activeBloggers ?? 0 };
 const magnitAd = {
   link: MAGNIT_LINK,
   landingLink: MAGNIT_LINK,
@@ -52,6 +53,18 @@ const yandexTravelNewAd: Coupon["affiliate"] = {
   ordMarker: "2RanynSc5X1",
   ordText: 'Реклама. ООО "ЯНДЕКС.ВЕРТИКАЛИ", ИНН 7704340327. erid: 2RanynSc5X1',
 };
+// Current Perfluence placement for PromoFact website, supplied 16 October 2026.
+// All four Tanuki coupons must use this newly issued site URL AND matching ERID.
+export const TANUKI_OCT16_LINK = "https://tanuki.prfl.me/sites/wyy3z6?erid=2RanymqYc6X";
+export const TANUKI_OCT16_ERID = "2RanymqYc6X";
+const tanukiAd: Coupon["affiliate"] = {
+  link: TANUKI_OCT16_LINK,
+  landingLink: TANUKI_OCT16_LINK,
+  ordMarker: TANUKI_OCT16_ERID,
+  ordText: 'Реклама. ООО "Корсика", ИНН 7730290633. erid: 2RanymqYc6X',
+};
+const TANUKI_SUPPORTED_CITIES = "Москва, Краснодар, Самара, Казань, Уфа, Воронеж, Екатеринбург и Нижний Новгород";
+
 const winlabAd = {
   link: WINLAB_LINK,
   landingLink: WINLAB_LINK,
@@ -122,6 +135,34 @@ export const CITYDRIVE_APPROVED_OFFERS: Coupon[] = [
     "Промокод BACK163 для Ситидрайв", "2026-10-31",
     "По условиям акции",
     "Промокод BACK163 указан в согласованном размещении Ситидрайв. Размер бонуса не предоставлен. Проверьте доступный бонус и ограничения в приложении до поездки. Действует до 31 октября 2026 года."),
+];
+
+/**
+ * The user-provided Tanuki website placement was renewed on 16 October.
+ * The Perfluence snapshot still includes old tracking link/ERID for some codes.
+ * Benefit/threshold for ZB1177 were NOT provided: do not infer them from
+ * the concurrent notification about a dish giveaway.
+ * Tanuki may NOT be jointly included in editorial selections with FARFOR
+ * or Ёёёёёёё (formerly Ёбидоёби).
+ */
+export const TANUKI_OCT16_OFFERS: Coupon[] = [
+  offer(82602001, tanuki, tanukiAd, "20FU1416",
+    "Скидка 20% на первый заказ от 1 090 ₽ в Тануки",
+    "2026-10-29T23:59:59+03:00", "Первый заказ · 8 городов",
+    `Скидка 20% на первый заказ в Тануки от 1 090 ₽. Города действия по опубликованному фиду: ${TANUKI_SUPPORTED_CITIES}. Проверьте применимость заказа, ограничения и итоговую цену до оплаты. До 29 октября 2026 года, 23:59 по Москве.`,
+    true),
+  offer(82602002, tanuki, tanukiAd, "15FU1416",
+    "Скидка 15% на повторный заказ от 1 490 ₽ в Тануки",
+    "2026-10-29T23:59:59+03:00", "Повторный заказ",
+    "Скидка 15% на повторный заказ в Тануки при сумме от 1 490 ₽. Применимость, ограничения и итоговую сумму уточняйте при оформлении. До 29 октября 2026 года, 23:59 по Москве."),
+  offer(82602003, tanuki, tanukiAd, "FU1417",
+    "Ролл Фурай в подарок при заказе от 1 490 ₽",
+    "2026-10-18T23:59:59+03:00", "Заказ от 1 490 ₽ · 8 городов",
+    `Ролл Фурай в подарок по промокоду FU1417 при заказе от 1 490 ₽. Города действия по опубликованному фиду: ${TANUKI_SUPPORTED_CITIES}. Наличие подарка и другие ограничения проверяйте в корзине. До 18 октября 2026 года, 23:59 по Москве.`),
+  offer(82602004, tanuki, tanukiAd, "ZB1177",
+    "Промокод ZB1177 для Тануки",
+    "2026-11-01T23:59:59+03:00", "По условиям акции",
+    "Промокод ZB1177 указан в актуальном размещении Perfluence до 1 ноября 2026 года, 23:59 по Москве. Размер скидки, состав подарка, минимальный заказ и другие ограничения не предоставлены. Проверьте бонус в корзине перед оплатой."),
 ];
 
 /**
