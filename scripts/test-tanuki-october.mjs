@@ -9,7 +9,7 @@ const expected = {
   "20FU1416": { expires:"2026-10-29T23:59:59+03:00", percent:"20%", min:"1 090", first:true },
   "15FU1416": { expires:"2026-10-29T23:59:59+03:00", percent:"15%", min:"1 490", first:false },
   "FU1417": { expires:"2026-10-18T23:59:59+03:00", percent:"Ролл Фурай", min:"1 490", first:false },
-  "ZB1177": { expires:"2026-11-01T23:59:59+03:00", percent:null, min:null, first:false },
+  "ZB1177": { expires:"2026-11-01T23:59:59+03:00", percent:"Запечённый краб", min:"1 490", first:false },
 };
 assert.equal(TANUKI_OCT16_LINK, "https://tanuki.prfl.me/sites/wyy3z6?erid=2RanymqYc6X");
 assert.equal(TANUKI_OCT16_ERID, "2RanymqYc6X");
@@ -35,10 +35,11 @@ for (const coupon of TANUKI_OCT16_OFFERS) {
   assert.equal(c.isBarcode,false);
 }
 
-const unknown = TANUKI_OCT16_OFFERS.find(c=>c.promocode.code==="ZB1177");
-assert(unknown && unknown.promocode.terms?.includes("не предоставлены"));
-assert(!/\b(?:\d+[%₽]|ролл в подарок|скидка \d+)/iu.test(unknown.promocode.bonusName||""),
-  "Do not invent the benefit or minimum order for ZB1177");
+const confirmedGift = TANUKI_OCT16_OFFERS.find(c=>c.promocode.code==="ZB1177");
+assert(confirmedGift && confirmedGift.promocode.bonusName.includes("Ролл «Запечённый краб»"));
+assert(confirmedGift.promocode.bonusName.includes("от 1 490 ₽"));
+assert(confirmedGift.promocode.terms?.includes("ролл «Запечённый краб» в подарок"));
+assert(!confirmedGift.promocode.terms?.includes("не предоставлены"));
 const old = TANUKI_OCT16_OFFERS[0];
 const stale={...old,id:992390, promocode:{...old.promocode,id:992390},
   affiliate:{...old.affiliate,link:"https://tanuki.prfl.me/sites/qbsv4v?erid=2RanymzKnrw",

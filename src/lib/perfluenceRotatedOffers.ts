@@ -16,6 +16,7 @@ const winlab: Coupon["store"] = { ...STABLE_STORES["winlab"], activeBloggers: ST
 const citydrive: Coupon["store"] = { ...STABLE_STORES.citydrive, activeBloggers: STABLE_STORES.citydrive.activeBloggers ?? 0 };
 const yandexTravel: Coupon["store"] = { ...STABLE_STORES["yandeks-puteshestviya"], activeBloggers: STABLE_STORES["yandeks-puteshestviya"].activeBloggers ?? 0 };
 const tanuki: Coupon["store"] = { ...STABLE_STORES["tanukifamily"], activeBloggers: STABLE_STORES["tanukifamily"].activeBloggers ?? 0 };
+const perekrestok: Coupon["store"] = { ...STABLE_STORES["perekrestok-dostavka"], activeBloggers: STABLE_STORES["perekrestok-dostavka"].activeBloggers ?? 0 };
 const magnitAd = {
   link: MAGNIT_LINK,
   landingLink: MAGNIT_LINK,
@@ -64,6 +65,17 @@ const tanukiAd: Coupon["affiliate"] = {
   ordText: 'Реклама. ООО "Корсика", ИНН 7730290633. erid: 2RanymqYc6X',
 };
 const TANUKI_SUPPORTED_CITIES = "Москва, Краснодар, Самара, Казань, Уфа, Воронеж, Екатеринбург и Нижний Новгород";
+
+// Updated, account-approved Perfluence website placement for promofact.ru,
+// supplied 16 October 2026. The cached widget has a DIFFERENT URL/ERID.
+export const PEREKRESTOK_OCT16_LINK = "https://perekrestok.prfl.me/sites/w4ofmz?erid=2RanykQXyH5";
+export const PEREKRESTOK_OCT16_ERID = "2RanykQXyH5";
+const perekrestokAd: Coupon["affiliate"] = {
+  link: PEREKRESTOK_OCT16_LINK,
+  landingLink: PEREKRESTOK_OCT16_LINK,
+  ordMarker: PEREKRESTOK_OCT16_ERID,
+  ordText: 'Реклама. ООО "ИКС 5 ДИДЖИТАЛ", ИНН 9722010808. erid: 2RanykQXyH5',
+};
 
 const winlabAd = {
   link: WINLAB_LINK,
@@ -140,8 +152,8 @@ export const CITYDRIVE_APPROVED_OFFERS: Coupon[] = [
 /**
  * The user-provided Tanuki website placement was renewed on 16 October.
  * The Perfluence snapshot still includes old tracking link/ERID for some codes.
- * Benefit/threshold for ZB1177 were NOT provided: do not infer them from
- * the concurrent notification about a dish giveaway.
+ * The advertiser-provided ZB1177 bonus was confirmed by the publisher:
+ * one "Запечённый краб" roll for an order from 1 490 ₽.
  * Tanuki may NOT be jointly included in editorial selections with FARFOR
  * or Ёёёёёёё (formerly Ёбидоёби).
  */
@@ -160,9 +172,31 @@ export const TANUKI_OCT16_OFFERS: Coupon[] = [
     "2026-10-18T23:59:59+03:00", "Заказ от 1 490 ₽ · 8 городов",
     `Ролл Фурай в подарок по промокоду FU1417 при заказе от 1 490 ₽. Города действия по опубликованному фиду: ${TANUKI_SUPPORTED_CITIES}. Наличие подарка и другие ограничения проверяйте в корзине. До 18 октября 2026 года, 23:59 по Москве.`),
   offer(82602004, tanuki, tanukiAd, "ZB1177",
-    "Промокод ZB1177 для Тануки",
-    "2026-11-01T23:59:59+03:00", "По условиям акции",
-    "Промокод ZB1177 указан в актуальном размещении Perfluence до 1 ноября 2026 года, 23:59 по Москве. Размер скидки, состав подарка, минимальный заказ и другие ограничения не предоставлены. Проверьте бонус в корзине перед оплатой."),
+    "Ролл «Запечённый краб» в подарок при заказе от 1 490 ₽",
+    "2026-11-01T23:59:59+03:00", "Заказ от 1 490 ₽",
+    "По промокоду ZB1177 — ролл «Запечённый краб» в подарок при заказе в Тануки от 1 490 ₽. Наличие ролла, ассортимент и прочие ограничения проверьте в корзине перед оплатой. Действует до 1 ноября 2026 года, 23:59 по Москве."),
+];
+
+/**
+ * Perfluence website publisher dashboard 16 October 2026: three active
+ * Perekrestok Delivery codes, all on a renewed link/ERID. The legacy widget
+ * conflicts on expiry of 173T5R64A and does not contain 171LREDEY. Keep only
+ * the confirmed code + benefit + cutoff. Do not infer basket-wide eligibility,
+ * minimum spend, maximum savings or first-order restrictions from the old feed.
+ */
+export const PEREKRESTOK_OCT16_OFFERS: Coupon[] = [
+  offer(82604301, perekrestok, perekrestokAd, "173T5R64A",
+    "Скидка 99% по промокоду в Перекрёсток Доставка",
+    "2026-10-18T23:59:59+03:00", "На товары по условиям акции",
+    "Промокод 173T5R64A: заявлена скидка 99% на участвующие в акции товары. Она не обязательно распространяется на всю корзину. Категории товаров, минимальную сумму заказа, лимит скидки и другие ограничения уточняйте в приложении. До 18 октября 2026 года, 23:59 по Москве."),
+  offer(82604302, perekrestok, perekrestokAd, "171LREDEY",
+    "Скидка 30% по промокоду в Перекрёсток Доставка",
+    "2026-10-31T23:59:59+03:00", "По условиям акции",
+    "Промокод 171LREDEY: скидка 30% в Перекрёсток Доставка. Минимальный заказ, максимальная скидка и применимость для первого или повторного заказа в новой публикации не указаны — проверьте условия в корзине. До 31 октября 2026 года, 23:59 по Москве."),
+  offer(82604303, perekrestok, perekrestokAd, "172E2Y5TJ",
+    "Скидка 300 ₽ по промокоду в Перекрёсток Доставка",
+    "2026-10-31T23:59:59+03:00", "По условиям акции",
+    "Промокод 172E2Y5TJ: скидка 300 ₽. Минимальный заказ, применимые товары и ограничения для нового размещения не подтверждены; проверьте условия и итоговую цену в приложении. До 31 октября 2026 года, 23:59 по Москве."),
 ];
 
 /**
