@@ -734,6 +734,15 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
         c.affiliate.ordMarker === "2RanymqYc6X" &&
         c.affiliate.ordText.includes("erid: 2RanymqYc6X");
     }
+    // Perfluence's old widget contains conflicting codes, expiry dates, URL
+    // and ERID. Only explicitly approved project website placement survives.
+    if (c.store.slug === "perekrestok-dostavka") {
+      const code = c.promocode.code.trim().toUpperCase();
+      return ["173T5R64A", "171LREDEY", "172E2Y5TJ"].includes(code) &&
+        c.affiliate.link === "https://perekrestok.prfl.me/sites/w4ofmz?erid=2RanykQXyH5" &&
+        c.affiliate.ordMarker === "2RanykQXyH5" &&
+        c.affiliate.ordText.includes("erid: 2RanykQXyH5");
+    }
     // Current WinLab publisher URL lacks an ERID in the supplied account view.
     // Suppress legacy codes until the current token is supplied and checked.
     if (c.store.slug === "winlab") return false;
