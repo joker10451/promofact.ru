@@ -1,0 +1,33 @@
+name: REVENUE-1 Admitad Read-Only Connectivity
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promofact-revenue-read-only
+  cancel-in-progress: false
+
+jobs:
+  probe-admitad-statistics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Validate revenue parser and privacy restrictions
+        run: npm run test:revenue-1
+      - name: Read-only Admitad Statistics API probe (never print amounts)
+        env:
+          ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
+          ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
+          ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}
+          REVENUE_1_PRIVATE_REPORT: 'false'
+        run: node --loader ./scripts/ts-loader.mjs scripts/revenue-1-preview.mjs
