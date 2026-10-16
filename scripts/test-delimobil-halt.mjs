@@ -39,6 +39,10 @@ assert(source.includes("if (isPausedPublisherStore(slug)) continue"),
 assert(source.includes("const list = withoutPausedPublisherOffers(await getCachedMergedCoupons())"),
  "Store directories and dynamic sitemap must be protected");
 assert(snap.includes("getPerfluenceCoupons()"),"Public Perfluence snapshot must use paused-offer filter");
+assert(snap.includes('export const revalidate = 0'),"Snapshot must not use ISR after a partner stop");
+assert(snap.includes('"Cache-Control": "no-store, max-age=0, must-revalidate"'),
+ "Emergency blackout must prevent publicly cached offers from persisting after deployment");
+assert(!snap.includes("stale-while-revalidate"),"Do not let CDN serve halted offers as stale");
 assert.equal(route.split("if (isPausedPublisherStore(slug)) notFound()").length-1,2,
  "Both store page and metadata must 404 without showing affiliate buttons or old SEO text");
 assert(!articles.includes('href: "/store/delimobil"'),
