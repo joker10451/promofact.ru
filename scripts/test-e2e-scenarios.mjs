@@ -752,45 +752,54 @@ async function run() {
           if (pathUrl === "/store/podruzhka") {
             const retailCard = page.locator("#coupon-50042");
             const onlineCard = page.locator("#coupon-50041");
-            assert.equal(await retailCard.count(), 1, "Podruzhka retail barcode must be present in the local published feed");
-            {
+            // The online code ended on 15 October, while the separately
+            // approved in-store barcode remains valid until 18 October.
+            const onlineActive = Date.now() <= Date.parse("2026-10-15T23:59:59+03:00");
+            const retailActive = Date.now() <= Date.parse("2026-10-18T23:59:59+03:00");
+            assert.equal(await onlineCard.count(), onlineActive ? 1 : 0,
+              "Podruzhka expired online code must disappear on time");
+            assert.equal(await retailCard.count(), retailActive ? 1 : 0,
+              "Podruzhka retail barcode must follow its separate expiry");
+
+            if (retailActive) {
               assert.equal(await retailCard.getByRole("img", { name: "Штрихкод 2921098553491" }).count(), 1,
                 "Podruzhka retail EAN-13 graphic must match the supplied barcode");
               assert.ok((await retailCard.innerText()).includes("2921098553491"),
-                "Retail barcode number must be visible to the customer");
+                "Retail barcode number must be visible");
               assert.ok(!(await retailCard.innerText()).includes("Штрихкод ожидает загрузки"),
-                "Verified retail barcode must no longer show a missing-barcode placeholder");
+                "Retail barcode must not show a missing-barcode placeholder");
               assert.equal(await retailCard.getByRole("link", { name: /Перейти к предложению/ }).count(), 0,
-                "Retail barcode is presented on the card instead of generic code-free offer link");
+                "Retail barcode must not appear as a generic code-free offer");
             }
-            if (res.width >= 768) {
-              const retailBounds = await retailCard.boundingBox();
-              const onlineBounds = await onlineCard.boundingBox();
-              assert.ok(retailBounds && onlineBounds &&
-                retailBounds.x > onlineBounds.x &&
-                Math.abs(retailBounds.y - onlineBounds.y) < 4,
-                "Podruzhka must use two side-by-side cards rather than leave a third empty grid slot");
-              if (res.width >= 1200) {
-                assert.ok(onlineBounds.width > 400 && retailBounds.width > 400,
-                  "Podruzhka cards must fill both halves of the store coupon section on desktop");
+
+            // Layout and copy controls apply while BOTH distinct offers are live.
+            if (onlineActive && retailActive) {
+              if (res.width >= 768) {
+                const retailBounds = await retailCard.boundingBox();
+                const onlineBounds = await onlineCard.boundingBox();
+                assert.ok(retailBounds && onlineBounds &&
+                  retailBounds.x > onlineBounds.x &&
+                  Math.abs(retailBounds.y - onlineBounds.y) < 4,
+                  "Podruzhka active cards must remain side by side");
+                if (res.width >= 1200) {
+                  assert.ok(onlineBounds.width > 400 && retailBounds.width > 400,
+                    "Two active Podruzhka cards must each have a readable width");
+                }
               }
-            }
-            const conditionsButton = onlineCard.getByRole("button", { name: "Условия акции" });
-            const copyCodeControl = onlineCard.locator('button[aria-label^="Скопировать промокод "]').first();
-            const conditionsBounds = await conditionsButton.boundingBox();
-            const copyBounds = await copyCodeControl.boundingBox();
-            assert.ok(conditionsBounds && copyBounds &&
-              copyBounds.y - (conditionsBounds.y + conditionsBounds.height) < 85,
-              "Podruzhka online code should follow terms without a tall blank gap");
-            assert.equal(await onlineCard.count(), 1, "Podruzhka online coupon must be present in the local published feed");
-            {
+              const conditionsButton = onlineCard.getByRole("button", { name: "Условия акции" });
+              const copyCodeControl = onlineCard.locator('button[aria-label^="Скопировать промокод "]').first();
+              const conditionsBounds = await conditionsButton.boundingBox();
+              const copyBounds = await copyCodeControl.boundingBox();
+              assert.ok(conditionsBounds && copyBounds &&
+                copyBounds.y - (conditionsBounds.y + conditionsBounds.height) < 85,
+                "Online code must follow terms without a tall blank gap");
               assert.ok((await onlineCard.innerText()).includes("2921098554627"),
-                "The working online promo must remain visible and copyable");
+                "Active online promo must remain copyable");
               assert.equal(await onlineCard.getByRole("button", { name: /Скопировать промокод/ }).count(), 1,
                 "Online promo must retain its copy action");
             }
             assert.ok(await page.locator('img[src="/brands/podruzhka-mark.svg"]').count() > 0,
-              "Podruzhka store mark must be local and not depend on an external favicon");
+              "Podruzhka store mark must stay local");
             if (res.width === 390) {
               await page.screenshot({
                 path: path.join(afterScreenshotsDir, "polish-podruzhka-390.png"),
