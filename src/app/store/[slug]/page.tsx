@@ -483,8 +483,29 @@ export default async function StorePage({
           </div>
         </div>
 
+        {/* Clear distinction between Flowwow and FMART by flowwow:
+            separate publisher URLs, discount codes and ERID. */}
+        {slug === "flowwow" && stores.some((s) => s.slug === "fmart" && s.coupons.length > 0) && (
+          <aside aria-label="Отдельный проект FMART" className="mt-5 rounded-2xl border border-line bg-paper/60 px-4 py-4 sm:px-5">
+            <p className="text-sm font-semibold text-ink">Ищете промокоды FMART by flowwow?</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink/70 sm:text-sm">
+              FMART — отдельный проект с собственными промокодами и рекламной ссылкой.
+              Их нет в купонах обычного Flowwow.
+            </p>
+            <Link href="/store/fmart#offers" className="mt-2 inline-flex min-h-11 items-center text-sm font-extrabold text-red underline-offset-4 hover:underline">
+              Открыть актуальные промокоды FMART →
+            </Link>
+          </aside>
+        )}
+        {slug === "fmart" && (
+          <p className="mt-4 rounded-xl border border-line bg-paper/60 px-4 py-3 text-xs leading-relaxed text-ink/75 sm:text-sm">
+            Это предложения FMART by flowwow, а не отдельные промокоды сервиса Flowwow.
+            Действующие коды, сроки и условия перечислены ниже. Применимость проверяйте в корзине.
+          </p>
+        )}
+
         {/* 1. ГЛАВНЫЙ БЛОК: АКТИВНЫЕ КУПОНЫ И ПРОМОКОДЫ (СРАЗУ НА 1-М ЭКРАНЕ) */}
-        <div className="mt-6">
+        <div id="offers" className="mt-6 scroll-mt-24">
           {store.coupons.length === 0 ? (
             <div className="rounded-3xl border border-line bg-white p-6 sm:p-10 text-center shadow-xs">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-paper border border-line mb-3 text-ink/40">

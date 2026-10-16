@@ -95,7 +95,7 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 12;
+    const totalTests = 13;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
@@ -1194,6 +1194,48 @@ async function run() {
           fullPage: false,
           animations: "disabled",
         });
+      }
+      await context.close();
+      passedTests++;
+    }
+
+    // --- SCENARIO 13: FMART by flowwow and Flowwow are separate publishers ---
+    console.log("\n[Test 13] FMART: actual store cards, approved ERID and discoverability");
+    {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const page = await context.newPage();
+      const response = await page.goto(BASE_URL + "/store/fmart", { waitUntil: "domcontentloaded" });
+      assert.equal(response?.status(), 200, "FMART store must resolve independently of Flowwow");
+      const now = Date.now();
+      const expected = [
+        ["FMARTPE23khl6x", "2026-10-31T23:59:59+03:00"],
+        ["FMARTPE900btr9u", "2026-10-31T23:59:59+03:00"],
+        ["FMARTPE403c8la", "2026-10-17T23:59:59+03:00"],
+        ["fmartpe2063dcr", "2026-10-31T23:59:59+03:00"],
+      ].filter((item) => now <= Date.parse(item[1]));
+      assert.match(await page.locator("h1").innerText(), /FMART/i);
+      const codes = page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]');
+      await page.waitForTimeout(550);
+      assert.equal(await codes.count(), expected.length,
+        "FMART active cards must reflect approved expiry, never a stale widget");
+      for (const item of expected) {
+        const code = item[0];
+        assert.equal(await page.locator('button[aria-label="Скопировать промокод ' + code + '"]').count(), 1,
+          "Publisher code must be visible: " + code);
+      }
+      if (expected.length > 0) {
+        assert((await page.content()).includes("2Ranykhnax3"), "FMART must use approved ERID");
+        const home = await page.goto(BASE_URL + "/", { waitUntil: "domcontentloaded" });
+        assert.equal(home?.status(), 200);
+        const direct = page.locator('a[href="/store/fmart#offers"]').first();
+        assert(await direct.count() > 0, "Homepage must expose FMART entry point");
+        await direct.click();
+        await page.waitForURL("**/store/fmart#offers", { timeout: 10000 });
+      }
+      const flowwow = await page.goto(BASE_URL + "/store/flowwow", { waitUntil: "domcontentloaded" });
+      if (flowwow?.status() === 200 && expected.length > 0) {
+        assert.equal(await page.locator('aside[aria-label="Отдельный проект FMART"] a[href="/store/fmart#offers"]').count(), 1,
+          "Flowwow must link to FMART without blending their promo codes");
       }
       await context.close();
       passedTests++;

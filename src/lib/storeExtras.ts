@@ -1,3 +1,5 @@
+import { isCouponActive } from "@/lib/couponExpiry";
+
 /**
  * Дополнения к странице магазина, которые нельзя собрать из фида.
  *
@@ -200,9 +202,9 @@ export function hasActiveRequiredCoupons(
     coupons.some((c) => {
       const codeMatches = c.promocode.code?.trim().toUpperCase() === reqCode.trim().toUpperCase();
       if (!codeMatches) return false;
-      if (!c.promocode.expires) return true;
-      const expTime = new Date(`${c.promocode.expires}T23:59:59+03:00`).getTime();
-      return expTime >= now;
+      // Shared date parser handles date-only AND full ISO timestamps.
+      // Appending another T23:59 to a timestamp silently disabled SEO.
+      return isCouponActive(c.promocode.expires, now);
     })
   );
 }
