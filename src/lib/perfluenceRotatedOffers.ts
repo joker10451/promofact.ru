@@ -3,7 +3,9 @@ import { STABLE_STORES } from "@/lib/stableStores";
 
 /** Perfluence: account-approved PromoFact links copied from 14 October 2026. */
 const MAGNIT_LINK = "https://mgntgm.prfl.me/sites/vjjrfu?erid=2RanynuJXUf";
-const WINLAB_LINK = "https://winelab.prfl.me/sites/ujkqzr";
+// Site-specific WinLab publisher link renewed 16 October 2026; ERID has NOT been supplied.
+// These staged offers remain excluded from production until the token is verified.
+export const WINLAB_LINK_PENDING_ERID = "https://winelab.prfl.me/sites/gittf8";
 const M_KOSMETIK_LINK = "https://mgntksm1.prfl.me/sites/1sq4qx?erid=2Ranymz3211";
 const CITYDRIVE_FIRST_LINK = "https://citydrive.prfl.me/sites/tnp7jq?erid=2Ranykexfns";
 const CITYDRIVE_APP_LINK = "https://citydrive.prfl.me/sites/pqng58?erid=2RanykbzhEB";
@@ -78,10 +80,10 @@ const perekrestokAd: Coupon["affiliate"] = {
 };
 
 const winlabAd = {
-  link: WINLAB_LINK,
-  landingLink: WINLAB_LINK,
+  link: WINLAB_LINK_PENDING_ERID,
+  landingLink: WINLAB_LINK_PENDING_ERID,
   ordMarker: "",
-  ordText: "Реклама. АО «ВИНЛАБ», ИНН 7727404495. 18+. Токен erid для новой ссылки не предоставлен.",
+  ordText: "Реклама. АО «ВИНЛАБ», ИНН 7727404495. 18+. ERID обновлённой ссылки пока не предоставлен, публикация заблокирована.",
 };
 
 function offer(
@@ -231,13 +233,22 @@ export const YANDEX_TRAVEL_ROTATED_OFFERS: Coupon[] = [
     "Промокод PF-PREMIUMPRO-B66N2: скидка 2 500 ₽ при бронировании отеля из подборки. Действует до 16 октября 2026 года, 10:59 по московскому времени. Подходящие отели, минимальную сумму и прочие ограничения уточняйте при бронировании."),
 ];
 
- /**
- * The provided WinLab placement has no ERID. Keep codes in staging until a
- * current advertising token is confirmed; never silently reuse an old token.
+/**
+ * WinLab promofact.ru placement, renewed 16 October 2026. Publisher approved.
+ * The link is https://winelab.prfl.me/sites/gittf8, but the new campaign
+ * erid / ORD marker has NOT been supplied. Never use the old placement's token.
+ * Keep these codes in staging, excluded from getCustomCoupons and getCoupons.
+ * The two October 21 offers expire at 10:59 Moscow, NOT 23:59.
  * WinLab is also prohibited from joint promotions with Ukids.
  */
 export const WINLAB_ROTATED_OFFERS_PENDING_ERID: Coupon[] = [
-  offer(81409141, winlab, winlabAd, "10PFNS5229", "Скидка 10% в ВинЛаб", "2026-10-31", "18+"),
-  offer(81409142, winlab, winlabAd, "WCPFOKT4737", "Скидка 10% в ВинЛаб", "2026-10-21", "18+"),
-  offer(81409143, winlab, winlabAd, "5OKTPF4737", "Скидка 5% в ВинЛаб", "2026-10-21", "18+"),
+  offer(81409141, winlab, winlabAd, "10PFNS5229", "Скидка 10% в ВинЛаб",
+    "2026-10-31T23:59:59+03:00", "18+ · по условиям акции",
+    "Промокод 10PFNS5229: скидка 10%. Условия участия, ассортимент и ограничения уточняйте у рекламодателя. Действует до 31 октября 2026 года, 23:59 по Москве."),
+  offer(81409142, winlab, winlabAd, "WCPFOKT4737", "Скидка 10% в ВинЛаб",
+    "2026-10-21T10:59:00+03:00", "18+ · по условиям акции",
+    "Промокод WCPFOKT4737: скидка 10%. Условия и ограничения уточняйте у рекламодателя. Действует до 21 октября 2026 года, 10:59 по Москве."),
+  offer(81409143, winlab, winlabAd, "5OKTPF4737", "Скидка 5% в ВинЛаб",
+    "2026-10-21T10:59:00+03:00", "18+ · по условиям акции",
+    "Промокод 5OKTPF4737: скидка 5%. Условия и ограничения уточняйте у рекламодателя. Действует до 21 октября 2026 года, 10:59 по Москве."),
 ];
