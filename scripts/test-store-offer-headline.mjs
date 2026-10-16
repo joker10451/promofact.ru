@@ -27,7 +27,11 @@ assert.equal(formatStoreOfferTitle({name:"Tasty Coffee",month:"октябрь 20
 assert.equal(formatPriorityStoreTitle({slug:"tasty-coffee",month:"октябрь 2026",codes:1,codeFree:0}),"Tasty Coffee: 1 промокод — октябрь 2026");
 assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:1,codeFree:2}),"Randewoo: 1 промокод и 2 акции");
 assert.equal(formatPriorityStoreTitle({slug:"yandeks-puteshestviya",month:"октябрь 2026",codes:1,codeFree:0}),"Яндекс Путешествия: 1 промокод");
-assert.equal(formatPriorityStoreTitle({slug:"pyaterochka",month:"октябрь 2026",codes:2,codeFree:0}),"Пятёрочка Доставка: 2 промокода");
+assert.equal(formatPriorityStoreTitle({slug:"pyaterochka",month:"октябрь 2026",codes:2,codeFree:0}),"Промокоды Пятёрочки Доставка: 2 промокода");
+assert.equal(formatPriorityStoreTitle({slug:"pyaterochka",month:"октябрь 2026",codes:0,codeFree:1}),"Акции Пятёрочки Доставка: 1 акция");
+assert.equal(formatPriorityStoreTitle({slug:"yandex-eda",month:"октябрь 2026",codes:2,codeFree:1}),"Промокоды Яндекс Еда: 2 промокода и 1 акция");
+assert.equal(formatPriorityStoreTitle({slug:"yandex-eda",month:"октябрь 2026",codes:0,codeFree:2}),"Акции Яндекс Еда: 2 акции");
+assert.equal(formatPriorityStoreTitle({slug:"yandex-eda",month:"октябрь 2026",codes:0,codeFree:0}),null);
 assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:0,codeFree:3}),"Randewoo: 3 акции");
 assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:0,codeFree:0}),null);
 assert.equal(formatPriorityStoreTitle({slug:"some-other-store",month:"октябрь 2026",codes:2,codeFree:0}),null);

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { hasActiveCampaignsOutsideBatch } from "./check-admitad-sync-preflight.mjs";
 import {
   BATCH_VERIFIED_CAMPAIGNS,getBatchCampaignAllowlist,getEffectiveCampaignAllowlist,
   isVerifiedBatchCampaignOrigin,
@@ -105,7 +106,16 @@ try {
   }
   assert.deepEqual(duplicateCandidates,[],
     "Perfluence bundled feed has same-merchant matching codes: review before Admitad launch");
+  const legacyScope="141770,1667,17220,25224,26110,28532,14647,22484";
+  assert.equal(hasActiveCampaignsOutsideBatch(legacyScope,["141770","22484"]),false);
+  assert.equal(hasActiveCampaignsOutsideBatch(legacyScope,["141770","29791"]),true);
+  assert.throws(()=>hasActiveCampaignsOutsideBatch(legacyScope,["not-an-id"]),/ACTIVE_CAMPAIGN_ID_INVALID/);
   const runner=fs.readFileSync("scripts/admitad-batch-sync.mjs","utf8");
+  assert.ok(runner.includes("ADMITAD_BATCH_DEFERRED_TO_PUBLISHER_CATALOG") &&
+    runner.indexOf("ADMITAD_BATCH_DEFERRED_TO_PUBLISHER_CATALOG") <
+      runner.indexOf("const preview=await runAdmitadSafeSync"),
+    "Publisher-wide catalog must be deferred before any publication");
+  assert.ok(runner.includes("dbWrites:0"));
   assert.match(runner,/ADMITAD_BATCH_PREVIEW_ONLY/);
   assert.match(runner,/ADMITAD_FIVE_READ_ONLY_PREVIEW/);
   assert.ok(runner.indexOf("if(previewOnly) {") < runner.indexOf("const applied=await runAdmitadSafeSync(opts)"),

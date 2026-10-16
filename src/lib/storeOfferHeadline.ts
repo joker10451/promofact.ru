@@ -64,7 +64,12 @@ export function formatPriorityStoreTitle({
     case "tasty-coffee": return `Tasty Coffee: ${counts} — ${month}`;
     case "randewoo": return `Randewoo: ${counts}`;
     case "yandeks-puteshestviya": return `Яндекс Путешествия: ${counts}`;
-    case "pyaterochka": return `Пятёрочка Доставка: ${counts}`;
+    case "pyaterochka": return codes > 0
+      ? `Промокоды Пятёрочки Доставка: ${counts}`
+      : `Акции Пятёрочки Доставка: ${counts}`;
+    case "yandex-eda": return codes > 0
+      ? `Промокоды Яндекс Еда: ${counts}`
+      : `Акции Яндекс Еда: ${counts}`;
     default: return null;
   }
 }

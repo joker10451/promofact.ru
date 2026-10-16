@@ -11,7 +11,7 @@
 import { getSupabaseAdmin } from "../src/lib/supabase.ts";
 import { getBatchCampaignAllowlist, getEffectiveCampaignAllowlist, parseReviewedFiveCouponIds, FIVE_NEW_CAMPAIGN_IDS, isFiveCouponExplicitlyReviewed, FIVE_REVIEW_CANDIDATES } from "../src/lib/admitadAutopilot.ts";
 import { runAdmitadSafeSync } from "../src/lib/admitadSyncWorker.ts";
-import { validateRetainsActiveCampaigns } from "./check-admitad-sync-preflight.mjs";
+import { validateRetainsActiveCampaigns, hasActiveCampaignsOutsideBatch } from "./check-admitad-sync-preflight.mjs";
 
 const MAX_FIRST_BATCH = 40;
 const PREVIOUS_BATCH = "28532,14647,22484";
@@ -115,6 +115,16 @@ async function main() {
   ]);
   if(meta.error || !meta.data || meta.data.last_status!=="SUCCESS")
     abort("AUTHORITATIVE_SYNC_NOT_HEALTHY");
+  // The old eight-campaign batch must never overwrite an independently
+  // approved, wider website-scoped publisher catalog.
+  if (mode==="recurring" && process.env.ADMITAD_PUBLISH_WEBSITE_COUPONS==="true" &&
+      hasActiveCampaignsOutsideBatch(baseCsv+","+csv, before.map(x=>x.source_campaign_id))) {
+    if (before.length!==Number(meta.data.last_success_count))abort("ACTIVE_SNAPSHOT_COUNT_MISMATCH");
+    console.info("ADMITAD_BATCH_DEFERRED_TO_PUBLISHER_CATALOG "+JSON.stringify({
+      activeOffers:before.length,dbWrites:0,publisherScope:"broader_than_legacy_batch"
+    }));
+    return;
+  }
   validateRetainsActiveCampaigns(baseCsv+","+csv,
     before.map(x=>x.source_campaign_id),before.length,Number(meta.data.last_success_count));
   baselineCheck(before,mode);
@@ -164,7 +174,17 @@ async function main() {
   }));
 }
 main().catch(e=>{
-  const reason=/^[A-Z0-9_]+$/.test(e?.code||"")?e.code:"BATCH_RUNTIME_FAILURE";
-  console.error("ADMITAD_BATCH_FAILED "+reason);
+  // Never expose remote error messages that may contain affiliate links/credentials.
+  const safe = new Set([
+    "ACTIVE_SNAPSHOT_COUNT_MISMATCH","ACTIVE_CAMPAIGN_ID_INVALID",
+    "PREVIOUSLY_ACTIVE_CAMPAIGN_EXCLUDED","APPROVAL_LIST_EMPTY",
+    "APPROVAL_LIST_MALFORMED","APPROVAL_LIST_DUPLICATED",
+    "ACTIVE_SNAPSHOT_READ_FAILED","AUTHORITATIVE_SYNC_NOT_HEALTHY",
+    "BATCH_DRY_RUN_FAILED","BATCH_ATOMIC_SYNC_FAILED","BATCH_POST_SYNC_METADATA_FAILED",
+    "PUBLISHER_REFRESH_SCOPE_INVALID","BATCH_CAMPAIGNS_NOT_REVIEWED",
+    "CONCURRENT_SNAPSHOT_CHANGED"
+  ]);
+  const code = safe.has(e?.code) ? e.code : safe.has(e?.message) ? e.message : "BATCH_RUNTIME_FAILURE";
+  console.error("ADMITAD_BATCH_FAILED "+code);
   process.exitCode=1;
 });

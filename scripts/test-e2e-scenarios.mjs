@@ -273,16 +273,19 @@ async function run() {
 
       // Находим первую карточку купона
       const firstCard = page.locator('article[id^="coupon-"]').first();
-      const codeElement = firstCard.locator('div[role="button"] span.truncate');
-      const expectedCode = (await codeElement.innerText()).trim();
+      // Accessible code control replaces the former div with a truncated span.
+      const codeElement = firstCard.locator('button[aria-label^="Скопировать промокод "]').first();
+      const label = await codeElement.getAttribute("aria-label");
+      const expectedCode = (label || "").replace(/^Скопировать промокод\s+/, "").trim();
+      if (!expectedCode) throw new Error("Не найден промокод в доступной кнопке");
 
       const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
       await copyBtn.waitFor({ state: "visible" });
       await copyBtn.click();
 
       // Проверяем статус в карточке
-      const copiedBadge = firstCard.locator("text=скопировано!");
-      await copiedBadge.waitFor({ state: "visible", timeout: 2000 });
+      const copiedBadge = firstCard.getByText("Скопировано", { exact: true });
+      await copiedBadge.waitFor({ state: "visible", timeout: 3000 });
 
       // Считываем реальное содержимое буфера обмена через Clipboard API
       const clipboardContent = await page.evaluate(() => navigator.clipboard.readText());
@@ -351,7 +354,7 @@ async function run() {
       }
 
       // Убеждаемся, что фиктивный статус "скопировано!" НЕ отобразился
-      const fakeSuccess = await firstCard.locator("text=скопировано!").isVisible();
+      const fakeSuccess = await firstCard.getByText("Скопировано", { exact: true }).isVisible();
       if (fakeSuccess) {
         throw new Error("Отобразился статус успешного копирования при ошибке Clipboard API!");
       }
@@ -768,7 +771,7 @@ async function run() {
               }
             }
             const conditionsButton = onlineCard.getByRole("button", { name: "Условия акции" });
-            const copyCodeControl = onlineCard.locator('div[role="button"]').first();
+            const copyCodeControl = onlineCard.locator('button[aria-label^="Скопировать промокод "]').first();
             const conditionsBounds = await conditionsButton.boundingBox();
             const copyBounds = await copyCodeControl.boundingBox();
             assert.ok(conditionsBounds && copyBounds &&

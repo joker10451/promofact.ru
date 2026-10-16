@@ -18,6 +18,16 @@ export function parseCampaignIds(csv) {
   return new Set(tokens);
 }
 
+/** Broad publisher baseline detection permits a read-only defer, never new write rights. */
+export function hasActiveCampaignsOutsideBatch(csv, activeIds) {
+  const approved = parseCampaignIds(csv);
+  return activeIds.some(raw => {
+    const id = String(raw ?? "").trim();
+    if (!/^[0-9]{1,12}$/.test(id)) throw new Error("ACTIVE_CAMPAIGN_ID_INVALID");
+    return !approved.has(id);
+  });
+}
+
 export function validateRetainsActiveCampaigns(csv, activeIds, activeRowCount, expectedCount) {
   const approved = parseCampaignIds(csv);
   if (!Number.isSafeInteger(activeRowCount) || !Number.isSafeInteger(expectedCount) ||
