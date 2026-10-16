@@ -1,6 +1,7 @@
 import { MAGNIT_ROTATED_OFFERS, M_KOSMETIK_ROTATED_OFFERS, CITYDRIVE_APPROVED_OFFERS, YANDEX_TRAVEL_ROTATED_OFFERS, TANUKI_OCT16_OFFERS, PEREKRESTOK_OCT16_OFFERS } from "@/lib/perfluenceRotatedOffers";
 import type { Coupon } from "@/lib/types";
 import { STABLE_STORES } from "@/lib/stableStores";
+import { PERFLUENCE_OCT16_APPROVED_OFFERS } from "@/lib/perfluenceOct16Offers";
 
 /**
  * Ручные купоны от рекламодателей и партнёрских сетей.
@@ -86,6 +87,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
   ...YANDEX_TRAVEL_ROTATED_OFFERS,
   ...TANUKI_OCT16_OFFERS,
   ...PEREKRESTOK_OCT16_OFFERS,
+  ...PERFLUENCE_OCT16_APPROVED_OFFERS,
   {
     id: 50671,
     promocode: {

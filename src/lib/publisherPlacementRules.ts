@@ -29,3 +29,21 @@ export function withoutForbiddenTanukiCoPromotion(coupons: Coupon[]): Coupon[] {
   if (!incompatible) return coupons;
   return coupons.filter((c) => c.store.slug !== "tanukifamily");
 }
+
+
+/**
+ * Perfluence restrictions 16 October 2026:
+ * FMART by flowwow may not be advertised in a curated selection with Flor2u.
+ * ЛЭТУАЛЬ may not be advertised with Золотое Яблоко.
+ * This controls curated homepage and article-like collection blocks, NOT
+ * standalone stores or neutral searchable directories.
+ */
+export function withoutForbiddenFloristBeautyCoPromotion(coupons: Coupon[]): Coupon[] {
+  const hasFlor2u = coupons.some(c => c.store.slug === "flor2u" ||
+    /(?:^|\W)flor2u(?:$|\W)/iu.test(c.store.name));
+  const hasGoldApple = coupons.some(c => c.store.slug === "zolotoe-yabloko" ||
+    /золотое\s+яблоко/iu.test(c.store.name));
+  return coupons.filter(c =>
+    !(hasFlor2u && c.store.slug === "fmart") &&
+    !(hasGoldApple && c.store.slug === "letual"));
+}
