@@ -54,7 +54,11 @@ for (const [slug, codes] of Object.entries(plan)) {
     assert(c.affiliate.ordText.includes(p.legal.slice(0,13)));
     assert.equal(c.promocode.isFirstOrderOnly,false,"No invented first-order rule");
     assert.equal(isApprovedOct16PublisherOffer(c),true);
-    const cut=new Date(expires).getTime();
+    // Date-only publisher fields run through 23:59:59 Moscow, not
+    // 00:00 UTC at the beginning of the calendar date.
+    const cut=expires.length===10
+      ? Date.parse(expires+"T23:59:59+03:00")
+      : Date.parse(expires);
     assert.equal(isCouponActive(expires,cut-1000),true);
     assert.equal(isCouponActive(expires,cut+1000),false);
     const stale={...c,id:c.id+900000,affiliate:{
