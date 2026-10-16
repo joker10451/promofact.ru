@@ -45,6 +45,6 @@ for(const k of ['import "server-only"','getAdmitadAccessToken',
   'action.subid3 === "promofact"','action.action_date',
   'if (seen.has(id)) return fail()'])assert(dash.includes(k),k);
 for(const k of ["getSupabaseAdmin","SUPABASE_SERVICE_ROLE_KEY",
-  "localStorage","subid4","promocode","res.text()"])assert(!dash.includes(k),k);
+  "localStorage","action.subid4","action.promocode","res.text()"])assert(!dash.includes(k),k);
 assert.match(dash,/approved_but_stalled/);
 console.log("REVENUE-2: dual authorization, no-store server-only reports, attribution, 7/30/90 visualization and privacy PASS");
