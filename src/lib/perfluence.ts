@@ -7,6 +7,7 @@ import type { Affiliate, Coupon, Promocode, Store } from "@/lib/types";
 import { CATEGORIES } from "@/lib/categoryTaxonomy";
 import { isCouponActive } from "@/lib/couponExpiry";
 import { STABLE_STORES } from "@/lib/stableStores";
+import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isPausedPublisherStore, withoutPausedPublisherOffers } from "@/lib/publisherPauses";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
@@ -452,7 +453,7 @@ async function fetchSnapshot(): Promise<Coupon[]> {
 /** Только купоны Perfluence, без Admitad и прочих фидов — для /api/perfluence-snapshot. */
 export async function getPerfluenceCoupons(): Promise<Coupon[]> {
   // Block the halted advertiser even in direct API snapshots and stale cache.
-  return withoutPausedPublisherOffers(await fetchData());
+  return withoutPausedPublisherOffers(await fetchData()).filter(isApprovedOct16PublisherOffer);
 }
 
 async function fetchData(): Promise<Coupon[]> {
@@ -687,14 +688,10 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
 
   // Custom partner offers must always come from the CURRENT server bundle.
   // Historical unstable_cache snapshots can outlive code deployments on Vercel.
-  const liveSberDevicesCodes = new Set(
-    baseBuckets.flatMap((bucket) => bucket.source === "perfluence" ? bucket.coupons : [])
-      .filter((c) => /сбердевайс|sberdevices/iu.test(c.store.name) || /sberdevices\.ru/iu.test(c.store.site))
-      .map((c) => c.promocode.code.trim().toUpperCase()),
-  );
-  const freshCustomCoupons = (await import("@/lib/customCoupons")).getCustomCoupons()
-    .filter((c) => c.store.slug !== "sberdevaysy" ||
-      !liveSberDevicesCodes.has(c.promocode.code.trim().toUpperCase()));
+  // Exact approved publisher URLs outrank cached widget entries for ALL
+  // four rotated projects. Never hide our verified SberDevices placement
+  // just because a stale widget mentions the same coupon code.
+  const freshCustomCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
   const sources: import("@/lib/dedupe").SourceBucket[] = [
     { source: "custom", coupons: freshCustomCoupons },
     ...baseBuckets.map((b) => ({ source: b.source, coupons: b.coupons })),
@@ -723,7 +720,7 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // Source snapshots still contain pre-14 October coupons. Do not let them
   // reappear when code rotations require fresh publisher credentials.
   const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ЧАЙ"]);
-  return withoutPausedPublisherOffers(coupons).filter((c) => {
+  return withoutPausedPublisherOffers(coupons).filter(isApprovedOct16PublisherOffer).filter((c) => {
     if (c.store.slug === "magnit-dostavka") {
       return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase());
     }

@@ -5,7 +5,7 @@ import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { getCollections } from "@/lib/collections";
-import { withoutForbiddenTanukiCoPromotion } from "@/lib/publisherPlacementRules";
+import { withoutForbiddenTanukiCoPromotion, withoutForbiddenFloristBeautyCoPromotion } from "@/lib/publisherPlacementRules";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
@@ -50,7 +50,7 @@ export async function generateMetadata({
   const [collections, all] = await Promise.all([getCollections(), getCoupons()]);
   const col = collections.find((c) => c.slug === slug);
   if (!col) return {};
-  const count = withoutForbiddenTanukiCoPromotion(all.filter(col.filter)).length;
+  const count = withoutForbiddenFloristBeautyCoPromotion(withoutForbiddenTanukiCoPromotion(all.filter(col.filter))).length;
   const pageUrl = `${SITE_URL}/collections/${slug}`;
   const pageTitle = `Подборка скидок «${col.name}» — лучшие промокоды на ${MONTH_YEAR}`;
   const ogTitle = `${pageTitle} — ${SITE_NAME}`;
@@ -119,7 +119,7 @@ export default async function CollectionPage({
   const col = collections.find((c) => c.slug === slug);
   if (!col) notFound();
 
-  const list = withoutForbiddenTanukiCoPromotion(all.filter(col.filter));
+  const list = withoutForbiddenFloristBeautyCoPromotion(withoutForbiddenTanukiCoPromotion(all.filter(col.filter)));
   const storeNames = [...new Set(list.map((c) => c.store.name))];
   const paragraphs = seoText(col.name, storeNames, storeNames.length, list.length);
   const pageUrl = `${SITE_URL}/collections/${slug}`;
