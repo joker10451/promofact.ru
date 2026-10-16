@@ -8,6 +8,7 @@ import { getPerfluenceCoupons } from "@/lib/perfluence";
  * Секретов здесь нет — это те же коды, ссылки и маркировка, что на страницах.
  */
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
   const coupons = await getPerfluenceCoupons();
@@ -15,6 +16,7 @@ export async function GET() {
     return NextResponse.json({ error: "no data" }, { status: 503 });
   }
   return NextResponse.json(coupons, {
-    headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400" },
+    // Emergency partner blackout: never serve stale affiliate snapshots from CDN.
+    headers: { "Cache-Control": "no-store, max-age=0, must-revalidate" },
   });
 }
