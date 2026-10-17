@@ -8,8 +8,8 @@
  * Never infer a percentage from a minimum-order amount or unlabelled "99%":
  * percentage of the assortment is not necessarily a consumer discount.
  */
-const CONDITION_ONLY = /^(?:при\s+(?:заказе|покупке|оформлении)|(?:заказ|покупка)\s+от|на\s+заказ\s+от|от\s+[\d\s]+(?:₽|руб))(?=$|[\s,.:;!?])/iu;
-const HAS_BENEFIT = /(?:[−-]\s*\d{1,3}\s*%|скидк[а-яё]*\s*(?:до\s*)?\d{1,3}\s*%|[−-]\s*[\d\s]+\s*₽|бесплатн[а-яё]*\s+достав|подар|к[еэ]шб[еэ]к|бонус)/iu;
+const CONDITION_ONLY = /^(?:при\s+(?:заказе|покупке|оформлении)|(?:заказ|покупка)\s+от|на\s+заказ\s+от|от\s+[\d\s]+(?:₽|руб)|на\s+перв(?:ую|ой)\s+(?:покупк[ау]|оплат[уы])|для\s+новых\s+клиентов|по\s+промокоду)(?=$|[\s,.:;!?])/iu;
+const HAS_BENEFIT = /(?:[−-]\s*\d{1,3}\s*%|скидк[а-яё]*\s*(?:до\s*)?\d{1,3}\s*%|[−-]\s*[\d\s]+\s*₽|бесплатн[а-яё]*\s+достав|подар|к[еэ]шб[еэ]к|бонус|дополнительн[а-яё]*\s+урок|добавля[а-яё]*\s+\d+\s+урок)/iu;
 
 export function isConditionOnlyOfferTitle(value: string): boolean {
   const title = (value || "").trim();
@@ -46,6 +46,18 @@ function benefitFromDiscount(discount: string): string | null {
   if (rub) {
     const amount = Number(rub[1].replace(/\s/g, ""));
     if (amount > 0 && amount <= 100000) return "−" + amount.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽";
+  }
+  // Recover non-cash benefits that the verified source stores in discount.
+  const extraLessons = value.match(/^(?:добавля[а-яё]*|дарим|получите|плюс|\+)\s+(\d{1,2})\s+(?:дополнительн[а-яё]*\s+)?урок[а-яё]*/iu);
+  if (extraLessons) {
+    const count = Number(extraLessons[1]);
+    if (count >= 1 && count <= 50) {
+      const lesson = count % 10 === 1 && count % 100 !== 11
+        ? "дополнительный урок"
+        : count % 10 >= 2 && count % 10 <= 4 && !(count % 100 >= 12 && count % 100 <= 14)
+        ? "дополнительных урока" : "дополнительных уроков";
+      return String(count) + " " + lesson;
+    }
   }
   if (/^.{0,3}бесплатн[а-яё]*\s+достав/iu.test(value)) return "Бесплатная доставка";
   return null;
