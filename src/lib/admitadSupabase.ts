@@ -7,6 +7,7 @@ import { STABLE_STORES } from "@/lib/stableStores";
 import { isPublicAdmitadRow } from "@/lib/admitadPublicVisibility";
 import { isRealPromoCode } from "@/lib/dedupe";
 import { resolveAdmitadOfferHeadline } from "@/lib/admitadOfferHeadline";
+import { resolveCustomerType } from "@/lib/admitadNormalizer";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -79,6 +80,12 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
   const ordMarker = str(row.ord_marker);
   const ordText = str(row.ord_text) || (ordMarker ? `Реклама. erid: ${ordMarker}` : `Реклама. ${storeName}`);
 
+  // Old active snapshots can have is_first_order_only=false despite explicit
+  // first-purchase terms. Recover the audience without editing partner data.
+  const inferredCustomer = resolveCustomerType(undefined, bonusName, terms || "");
+  const firstOrderOnly = bool(row.is_first_order_only) || inferredCustomer.customerType === "new_customers";
+  const customerTypeLabel = firstOrderOnly ? "Первый заказ" : inferredCustomer.customerTypeLabel;
+
   return {
     id,
     promocode: {
@@ -88,9 +95,9 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
       terms,
       expires,
       isHit: bool(row.is_hit),
-      isUniversal: !bool(row.is_first_order_only),
-      isFirstOrderOnly: bool(row.is_first_order_only),
-      customerTypeLabel: bool(row.is_first_order_only) ? "Первый заказ" : "Для всех",
+      isUniversal: !firstOrderOnly,
+      isFirstOrderOnly: firstOrderOnly,
+      customerTypeLabel,
       minimumOrder: null,
       region: str(row.region) || "RU",
       isBarcode: false,
