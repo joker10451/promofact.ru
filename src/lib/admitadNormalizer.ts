@@ -61,21 +61,22 @@ export function stripHtml(v: unknown): string {
 export function extractMinimumOrder(text: string): MinimumOrder | null {
   if (!text) return null;
   const clean = stripHtml(text);
-  const regex =
-    /(?:при\s+(?:каждом\s+)?(?:заказе|покупке|оформлении)\s+)?(?:на\s+сумму\s+)?(?:от|свыше)\s+([\d\s.,]+)\s*(?:₽|р\b|руб(?:л[ея]й)?|RUB)?/iu;
-  const match = clean.match(regex);
+  // Lesson/item quantities are not RUB. Require a currency suffix, or an
+  // explicitly monetary phrase ("на сумму от 4299") in currency-less feeds.
+  const withCurrency = clean.match(
+    /(?:от|свыше)\s+(\d[\d\s.,]*?)\s*(?:₽|руб(?:лей|ля|\.?)?|р\.(?=\s|$)|RUB)(?![а-яёa-z])/iu
+  );
+  const moneyContext = clean.match(
+    /(?:на\s+сумму|суммой|сумма|чек[а]?|стоимостью)\s+(?:от|свыше)\s+(\d[\d\s.,]*)/iu
+  );
+  const match = withCurrency || moneyContext;
   if (!match) return null;
 
   const rawNum = match[1].replace(/\s/g, "").replace(",", ".");
-  // Удаляем точку как разделитель тысяч (4.299 -> 4299)
   const cleanNumStr = rawNum.replace(/\.(?=\d{3}\b)/g, "");
   const val = parseFloat(cleanNumStr);
-  if (isNaN(val) || val <= 0) return null;
-
-  return {
-    value: Math.round(val),
-    currency: "RUB",
-  };
+  if (!Number.isFinite(val) || val <= 0) return null;
+  return { value: Math.round(val), currency: "RUB" };
 }
 
 /**
@@ -148,6 +149,8 @@ export function resolveCustomerType(
     /на\s+первый\s+заказ/i.test(combined) ||
     /первый\s+заказ/i.test(combined) ||
     /первая\s+покупка/i.test(combined) ||
+    /перв(?:ую|ой|ая|ое)\s+(?:покупк[ауеи]|оплат[уыие])/i.test(combined) ||
+    /новым\s+клиентам/i.test(combined) ||
     /для\s+новых\s+(пользователей|клиентов|покупателей)/i.test(combined);
 
   const rawSaysNew = rawCust.includes("new") || rawCust.includes("first");
