@@ -3,7 +3,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert";
-import { chromium } from "playwright";
+import { chromium, firefox, webkit } from "playwright";
 
 const PORT = 3456;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -95,7 +95,7 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 13;
+    const totalTests = 14;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
@@ -499,6 +499,10 @@ async function run() {
         } catch {
           window.ym = ymFn;
         }
+      });
+      // A blocked window.open must not affect native target="_blank" links.
+      await page.addInitScript(() => {
+        window.open = () => { throw new Error("SIMULATED_POPUP_BLOCK"); };
       });
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
@@ -1238,6 +1242,76 @@ async function run() {
           "Flowwow must link to FMART without blending their promo codes");
       }
       await context.close();
+      passedTests++;
+    }
+
+    // --- SCENARIO 14: real rendered Admitad CTA and copy-and-open, no external requests ---
+    console.log("\\n[Test 14] Admitad native navigation: three browser engines, narrow/wide viewports, blocked window.open");
+    {
+      const targets = [["chromium", chromium], ["firefox", firefox], ["webkit", webkit]];
+      for (const [engineName, engine] of targets) {
+        const runningBrowser = engineName === "chromium" ? browser : await engine.launch({ headless: true });
+        try {
+          for (const narrow of [false, true]) {
+            const context = await runningBrowser.newContext({
+              viewport: narrow ? { width: 390, height: 844 } : { width: 1366, height: 768 },
+              ...(narrow && engineName !== "firefox" ? { hasTouch: true, isMobile: true } : {}),
+            });
+            try {
+              // No test request reaches the actual affiliate network.
+              await context.route("**/ad.admitad.com/**", (route) => route.fulfill({
+                status: 200, contentType: "text/html", body: "<html>Mock Admitad landing</html>",
+              }));
+              const page = await context.newPage();
+              await page.addInitScript(() => {
+                window.open = () => { throw new Error("SIMULATED_POPUP_BLOCK"); };
+              });
+              await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
+              const card = page.locator("#coupon-99233303");
+              await card.waitFor({ state: "visible", timeout: 10000 });
+              const link = card.locator('a:has-text("Перейти на сайт")');
+              const rendered = new URL(await link.getAttribute("href"));
+              assert.equal(rendered.searchParams.get("erid"), "TestERIDAdmitad2026");
+              assert.equal(rendered.searchParams.get("subid"), "store_coupon");
+              assert.equal(rendered.searchParams.get("subid1"), "store");
+              assert.equal(rendered.searchParams.get("subid2"), "99233303");
+              assert.equal(rendered.searchParams.get("subid3"), "promofact");
+              assert.equal(await link.getAttribute("target"), "_blank");
+              assert.match(await link.getAttribute("rel"), /noopener.*sponsored.*nofollow/);
+              const [tab] = await Promise.all([
+                context.waitForEvent("page", { timeout: 9000 }), link.click(),
+              ]);
+              await tab.waitForURL("**/ad.admitad.com/**", { timeout: 9000 });
+              const visited = new URL(tab.url());
+              assert.equal(visited.searchParams.get("erid"), "TestERIDAdmitad2026");
+              assert.equal(visited.searchParams.get("subid2"), "99233303");
+              assert.match(visited.searchParams.get("subid4") || "", /^[0-9a-f-]{36}$/i);
+              await tab.close();
+
+              // The modal copy-and-open button must also navigate natively.
+              await card.locator('button:has-text("Условия акции")').click();
+              const modal = page.locator('div[role="dialog"]').last();
+              await modal.waitFor({ state: "visible" });
+              const copyAndOpen = modal.locator('a:has-text("Скопировать")').first();
+              assert.equal(await copyAndOpen.getAttribute("target"), "_blank");
+              const [copiedTab] = await Promise.all([
+                context.waitForEvent("page", { timeout: 9000 }), copyAndOpen.click(),
+              ]);
+              await copiedTab.waitForURL("**/ad.admitad.com/**", { timeout: 9000 });
+              const copiedUrl = new URL(copiedTab.url());
+              assert.equal(copiedUrl.searchParams.get("erid"), "TestERIDAdmitad2026");
+              assert.equal(copiedUrl.searchParams.get("subid"), "store_coupon");
+              assert.match(copiedUrl.searchParams.get("subid4") || "", /^[0-9a-f-]{36}$/i);
+              await copiedTab.close();
+              console.log("  ✓ " + engineName + (narrow ? " 390px" : " desktop") + ": direct + modal partner navigation");
+            } finally {
+              await context.close();
+            }
+          }
+        } finally {
+          if (engineName !== "chromium") await runningBrowser.close();
+        }
+      }
       passedTests++;
     }
 

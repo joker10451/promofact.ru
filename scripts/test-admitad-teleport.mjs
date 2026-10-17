@@ -70,7 +70,15 @@ assert.match(source,/getTeleportVisitorIp/);
 assert.match(source,/fetchSite !== "same-origin" \|\| fetchUser !== "\?1"/);
 assert.match(ticket,/NEXT_PUBLIC_ADMITAD_TELEPORT_PILOT_ENABLED/);
 assert.match(ticket,/getConsent\(\)/);
-assert.match(ticket,/toPilot \? "noopener" : "noopener,noreferrer"/); // preserve referer for same-origin pilot
+// Native href keeps the referrer for the same-origin Teleport route.
+assert.ok(ticket.includes("anchor.href = withTeleportPilot(classicUrl, clickId)"));
+assert.ok(ticket.includes("href={outgoingUrl}"));
+assert.ok(ticket.includes('rel="noopener sponsored nofollow"'));
+const navStart = ticket.indexOf("const prepareNativeAffiliateLink =");
+const navEnd = ticket.indexOf("const discountSizeClass =", navStart);
+assert.ok(navStart >= 0 && navEnd > navStart);
+const navigationHandlers = ticket.slice(navStart, navEnd);
+assert.ok(!navigationHandlers.includes("e.preventDefault(") && !navigationHandlers.includes("window.open("));
 assert.match(privacy,/IP-адрес посетителя/);
 assert.match(consent,/document.cookie = "promofact_teleport_consent=yes/);
 assert.doesNotMatch(source,/searchParams.get\("url"\)/);

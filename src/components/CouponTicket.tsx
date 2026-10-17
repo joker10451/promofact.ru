@@ -244,9 +244,12 @@ export default function CouponTicket({
     ymReachGoal("affiliate_click", getAnalyticsContext());
   };
 
-  const handleDirectCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isAdmitad) {
-      e.preventDefault();
+  // Leave native navigation intact: blocked scripted popups must not lose clicks.
+  // The original affiliate href, including the approved ERID and SubIDs, is
+  // always present in server-rendered markup as a safe fallback.
+  const prepareNativeAffiliateLink = (anchor: HTMLAnchorElement) => {
+    if (!isAdmitad) return;
+    try {
       const clickId = generateClickId();
       activeClickIdRef.current = clickId;
       const classicUrl = decorateAdmitadUrl(targetUrl, {
@@ -255,63 +258,26 @@ export default function CouponTicket({
         couponId: coupon.id,
         clickId,
       });
-      const finalUrl = withTeleportPilot(classicUrl, clickId);
-      handleAffiliateClick();
+      anchor.href = withTeleportPilot(classicUrl, clickId);
+    } catch {
       activeClickIdRef.current = undefined;
-      if (typeof window !== "undefined" && finalUrl && finalUrl !== "#") {
-        try {
-          // The same-origin Teleport endpoint needs our own site Referer.
-          // Legacy external links keep noreferrer; both modes keep noopener.
-          const toPilot = finalUrl.startsWith("/go/admitad/");
-          const win = window.open(finalUrl, "_blank", toPilot ? "noopener" : "noopener,noreferrer");
-          if (win) {
-            try {
-              win.opener = null;
-            } catch {}
-          }
-        } catch {}
-      }
-    } else {
-      handleAffiliateClick();
     }
   };
 
-  const copyAndOpen = (code: string, url: string) => {
-    let opened = false;
-    const clickId = isAdmitad ? generateClickId() : undefined;
-    activeClickIdRef.current = clickId;
-    const finalUrl = isAdmitad
-      ? withTeleportPilot(decorateAdmitadUrl(url, {
-          placement,
-          pageType: getPageTypeFromPlacement(placement),
-          couponId: coupon.id,
-          clickId,
-        }), clickId!)
-      : url;
+  const handleDirectCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    prepareNativeAffiliateLink(e.currentTarget);
+    // An analytics goal counts click intent, not confirmed partner attribution.
+    handleAffiliateClick();
+    activeClickIdRef.current = undefined;
+  };
 
-    // 1. Открытие партнёрской ссылки непосредственно в синхронном контексте пользовательского клика
-    if (typeof window !== "undefined" && finalUrl && finalUrl !== "#") {
-      try {
-        const win = window.open(finalUrl, "_blank");
-        if (win) {
-          try {
-            win.opener = null;
-          } catch {}
-          opened = true;
-        }
-      } catch {
-        opened = false;
-      }
-    }
-
+  const copyAndOpen = (e: React.MouseEvent<HTMLAnchorElement>, code: string) => {
+    prepareNativeAffiliateLink(e.currentTarget);
     ymReachGoal("copy_and_open", getAnalyticsContext());
     handleAffiliateClick();
     activeClickIdRef.current = undefined;
-
-    // 2. Копирование промокода с сохранением обработки ошибок Clipboard API
-    if (code) {
-      copyCode(code, opened ? "opened" : "copied");
-    }
+    // The native anchor navigates independently of clipboard permission.
+    if (code) void copyCode(code, "opened");
   };
 
   const discountSizeClass =
@@ -768,11 +734,13 @@ export default function CouponTicket({
               </div>
 
               <div className="mt-6 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
+                <a
+                  href={outgoingUrl}
+                  target="_blank"
+                  rel="noopener sponsored nofollow"
+                  onClick={(e) => {
                     setTimeout(() => setShowDetailsModal(false), 150);
-                    copyAndOpen(promocode.code, targetUrl);
+                    copyAndOpen(e, promocode.code);
                   }}
                   className="w-full rounded-2xl bg-gradient-to-r from-red to-red-dark py-3.5 px-4 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer block"
                 >
@@ -781,7 +749,7 @@ export default function CouponTicket({
                       ? `Скопировать номер штрихкода (${promocode.code}) и перейти →`
                       : `Скопировать ${promocode.code} и перейти →`
                     : `Перейти в магазин →`}
-                </button>
+                </a>
               </div>
             </div>
           </div>,

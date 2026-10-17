@@ -79,5 +79,43 @@ export function getE2EFixtureCoupons(): Coupon[] {
       },
       extraLinks: [],
     },
+    // Synthetic Admitad link for real-browser click routing checks. Available
+    // only in E2E_FIXTURES builds; never part of production partner inventory.
+    {
+      id: 99233303,
+      promocode: {
+        id: 99233303,
+        code: "ADMITADE2E",
+        bonusName: "Синтетический тест партнёрского перехода",
+        terms: "Только тестовая фикстура для E2E; не является акцией.",
+        expires: "2028-12-31",
+        isHit: false,
+        isUniversal: false,
+        isFirstOrderOnly: false,
+        region: null,
+        isBarcode: false,
+        barcodeImage: null,
+        group: "admitad",
+      },
+      store: {
+        id: 2333,
+        name: "FARFOR",
+        slug: "farfor",
+        logo: "/media/p/1/6/8/1683f7ba-0c46-4e81-bb29-1cecc344e29c.jpg",
+        category: "Доставка из ресторанов",
+        categorySlug: "dostavka-iz-restoranov",
+        about: "Синтетическая E2E фикстура.",
+        conditions: "Синтетическая E2E фикстура.",
+        site: "https://farfor.ru",
+        activeBloggers: 0,
+      },
+      affiliate: {
+        link: "https://ad.admitad.com/g/fixture-e2e/?i=31&erid=TestERIDAdmitad2026",
+        landingLink: "https://ad.admitad.com/g/fixture-e2e/?i=31&erid=TestERIDAdmitad2026",
+        ordMarker: "TestERIDAdmitad2026",
+        ordText: "Синтетическая E2E фикстура: тестовая маркировка.",
+      },
+      extraLinks: [],
+    },
   ];
 }
