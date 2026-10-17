@@ -70,7 +70,12 @@ assert.match(source,/getTeleportVisitorIp/);
 assert.match(source,/fetchSite !== "same-origin" \|\| fetchUser !== "\?1"/);
 assert.match(ticket,/NEXT_PUBLIC_ADMITAD_TELEPORT_PILOT_ENABLED/);
 assert.match(ticket,/getConsent\(\)/);
-assert.match(ticket,/toPilot \? "noopener" : "noopener,noreferrer"/); // preserve referer for same-origin pilot
+// Native <a> navigation keeps referrer for the same-origin Teleport route;
+// unlike window.open, it cannot lose the click to a scripted popup blocker.
+assert.match(ticket, /anchor\\.href = withTeleportPilot\\(classicUrl, clickId\\)/);
+assert.match(ticket, /href=\\{outgoingUrl\\}/);
+assert.match(ticket, /rel="noopener sponsored nofollow"/);
+assert.doesNotMatch(ticket, /e\\.preventDefault\\(\\)|window\\.open\\(/);
 assert.match(privacy,/IP-адрес посетителя/);
 assert.match(consent,/document.cookie = "promofact_teleport_consent=yes/);
 assert.doesNotMatch(source,/searchParams.get\("url"\)/);
