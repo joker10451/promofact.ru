@@ -78,7 +78,7 @@ export function resolveAdmitadOfferHeadline(
     return "Акция при покупке " + packs[1] + " пачек " + packs[2];
 
   if (/^в(?:в)?вод\s+промокода\s+не\s+требуется/iu.test(details))
-    return /из\s+категории\s+чай\b/iu.test(details)
+    return /из\s+категории\s+чай(?=\s|$)/iu.test(details)
       ? "Акция на чай без промокода"
       : "Акция на отдельные категории без промокода";
 
