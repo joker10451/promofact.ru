@@ -4,7 +4,9 @@
     50005,
     50007,
     50040,
-    16990201
+    16990201,
+    829200351,
+    829200252
   ],
   "history": [
     {
@@ -176,6 +178,15 @@
       "postUrl": "https://t.me/smart_zakupka/82",
       "date": "2026-09-29T12:10:58.801Z",
       "messageId": 82
+    },
+    {
+      "id": 829200351,
+      "code": "JHD_H13J3H1, KRL_4G44HH5",
+      "store": "Flor2u",
+      "storeSlug": "flor2u",
+      "postUrl": "https://t.me/smart_zakupka/85",
+      "date": "2026-10-18T15:31:20.849Z",
+      "messageId": 85
     }
   ]
 }
