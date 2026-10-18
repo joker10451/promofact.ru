@@ -73,10 +73,8 @@ function formatExpiryDate(rawExpires: string | null | undefined): string {
       // fallback below
     }
   }
-  const now = new Date();
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const monthName = now.toLocaleDateString("ru-RU", { month: "short" });
-  return `до ${lastDay} ${monthName}`;
+  // Partner does not specify a date; never fabricate the end of the month.
+  return "Срок не указан";
 }
 
 export default function StoreSummaryTable({
@@ -113,7 +111,7 @@ export default function StoreSummaryTable({
             </p>
           </div>
           <span className="self-start sm:self-auto rounded-full bg-mint/15 border border-mint/30 px-2.5 py-0.5 text-[11px] font-bold text-mint-dark">
-            Обновлено сегодня
+            Сроки из партнёрского источника
           </span>
         </div>
       </div>
