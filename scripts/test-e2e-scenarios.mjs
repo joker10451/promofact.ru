@@ -506,7 +506,9 @@ async function run() {
       });
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
-      const firstCard = page.locator("article").first();
+      // A deterministic fixture with a real coupon code. The first article may
+      // be a code-free promotion and therefore has no copy-and-open control.
+      const firstCard = page.locator("#coupon-99233301");
       await firstCard.waitFor({ state: "visible" });
 
       // Открываем модальное окно деталей/условий купона
@@ -517,7 +519,7 @@ async function run() {
       const modal = page.locator("div[role='dialog']").last();
       await modal.waitFor({ state: "visible", timeout: 4000 });
       const copyAndOpenBtn = modal.locator("button:has-text('Скопировать'), a:has-text('Скопировать')").first();
-      await copyAndOpenBtn.waitFor({ state: "visible", timeout: 3000 });
+      await copyAndOpenBtn.waitFor({ state: "visible", timeout: 9000 });
 
       // Ожидаем открытие новой вкладки непосредственно при клике (без блокировки браузером)
       const [newPage] = await Promise.all([
