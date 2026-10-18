@@ -129,14 +129,19 @@ export function formatTelegramPost(coupon: Coupon): {
     lines.push(`<i>Реклама. ${storeName}</i>`);
   }
 
-  // Кнопки: переход в магазин (CPA) + каталог на сайте
+  // Flor2u is currently approved on @smart_zakupka ONLY. Never add a website
+  // CTA implying that promofact.ru has approval or mix its attribution links.
+  if (coupon.store.slug === "flor2u" && coupon.promocode.terms) {
+    lines.push("ℹ️ " + escapeHtml(stripHtml(coupon.promocode.terms)));
+  }
   const affiliateUrl = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site;
   const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
-
   const buttons: TelegramButton[][] = [
     [{ text: `🛍 В магазин ${coupon.store.name} →`, url: affiliateUrl }],
-    [{ text: `🌐 Все купоны ${coupon.store.name} на сайте`, url: storeUrl }],
   ];
+  if (coupon.store.slug !== "flor2u") {
+    buttons.push([{ text: `🌐 Все купоны ${coupon.store.name} на сайте`, url: storeUrl }]);
+  }
 
   return {
     text: lines.join("\n"),

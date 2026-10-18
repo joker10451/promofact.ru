@@ -3,6 +3,7 @@ import { getCoupons } from "@/lib/perfluence";
 import { sendCouponToTelegram } from "@/lib/telegram";
 import { isBearerAuthorized } from "@/lib/apiAuth";
 import { selectBestCouponToPost, recordPosting } from "@/lib/postingEngine";
+import { getFlor2uTelegramOffers } from "@/lib/perfluenceOct18Telegram";
 
 export const dynamic = "force-dynamic";
 
@@ -22,14 +23,26 @@ async function handlePost(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const hitOnly = searchParams.get("hitOnly") === "true";
     const storeSlug = searchParams.get("store");
+    const requestedCode = searchParams.get("code");
     const dryRun = searchParams.get("dryRun") === "true";
 
-    const coupons = await getCoupons();
+    // This channel placement is approved; promofact.ru is still under review.
+    const coupons = storeSlug === "flor2u" ? getFlor2uTelegramOffers() : await getCoupons();
     if (!coupons || coupons.length === 0) {
       return NextResponse.json({ message: "No active coupons found" }, { status: 404 });
     }
 
-    const selection = selectBestCouponToPost(coupons, { hitOnly, storeSlug: storeSlug || undefined });
+    // The one-day 35% Flor2u campaign ends tonight; the generic 48-hour
+    // posting threshold would incorrectly reject it. Use only the current
+    // site-owner-approved channel coupon and never a stale website feed.
+    const flor2uCoupon = requestedCode
+      ? coupons.find(c => c.promocode.code === requestedCode)
+      : coupons[0];
+    const selection = storeSlug === "flor2u"
+      ? (flor2uCoupon
+        ? { coupon: flor2uCoupon, reason: "Подтверждённое отдельное Telegram-размещение Flor2u", stats: { total: coupons.length } }
+        : null)
+      : selectBestCouponToPost(coupons, { hitOnly, storeSlug: storeSlug || undefined });
     if (!selection) {
       return NextResponse.json({ message: "No matching coupons eligible for posting" }, { status: 404 });
     }

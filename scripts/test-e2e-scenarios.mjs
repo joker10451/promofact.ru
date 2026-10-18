@@ -95,7 +95,7 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 14;
+    const totalTests = 15;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
@@ -506,7 +506,9 @@ async function run() {
       });
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
-      const firstCard = page.locator("article").first();
+      // A deterministic fixture with a real coupon code. The first article may
+      // be a code-free promotion and therefore has no copy-and-open control.
+      const firstCard = page.locator("#coupon-99233301");
       await firstCard.waitFor({ state: "visible" });
 
       // Открываем модальное окно деталей/условий купона
@@ -517,7 +519,7 @@ async function run() {
       const modal = page.locator("div[role='dialog']").last();
       await modal.waitFor({ state: "visible", timeout: 4000 });
       const copyAndOpenBtn = modal.locator("button:has-text('Скопировать'), a:has-text('Скопировать')").first();
-      await copyAndOpenBtn.waitFor({ state: "visible", timeout: 3000 });
+      await copyAndOpenBtn.waitFor({ state: "visible", timeout: 9000 });
 
       // Ожидаем открытие новой вкладки непосредственно при клике (без блокировки браузером)
       const [newPage] = await Promise.all([
@@ -1311,6 +1313,38 @@ async function run() {
         } finally {
           if (engineName !== "chromium") await runningBrowser.close();
         }
+      }
+      passedTests++;
+    }
+
+    // --- SCENARIO 15: approved VkusVill website attribution and screenshot ---
+    console.log("\\n[Test 15] VkusVill: five 31 Oct codes, new site ERID, no Flor2u site promotion");
+    {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      try {
+        const page = await context.newPage();
+        const response = await page.goto(BASE_URL + "/store/vkusvill-dostavka", { waitUntil: "domcontentloaded" });
+        assert.equal(response?.status(), 200);
+        const codes = ["VSTCLCZ", "30V8RX3X", "VSYGG5G", "VSDJR76", "35VEM5EY"];
+        for(const code of codes) {
+          assert.equal(await page.locator('button[aria-label="Скопировать промокод ' + code + '"]').count(), 1, code);
+        }
+        assert.equal(await page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]').count(), 5);
+        const html = await page.content();
+        assert(html.includes("2RanyncweGj"), "VkusVill must use current approved site ERID");
+        assert(!html.includes("2RanynjH547"), "Never restore stale Telegram marker");
+        assert(!html.includes("vksvl.prfl.me/smart_zakupka"), "Never route website clicks through Telegram");
+        await page.screenshot({
+          path: path.resolve("./audit-screenshots/after/polish-vkusvill-390.png"),
+          fullPage: true, animations: "disabled",
+        });
+        const collection = await page.goto(BASE_URL + "/collections/tsvety-i-podarki", { waitUntil: "domcontentloaded" });
+        if (collection?.status() === 200) {
+          assert.equal(await page.locator('article[id^="coupon-"]').filter({ hasText: "Flor2u" }).count(), 0,
+            "Flor2u awaiting website approval must not be publicly promoted");
+        }
+      } finally {
+        await context.close();
       }
       passedTests++;
     }

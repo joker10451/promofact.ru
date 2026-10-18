@@ -8,6 +8,7 @@ import { CATEGORIES } from "@/lib/categoryTaxonomy";
 import { isCouponActive } from "@/lib/couponExpiry";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
+import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
 import { isPausedPublisherStore, withoutPausedPublisherOffers } from "@/lib/publisherPauses";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
@@ -453,7 +454,7 @@ async function fetchSnapshot(): Promise<Coupon[]> {
 /** Только купоны Perfluence, без Admitad и прочих фидов — для /api/perfluence-snapshot. */
 export async function getPerfluenceCoupons(): Promise<Coupon[]> {
   // Block the halted advertiser even in direct API snapshots and stale cache.
-  return withoutPausedPublisherOffers(await fetchData()).filter(isApprovedOct16PublisherOffer);
+  return withoutPausedPublisherOffers(await fetchData()).filter(isApprovedOct16PublisherOffer).filter(isApprovedOct18WebsitePlacement);
 }
 
 async function fetchData(): Promise<Coupon[]> {
@@ -720,7 +721,7 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // Source snapshots still contain pre-14 October coupons. Do not let them
   // reappear when code rotations require fresh publisher credentials.
   const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ЧАЙ"]);
-  return withoutPausedPublisherOffers(coupons).filter(isApprovedOct16PublisherOffer).filter((c) => {
+  return withoutPausedPublisherOffers(coupons).filter(isApprovedOct16PublisherOffer).filter(isApprovedOct18WebsitePlacement).filter((c) => {
     if (c.store.slug === "magnit-dostavka") {
       return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase());
     }

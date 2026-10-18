@@ -1,0 +1,73 @@
+name: One-time Flor2u Telegram campaign — 18 Oct 2026
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/lib/perfluenceOct18Telegram.ts
+
+permissions:
+  contents: read
+  statuses: read
+
+jobs:
+  post-flor2u:
+    # One exact squash title authorizes this one-time post; later source edits
+    # must never auto-post Flor2u again. Only @smart_zakupka is approved.
+    if: ${{ contains(github.event.head_commit.message, '[FLOR2U-ONCE-20261018]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Confirm Vercel production deployment succeeded
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=0
+          for attempt in $(seq 1 35); do
+            payload="$(curl --fail --silent --show-error \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/status")"
+            state="$(printf '%s' "$payload" | jq -r '[.statuses[] | select(.context == "Vercel") | .state][0] // "pending"')"
+            echo "Vercel deployment state: $state (check $attempt/35)"
+            if [ "$state" = "success" ]; then ready=1; break; fi
+            if [ "$state" = "failure" ] || [ "$state" = "error" ]; then
+              echo '::error::Vercel deployment failed; Telegram publication blocked'
+              exit 1
+            fi
+            sleep 12
+          done
+          if [ "$ready" != 1 ]; then
+            echo '::error::Vercel deployment not confirmed; publication blocked'
+            exit 1
+          fi
+
+      - name: Publish the approved 35-percent Flor2u code to smart_zakupka
+        env:
+          POST_SECRET: ${{ secrets.TELEGRAM_POSTING_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Deadline is October 18 2026 23:59:59 in Moscow (UTC+03:00).
+          cutoff=$(date -u -d '2026-10-18 20:59:59 UTC' +%s)
+          if [ "$(date -u +%s)" -gt "$cutoff" ]; then
+            echo '::warning::Flor2u 35% offer already expired. Nothing sent.'
+            exit 0
+          fi
+          if [ -z "$POST_SECRET" ]; then
+            echo '::error::TELEGRAM_POSTING_SECRET is missing. Nothing sent.'
+            exit 1
+          fi
+          status=$(curl -sS --max-time 50 -o response.json -w '%{http_code}' -X POST \
+            'https://promofact.ru/api/telegram/post?store=flor2u&code=JHD_H13J3H1' \
+            -H "Authorization: Bearer $POST_SECRET")
+          echo "Telegram posting API HTTP status: $status"
+          if [ "$status" != "200" ]; then
+            jq '{error, message}' response.json || true
+            exit 1
+          fi
+          jq -e '.success == true and .results[0].code == "JHD_H13J3H1" and (.results[0].messageId | type == "number")' response.json > /dev/null
+          echo "Successfully published exactly JHD_H13J3H1: $(jq -r '.results[0].messageId' response.json)"
+          echo "Evidence URL: https://t.me/smart_zakupka/$(jq -r '.results[0].messageId' response.json)"
