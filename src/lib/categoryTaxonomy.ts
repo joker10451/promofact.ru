@@ -208,6 +208,8 @@ export const BRAND_CATEGORY: Record<string, string> = {
   askona: "vse-dlya-doma",
   lazurit: "vse-dlya-doma",
   "fix price": "vse-dlya-doma",
+  "cozy home": "vse-dlya-doma",
+  "cozy-home": "vse-dlya-doma",
   tefal: "elektronika-i-tehnika",
   itab: "elektronika-i-tehnika",
 

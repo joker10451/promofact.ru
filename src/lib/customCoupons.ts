@@ -221,6 +221,42 @@ export const CUSTOM_COUPONS: Coupon[] = [
     },
     extraLinks: [],
   },
+  {
+    id: 50050,
+    promocode: {
+      id: 50050,
+      code: "KW9JUP1C",
+      bonusName: "Скидка 25% на заказ",
+      terms: "Скидка 25% по промокоду KW9JUP1C на постельное бельё, текстиль, декор и товары для дома Cozy Home при заказе онлайн до 18 октября 2026 года 23:59.",
+      expires: "2026-10-18",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      id: 3641,
+      name: "Cozy Home",
+      slug: "cozy-home",
+      logo: "https://favicon.yandex.net/favicon/v2/cozyhome.ru?size=120",
+      category: "Всё для дома",
+      categorySlug: "vse-dlya-doma",
+      about: "Cozy Home — сеть магазинов стильного домашнего уюта: комплекты постельного белья, мягкие пледы, махровые полотенца, домашняя одежда и изысканные ароматы для дома.",
+      conditions: "Введите промокод KW9JUP1C при оформлении заказа онлайн для получения скидки 25%. Действует до 18 октября 2026 года 23:59.",
+      site: "https://cozyhome.ru",
+      activeBloggers: 4200,
+    },
+    affiliate: {
+      link: "https://cozyhome.prfl.me/sites/jy58f4?erid=2RanynxDUwD",
+      landingLink: "https://cozyhome.prfl.me/sites/jy58f4?erid=2RanynxDUwD",
+      ordMarker: "2RanynxDUwD",
+      ordText: "Реклама. Cozy Home erid: 2RanynxDUwD",
+    },
+    extraLinks: [],
+  },
 ];
 
 /**
