@@ -119,7 +119,7 @@ export default function StoreSummaryTable({
       {/* Табличная часть с горизонтальным скроллом на мобильных */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[680px] text-left text-sm border-collapse">
-          <caption className="sr-only">{headingText}</caption>
+          <caption className="sr-only">Сравнение выгод и условий предложений {storeName}</caption>
           <thead className="border-b border-line bg-paper text-[11px] font-extrabold uppercase tracking-wider text-ink/55">
             <tr>
               <th scope="col" className="px-4 sm:px-5 py-3">Скидка / Акция</th>
