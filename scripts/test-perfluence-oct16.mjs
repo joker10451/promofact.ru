@@ -18,7 +18,6 @@ const plan = {
   fmart: [
     ["FMARTPE23khl6x", "23%", "2026-10-31T23:59:59+03:00"],
     ["FMARTPE900btr9u", "900 ₽", "2026-10-31T23:59:59+03:00"],
-    ["FMARTPE403c8la", "40%", "2026-10-17T23:59:59+03:00"],
     ["fmartpe2063dcr", "20%", "2026-10-31T23:59:59+03:00"],
   ],
   letual: [
@@ -31,9 +30,9 @@ const plan = {
     ["Sberdv71", "5%", "2026-10-31"],
   ],
 };
-assert.equal(PERFLUENCE_OCT16_APPROVED_OFFERS.length,8);
+assert.equal(PERFLUENCE_OCT16_APPROVED_OFFERS.length,7);
 const all=CUSTOM_COUPONS.filter(c=>Object.hasOwn(plan,c.store.slug));
-assert.equal(all.length,10, "Exactly ten site-approved coupons across four projects");
+assert.equal(all.length,9, "Exactly nine site-approved coupons across four projects");
 
 for (const [slug, codes] of Object.entries(plan)) {
   const p=PERFLUENCE_OCT16_PLACEMENTS[slug];
@@ -85,8 +84,12 @@ const october=all.find(c=>c.promocode.code==="ОКТЯБРЬ");
 assert(naberi.promocode.terms.includes("не скидка 20 000 ₽ на любой заказ"));
 assert(udacha.promocode.terms.includes("не предоставлены"));
 assert(october.promocode.terms.includes("не указаны"));
-const gift=all.find(c=>c.promocode.code==="FMARTPE403c8la");
-assert.equal(gift.promocode.expires,"2026-10-17T23:59:59+03:00");
+assert.equal(all.some(c=>c.promocode.code==="FMARTPE403c8la"),false,
+  "Expired 40% FMART offer must stay retired after the link rotation");
+assert.equal(isApprovedOct16PublisherOffer({
+  ...all.find(c=>c.promocode.code==="FMARTPE23khl6x"),
+  promocode:{...all.find(c=>c.promocode.code==="FMARTPE23khl6x").promocode,code:"FMARTPE403c8la"},
+}),false,"Expired code must be denied even if a stale widget supplies the new URL");
 
 const fmart=all.find(c=>c.store.slug==="fmart");
 const letual=all.find(c=>c.store.slug==="letual");
@@ -109,4 +112,4 @@ assert(src.includes("const freshCustomCoupons = (await import"));
 assert(!src.includes("liveSberDevicesCodes"));
 assert(home.includes("withoutForbiddenFloristBeautyCoPromotion"));
 assert.equal((collections.match(/withoutForbiddenFloristBeautyCoPromotion/g)||[]).length,3);
-console.log("PERFLUENCE 16 OCT: 4 projects, 10 codes, dates, attribution, legality, stale suppression, no fabricated benefits, incompatible selections PASS");
+console.log("PERFLUENCE: 4 projects, 9 valid codes, FMART 18 Oct rotated link, ERID, expiry, stale suppression and incompatible selections PASS");
