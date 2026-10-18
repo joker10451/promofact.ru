@@ -43,9 +43,9 @@ const LAVKA_ORD = "Реклама. ООО «Яндекс.Лавка», ИНН 97
 const PEREKRESTOK_LINK = "https://perekrestok.prfl.me/sites/rlj0bi?erid=2Ranyo8ekC3";
 const PEREKRESTOK_ORD = "Реклама. ООО «ИКС 5 ДИДЖИТАЛ», ИНН 9722010808. erid: 2Ranyo8ekC3";
 
-const VKUSVILL_LINK = "https://vksvl.prfl.me/smart_zakupka/ekg3pn?erid=2RanynjH547";
+const VKUSVILL_LINK = "https://vksvl.prfl.me/sites/ni6chn?erid=2RanyncweGj";
 const VKUSVILL_ORD =
-  "Реклама. АО «ВкусВилл», ОГРН 1217700253671. Подробности на сайте vkusvill.ru. erid: 2RanynjH547";
+  "Реклама. АО ВкусВилл, ОГРН 1217700253671. Подробности на сайте vkusvill.ru erid: 2RanyncweGj";
 
 // Публикация Perfluence для аккаунта сайта (erid приходит в ordMarker виджета).
 const FARFOR_LINK = "https://farfor1.prfl.me/sites/l37lji?erid=2RanykNkpXu";
@@ -248,7 +248,7 @@ export const ARTICLES: Article[] = [
       "**Шаг 2.** Соберите корзину под выбранный порог.",
       "**Шаг 3.** Введите промокод при оформлении и убедитесь, что скидка появилась до оплаты.",
       "## Что учесть",
-      "Все коды действуют до 30 сентября 2026 года и только на первую покупку — в одном аккаунте сработает лишь один. Скидка не распространяется на товары из акций «Всегда дешевле» и на алкоголь.",
+      "Все коды действуют до 31 октября 2026 года и только на первую покупку — в одном аккаунте сработает лишь один. Скидка не распространяется на товары из акций «Всегда дешевле» и на алкоголь.",
     ],
     faq: [
       {
@@ -261,7 +261,7 @@ export const ARTICLES: Article[] = [
       },
       {
         q: "До какого числа действуют коды?",
-        a: "До 30 сентября 2026 года включительно.",
+        a: "До 31 октября 2026 года включительно.",
       },
     ],
     ctaButton: {
