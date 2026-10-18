@@ -100,5 +100,15 @@ const telegramRoute = fs.readFileSync("src/app/api/telegram/post/route.ts","utf8
 assert.ok(telegramRoute.includes('storeSlug === "flor2u" ? getFlor2uTelegramOffers() : await getCoupons()'));
 const tgSource=fs.readFileSync("src/lib/telegram.ts","utf8");
 assert.ok(tgSource.includes('coupon.store.slug !== "flor2u"'));
-console.log("PASS: VkusVill website approvals and anti-co-promotion; Flor2u Telegram-only attribution, flash expiry, safe CTA");
+const workflow = fs.readFileSync(".github/workflows/telegram-flor2u-once.yml","utf8");
+assert.ok(workflow.includes("[FLOR2U-ONCE-20261018]"),"One-time commit marker prevents repeat posting");
+assert.ok(workflow.includes("Vercel production deployment succeeded"),"No posts before production deployment");
+assert.ok(workflow.includes("store=flor2u&code=JHD_H13J3H1"),"One exact approved code");
+assert.ok(workflow.includes("TELEGRAM_POSTING_SECRET"),"Protected posting API secret");
+assert.ok(workflow.includes("2026-10-18 20:59:59 UTC"),"Flash code must not post after expiry");
+assert.ok(workflow.includes("github.event.head_commit.message"),"Unexpected future pushes must not send");
+assert.ok(telegramRoute.includes('coupons.find(c => c.promocode.code === requestedCode)'),
+  "Expired or unknown explicit code must fail closed");
+console.log("PASS: VkusVill website approvals and anti-co-promotion; Flor2u Telegram-only placement, verified deadline and one-shot guarded publish");
+
 
