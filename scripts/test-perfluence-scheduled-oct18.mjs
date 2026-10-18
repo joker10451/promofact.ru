@@ -11,6 +11,8 @@ import {
 import { getCustomCoupons } from "../src/lib/customCoupons.ts";
 import { withoutForbiddenGroceryCoPromotion } from "../src/lib/publisherPlacementRules.ts";
 import { isCouponActive } from "../src/lib/couponExpiry.ts";
+import { getFlor2uTelegramOffers, FLOR2U_OCT18_TELEGRAM_LINK, FLOR2U_OCT18_TELEGRAM_ERID } from "../src/lib/perfluenceOct18Telegram.ts";
+import { formatTelegramPost } from "../src/lib/telegram.ts";
 import { dedupeCoupons } from "../src/lib/dedupe.ts";
 
 // Publisher panel: VkusVill approved for promofact.ru, Flor2u for Telegram only.
@@ -74,4 +76,29 @@ const article=fs.readFileSync("src/lib/articles.ts","utf8");
 assert.ok(article.includes(VKUSVILL_OCT18_SITE_LINK));
 assert.ok(article.includes("Все коды действуют до 31 октября 2026 года"));
 assert.ok(!article.includes("vksvl.prfl.me/smart_zakupka/ekg3pn"));
-console.log("PASS: VkusVill 5 current website codes and ERID, expiry, stale-source blocking; Flor2u Telegram only, Pyaterochka co-promotion guard");
+
+const evening = Date.parse("2026-10-18T17:00:00+03:00");
+const flor2uTelegram = getFlor2uTelegramOffers(evening);
+assert.equal(flor2uTelegram.length,2);
+assert.deepEqual(flor2uTelegram.map(c=>c.promocode.code),["JHD_H13J3H1","KRL_4G44HH5"]);
+for (const c of flor2uTelegram) {
+  assert.equal(c.affiliate.link,FLOR2U_OCT18_TELEGRAM_LINK);
+  assert.equal(c.affiliate.ordMarker,FLOR2U_OCT18_TELEGRAM_ERID);
+  assert.equal(c.store.slug,"flor2u");
+  assert.equal(isApprovedOct18WebsitePlacement(c),false);
+  const post = formatTelegramPost(c);
+  assert.equal(post.buttons.length,1,"Unapproved website must not be linked from Telegram");
+  assert.equal(post.buttons[0][0].url,FLOR2U_OCT18_TELEGRAM_LINK);
+  assert.ok(post.text.includes("erid: "+FLOR2U_OCT18_TELEGRAM_ERID));
+  assert.ok(post.text.includes(c.promocode.code));
+}
+assert.equal(flor2uTelegram[0].promocode.isFirstOrderOnly,true);
+assert.equal(flor2uTelegram[1].promocode.isUniversal,true);
+assert.deepEqual(getFlor2uTelegramOffers(Date.parse("2026-10-19T00:00:00+03:00")).map(c=>c.promocode.code),["KRL_4G44HH5"]);
+assert.equal(getFlor2uTelegramOffers(Date.parse("2026-11-01T00:00:00+03:00")).length,0);
+const telegramRoute = fs.readFileSync("src/app/api/telegram/post/route.ts","utf8");
+assert.ok(telegramRoute.includes('storeSlug === "flor2u" ? getFlor2uTelegramOffers() : await getCoupons()'));
+const tgSource=fs.readFileSync("src/lib/telegram.ts","utf8");
+assert.ok(tgSource.includes('coupon.store.slug !== "flor2u"'));
+console.log("PASS: VkusVill website approvals and anti-co-promotion; Flor2u Telegram-only attribution, flash expiry, safe CTA");
+
