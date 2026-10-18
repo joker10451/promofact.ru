@@ -1214,7 +1214,6 @@ async function run() {
       const expected = [
         ["FMARTPE23khl6x", "2026-10-31T23:59:59+03:00"],
         ["FMARTPE900btr9u", "2026-10-31T23:59:59+03:00"],
-        ["FMARTPE403c8la", "2026-10-17T23:59:59+03:00"],
         ["fmartpe2063dcr", "2026-10-31T23:59:59+03:00"],
       ].filter((item) => now <= Date.parse(item[1]));
       assert.match(await page.locator("h1").innerText(), /FMART/i);
@@ -1228,7 +1227,8 @@ async function run() {
           "Publisher code must be visible: " + code);
       }
       if (expected.length > 0) {
-        assert((await page.content()).includes("2Ranykhnax3"), "FMART must use approved ERID");
+        assert((await page.content()).includes("2Ranynyf7r3"), "FMART must use approved ERID");
+        await page.screenshot({ path: path.resolve("./audit-screenshots/after/polish-fmart-390.png"), fullPage: true, animations: "disabled" });
         const home = await page.goto(BASE_URL + "/", { waitUntil: "domcontentloaded" });
         assert.equal(home?.status(), 200);
         const direct = page.locator('a[href="/store/fmart#offers"]').first();
