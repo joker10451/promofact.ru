@@ -35,10 +35,27 @@ export function refineOffer(
     .replace(/(^|[\s,.:;!?-])на\s+се(?=[\s,.:;!?-]|$)/gi, "$1на все")
     .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
   const isNoCode = !isRealPromoCode(code);
+
+  // A loyalty program accumulates future rewards; its ceiling is NOT
+  // an instant percentage discount applied at checkout.
+  if (/накопительн[а-яё]*\s+(?:программ[а-яё]*|систем[а-яё]*|скидк[а-яё]*)/iu.test(title)) {
+    const reward = terms.match(/за\s+каждые\s+([\d\s]+)\s+рубл[а-яё]*[\s\S]{0,90}?\+(\d{1,2})\s*%/iu);
+    return {
+      type: "default",
+      discount: title,
+      condition: reward
+        ? "За каждые " + Number(reward[1].replace(/\s/g, "")).toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽ — +" + reward[2] + "% к будущей скидке"
+        : "Накопление скидки на будущие заказы",
+      fullTerms: terms || title,
+      isNoCode,
+    };
+  }
   // Admitad sometimes supplies a campaign title "по промокоду", while the
   // actual coupon field says "НЕ НУЖЕН". Never present that as a guaranteed
   // discount by link or as a copyable code. Prefer the specific source terms.
-  const missingCodeClaim = isNoCode && /(?:^|\s)по\s+промокод[а-яё]*/i.test(title);
+  const explicitlyNoCode = /(?:в(?:в)?вод\s+промокода\s+не\s+требуется|промокод\s+не\s+(?:нужен|требуется)|без\s+промокода)/iu.test(terms);
+  const missingCodeClaim = isNoCode && !explicitlyNoCode &&
+    /(?:^|\s)по\s+промокод[а-яё]*/i.test(title);
   if (missingCodeClaim) {
     return {
       type: "default",
@@ -249,7 +266,7 @@ export function refineOffer(
     return {
       type: "default",
       discount: formattedTitle,
-      condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : "Условия акции смотрите у магазина",
+      condition: minOrder ? `при заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽` : /при\s+покупке\s+(?:от\s+)?\d+\s+пач/iu.test(terms) ? cleanTruncate(terms, 95) : "Условия акции смотрите у магазина",
       fullTerms: terms || "Перейдите на страницу предложения и уточните условия акции у магазина.",
       isNoCode: true,
     };
