@@ -363,14 +363,14 @@ export default function CouponTicket({
 
         {/* 2. Главный акцент — визуально разный для каждого типа */}
         <div className="mt-4 mb-1 flex flex-col justify-center">
-          {/* Тип: subscription — синяя плашка, «<Icon name="sparkle" size={11} /> Промокод не требуется» */}
+          {/* Тип: subscription — синяя плашка */}
           {offer.type === "subscription" ? (
             <div className="rounded-xl bg-blue-50 border border-blue-200 px-3 py-2.5">
               <div className={`font-display ${discountSizeClass} text-[#1a56db] font-black`}>
                 {offer.discount}
               </div>
               <p className="mt-1 text-xs font-semibold text-[#1a56db]/70">
-                <Icon name="sparkle" size={11} /> Промокод не требуется
+                <Icon name="sparkle" size={11} /> {offer.isNoCode ? "Промокод не требуется" : "По промокоду"}
               </p>
             </div>
           ) : offer.type === "gift" ? (
