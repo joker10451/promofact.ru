@@ -8,7 +8,7 @@
  * Never infer a percentage from a minimum-order amount or unlabelled "99%":
  * percentage of the assortment is not necessarily a consumer discount.
  */
-const CONDITION_ONLY = /^(?:при\s+(?:заказе|покупке|оформлении)|(?:заказ|покупка)\s+от|на\s+заказ\s+от|от\s+[\d\s]+(?:₽|руб)|на\s+перв(?:ую|ой)\s+(?:покупк[ау]|оплат[уы])|для\s+новых\s+клиентов|по\s+промокоду)(?=$|[\s,.:;!?])/iu;
+const CONDITION_ONLY = /^(?:при\s+(?:заказе|покупке|оформлении)|(?:заказ|покупка)\s+от|на\s+заказ\s+от|от\s+[\d\s]+(?:₽|руб)|на\s+перв(?:ую|ой)\s+(?:покупк[ау]|оплат[уы])|для\s+новых\s+клиентов|(?:на\s+)?по\s+(?:купону|промокоду))(?=$|[\s,.:;!?])/iu;
 const HAS_BENEFIT = /(?:[−-]\s*\d{1,3}\s*%|скидк[а-яё]*\s*(?:до\s*)?\d{1,3}\s*%|[−-]\s*[\d\s]+\s*₽|бесплатн[а-яё]*\s+достав|подар|к[еэ]шб[еэ]к|бонус|дополнительн[а-яё]*\s+урок|добавля[а-яё]*\s+\d+\s+урок)/iu;
 
 export function isConditionOnlyOfferTitle(value: string): boolean {
@@ -70,6 +70,25 @@ export function resolveAdmitadOfferHeadline(
 ): string {
   const title = (bonusName || "").trim();
   const details = (terms || "").trim();
+
+  // The original feed can describe six PACKS while the stored headline
+  // incorrectly claims "6 ₽". Prefer the actual condition, not fake savings.
+  const packs = details.match(/при\s+покупке\s+(?:от\s+)?(\d{1,2})\s+пач(?:ек|ки|к[ауи])\s+(кофе|чая)/iu);
+  if (packs && !benefitFromDiscount(discount || "") && !benefitFromTerms(details))
+    return "Акция при покупке " + packs[1] + " пачек " + packs[2];
+
+  if (/^в(?:в)?вод\s+промокода\s+не\s+требуется/iu.test(details))
+    return /из\s+категории\s+чай\b/iu.test(details)
+      ? "Акция на чай без промокода"
+      : "Акция на отдельные категории без промокода";
+
+  // A loyalty balance is earned towards future orders, never an immediate -15%.
+  if (/накопительн[а-яё]*\s+скидк/iu.test(details) &&
+      /каждые\s+[\d\s]+\s+рубл/iu.test(details)) {
+    const max = details.match(/максимальн[а-яё]*\s+скидк[а-яё]*\s*[—−-]?\s*(\d{1,2})\s*%/iu);
+    return max ? "Накопительная программа — до " + max[1] + "%" : "Накопительная программа скидок";
+  }
+
   if (title && !isConditionOnlyOfferTitle(title)) return title;
 
   const structured = benefitFromDiscount(discount || "");
@@ -81,7 +100,7 @@ export function resolveAdmitadOfferHeadline(
     described?.startsWith("Подарок") && !/достав/iu.test(details);
   const conflictingCashback = described?.startsWith("Кешбэк") && structured?.startsWith("−");
   const benefit = (conflictingDelivery || conflictingCashback) ? described : structured || described;
-  const condition = /^скидка\s*$/iu.test(title) ? "" : title;
+  const condition = /^скидка\s*$/iu.test(title) || /^(?:на\s+)?по\s+(?:купону|промокоду)(?=$|\s)/iu.test(title) ? "" : title;
   if (!benefit) return condition ? "Выгода не уточнена · " + condition : (title || "Условия предложения");
   if (!condition || benefit.toLowerCase() === condition.toLowerCase()) return benefit;
   return benefit + " · " + condition.charAt(0).toLowerCase() + condition.slice(1);
