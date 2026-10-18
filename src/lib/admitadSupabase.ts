@@ -71,7 +71,7 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
   const expires = str(row.expires) ? str(row.expires).slice(0, 10) : null;
   // Display cleanup only: the raw partner snapshot, legal marker and URL stay intact.
   const terms = (str(row.terms || row.description)
-    .replace(/\bВввод\b/giu, "Ввод")
+    .replace(/Вввод(?=\s)/giu, "Ввод")
     .replace(/на\s+товары\s+из\s+категорий\s*$/iu,
       "на отдельные категории товаров (перечень уточняйте у магазина)")
     .trim()) || null;
