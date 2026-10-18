@@ -69,7 +69,12 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
   const categorySlug = stableMeta?.categorySlug || (str(row.category_slug) ? translit(str(row.category_slug)) : translit(category) || "drugoe");
 
   const expires = str(row.expires) ? str(row.expires).slice(0, 10) : null;
-  const terms = str(row.terms || row.description) || null;
+  // Display cleanup only: the raw partner snapshot, legal marker and URL stay intact.
+  const terms = (str(row.terms || row.description)
+    .replace(/Вввод(?=\s)/giu, "Ввод")
+    .replace(/на\s+товары\s+из\s+категорий\s*$/iu,
+      "на отдельные категории товаров (перечень уточняйте у магазина)")
+    .trim()) || null;
   // Published rows often store only a basket threshold in bonus_name and the
   // actual discount in the separate discount column. Keep both in the title.
   const bonusName = resolveAdmitadOfferHeadline(
@@ -112,7 +117,8 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
       category,
       categorySlug,
       about: str(row.about) || null,
-      conditions: terms,
+      // Coupon restrictions must never become store-wide terms on every card.
+      conditions: null,
       site: storeSite,
       activeBloggers: 0,
     },

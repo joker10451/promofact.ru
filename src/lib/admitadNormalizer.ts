@@ -69,7 +69,12 @@ export function extractMinimumOrder(text: string): MinimumOrder | null {
   const moneyContext = clean.match(
     /(?:на\s+сумму|суммой|сумма|чек[а]?|стоимостью)\s+(?:от|свыше)\s+(\d[\d\s.,]*)/iu
   );
-  const match = withCurrency || moneyContext;
+  // Historical feeds also write "мин. сумма заказа - 1000 р.".
+  // This is unambiguously money, unlike "6 пачек" or "10 уроков".
+  const explicitMinimum = clean.match(
+    /мин(?:имальная)?\.?\s+сумма\s+заказа\s*(?:[-–—=:]\s*)?(\d[\d\s]*)\s*(?:₽|р\.|руб(?:лей|ля|\.?)?)(?![а-яёa-z])/iu
+  );
+  const match = withCurrency || moneyContext || explicitMinimum;
   if (!match) return null;
 
   const rawNum = match[1].replace(/\s/g, "").replace(",", ".");

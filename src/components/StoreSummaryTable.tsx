@@ -73,10 +73,8 @@ function formatExpiryDate(rawExpires: string | null | undefined): string {
       // fallback below
     }
   }
-  const now = new Date();
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const monthName = now.toLocaleDateString("ru-RU", { month: "short" });
-  return `до ${lastDay} ${monthName}`;
+  // Partner does not specify a date; never fabricate the end of the month.
+  return "Срок не указан";
 }
 
 export default function StoreSummaryTable({
@@ -113,7 +111,7 @@ export default function StoreSummaryTable({
             </p>
           </div>
           <span className="self-start sm:self-auto rounded-full bg-mint/15 border border-mint/30 px-2.5 py-0.5 text-[11px] font-bold text-mint-dark">
-            Обновлено сегодня
+            Сроки из партнёрского источника
           </span>
         </div>
       </div>
@@ -121,7 +119,7 @@ export default function StoreSummaryTable({
       {/* Табличная часть с горизонтальным скроллом на мобильных */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[680px] text-left text-sm border-collapse">
-          <caption className="sr-only">{headingText}</caption>
+          <caption className="sr-only">Сравнение выгод и условий предложений {storeName}</caption>
           <thead className="border-b border-line bg-paper text-[11px] font-extrabold uppercase tracking-wider text-ink/55">
             <tr>
               <th scope="col" className="px-4 sm:px-5 py-3">Скидка / Акция</th>

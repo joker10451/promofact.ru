@@ -582,8 +582,8 @@ export default async function StorePage({
             </div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Регистрация</div>
-            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">Не нужна</div>
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Оформление</div>
+            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">По правилам магазина</div>
           </div>
         </div>
 
