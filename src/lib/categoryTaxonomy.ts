@@ -168,6 +168,10 @@ export const BRAND_CATEGORY: Record<string, string> = {
   "яндекс еда": "dostavka-iz-restoranov",
   "yandex-eda": "dostavka-iz-restoranov",
   "post meridiem": "dostavka-iz-restoranov",
+  farfor: "dostavka-iz-restoranov",
+  фарфор: "dostavka-iz-restoranov",
+  "додо пицца": "dostavka-iz-restoranov",
+  "dodo-pizza": "dostavka-iz-restoranov",
 
   // Продукты и напитки
   "tasty coffee": "produkty-i-napitki",
@@ -234,9 +238,14 @@ export const BRAND_CATEGORY: Record<string, string> = {
   kion: "onlayn-kinoteatry",
   rutube: "onlayn-kinoteatry",
   рутуб: "onlayn-kinoteatry",
+  start: "onlayn-kinoteatry",
+  "start.ru": "onlayn-kinoteatry",
+  "start-ru": "onlayn-kinoteatry",
   korston: "razvlecheniya",
   "broadway-moscow": "razvlecheniya",
   "afisha.yandex": "razvlecheniya",
+  "яндекс афиша": "razvlecheniya",
+  "yandeks-afisha": "razvlecheniya",
   muzloto: "razvlecheniya",
   "король говорит!": "razvlecheniya",
   winline: "razvlecheniya",
@@ -252,6 +261,7 @@ export const BRAND_CATEGORY: Record<string, string> = {
   speech2text: "servisy-i-podpiski",
   "redsolution.company": "servisy-i-podpiski",
   копирка: "servisy-i-podpiski",
+  netprint: "servisy-i-podpiski",
   gruzovichkof: "servisy-i-podpiski",
 
   // Связь

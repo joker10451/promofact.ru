@@ -3,6 +3,7 @@ import type { Coupon } from "@/lib/types";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { PERFLUENCE_OCT16_APPROVED_OFFERS } from "@/lib/perfluenceOct16Offers";
 import { VKUSVILL_OCT18_SITE_OFFERS } from "@/lib/perfluenceOct18Scheduled";
+import { PERFLUENCE_OCT18_BATCH_OFFERS } from "@/lib/perfluenceOct18Batch";
 
 /**
  * Ручные купоны от рекламодателей и партнёрских сетей.
@@ -90,6 +91,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
   ...PEREKRESTOK_OCT16_OFFERS,
   ...PERFLUENCE_OCT16_APPROVED_OFFERS,
   ...VKUSVILL_OCT18_SITE_OFFERS,
+  ...PERFLUENCE_OCT18_BATCH_OFFERS,
   {
     id: 50671,
     promocode: {
