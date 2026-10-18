@@ -23,6 +23,7 @@ async function handlePost(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const hitOnly = searchParams.get("hitOnly") === "true";
     const storeSlug = searchParams.get("store");
+    const requestedCode = searchParams.get("code");
     const dryRun = searchParams.get("dryRun") === "true";
 
     // This channel placement is approved; promofact.ru is still under review.
@@ -34,8 +35,13 @@ async function handlePost(req: NextRequest) {
     // The one-day 35% Flor2u campaign ends tonight; the generic 48-hour
     // posting threshold would incorrectly reject it. Use only the current
     // site-owner-approved channel coupon and never a stale website feed.
+    const flor2uCoupon = requestedCode
+      ? coupons.find(c => c.promocode.code === requestedCode)
+      : coupons[0];
     const selection = storeSlug === "flor2u"
-      ? { coupon: coupons[0], reason: "Подтверждённое отдельное Telegram-размещение Flor2u", stats: { total: coupons.length } }
+      ? (flor2uCoupon
+        ? { coupon: flor2uCoupon, reason: "Подтверждённое отдельное Telegram-размещение Flor2u", stats: { total: coupons.length } }
+        : null)
       : selectBestCouponToPost(coupons, { hitOnly, storeSlug: storeSlug || undefined });
     if (!selection) {
       return NextResponse.json({ message: "No matching coupons eligible for posting" }, { status: 404 });
