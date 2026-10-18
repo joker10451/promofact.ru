@@ -117,7 +117,8 @@ export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
       category,
       categorySlug,
       about: str(row.about) || null,
-      conditions: terms,
+      // Coupon restrictions must never become store-wide terms on every card.
+      conditions: null,
       site: storeSite,
       activeBloggers: 0,
     },
