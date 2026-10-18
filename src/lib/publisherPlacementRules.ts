@@ -47,3 +47,13 @@ export function withoutForbiddenFloristBeautyCoPromotion(coupons: Coupon[]): Cou
     !(hasFlor2u && c.store.slug === "fmart") &&
     !(hasGoldApple && c.store.slug === "letual"));
 }
+
+/** Perfluence: VkusVill Delivery must not share a curated promo collection with Pyaterochka. */
+export function withoutForbiddenGroceryCoPromotion(coupons: Coupon[]): Coupon[] {
+  const hasPyaterochka = coupons.some(c =>
+    c.store.slug === "pyaterochka" || c.store.slug === "pyaterochka-dostavka" ||
+    /пят[её]рочк/iu.test(c.store.name));
+  if (!hasPyaterochka) return coupons;
+  // Keep the original Pyaterochka placement; publish VkusVill separately.
+  return coupons.filter(c => c.store.slug !== "vkusvill-dostavka");
+}
