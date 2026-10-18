@@ -3,7 +3,8 @@ import { STABLE_STORES } from "@/lib/stableStores";
 
 /**
  * Site-specific, approved promofact.ru placements copied from Perfluence on
- * 16 October 2026. These override the older public widget URL/ERID.
+ * 16 October 2026; FMART placement rotated on 18 October 2026.
+ * These override the older public widget URL/ERID.
  * The stated amounts are campaign labels, NOT unconditional savings on a cart.
  */
 export const PERFLUENCE_OCT16_PLACEMENTS = {
@@ -15,9 +16,9 @@ export const PERFLUENCE_OCT16_PLACEMENTS = {
   },
   fmart: {
     slug: "fmart",
-    link: "https://fmart-flowers.prfl.me/sites/l3gt41?erid=2Ranykhnax3",
-    erid: "2Ranykhnax3",
-    legal: 'Реклама. ООО "ФМАРТ" ОГРН 1237700524060 г. Москва erid: 2Ranykhnax3',
+    link: "https://fmart-flowers.prfl.me/sites/283ede?erid=2Ranynyf7r3",
+    erid: "2Ranynyf7r3",
+    legal: 'Реклама. ООО "ФМАРТ" ОГРН 1237700524060 г. Москва erid: 2Ranynyf7r3',
   },
   letual: {
     slug: "letual",
@@ -100,12 +101,6 @@ export const PERFLUENCE_OCT16_APPROVED_OFFERS: Coupon[] = [
     "2026-10-31T23:59:59+03:00",
   ),
   offer(
-    82645793, "fmart", "FMARTPE403c8la",
-    "Скидка 40% в FMART by flowwow",
-    "Промокод FMARTPE403c8la: скидка 40% по условиям акции. Срок ограничен 17 октября 2026 года до 23:59 по Москве. Ограничения проверьте в корзине.",
-    "2026-10-17T23:59:59+03:00",
-  ),
-  offer(
     82645794, "fmart", "fmartpe2063dcr",
     "Скидка 20% в FMART by flowwow",
     "Промокод fmartpe2063dcr: скидка 20% по условиям акции. Ограничения, минимальный чек и возможность повторного применения уточняйте при заказе.",
@@ -134,7 +129,7 @@ export const PERFLUENCE_OCT16_APPROVED_OFFERS: Coupon[] = [
 /** Approved placement for all four brands, including the two existing SberDevices codes. */
 export const PERFLUENCE_OCT16_CODES: Record<keyof typeof PERFLUENCE_OCT16_PLACEMENTS, readonly string[]> = {
   librederm: ["PC078BC488BA"],
-  fmart: ["FMARTPE23khl6x", "FMARTPE900btr9u", "FMARTPE403c8la", "fmartpe2063dcr"],
+  fmart: ["FMARTPE23khl6x", "FMARTPE900btr9u", "fmartpe2063dcr"],
   letual: ["НАБЕРИ", "УДАЧА", "ОКТЯБРЬ"],
   sberdevaysy: ["Sberdv171", "Sberdv71"],
 };
