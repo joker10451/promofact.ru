@@ -409,10 +409,10 @@ async function run() {
           document.body.appendChild(input);
           input.focus();
         });
-        await page.waitForTimeout(150);
-
-        const isHiddenOnKeyboard = await helperBtn.isHidden();
-        if (!isHiddenOnKeyboard) {
+        // Focus can precede hydration; assert the eventual state, not a fixed 150ms delay.
+        try {
+          await helperBtn.waitFor({ state: "hidden", timeout: 3000 });
+        } catch {
           throw new Error(`На ${res.name} помощник не скрылся при активном поле ввода / виртуальной клавиатуре!`);
         }
         console.log(`  ✓ ${res.name}: Помощник прижат к краю (не перекрывает CTA) и корректно скрывается при открытии клавиатуры`);

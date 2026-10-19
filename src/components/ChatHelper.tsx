@@ -318,6 +318,14 @@ export default function ChatHelper() {
     window.addEventListener("focusout", handleFocusOut);
     window.addEventListener("scroll", handleScroll, { passive: true });
 
+    // An input may receive focus before React hydration attaches focusin.
+    // Recover its current state so the mobile helper cannot obscure a CTA.
+    const focused = document.activeElement as HTMLElement | null;
+    if (focused && (focused.tagName === "INPUT" || focused.tagName === "TEXTAREA") &&
+        !focused.closest("[data-chat-helper]")) {
+      setIsKeyboardOpen(true);
+    }
+
     return () => {
       window.visualViewport?.removeEventListener("resize", handleResize);
       window.removeEventListener("focusin", handleFocusIn);
