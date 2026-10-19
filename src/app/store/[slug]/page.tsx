@@ -195,7 +195,6 @@ export default async function StorePage({
   const offerCountLabel = formatStoreOfferCounts(realCodeCount, codeFreeCount, barcodeCount);
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const todayIso = TODAY_ISO;
-  const todayRu = TODAY_RU;
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
   const maxDisc = getMaxVerifiedDiscount(store.coupons);
@@ -452,7 +451,7 @@ export default async function StorePage({
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
-                  Обновлено {todayRu}
+                  Сроки и ограничения — в карточках
                 </span>
                 {storeProofCount > 0 && (
                   <span className="rounded-full bg-red/10 border border-red/30 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/70">
@@ -576,9 +575,9 @@ export default async function StorePage({
             </div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Первый заказ</div>
-            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-mint">
-              {firstOrderPromo ? "Скидка есть" : "Для всех"}
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Кому подходит</div>
+            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">
+              Смотрите условия
             </div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
