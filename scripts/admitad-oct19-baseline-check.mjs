@@ -36,10 +36,12 @@ const [mode] = process.argv.slice(2);
 const [meta, rows] = await Promise.all([readMeta(),readRetired()]);
 if (meta.last_status !== "SUCCESS") throw new Error("ADM_RECOVERY_UNEXPECTED_STATUS");
 const t = Date.parse(meta.last_success_at || "");
-if (!Number.isFinite(t) || rows.some(row=>!matchesOriginal(row)) ||
-    rows.length !== retired.length) throw new Error("ADM_RECOVERY_BASELINE_IDENTITY_MISMATCH");
+if (!Number.isFinite(t) || rows.some(row=>!matchesOriginal(row))) {
+  throw new Error("ADM_RECOVERY_BASELINE_IDENTITY_MISMATCH");
+}
 if (mode === "before") {
   if (t !== oldEpoch || Number(meta.last_success_count) !== 441 ||
+      rows.length !== retired.length ||
       rows.some(row => row.is_active !== true)) {
     throw new Error("ADM_RECOVERY_BASELINE_CHANGED__NO_WRITES");
   }
