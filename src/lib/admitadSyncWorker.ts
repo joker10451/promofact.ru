@@ -15,6 +15,7 @@ import {
   resolveWebsite,
   getConnectedPrograms,
   getWebsiteCoupons,
+  admitadFetch,
   matchCanonicalStore,
   evaluateQualityGate,
   evaluateLegalGate,
@@ -480,6 +481,31 @@ export async function runAdmitadSafeSync(options: {
       }).sort((a, b) => a.sourceCouponId.localeCompare(b.sourceCouponId));
       console.warn("[publisher/retention] missing_valid_breakdown=" +
         JSON.stringify(missingBreakdown));
+
+      // Admitad documents GET /coupons/{coupon_id}/website/{website_id}/.
+      // This is an independent, read-only check of an omitted list entry.
+      // A 404 can justify individual retirement review; other errors cannot.
+      const individualLookups = await Promise.all(missingBreakdown.map(async entry => {
+        if (!/^[0-9]{1,18}$/.test(entry.sourceCouponId)) {
+          return { sourceCouponId: "INVALID_ID", result: "INVALID_ID" };
+        }
+        try {
+          const detail = await admitadFetch<{ id?: number; status?: string }>(
+            `/coupons/${entry.sourceCouponId}/website/${website.id}/`,
+            { customFetch: options.customFetch, maxRetries: 0 }
+          );
+          return { sourceCouponId: entry.sourceCouponId,
+            result: String(detail.id || "") === entry.sourceCouponId
+              ? "FOUND_MATCHING_ID" : "FOUND_UNEXPECTED_ID" };
+        } catch (err) {
+          const status = (err as { statusCode?: number }).statusCode;
+          return { sourceCouponId: entry.sourceCouponId,
+            result: status === 404 ? "NOT_FOUND_404" :
+              status === 403 ? "ACCESS_DENIED_403" : "REQUEST_FAILED" };
+        }
+      }));
+      console.warn("[publisher/retention] individual_site_coupon_lookup=" +
+        JSON.stringify(individualLookups));
     }
     if (options.requireActiveRetention &&
         (publisherScoped ? missingStillEligible.length : missingBaselineRows.length) > 0) {
