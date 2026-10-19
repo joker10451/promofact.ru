@@ -9,6 +9,7 @@ import {
   isApprovedOct18WebsitePlacement,
 } from "../src/lib/perfluenceOct18Scheduled.ts";
 import { getCustomCoupons } from "../src/lib/customCoupons.ts";
+import { PERFLUENCE_OCT18_BATCH_OFFERS } from "../src/lib/perfluenceOct18Batch.ts";
 import { withoutForbiddenGroceryCoPromotion } from "../src/lib/publisherPlacementRules.ts";
 import { isCouponActive } from "../src/lib/couponExpiry.ts";
 import { getFlor2uTelegramOffers, FLOR2U_OCT18_TELEGRAM_LINK, FLOR2U_OCT18_TELEGRAM_ERID } from "../src/lib/perfluenceOct18Telegram.ts";
@@ -112,3 +113,23 @@ assert.ok(telegramRoute.includes('coupons.find(c => c.promocode.code === request
 console.log("PASS: VkusVill website approvals and anti-co-promotion; Flor2u Telegram-only placement, verified deadline and one-shot guarded publish");
 
 
+
+
+// Perfluence post #17323404, project #1653 (Dodo Pizza South): source
+// project's legal advertiser details came from the publisher feed, while
+// the new exact creative ERID is provided by this post's moderation card.
+const dodoPostErid = "2RanynisbQ7";
+const dodoLegal = "Реклама. Индивидуальный предприниматель Гринев Денис Петрович, ИНН 615400951595. erid: " + dodoPostErid;
+const dodoCards = PERFLUENCE_OCT18_BATCH_OFFERS.filter(c => c.store.slug === "dodo-pizza");
+assert.equal(dodoCards.length, 4, "All four Dodo coupons must carry the approved creative");
+for (const coupon of dodoCards) {
+  assert.equal(coupon.affiliate.ordMarker, dodoPostErid);
+  assert.equal(coupon.affiliate.ordText, dodoLegal, "Advertiser legal name and INN are mandatory for Perfluence moderation");
+  assert.equal(coupon.affiliate.link, "https://dodo1.prfl.me/sites/5worzz?erid=" + dodoPostErid);
+  assert.equal(coupon.affiliate.landingLink, coupon.affiliate.link);
+}
+const dodoFeed = JSON.parse(fs.readFileSync("src/data/perfluence-feed.json","utf8"));
+const dodoProject = dodoFeed.data.find(row => row.project?.id === 1653);
+assert.ok(dodoProject, "Source publisher project must exist");
+assert.ok(dodoProject.groups.some(g => g.promocodes?.some(p => p.ord_custom_text?.includes("ИНН 615400951595") && p.ord_custom_text?.includes("Гринев"))),
+  "Dodo advertiser identity is grounded in the Perfluence publisher feed");
