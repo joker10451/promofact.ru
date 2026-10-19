@@ -83,9 +83,9 @@ const REVIEWED_MISSING_WEBSITE_COUPONS: Readonly<Record<string, {
 });
 
 export function isReviewedMissingWebsiteCoupon(row: {
-  id?: string;
-  source_coupon_id?: string;
-  source_campaign_id?: string;
+  id?: string | null;
+  source_coupon_id?: string | null;
+  source_campaign_id?: string | null;
   expires?: string | null;
   last_seen_at?: string | null;
 }): boolean {
