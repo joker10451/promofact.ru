@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Coupon } from "@/lib/types";
 import { refineOffer } from "@/lib/offerRefiner";
 import { isRealPromoCode } from "@/lib/dedupe";
+import { isCouponActive } from "@/lib/couponExpiry";
 import { getAttributedCouponHref, prepareAttributedCouponClick } from "@/lib/admitadOutboundLink";
 
 interface StoreSummaryTableProps {
@@ -85,7 +86,8 @@ export default function StoreSummaryTable({
   title,
   subtitle,
 }: StoreSummaryTableProps) {
-  if (!coupons || coupons.length === 0) return null;
+  const activeCoupons = (coupons || []).filter((c) => isCouponActive(c.promocode.expires));
+  if (activeCoupons.length === 0) return null;
 
   const now = new Date();
   const monthYear = now.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
@@ -132,7 +134,7 @@ export default function StoreSummaryTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
-            {coupons.map((coupon) => {
+            {activeCoupons.map((coupon) => {
               const code = isRealPromoCode(coupon.promocode.code) ? coupon.promocode.code : "";
               const isFirst = coupon.promocode.isFirstOrderOnly;
               const refined = refineOffer(

@@ -651,6 +651,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://tanukifamily.ru",
     "activeBloggers": 8447
   },
+  "foodband": {
+    "id": 18780,
+    "slug": "foodband",
+    "name": "Foodband",
+    "logo": "https://favicon.yandex.net/favicon/v2/foodband.ru?size=120",
+    "category": "Доставка из ресторанов",
+    "categorySlug": "dostavka-iz-restoranov",
+    "about": "Foodband — круглосуточная доставка пиццы, суши, вок и закусок в Москве и Московской области. Свежие продукты, большие порции и регулярные выгодные акции на сеты и подарки к заказу.",
+    "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
+    "site": "https://foodband.ru",
+    "activeBloggers": 1200
+  },
   // Keep an existing Google-indexed landing route available after Perfluence
   // offers expire. This entry carries NO synthetic coupons or affiliate links.
   "tasty-coffee": {

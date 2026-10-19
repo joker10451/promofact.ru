@@ -172,6 +172,8 @@ export const BRAND_CATEGORY: Record<string, string> = {
   фарфор: "dostavka-iz-restoranov",
   "додо пицца": "dostavka-iz-restoranov",
   "dodo-pizza": "dostavka-iz-restoranov",
+  foodband: "dostavka-iz-restoranov",
+  "фудбэнд": "dostavka-iz-restoranov",
 
   // Продукты и напитки
   "tasty coffee": "produkty-i-napitki",

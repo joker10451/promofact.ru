@@ -4,6 +4,8 @@ import { STABLE_STORES } from "@/lib/stableStores";
 import { PERFLUENCE_OCT16_APPROVED_OFFERS } from "@/lib/perfluenceOct16Offers";
 import { VKUSVILL_OCT18_SITE_OFFERS } from "@/lib/perfluenceOct18Scheduled";
 import { PERFLUENCE_OCT18_BATCH_OFFERS } from "@/lib/perfluenceOct18Batch";
+import { FOODBAND_OFFERS } from "@/lib/foodbandOffers";
+import { isCouponActive } from "@/lib/couponExpiry";
 
 /**
  * Ручные купоны от рекламодателей и партнёрских сетей.
@@ -92,6 +94,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
   ...PERFLUENCE_OCT16_APPROVED_OFFERS,
   ...VKUSVILL_OCT18_SITE_OFFERS,
   ...PERFLUENCE_OCT18_BATCH_OFFERS,
+  ...FOODBAND_OFFERS,
   {
     id: 50671,
     promocode: {
@@ -295,6 +298,7 @@ const PUBLISH_FROM: Record<number, string> = {};
 export function getCustomCoupons(now = Date.now()): Coupon[] {
   return CUSTOM_COUPONS.filter((c) => {
     const from = PUBLISH_FROM[c.id];
-    return !from || now >= new Date(from).getTime();
+    if (from && now < new Date(from).getTime()) return false;
+    return isCouponActive(c.promocode.expires, now);
   });
 }
