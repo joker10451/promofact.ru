@@ -43,8 +43,8 @@ export interface PromoBanner {
   exactCopy?: string;
 }
 
-/** Perfluence notice 13 October 2026: Ulybatl campaign temporarily paused. */
-export const PAUSED_PROMO_BANNER_IDS = new Set(["sber-ulybatl-185-2026", "winlab-rozygrysh-2026"]);
+/** Perfluence notice 19 October 2026: Ulybatl resumed. Winlab draw remains paused. */
+export const PAUSED_PROMO_BANNER_IDS = new Set(["winlab-rozygrysh-2026"]);
 
 export const PROMO_BANNERS: PromoBanner[] = [
   {
