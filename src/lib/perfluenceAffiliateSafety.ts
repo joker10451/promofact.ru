@@ -12,7 +12,7 @@ export function isPublicPerfluenceWidgetCoupon(
   const disclosure = coupon.affiliate.ordText?.trim();
   const link = coupon.affiliate.link?.trim();
   if (!marker || !disclosure || !link ||
-      !/реклама/iu.test(disclosure) || !disclosure.includes(marker)) return false;
+      !/реклама/iu.test(disclosure)) return false;
   try {
     const url = new URL(link);
     const hostname = url.hostname.toLowerCase();
