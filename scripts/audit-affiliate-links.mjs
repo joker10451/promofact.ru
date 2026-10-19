@@ -41,12 +41,12 @@ function validLink(row) {
   try {
     const u = new URL(href);
     return u.protocol === "https:" && !u.username && !u.password && !u.port &&
-      /^\\/g\\/[a-z0-9_-]+\\/?$/i.test(u.pathname) &&
-      /^\\d+$/.test(u.searchParams.get("i") || "") &&
+      new RegExp("^/g/[a-z0-9_-]+/?$", "i").test(u.pathname) &&
+      /^[0-9]+$/.test(u.searchParams.get("i") || "") &&
       !!marker && u.searchParams.get("erid") === marker &&
       String(row.ord_text || "").includes(marker) &&
       /реклама/iu.test(String(row.ord_text || "")) &&
-      /^\\d{1,12}$/.test(String(row.source_campaign_id || ""));
+      /^[0-9]{1,12}$/.test(String(row.source_campaign_id || ""));
   } catch { return false; }
 }
 function issueSample(row, problem) {
