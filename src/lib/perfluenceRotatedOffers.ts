@@ -67,14 +67,14 @@ const tanukiAd: Coupon["affiliate"] = {
 const TANUKI_SUPPORTED_CITIES = "Москва, Краснодар, Самара, Казань, Уфа, Воронеж, Екатеринбург и Нижний Новгород";
 
 // Updated, account-approved Perfluence website placement for promofact.ru,
-// supplied 16 October 2026. The cached widget has a DIFFERENT URL/ERID.
-export const PEREKRESTOK_OCT16_LINK = "https://perekrestok.prfl.me/sites/w4ofmz?erid=2RanykQXyH5";
-export const PEREKRESTOK_OCT16_ERID = "2RanykQXyH5";
+// supplied 19 October 2026. The cached widget has a DIFFERENT URL/ERID.
+export const PEREKRESTOK_OCT16_LINK = "https://perekrestok.prfl.me/sites/9833ce?erid=2RanyngM9SB";
+export const PEREKRESTOK_OCT16_ERID = "2RanyngM9SB";
 const perekrestokAd: Coupon["affiliate"] = {
   link: PEREKRESTOK_OCT16_LINK,
   landingLink: PEREKRESTOK_OCT16_LINK,
   ordMarker: PEREKRESTOK_OCT16_ERID,
-  ordText: 'Реклама. ООО "ИКС 5 ДИДЖИТАЛ", ИНН 9722010808. erid: 2RanykQXyH5',
+  ordText: 'Реклама. ООО "ИКС 5 ДИДЖИТАЛ", ИНН 9722010808 erid: 2RanyngM9SB',
 };
 
 const winlabAd = {
@@ -185,18 +185,18 @@ export const TANUKI_OCT16_OFFERS: Coupon[] = [
  * minimum spend, maximum savings or first-order restrictions from the old feed.
  */
 export const PEREKRESTOK_OCT16_OFFERS: Coupon[] = [
-  offer(82604301, perekrestok, perekrestokAd, "173T5R64A",
-    "Скидка 99% по промокоду в Перекрёсток Доставка",
-    "2026-10-18T23:59:59+03:00", "На товары по условиям акции",
-    "Промокод 173T5R64A: заявлена скидка 99% на участвующие в акции товары. Она не обязательно распространяется на всю корзину. Категории товаров, минимальную сумму заказа, лимит скидки и другие ограничения уточняйте в приложении. До 18 октября 2026 года, 23:59 по Москве."),
-  offer(82604302, perekrestok, perekrestokAd, "171LREDEY",
+  offer(82604301, perekrestok, perekrestokAd, "171LREDEY",
     "Скидка 30% по промокоду в Перекрёсток Доставка",
     "2026-10-31T23:59:59+03:00", "По условиям акции",
-    "Промокод 171LREDEY: скидка 30% в Перекрёсток Доставка. Минимальный заказ, максимальная скидка и применимость для первого или повторного заказа в новой публикации не указаны — проверьте условия в корзине. До 31 октября 2026 года, 23:59 по Москве."),
-  offer(82604303, perekrestok, perekrestokAd, "172E2Y5TJ",
+    "Промокод 171LREDEY: скидка 30% в Перекрёсток Доставка. Действует в мобильном приложении до 31 октября 2026 года, 23:59 по Москве."),
+  offer(82604302, perekrestok, perekrestokAd, "172E2Y5TJ",
     "Скидка 300 ₽ по промокоду в Перекрёсток Доставка",
     "2026-10-31T23:59:59+03:00", "По условиям акции",
-    "Промокод 172E2Y5TJ: скидка 300 ₽. Минимальный заказ, применимые товары и ограничения для нового размещения не подтверждены; проверьте условия и итоговую цену в приложении. До 31 октября 2026 года, 23:59 по Москве."),
+    "Промокод 172E2Y5TJ: скидка 300 ₽ в приложении Перекрёсток Доставка. Действует до 31 октября 2026 года, 23:59 по Москве."),
+  offer(82604303, perekrestok, perekrestokAd, "174NYBBJV",
+    "Скидка на заказ в приложении Перекрёсток Доставка",
+    "2026-10-31T23:59:59+03:00", "По условиям акции",
+    "Промокод 174NYBBJV: специальный промокод на заказ в мобильном приложении Перекрёсток Доставка. Действует до 31 октября 2026 года, 23:59 по Москве."),
 ];
 
 /**

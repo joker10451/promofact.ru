@@ -35,27 +35,27 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || "@smart_zakupka";
 const imagePath = "C:/Users/Kriri/AppData/Local/hermes/attachments/template (10).png";
 
-const postText = `🎁 <b>Бокс с косметикой в подарок в магазинах «Подружка»!</b>
+const postText = `🔥 <b>Скидка 30% на ВСЁ в магазинах и онлайн в «Подружке»!</b>
 
-В честь Дня рождения «Подружка» дарит фирменные бьюти-боксы с косметикой при любой покупке от 1500 ₽!
+С 19 октября в «Подружке» действует мощный бонус — скидка 30% без минимальной суммы заказа!
 
-💄 <b>Как забрать свой бокс:</b>
-1. Откройте штрихкод по ссылке: <a href="https://podrygka.prfl.me/smart_zakupka/hopflr?erid=2RanykAX6Cs">получить штрихкод</a>
-2. Приходите в любой розничный магазин «Подружка»
-3. Покажите штрихкод на кассе перед оплатой покупки от 1500 ₽
-4. Заберите подарочный бокс с косметикой!
+💄 <b>Как воспользоваться скидкой:</b>
+1. Откройте штрихкод по ссылке: <a href="https://podrygka.prfl.me/sites/xigpgx?erid=2RanynYwD2T">получить штрихкод</a>
+2. При покупке в розничном магазине — покажите штрихкод <code>2921060875255</code> на кассе
+3. При заказе онлайн — примените промокод или перейдите по ссылке
+4. Получите скидку 30% на вашу покупку!
 
-⏳ <i>Акция действует только с 21 по 27 сентября во всех городах России. Количество боксов ограничено, наполнение может отличаться!</i>
+⏳ <i>Акция действует до 25 октября 2026 года 23:59.</i>
 
 ────────────────────
-<tg-spoiler><i>Реклама. ООО «Табер Трейд», ИНН 7709505477, ОГРН 1037739861851 erid: 2RanykAX6Cs</i></tg-spoiler>`;
+<tg-spoiler><i>Реклама. ООО «Табер Трейд», ИНН 7709505477, ОГРН 1037739861851 erid: 2RanynYwD2T</i></tg-spoiler>`;
 
 const markup = {
   inline_keyboard: [
     [
       {
-        text: "🎁 Получить штрихкод на бокс →",
-        url: "https://podrygka.prfl.me/smart_zakupka/hopflr?erid=2RanykAX6Cs",
+        text: "🛍️ Получить скидку 30% в Подружке →",
+        url: "https://podrygka.prfl.me/sites/xigpgx?erid=2RanynYwD2T",
       },
     ],
     [
@@ -114,9 +114,9 @@ async function post() {
     list.push({
       store: "Подружка",
       storeSlug: "podryzhka",
-      title: "Бокс с косметикой в подарок",
-      link: "https://podrygka.prfl.me/smart_zakupka/hopflr?erid=2RanykAX6Cs",
-      erid: "2RanykAX6Cs",
+      title: "Скидка 30% без минимальной суммы заказа",
+      link: "https://podrygka.prfl.me/sites/xigpgx?erid=2RanynYwD2T",
+      erid: "2RanynYwD2T",
       postUrl: `https://t.me/${CHANNEL_ID.replace("@", "")}/${resData.result.message_id}`,
       date: new Date().toISOString(),
       messageId: resData.result.message_id,

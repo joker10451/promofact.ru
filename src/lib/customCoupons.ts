@@ -224,6 +224,31 @@ export const CUSTOM_COUPONS: Coupon[] = [
     extraLinks: [],
   },
   {
+    id: 50045,
+    promocode: {
+      id: 50045,
+      code: "2921060875255",
+      bonusName: "Скидка 30% без минимальной суммы заказа",
+      terms: "Скидка 30% без минимальной суммы заказа. Действует онлайн и в розничных магазинах «Подружка» по штрихкоду до 25 октября 2026 года.",
+      expires: "2026-10-25",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      region: "RU",
+      isBarcode: true,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: PODRUZHKA_STORE,
+    affiliate: {
+      link: "https://podrygka.prfl.me/sites/xigpgx?erid=2RanynYwD2T",
+      landingLink: "https://podrygka.prfl.me/sites/xigpgx?erid=2RanynYwD2T",
+      ordMarker: "2RanynYwD2T",
+      ordText: "Реклама. ООО «Табер Трейд», ИНН 7709505477, ОГРН 1037739861851. Адрес места нахождения (Юридический адрес): 115280, г.Москва, ул.Ленинская Слобода, д.19, комн. 21В erid: 2RanynYwD2T",
+    },
+    extraLinks: [],
+  },
+  {
     id: 50050,
     promocode: {
       id: 50050,

@@ -738,10 +738,10 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     // and ERID. Only explicitly approved project website placement survives.
     if (c.store.slug === "perekrestok-dostavka") {
       const code = c.promocode.code.trim().toUpperCase();
-      return ["173T5R64A", "171LREDEY", "172E2Y5TJ"].includes(code) &&
-        c.affiliate.link === "https://perekrestok.prfl.me/sites/w4ofmz?erid=2RanykQXyH5" &&
-        c.affiliate.ordMarker === "2RanykQXyH5" &&
-        c.affiliate.ordText.includes("erid: 2RanykQXyH5");
+      return ["171LREDEY", "172E2Y5TJ", "174NYBBJV"].includes(code) &&
+        c.affiliate.link === "https://perekrestok.prfl.me/sites/9833ce?erid=2RanyngM9SB" &&
+        c.affiliate.ordMarker === "2RanyngM9SB" &&
+        c.affiliate.ordText.includes("erid: 2RanyngM9SB");
     }
     // Current WinLab publisher URL lacks an ERID in the supplied account view.
     // Suppress legacy codes until the current token is supplied and checked.
