@@ -169,7 +169,7 @@ export default async function CityCategoryPage({
         "@type": "Offer",
         name: `Промокод ${c.promocode.code}`,
         description: c.promocode.bonusName || c.store.name,
-        url: c.affiliate.link,
+        url: `${SITE_URL}/store/${c.store.slug}`,
         priceValidUntil: c.promocode.expires,
         availability: "https://schema.org/InStock",
         seller: { "@type": "Organization", name: c.store.name },
