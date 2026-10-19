@@ -1,0 +1,59 @@
+name: Admitad Reviewed Recovery (Oct 19, One-Time)
+
+# One reviewed publishing attempt, on the merge which adds this workflow.
+# Later pushes do not match this file unless the workflow itself changes.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/admitad-reviewed-recovery-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admitad-publisher
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Guard and publisher unit tests
+        run: |
+          node scripts/test-catalog-1-refresh.mjs
+          node --loader ./scripts/ts-loader.mjs scripts/test-admitad-publisher-catalog.mjs
+      - name: Confirm frozen October 16 production baseline (read only)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/admitad-oct19-baseline-check.mjs before
+      - name: Preview, independently reverify 3 withdrawals, then atomically publish
+        env:
+          ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
+          ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
+          ADMITAD_WEBSITE_ID: ${{ secrets.ADMITAD_WEBSITE_ID }}
+          ADMITAD_WEBSITE_HOST: promofact.ru
+          ADMITAD_APPROVED_CAMPAIGNS: '141770,1667,17220,25224,26110'
+          ADMITAD_BATCH_APPROVED_CAMPAIGNS: '28532,14647,22484'
+          ADMITAD_PUBLISH_WEBSITE_COUPONS: 'true'
+          ADMITAD_PUBLISHER_CATALOG_DRY_RUN: 'false'
+          ADMITAD_CATALOG_PUBLISH_APPROVED: 'true'
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node --loader ./scripts/ts-loader.mjs scripts/catalog-1-refresh.mjs
+      - name: Verify only approved coupons retired and new snapshot published
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/admitad-oct19-baseline-check.mjs after
