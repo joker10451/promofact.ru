@@ -118,8 +118,8 @@ export function refineOffer(
   // 2. Комбинация: Скидка (%) + Подарок (например, Кинопоиск 50% + 60 дней)
   const pctMatch = title.match(/(\d+)\s*%/) || terms.match(/(\d+)\s*%/);
   const isGiftInText =
-    /подарок|ролл|фото|пицца|подвеск|gift|в\s+подарок/i.test(title) ||
-    /подарок|ролл|фото|пицца|подвеск|в\s+подарок/i.test(terms);
+    /подар(?:ок|ки|ка|ков)|ролл|фото|пицца|подвеск|gift|в\s+подарок/i.test(title) ||
+    /подар(?:ок|ки|ка|ков)|ролл|фото|пицца|подвеск|в\s+подарок/i.test(terms);
 
   if (pctMatch && isGiftInText) {
     const val = parseInt(pctMatch[1], 10);
