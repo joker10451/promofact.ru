@@ -36,6 +36,27 @@ export function refineOffer(
     .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
   const isNoCode = !isRealPromoCode(code);
 
+
+  // A service advertised "from 2,000 rubles" has a PRICE, not a discount.
+  if (/^3D-диагностика\s+и\s+массаж\s+лица\s*[—–-]\s*от\s*2\s*000\s*₽/iu.test(title)) {
+    return { type: "default", discount: "3D-диагностика и массаж лица",
+      condition: "Стоимость от 2 000 ₽ · Москва", fullTerms: terms, isNoCode };
+  }
+  // 50% applies only to optional cosmetic purchases after a FREE diagnostic.
+  if (title === "Бесплатная диагностика кожи" &&
+      /купить\s+косметику\s+со\s+скидкой\s+50\s*%/iu.test(terms)) {
+    return { type: "default", discount: title,
+      condition: "После процедуры косметику можно купить со скидкой 50%",
+      fullTerms: terms, isNoCode };
+  }
+  // Professional scheme is a future-month benefit, not immediate checkout -40%.
+  if (/^−40%\s+на\s+заказ\s+следующего\s+месяца\s+для\s+мастеров/iu.test(title) &&
+      /подтверждающ[а-яё]*\s+документ\s+специалиста/iu.test(terms)) {
+    return { type: "percent", discount: "−40%",
+      condition: "На заказ следующего месяца после подтверждения статуса мастера",
+      fullTerms: terms, isNoCode };
+  }
+
   // A loyalty program accumulates future rewards; its ceiling is NOT
   // an instant percentage discount applied at checkout.
   if (/накопительн[а-яё]*\s+(?:программ[а-яё]*|систем[а-яё]*|скидк[а-яё]*)/iu.test(title)) {
@@ -162,12 +183,12 @@ export function refineOffer(
 
     // Кэшбэк — не скидка: «−5%» с подписью «на Кэшбек на каждую покупку»
     // обещал бы то, чего нет.
-    if (/кэшб[еэ]к/i.test(combined)) {
+    if (/к[еэ]шб[еэ]к/i.test(combined)) {
       const rest = cleanConditionText(title, pctMatch[0]) || cleanConditionText(terms, pctMatch[0]);
-      const condition = rest.replace(/(^|\s)(?:на\s+)?кэшб[еэ]к[а-яё]*/gi, " ").trim();
+      const condition = rest.replace(/(^|\s)(?:на\s+)?к[еэ]шб[еэ]к[а-яё]*/gi, " ").trim();
       return {
         type: "percent",
-        discount: `${val}% кэшбэк`,
+        discount: `Кешбэк ${val}%`,
         condition: condition.length >= 3 ? formatConditionPrefix(condition) : "на каждую покупку",
         fullTerms: terms || `Кэшбэк ${val}% за покупки в ${storeName}.`,
         isNoCode,
