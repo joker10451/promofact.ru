@@ -464,6 +464,22 @@ export async function runAdmitadSafeSync(options: {
       }).sort();
       console.warn("[publisher/retention] missing_valid_source_coupon_ids=" +
         JSON.stringify(absentCouponIds));
+      // A missing active ID can mean absent upstream OR present-but-rejected.
+      // Keep that distinction, otherwise manually retiring a coupon could
+      // conceal a mapping/ERID/quality regression in our own importer.
+      const rowById = new Map(rowsToUpsert.map(r => [r.id, r]));
+      const missingBreakdown = missingStillEligible.map(row => {
+        const sourceCouponId = String(row.source_coupon_id || "");
+        const safeId = /^[0-9]{1,18}$/.test(sourceCouponId) ? sourceCouponId : "INVALID_ID";
+        const staged = rowById.get(row.id);
+        return {
+          sourceCouponId: safeId,
+          state: staged ? "REJECTED_DURING_VALIDATION" : "NOT_IN_WEBSITE_API",
+          status: staged ? String(staged.sync_status || "UNKNOWN") : null,
+        };
+      }).sort((a, b) => a.sourceCouponId.localeCompare(b.sourceCouponId));
+      console.warn("[publisher/retention] missing_valid_breakdown=" +
+        JSON.stringify(missingBreakdown));
     }
     if (options.requireActiveRetention &&
         (publisherScoped ? missingStillEligible.length : missingBaselineRows.length) > 0) {
