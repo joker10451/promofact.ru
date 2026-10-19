@@ -169,11 +169,13 @@ export default function CouponGrid({
 
   // Группировка по магазинам: 1 лучший промокод магазина + аккордеон остальных
   const groupedStoreList = useMemo(() => {
-    const storeMap = new Map<number, CatalogCoupon[]>();
+    // A store may have different numeric IDs in different partner networks.
+    // Group by public store slug, exactly as in the total-store counter.
+    const storeMap = new Map<string, CatalogCoupon[]>();
     for (const c of filteredCoupons) {
-      const list = storeMap.get(c.store.id) || [];
+      const list = storeMap.get(c.store.slug) || [];
       list.push(c);
-      storeMap.set(c.store.id, list);
+      storeMap.set(c.store.slug, list);
     }
 
     const PRIORITY_SLUGS = [
