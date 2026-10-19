@@ -48,9 +48,20 @@ assert.equal(route.split("if (isPausedPublisherStore(slug)) notFound()").length-
 assert(!articles.includes('href: "/store/delimobil"'),
  "Historic article cross-promotion must be removed");
 // Protect against accidental regression by historic (non-public) fixtures.
+// The weekly Perfluence refresh may legitimately remove a paused advertiser.
+// Safety must be asserted against an explicit stale fixture, not by requiring
+// a removed record to remain in the *current* feed.
 const bundled=JSON.parse(fs.readFileSync("src/data/perfluence-feed.json","utf8"));
-assert(bundled.data.some(x=>x.project?.id===112),
- "The fixture models a real stale source and guards are needed even when it exists");
+assert(Array.isArray(bundled.data), "Bundled feed must have a data array");
+const historicPaused = {
+  id: 112,
+  store: { slug: "delimobil" },
+  promocode: { code: "h49fcs" },
+  affiliate: { link: "https://delimobil.prfl.me/sites/dux1e5" },
+};
+assert.equal(withoutPausedPublisherOffers([historicPaused]).length, 0,
+  "Historic partner links must remain blocked even after the feed removes them");
+
 assert(!fs.readFileSync("src/lib/customCoupons.ts","utf8").includes("...DELIMOBIL"),
  "No hand-curated override of the partner stop");
 
