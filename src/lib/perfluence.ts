@@ -338,7 +338,9 @@ export function parsePayload(payloadJson: string): Coupon[] {
       const promoId = num(p.id ?? p.post_id ?? p.bonus_id);
       fallbackPromoId += 1;
       let customerTypeLabel: string | null = null;
-      const combinedText = `${p.name || ""} ${p.comment || ""} ${p.promo_terms || ""}`.toLowerCase();
+      const combinedText = `${p.name || ""} ${p.comment || ""} ${p.promo_terms || ""} ${p.terms || ""}`.toLowerCase();
+      // Missing repeat_order is unknown, never proof of a first-order-only offer.
+      const hasRepeatOrderFlag = p.repeat_order !== undefined && p.repeat_order !== null && String(p.repeat_order).trim() !== "";
       if (
         combinedText.includes("не пользовался") ||
         combinedText.includes("не заказывал") ||
@@ -348,10 +350,10 @@ export function parsePayload(payloadJson: string): Coupon[] {
         customerTypeLabel = "Не заказывали >1 года";
       } else if (combinedText.includes("обедомани")) {
         customerTypeLabel = "Обедомания (12–16ч)";
-      } else if (!bool(p.repeat_order)) {
+      } else if (hasRepeatOrderFlag && !bool(p.repeat_order)) {
         customerTypeLabel = "1-й заказ";
-      } else {
-        customerTypeLabel = "Для всех";
+      } else if (hasRepeatOrderFlag) {
+        customerTypeLabel = "Повторный заказ возможен";
       }
 
       const promocode: Promocode = {
@@ -362,7 +364,7 @@ export function parsePayload(payloadJson: string): Coupon[] {
         expires: isoDate(p.date || p.expires),
         isHit: bool(p.is_hit),
         isUniversal: bool(p.is_universal),
-        isFirstOrderOnly: !bool(p.repeat_order),
+        isFirstOrderOnly: customerTypeLabel === "1-й заказ",
         customerTypeLabel,
         region: regionStr(p.region_promo ?? p.region),
         isBarcode: bool(p.is_barcode),
