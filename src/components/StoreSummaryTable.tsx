@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Coupon } from "@/lib/types";
 import { refineOffer } from "@/lib/offerRefiner";
 import { isRealPromoCode } from "@/lib/dedupe";
+import { getAttributedCouponHref, prepareAttributedCouponClick } from "@/lib/admitadOutboundLink";
 
 interface StoreSummaryTableProps {
   coupons: Coupon[];
@@ -146,7 +147,7 @@ export default function StoreSummaryTable({
               const isRepeat = /повтор/i.test(customerLabel);
               const isOnlyNew = /перв/i.test(customerLabel) && !isRepeat;
 
-              const affLink = coupon.affiliate.link || coupon.store.site || `/store/${storeSlug}`;
+              const affLink = getAttributedCouponHref(coupon, "store_summary", "store");
 
               return (
                 <tr key={`${coupon.id}-${code}`} className="hover:bg-paper/40 transition-colors">
@@ -203,7 +204,8 @@ export default function StoreSummaryTable({
                   <td className="px-4 sm:px-5 py-3.5 text-right whitespace-nowrap">
                     <a
                       href={affLink}
-                      target="_blank"
+                       onClick={(event) => prepareAttributedCouponClick(event.currentTarget, coupon, "store_summary", "store")}
+                       target="_blank"
                       rel="nofollow sponsored noopener"
                       className="inline-flex items-center gap-1 rounded-lg bg-red px-2.5 py-1 text-xs font-bold text-white shadow-2xs hover:bg-red/90 transition-all"
                     >

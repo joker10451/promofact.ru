@@ -126,11 +126,11 @@ export default async function CouponPage({
     category: label,
     validThrough: p.expires,
     dateModified: todayIso,
-    url: coupon.affiliate.link || store.site,
+    url: pageUrl,
     seller: { "@type": "Organization", name: store.name },
     offers: {
       "@type": "Offer",
-      url: coupon.affiliate.link || store.site,
+      url: pageUrl,
       priceValidUntil: p.expires,
       availability: "https://schema.org/InStock",
     },

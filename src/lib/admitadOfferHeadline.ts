@@ -71,6 +71,32 @@ export function resolveAdmitadOfferHeadline(
   const title = (bonusName || "").trim();
   const details = (terms || "").trim();
 
+
+  // Source-backed offer semantics: a service price is not a discount, cashback
+  // is not an immediate price reduction and next-month pro discounts need proof.
+  if (/^Aravia:\s*3D-диагностик/iu.test(details) && /от\s*2\s*000\s*руб/iu.test(details))
+    return "3D-диагностика и массаж лица — от 2 000 ₽";
+  if (/учебных\s+центрах\s+Aravia/iu.test(details) &&
+      /диагностик/iu.test(details) && /бесплатн[а-яё]*\s+диагностик/iu.test(discount || ""))
+    return "Бесплатная диагностика кожи";
+  if (/повышенн[а-яё]*\s+к[еэ]шб[еэ]к\s*[-–—:]?\s*30\s*%/iu.test(details) &&
+      /уход\s+за\s+волосами/iu.test(details))
+    return "Кешбэк 30% на уход за волосами";
+  if (/двойн[а-яё]*\s+к[еэ]шб[еэ]к/iu.test(details) && /уход\s+за\s+волосами/iu.test(details))
+    return "Двойной кешбэк на товары, кроме ухода за волосами";
+  if (/скидку\s+40\s*%\s+на\s+заказ\s+в\s+следующем\s+календарном\s+месяце/iu.test(details) &&
+      /документ[а-яё]*\s+специалиста/iu.test(details))
+    return "−40% на заказ следующего месяца для мастеров";
+  if (/на\s+номинал\s+подарочн[а-яё]*\s+сертификат/iu.test(title) &&
+      /^[−–-]\s*10\s*%$/u.test((discount || "").trim()))
+    return "−10% на подарочные сертификаты";
+  if (/подарок\s*[-–—]\s*арт\./iu.test(details) && /пептид/iu.test(details) &&
+      /бесплатн[а-яё]*\s+доставк/iu.test(details))
+    return "Подарок к заказу · при заказе от 1 500 ₽";
+  if (/за\s+заказ\s+от\s+3\s*500\s*₽/iu.test(details) &&
+      /подарки\s+суммируются/iu.test(details))
+    return "Подарки при заказе от 3 500 ₽";
+
   // The original feed can describe six PACKS while the stored headline
   // incorrectly claims "6 ₽". Prefer the actual condition, not fake savings.
   const packs = details.match(/при\s+покупке\s+(?:от\s+)?(\d{1,2})\s+пач(?:ек|ки|к[ауи])\s+(кофе|чая)/iu);

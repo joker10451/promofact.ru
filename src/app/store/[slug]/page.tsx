@@ -243,7 +243,7 @@ export default async function StorePage({
   };
 
   const couponsJsonLd: Record<string, unknown>[] = store.coupons.map((c) =>
-    getOfferSchema(store.name, c.affiliate.link || store.site, c.promocode, store.logo),
+    getOfferSchema(store.name, pageUrl, c.promocode, store.logo),
   );
 
   const storeExtra = getStoreExtra(slug);
@@ -402,7 +402,7 @@ export default async function StorePage({
         "@type": "Offer",
         name: getOfferDisplayName(store.name, c.promocode),
         description: c.promocode.bonusName || store.name,
-        url: c.affiliate.link || pageUrl,
+        url: pageUrl,
         priceValidUntil: c.promocode.expires,
         availability: "https://schema.org/InStock",
         seller: { "@type": "Organization", name: store.name, ...(store.logo ? { logo: store.logo } : {}) },

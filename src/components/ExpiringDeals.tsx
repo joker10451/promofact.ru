@@ -6,6 +6,7 @@ import StoreLogo from "@/components/StoreLogo";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import type { Coupon } from "@/lib/types";
 import { expiryTimestamp } from "@/lib/couponExpiry";
+import { getAttributedCouponHref, prepareAttributedCouponClick } from "@/lib/admitadOutboundLink";
 
 interface ExpiringDealsProps {
   /** Уже отобранные купоны — см. pickExpiringDeals: ближайший срок, по одному от магазина. */
@@ -124,15 +125,13 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                 </div>
 
                 <a
-                  href={coupon.affiliate.link || coupon.store.site || "#"}
+                  href={getAttributedCouponHref(coupon, "expiring_deal", "home")}
                   target="_blank"
                   rel="nofollow sponsored noopener"
-                  onClick={() =>
-                    ymReachGoal("click_expiring_store", {
-                      code: coupon.promocode.code,
-                      store: coupon.store.name,
-                    })
-                  }
+                  onClick={(event) => {
+                     prepareAttributedCouponClick(event.currentTarget, coupon, "expiring_deal", "home");
+                     ymReachGoal("click_expiring_store", { store: coupon.store.name });
+                   }}
                   className="block w-full rounded-xl bg-ink py-2 text-center text-xs font-bold text-white transition-all hover:bg-red"
                 >
                   В магазин →
