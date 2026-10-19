@@ -11,6 +11,7 @@ const approved = {
   },
 };
 assert.equal(isPublicPerfluenceWidgetCoupon(approved), true);
+assert.equal(isPublicPerfluenceWidgetCoupon({ affiliate: { ...approved.affiliate, ordText: "Реклама. ООО Тест." } }), true, "Server adds erid to Perfluence disclosure after import");
 assert.equal(isPublicPerfluenceWidgetCoupon({
   affiliate: { ...approved.affiliate, link: "https://example.prfl.me/smart_zakupka/abc123?erid=2RanyTESTabc" },
 }), true, "Channel origin is a separate placement-approval question, not a malformed link");
