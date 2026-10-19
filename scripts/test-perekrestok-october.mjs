@@ -9,7 +9,7 @@ import { dedupeCoupons } from "../src/lib/dedupe.ts";
 const approved = {
   "171LREDEY": { amount:"30%", expires:"2026-10-31T23:59:59+03:00" },
   "172E2Y5TJ": { amount:"300 ₽", expires:"2026-10-31T23:59:59+03:00" },
-  "174NYBBJV": { amount:"Скидка", expires:"2026-10-31T23:59:59+03:00" },
+  "174NYBBJV": { amount:"1 ₽", expires:"2026-10-31T23:59:59+03:00" },
 };
 assert.equal(PEREKRESTOK_OCT16_ERID, "2RanyngM9SB");
 assert.equal(PEREKRESTOK_OCT16_LINK, "https://perekrestok.prfl.me/sites/9833ce?erid=2RanyngM9SB");
