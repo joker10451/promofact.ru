@@ -9,6 +9,7 @@ import { isCouponActive } from "@/lib/couponExpiry";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
+import { isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
 import { isPausedPublisherStore, withoutPausedPublisherOffers } from "@/lib/publisherPauses";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
@@ -697,7 +698,12 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   const freshCustomCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
   const sources: import("@/lib/dedupe").SourceBucket[] = [
     { source: "custom", coupons: freshCustomCoupons },
-    ...baseBuckets.map((b) => ({ source: b.source, coupons: b.coupons })),
+    ...baseBuckets.map((b) => ({
+      source: b.source,
+      coupons: b.source === "perfluence"
+        ? b.coupons.filter(isPublicPerfluenceWidgetCoupon)
+        : b.coupons,
+    })),
   ];
 
   if (process.env.ADMITAD_CATALOG_ENABLED === "true") {
