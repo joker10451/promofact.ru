@@ -143,9 +143,9 @@ export default function StoreSummaryTable({
                 isFirst
               );
 
-              const customerLabel = coupon.promocode.customerTypeLabel || (isFirst ? "Первый заказ" : "Для всех");
-              const isRepeat = /повтор/i.test(customerLabel);
-              const isOnlyNew = /перв/i.test(customerLabel) && !isRepeat;
+              const customerLabel = coupon.promocode.customerTypeLabel?.trim() || (isFirst ? "Первый заказ" : "Уточните условия");
+              const isRepeat = /повтор|постоянн/i.test(customerLabel);
+              const isOnlyNew = /перв|1-й|новым|новые/i.test(customerLabel) && !isRepeat;
 
               const affLink = getAttributedCouponHref(coupon, "store_summary", "store");
 
@@ -176,21 +176,21 @@ export default function StoreSummaryTable({
                   </td>
 
                   {/* 4. Для кого */}
-                  <td className="px-4 sm:px-5 py-3.5 whitespace-nowrap">
+                  <td className="px-4 sm:px-5 py-3.5 max-w-[220px] whitespace-normal">
                     {isOnlyNew ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-mint/15 border border-mint/40 px-2 py-0.5 text-[11px] font-bold text-mint-dark">
                         <Icon name="gift" size={14} />
-                        <span>Новым</span>
+                        <span>{customerLabel}</span>
                       </span>
                     ) : isRepeat ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-[11px] font-bold text-blue-800">
                         <Icon name="repeat" size={14} />
-                        <span>Повторным</span>
+                        <span>{customerLabel}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full bg-paper border border-line px-2 py-0.5 text-[11px] font-bold text-ink/65">
                         <Icon name="check" size={14} />
-                        <span>Для всех</span>
+                        <span>{customerLabel}</span>
                       </span>
                     )}
                   </td>

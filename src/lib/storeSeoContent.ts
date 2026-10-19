@@ -232,10 +232,8 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
   }
 
   // 5. Доверие (ссылка на сайт магазина ставится отдельным якорем в странице).
-  const bloggers = input.activeBloggers
-    ? ` Подборку рекомендуют ${input.activeBloggers} блогеров.`
-    : "";
-  const trust = `Предложения с указанной датой проверяются на истечение срока; для акций без даты уточняйте актуальность у магазина.${bloggers} ПромоФакт может получать партнёрскую комиссию, но использование предложений на сайте бесплатно.`;
+  // Partner-network activeBloggers is not evidence that anyone endorsed PromoFact.
+  const trust = `Предложения с указанной датой проверяются на истечение срока; для акций без даты уточняйте актуальность у магазина. ПромоФакт может получать партнёрскую комиссию, но использование предложений на сайте бесплатно.`;
 
   return [lead, angle, codes, order, trust];
 }

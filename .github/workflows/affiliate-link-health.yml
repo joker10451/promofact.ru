@@ -1,0 +1,33 @@
+name: Affiliate Link Health (Read Only)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily health report, not a sync. No partner redirects or DB writes.
+    - cron: "25 4 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: affiliate-link-health
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Test link safety
+        run: npm run test:perfluence-affiliate-safety
+      - name: Audit stored links and sync freshness
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run audit:affiliate

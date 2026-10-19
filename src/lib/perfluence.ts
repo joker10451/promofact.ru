@@ -9,6 +9,7 @@ import { isCouponActive } from "@/lib/couponExpiry";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
+import { isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
 import { isPausedPublisherStore, withoutPausedPublisherOffers } from "@/lib/publisherPauses";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
@@ -338,7 +339,9 @@ export function parsePayload(payloadJson: string): Coupon[] {
       const promoId = num(p.id ?? p.post_id ?? p.bonus_id);
       fallbackPromoId += 1;
       let customerTypeLabel: string | null = null;
-      const combinedText = `${p.name || ""} ${p.comment || ""} ${p.promo_terms || ""}`.toLowerCase();
+      const combinedText = `${p.name || ""} ${p.comment || ""} ${p.promo_terms || ""} ${p.terms || ""}`.toLowerCase();
+      // Missing repeat_order is unknown, never proof of a first-order-only offer.
+      const hasRepeatOrderFlag = p.repeat_order !== undefined && p.repeat_order !== null && String(p.repeat_order).trim() !== "";
       if (
         combinedText.includes("не пользовался") ||
         combinedText.includes("не заказывал") ||
@@ -348,10 +351,10 @@ export function parsePayload(payloadJson: string): Coupon[] {
         customerTypeLabel = "Не заказывали >1 года";
       } else if (combinedText.includes("обедомани")) {
         customerTypeLabel = "Обедомания (12–16ч)";
-      } else if (!bool(p.repeat_order)) {
+      } else if (hasRepeatOrderFlag && !bool(p.repeat_order)) {
         customerTypeLabel = "1-й заказ";
-      } else {
-        customerTypeLabel = "Для всех";
+      } else if (hasRepeatOrderFlag) {
+        customerTypeLabel = "Повторный заказ возможен";
       }
 
       const promocode: Promocode = {
@@ -362,7 +365,7 @@ export function parsePayload(payloadJson: string): Coupon[] {
         expires: isoDate(p.date || p.expires),
         isHit: bool(p.is_hit),
         isUniversal: bool(p.is_universal),
-        isFirstOrderOnly: !bool(p.repeat_order),
+        isFirstOrderOnly: customerTypeLabel === "1-й заказ",
         customerTypeLabel,
         region: regionStr(p.region_promo ?? p.region),
         isBarcode: bool(p.is_barcode),
@@ -695,7 +698,12 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   const freshCustomCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
   const sources: import("@/lib/dedupe").SourceBucket[] = [
     { source: "custom", coupons: freshCustomCoupons },
-    ...baseBuckets.map((b) => ({ source: b.source, coupons: b.coupons })),
+    ...baseBuckets.map((b) => ({
+      source: b.source,
+      coupons: b.source === "perfluence"
+        ? b.coupons.filter(isPublicPerfluenceWidgetCoupon)
+        : b.coupons,
+    })),
   ];
 
   if (process.env.ADMITAD_CATALOG_ENABLED === "true") {

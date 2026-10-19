@@ -355,7 +355,7 @@ export default function CouponTicket({
               </span>
             ) : (
               <span className="inline-flex max-w-full rounded-full border border-line bg-paper px-2.5 py-1 text-[11px] font-semibold text-ink/75">
-                Для всех
+                Уточните условия
               </span>
             )}
           </div>
@@ -578,7 +578,7 @@ export default function CouponTicket({
         {/* 5. Мета-данные и реклама */}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-1 text-[11px] font-medium leading-relaxed text-ink/65">
           <span>
-            {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Первый заказ" : "Для всех")} · RU
+            {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Первый заказ" : "Уточните условия")} · RU
           </span>
           <span>
             {promocode.expires
@@ -687,10 +687,10 @@ export default function CouponTicket({
                 <div className="rounded-xl bg-mint/10 border border-mint/30 p-3 text-[11px] text-ink/80 space-y-1">
                   <div className="font-bold text-mint-dark flex items-center gap-1.5">
                     <Icon name="check" size={12} />
-                    <span>Гарантия актуальности ПромоФакт</span>
+                    <span>Как проверить скидку</span>
                   </div>
                   <p className="text-ink/65 text-[10px] leading-relaxed">
-                    Скидка применяется в корзине {store.name} при соблюдении условий акции.
+                    Проверьте итоговую сумму заказа в корзине {store.name} до оплаты.
                   </p>
                   {proofCount > 0 && (
                     <p className="text-ink/65 text-[10px] leading-relaxed font-semibold">
@@ -709,7 +709,7 @@ export default function CouponTicket({
                   <div>
                     <span className="text-ink/45 block">Для кого:</span>
                     <span className="font-bold text-ink">
-                      {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Только новый клиент" : "Для всех покупателей")}
+                      {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Только новый клиент" : "Уточните условия акции")}
                     </span>
                   </div>
                 </div>

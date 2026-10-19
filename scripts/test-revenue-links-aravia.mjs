@@ -57,6 +57,21 @@ assert.match(click.searchParams.get("subid4")||"",/^[0-9a-f-]{36}$/i);
 assert.equal(click.searchParams.get("erid"),base.ord_marker);
 assert.equal(night.affiliate.link,original);
 assert.equal(new URL(getAttributedCouponHref(night,"expiring_deal","home")).searchParams.get("subid"),"expiring_deal");
+// Admitad website coupons can legitimately use different i= tracking values.
+// Never rewrite i or ERID when adding our SubIDs.
+for (const i of ["3", "31"]) {
+  const sourceUrl = `https://dkfrh.com/g/va69o33134c7dde8999c9ebcee8c5e/?i=${i}&erid=EXAMPLE-ERID`;
+  const offer = { ...night, affiliate: { ...night.affiliate, link: sourceUrl } };
+  const decorated = new URL(getAttributedCouponHref(offer, "store_summary", "store"));
+  assert.equal(decorated.searchParams.get("i"), i);
+  assert.equal(decorated.searchParams.get("erid"), "EXAMPLE-ERID");
+  assert.equal(decorated.pathname, new URL(sourceUrl).pathname);
+  const trackedAnchor = { href: decorated.toString() };
+  prepareAttributedCouponClick(trackedAnchor, offer, "store_summary", "store");
+  const tracked = new URL(trackedAnchor.href);
+  assert.equal(tracked.searchParams.get("i"), i);
+  assert.equal(tracked.searchParams.get("erid"), "EXAMPLE-ERID");
+}
 const perf={...night,promocode:{...night.promocode,group:"perfluence"}};
 assert.equal(getAttributedCouponHref(perf,"store_summary","store"),original);
 const pAnchor={href:original};prepareAttributedCouponClick(pAnchor,perf,"store_summary","store");assert.equal(pAnchor.href,original);
