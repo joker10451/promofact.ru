@@ -451,6 +451,20 @@ export async function runAdmitadSafeSync(options: {
     if (publisherScoped) console.log("[publisher/retention] missing_valid=" +
       missingStillEligible.length + " expired_baseline_allowed_to_deactivate=" +
       (missingBaselineRows.length - missingStillEligible.length));
+    // Diagnostic only: numeric publisher coupon IDs are public identifiers,
+    // unlike coupon codes, destination URLs, ERIDs or authentication data.
+    // Emit only for a read-only publisher preview that already failed retention.
+    // This makes it possible to resolve a missing-offer mismatch without
+    // automatically deleting any still-eligible baseline coupon.
+    if (publisherScoped && options.skipDbWrite && options.requireActiveRetention &&
+        missingStillEligible.length > 0) {
+      const absentCouponIds = missingStillEligible.map(row => {
+        const candidate = String(row.source_coupon_id || "");
+        return /^[0-9]{1,18}$/.test(candidate) ? candidate : "INVALID_ID";
+      }).sort();
+      console.warn("[publisher/retention] missing_valid_source_coupon_ids=" +
+        JSON.stringify(absentCouponIds));
+    }
     if (options.requireActiveRetention &&
         (publisherScoped ? missingStillEligible.length : missingBaselineRows.length) > 0) {
       throw new Error("BATCH_ACTIVE_COUPON_RETENTION_FAILED");
