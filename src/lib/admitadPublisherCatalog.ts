@@ -63,3 +63,36 @@ export function baselineStillEligible(expires: string | null | undefined, atMs =
   const end = Date.parse(expires.slice(0,10) + "T23:59:59+03:00");
   return !Number.isFinite(end) || end >= atMs;
 }
+
+
+/**
+ * Exactly three Yandex Travel website-coupon IDs checked on 2026-10-19:
+ * absent from GET /coupons/website/{site_id}/ AND separately 404 from
+ * GET /coupons/{coupon_id}/website/{site_id}/ on this publisher's account.
+ *
+ * This register is NOT a general permission to drop active offers. Each
+ * retirement is allowed only for the old campaign, known date, and after
+ * another live independent 404 confirmation immediately before a publish.
+ */
+const REVIEWED_MISSING_WEBSITE_COUPONS: Readonly<Record<string, {
+  campaign: string; expires: string;
+}>> = Object.freeze({
+  "901876": { campaign: "25224", expires: "2026-10-31" },
+  "939051": { campaign: "25224", expires: "2026-10-31" },
+  "940388": { campaign: "25224", expires: "2026-10-31" },
+});
+
+export function isReviewedMissingWebsiteCoupon(row: {
+  id?: string;
+  source_coupon_id?: string;
+  source_campaign_id?: string;
+  expires?: string | null;
+  last_seen_at?: string | null;
+}): boolean {
+  const id = String(row.source_coupon_id || "");
+  const approved = REVIEWED_MISSING_WEBSITE_COUPONS[id];
+  return Boolean(approved && row.id === "adm_" + id &&
+    String(row.source_campaign_id) === approved.campaign &&
+    row.expires === approved.expires &&
+    String(row.last_seen_at || "").slice(0, 10) === "2026-10-16");
+}
