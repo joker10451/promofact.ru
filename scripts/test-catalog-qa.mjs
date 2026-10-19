@@ -33,19 +33,19 @@ assert.equal(light.promocode.group,"admitad","Admitad origin must survive lightw
 assert.equal(light.affiliate.link,full.affiliate.link);
 assert.equal(light.affiliate.ordText,full.affiliate.ordText);
 const summaryTable = fs.readFileSync("src/components/StoreSummaryTable.tsx", "utf8");
-assert.match(summaryTable, /customerTypeLabel\\?\\.trim\\(\\)/, "Explicit audience label must be preserved");
-assert.doesNotMatch(summaryTable, /<span>Для всех<\\/span>/, "Unknown audience must never become universal");
+assert.ok(summaryTable.includes("customerTypeLabel?.trim()"), "Explicit audience label must be preserved");
+assert.ok(!summaryTable.includes("<span>Для всех</span>"), "Unknown audience must never become universal");
 const grid = fs.readFileSync("src/components/CouponGrid.tsx", "utf8");
-assert.match(grid, /new Map<string, CatalogCoupon\\[\\]>/, "Grouping must use the store slug");
+assert.ok(grid.includes("new Map<string, CatalogCoupon[]>()"), "Grouping must use the store slug");
 const seo = fs.readFileSync("src/lib/storeSeoContent.ts", "utf8");
-assert.doesNotMatch(seo, /Подборку рекомендуют/, "Network publisher statistics must not imply endorsements");
+assert.ok(!seo.includes("Подборку рекомендуют"), "Network publisher statistics must not imply endorsements");
 const perfluence = fs.readFileSync("src/lib/perfluence.ts", "utf8");
-assert.match(perfluence, /const hasRepeatOrderFlag =/, "Missing repeat-order flag must not imply first-order only");
-assert.match(perfluence, /isFirstOrderOnly: customerTypeLabel === "1-й заказ"/);
+assert.ok(perfluence.includes("const hasRepeatOrderFlag ="), "Missing repeat-order flag must not imply first-order only");
+assert.ok(perfluence.includes('isFirstOrderOnly: customerTypeLabel === "1-й заказ"'));
 const card = fs.readFileSync("src/components/CouponTicket.tsx", "utf8");
-assert.doesNotMatch(card, /Гарантия актуальности ПромоФакт/, "Never guarantee untested discounts");
+assert.ok(!card.includes("Гарантия актуальности ПромоФакт"), "Never guarantee untested discounts");
 const storePage = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
-assert.doesNotMatch(storePage, /firstOrderPromo \\? "Скидка есть" : "Для всех"/);
+assert.ok(!storePage.includes('firstOrderPromo ? "Скидка есть" : "Для всех"'));
 console.log("AUDIT: audience truthfulness, counts, trust wording PASS");
 console.log("CATALOG-QA-1: audience, gift and source preservation PASS");
 
