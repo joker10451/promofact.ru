@@ -25,7 +25,7 @@ import {
   normalizeAdmitadCoupon,
 } from "@/lib/admitadNormalizer";
 import { STABLE_STORES } from "@/lib/stableStores";
-import { verifiedPublisherWebsite, resolvePublisherStore, validPublisherAffiliateLink, baselineStillEligible } from "@/lib/admitadPublisherCatalog";
+import { verifiedPublisherWebsite, resolvePublisherStore, validPublisherAffiliateLink, baselineStillEligible, isReviewedMissingWebsiteCoupon } from "@/lib/admitadPublisherCatalog";
 import {
   isAdmitadPublishable,
   evaluateSnapshotSafety,
@@ -452,63 +452,56 @@ export async function runAdmitadSafeSync(options: {
     if (publisherScoped) console.log("[publisher/retention] missing_valid=" +
       missingStillEligible.length + " expired_baseline_allowed_to_deactivate=" +
       (missingBaselineRows.length - missingStillEligible.length));
-    // Diagnostic only: numeric publisher coupon IDs are public identifiers,
-    // unlike coupon codes, destination URLs, ERIDs or authentication data.
-    // Emit only for a read-only publisher preview that already failed retention.
-    // This makes it possible to resolve a missing-offer mismatch without
-    // automatically deleting any still-eligible baseline coupon.
-    if (publisherScoped && options.skipDbWrite && options.requireActiveRetention &&
-        missingStillEligible.length > 0) {
-      const absentCouponIds = missingStillEligible.map(row => {
-        const candidate = String(row.source_coupon_id || "");
-        return /^[0-9]{1,18}$/.test(candidate) ? candidate : "INVALID_ID";
-      }).sort();
-      console.warn("[publisher/retention] missing_valid_source_coupon_ids=" +
-        JSON.stringify(absentCouponIds));
-      // A missing active ID can mean absent upstream OR present-but-rejected.
-      // Keep that distinction, otherwise manually retiring a coupon could
-      // conceal a mapping/ERID/quality regression in our own importer.
-      const rowById = new Map(rowsToUpsert.map(r => [r.id, r]));
-      const missingBreakdown = missingStillEligible.map(row => {
-        const sourceCouponId = String(row.source_coupon_id || "");
-        const safeId = /^[0-9]{1,18}$/.test(sourceCouponId) ? sourceCouponId : "INVALID_ID";
-        const staged = rowById.get(row.id);
-        return {
-          sourceCouponId: safeId,
-          state: staged ? "REJECTED_DURING_VALIDATION" : "NOT_IN_WEBSITE_API",
-          status: staged ? String(staged.sync_status || "UNKNOWN") : null,
-        };
-      }).sort((a, b) => a.sourceCouponId.localeCompare(b.sourceCouponId));
-      console.warn("[publisher/retention] missing_valid_breakdown=" +
-        JSON.stringify(missingBreakdown));
-
-      // Admitad documents GET /coupons/{coupon_id}/website/{website_id}/.
-      // This is an independent, read-only check of an omitted list entry.
-      // A 404 can justify individual retirement review; other errors cannot.
-      const individualLookups = await Promise.all(missingBreakdown.map(async entry => {
-        if (!/^[0-9]{1,18}$/.test(entry.sourceCouponId)) {
-          return { sourceCouponId: "INVALID_ID", result: "INVALID_ID" };
+    // A missing baseline row may be absent upstream OR merely rejected by our
+    // validator. Never approve a validation failure as a withdrawn coupon.
+    const stagedById = new Map(rowsToUpsert.map(row => [row.id, row]));
+    const verifiedWithdrawals = new Set<string>();
+    if (publisherScoped && options.requireActiveRetention && missingStillEligible.length > 0) {
+      const checks = await Promise.all(missingStillEligible.map(async row => {
+        const sourceId = String(row.source_coupon_id || "");
+        const safeId = /^[0-9]{1,18}$/.test(sourceId) ? sourceId : "INVALID_ID";
+        const staged = stagedById.get(row.id);
+        if (staged) {
+          return { id: row.id, sourceCouponId: safeId,
+            result: "REJECTED_DURING_VALIDATION" };
         }
+        if (!isReviewedMissingWebsiteCoupon(row)) {
+          return { id: row.id, sourceCouponId: safeId, result: "NOT_REVIEWED" };
+        }
+        // Authoritative, site-scoped coupon detail endpoint: 404 is the only
+        // proof that can activate this narrowly reviewed retirement.
         try {
-          const detail = await admitadFetch<{ id?: number; status?: string }>(
-            `/coupons/${entry.sourceCouponId}/website/${website.id}/`,
+          await admitadFetch<unknown>(
+            `/coupons/${sourceId}/website/${website.id}/`,
             { customFetch: options.customFetch, maxRetries: 0 }
           );
-          return { sourceCouponId: entry.sourceCouponId,
-            result: String(detail.id || "") === entry.sourceCouponId
-              ? "FOUND_MATCHING_ID" : "FOUND_UNEXPECTED_ID" };
+          return { id: row.id, sourceCouponId: safeId, result: "STILL_AVAILABLE" };
         } catch (err) {
-          const status = (err as { statusCode?: number }).statusCode;
-          return { sourceCouponId: entry.sourceCouponId,
-            result: status === 404 ? "NOT_FOUND_404" :
-              status === 403 ? "ACCESS_DENIED_403" : "REQUEST_FAILED" };
+          if ((err as { statusCode?: number }).statusCode === 404) {
+            return { id: row.id, sourceCouponId: safeId,
+              result: "CONFIRMED_WITHDRAWN_404" };
+          }
+          return { id: row.id, sourceCouponId: safeId,
+            result: "LOOKUP_UNVERIFIED" };
         }
       }));
-      console.warn("[publisher/retention] individual_site_coupon_lookup=" +
-        JSON.stringify(individualLookups));
+      for (const check of checks) {
+        if (check.result === "CONFIRMED_WITHDRAWN_404") {
+          verifiedWithdrawals.add(check.id);
+        }
+      }
+      if (options.skipDbWrite) {
+        // No promotional codes, URLs, ERIDs, OAuth values or personal data.
+        console.warn("[publisher/retention] reviewed_coupon_disposition=" +
+          JSON.stringify(checks.map(check => ({
+            sourceCouponId: check.sourceCouponId, result: check.result,
+          })).sort((x, y) => x.sourceCouponId.localeCompare(y.sourceCouponId))));
+      }
     }
-    if (options.requireActiveRetention &&
-        (publisherScoped ? missingStillEligible.length : missingBaselineRows.length) > 0) {
+    const protectedMissingCount = publisherScoped
+      ? missingStillEligible.filter(row => !verifiedWithdrawals.has(row.id)).length
+      : missingBaselineRows.length;
+    if (options.requireActiveRetention && protectedMissingCount > 0) {
       throw new Error("BATCH_ACTIVE_COUPON_RETENTION_FAILED");
     }
     if (options.maxNewOffers !== undefined) {
