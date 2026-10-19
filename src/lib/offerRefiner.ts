@@ -37,6 +37,14 @@ export function refineOffer(
   const isNoCode = !isRealPromoCode(code);
 
 
+  // A free-shipping minimum (e.g. 3,000 ₽) is not a ruble discount.
+  if (/^Бесплатная доставка/iu.test(title) && /бесплатн[а-яё]*\s+доставк/iu.test(terms)) {
+    const minimum = extractMinimumOrder(title + " " + terms);
+    return { type: "default", discount: "Бесплатная доставка",
+      condition: minimum ? "При заказе от " + minimum.value.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽" : "По условиям магазина",
+      fullTerms: terms, isNoCode };
+  }
+
   // A service advertised "from 2,000 rubles" has a PRICE, not a discount.
   if (/^3D-диагностика\s+и\s+массаж\s+лица\s*[—–-]\s*от\s*2\s*000\s*₽/iu.test(title)) {
     return { type: "default", discount: "3D-диагностика и массаж лица",
