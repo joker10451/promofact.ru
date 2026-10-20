@@ -12,7 +12,7 @@ export function withoutForbiddenTravelCoPromotion(coupons: Coupon[]): Coupon[] {
   const hasMtsMusic = coupons.some((c) =>
     /^\s*мтс\s+музыка\s*$/iu.test(c.store.name));
   if (!hasMtsMusic) return coupons;
-  return coupons.filter((c) => c.store.slug !== "yandeks-puteshestviya");
+  return coupons.filter((c) => c.store.slug !== "yandeks-puteshestviya" && c.store.slug !== "kinopoisk");
 }
 
 

@@ -485,10 +485,10 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // and ERID. Only explicitly approved project website placement survives.
     if (c.store.slug === "perekrestok-dostavka") {
       const code = c.promocode.code.trim().toUpperCase();
-      return ["171LREDEY", "172E2Y5TJ", "174NYBBJV"].includes(code) &&
-        c.affiliate.link === "https://perekrestok.prfl.me/sites/9833ce?erid=2RanyngM9SB" &&
-        c.affiliate.ordMarker === "2RanyngM9SB" &&
-        c.affiliate.ordText.includes("erid: 2RanyngM9SB");
+      return ["171LREDEY", "172E2Y5TJ", "174NYBBJV", "178PQJL7A"].includes(code) &&
+        c.affiliate.link === "https://perekrestok.prfl.me/sites/me2ds4?erid=2RanykFbMxo" &&
+        c.affiliate.ordMarker === "2RanykFbMxo" &&
+        c.affiliate.ordText.includes("erid: 2RanykFbMxo");
     }
     // Current WinLab publisher URL lacks an ERID in the supplied account view.
     // Suppress legacy codes until the current token is supplied and checked.

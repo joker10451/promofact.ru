@@ -56,7 +56,7 @@ assert.match(route,/^\/go\/admitad\/231\?/);
 assert.match(route,/click_id=550e8400/);
 
 // Safety checks for privacy, route flags, and no client-provided external URL.
-const source = fs.readFileSync("src/app/go/admitad/[couponId]/route.ts","utf8");
+const source = fs.readFileSync("src/app/go/admitad/[couponId]/route.ts","utf8").replace(/\r\n/g, "\n");
 const ticket = fs.readFileSync("src/components/CouponTicket.tsx","utf8");
 const privacy = fs.readFileSync("src/app/privacy/page.tsx","utf8");
 const consent = fs.readFileSync("src/lib/cookieConsent.ts","utf8");
