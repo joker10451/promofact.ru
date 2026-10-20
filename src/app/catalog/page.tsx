@@ -8,7 +8,7 @@ import { toCatalogCoupon } from "@/lib/catalogCoupon";
 import { SITE_URL } from "@/lib/site";
 
 // Always share the same live active offers with the homepage and store pages.
-export const revalidate = 3600; // Обновление раз в час: актуальные акции не ждут следующего деплоя.
+export const revalidate = 900; // SSR обновляется каждые 15 минут; карточки проверяют срок на клиенте.
 
 export const metadata: Metadata = {
   title: "Все промокоды и купоны — каталог скидок",
@@ -44,7 +44,7 @@ export default async function CatalogPage() {
               Каталог купонов и промокодов
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink/65 sm:text-base">
-              Все {coupons.length} активных предложений — в одном месте. Фильтруйте по магазину, категории, региону и условиям заказа.
+              Ищите действующие предложения по магазину, категории, региону и условиям заказа. Точное количество обновляется в каталоге ниже.
             </p>
             <div className="mt-4 flex flex-wrap gap-3 text-xs font-bold">
               <Link href="/promokody" className="text-red hover:underline">Список магазинов →</Link>

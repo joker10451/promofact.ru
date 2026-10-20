@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import StoreLogo from "@/components/StoreLogo";
 import { formatExpires } from "@/lib/format";
+import { isCouponActive } from "@/lib/couponExpiry";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import { CHANNELS } from "@/lib/site";
 import { CheckIcon } from "@/components/CheckIcon";
@@ -154,6 +155,7 @@ export default function CouponTicket({
   const [toastType, setToastType] = useState<"copied" | "opened">("copied");
   const [toast, setToast] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [expiredAttempt, setExpiredAttempt] = useState(false);
   const [mounted, setMounted] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -179,7 +181,10 @@ export default function CouponTicket({
   }, [showDetailsModal]);
 
   const copyCode = async (code: string, toastMode: "copied" | "opened" = "copied"): Promise<boolean> => {
-    if (!code) return false;
+    if (!code || !isCouponActive(promocode.expires)) {
+      if (!isCouponActive(promocode.expires)) setExpiredAttempt(true);
+      return false;
+    }
     let success = false;
     if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
       try {
@@ -265,6 +270,11 @@ export default function CouponTicket({
   };
 
   const handleDirectCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isCouponActive(promocode.expires)) {
+      e.preventDefault();
+      setExpiredAttempt(true);
+      return;
+    }
     prepareNativeAffiliateLink(e.currentTarget);
     // An analytics goal counts click intent, not confirmed partner attribution.
     handleAffiliateClick();
@@ -272,6 +282,11 @@ export default function CouponTicket({
   };
 
   const copyAndOpen = (e: React.MouseEvent<HTMLAnchorElement>, code: string) => {
+    if (!isCouponActive(promocode.expires)) {
+      e.preventDefault();
+      setExpiredAttempt(true);
+      return;
+    }
     prepareNativeAffiliateLink(e.currentTarget);
     ymReachGoal("copy_and_open", getAnalyticsContext());
     handleAffiliateClick();
@@ -436,6 +451,12 @@ export default function CouponTicket({
           </button>
         </div>
       </div>
+
+      {expiredAttempt && (
+        <p role="status" className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">
+          Срок действия этого предложения истёк. Обновите страницу, чтобы увидеть актуальные промокоды.
+        </p>
+      )}
 
       {/* 4. Нижний блок: Код + Кнопка One-Click */}
       <div className="mt-4 border-t border-line/60 pt-4">

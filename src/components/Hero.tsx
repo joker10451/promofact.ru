@@ -282,7 +282,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-line/60 pt-3 text-xs font-semibold text-ink/70 sm:mt-7 sm:pt-4">
           <span className="inline-flex items-center gap-1.5">
             <Icon name="tag" size={14} className="text-red" />
-            {couponCount} актуальных предложений
+            {couponCount} предложений по последнему обновлению
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Icon name="check" size={14} className="text-mint-dark" />
