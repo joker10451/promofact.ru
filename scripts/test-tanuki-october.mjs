@@ -71,6 +71,8 @@ assert(perfluence.includes('if (c.store.slug === "tanukifamily")') &&
   perfluence.includes('c.affiliate.ordText.includes("erid: '+TANUKI_OCT16_ERID+'")'),
   "Do not surface stale Perfluence tracking URL/ERID");
 assert(home.includes("withoutForbiddenTanukiCoPromotion(withoutForbiddenTravelCoPromotion(coupons))"));
-assert(collections.includes("withoutForbiddenTanukiCoPromotion(all.filter(col.filter))"),
- "Editorial collections and their metadata must exclude incompatible co-promotions");
+const collectionLib=fs.readFileSync("src/lib/collections.ts","utf8");
+assert(collections.includes("getCollectionCoupons(col, all)") &&
+ collectionLib.includes("withoutForbiddenTanukiCoPromotion(coupons.filter(collection.filter))"),
+ "Editorial collections and their metadata must exclude incompatible co-promotions via shared helper");
 console.log("TANUKI 16 OCT: four site-approved codes, expiry, real benefit claims, URL/ERID rotation, stale suppression and prohibited combinations PASS");
