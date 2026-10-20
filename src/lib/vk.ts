@@ -1,6 +1,7 @@
 import "server-only";
 import { SITE_URL } from "@/lib/site";
 import type { Coupon } from "@/lib/types";
+import { getAttributedCouponHref } from "@/lib/admitadOutboundLink";
 
 const VK_API_VERSION = "5.199";
 
@@ -52,7 +53,7 @@ export function formatVkPost(coupon: Coupon): string {
   const categoryTitle = (coupon.store.category || "Скидки и акции").toUpperCase();
   const bonus = coupon.promocode.bonusName || "Скидка по промокоду";
   const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
-  const directLink = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site || storeUrl;
+  const directLink = getAttributedCouponHref(coupon, "vk_post", "social");
 
   const lines: string[] = [
     `${emoji} ${categoryTitle}`,
@@ -84,7 +85,7 @@ export function formatVkPost(coupon: Coupon): string {
   }
 
   lines.push(``);
-  lines.push(`🛍 В магазин: ${directLink}`);
+  lines.push(`🛍 В магазин: ${directLink === "#" ? storeUrl : directLink}`);
   lines.push(`🌐 Все купоны магазина: ${storeUrl}`);
 
   // Обязательная маркировка рекламы (ОРД) по закону РФ
