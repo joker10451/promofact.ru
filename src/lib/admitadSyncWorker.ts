@@ -15,6 +15,7 @@ import {
   resolveWebsite,
   getConnectedPrograms,
   getWebsiteCoupons,
+  admitadFetch,
   matchCanonicalStore,
   evaluateQualityGate,
   evaluateLegalGate,
@@ -24,7 +25,7 @@ import {
   normalizeAdmitadCoupon,
 } from "@/lib/admitadNormalizer";
 import { STABLE_STORES } from "@/lib/stableStores";
-import { verifiedPublisherWebsite, resolvePublisherStore, validPublisherAffiliateLink, baselineStillEligible } from "@/lib/admitadPublisherCatalog";
+import { verifiedPublisherWebsite, resolvePublisherStore, validPublisherAffiliateLink, baselineStillEligible, isReviewedMissingWebsiteCoupon } from "@/lib/admitadPublisherCatalog";
 import {
   isAdmitadPublishable,
   evaluateSnapshotSafety,
@@ -451,8 +452,56 @@ export async function runAdmitadSafeSync(options: {
     if (publisherScoped) console.log("[publisher/retention] missing_valid=" +
       missingStillEligible.length + " expired_baseline_allowed_to_deactivate=" +
       (missingBaselineRows.length - missingStillEligible.length));
-    if (options.requireActiveRetention &&
-        (publisherScoped ? missingStillEligible.length : missingBaselineRows.length) > 0) {
+    // A missing baseline row may be absent upstream OR merely rejected by our
+    // validator. Never approve a validation failure as a withdrawn coupon.
+    const stagedById = new Map(rowsToUpsert.map(row => [row.id, row]));
+    const verifiedWithdrawals = new Set<string>();
+    if (publisherScoped && options.requireActiveRetention && missingStillEligible.length > 0) {
+      const checks = await Promise.all(missingStillEligible.map(async row => {
+        const sourceId = String(row.source_coupon_id || "");
+        const safeId = /^[0-9]{1,18}$/.test(sourceId) ? sourceId : "INVALID_ID";
+        const staged = stagedById.get(row.id);
+        if (staged) {
+          return { id: row.id, sourceCouponId: safeId,
+            result: "REJECTED_DURING_VALIDATION" };
+        }
+        if (!isReviewedMissingWebsiteCoupon(row)) {
+          return { id: row.id, sourceCouponId: safeId, result: "NOT_REVIEWED" };
+        }
+        // Authoritative, site-scoped coupon detail endpoint: 404 is the only
+        // proof that can activate this narrowly reviewed retirement.
+        try {
+          await admitadFetch<unknown>(
+            `/coupons/${sourceId}/website/${website.id}/`,
+            { customFetch: options.customFetch, maxRetries: 0 }
+          );
+          return { id: row.id, sourceCouponId: safeId, result: "STILL_AVAILABLE" };
+        } catch (err) {
+          if ((err as { statusCode?: number }).statusCode === 404) {
+            return { id: row.id, sourceCouponId: safeId,
+              result: "CONFIRMED_WITHDRAWN_404" };
+          }
+          return { id: row.id, sourceCouponId: safeId,
+            result: "LOOKUP_UNVERIFIED" };
+        }
+      }));
+      for (const check of checks) {
+        if (check.result === "CONFIRMED_WITHDRAWN_404") {
+          verifiedWithdrawals.add(check.id);
+        }
+      }
+      if (options.skipDbWrite) {
+        // No promotional codes, URLs, ERIDs, OAuth values or personal data.
+        console.warn("[publisher/retention] reviewed_coupon_disposition=" +
+          JSON.stringify(checks.map(check => ({
+            sourceCouponId: check.sourceCouponId, result: check.result,
+          })).sort((x, y) => x.sourceCouponId.localeCompare(y.sourceCouponId))));
+      }
+    }
+    const protectedMissingCount = publisherScoped
+      ? missingStillEligible.filter(row => !verifiedWithdrawals.has(row.id)).length
+      : missingBaselineRows.length;
+    if (options.requireActiveRetention && protectedMissingCount > 0) {
       throw new Error("BATCH_ACTIVE_COUPON_RETENTION_FAILED");
     }
     if (options.maxNewOffers !== undefined) {

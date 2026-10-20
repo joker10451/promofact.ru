@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {verifiedPublisherWebsite,resolvePublisherStore,validPublisherAffiliateLink,baselineStillEligible} from "../src/lib/admitadPublisherCatalog.ts";
+import {verifiedPublisherWebsite,resolvePublisherStore,validPublisherAffiliateLink,baselineStillEligible,isReviewedMissingWebsiteCoupon} from "../src/lib/admitadPublisherCatalog.ts";
 import {evaluateQualityGate} from "../src/lib/admitadApi.ts";
 import {isAdmitadPublishable} from "../src/lib/admitadAutopilot.ts";
 const site={id:2990501,name:"ПромоФакт",status:"active",site_url:"https://promofact.ru/"};
@@ -43,4 +43,26 @@ assert.equal(baselineStillEligible("2026-10-14",now),true);
 assert.equal(baselineStillEligible("2026-10-15",now),true);
 assert.equal(baselineStillEligible(null,now),true);
 assert.equal(baselineStillEligible("not-a-date",now),true);
+const reviewedBase={ id:"adm_901876",source_coupon_id:"901876",
+ source_campaign_id:"25224",expires:"2026-10-31",
+ last_seen_at:"2026-10-16T00:39:46.867Z" };
+for (const couponId of ["901876","939051","940388"]) {
+ assert.equal(isReviewedMissingWebsiteCoupon({
+   ...reviewedBase,id:"adm_"+couponId,source_coupon_id:couponId
+ }),true,"Exactly reviewed publisher Yandex Travel IDs");
+}
+for (const change of [
+ {source_coupon_id:"901875",id:"adm_901875"},
+ {source_campaign_id:"45863"},
+ {expires:"2026-11-01"},
+ {expires:null},
+ {last_seen_at:"2026-10-19T00:00:00Z"},
+ {id:"adm_999999"},
+]) assert.equal(isReviewedMissingWebsiteCoupon({...reviewedBase,...change}),false);
+const workerSource=(await import("node:fs")).readFileSync("src/lib/admitadSyncWorker.ts","utf8");
+assert.match(workerSource,/CONFIRMED_WITHDRAWN_404/);
+assert.match(workerSource,/REJECTED_DURING_VALIDATION/);
+assert.match(workerSource,/protectedMissingCount/);
+assert.match(workerSource,/if \(options.requireActiveRetention && protectedMissingCount > 0\)/);
+console.log("Publisher retirement: exact 3 coupon IDs, 404 evidence and global retention protection PASS");
 console.log("Publisher-scope retention: expired records can drop, unexpired and undated records protected PASS");
