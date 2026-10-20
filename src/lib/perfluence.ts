@@ -10,6 +10,7 @@ import { STABLE_STORES } from "@/lib/stableStores";
 import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
 import { isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
+import { getActivePromoBanners, isBannerStarted } from "@/lib/promoBanners";
 import { isPausedPublisherStore, withoutPausedPublisherOffers } from "@/lib/publisherPauses";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
@@ -457,6 +458,40 @@ async function fetchSnapshot(): Promise<Coupon[]> {
   }
 }
 
+
+/**
+ * A current, separately approved editorial banner can authenticate a specific
+ * widget coupon when Perfluence omits ERID in its widget URL. Match host, path,
+ * exact code, store and ORD marker: never repair arbitrary publisher URLs.
+ * This enrichment is forbidden in the raw monitoring snapshot.
+ */
+export function withApprovedEditorialPerfluenceLink(coupon: Coupon, now = Date.now()): Coupon {
+  if (isPublicPerfluenceWidgetCoupon(coupon)) return coupon;
+  const code = coupon.promocode.code?.trim().toUpperCase();
+  if (!code) return coupon;
+  try {
+    const original = new URL(coupon.affiliate.link);
+    if (original.protocol !== "https:" || original.username || original.password || original.port) return coupon;
+    const banner = getActivePromoBanners({ storeSlug: coupon.store.slug, now }).find((item) => {
+      if (!isBannerStarted(item, now) || item.code?.trim().toUpperCase() !== code) return false;
+      const approved = new URL(item.link);
+      return approved.protocol === "https:" &&
+        approved.origin === original.origin &&
+        approved.pathname === original.pathname &&
+        approved.searchParams.getAll("erid").length === 1 &&
+        approved.searchParams.get("erid") === coupon.affiliate.ordMarker &&
+        !original.searchParams.has("erid");
+    });
+    if (!banner) return coupon;
+    const affiliate = { ...coupon.affiliate,
+      link: banner.link, landingLink: banner.link, ordText: banner.ordText };
+    const enriched = { ...coupon, affiliate };
+    return isPublicPerfluenceWidgetCoupon(enriched) ? enriched : coupon;
+  } catch {
+    return coupon;
+  }
+}
+
 /** Raw, read-only diagnostics: never consume this result for publication. */
 export async function getPerfluenceAuditCoupons(): Promise<Coupon[]> {
   // Keep invalid and expired feed entries visible to daily health checks.
@@ -467,6 +502,7 @@ export async function getPerfluenceAuditCoupons(): Promise<Coupon[]> {
 export async function getPerfluenceCoupons(): Promise<Coupon[]> {
   return (await getPerfluenceAuditCoupons())
     .filter((coupon) => isCouponActive(coupon.promocode.expires))
+    .map((coupon) => withApprovedEditorialPerfluenceLink(coupon))
     .filter(isPublicPerfluenceWidgetCoupon);
 }
 
@@ -711,7 +747,8 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     ...baseBuckets.map((b) => ({
       source: b.source,
       coupons: b.source === "perfluence"
-        ? b.coupons.filter(isPublicPerfluenceWidgetCoupon)
+        ? b.coupons.map((coupon) => withApprovedEditorialPerfluenceLink(coupon))
+          .filter(isPublicPerfluenceWidgetCoupon)
         : b.coupons,
     })),
   ];

@@ -45,7 +45,7 @@ assert.equal(isPublicPerfluenceWidgetCoupon({
   affiliate: { ...approved.affiliate, link: "https://example.prfl.me/sites/abc123", ordMarker: "2RanyTESTabc" },
 }), false, "ORD marker alone cannot repair an unverified source URL");
 
-const { parsePayload } = await import("../src/lib/perfluence.ts");
+const { parsePayload, withApprovedEditorialPerfluenceLink } = await import("../src/lib/perfluence.ts");
 const sample = JSON.stringify({ data: [{
   project: { id: 1409, name: "ВинЛаб", site: "https://winlab.ru" },
   groups: [{
@@ -58,6 +58,30 @@ const [winlab] = parsePayload(sample);
 assert.equal(winlab.affiliate.link, "https://winlab.prfl.me/sites/test123",
   "Parsing cannot synthesize ERID from a different field");
 assert.equal(isPublicPerfluenceWidgetCoupon(winlab), false, "Unverified feed coupon must be quarantined");
+assert.equal(isPublicPerfluenceWidgetCoupon(withApprovedEditorialPerfluenceLink(winlab,
+  new Date("2026-10-20T12:00:00+03:00").getTime())), false,
+  "An unrelated approved banner cannot authorize WinLab");
+
+const feed = JSON.parse(fs.readFileSync("src/data/perfluence-feed.json", "utf8"));
+const approvedSample = feed.data.find((item) => JSON.stringify(item).includes("PERPREGA309361"));
+assert.ok(approvedSample, "Approved SberHealth offer must be in bundled feed");
+const pregnancy = parsePayload(JSON.stringify({ data: [approvedSample] }))
+  .find((c) => c.promocode.code === "PERPREGA309361");
+assert.ok(pregnancy);
+assert.equal(isPublicPerfluenceWidgetCoupon(pregnancy), false, "Raw widget URL lacks ERID");
+const fixedPregnancy = withApprovedEditorialPerfluenceLink(pregnancy,
+  new Date("2026-10-20T12:00:00+03:00").getTime());
+assert.equal(fixedPregnancy.affiliate.link,
+  "https://sberanalizy.prfl.me/sites/jhtq64?erid=2Ranym5xMV5");
+assert.equal(isPublicPerfluenceWidgetCoupon(fixedPregnancy), true);
+assert.equal(withApprovedEditorialPerfluenceLink(pregnancy,
+  new Date("2026-11-01T12:00:00+03:00").getTime()).affiliate.link,
+  pregnancy.affiliate.link, "Expired editorial approval must not revive widget links");
+const tampered = { ...pregnancy, affiliate: { ...pregnancy.affiliate,
+  link: "https://elsewhere.prfl.me/sites/jhtq64" } };
+assert.equal(withApprovedEditorialPerfluenceLink(tampered,
+  new Date("2026-10-20T12:00:00+03:00").getTime()).affiliate.link,
+  tampered.affiliate.link, "A different partner domain must not inherit editorial approval");
 
 const source = fs.readFileSync("src/lib/perfluence.ts", "utf8");
 assert.match(source, /isPublicPerfluenceWidgetCoupon/);
