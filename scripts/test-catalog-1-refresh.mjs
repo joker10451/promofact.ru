@@ -49,6 +49,11 @@ assert.equal(assertSafeResult({
 assert.throws(() => assertSafeResult({
   success: true,status:"SUCCESS",aggregates:{publishable:0},
 },original),/CATALOG_RETENTION_CHECK_FAILED/);
+assert.throws(() => assertSafeResult({
+  success: true,status:"SUCCESS",aggregates:{publishable:original.count+CATALOG_MAX_NEW+1},
+},original),/CATALOG_NEW_OFFER_CAP_EXCEEDED/);
+assert.equal(redactedFailure(new Error("CATALOG_NEW_OFFER_CAP_EXCEEDED")),
+  "CATALOG_NEW_OFFER_CAP_EXCEEDED");
 assert.throws(() => examinePublisherSnapshot([base],meta,current),/CATALOG_META_COUNT_MISMATCH/);
 assert.throws(() => examinePublisherSnapshot([base,base],meta,current),/CATALOG_ID_OR_CAMPAIGN_INVALID/);
 const untrusted = {...base,affiliate_link:"https://merchant.example/click?erid=wrong"};
@@ -69,7 +74,14 @@ assert.ok(worker.includes("PUBLISHER_COUPON_ID_CAMPAIGN_CHANGED"),
 assert.ok(runner.includes("assertSnapshotUnchanged") && runner.includes("skipDbWrite: true") &&
   runner.includes("ADMITAD_CATALOG_PUBLISH_APPROVED"),
   "Runner must preview first and require explicit approval");
-assert.match(workflow,/cron: ['"]27 \*\/6 \* \* \*['"]/);
+assert.match(workflow,/cron: ['"]27 4 \* \* \*['"]/);
+assert.match(workflow,/ADMITAD_PUBLISHER_AUTO_SYNC_ENABLED != 'false'/);
+assert.match(workflow,/github.event_name == 'schedule'/);
+assert.match(workflow,/ADMITAD_PUBLISHER_CATALOG_DRY_RUN:/);
+assert.match(workflow,/ADMITAD_CATALOG_PUBLISH_APPROVED:/);
+assert.ok(!workflow.includes("git push"), "Scheduled DB refresh must not push or deploy");
+const oldBatch = fs.readFileSync(".github/workflows/admitad-batch.yml", "utf8");
+assert.doesNotMatch(oldBatch,/\bschedule:/, "Old narrower cron must remain disabled");
 assert.match(workflow,/concurrency:/);
 assert.match(workflow,/catalog-1-refresh\.mjs/);
 assert.match(workflow,/inputs\.confirm == true/);

@@ -117,6 +117,10 @@ export function assertSafeResult(result, overview) {
   const proposed = Number(result.aggregates?.publishable);
   if (!Number.isSafeInteger(proposed) || proposed < overview.count - overview.expired)
     fail("CATALOG_RETENTION_CHECK_FAILED");
+  // Belt and braces: the underlying worker also caps individual additions,
+  // but a bad aggregate must never authorize a massive net increase.
+  if (proposed > overview.count + CATALOG_MAX_NEW)
+    fail("CATALOG_NEW_OFFER_CAP_EXCEEDED");
   return proposed;
 }
 
@@ -127,7 +131,7 @@ export function redactedFailure(err) {
     "CATALOG_INVALID_ACTIVE_ROWS","CATALOG_BASELINE_TOO_OLD",
     "CATALOG_INVALID_MODE","CATALOG_PUBLISH_NOT_APPROVED",
     "CATALOG_SNAPSHOT_CHANGED","CATALOG_PREVIEW_REJECTED",
-    "CATALOG_RETENTION_CHECK_FAILED",
+    "CATALOG_RETENTION_CHECK_FAILED","CATALOG_NEW_OFFER_CAP_EXCEEDED",
   ]);
   return known.has(err?.code) ? err.code : known.has(err?.message) ? err.message : "CATALOG_OPERATION_FAILED";
 }

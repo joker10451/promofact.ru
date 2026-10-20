@@ -9,9 +9,10 @@ on:
       - 'scripts/test-catalog-1-refresh.mjs'
       - 'src/lib/admitadSyncWorker.ts'
       - '.github/workflows/admitad-publisher-catalog.yml'
-  # Every six hours: monitor only. Scheduled runs can NEVER write.
+  # One daily publisher-scope refresh; data-only writes (no Git push/deploy).
+  # Disable immediately with Actions variable ADMITAD_PUBLISHER_AUTO_SYNC_ENABLED=false.
   schedule:
-    - cron: '27 */6 * * *'
+    - cron: '27 4 * * *'
   workflow_dispatch:
     inputs:
       mode:
@@ -35,8 +36,9 @@ concurrency:
 
 jobs:
   publisher-coupon-sync:
-    # Forked PRs never receive publisher/database credentials.
-    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (github.event_name != 'workflow_dispatch' || inputs.mode != 'publish' || inputs.confirm == true) }}
+    # PRs always preview. Only daily schedule on main or confirmed manual publish may write.
+    # A repo Actions variable provides immediate stop without another deployment.
+    if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'schedule' && vars.ADMITAD_PUBLISHER_AUTO_SYNC_ENABLED != 'false') || (github.event_name == 'workflow_dispatch' && (inputs.mode == 'preview' || inputs.confirm == true)) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -50,7 +52,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Test CATALOG-1 safety and authorization
         run: node scripts/test-catalog-1-refresh.mjs
-      - name: Preview first; write only on explicitly approved manual publish
+      - name: Preview and atomic publish only for enabled schedule or confirmed manual run
         env:
           ADMITAD_CLIENT_ID: ${{ secrets.ADMITAD_CLIENT_ID }}
           ADMITAD_CLIENT_SECRET: ${{ secrets.ADMITAD_CLIENT_SECRET }}
@@ -59,8 +61,8 @@ jobs:
           ADMITAD_APPROVED_CAMPAIGNS: '141770,1667,17220,25224,26110'
           ADMITAD_BATCH_APPROVED_CAMPAIGNS: '28532,14647,22484'
           ADMITAD_PUBLISH_WEBSITE_COUPONS: 'true'
-          ADMITAD_PUBLISHER_CATALOG_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true && 'false' || 'true' }}
-          ADMITAD_CATALOG_PUBLISH_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true && 'true' || 'false' }}
+          ADMITAD_PUBLISHER_CATALOG_DRY_RUN: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true)) && 'false' || 'true' }}
+          ADMITAD_CATALOG_PUBLISH_APPROVED: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true)) && 'true' || 'false' }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node --loader ./scripts/ts-loader.mjs scripts/catalog-1-refresh.mjs
