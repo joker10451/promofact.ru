@@ -68,13 +68,13 @@ const TANUKI_SUPPORTED_CITIES = "Москва, Краснодар, Самара,
 
 // Updated, account-approved Perfluence website placement for promofact.ru,
 // supplied 19 October 2026. The cached widget has a DIFFERENT URL/ERID.
-export const PEREKRESTOK_OCT16_LINK = "https://perekrestok.prfl.me/sites/9833ce?erid=2RanyngM9SB";
-export const PEREKRESTOK_OCT16_ERID = "2RanyngM9SB";
+export const PEREKRESTOK_OCT16_LINK = "https://perekrestok.prfl.me/sites/me2ds4?erid=2RanykFbMxo";
+export const PEREKRESTOK_OCT16_ERID = "2RanykFbMxo";
 const perekrestokAd: Coupon["affiliate"] = {
   link: PEREKRESTOK_OCT16_LINK,
   landingLink: PEREKRESTOK_OCT16_LINK,
   ordMarker: PEREKRESTOK_OCT16_ERID,
-  ordText: 'Реклама. ООО "ИКС 5 ДИДЖИТАЛ", ИНН 9722010808 erid: 2RanyngM9SB',
+  ordText: 'Реклама. ООО "ИКС 5 ДИДЖИТАЛ", ИНН 9722010808 erid: 2RanykFbMxo',
 };
 
 const winlabAd = {
@@ -185,6 +185,10 @@ export const TANUKI_OCT16_OFFERS: Coupon[] = [
  * minimum spend, maximum savings or first-order restrictions from the old feed.
  */
 export const PEREKRESTOK_OCT16_OFFERS: Coupon[] = [
+  offer(82604304, perekrestok, perekrestokAd, "178PQJL7A",
+    "Скидка 750 ₽ по промокоду в Перекрёсток Доставка",
+    "2026-10-31T23:59:59+03:00", "По условиям акции",
+    "Промокод 178PQJL7A: скидка 750 ₽ в приложении «Перекрёсток Доставка». Действует до 31 октября 2026 года, 23:59 по Москве."),
   offer(82604301, perekrestok, perekrestokAd, "171LREDEY",
     "Скидка 30% по промокоду в Перекрёсток Доставка",
     "2026-10-31T23:59:59+03:00", "По условиям акции",
