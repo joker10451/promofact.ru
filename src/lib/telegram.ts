@@ -1,5 +1,6 @@
 import { SITE_URL } from "@/lib/site";
 import type { Coupon } from "@/lib/types";
+import { getAttributedCouponHref } from "@/lib/admitadOutboundLink";
 
 export interface TelegramPostOptions {
   botToken?: string;
@@ -134,7 +135,7 @@ export function formatTelegramPost(coupon: Coupon): {
   if (coupon.store.slug === "flor2u" && coupon.promocode.terms) {
     lines.push("ℹ️ " + escapeHtml(stripHtml(coupon.promocode.terms)));
   }
-  const affiliateUrl = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site;
+  const affiliateUrl = getAttributedCouponHref(coupon, "telegram_post", "social");
   const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
   const buttons: TelegramButton[][] = [
     [{ text: `🛍 В магазин ${coupon.store.name} →`, url: affiliateUrl }],
