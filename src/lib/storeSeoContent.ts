@@ -12,6 +12,7 @@
 
 import { isRealPromoCode } from "@/lib/dedupe";
 import { formatStoreOfferCounts } from "@/lib/storeOfferHeadline";
+import { getStoreBuyerGuide } from "@/lib/storeBuyerGuides";
 
 export interface StoreArticleInput {
   name: string;
@@ -207,8 +208,11 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
   }
 
   // 2. Категорийный угол (выбирается по хэшу слоуга — два магазина одной категории различаются).
-  const angle = realCodes === 0 && noCodeDeals > 0
-    ? `Акции ${input.name} действуют по указанным в карточках условиям: проверьте ограничения, сроки и итоговую выгоду перед покупкой. Вводить промокод для этих предложений не нужно.`
+  const buyerGuide = getStoreBuyerGuide(slug);
+  const angle = buyerGuide
+    ? buyerGuide.intro
+    : realCodes === 0 && noCodeDeals > 0
+      ? `Акции ${input.name} действуют по указанным в карточках условиям: проверьте ограничения, сроки и итоговую выгоду перед покупкой. Вводить промокод для этих предложений не нужно.`
     : STORE_ANGLES[slug]
       ? fill(STORE_ANGLES[slug], f)
       : input.hasGiftOffer && !input.maxDiscount
