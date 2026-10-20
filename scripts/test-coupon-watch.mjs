@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { inspectCoupons, compareInventories, checkSourceCompleteness } from "./coupon-watch-core.mjs";
+import { inspectCoupons, compareInventories, checkSourceCompleteness, reconcileCrossSourceChanges } from "./coupon-watch-core.mjs";
 
 function coupon(id, code, expires = "2026-10-31", options = {}) {
   const erid = options.erid || "2RanykEXAMPLE";
@@ -97,6 +97,18 @@ const stillActive = inspectCoupons(Array.from({ length: 5 }, (_, i) =>
   coupon(i + 300, "ACTIVE" + i)), "perfluence", timestamp);
 assert(checkSourceCompleteness(previouslyExpired, stillActive, "perfluence", timestamp).ok,
   "Planned expiration of old offers must not look like a partner data outage");
+
+
+const movedOld = inspectCoupons([coupon(10, "TRANSFER2026", "2026-10-31", { slug: "moved" })], "perfluence", timestamp);
+const movedCurrent = inspectCoupons([], "perfluence", timestamp);
+const movedManual = inspectCoupons([coupon(11, "TRANSFER2026", "2026-10-31", { slug: "moved" })], "manual", timestamp);
+const movedChanges = compareInventories(movedOld, movedCurrent, timestamp);
+const transfer = reconcileCrossSourceChanges(movedChanges, { perfluence: movedCurrent, manual: movedManual }, new Set(["perfluence", "manual"]));
+assert.equal(transfer[0].type, "transferred", "Cross-source move must not be classified as disappearance");
+assert.equal(reconcileCrossSourceChanges(movedChanges, { perfluence: movedCurrent, manual: movedManual }, new Set(["perfluence"]))[0].type, "removed",
+  "A failed or skipped destination source must not disguise a real removal");
+const notMoved = inspectCoupons([coupon(12, "DIFFERENT", "2026-10-31", { slug: "moved" })], "manual", timestamp);
+assert.equal(reconcileCrossSourceChanges(movedChanges, { perfluence: movedCurrent, manual: notMoved }, new Set(["perfluence", "manual"]))[0].type, "removed");
 
 const workflow = fs.readFileSync(".github/workflows/daily-coupon-watch.yml", "utf8");
 assert(workflow.includes('cron: "10 5 * * *"'));
