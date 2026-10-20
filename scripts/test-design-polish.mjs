@@ -78,7 +78,7 @@ console.log("PromoFact category discovery: homepage preview, full route and site
 const couponGrid = fs.readFileSync("src/components/CouponGrid.tsx", "utf8");
 const urgentDeals = fs.readFileSync("src/components/ExpiringDeals.tsx", "utf8");
 const mobileNav = fs.readFileSync("src/components/MobileBottomNav.tsx", "utf8");
-assert.ok(couponGrid.includes("allCoupons.length} предложений от {totalStoreCount} магазинов") &&
+assert.ok(couponGrid.includes("currentCoupons.length} предложений от {totalStoreCount} магазинов") &&
           couponGrid.includes("featuredCount = allCoupons.length - coupons.length") &&
           couponGrid.includes('href="#expiring"'),
   "Site-wide totals must reconcile with the non-duplicated coupon grid");

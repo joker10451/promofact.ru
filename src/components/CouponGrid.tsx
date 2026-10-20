@@ -5,6 +5,8 @@ import Icon from "@/components/Icon";
 import { useMemo, useState, useEffect } from "react";
 import CouponTicket from "@/components/CouponTicket";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
+import { isCouponActive, expiryTimestamp } from "@/lib/couponExpiry";
+import { useCouponClock } from "@/lib/useCouponClock";
 
 type SortOrder = "hits" | "discount" | "expiring";
 
@@ -21,22 +23,32 @@ export default function CouponGrid({
   proofsByStore?: Record<number, number>;
   excludeOfferKeys?: string[];
 }) {
+  // Cached SSR can still contain an offer whose deadline elapsed since render.
+  // After hydration hide it and refresh both the visible and total counters.
+  const clientNow = useCouponClock();
+  const currentCoupons = useMemo(
+    () => clientNow === null
+      ? allCoupons
+      : allCoupons.filter((c) => isCouponActive(c.promocode.expires, clientNow)),
+    [allCoupons, clientNow],
+  );
+
   // Исключаем купоны из «Спецпредложений дня» — они уже показаны выше, а иначе
   // дублировались бы первыми карточками ленты. Ключ «магазин + код» убирает и
   // дубли того же оффера с другим id. Один раз здесь — и все счётчики,
   // фильтры и группировка ниже работают с уже очищенным списком.
   const coupons = useMemo(() => {
-    if (!excludeOfferKeys || excludeOfferKeys.length === 0) return allCoupons;
+    if (!excludeOfferKeys || excludeOfferKeys.length === 0) return currentCoupons;
     const excluded = new Set(excludeOfferKeys);
-    return allCoupons.filter(
+    return currentCoupons.filter(
       (c) => !excluded.has(`${c.store.slug}::${(c.promocode.code || "").trim().toUpperCase()}`),
     );
-  }, [allCoupons, excludeOfferKeys]);
+  }, [currentCoupons, excludeOfferKeys]);
   // Featured coupons are not duplicated in the grid, but stay part of the total.
-  const featuredCount = allCoupons.length - coupons.length;
+  const featuredCount = currentCoupons.length - coupons.length;
   const totalStoreCount = useMemo(
-    () => new Set(allCoupons.map((coupon) => coupon.store.slug)).size,
-    [allCoupons],
+    () => new Set(currentCoupons.map((coupon) => coupon.store.slug)).size,
+    [currentCoupons],
   );
   const [filter, setFilter] = useState<string>("all");
   const [quickFilter, setQuickFilter] = useState<"all" | "hit" | "first" | "repeat" | "discount_20">("all");
@@ -156,8 +168,8 @@ export default function CouponGrid({
       res = [...res].sort((a, b) => extractDiscountValue(b.promocode.bonusName) - extractDiscountValue(a.promocode.bonusName));
     } else if (sortBy === "expiring") {
       res = [...res].sort((a, b) => {
-        const d1 = a.promocode.expires ? new Date(a.promocode.expires).getTime() : Infinity;
-        const d2 = b.promocode.expires ? new Date(b.promocode.expires).getTime() : Infinity;
+        const d1 = expiryTimestamp(a.promocode.expires);
+        const d2 = expiryTimestamp(b.promocode.expires);
         return d1 - d2;
       });
     } else {
@@ -251,7 +263,7 @@ export default function CouponGrid({
             Купоны на сегодня
           </h2>
           <p className="mt-1 text-xs font-semibold text-ink/70 sm:text-sm">
-            Всего на сайте: {allCoupons.length} предложений от {totalStoreCount} магазинов
+            Всего в текущем каталоге: {currentCoupons.length} предложений от {totalStoreCount} магазинов
           </p>
           <p className="mt-1 text-xs text-ink/55" aria-live="polite">
             {isFiltered ? "По выбранным фильтрам: " : "В каталоге ниже: "}

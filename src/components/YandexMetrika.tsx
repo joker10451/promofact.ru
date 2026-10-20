@@ -63,6 +63,9 @@ export default function YandexMetrika() {
 
 /** Хелпер для вызова целей Метрики из любого клиентского кода. */
 export function ymReachGoal(goal: string, params?: Record<string, unknown>) {
+  // The counter may stay on window after the visitor declines cookies.
+  // Never send goals after an explicit opt-out.
+  if (typeof window === "undefined" || getConsent() === "declined") return;
   const w = window as unknown as {
     ym?: (id: number, method: string, goal: string, params?: Record<string, unknown>) => void;
   };
