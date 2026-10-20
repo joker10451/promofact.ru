@@ -9,7 +9,7 @@ on:
       - 'scripts/test-catalog-1-refresh.mjs'
       - 'src/lib/admitadSyncWorker.ts'
       - '.github/workflows/admitad-publisher-catalog.yml'
-  # One daily publisher-scope refresh; data-only writes (no Git push/deploy).
+  # One daily publisher-scope refresh; modifies catalog data only.
   # Disable immediately with Actions variable ADMITAD_PUBLISHER_AUTO_SYNC_ENABLED=false.
   schedule:
     - cron: '27 4 * * *'
