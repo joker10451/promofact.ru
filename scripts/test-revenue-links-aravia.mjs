@@ -72,8 +72,14 @@ for (const i of ["3", "31"]) {
   assert.equal(tracked.searchParams.get("i"), i);
   assert.equal(tracked.searchParams.get("erid"), "EXAMPLE-ERID");
 }
+const landingOnly={...night,affiliate:{...night.affiliate,link:"",landingLink:original}};
+const landingHref=getAttributedCouponHref(landingOnly,"telegram_post","social");
+assert.equal(new URL(landingHref).searchParams.get("subid"),"telegram_post");
+const landingAnchor={href:landingHref};prepareAttributedCouponClick(landingAnchor,landingOnly,"telegram_post","social");
+assert.match(new URL(landingAnchor.href).searchParams.get("subid4")||"",/^[0-9a-f-]{36}$/i);
 const perf={...night,promocode:{...night.promocode,group:"perfluence"}};
 assert.equal(getAttributedCouponHref(perf,"store_summary","store"),original);
+assert.equal(getAttributedCouponHref({...perf,affiliate:{...perf.affiliate,link:"",landingLink:original}},"telegram_post","social"),original);
 const pAnchor={href:original};prepareAttributedCouponClick(pAnchor,perf,"store_summary","store");assert.equal(pAnchor.href,original);
 for(const path of ["src/app/store/[slug]/page.tsx","src/app/store/[slug]/[code]/page.tsx","src/app/category/[slug]/page.tsx","src/app/collections/[slug]/page.tsx","src/app/gorod/[slug]/[category]/page.tsx"]){
  const source=fs.readFileSync(path,"utf8");
@@ -85,4 +91,8 @@ assert.match(summary,/getAttributedCouponHref\(coupon, "store_summary", "store"\
 assert.match(summary,/prepareAttributedCouponClick\(event.currentTarget, coupon, "store_summary", "store"\)/);
 assert.match(expiring,/getAttributedCouponHref\(coupon, "expiring_deal", "home"\)/);
 assert.match(expiring,/prepareAttributedCouponClick\(event.currentTarget, coupon, "expiring_deal", "home"\)/);
+for(const [file,placement] of [["src/lib/telegram.ts","telegram_post"],["src/lib/vk.ts","vk_post"]]){
+ const social=fs.readFileSync(file,"utf8");
+ assert.ok(social.includes(`getAttributedCouponHref(coupon, "${placement}", "social")`));
+}
 console.log("PASS: Aravia semantics; attributed Admitad anchors; Perfluence unaffected; no affiliate URLs in JSON-LD");

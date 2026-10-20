@@ -9,7 +9,7 @@ on:
       - 'scripts/test-catalog-1-refresh.mjs'
       - 'src/lib/admitadSyncWorker.ts'
       - '.github/workflows/admitad-publisher-catalog.yml'
-  # Every six hours: monitor only. Scheduled runs can NEVER write.
+  # Every six hours: read-only by default; publishing requires a repository-variable opt-in.
   schedule:
     - cron: '27 */6 * * *'
   workflow_dispatch:
@@ -59,8 +59,8 @@ jobs:
           ADMITAD_APPROVED_CAMPAIGNS: '141770,1667,17220,25224,26110'
           ADMITAD_BATCH_APPROVED_CAMPAIGNS: '28532,14647,22484'
           ADMITAD_PUBLISH_WEBSITE_COUPONS: 'true'
-          ADMITAD_PUBLISHER_CATALOG_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true && 'false' || 'true' }}
-          ADMITAD_CATALOG_PUBLISH_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true && 'true' || 'false' }}
+          ADMITAD_PUBLISHER_CATALOG_DRY_RUN: ${{ ((github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true) || (github.event_name == 'schedule' && vars.ADMITAD_PUBLISHER_AUTO_REFRESH_ENABLED == 'true')) && 'false' || 'true' }}
+          ADMITAD_CATALOG_PUBLISH_APPROVED: ${{ ((github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true) || (github.event_name == 'schedule' && vars.ADMITAD_PUBLISHER_AUTO_REFRESH_ENABLED == 'true')) && 'true' || 'false' }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node --loader ./scripts/ts-loader.mjs scripts/catalog-1-refresh.mjs
