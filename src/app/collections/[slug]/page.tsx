@@ -4,17 +4,12 @@ import { notFound } from "next/navigation";
 import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
-import { getCollections } from "@/lib/collections";
-import { withoutForbiddenTanukiCoPromotion, withoutForbiddenFloristBeautyCoPromotion, withoutForbiddenGroceryCoPromotion } from "@/lib/publisherPlacementRules";
+import { getCollections, getCollectionCoupons, MIN_INDEXABLE_COLLECTION_OFFERS } from "@/lib/collections";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
-  month: "long",
-  year: "numeric",
-});
-
+// Keep thematic pages current as partner catalog offers change.
 export const dynamicParams = false;
-export const revalidate = false;
+export const revalidate = 900;
 
 export async function generateStaticParams() {
   try {
@@ -50,13 +45,15 @@ export async function generateMetadata({
   const [collections, all] = await Promise.all([getCollections(), getCoupons()]);
   const col = collections.find((c) => c.slug === slug);
   if (!col) return {};
-  const count = withoutForbiddenGroceryCoPromotion(withoutForbiddenFloristBeautyCoPromotion(withoutForbiddenTanukiCoPromotion(all.filter(col.filter)))).length;
+  const count = getCollectionCoupons(col, all).length;
   const pageUrl = `${SITE_URL}/collections/${slug}`;
-  const pageTitle = `Подборка скидок «${col.name}» — лучшие промокоды на ${MONTH_YEAR}`;
+  const pageTitle = `Промокоды и акции: ${col.name}`;
   const ogTitle = `${pageTitle} — ${SITE_NAME}`;
   const og = {
     title: ogTitle,
-    description: `Тематическая подборка выгодных предложений «${col.name}»: ${count} актуальных промокодов и акций от проверенных сервисов на ${MONTH_YEAR}.`,
+    description: count >= MIN_INDEXABLE_COLLECTION_OFFERS
+      ? `${col.name}: ${count} предложений с условиями и сроками действия. Проверьте ограничения скидок перед заказом.`
+      : `${col.name}: сейчас недостаточно действующих предложений для подборки. Посмотрите полный каталог.`,
     url: pageUrl,
     type: "website" as const,
     locale: "ru_RU",
@@ -66,6 +63,7 @@ export async function generateMetadata({
     title: pageTitle,
     description: og.description,
     alternates: { canonical: pageUrl },
+    robots: { index: count >= MIN_INDEXABLE_COLLECTION_OFFERS, follow: true },
     openGraph: og,
     twitter: {
       card: "summary",
@@ -87,7 +85,7 @@ function seoText(
       ? storeNames.slice(0, 5).join(", ")
       : "скидки на популярные бренды";
   return [
-    `Подборка рабочих промокодов «${colName}»: сейчас в ней ${couponCount} ${plural(
+    `В подборке «${colName}» сейчас ${couponCount} ${plural(
       couponCount,
       "актуальный купон",
       "актуальных купона",
@@ -97,9 +95,9 @@ function seoText(
       "магазина-партнёра",
       "магазинов-партнёров",
       "магазинов-партнёров",
-    )}. Собрали актуальные коды, которые участвуют в акциях и распродажах: ${shopList}. Все предложения получены напрямую от партнерских сетей и официальных рекламодателей.`,
-    `Как применить промокод: скопируйте код кнопкой «Копировать», перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Условия у каждого купона свои: где-то нужна минимальная сумма заказа, где-то промокод действует только для новых клиентов. Обязательно читайте описание перед переходом в магазин — так скидка применится с первого раза.`,
-    `Новые скидки в подборке «${colName}» появляются по мере обновления партнерских программ. Следите за обновлениями, чтобы вовремя активировать ${
+    )}. Предложения по магазинам: ${shopList}. Сроки и условия приведены в карточках; итоговую скидку нужно проверить перед оплатой.`,
+    `Как применить промокод: скопируйте код кнопкой «Копировать», перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Условия у каждого купона свои: где-то нужна минимальная сумма заказа, где-то промокод действует только для новых клиентов. Читайте условия до перехода: скидка может не подойти выбранным товарам или аккаунту.`,
+    `Состав подборки «${colName}» меняется по мере обновления партнёрских программ. Сравните условия, если выбираете ${
       top.length > 0 ? `акции ${top.join(", ")}` : "выгодные предложения"
     } и специальные скидки недели.`,
   ];
@@ -119,7 +117,7 @@ export default async function CollectionPage({
   const col = collections.find((c) => c.slug === slug);
   if (!col) notFound();
 
-  const list = withoutForbiddenGroceryCoPromotion(withoutForbiddenFloristBeautyCoPromotion(withoutForbiddenTanukiCoPromotion(all.filter(col.filter))));
+  const list = getCollectionCoupons(col, all);
   const storeNames = [...new Set(list.map((c) => c.store.name))];
   const paragraphs = seoText(col.name, storeNames, storeNames.length, list.length);
   const pageUrl = `${SITE_URL}/collections/${slug}`;
@@ -142,7 +140,7 @@ export default async function CollectionPage({
         name: `Где искать промокоды ${col.name.toLowerCase()}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Все актуальные купоны ${col.name.toLowerCase()} собраны на этой странице. Мы обновляем их каждый день по мере запуска акций партнёров.`,
+          text: `На этой странице показаны предложения, доступные в каталоге. Состав обновляется по мере синхронизации с партнёрами; условия нужно проверить у магазина.`,
         },
       },
       {
@@ -150,7 +148,7 @@ export default async function CollectionPage({
         name: `Как применить промокод ${col.name.toLowerCase()}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Скопируйте код кнопкой «Копировать» на карточке, перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Скидка применится сразу.",
+          text: "Скопируйте код кнопкой «Копировать» на карточке, перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Магазин покажет итоговую сумму до оплаты, если предложение подходит вашему заказу.",
         },
       },
     ],
@@ -170,7 +168,7 @@ export default async function CollectionPage({
         description: c.promocode.bonusName || c.store.name,
         url: `${SITE_URL}/store/${c.store.slug}`,
         priceValidUntil: c.promocode.expires,
-        availability: "https://schema.org/InStock",
+
         seller: { "@type": "Organization", name: c.store.name },
       },
     })),
@@ -191,7 +189,7 @@ export default async function CollectionPage({
       <JsonLd data={breadcrumb} />
       <JsonLd data={collectionJsonLd} />
       <JsonLd data={faqJsonLd} />
-      <JsonLd data={listing} />
+
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
         <nav
@@ -211,10 +209,16 @@ export default async function CollectionPage({
           Промокоды и купоны: {col.name}
         </h1>
         <p className="mt-3 max-w-2xl text-ink/60">
-          {list.length} {list.length === 1 ? "промокод" : "промокодов"} в
-          подборке «{col.name.toLowerCase()}». Обновляем ежедневно.
+          {list.length > 0
+            ? `${list.length} предложений с условиями и датами действия. Проверяйте итоговую сумму перед заказом.`
+            : "Сейчас действующих предложений в подборке нет. Откройте полный каталог."}
         </p>
 
+        {list.length === 0 && (
+          <Link href="/catalog" className="mt-5 inline-flex rounded-xl bg-red px-4 py-3 text-sm font-bold text-white">
+            Посмотреть все предложения →
+          </Link>
+        )}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {list.map((coupon) => (
             <CouponTicket
@@ -228,6 +232,14 @@ export default async function CollectionPage({
         </div>
 
         
+        {col.buyerTips && (
+          <section aria-label="Памятка покупателю" className="mt-12 max-w-3xl rounded-2xl border border-line bg-white p-5 sm:p-7">
+            <h2 className="font-display text-xl font-extrabold text-ink">Что проверить перед покупкой</h2>
+            <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-relaxed text-ink/75">
+              {col.buyerTips.map((tip, index) => <li key={index}>{tip}</li>)}
+            </ol>
+          </section>
+        )}
         <article className="mt-14 max-w-3xl">
           <h2 className="font-display text-lg font-extrabold">
             Купоны на {col.name.toLowerCase()} — что учесть перед покупкой
@@ -251,9 +263,8 @@ export default async function CollectionPage({
                 <span className="float-right text-red hidden group-open:inline">−</span>
               </summary>
               <p className="mt-3 text-sm leading-relaxed text-ink/70">
-                Все актуальные купоны {col.name.toLowerCase()} собраны на этой
-                странице. Мы обновляем их каждый день по мере запуска акций
-                партнёров.
+                На этой странице собраны предложения, доступные в каталоге.
+                Список меняется по мере обновления партнёрских программ. Проверяйте условия у магазина.
               </p>
             </details>
             <details className="group rounded-2xl border border-line bg-white px-5 py-4">
@@ -265,7 +276,7 @@ export default async function CollectionPage({
               <p className="mt-3 text-sm leading-relaxed text-ink/70">
                 Скопируйте код кнопкой «Копировать» на карточке, перейдите в
                 магазин по нашей ссылке и вставьте код в поле «Промокод» на
-                этапе оплаты. Скидка применится сразу.
+                этапе оплаты. Магазин покажет итоговую сумму до оплаты, если предложение подходит вашему заказу.
               </p>
             </details>
           </div>
