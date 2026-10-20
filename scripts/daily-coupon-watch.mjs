@@ -123,7 +123,9 @@ async function inspectSource(name, producer) {
 }
 
 await inspectSource("manual", () => Promise.resolve(getCustomCoupons(now)));
-await inspectSource("perfluence", () => fetchJson(SITE_URL + "/api/perfluence-snapshot"));
+// Audit the UNFILTERED feed; the public snapshot intentionally hides
+// unverified affiliate offers, but the watcher must still report them.
+await inspectSource("perfluence", () => fetchJson(SITE_URL + "/api/perfluence-audit"));
 await inspectSource("admitad", getPublishedAdmitad);
 
 const reconciledChanges = reconcileCrossSourceChanges(changes, state.sources, healthySources);

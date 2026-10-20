@@ -278,8 +278,11 @@ export function parsePayload(payloadJson: string): Coupon[] {
       const rawLanding = landingLink || primaryLink || site;
 
       const affiliate: Affiliate = {
-        link: normalizeAffiliateLink(rawLink, ordMarker),
-        landingLink: normalizeAffiliateLink(rawLanding, ordMarker),
+        // Never invent an ERID on a widget link from a separate ORD field.
+        // The original affiliate URL must carry its own verified token before
+        // the auto-imported offer is allowed into the public catalog.
+        link: normalizeAffiliateLink(rawLink),
+        landingLink: normalizeAffiliateLink(rawLanding),
         ordMarker,
         ordText,
       };
@@ -454,10 +457,17 @@ async function fetchSnapshot(): Promise<Coupon[]> {
   }
 }
 
-/** Только купоны Perfluence, без Admitad и прочих фидов — для /api/perfluence-snapshot. */
-export async function getPerfluenceCoupons(): Promise<Coupon[]> {
-  // Block the halted advertiser even in direct API snapshots and stale cache.
+/** Raw, read-only diagnostics: never consume this result for publication. */
+export async function getPerfluenceAuditCoupons(): Promise<Coupon[]> {
+  // Keep invalid and expired feed entries visible to daily health checks.
   return withoutPausedPublisherOffers(await fetchData()).filter(isApprovedOct16PublisherOffer).filter(isApprovedOct18WebsitePlacement);
+}
+
+/** Public fallback snapshot: only active, verified Perfluence widget offers. */
+export async function getPerfluenceCoupons(): Promise<Coupon[]> {
+  return (await getPerfluenceAuditCoupons())
+    .filter((coupon) => isCouponActive(coupon.promocode.expires))
+    .filter(isPublicPerfluenceWidgetCoupon);
 }
 
 async function fetchData(): Promise<Coupon[]> {

@@ -31,7 +31,44 @@ assert.equal(isPublicPerfluenceWidgetCoupon({
   affiliate: { ...approved.affiliate, ordText: "" },
 }), false);
 
+
+assert.equal(isPublicPerfluenceWidgetCoupon({
+  affiliate: { ...approved.affiliate, ordText: "Реклама. ООО Тест. erid: 2RanyWRONGabc" },
+}), false, "Text ERID must match link and ORD field");
+assert.equal(isPublicPerfluenceWidgetCoupon({
+  affiliate: { ...approved.affiliate, ordText: "Реклама. ООО Тест. erid пока не получен" },
+}), false, "Placeholder ERID text is not a valid disclosure");
+assert.equal(isPublicPerfluenceWidgetCoupon({
+  affiliate: { ...approved.affiliate, link: "https://example.prfl.me/sites/abc123?erid=2RanyTESTabc&erid=2RanyTESTabc" },
+}), false, "Duplicate ERID parameters must not pass");
+assert.equal(isPublicPerfluenceWidgetCoupon({
+  affiliate: { ...approved.affiliate, link: "https://example.prfl.me/sites/abc123", ordMarker: "2RanyTESTabc" },
+}), false, "ORD marker alone cannot repair an unverified source URL");
+
+const { parsePayload } = await import("../src/lib/perfluence.ts");
+const sample = JSON.stringify({ data: [{
+  project: { id: 1409, name: "ВинЛаб", site: "https://winlab.ru" },
+  groups: [{
+    landing: { link: "https://winlab.prfl.me/sites/test123?source=js-widget",
+      ord_marker: "2RanyTESTabc", ord_custom_text: "Реклама. ООО Тест. erid: 2RanyTESTabc" },
+    promocodes: [{ id: 4737, code: "WCPFOKT4737", date: "2026-10-31" }],
+  }],
+}] });
+const [winlab] = parsePayload(sample);
+assert.equal(winlab.affiliate.link, "https://winlab.prfl.me/sites/test123",
+  "Parsing cannot synthesize ERID from a different field");
+assert.equal(isPublicPerfluenceWidgetCoupon(winlab), false, "Unverified feed coupon must be quarantined");
+
 const source = fs.readFileSync("src/lib/perfluence.ts", "utf8");
 assert.match(source, /isPublicPerfluenceWidgetCoupon/);
 assert.match(source, /b\.source === "perfluence"/);
+assert.match(source, /\.filter\(isPublicPerfluenceWidgetCoupon\)/);
+assert.match(source, /getPerfluenceAuditCoupons/);
+const publicRoute = fs.readFileSync("src/app/api/perfluence-snapshot/route.ts", "utf8");
+assert.match(publicRoute, /getPerfluenceCoupons\(\)/);
+const auditRoute = fs.readFileSync("src/app/api/perfluence-audit/route.ts", "utf8");
+assert.match(auditRoute, /getPerfluenceAuditCoupons\(\)/);
+const monitor = fs.readFileSync("scripts/daily-coupon-watch.mjs", "utf8");
+assert.match(monitor, /\/api\/perfluence-audit/);
+assert.doesNotMatch(monitor, /fetchJson\(SITE_URL \+ "\/api\/perfluence-snapshot"/);
 console.log("PASS: Perfluence widget affiliate/erid/disclosure gate");
