@@ -6,16 +6,17 @@ import { decorateAdmitadUrl, generateClickId } from "@/lib/admitadAutopilot";
  * Preserve ERID, original link and native browser navigation.
  */
 export function getAttributedCouponHref(coupon: Coupon, placement: string, pageType: string): string {
-  const href = coupon.affiliate.link || coupon.store.site || "#";
-  if (coupon.promocode.group !== "admitad" || !coupon.affiliate.link) return href;
+  const href = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site || "#";
+  if (coupon.promocode.group !== "admitad" || !(coupon.affiliate.link || coupon.affiliate.landingLink)) return href;
   return decorateAdmitadUrl(href, { placement, pageType, couponId: coupon.id });
 }
 export function prepareAttributedCouponClick(
   anchor: HTMLAnchorElement, coupon: Coupon, placement: string, pageType: string,
 ): void {
-  if (coupon.promocode.group !== "admitad" || !coupon.affiliate.link) return;
+  const href = coupon.affiliate.link || coupon.affiliate.landingLink;
+  if (coupon.promocode.group !== "admitad" || !href) return;
   try {
-    anchor.href = decorateAdmitadUrl(coupon.affiliate.link, {
+    anchor.href = decorateAdmitadUrl(href, {
       placement, pageType, couponId: coupon.id, clickId: generateClickId(),
     });
   } catch {
