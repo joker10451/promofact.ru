@@ -124,8 +124,9 @@ assert.deepEqual(pickExpiringDeals([futureCode, { ...futureCode, id: 7002, promo
 assert.deepEqual(pickHotDeals([futureCode, { ...futureCode, id: 7003, promocode: { ...futureCode.promocode, code: "NO_CODE" } }], 3).map(c => c.id), [7001]);
 for (const path of ["src/app/page.tsx", "src/app/catalog/page.tsx", "src/app/promokody/page.tsx", "src/app/category/[slug]/page.tsx"]) {
   const page = fs.readFileSync(path, "utf8");
-  assert.ok(page.includes("export const revalidate = 3600;"),
-    `${path} must refresh live inventory, not cache a build-time snapshot forever`);
+  const isrSeconds = Number(page.match(/export const revalidate = (\d+);/)?.[1]);
+  assert.ok(Number.isInteger(isrSeconds) && isrSeconds >= 60 && isrSeconds <= 3600,
+    `${path} must use bounded ISR for live inventory rather than a perpetual build snapshot`);
 }
 const expiryCardSource = fs.readFileSync("src/components/ExpiringDeals.tsx", "utf8");
 assert.ok(expiryCardSource.includes("const end = expiryTimestamp(expires)") &&

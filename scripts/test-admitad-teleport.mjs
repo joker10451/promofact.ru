@@ -78,7 +78,12 @@ const navStart = ticket.indexOf("const prepareNativeAffiliateLink =");
 const navEnd = ticket.indexOf("const discountSizeClass =", navStart);
 assert.ok(navStart >= 0 && navEnd > navStart);
 const navigationHandlers = ticket.slice(navStart, navEnd);
-assert.ok(!navigationHandlers.includes("e.preventDefault(") && !navigationHandlers.includes("window.open("));
+const expiryOnly = /if \(!isCouponActive\(promocode\.expires\)\) \{\s*e\.preventDefault\(\);\s*setExpiredAttempt\(true\);\s*return;\s*\}/g;
+assert.equal([...navigationHandlers.matchAll(expiryOnly)].length, 2,
+  "Expired coupons must block native clicks before Teleport or analytics");
+assert.ok(!navigationHandlers.replace(expiryOnly, "").includes("e.preventDefault(") &&
+  !navigationHandlers.includes("window.open("),
+  "Valid Admitad links must keep native navigation without scripted popups");
 assert.match(privacy,/IP-адрес посетителя/);
 assert.match(consent,/document.cookie = "promofact_teleport_consent=yes/);
 assert.doesNotMatch(source,/searchParams.get\("url"\)/);

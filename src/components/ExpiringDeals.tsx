@@ -4,8 +4,10 @@ import Icon from "@/components/Icon";
 import { useState } from "react";
 import StoreLogo from "@/components/StoreLogo";
 import { ymReachGoal } from "@/components/YandexMetrika";
+import { homeCouponAnalyticsContext } from "@/lib/homeCouponAnalyticsContext";
 import type { Coupon } from "@/lib/types";
-import { expiryTimestamp } from "@/lib/couponExpiry";
+import { expiryTimestamp, isCouponActive } from "@/lib/couponExpiry";
+import { useCouponClock } from "@/lib/useCouponClock";
 import { getAttributedCouponHref, prepareAttributedCouponClick } from "@/lib/admitadOutboundLink";
 
 interface ExpiringDealsProps {
@@ -47,17 +49,25 @@ function expiryLabel(expires: string | null): { text: string; urgent: boolean } 
  */
 export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  // Recheck the cached SSR selection after hydration and as Moscow-time expiry passes.
+  const now = useCouponClock();
+  const visibleCoupons = now === null ? coupons : coupons.filter((c) => isCouponActive(c.promocode.expires, now));
 
-  const copy = async (code: string, storeName: string) => {
+  const copy = async (coupon: Coupon) => {
+    if (!isCouponActive(coupon.promocode.expires)) return;
+    const code = coupon.promocode.code;
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
       setTimeout(() => setCopiedCode(null), 2500);
-      ymReachGoal("expiring_deal_copy", { store: storeName });
+      // The homepage must participate in the SAME copy funnel as CouponTicket.
+      ymReachGoal("copy_code", homeCouponAnalyticsContext(coupon, "expiring_deals"));
+      // Keep the historical dashboard goal during migration.
+      ymReachGoal("expiring_deal_copy", { store: coupon.store.name });
     } catch {}
   };
 
-  if (coupons.length === 0) return null;
+  if (visibleCoupons.length === 0) return null;
 
   return (
     <section id="expiring" aria-label="Скоро заканчиваются" className="scroll-mt-24 relative overflow-hidden rounded-3xl border-2 border-red/20 bg-gradient-to-br from-red-50/50 via-white to-amber-50/40 p-6 sm:p-8 shadow-[0_8px_30px_rgba(255,51,85,0.06)]">
@@ -74,7 +84,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {coupons.map((coupon) => {
+        {visibleCoupons.map((coupon) => {
           const isCopied = copiedCode === coupon.promocode.code;
           const expiry = expiryLabel(coupon.promocode.expires);
           return (
@@ -114,7 +124,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                   <code className="truncate px-2 font-mono text-xs font-bold text-ink">{coupon.promocode.code}</code>
                   <button
                     type="button"
-                    onClick={() => copy(coupon.promocode.code, coupon.store.name)}
+                    onClick={() => copy(coupon)}
                     className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all ${
                       isCopied ? "bg-mint text-white" : "bg-yellow text-ink hover:bg-yellow/80"
                     }`}
@@ -129,7 +139,13 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                   target="_blank"
                   rel="nofollow sponsored noopener"
                   onClick={(event) => {
+                     if (!isCouponActive(coupon.promocode.expires)) {
+                       event.preventDefault();
+                       return;
+                     }
                      prepareAttributedCouponClick(event.currentTarget, coupon, "expiring_deal", "home");
+                     // A direct affiliate click; do not count it as an internal navigation.
+                     ymReachGoal("affiliate_click", homeCouponAnalyticsContext(coupon, "expiring_deals"));
                      ymReachGoal("click_expiring_store", { store: coupon.store.name });
                    }}
                   className="block w-full rounded-xl bg-ink py-2 text-center text-xs font-bold text-white transition-all hover:bg-red"

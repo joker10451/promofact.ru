@@ -1,6 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { isCouponActive } from "@/lib/couponExpiry";
+import { useCouponClock } from "@/lib/useCouponClock";
 import StoreLogo from "@/components/StoreLogo";
 import type { Coupon } from "@/lib/types";
+import { ymReachGoal } from "@/components/YandexMetrika";
+import { homeCouponAnalyticsContext } from "@/lib/homeCouponAnalyticsContext";
 
 /**
  * Editorial preview: only four actual, active offers from the shared live feed.
@@ -14,6 +20,8 @@ export default function HomeOffersPreview({
   coupons: Coupon[];
   totalCount: number;
 }) {
+  const now = useCouponClock();
+  const visibleCoupons = now === null ? coupons : coupons.filter((c) => isCouponActive(c.promocode.expires, now));
   return (
     <section aria-labelledby="home-offers-heading">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -25,7 +33,7 @@ export default function HomeOffersPreview({
             Хорошие предложения — сразу к делу
           </h2>
           <p className="mt-2 text-sm text-ink/60">
-            Небольшая подборка из {totalCount} действующих предложений. Полный каталог — с поиском и фильтрами.
+            Подборка из каталога ({totalCount} предложений по последнему обновлению). Полный список — с поиском и фильтрами.
           </p>
         </div>
         <Link href="/catalog#catalog"
@@ -34,9 +42,9 @@ export default function HomeOffersPreview({
         </Link>
       </div>
 
-      {coupons.length > 0 ? (
+      {visibleCoupons.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-          {coupons.map((coupon) => (
+          {visibleCoupons.map((coupon) => (
             <article key={`${coupon.store.slug}-${coupon.id}`} className="group flex min-w-0 flex-col rounded-[22px] border border-line bg-white p-4 shadow-[0_8px_30px_-25px_rgba(11,16,43,0.25)] transition-all hover:-translate-y-0.5 hover:border-red/40 hover:shadow-[0_16px_32px_-24px_rgba(11,16,43,0.3)] sm:p-5">
               <div className="flex items-center gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line bg-paper/50 p-1">
@@ -55,6 +63,14 @@ export default function HomeOffersPreview({
               </p>
               <div className="mt-auto pt-4">
                 <Link href={`/store/${coupon.store.slug}#coupon-${coupon.id}`}
+                  onClick={(event) => {
+                    if (!isCouponActive(coupon.promocode.expires)) {
+                      event.preventDefault();
+                      return;
+                    }
+                    // Internal navigation only: never inflate affiliate_click.
+                    ymReachGoal("home_offer_open", homeCouponAnalyticsContext(coupon, "home_offers_preview"));
+                  }}
                   className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-ink px-3 py-2.5 text-xs font-extrabold text-white transition-colors group-hover:bg-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red sm:text-sm">
                   Смотреть промокод <span className="ml-2" aria-hidden="true">→</span>
                 </Link>

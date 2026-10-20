@@ -33,6 +33,8 @@ export interface Affiliate {
   landingLink: string;
   ordMarker: string;
   ordText: string;
+  /** Raw widget URL, preserved before ERID enrichment for monitoring only. */
+  sourceLink?: string;
 }
 
 export interface Coupon {

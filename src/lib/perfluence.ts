@@ -78,7 +78,7 @@ export function normalizeAffiliateLink(link: string, ordMarker?: string): string
   try {
     const url = new URL(link);
     // Нормализуем только известные партнерские ссылки Perfluence (prfl.me)
-    if (url.hostname.endsWith("prfl.me") || url.hostname === "prfl.me") {
+    if (url.hostname === "prfl.me" || url.hostname.endsWith(".prfl.me")) {
       // Удаляем виджетные query-параметры трекинга
       url.searchParams.delete("source");
       url.searchParams.delete("source_id");
@@ -278,10 +278,16 @@ export function parsePayload(payloadJson: string): Coupon[] {
       const rawLanding = landingLink || primaryLink || site;
 
       const affiliate: Affiliate = {
+        // Widget URLs may omit ERID even when the same Perfluence payload
+        // explicitly supplies the token in ord_marker. Add only that sourced
+        // token, never synthesize a value when ord_marker is missing. The
+        // publication gate independently checks URL, field and legal text.
         link: normalizeAffiliateLink(rawLink, ordMarker),
         landingLink: normalizeAffiliateLink(rawLanding, ordMarker),
         ordMarker,
         ordText,
+        // Preserve exactly what Perfluence supplied, before normalizing the public link.
+        sourceLink: rawLink,
       };
 
       const extraLinks = links
@@ -454,10 +460,81 @@ async function fetchSnapshot(): Promise<Coupon[]> {
   }
 }
 
-/** Только купоны Perfluence, без Admitad и прочих фидов — для /api/perfluence-snapshot. */
-export async function getPerfluenceCoupons(): Promise<Coupon[]> {
-  // Block the halted advertiser even in direct API snapshots and stale cache.
+
+/**
+ * One publication approval policy shared by the merged site catalog and
+ * the Perfluence public snapshot. Diagnostic /api/perfluence-audit does NOT
+ * apply it, so blocked records remain available for health monitoring.
+ */
+export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
+  const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ЧАЙ"]);
+
+    if (c.store.slug === "magnit-dostavka") {
+      return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase());
+    }
+    // New site-specific Tanuki publication supersedes the stale widget URL and
+    // historical ERID. Deny unknown/historical codes until reviewed.
+    if (c.store.slug === "tanukifamily") {
+      const code = c.promocode.code.trim().toUpperCase();
+      return ["20FU1416", "15FU1416", "FU1417", "ZB1177"].includes(code) &&
+        c.affiliate.link === "https://tanuki.prfl.me/sites/wyy3z6?erid=2RanymqYc6X" &&
+        c.affiliate.ordMarker === "2RanymqYc6X" &&
+        c.affiliate.ordText.includes("erid: 2RanymqYc6X");
+    }
+    // Perfluence's old widget contains conflicting codes, expiry dates, URL
+    // and ERID. Only explicitly approved project website placement survives.
+    if (c.store.slug === "perekrestok-dostavka") {
+      const code = c.promocode.code.trim().toUpperCase();
+      return ["171LREDEY", "172E2Y5TJ", "174NYBBJV"].includes(code) &&
+        c.affiliate.link === "https://perekrestok.prfl.me/sites/9833ce?erid=2RanyngM9SB" &&
+        c.affiliate.ordMarker === "2RanyngM9SB" &&
+        c.affiliate.ordText.includes("erid: 2RanyngM9SB");
+    }
+    // Current WinLab publisher URL lacks an ERID in the supplied account view.
+    // Suppress legacy codes until the current token is supplied and checked.
+    if (c.store.slug === "winlab") return false;
+    // Only the newly approved affiliate URL/ERID can revive the previously
+    // suppressed 2,500 RUB code. An outdated Perfluence snapshot remains blocked.
+    // MTS Music co-promotion is prohibited elsewhere in publisherPlacementRules.
+    if (c.store.slug === "yandeks-puteshestviya") {
+      const code = c.promocode.code.trim().toUpperCase();
+      if (code === "PF-PREMIUMPRO-B66N2") {
+        return c.affiliate.link === "https://yandextravel.prfl.me/sites/t21yi1?erid=2RanynSc5X1" &&
+          c.affiliate.ordMarker === "2RanynSc5X1" &&
+          c.affiliate.ordText.includes("erid: 2RanynSc5X1");
+      }
+      return ["PF-ALLIOOO-EGGTH", "BOLSHE", "SHARJAH26"].includes(code);
+    }
+    // Ivi rotated the 35-day code and approved placement on 15 Oct 2026.
+    // Never show legacy FILM35 or an outdated tracking/ERID URL alongside the current offer.
+    if (c.store.slug === "ivi") {
+      return c.promocode.code.trim().toLowerCase() === "begrnta7swiz";
+    }
+    return true;
+
+}
+
+/** Raw, read-only diagnostics: never consume this result for publication. */
+export async function getPerfluenceAuditCoupons(): Promise<Coupon[]> {
+  // Keep invalid and expired feed entries visible to daily health checks.
   return withoutPausedPublisherOffers(await fetchData()).filter(isApprovedOct16PublisherOffer).filter(isApprovedOct18WebsitePlacement);
+}
+
+/** Strip source-only URLs before returning publishable coupons to site components. */
+function withoutPerfluenceAuditMetadata(coupon: Coupon): Coupon {
+  if (!coupon.affiliate.sourceLink) return coupon;
+  const affiliate = { ...coupon.affiliate };
+  delete affiliate.sourceLink;
+  return { ...coupon, affiliate };
+}
+
+/** Public fallback snapshot: only active, verified Perfluence widget offers. */
+export async function getPerfluenceCoupons(): Promise<Coupon[]> {
+  return (await getPerfluenceAuditCoupons())
+    .filter((coupon) => isCouponActive(coupon.promocode.expires))
+    .filter(isPublicPerfluenceWidgetCoupon)
+    .filter(isApprovedPublicCouponPlacement)
+    .map(withoutPerfluenceAuditMetadata);
 }
 
 async function fetchData(): Promise<Coupon[]> {
@@ -701,7 +778,7 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     ...baseBuckets.map((b) => ({
       source: b.source,
       coupons: b.source === "perfluence"
-        ? b.coupons.filter(isPublicPerfluenceWidgetCoupon)
+        ? b.coupons.filter(isPublicPerfluenceWidgetCoupon).map(withoutPerfluenceAuditMetadata)
         : b.coupons,
     })),
   ];
@@ -726,53 +803,11 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     );
   }
 
-  // Source snapshots still contain pre-14 October coupons. Do not let them
-  // reappear when code rotations require fresh publisher credentials.
-  const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ЧАЙ"]);
-  return withoutPausedPublisherOffers(coupons).filter(isApprovedOct16PublisherOffer).filter(isApprovedOct18WebsitePlacement).filter((c) => {
-    if (c.store.slug === "magnit-dostavka") {
-      return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase());
-    }
-    // New site-specific Tanuki publication supersedes the stale widget URL and
-    // historical ERID. Deny unknown/historical codes until reviewed.
-    if (c.store.slug === "tanukifamily") {
-      const code = c.promocode.code.trim().toUpperCase();
-      return ["20FU1416", "15FU1416", "FU1417", "ZB1177"].includes(code) &&
-        c.affiliate.link === "https://tanuki.prfl.me/sites/wyy3z6?erid=2RanymqYc6X" &&
-        c.affiliate.ordMarker === "2RanymqYc6X" &&
-        c.affiliate.ordText.includes("erid: 2RanymqYc6X");
-    }
-    // Perfluence's old widget contains conflicting codes, expiry dates, URL
-    // and ERID. Only explicitly approved project website placement survives.
-    if (c.store.slug === "perekrestok-dostavka") {
-      const code = c.promocode.code.trim().toUpperCase();
-      return ["171LREDEY", "172E2Y5TJ", "174NYBBJV"].includes(code) &&
-        c.affiliate.link === "https://perekrestok.prfl.me/sites/9833ce?erid=2RanyngM9SB" &&
-        c.affiliate.ordMarker === "2RanyngM9SB" &&
-        c.affiliate.ordText.includes("erid: 2RanyngM9SB");
-    }
-    // Current WinLab publisher URL lacks an ERID in the supplied account view.
-    // Suppress legacy codes until the current token is supplied and checked.
-    if (c.store.slug === "winlab") return false;
-    // Only the newly approved affiliate URL/ERID can revive the previously
-    // suppressed 2,500 RUB code. An outdated Perfluence snapshot remains blocked.
-    // MTS Music co-promotion is prohibited elsewhere in publisherPlacementRules.
-    if (c.store.slug === "yandeks-puteshestviya") {
-      const code = c.promocode.code.trim().toUpperCase();
-      if (code === "PF-PREMIUMPRO-B66N2") {
-        return c.affiliate.link === "https://yandextravel.prfl.me/sites/t21yi1?erid=2RanynSc5X1" &&
-          c.affiliate.ordMarker === "2RanynSc5X1" &&
-          c.affiliate.ordText.includes("erid: 2RanynSc5X1");
-      }
-      return ["PF-ALLIOOO-EGGTH", "BOLSHE", "SHARJAH26"].includes(code);
-    }
-    // Ivi rotated the 35-day code and approved placement on 15 Oct 2026.
-    // Never show legacy FILM35 or an outdated tracking/ERID URL alongside the current offer.
-    if (c.store.slug === "ivi") {
-      return c.promocode.code.trim().toLowerCase() === "begrnta7swiz";
-    }
-    return true;
-  }).map((c) => {
+  // Publisher restrictions apply identically to site pages and snapshot.
+  return withoutPausedPublisherOffers(coupons)
+    .filter(isApprovedOct16PublisherOffer)
+    .filter(isApprovedOct18WebsitePlacement)
+    .filter(isApprovedPublicCouponPlacement).map((c) => {
     const logo = proxiedLogo(c.store.logo);
     const ordText = withErid(c.affiliate.ordText, c.affiliate.ordMarker);
     if (logo === c.store.logo && ordText === c.affiliate.ordText) return c;

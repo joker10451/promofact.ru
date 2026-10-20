@@ -19,7 +19,7 @@ import { withoutForbiddenTravelCoPromotion, withoutForbiddenTanukiCoPromotion, w
 
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const revalidate = 3600; // Обновление раз в час: актуальные акции не ждут следующего деплоя.
+export const revalidate = 900; // Обновление не реже чем раз в 15 минут; клиент дополнительно скрывает истёкшие купоны.
 
 export default async function Home() {
   const [coupons, stores, uses] = await Promise.all([

@@ -7,7 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { getCustomCoupons } from "../src/lib/customCoupons.ts";
-import { inspectCoupons, compareInventories, checkSourceCompleteness } from "./coupon-watch-core.mjs";
+import { inspectCoupons, compareInventories, checkSourceCompleteness, checkPerfluenceAuditProvenance, reconcileCrossSourceChanges } from "./coupon-watch-core.mjs";
 
 const OUTPUT = path.resolve("audit-results");
 const STATE_PATH = path.join(OUTPUT, "coupon-watch-state.json");
@@ -34,6 +34,9 @@ const changes = [];
 const findings = [];
 const expiring = [];
 const errors = [];
+const healthySources = new Set();
+let totalFindings = 0;
+let totalCriticalFindings = 0;
 
 async function fetchJson(url) {
   const response = await fetch(url, {
@@ -91,6 +94,14 @@ async function inspectSource(name, producer) {
       sourceReports.push({ source: name, status: "skipped", message: raw.skipped });
       return;
     }
+    if (name === "perfluence") {
+      const provenance = checkPerfluenceAuditProvenance(raw, now);
+      if (!provenance.ok) {
+        const anomaly = new Error(provenance.detail);
+        anomaly.sourceAnomaly = true;
+        throw anomaly;
+      }
+    }
     const result = inspectCoupons(raw, name, now);
     const prior = previous.sources[name];
     const completeness = checkSourceCompleteness(prior, result, name, now);
@@ -100,12 +111,15 @@ async function inspectSource(name, producer) {
       throw anomaly;
     }
     if (prior?.records) changes.push(...compareInventories(prior, result, now));
+    healthySources.add(name);
     findings.push(...result.findings);
+    totalFindings += result.findingsTotal ?? result.findings.length;
+    totalCriticalFindings += result.criticalTotal ?? result.findings.filter((f) => f.severity === "critical").length;
     expiring.push(...result.expiring);
     state.sources[name] = { records: result.records, consecutiveFailures: 0 };
     sourceReports.push({
       source: name, status: "ok", active: result.activeCount, codes: result.codeCount,
-      deals: result.noCodeCount, expired: result.expiredCount, issues: result.findings.length,
+      deals: result.noCodeCount, expired: result.expiredCount, issues: result.findingsTotal ?? result.findings.length,
     });
   } catch (error) {
     const previousFailures = previous.sources[name]?.consecutiveFailures || 0;
@@ -121,12 +135,15 @@ async function inspectSource(name, producer) {
 }
 
 await inspectSource("manual", () => Promise.resolve(getCustomCoupons(now)));
-await inspectSource("perfluence", () => fetchJson(SITE_URL + "/api/perfluence-snapshot"));
+// Audit the UNFILTERED feed; the public snapshot intentionally hides
+// unverified affiliate offers, but the watcher must still report them.
+await inspectSource("perfluence", () => fetchJson(SITE_URL + "/api/perfluence-audit"));
 await inspectSource("admitad", getPublishedAdmitad);
 
+const reconciledChanges = reconcileCrossSourceChanges(changes, state.sources, healthySources);
 const critical = findings.filter((f) => f.severity === "critical");
-const majorChanges = changes.filter((c) => ["removed", "changed"].includes(c.type));
-const newOffers = changes.filter((c) => c.type === "new");
+const majorChanges = reconciledChanges.filter((c) => ["removed", "changed"].includes(c.type));
+const newOffers = reconciledChanges.filter((c) => c.type === "new");
 const outages = errors.filter((e) => e.consecutiveFailures >= 2 || e.anomaly);
 const attention = [
   ...critical.map(getMessageLine),
@@ -138,8 +155,8 @@ const attention = [
 ].slice(0, 75);
 const report = {
   generatedAt: state.generatedAt,
-  sourceReports, criticalCount: critical.length, warningCount: findings.length - critical.length,
-  changes, expiring, outages, findings, attention, requiresAttention: attention.length > 0,
+  sourceReports, criticalCount: totalCriticalFindings, warningCount: totalFindings - totalCriticalFindings,
+  changes: reconciledChanges, expiring, outages, findings, attention, requiresAttention: attention.length > 0,
 };
 const lines = [
   "# Ежедневный контроль промокодов — " + state.generatedAt,
@@ -152,8 +169,8 @@ const lines = [
     (r.message ? " (" + r.message.replace(/\|/g, "/") + ")" : "") + " | " +
     (r.active ?? "—") + " | " + (r.codes ?? "—") + " | " + (r.deals ?? "—") + " |"),
   "",
-  "Критичных нарушений: **" + critical.length + "**; предупреждений: **" +
-    (findings.length - critical.length) + "**; изменений: **" + changes.length +
+  "Критичных нарушений: **" + totalCriticalFindings + "**; предупреждений: **" +
+    (totalFindings - totalCriticalFindings) + "**; изменений: **" + reconciledChanges.length +
     "**; акций ручного каталога с окончанием менее чем через 48 ч: **" + expiring.length + "**.",
   "",
   "## Требуют внимания",
@@ -161,8 +178,8 @@ const lines = [
   ...(attention.length > maxLines ? ["- И ещё " + (attention.length - maxLines) + " — в JSON-отчёте."] : []),
   "",
   "## Изменения относительно предыдущего успешного снимка",
-  ...(!changes.length ? ["- Нет изменений; или это первый запуск / источник пока недоступен."] :
-    changes.slice(0, maxLines).map((c) => "- " + c.type + " · " + c.source + " · " + c.slug +
+  ...(!reconciledChanges.length ? ["- Нет изменений; или это первый запуск / источник пока недоступен."] :
+    reconciledChanges.slice(0, maxLines).map((c) => "- " + c.type + " · " + c.source + " · " + c.slug +
       (c.code ? " / " + c.code : "") + ": " + c.detail)),
   "",
   "## Заканчиваются за 48 часов (ручные партнёрские размещения)",
@@ -179,4 +196,4 @@ fs.writeFileSync(MARKDOWN_PATH, lines.join("\n") + "\n");
 fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2) + "\n");
 console.log(lines.join("\n"));
 console.log("JSON report:", JSON_PATH);
-if (critical.length || outages.length) process.exitCode = 1;
+if (totalCriticalFindings || outages.length) process.exitCode = 1;
