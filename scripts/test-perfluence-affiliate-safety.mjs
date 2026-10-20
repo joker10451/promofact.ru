@@ -59,6 +59,9 @@ assert.equal(winlab.affiliate.link, "https://winlab.prfl.me/sites/test123",
   "An absent source ORD marker must never create a URL token");
 assert.equal(isPublicPerfluenceWidgetCoupon(winlab), false,
   "Unknown WinLab ERID must remain quarantined");
+assert.equal(winlab.affiliate.sourceLink,
+  "https://winlab.prfl.me/sites/test123?source=js-widget",
+  "Source URL must preserve the original WinLab link without ERID");
 
 const feed = JSON.parse(fs.readFileSync("src/data/perfluence-feed.json", "utf8"));
 const approvedSample = feed.data.find((item) => JSON.stringify(item).includes("PERPREGA309361"));
@@ -71,6 +74,9 @@ assert.equal(pregnancy.affiliate.link,
   "A real Perfluence-supplied token may be appended to its tracking link");
 assert.equal(isPublicPerfluenceWidgetCoupon(pregnancy), true,
   "Verified SberHealth code must not disappear from the catalog");
+assert.equal(pregnancy.affiliate.sourceLink,
+  "https://sberanalizy.prfl.me/sites/jhtq64?source=js-widget&source_id=8842",
+  "Original Perfluence link must remain unchanged even after enrichment");
 
 const fake = JSON.parse(JSON.stringify(approvedSample));
 fake.groups[0].promocodes[0].ord_marker = "";
@@ -79,11 +85,37 @@ assert.equal(new URL(missing.affiliate.link).searchParams.get("erid"), null);
 assert.equal(isPublicPerfluenceWidgetCoupon(missing), false,
   "No marker in the source means no ERID in the published link");
 
+const { inspectCoupons } = await import("./coupon-watch-core.mjs");
+const timestamp = new Date("2026-10-20T12:00:00+03:00").getTime();
+const pregnancyAudit = inspectCoupons([pregnancy], "perfluence", timestamp);
+assert.equal(pregnancyAudit.criticalTotal, 0);
+assert(pregnancyAudit.findings.some((f) => f.severity === "warning" &&
+  f.detail.includes("Исходная ссылка Perfluence без erid")),
+  "Audit must detect a missing ERID in the untouched source URL");
+const winlabAudit = inspectCoupons([winlab], "perfluence", timestamp);
+assert(winlabAudit.findings.some((f) => f.severity === "critical" &&
+  f.detail.includes("без параметра erid")),
+  "The unknown WinLab marker must still cause a critical incident");
+
+const { getPerfluenceCoupons, getPerfluenceAuditCoupons, normalizeAffiliateLink } =
+  await import("../src/lib/perfluence.ts");
+const safeCoupon = (await getPerfluenceCoupons()).find((c) => c.promocode.code === "PERPREGA309361");
+assert.ok(safeCoupon, "The accepted SberHealth coupon must remain publicly available");
+assert.equal(safeCoupon.affiliate.sourceLink, undefined,
+  "Original source-only URL must not be shipped in public catalog JSON");
+const auditCoupon = (await getPerfluenceAuditCoupons()).find((c) => c.promocode.code === "PERPREGA309361");
+assert.ok(auditCoupon?.affiliate.sourceLink, "Unfiltered audit feed retains provenance");
+const malicious = "https://evilprfl.me/sites/fake?source=js-widget";
+assert.equal(normalizeAffiliateLink(malicious, "2RanyTESTabc"), malicious,
+  "Lookalike domain must never be decorated with a Perfluence ERID");
+
 const source = fs.readFileSync("src/lib/perfluence.ts", "utf8");
 assert.match(source, /isPublicPerfluenceWidgetCoupon/);
 assert.match(source, /b\.source === "perfluence"/);
 assert.match(source, /\.filter\(isPublicPerfluenceWidgetCoupon\)/);
 assert.match(source, /getPerfluenceAuditCoupons/);
+assert.match(source, /sourceLink: rawLink/);
+assert.match(source, /\.map\(withoutPerfluenceAuditMetadata\)/);
 const publicRoute = fs.readFileSync("src/app/api/perfluence-snapshot/route.ts", "utf8");
 assert.match(publicRoute, /getPerfluenceCoupons\(\)/);
 const auditRoute = fs.readFileSync("src/app/api/perfluence-audit/route.ts", "utf8");

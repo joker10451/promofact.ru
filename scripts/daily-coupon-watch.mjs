@@ -35,6 +35,8 @@ const findings = [];
 const expiring = [];
 const errors = [];
 const healthySources = new Set();
+let totalFindings = 0;
+let totalCriticalFindings = 0;
 
 async function fetchJson(url) {
   const response = await fetch(url, {
@@ -103,11 +105,13 @@ async function inspectSource(name, producer) {
     if (prior?.records) changes.push(...compareInventories(prior, result, now));
     healthySources.add(name);
     findings.push(...result.findings);
+    totalFindings += result.findingsTotal ?? result.findings.length;
+    totalCriticalFindings += result.criticalTotal ?? result.findings.filter((f) => f.severity === "critical").length;
     expiring.push(...result.expiring);
     state.sources[name] = { records: result.records, consecutiveFailures: 0 };
     sourceReports.push({
       source: name, status: "ok", active: result.activeCount, codes: result.codeCount,
-      deals: result.noCodeCount, expired: result.expiredCount, issues: result.findings.length,
+      deals: result.noCodeCount, expired: result.expiredCount, issues: result.findingsTotal ?? result.findings.length,
     });
   } catch (error) {
     const previousFailures = previous.sources[name]?.consecutiveFailures || 0;
@@ -143,7 +147,7 @@ const attention = [
 ].slice(0, 75);
 const report = {
   generatedAt: state.generatedAt,
-  sourceReports, criticalCount: critical.length, warningCount: findings.length - critical.length,
+  sourceReports, criticalCount: totalCriticalFindings, warningCount: totalFindings - totalCriticalFindings,
   changes: reconciledChanges, expiring, outages, findings, attention, requiresAttention: attention.length > 0,
 };
 const lines = [
@@ -157,8 +161,8 @@ const lines = [
     (r.message ? " (" + r.message.replace(/\|/g, "/") + ")" : "") + " | " +
     (r.active ?? "—") + " | " + (r.codes ?? "—") + " | " + (r.deals ?? "—") + " |"),
   "",
-  "Критичных нарушений: **" + critical.length + "**; предупреждений: **" +
-    (findings.length - critical.length) + "**; изменений: **" + reconciledChanges.length +
+  "Критичных нарушений: **" + totalCriticalFindings + "**; предупреждений: **" +
+    (totalFindings - totalCriticalFindings) + "**; изменений: **" + reconciledChanges.length +
     "**; акций ручного каталога с окончанием менее чем через 48 ч: **" + expiring.length + "**.",
   "",
   "## Требуют внимания",
@@ -184,4 +188,4 @@ fs.writeFileSync(MARKDOWN_PATH, lines.join("\n") + "\n");
 fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2) + "\n");
 console.log(lines.join("\n"));
 console.log("JSON report:", JSON_PATH);
-if (critical.length || outages.length) process.exitCode = 1;
+if (totalCriticalFindings || outages.length) process.exitCode = 1;

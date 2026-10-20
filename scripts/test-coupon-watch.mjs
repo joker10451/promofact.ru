@@ -110,6 +110,45 @@ assert.equal(reconcileCrossSourceChanges(movedChanges, { perfluence: movedCurren
 const notMoved = inspectCoupons([coupon(12, "DIFFERENT", "2026-10-31", { slug: "moved" })], "manual", timestamp);
 assert.equal(reconcileCrossSourceChanges(movedChanges, { perfluence: movedCurrent, manual: notMoved }, new Set(["perfluence", "manual"]))[0].type, "removed");
 
+const normalizedFromPartner = coupon(1001, "PARTNERERID");
+normalizedFromPartner.affiliate.sourceLink = "https://store.prfl.me/sites/abc123?source=js-widget";
+const tagged = inspectCoupons([normalizedFromPartner], "perfluence", timestamp);
+assert.equal(tagged.criticalTotal, 0, "Sourced ERID should not be incorrectly marked as unknown");
+assert.equal(tagged.findingsTotal, 1, "Original link gap must remain visible");
+assert.match(tagged.findings[0].detail, /Исходная ссылка Perfluence без erid/);
+
+const unknownSourceToken = coupon(1002, "UNKNOWNERID", "2026-10-31", {
+  link: "https://store.prfl.me/sites/abc123", marker: "", text: "Реклама. ERID пока нет",
+});
+unknownSourceToken.affiliate.sourceLink = unknownSourceToken.affiliate.link;
+const missingOriginal = inspectCoupons([unknownSourceToken], "perfluence", timestamp);
+assert(missingOriginal.criticalTotal >= 1, "Completely unknown source token remains critical");
+
+const suspiciousSource = coupon(1003, "SUSPICIOUS");
+suspiciousSource.affiliate.sourceLink = "https://store.prfl.me/sites/abc123?erid=2RanyOTHER";
+assert(inspectCoupons([suspiciousSource], "perfluence", timestamp)
+  .findings.some((f) => f.severity === "critical" && f.detail.includes("исходной ссылки")),
+  "Mismatched original token must be caught even when published URL is valid");
+
+const lotsOfWarnings = Array.from({ length: 70 }, (_, i) => {
+  const item = coupon(1100 + i, "NOISE" + i);
+  item.affiliate.sourceLink = "https://store.prfl.me/sites/abc123";
+  return item;
+});
+const priority = inspectCoupons([...lotsOfWarnings, unknownSourceToken], "perfluence", timestamp);
+assert(priority.criticalTotal >= 1 && priority.findings.some((f) => f.severity === "critical"),
+  "Warnings cannot push later critical offers beyond the report cap");
+assert(priority.findingsTotal > priority.findings.length, "Reported totals must not be capped");
+
+const oldState = inspectCoupons([coupon(1001, "PARTNERERID")], "perfluence", timestamp);
+assert.equal(compareInventories(oldState, tagged, timestamp).length, 0,
+  "Introducing sourceLink alone should not make existing offers appear changed");
+const changedOriginal = coupon(1001, "PARTNERERID");
+changedOriginal.affiliate.sourceLink = "https://store.prfl.me/sites/changed?source=js-widget";
+const changed = inspectCoupons([changedOriginal], "perfluence", timestamp);
+assert.equal(compareInventories(tagged, changed, timestamp)[0].type, "changed",
+  "A later change of the source URL must be observable despite unchanged public link");
+
 const workflow = fs.readFileSync(".github/workflows/daily-coupon-watch.yml", "utf8");
 assert(workflow.includes('cron: "10 5 * * *"'));
 assert(workflow.includes("permissions:\n  contents: read\n  issues: write"));

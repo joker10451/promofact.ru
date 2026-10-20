@@ -78,7 +78,7 @@ export function normalizeAffiliateLink(link: string, ordMarker?: string): string
   try {
     const url = new URL(link);
     // Нормализуем только известные партнерские ссылки Perfluence (prfl.me)
-    if (url.hostname.endsWith("prfl.me") || url.hostname === "prfl.me") {
+    if (url.hostname === "prfl.me" || url.hostname.endsWith(".prfl.me")) {
       // Удаляем виджетные query-параметры трекинга
       url.searchParams.delete("source");
       url.searchParams.delete("source_id");
@@ -286,6 +286,8 @@ export function parsePayload(payloadJson: string): Coupon[] {
         landingLink: normalizeAffiliateLink(rawLanding, ordMarker),
         ordMarker,
         ordText,
+        // Preserve exactly what Perfluence supplied, before normalizing the public link.
+        sourceLink: rawLink,
       };
 
       const extraLinks = links
@@ -465,11 +467,20 @@ export async function getPerfluenceAuditCoupons(): Promise<Coupon[]> {
   return withoutPausedPublisherOffers(await fetchData()).filter(isApprovedOct16PublisherOffer).filter(isApprovedOct18WebsitePlacement);
 }
 
+/** Strip source-only URLs before returning publishable coupons to site components. */
+function withoutPerfluenceAuditMetadata(coupon: Coupon): Coupon {
+  if (!coupon.affiliate.sourceLink) return coupon;
+  const affiliate = { ...coupon.affiliate };
+  delete affiliate.sourceLink;
+  return { ...coupon, affiliate };
+}
+
 /** Public fallback snapshot: only active, verified Perfluence widget offers. */
 export async function getPerfluenceCoupons(): Promise<Coupon[]> {
   return (await getPerfluenceAuditCoupons())
     .filter((coupon) => isCouponActive(coupon.promocode.expires))
-    .filter(isPublicPerfluenceWidgetCoupon);
+    .filter(isPublicPerfluenceWidgetCoupon)
+    .map(withoutPerfluenceAuditMetadata);
 }
 
 async function fetchData(): Promise<Coupon[]> {
@@ -713,7 +724,7 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     ...baseBuckets.map((b) => ({
       source: b.source,
       coupons: b.source === "perfluence"
-        ? b.coupons.filter(isPublicPerfluenceWidgetCoupon)
+        ? b.coupons.filter(isPublicPerfluenceWidgetCoupon).map(withoutPerfluenceAuditMetadata)
         : b.coupons,
     })),
   ];
