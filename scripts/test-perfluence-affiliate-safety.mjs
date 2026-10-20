@@ -109,6 +109,36 @@ const malicious = "https://evilprfl.me/sites/fake?source=js-widget";
 assert.equal(normalizeAffiliateLink(malicious, "2RanyTESTabc"), malicious,
   "Lookalike domain must never be decorated with a Perfluence ERID");
 
+
+const { isApprovedPublicCouponPlacement } = await import("../src/lib/perfluence.ts");
+const validWinLab = {
+  ...winlab,
+  affiliate: { ...winlab.affiliate,
+    link: "https://winelab.prfl.me/sites/lnf1cg?erid=2RanyEXAMPLE",
+    ordMarker: "2RanyEXAMPLE",
+    ordText: "Реклама. ООО Тест. erid: 2RanyEXAMPLE" },
+};
+assert.equal(isPublicPerfluenceWidgetCoupon(validWinLab), true,
+  "A syntactically valid ERID alone cannot certify a paused advertiser");
+assert.equal(isApprovedPublicCouponPlacement(validWinLab), false,
+  "WinLab must remain blocked even after a token is present in the Perfluence feed");
+const oldIvi = { ...validWinLab, store: { ...validWinLab.store, slug: "ivi" },
+  promocode: { ...validWinLab.promocode, code: "FILM35" } };
+assert.equal(isApprovedPublicCouponPlacement(oldIvi), false,
+  "Old IVI promo must not leak through public API");
+const approvedIvi = { ...oldIvi, promocode: { ...oldIvi.promocode, code: "begrnta7swiz" } };
+assert.equal(isApprovedPublicCouponPlacement(approvedIvi), true,
+  "New approved IVI promo must pass the shared policy");
+const wrongTanuki = { ...approvedIvi, store: { ...approvedIvi.store, slug: "tanukifamily" },
+  promocode: { ...approvedIvi.promocode, code: "20FU1416" } };
+assert.equal(isApprovedPublicCouponPlacement(wrongTanuki), false,
+  "Tanuki must require exact approved affiliate link and ERID");
+const publishedPerfluence = await getPerfluenceCoupons();
+assert(publishedPerfluence.every(isApprovedPublicCouponPlacement),
+  "No unapproved publisher may appear in the public snapshot");
+assert(publishedPerfluence.every((c) => !c.affiliate.sourceLink),
+  "Original audit-only tracking URLs must not leak into public API");
+
 const source = fs.readFileSync("src/lib/perfluence.ts", "utf8");
 assert.match(source, /isPublicPerfluenceWidgetCoupon/);
 assert.match(source, /b\.source === "perfluence"/);
