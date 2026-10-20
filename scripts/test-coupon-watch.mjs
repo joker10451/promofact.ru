@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { inspectCoupons, compareInventories, checkSourceCompleteness, reconcileCrossSourceChanges } from "./coupon-watch-core.mjs";
+import { inspectCoupons, compareInventories, checkSourceCompleteness, checkPerfluenceAuditProvenance, reconcileCrossSourceChanges } from "./coupon-watch-core.mjs";
 
 function coupon(id, code, expires = "2026-10-31", options = {}) {
   const erid = options.erid || "2RanykEXAMPLE";
@@ -148,6 +148,38 @@ changedOriginal.affiliate.sourceLink = "https://store.prfl.me/sites/changed?sour
 const changed = inspectCoupons([changedOriginal], "perfluence", timestamp);
 assert.equal(compareInventories(tagged, changed, timestamp)[0].type, "changed",
   "A later change of the source URL must be observable despite unchanged public link");
+
+const provenanceTime = new Date("2026-10-20T12:00:00+03:00").getTime();
+const provenanceCoupon = (id, expires = "2026-10-31") => {
+  const entry = coupon(id, "SRC" + id, expires);
+  entry.affiliate.sourceLink = "https://store.prfl.me/sites/abc123?source=js-widget";
+  return entry;
+};
+const intact = [provenanceCoupon(1), provenanceCoupon(2), provenanceCoupon(3)];
+assert.equal(checkPerfluenceAuditProvenance(intact, provenanceTime).ok, true);
+const oldPublicSnapshot = intact.map(({ affiliate, ...rest }) => ({
+  ...rest, affiliate: { ...affiliate, sourceLink: undefined },
+}));
+assert.equal(checkPerfluenceAuditProvenance(oldPublicSnapshot, provenanceTime).ok, false,
+  "Sanitized fallback snapshots must not be accepted as a fresh raw feed");
+const halfMissing = [
+  intact[0], { ...intact[1], affiliate: { ...intact[1].affiliate, sourceLink: undefined } },
+  { ...intact[2], affiliate: { ...intact[2].affiliate, sourceLink: undefined } },
+];
+const anomaly = checkPerfluenceAuditProvenance(halfMissing, provenanceTime);
+assert.equal(anomaly.ok, false);
+assert.equal(anomaly.missing, 2);
+assert.match(anomaly.detail, /baseline сохранён/);
+const oneMissing = [
+  intact[0], intact[1],
+  { ...intact[2], affiliate: { ...intact[2].affiliate, sourceLink: undefined } },
+];
+assert.equal(checkPerfluenceAuditProvenance(oneMissing, provenanceTime).ok, true,
+  "Small gaps are diagnosed per offer without making the entire source unavailable");
+const expiredMissing = provenanceCoupon(9, "2026-10-19");
+delete expiredMissing.affiliate.sourceLink;
+assert.equal(checkPerfluenceAuditProvenance([...intact, expiredMissing], provenanceTime).ok, true,
+  "Expired records must not turn a healthy feed into an outage");
 
 const workflow = fs.readFileSync(".github/workflows/daily-coupon-watch.yml", "utf8");
 assert(workflow.includes('cron: "10 5 * * *"'));

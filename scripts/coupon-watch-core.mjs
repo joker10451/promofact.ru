@@ -175,6 +175,28 @@ export function compareInventories(previous, current, now = Date.now()) {
  * of still-valid offers disappeared. Check only still-active previous offers:
  * planned expirations are not "source loss". Manual entries are versioned.
  */
+/**
+ * A public fallback snapshot has sourceLink stripped for visitor safety.
+ * Such a snapshot must never masquerade as the full diagnostic Perfluence
+ * feed: accepting it would create false disappearances and a bad baseline.
+ * Ignore already expired offers, and allow a small number of partial gaps
+ * to remain visible as ordinary per-offer provenance warnings.
+ */
+export function checkPerfluenceAuditProvenance(coupons, now = Date.now()) {
+  const active = coupons.filter((coupon) =>
+    isCouponActive(coupon?.promocode?.expires || null, now));
+  const missing = active.filter((coupon) => !toStr(coupon?.affiliate?.sourceLink)).length;
+  if (active.length && missing >= Math.ceil(active.length * 0.5)) {
+    return {
+      ok: false, active: active.length, missing,
+      detail: "Диагностический фид Perfluence неполон: отсутствуют исходные ссылки у " +
+        missing + " из " + active.length + " активных предложений. " +
+        "Возможен резервный публичный снимок; последний успешный baseline сохранён.",
+    };
+  }
+  return { ok: true, active: active.length, missing };
+}
+
 export function checkSourceCompleteness(previous, current, source, now = Date.now()) {
   if (source === "manual") return { ok: true };
   const old = Object.values(previous?.records || {}).filter((r) =>

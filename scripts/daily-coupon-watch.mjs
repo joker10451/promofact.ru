@@ -7,7 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { getCustomCoupons } from "../src/lib/customCoupons.ts";
-import { inspectCoupons, compareInventories, checkSourceCompleteness, reconcileCrossSourceChanges } from "./coupon-watch-core.mjs";
+import { inspectCoupons, compareInventories, checkSourceCompleteness, checkPerfluenceAuditProvenance, reconcileCrossSourceChanges } from "./coupon-watch-core.mjs";
 
 const OUTPUT = path.resolve("audit-results");
 const STATE_PATH = path.join(OUTPUT, "coupon-watch-state.json");
@@ -93,6 +93,14 @@ async function inspectSource(name, producer) {
     if (raw?.skipped) {
       sourceReports.push({ source: name, status: "skipped", message: raw.skipped });
       return;
+    }
+    if (name === "perfluence") {
+      const provenance = checkPerfluenceAuditProvenance(raw, now);
+      if (!provenance.ok) {
+        const anomaly = new Error(provenance.detail);
+        anomaly.sourceAnomaly = true;
+        throw anomaly;
+      }
     }
     const result = inspectCoupons(raw, name, now);
     const prior = previous.sources[name];
