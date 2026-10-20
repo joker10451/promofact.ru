@@ -96,7 +96,7 @@ export function compareInventories(previous, current, now = Date.now()) {
   }
   for (const [key, entry] of Object.entries(old)) {
     if (fresh[key] || !isCouponActive(entry.expires || null, now)) continue;
-    changes.push({ type: "removed", source: entry.source, slug: entry.slug, code: entry.code, detail: "Активное по сроку предложение исчезло из источника" });
+    changes.push({ type: "removed", source: entry.source, slug: entry.slug, code: entry.code, kind: entry.kind, identity: entry.kind === "deal" ? entry.key.split("|").at(-1) : entry.code, detail: "Активное по сроку предложение исчезло из источника" });
   }
   return changes.slice(0, 200);
 }
@@ -131,4 +131,29 @@ export function checkSourceCompleteness(previous, current, source, now = Date.no
     };
   }
   return { ok: true };
+}
+
+/**
+ * Reconcile source-specific removals against the entire current inventory.
+ * An offer that is still available under another source is a transfer, not
+ * a disappearance. Do not suppress removals when the other source failed.
+ */
+export function reconcileCrossSourceChanges(changes, sourceStates, healthySources) {
+  const indexes = new Map();
+  for (const source of healthySources) {
+    const records = sourceStates[source]?.records || {};
+    for (const record of Object.values(records)) {
+      const identity = [record.slug, record.kind, record.code || record.key.split("|").at(-1)].join("|");
+      if (!indexes.has(identity)) indexes.set(identity, new Set());
+      indexes.get(identity).add(source);
+    }
+  }
+  return changes.map((change) => {
+    if (change.type !== "removed") return change;
+    const identity = [change.slug, change.kind, change.code || change.identity].join("|");
+    const found = [...(indexes.get(identity) || [])].filter((source) => source !== change.source);
+    return found.length
+      ? { ...change, type: "transferred", detail: "Предложение отсутствует в прежнем источнике, но найдено в " + found.join(", ") }
+      : change;
+  });
 }
