@@ -4,6 +4,7 @@ import Icon from "@/components/Icon";
 import { useState } from "react";
 import StoreLogo from "@/components/StoreLogo";
 import { ymReachGoal } from "@/components/YandexMetrika";
+import { homeCouponAnalyticsContext } from "@/lib/homeCouponAnalyticsContext";
 import type { Coupon } from "@/lib/types";
 import { expiryTimestamp, isCouponActive } from "@/lib/couponExpiry";
 import { useCouponClock } from "@/lib/useCouponClock";
@@ -52,13 +53,17 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
   const now = useCouponClock();
   const visibleCoupons = now === null ? coupons : coupons.filter((c) => isCouponActive(c.promocode.expires, now));
 
-  const copy = async (code: string, storeName: string, expires: string | null) => {
-    if (!isCouponActive(expires)) return;
+  const copy = async (coupon: Coupon) => {
+    if (!isCouponActive(coupon.promocode.expires)) return;
+    const code = coupon.promocode.code;
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
       setTimeout(() => setCopiedCode(null), 2500);
-      ymReachGoal("expiring_deal_copy", { store: storeName });
+      // The homepage must participate in the SAME copy funnel as CouponTicket.
+      ymReachGoal("copy_code", homeCouponAnalyticsContext(coupon, "expiring_deals"));
+      // Keep the historical dashboard goal during migration.
+      ymReachGoal("expiring_deal_copy", { store: coupon.store.name });
     } catch {}
   };
 
@@ -119,7 +124,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                   <code className="truncate px-2 font-mono text-xs font-bold text-ink">{coupon.promocode.code}</code>
                   <button
                     type="button"
-                    onClick={() => copy(coupon.promocode.code, coupon.store.name, coupon.promocode.expires)}
+                    onClick={() => copy(coupon)}
                     className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all ${
                       isCopied ? "bg-mint text-white" : "bg-yellow text-ink hover:bg-yellow/80"
                     }`}
@@ -139,6 +144,8 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                        return;
                      }
                      prepareAttributedCouponClick(event.currentTarget, coupon, "expiring_deal", "home");
+                     // A direct affiliate click; do not count it as an internal navigation.
+                     ymReachGoal("affiliate_click", homeCouponAnalyticsContext(coupon, "expiring_deals"));
                      ymReachGoal("click_expiring_store", { store: coupon.store.name });
                    }}
                   className="block w-full rounded-xl bg-ink py-2 text-center text-xs font-bold text-white transition-all hover:bg-red"

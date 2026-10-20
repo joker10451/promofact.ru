@@ -147,4 +147,29 @@ for (const { file, count, placement } of callSites) {
 assert.strictEqual(totalCallSitesFound, 11, `Ожидалось ровно 11 вызовов CouponTicket, найдено ${totalCallSitesFound}`);
 console.log(`✓ Все 11 вызовов CouponTicket передают явный placement`);
 
+
+const homeContext = fs.readFileSync(
+  path.join(rootDir, "src/lib/homeCouponAnalyticsContext.ts"), "utf8"
+);
+const homepageUrgent = fs.readFileSync(
+  path.join(rootDir, "src/components/ExpiringDeals.tsx"), "utf8"
+);
+const homepagePreview = fs.readFileSync(
+  path.join(rootDir, "src/components/HomeOffersPreview.tsx"), "utf8"
+);
+assert.match(homeContext, /coupon_id: coupon.id/);
+assert.match(homeContext, /store: coupon.store.slug/);
+assert.match(homeContext, /placement: surface === "expiring_deals" \? "home_hot_deals" : "home_preview"/);
+assert.match(homeContext, /page_type: "home"/);
+assert.match(homeContext, /source_component: surface/);
+assert.doesNotMatch(homeContext, /code: coupon.promocode.code|promocode: coupon.promocode.code/);
+assert.match(homepageUrgent, /ymReachGoal\("copy_code", homeCouponAnalyticsContext\(coupon, "expiring_deals"\)\)/);
+assert.match(homepageUrgent, /ymReachGoal\("affiliate_click", homeCouponAnalyticsContext\(coupon, "expiring_deals"\)\)/);
+assert.match(homepageUrgent, /prepareAttributedCouponClick\(event.currentTarget, coupon, "expiring_deal", "home"\)/);
+assert.match(homepageUrgent, /ymReachGoal\("expiring_deal_copy"/);
+assert.match(homepagePreview, /ymReachGoal\("home_offer_open", homeCouponAnalyticsContext\(coupon, "home_offers_preview"\)\)/);
+assert.doesNotMatch(homepagePreview, /ymReachGoal\("affiliate_click"/);
+assert.match(homepagePreview, /event.preventDefault\(\)/);
+console.log("PASS: homepage copy, affiliate clicks, and internal navigation use distinct funnel goals");
+
 console.log("🎉 Все проверки Revenue Attribution P1.1 успешно пройдены!");
