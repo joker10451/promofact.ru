@@ -128,7 +128,8 @@ try {
   // published through the separate, explicitly confirmed full-catalog workflow.
   assert.match(workflow,/ADMITAD_PUBLISH_WEBSITE_COUPONS:/);
   assert.match(workflow,/inputs\.mode == 'recurring' && inputs\.batch == 'existing-three'/);
-  assert.match(workflow,/github\.event_name == 'schedule'/);
+  assert.doesNotMatch(workflow,/\bschedule:/, "Legacy batch must not run on a cron");
+  assert.match(workflow,/github\.event_name == 'workflow_dispatch'/);
   assert.match(runner,/PUBLISHER_REFRESH_SCOPE_INVALID/);
   assert.match(runner,/mode!=="recurring" \|\| csv!==PREVIOUS_BATCH/);
   console.log("Publisher site-scoped post-release recurring refresh guard PASS");

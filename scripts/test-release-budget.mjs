@@ -9,9 +9,15 @@ assert.doesNotMatch(workflow,/5 21,3,9,15/,"Four daily deploy-triggering cron ti
 assert.match(workflow,/workflow_dispatch:/,"Urgent manual Perfluence sync remains available");
 assert.match(workflow,/git push origin main/,"Verified feed changes are still published; never silently drop them");
 const admitad = fs.readFileSync(".github/workflows/admitad-batch.yml", "utf8");
-assert.ok(admitad.includes("cron: '17 */3 * * *'"), "Admitad schedule must avoid peak hour minute 0");
-assert.ok(!admitad.includes("cron: '0 */3 * * *'"), "Old peak-hour cron must remain absent");
-assert.match(admitad, /ADMITAD_BATCH_AUTO_SYNC_ENABLED/, "Admitad scheduled kill switch must remain available");
+assert.doesNotMatch(admitad, /\bschedule:/, "Legacy narrow batch must not auto-publish or run scheduled no-op");
+assert.match(admitad, /workflow_dispatch:/, "Manual reviewed batch remains available");
+const publisher = fs.readFileSync(".github/workflows/admitad-publisher-catalog.yml", "utf8");
+assert.match(publisher, /cron: '27 4 \* \* \*'/, "Publisher catalog owns exactly one daily cron");
+assert.match(publisher, /ADMITAD_PUBLISHER_AUTO_SYNC_ENABLED != 'false'/, "Daily publisher kill switch");
+assert.match(publisher, /github.event_name == 'schedule'/, "Only scheduled or confirmed manual runs may write");
+assert.match(publisher, /ADMITAD_CATALOG_PUBLISH_APPROVED:/, "Publication must remain explicitly gated");
+assert.match(publisher, /ADMITAD_PUBLISHER_CATALOG_DRY_RUN:/, "Preview mode must remain available");
+assert.doesNotMatch(publisher, /git push|vercel deploy/i, "Data refresh must not deploy the website");
 assert.match(admitad, /group: admitad-publisher/, "Single-publisher concurrency guard must remain enabled");
 assert.match(admitad, /inputs\.batch == 'expand-five' && inputs\.mode == 'initial'/, "Manual expanded batch gate must remain protected");
 console.log("Vercel Preview, Perfluence cadence, and Admitad cron release budget PASS");
