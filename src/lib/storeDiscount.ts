@@ -57,7 +57,7 @@ export function getMaxVerifiedDiscount(coupons: readonly DiscountCoupon[]): stri
 
 export function hasGiftOffer(coupons: readonly DiscountCoupon[]): boolean {
   return coupons.some((c) =>
-    /подар|бесплатн[а-яё]*\s+(?:товар|блюдо|ролл|десерт)/iu.test(
+    /подар|бесплатн[а-яё]*\s+(?:товар|блюдо|ролл|десерт)|(?:готов[а-яё]*\s+)?еда\s+за\s+1\s*(?:₽|р\b|руб)/iu.test(
       `${c.promocode.bonusName || ""} ${c.promocode.terms || ""}`,
     ),
   );

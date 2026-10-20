@@ -164,7 +164,7 @@ function codesSentence(input: StoreArticleInput): string {
     return `Сейчас активных промокодов ${input.name} нет — новые коды появляются на этой странице по мере запуска партнёрских акций. Заглядывайте позже или подпишитесь, чтобы не пропустить свежую скидку.`;
   }
   const tops = active
-    .slice(0, 3)
+    .slice(0, active.length <= 4 ? 4 : 3)
     .map((c) => `«${c.code}»${c.bonusName ? " — " + c.bonusName : ""}`)
     .join(", ");
   const countWord =

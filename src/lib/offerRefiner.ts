@@ -150,6 +150,31 @@ export function refineOffer(
     };
   }
 
+  // 3.0. Подарки и товары/блюда за 1 ₽ (номинальная цена, не скидка −1 ₽)
+  const oneRubleMatch = combined.match(/(?:^|[\s,.:;!?-])([а-яё\s«»"-]+?)\s+за\s+1\s*(?:₽|р\b|руб(?:ль|ля|\.)?)/iu);
+  if (oneRubleMatch && !/подписк|доступ|дней|дня|день/iu.test(combined)) {
+    let giftTitle = oneRubleMatch[1].trim();
+    giftTitle = giftTitle.replace(/^(?:получите|заберите|выберите|акция|промокод|скидка\s+на)\s+/iu, "").trim();
+    if (!giftTitle || giftTitle.length < 3) {
+      giftTitle = /готов[а-яё]*\s+еда/iu.test(combined) ? "Готовая еда" : "Товар";
+    }
+    const formattedGift = `${giftTitle} за 1 ₽`;
+    const isFirst = isFirstOrder || /перв|1[-‑–—]?[ыое]?й/i.test(combined);
+    const condition = minOrder
+      ? `${isFirst ? "на первый заказ" : "при заказе"} от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
+      : isFirst
+      ? "на первый заказ"
+      : "по промокоду при оформлении заказа";
+
+    return {
+      type: "gift",
+      discount: formattedGift,
+      condition,
+      fullTerms: terms || `${formattedGift} в мобильном приложении или на сайте ${storeName}.`,
+      isNoCode,
+    };
+  }
+
   // 3. Подарки к заказу (Gift) — срабатывает если нет процентной скидки
   if (isGiftInText) {
     let giftTitle = /подарок\s+на\s+выбор/iu.test(combined) ? "Подарок на выбор" : "Подарок к заказу";
