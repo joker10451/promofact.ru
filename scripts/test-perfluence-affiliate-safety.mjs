@@ -45,43 +45,39 @@ assert.equal(isPublicPerfluenceWidgetCoupon({
   affiliate: { ...approved.affiliate, link: "https://example.prfl.me/sites/abc123", ordMarker: "2RanyTESTabc" },
 }), false, "ORD marker alone cannot repair an unverified source URL");
 
-const { parsePayload, withApprovedEditorialPerfluenceLink } = await import("../src/lib/perfluence.ts");
+const { parsePayload } = await import("../src/lib/perfluence.ts");
 const sample = JSON.stringify({ data: [{
   project: { id: 1409, name: "ВинЛаб", site: "https://winlab.ru" },
   groups: [{
     landing: { link: "https://winlab.prfl.me/sites/test123?source=js-widget",
-      ord_marker: "2RanyTESTabc", ord_custom_text: "Реклама. ООО Тест. erid: 2RanyTESTabc" },
+      ord_marker: "", ord_custom_text: "Реклама. ООО Тест. erid пока не получен" },
     promocodes: [{ id: 4737, code: "WCPFOKT4737", date: "2026-10-31" }],
   }],
 }] });
 const [winlab] = parsePayload(sample);
 assert.equal(winlab.affiliate.link, "https://winlab.prfl.me/sites/test123",
-  "Parsing cannot synthesize ERID from a different field");
-assert.equal(isPublicPerfluenceWidgetCoupon(winlab), false, "Unverified feed coupon must be quarantined");
-assert.equal(isPublicPerfluenceWidgetCoupon(withApprovedEditorialPerfluenceLink(winlab,
-  new Date("2026-10-20T12:00:00+03:00").getTime())), false,
-  "An unrelated approved banner cannot authorize WinLab");
+  "An absent source ORD marker must never create a URL token");
+assert.equal(isPublicPerfluenceWidgetCoupon(winlab), false,
+  "Unknown WinLab ERID must remain quarantined");
 
 const feed = JSON.parse(fs.readFileSync("src/data/perfluence-feed.json", "utf8"));
 const approvedSample = feed.data.find((item) => JSON.stringify(item).includes("PERPREGA309361"));
-assert.ok(approvedSample, "Approved SberHealth offer must be in bundled feed");
+assert.ok(approvedSample);
 const pregnancy = parsePayload(JSON.stringify({ data: [approvedSample] }))
   .find((c) => c.promocode.code === "PERPREGA309361");
 assert.ok(pregnancy);
-assert.equal(isPublicPerfluenceWidgetCoupon(pregnancy), false, "Raw widget URL lacks ERID");
-const fixedPregnancy = withApprovedEditorialPerfluenceLink(pregnancy,
-  new Date("2026-10-20T12:00:00+03:00").getTime());
-assert.equal(fixedPregnancy.affiliate.link,
-  "https://sberanalizy.prfl.me/sites/jhtq64?erid=2Ranym5xMV5");
-assert.equal(isPublicPerfluenceWidgetCoupon(fixedPregnancy), true);
-assert.equal(withApprovedEditorialPerfluenceLink(pregnancy,
-  new Date("2026-11-01T12:00:00+03:00").getTime()).affiliate.link,
-  pregnancy.affiliate.link, "Expired editorial approval must not revive widget links");
-const tampered = { ...pregnancy, affiliate: { ...pregnancy.affiliate,
-  link: "https://elsewhere.prfl.me/sites/jhtq64" } };
-assert.equal(withApprovedEditorialPerfluenceLink(tampered,
-  new Date("2026-10-20T12:00:00+03:00").getTime()).affiliate.link,
-  tampered.affiliate.link, "A different partner domain must not inherit editorial approval");
+assert.equal(pregnancy.affiliate.link,
+  "https://sberanalizy.prfl.me/sites/jhtq64?erid=2Ranym5xMV5",
+  "A real Perfluence-supplied token may be appended to its tracking link");
+assert.equal(isPublicPerfluenceWidgetCoupon(pregnancy), true,
+  "Verified SberHealth code must not disappear from the catalog");
+
+const fake = JSON.parse(JSON.stringify(approvedSample));
+fake.groups[0].promocodes[0].ord_marker = "";
+const missing = parsePayload(JSON.stringify({ data: [fake] }))[0];
+assert.equal(new URL(missing.affiliate.link).searchParams.get("erid"), null);
+assert.equal(isPublicPerfluenceWidgetCoupon(missing), false,
+  "No marker in the source means no ERID in the published link");
 
 const source = fs.readFileSync("src/lib/perfluence.ts", "utf8");
 assert.match(source, /isPublicPerfluenceWidgetCoupon/);
