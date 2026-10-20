@@ -5,6 +5,8 @@ import { isCouponActive } from "@/lib/couponExpiry";
 import { useCouponClock } from "@/lib/useCouponClock";
 import StoreLogo from "@/components/StoreLogo";
 import type { Coupon } from "@/lib/types";
+import { ymReachGoal } from "@/components/YandexMetrika";
+import { homeCouponAnalyticsContext } from "@/lib/homeCouponAnalyticsContext";
 
 /**
  * Editorial preview: only four actual, active offers from the shared live feed.
@@ -61,6 +63,14 @@ export default function HomeOffersPreview({
               </p>
               <div className="mt-auto pt-4">
                 <Link href={`/store/${coupon.store.slug}#coupon-${coupon.id}`}
+                  onClick={(event) => {
+                    if (!isCouponActive(coupon.promocode.expires)) {
+                      event.preventDefault();
+                      return;
+                    }
+                    // Internal navigation only: never inflate affiliate_click.
+                    ymReachGoal("home_offer_open", homeCouponAnalyticsContext(coupon, "home_offers_preview"));
+                  }}
                   className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-ink px-3 py-2.5 text-xs font-extrabold text-white transition-colors group-hover:bg-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red sm:text-sm">
                   Смотреть промокод <span className="ml-2" aria-hidden="true">→</span>
                 </Link>
