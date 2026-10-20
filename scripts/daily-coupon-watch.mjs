@@ -7,7 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { getCustomCoupons } from "../src/lib/customCoupons.ts";
-import { inspectCoupons, compareInventories, checkSourceCompleteness } from "./coupon-watch-core.mjs";
+import { inspectCoupons, compareInventories, checkSourceCompleteness, reconcileCrossSourceChanges } from "./coupon-watch-core.mjs";
 
 const OUTPUT = path.resolve("audit-results");
 const STATE_PATH = path.join(OUTPUT, "coupon-watch-state.json");
@@ -34,6 +34,7 @@ const changes = [];
 const findings = [];
 const expiring = [];
 const errors = [];
+const healthySources = new Set();
 
 async function fetchJson(url) {
   const response = await fetch(url, {
@@ -100,6 +101,7 @@ async function inspectSource(name, producer) {
       throw anomaly;
     }
     if (prior?.records) changes.push(...compareInventories(prior, result, now));
+    healthySources.add(name);
     findings.push(...result.findings);
     expiring.push(...result.expiring);
     state.sources[name] = { records: result.records, consecutiveFailures: 0 };
@@ -124,9 +126,10 @@ await inspectSource("manual", () => Promise.resolve(getCustomCoupons(now)));
 await inspectSource("perfluence", () => fetchJson(SITE_URL + "/api/perfluence-snapshot"));
 await inspectSource("admitad", getPublishedAdmitad);
 
+const reconciledChanges = reconcileCrossSourceChanges(changes, state.sources, healthySources);
 const critical = findings.filter((f) => f.severity === "critical");
-const majorChanges = changes.filter((c) => ["removed", "changed"].includes(c.type));
-const newOffers = changes.filter((c) => c.type === "new");
+const majorChanges = reconciledChanges.filter((c) => ["removed", "changed"].includes(c.type));
+const newOffers = reconciledChanges.filter((c) => c.type === "new");
 const outages = errors.filter((e) => e.consecutiveFailures >= 2 || e.anomaly);
 const attention = [
   ...critical.map(getMessageLine),
@@ -139,7 +142,7 @@ const attention = [
 const report = {
   generatedAt: state.generatedAt,
   sourceReports, criticalCount: critical.length, warningCount: findings.length - critical.length,
-  changes, expiring, outages, findings, attention, requiresAttention: attention.length > 0,
+  changes: reconciledChanges, expiring, outages, findings, attention, requiresAttention: attention.length > 0,
 };
 const lines = [
   "# Ежедневный контроль промокодов — " + state.generatedAt,
@@ -153,7 +156,7 @@ const lines = [
     (r.active ?? "—") + " | " + (r.codes ?? "—") + " | " + (r.deals ?? "—") + " |"),
   "",
   "Критичных нарушений: **" + critical.length + "**; предупреждений: **" +
-    (findings.length - critical.length) + "**; изменений: **" + changes.length +
+    (findings.length - critical.length) + "**; изменений: **" + reconciledChanges.length +
     "**; акций ручного каталога с окончанием менее чем через 48 ч: **" + expiring.length + "**.",
   "",
   "## Требуют внимания",
@@ -161,8 +164,8 @@ const lines = [
   ...(attention.length > maxLines ? ["- И ещё " + (attention.length - maxLines) + " — в JSON-отчёте."] : []),
   "",
   "## Изменения относительно предыдущего успешного снимка",
-  ...(!changes.length ? ["- Нет изменений; или это первый запуск / источник пока недоступен."] :
-    changes.slice(0, maxLines).map((c) => "- " + c.type + " · " + c.source + " · " + c.slug +
+  ...(!reconciledChanges.length ? ["- Нет изменений; или это первый запуск / источник пока недоступен."] :
+    reconciledChanges.slice(0, maxLines).map((c) => "- " + c.type + " · " + c.source + " · " + c.slug +
       (c.code ? " / " + c.code : "") + ": " + c.detail)),
   "",
   "## Заканчиваются за 48 часов (ручные партнёрские размещения)",
