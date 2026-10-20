@@ -3,7 +3,7 @@ import { getCategories, getAllStores, getCoupons } from "@/lib/perfluence";
 import { getArticles } from "@/lib/articles";
 import { ACTIONS } from "@/lib/actions";
 import { CITIES_SEO } from "@/lib/citiesSeo";
-import { COLLECTIONS } from "@/lib/collections";
+import { COLLECTIONS, getCollectionCoupons, MIN_INDEXABLE_COLLECTION_OFFERS } from "@/lib/collections";
 import { SITE_URL } from "@/lib/site";
 import { canonicalCategorySlug } from "@/lib/categoryTaxonomy";
 import syncMeta from "@/data/sync-meta.json";
@@ -19,7 +19,7 @@ import syncMeta from "@/data/sync-meta.json";
 //   магазины/категории/каталог -> дата подтверждённой синхронизации каталога syncMeta.lastSuccessSync).
 // - Для страниц без достоверных дат изменения lastModified опускается согласно стандарту sitemap.org.
 // - Запрещено использовать произвольные фиктивные даты.
-export const revalidate = false;
+export const revalidate = 900; // Update indexable URLs as publisher snapshots change.
 
 const CATALOG_SYNC_DATE = syncMeta.lastSuccessSync ? new Date(syncMeta.lastSuccessSync) : undefined;
 
@@ -76,12 +76,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // Подборки: статические агрегаторы без выдуманных дат
-  const collectionsMap: MetadataRoute.Sitemap = COLLECTIONS.map((col) => ({
-    url: `${SITE_URL}/collections/${col.slug}`,
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
+  // Only collections with enough active offers are indexable, using exactly
+  // the same co-promotion restrictions as their page and robots metadata.
+  const collectionsMap: MetadataRoute.Sitemap = COLLECTIONS
+    .filter((col) => getCollectionCoupons(col, coupons).length >= MIN_INDEXABLE_COLLECTION_OFFERS)
+    .map((col) => ({
+      url: `${SITE_URL}/collections/${col.slug}`,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    }));
 
   // Города: региональные страницы без выдуманных дат
   const citiesMap: MetadataRoute.Sitemap = CITIES_SEO.map((city) => ({

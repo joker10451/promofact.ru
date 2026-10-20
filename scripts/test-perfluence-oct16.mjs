@@ -111,5 +111,9 @@ assert(src.includes("withoutPausedPublisherOffers(await fetchData()).filter(isAp
 assert(src.includes("const freshCustomCoupons = (await import"));
 assert(!src.includes("liveSberDevicesCodes"));
 assert(home.includes("withoutForbiddenFloristBeautyCoPromotion"));
-assert.equal((collections.match(/withoutForbiddenFloristBeautyCoPromotion/g)||[]).length,3);
+const collectionLib=fs.readFileSync("src/lib/collections.ts","utf8");
+assert(collections.includes("getCollectionCoupons(col, all)"),
+ "Collection rendering and metadata must share the same eligibility helper");
+assert(collectionLib.includes("withoutForbiddenFloristBeautyCoPromotion("),
+ "Shared collection helper must retain florist/beauty co-promotion exclusion");
 console.log("PERFLUENCE: 4 projects, 9 valid codes, FMART 18 Oct rotated link, ERID, expiry, stale suppression and incompatible selections PASS");
