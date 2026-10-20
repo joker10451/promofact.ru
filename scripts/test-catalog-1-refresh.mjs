@@ -73,4 +73,6 @@ assert.match(workflow,/cron: ['"]27 \*\/6 \* \* \*['"]/);
 assert.match(workflow,/concurrency:/);
 assert.match(workflow,/catalog-1-refresh\.mjs/);
 assert.match(workflow,/inputs\.confirm == true/);
+assert.match(workflow,/vars\.ADMITAD_PUBLISHER_AUTO_REFRESH_ENABLED == 'true'/);
+assert.match(workflow,/github\.event_name == 'schedule'/);
 console.log("CATALOG-1: no-write preview, new-program guard, retention, identity and approval PASS");
