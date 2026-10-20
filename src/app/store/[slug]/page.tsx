@@ -15,6 +15,7 @@ import StoreSummaryTable from "@/components/StoreSummaryTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getAllStores, getUsesStats } from "@/lib/perfluence";
 import { buildStoreArticle, buildStoreDescription } from "@/lib/storeSeoContent";
+import { getStoreBuyerGuide } from "@/lib/storeBuyerGuides";
 import { getMaxVerifiedDiscount, hasGiftOffer } from "@/lib/storeDiscount";
 import { getStoreExtra, hasActiveRequiredCoupons } from "@/lib/storeExtras";
 import { getArticles } from "@/lib/articles";
@@ -206,6 +207,7 @@ export default async function StorePage({
 
 
   // Уникальный SEO-текст: собирается из реальных фактов магазина, а не шаблона.
+  const buyerGuide = store.coupons.length > 0 ? getStoreBuyerGuide(slug) : null;
   const storeArticle = buildStoreArticle(
     {
       name: store.name,
@@ -597,6 +599,25 @@ export default async function StorePage({
           storeName={store.name}
           storeSlug={store.slug}
         />
+
+        {buyerGuide && (
+          <section aria-labelledby="store-buyer-guide" className="mt-10 max-w-3xl rounded-2xl border border-line bg-white p-5 sm:p-7">
+            <h2 id="store-buyer-guide" className="font-display text-xl font-extrabold text-ink">
+              {buyerGuide.heading}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-ink/70">
+              Это памятка покупателю, а не гарантия применения промокода. Проверяйте условия конкретного предложения перед оплатой.
+            </p>
+            <ol className="mt-5 list-decimal space-y-4 pl-5">
+              {buyerGuide.checks.map((check) => (
+                <li key={check.title} className="pl-1 text-sm leading-relaxed text-ink/75">
+                  <span className="font-bold text-ink">{check.title}. </span>
+                  {check.explanation}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         <article className="mt-12 max-w-3xl">
           <h2 className="font-display text-xl font-extrabold">
