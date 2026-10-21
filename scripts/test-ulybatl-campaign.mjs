@@ -29,6 +29,8 @@ assert.ok(!home.includes("text-[10px]"), "Legal notice may not regress to tiny 1
 
 assert.ok(homePage.indexOf("<CouponGrid") < homePage.indexOf("<SberCampaignTeasers />"), "Real coupons appear first");
 assert.ok(home.includes('href="/akcii/ulybatl-sber-185"'));
+assert.ok(home.includes("Сбер · до 29 ноября · 18+"));
+assert.ok(!home.includes("до 25 октября"), "Homepage teaser must reflect the extended 29 November deadline");
 assert.ok(page.includes("<PromoBanner banner={campaign} />"));
 assert.ok(page.includes('CampaignExpiryGate endsAt={campaign.endsAt}'));
 assert.ok(gate.includes("+03:00"));

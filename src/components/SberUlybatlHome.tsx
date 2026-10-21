@@ -17,7 +17,7 @@ export default function SberUlybatlHome() {
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-ink/60">Сбер · до 25 октября · 18+</p>
+              <p className="text-[11px] font-semibold text-ink/60">Сбер · до 29 ноября · 18+</p>
               <h3 className="mt-1 font-display text-sm font-extrabold leading-snug text-ink sm:text-base">
                 Улыбатл: призы за оплату улыбкой
               </h3>
