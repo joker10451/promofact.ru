@@ -16,7 +16,7 @@ const STEPS = [
   },
   {
     n: "04",
-    text: "Вставь код при оплате и получи скидку мгновенно",
+    text: "Вставь код до оплаты и проверь итоговую сумму",
     accent: "bg-ink",
   },
 ];
@@ -28,7 +28,7 @@ export default function HowItWorks() {
         Как это работает
       </h2>
       <p className="mx-auto mt-3 max-w-xl text-center text-ink/60">
-        Четыре простых шага: от поиска промокода до скидки при оформлении заказа.
+        Четыре шага: от поиска промокода до проверки скидки в корзине.
       </p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
