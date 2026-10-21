@@ -14,7 +14,7 @@ assert.ok(banners.includes("ПАО Сбербанк"));
 assert.ok(banners.includes("7707083893"));
 assert.ok(banners.includes("2RanynNhMEK"));
 assert.ok(banners.includes("18+"));
-assert.ok(banners.includes('endsAt: "2026-10-25"'));
+assert.ok(banners.includes('endsAt: "2026-11-29"'));
 for(const v of ["Главный приз — концерт Вани Дмитриенко.", "Chery Tiggo 9", "20 новеньких iPhone 17 Pro Max", "50 тысяч промокодов"]) assert.ok(banners.includes(v),v);
 assert.ok(banners.includes('creativeOnly: true'));
 assert.ok(!banners.includes('code: "ULYBATL"'));

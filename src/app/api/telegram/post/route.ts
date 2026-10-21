@@ -3,7 +3,7 @@ import { getCoupons } from "@/lib/perfluence";
 import { sendCouponToTelegram } from "@/lib/telegram";
 import { isBearerAuthorized } from "@/lib/apiAuth";
 import { selectBestCouponToPost, recordPosting } from "@/lib/postingEngine";
-import { getFlor2uTelegramOffers } from "@/lib/perfluenceOct18Telegram";
+import { getFlor2uTelegramOffers, getGoldAppleTelegramOffers } from "@/lib/perfluenceOct18Telegram";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +27,8 @@ async function handlePost(req: NextRequest) {
     const dryRun = searchParams.get("dryRun") === "true";
 
     // This channel placement is approved; promofact.ru is still under review.
-    const coupons = storeSlug === "flor2u" ? getFlor2uTelegramOffers() : await getCoupons();
+    let coupons = storeSlug === "flor2u" ? getFlor2uTelegramOffers() : await getCoupons();
+    if (storeSlug === "zolotoe-yabloko") coupons = getGoldAppleTelegramOffers();
     if (!coupons || coupons.length === 0) {
       return NextResponse.json({ message: "No active coupons found" }, { status: 404 });
     }

@@ -91,7 +91,7 @@ https://www.sberbank.ru/common/img/uploaded/cards/sberkarta_kids/pravila_akcii_b
     label: "Спецпроект Сбера",
     title: "Улыбатл — розыгрыш призов за оплату улыбкой",
     subtitle: "Соревнование городов России и личные призы за оплату улыбкой.",
-    badge: "До 25 октября",
+    badge: "До 29 ноября",
     note: "Правила и ограничения участия уточняйте у организатора.",
     cta: "Участвовать в Улыбатле",
     link: "https://sberbank1.prfl.me/sites/il6l82?erid=2RanynNhMEK",
@@ -101,7 +101,7 @@ https://www.sberbank.ru/common/img/uploaded/cards/sberkarta_kids/pravila_akcii_b
     imageHeight: 1141,
     creativeOnly: true,
     maxDisplayWidth: 950,
-    exactCopy: `🎤 Улыбатл пройдёт по всем городам России до 25 октября
+    exactCopy: `🎤 Улыбатл пройдёт по всем городам России до 29 ноября
 
 Главный приз — концерт Вани Дмитриенко.
 
@@ -112,7 +112,7 @@ https://www.sberbank.ru/common/img/uploaded/cards/sberkarta_kids/pravila_akcii_b
 Регистрируйся в Улыбатле https://sberbank1.prfl.me/sites/il6l82?erid=2RanynNhMEK , плати улыбкой, и выигрывай!`,
     ordText: "Реклама. Рекламодатель — ПАО Сбербанк, ИНН: 7707083893. Генеральная лицензия Банка России № 1481 от 11.08.2015 г. 18+. erid: 2RanynNhMEK",
     startsAt: "2026-10-12",
-    endsAt: "2026-10-25",
+    endsAt: "2026-11-29",
   },
 
   {
