@@ -12,7 +12,12 @@ const priorities = [
   "admitad-25914-yandex",
   "megafon", "korston", "sunlight-ru", "foxford", "aravia",
   "yandeks-puteshestviya",
+  "globus", "admitad-200746-matras-krovat", "internet-magazin-bilayn",
+  "admitad-14113-tefal", "admitad-185231-maksavit", "polzaru",
+  "admitad-21324-velodrive", "admitad-38329-pro32", "befree-ru",
+  "tasty-coffee", "admitad-14032-street-beat", "admitad-13978-superstep",
 ];
+assert.equal(priorities.length, 20, "Initial SEO store plan must cover all 20 canonical slugs");
 assert.equal(Object.keys(STORE_BUYER_GUIDES).length, priorities.length);
 for (const slug of priorities) {
   const guide = getStoreBuyerGuide(slug);
@@ -54,4 +59,17 @@ assert.match(page, /StoreSummaryTable/);
 assert.match(page, /Проверяйте условия конкретного предложения перед оплатой/);
 assert.doesNotMatch(page, /ymReachGoal\("affiliate_click"/,
   "Editorial guide must not generate false outbound click events");
-console.log("Store SEO original buyer guides: 8 verified templates and visible conditional rendering PASS");
+const globusInput = {
+  ...articleInput,
+  name: "Globus", category: "Сервисы и подписки", categorySlug: "servisy-i-podpiski",
+};
+const globusParagraphs = buildStoreArticle(globusInput, "globus");
+assert(globusParagraphs.includes(getStoreBuyerGuide("globus").intro),
+  "Globus must not inherit the misleading subscription category in editorial content");
+const pro32Input = { ...articleInput, name: "Pro32", category: "Сервисы и подписки", categorySlug: "servisy-i-podpiski" };
+assert(buildStoreArticle(pro32Input, "admitad-38329-pro32")
+  .includes(getStoreBuyerGuide("admitad-38329-pro32").intro),
+  "Security software page must explain licenses instead of generic subscriptions");
+assert(getStoreBuyerGuide("polzaru").checks.some(c => /противоречии рекламных цифр/.test(c.explanation)),
+  "Do not promise potentially mismatched supplier discount figures");
+console.log("Store SEO original buyer guides: 20 verified templates, canonical data and conditional rendering PASS");
