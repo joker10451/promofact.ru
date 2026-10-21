@@ -129,9 +129,8 @@ export function formatTelegramPost(coupon: Coupon): {
     lines.push(`<i>Реклама. ${storeName}</i>`);
   }
 
-  // Flor2u is currently approved on @smart_zakupka ONLY. Never add a website
-  // CTA implying that promofact.ru has approval or mix its attribution links.
-  if (coupon.store.slug === "flor2u" && coupon.promocode.terms) {
+  // Выводим условия и подробности акции
+  if (coupon.promocode.terms) {
     lines.push("ℹ️ " + escapeHtml(stripHtml(coupon.promocode.terms)));
   }
   const affiliateUrl = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site;
@@ -254,6 +253,172 @@ export async function sendCouponToTelegram(
         ``,
         `🏬 Магазин: <b>${escapeHtml(coupon.store.name)}</b>`,
         `🎟 Промокод: <code>${escapeHtml(coupon.promocode.code)}</code>`,
+        ``,
+        `🔗 <b>Ссылка на пост (нажмите, чтобы скопировать):</b>`,
+        `<code>${postUrl}</code>`,
+      ].join("\n");
+
+      const adminMarkup = {
+        inline_keyboard: [
+          [{ text: "⚡ Сдать отчет в Perfluence →", url: perfluenceProjectUrl }],
+          [{ text: "👁 Открыть пост в канале", url: postUrl }],
+        ],
+      };
+
+      try {
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: adminChatId,
+            text: adminText,
+            parse_mode: "HTML",
+            reply_markup: adminMarkup,
+            disable_web_page_preview: true,
+          }),
+        });
+      } catch (adminErr) {
+        console.error("Admin notification error:", adminErr);
+      }
+    }
+
+    return { ok: true, messageId };
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
+}
+
+/**
+ * Удаление сообщения в Telegram (например, при замене поста)
+ */
+export async function deleteTelegramMessage(
+  messageId: number,
+  opts?: TelegramPostOptions,
+): Promise<boolean> {
+  const token = opts?.botToken || process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = opts?.channelId || process.env.TELEGRAM_CHANNEL_ID;
+  if (!token || !chatId) return false;
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/deleteMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, message_id: messageId }),
+    });
+    const data = await res.json();
+    return data.ok === true;
+  } catch (err) {
+    console.error("Failed to delete Telegram message:", err);
+    return false;
+  }
+}
+
+/**
+ * Формирование праздничного хэллоуинского поста Золотого Яблока сразу с 2 промокодами
+ */
+export function formatGoldAppleHalloweenPost(): {
+  text: string;
+  buttons: TelegramButton[][];
+} {
+  const affiliateUrl = "https://gldppl.prfl.me/smart_zakupka/lr8e4c?erid=2Ranyo8yEMy";
+  const storeUrl = `${SITE_URL}/store/zolotoe-yabloko`;
+
+  const text = [
+    "🎃 <b>Готовы к самому волшебному и загадочному празднику года?</b>",
+    "",
+    "Да, речь идет о Хэллоуине! 👻 На Хэллоуин каждый из нас может стать настоящим героем или героиней своего любимого фильма, мифа или сказки. Но чтобы ваш образ был по-настоящему потрясающим, необходимы яркие и выразительные косметические продукты, которые помогут вам превратиться во что угодно — от злой колдуньи до вампира!",
+    "",
+    `Спешите сделать заказ в приложении Золотого Яблока:`,
+    `🛍 <a href="${affiliateUrl}">Перейти в Золотое Яблоко</a>`,
+    "",
+    "А чтобы сэкономить, используйте промокоды:",
+    "",
+    "➡️ <code>PERF</code> – скидка на первый заказ до 10% от 3 000 ₽, до 15% от 6 000 ₽, до 20% от 9 000 ₽ + 300 бонусов на счет.",
+    "➡️ <code>ПРАЗДНИК</code> – скидка до 10% от 6 000 ₽, до 15% от 9 000 ₽ и до 20% от 12 000 ₽ на первый и все повторные заказы на подборку товаров.",
+    "",
+    "<i>(нажмите на промокод — он скопируется в буфер)</i>",
+    "",
+    "Воплотите свои самые смелые идеи и насладитесь атмосферой этого невероятного праздника!",
+    "",
+    "📌 <b>Условия акции:</b>",
+    "• Промокоды действуют только для авторизованных пользователей.",
+    "• Не суммируются со скидками выше 40%, акциями 3=2, 2=1 и подарками при покупке.",
+    "• Не действуют при покупке пластиковых и электронных подарочных карт.",
+    "• ❗️ Есть бренды-исключения.",
+    "• Сроки действия: «ПРАЗДНИК» до 29 октября, «PERF» до 31 октября 2026.",
+    "",
+    '<i>Реклама. ООО "ЕКАТЕРИНБУРГ ЯБЛОКО", адрес: г. Екатеринбург, ул. Сакко и Ванцетти, 62, ОГРН 1126670019585 erid: 2Ranyo8yEMy</i>',
+  ].join("\n");
+
+  const buttons: TelegramButton[][] = [
+    [{ text: "🛍 В магазин Золотое Яблоко →", url: affiliateUrl }],
+    [{ text: "🌐 Все купоны Золотое Яблоко на сайте", url: storeUrl }],
+  ];
+
+  return { text, buttons };
+}
+
+/**
+ * Отправка кастомного / мульти-промо поста в Telegram
+ */
+export async function sendCustomPostToTelegram(
+  post: { text: string; buttons?: TelegramButton[][] },
+  meta?: { storeId?: number; storeName?: string; promoCodes?: string[] },
+  opts?: TelegramPostOptions,
+): Promise<{ ok: boolean; messageId?: number; error?: string }> {
+  const token = opts?.botToken || process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = opts?.channelId || process.env.TELEGRAM_CHANNEL_ID;
+
+  if (!token) return { ok: false, error: "TELEGRAM_BOT_TOKEN не задан" };
+  if (!chatId) return { ok: false, error: "TELEGRAM_CHANNEL_ID не задан" };
+
+  const replyMarkup = post.buttons && post.buttons.length > 0 ? {
+    inline_keyboard: post.buttons.map((row) =>
+      row.map((btn) => ({ text: btn.text, url: btn.url })),
+    ),
+  } : undefined;
+
+  try {
+    const endpoint = `https://api.telegram.org/bot${token}/sendMessage`;
+    const body: Record<string, unknown> = {
+      chat_id: chatId,
+      text: post.text,
+      parse_mode: "HTML",
+      disable_notification: true,
+      disable_web_page_preview: true,
+    };
+    if (replyMarkup) {
+      body.reply_markup = replyMarkup;
+    }
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+    if (!data.ok) {
+      return {
+        ok: false,
+        error: `Telegram API: ${data.description || res.statusText} (status: ${res.status})`,
+      };
+    }
+
+    const messageId = data.result?.message_id;
+
+    const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+    if (adminChatId && messageId) {
+      const channelUsername = (process.env.TELEGRAM_CHANNEL_ID || "@smart_zakupka").replace("@", "");
+      const postUrl = `https://t.me/${channelUsername}/${messageId}`;
+      const perfluenceProjectUrl = meta?.storeId
+        ? `https://dash.perfluence.net/my-projects/${meta.storeId}`
+        : "https://dash.perfluence.net";
+
+      const adminText = [
+        `📢 <b>Опубликован пост для отчета Perfluence!</b>`,
+        ``,
+        `🏬 Магазин: <b>${escapeHtml(meta?.storeName || "Золотое Яблоко")}</b>`,
+        `🎟 Промокоды: <code>${(meta?.promoCodes || []).join(", ") || "Все"}</code>`,
         ``,
         `🔗 <b>Ссылка на пост (нажмите, чтобы скопировать):</b>`,
         `<code>${postUrl}</code>`,

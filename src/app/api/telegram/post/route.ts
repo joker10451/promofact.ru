@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCoupons } from "@/lib/perfluence";
-import { sendCouponToTelegram } from "@/lib/telegram";
+import { sendCouponToTelegram, sendCustomPostToTelegram, deleteTelegramMessage, formatGoldAppleHalloweenPost } from "@/lib/telegram";
 import { isBearerAuthorized } from "@/lib/apiAuth";
 import { selectBestCouponToPost, recordPosting } from "@/lib/postingEngine";
 import { getFlor2uTelegramOffers, getGoldAppleTelegramOffers } from "@/lib/perfluenceOct18Telegram";
@@ -25,12 +25,66 @@ async function handlePost(req: NextRequest) {
     const storeSlug = searchParams.get("store");
     const requestedCode = searchParams.get("code");
     const dryRun = searchParams.get("dryRun") === "true";
+    const deletePrev = searchParams.get("deletePrev") || searchParams.get("deleteMessageId");
+
+    if (deletePrev && !dryRun) {
+      await deleteTelegramMessage(Number(deletePrev));
+    }
 
     // This channel placement is approved; promofact.ru is still under review.
     let coupons = storeSlug === "flor2u" ? getFlor2uTelegramOffers() : await getCoupons();
     if (storeSlug === "zolotoe-yabloko") coupons = getGoldAppleTelegramOffers();
     if (!coupons || coupons.length === 0) {
       return NextResponse.json({ message: "No active coupons found" }, { status: 404 });
+    }
+
+    // Если запрошен магазин Золотое Яблоко и не указан отдельный одиночный промокод —
+    // публикуем объединенный праздничный пост сразу с 2 промокодами (PERF и ПРАЗДНИК)
+    if (storeSlug === "zolotoe-yabloko" && !requestedCode) {
+      const post = formatGoldAppleHalloweenPost();
+      if (dryRun) {
+        return NextResponse.json({
+          dryRun: true,
+          mode: "store_multi_post",
+          store: "Золотое Яблоко",
+          codes: ["PERF", "ПРАЗДНИК"],
+          text: post.text,
+          buttons: post.buttons,
+        });
+      }
+
+      const res = await sendCustomPostToTelegram(
+        post,
+        { storeId: 1707, storeName: "Золотое Яблоко", promoCodes: ["PERF", "ПРАЗДНИК"] },
+      );
+
+      if (res.ok) {
+        coupons.forEach((c) => {
+          recordPosting({
+            id: c.id,
+            code: c.promocode.code,
+            store: c.store.name,
+            storeSlug: c.store.slug,
+            categorySlug: c.store.categorySlug,
+            date: new Date().toISOString(),
+            messageId: res.messageId,
+            channel: "telegram",
+          });
+        });
+      }
+
+      return NextResponse.json({
+        success: res.ok,
+        results: [
+          {
+            store: "Золотое Яблоко",
+            codes: ["PERF", "ПРАЗДНИК"],
+            status: res.ok ? "posted" : "failed",
+            messageId: res.messageId,
+            error: res.error,
+          },
+        ],
+      });
     }
 
     // The one-day 35% Flor2u campaign ends tonight; the generic 48-hour
