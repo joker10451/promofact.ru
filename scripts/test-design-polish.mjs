@@ -261,3 +261,25 @@ assert.ok(browser.includes("filteredCoupons.length === 4") &&
   browser.includes("grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:gap-5"),
   "Four offers should form balanced two-column rows at desktop widths");
 console.log("PromoFact responsive coupon ticket: legibility, disclosure and balanced grid PASS");
+
+
+// Editorial FARFOR CTA must track the same approved placement as its coupon cards.
+const farforGuide = fs.readFileSync("src/lib/articles.ts", "utf8");
+const farforSource = fs.readFileSync("src/lib/perfluenceOct18Batch.ts", "utf8");
+const approvedFarforLink = farforSource.match(/link: "(https:\/\/farfor1\.prfl\.me\/sites\/[^"]+)"/)?.[1];
+const articleFarforLink = farforGuide.match(/const FARFOR_LINK = "([^"]+)"/)?.[1];
+assert.ok(approvedFarforLink, "Approved FARFOR placement must exist");
+assert.equal(articleFarforLink, approvedFarforLink,
+  "FARFOR editorial CTA must use the approved affiliate link");
+const approvedFarforErid = new URL(approvedFarforLink).searchParams.get("erid");
+const articleFarforOrd = farforGuide.match(/const FARFOR_ORD = "([^"]+)"/)?.[1] ?? "";
+assert.ok(approvedFarforErid && articleFarforOrd.includes("erid: " + approvedFarforErid),
+  "FARFOR editorial advertising token must match its approved affiliate link");
+const farforArticle = farforGuide.split('slug: "promokody-farfor-goroda"')[1]?.split("\n  },\n  {")[0] ?? "";
+for (const code of ["RYW35267", "VHR79997", "ZTF58756", "ZMB46487"]) {
+  assert.ok(farforSource.includes('code: "' + code + '"') && farforArticle.includes(code),
+    "FARFOR guide must cover the current approved code " + code);
+}
+assert.ok(farforArticle.includes("31 октября") && !farforArticle.includes("30 сентября"),
+  "FARFOR guide must not promise expired September terms");
+console.log("FARFOR editorial guide: approved tracking URL, ERID, codes and expiry PASS");
