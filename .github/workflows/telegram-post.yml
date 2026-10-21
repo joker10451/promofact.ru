@@ -38,7 +38,8 @@ jobs:
           fi
 
           if [ -n "$CODE" ]; then
-            PARAMS="${PARAMS}code=${CODE}&"
+            ENCODED_CODE=$(node -e "process.stdout.write(encodeURIComponent(process.argv[1]))" "$CODE")
+            PARAMS="${PARAMS}code=${ENCODED_CODE}&"
           fi
           
           # Remove trailing &
@@ -52,8 +53,10 @@ jobs:
           
           echo "Sending request to $TARGET_URL (dry_run=$DRY_RUN, store=$STORE, code=$CODE)"
           
+          AUTH_SECRET=$(printf '%s' "${{ secrets.TELEGRAM_POSTING_SECRET }}" | tr -d '\r\n')
+          
           HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$TARGET_URL" \
-            -H "Authorization: Bearer ${{ secrets.TELEGRAM_POSTING_SECRET }}")
+            -H "Authorization: Bearer $AUTH_SECRET")
           
           echo "Response HTTP Status: $HTTP_STATUS"
           cat response.json
