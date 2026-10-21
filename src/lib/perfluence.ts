@@ -467,7 +467,7 @@ async function fetchSnapshot(): Promise<Coupon[]> {
  * apply it, so blocked records remain available for health monitoring.
  */
 export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
-  const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ЧАЙ"]);
+  const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ПИРОГ"]);
 
     // Approved Gold Apple placement 21 October 2026.
     if (c.store.slug === "zolotoe-yabloko") {
@@ -478,8 +478,16 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.ordText.includes("erid: 2Ranyo8yEMy");
     }
 
+    // Fail closed: old Perfluence widgets may contain still-working codes but
+    // attribute their clicks to the old PromoFact placement and outdated ERID.
     if (c.store.slug === "magnit-dostavka") {
-      return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase());
+      return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase()) &&
+        c.affiliate.link === "https://mgntgm.prfl.me/sites/gdpiqn?erid=2RanymKnUcb" &&
+        c.affiliate.landingLink === "https://mgntgm.prfl.me/sites/gdpiqn?erid=2RanymKnUcb" &&
+        c.affiliate.ordMarker === "2RanymKnUcb" &&
+        c.affiliate.ordText.includes('АО "Тандер"') &&
+        c.affiliate.ordText.includes("ИНН 2310031475") &&
+        c.affiliate.ordText.includes("erid: 2RanymKnUcb");
     }
     // New site-specific Tanuki publication supersedes the stale widget URL and
     // historical ERID. Deny unknown/historical codes until reviewed.
