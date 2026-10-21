@@ -33,11 +33,15 @@ jobs:
             PARAMS="${PARAMS}store=${STORE}&"
           fi
           
-          # Remove trailing ? or &
+          # Remove trailing &
           PARAMS="${PARAMS%&}"
-          PARAMS="${PARAMS%\?}"
           
-          TARGET_URL="${URL}${PARAMS}"
+          if [ -n "$PARAMS" ]; then
+            TARGET_URL="${URL}?${PARAMS}"
+          else
+            TARGET_URL="${URL}"
+          fi
+          
           echo "Sending request to $TARGET_URL (dry_run=$DRY_RUN, store=$STORE)"
           
           HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$TARGET_URL" \

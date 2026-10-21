@@ -10,7 +10,10 @@ on:
         type: boolean
         default: false
       store:
-        description: 'Slug магазина (опционально, например pyaterochka, kinopoisk)'
+        description: 'Slug магазина (опционально, например pyaterochka, kinopoisk, zolotoe-yabloko)'
+        type: string
+      code:
+        description: 'Промокод (опционально, например ПРАЗДНИК, PERF)'
         type: string
 
 jobs:
@@ -21,6 +24,7 @@ jobs:
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
           STORE="${{ github.event.inputs.store || '' }}"
+          CODE="${{ github.event.inputs.code || '' }}"
           
           URL="https://promofact.ru/api/telegram/post"
           PARAMS=""
@@ -32,13 +36,21 @@ jobs:
           if [ -n "$STORE" ]; then
             PARAMS="${PARAMS}store=${STORE}&"
           fi
+
+          if [ -n "$CODE" ]; then
+            PARAMS="${PARAMS}code=${CODE}&"
+          fi
           
-          # Remove trailing ? or &
+          # Remove trailing &
           PARAMS="${PARAMS%&}"
-          PARAMS="${PARAMS%\?}"
           
-          TARGET_URL="${URL}${PARAMS}"
-          echo "Sending request to $TARGET_URL (dry_run=$DRY_RUN, store=$STORE)"
+          if [ -n "$PARAMS" ]; then
+            TARGET_URL="${URL}?${PARAMS}"
+          else
+            TARGET_URL="${URL}"
+          fi
+          
+          echo "Sending request to $TARGET_URL (dry_run=$DRY_RUN, store=$STORE, code=$CODE)"
           
           HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "$TARGET_URL" \
             -H "Authorization: Bearer ${{ secrets.TELEGRAM_POSTING_SECRET }}")

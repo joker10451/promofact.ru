@@ -39,11 +39,16 @@ async function handlePost(req: NextRequest) {
     const flor2uCoupon = requestedCode
       ? coupons.find(c => c.promocode.code === requestedCode)
       : coupons[0];
+    const specificCoupon = requestedCode
+      ? coupons.find(c => c.promocode.code.trim().toUpperCase() === requestedCode.trim().toUpperCase())
+      : null;
     const selection = storeSlug === "flor2u"
       ? (flor2uCoupon
         ? { coupon: flor2uCoupon, reason: "Подтверждённое отдельное Telegram-размещение Flor2u", stats: { total: coupons.length } }
         : null)
-      : selectBestCouponToPost(coupons, { hitOnly, storeSlug: storeSlug || undefined });
+      : specificCoupon
+        ? { coupon: specificCoupon, reason: `Запрошен конкретный промокод ${specificCoupon.promocode.code}`, stats: { total: coupons.length } }
+        : selectBestCouponToPost(coupons, { hitOnly, storeSlug: storeSlug || undefined });
     if (!selection) {
       return NextResponse.json({ message: "No matching coupons eligible for posting" }, { status: 404 });
     }
