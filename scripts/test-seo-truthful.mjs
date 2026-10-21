@@ -57,4 +57,23 @@ assert.ok(article.includes("article.image ? { image: new URL(article.image, SITE
 assert.ok(article.includes("logo: {"));
 assert.ok(article.includes("url: `${SITE_URL}/icon.png`"));
 assert.ok(!article.includes("article.published ?? new Date().toISOString()"));
+
+const faqContent = fs.readFileSync("src/lib/faqContent.ts", "utf8");
+const howItWorks = fs.readFileSync("src/components/HowItWorks.tsx", "utf8");
+const seoHelp = fs.readFileSync("src/components/SeoArticle.tsx", "utf8");
+for (const [name, content] of [["FAQ",faqContent],["HowItWorks",howItWorks],["SeoArticle",seoHelp]]) {
+  for (const unsupported of ["Скидка применится сразу","получи скидку мгновенно","почему они реально работают","Мы решили это","не передаём данные третьим лицам","добавляем новые купоны в день запуска"]) {
+    assert.ok(!content.includes(unsupported), name+": remove unverified promise "+unsupported);
+  }
+}
+assert.match(faqContent, /Admitad и Perfluence/);
+assert.match(faqContent, /согласия/);
+assert.match(faqContent, /итоговую сумму перед оплатой/);
+assert.match(howItWorks, /проверь итоговую сумму/);
+assert.match(seoHelp, /не подтверждает, что промокод подойдёт/);
+const guidePage = fs.readFileSync("src/app/guide/page.tsx", "utf8");
+assert.match(guidePage, /FAQ_ITEMS\.map/);
+assert.match(guidePage, /<Faq \/>/);
+console.log("Help and FAQ honest affiliate claims + shared structured answers PASS");
+
 console.log("SEO truthful Offer/Article structured-data tests PASS");
