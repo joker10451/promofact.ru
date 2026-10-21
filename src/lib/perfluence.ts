@@ -469,6 +469,15 @@ async function fetchSnapshot(): Promise<Coupon[]> {
 export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
   const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ЧАЙ"]);
 
+    // Approved Gold Apple placement 21 October 2026.
+    if (c.store.slug === "zolotoe-yabloko") {
+      const code = c.promocode.code.trim().toUpperCase();
+      return ["ПРАЗДНИК", "PERF"].includes(code) &&
+        c.affiliate.link === "https://gldppl.prfl.me/smart_zakupka/lr8e4c?erid=2Ranyo8yEMy" &&
+        c.affiliate.ordMarker === "2Ranyo8yEMy" &&
+        c.affiliate.ordText.includes("erid: 2Ranyo8yEMy");
+    }
+
     if (c.store.slug === "magnit-dostavka") {
       return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase());
     }

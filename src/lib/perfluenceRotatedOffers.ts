@@ -246,3 +246,42 @@ export const WINLAB_ROTATED_OFFERS_PENDING_ERID: Coupon[] = [
   offer(81409142, winlab, winlabAd, "WCPFOKT4737", "Скидка 10% в ВинЛаб", "2026-10-21", "18+"),
   offer(81409143, winlab, winlabAd, "5OKTPF4737", "Скидка 5% в ВинЛаб", "2026-10-21", "18+"),
 ];
+// Approved Gold Apple website placement, 21 October 2026.
+export const GOLDAPPLE_OCT21_LINK = "https://gldppl.prfl.me/smart_zakupka/lr8e4c?erid=2Ranyo8yEMy";
+export const GOLDAPPLE_OCT21_ERID = "2Ranyo8yEMy";
+export const GOLDAPPLE_OCT21_LEGAL = 'Реклама. ООО "ЕКАТЕРИНБУРГ ЯБЛОКО", адрес: г. Екатеринбург, ул. Сакко и Ванцетти, 62, ОГРН 1126670019585 erid: 2Ranyo8yEMy';
+
+const goldApple: Coupon["store"] = {
+  ...STABLE_STORES["zolotoe-yabloko"],
+  activeBloggers: STABLE_STORES["zolotoe-yabloko"].activeBloggers ?? 0,
+};
+
+const goldAppleAd: Coupon["affiliate"] = {
+  link: GOLDAPPLE_OCT21_LINK,
+  landingLink: GOLDAPPLE_OCT21_LINK,
+  ordMarker: GOLDAPPLE_OCT21_ERID,
+  ordText: GOLDAPPLE_OCT21_LEGAL,
+};
+
+export const GOLDAPPLE_ROTATED_OFFERS: Coupon[] = [
+  offer(
+    81707001,
+    goldApple,
+    goldAppleAd,
+    "ПРАЗДНИК",
+    "Скидка по промокоду ПРАЗДНИК в Золотом Яблоке",
+    "2026-10-29T23:59:59+03:00",
+    "По условиям акции",
+    "Новый промокод на скидку в интернет-магазине и приложении «Золотое Яблоко». Срок действия с 21 по 29 октября 2026 года до 23:59 по Москве. Проверяйте исключения и условия в корзине.",
+  ),
+  offer(
+    81707002,
+    goldApple,
+    goldAppleAd,
+    "PERF",
+    "Скидка по промокоду PERF в Золотом Яблоке",
+    "2026-10-31T23:59:59+03:00",
+    "По условиям акции",
+    "Промокод PERF на покупки в мобильном приложении и интернет-магазине «Золотое Яблоко». Действует до 31 октября 2026 года до 23:59 по Москве. Ограничения уточняйте при оформлении.",
+  ),
+];
