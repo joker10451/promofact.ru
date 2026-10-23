@@ -7,6 +7,7 @@ import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { getCollections, getCollectionCoupons, MIN_INDEXABLE_COLLECTION_OFFERS } from "@/lib/collections";
+import { getShoppingDayStatus, getBlackFridayStatus } from "@/lib/seasonalEvents";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 // Keep thematic pages current as partner catalog offers change.
@@ -49,13 +50,23 @@ export async function generateMetadata({
   if (!col) return {};
   const count = getCollectionCoupons(col, all).length;
   const pageUrl = `${SITE_URL}/collections/${slug}`;
-  const pageTitle = `Промокоды и акции: ${col.name}`;
+  let pageTitle = `Промокоды и акции: ${col.name}`;
+  let description = count >= MIN_INDEXABLE_COLLECTION_OFFERS
+    ? `${col.name}: ${count} предложений с условиями и сроками действия. Проверьте ограничения скидок перед заказом.`
+    : `${col.name}: сейчас недостаточно действующих предложений для подборки. Посмотрите полный каталог.`;
+
+  if (slug === "den-shopinga-11-11") {
+    pageTitle = "Промокоды на День шопинга 11.11 (2026) — скидки и купоны";
+    description = "Все действующие промокоды и скидки ко Всемирному дню шопинга 11.11 (2026) в интернет-магазинах России. Сравните условия купонов на маркетплейсы, одежду, косметику и электронику.";
+  } else if (slug === "black-friday") {
+    pageTitle = "Чёрная Пятница 2026: промокоды, скидки и купоны на распродажу";
+    description = "Промокоды и купоны на Чёрную Пятницу 2026 в России. Максимальные скидки до 90% на маркетплейсах, в магазинах техники, одежды и косметики. Проверяйте условия перед оплатой.";
+  }
+
   const ogTitle = `${pageTitle} — ${SITE_NAME}`;
   const og = {
     title: ogTitle,
-    description: count >= MIN_INDEXABLE_COLLECTION_OFFERS
-      ? `${col.name}: ${count} предложений с условиями и сроками действия. Проверьте ограничения скидок перед заказом.`
-      : `${col.name}: сейчас недостаточно действующих предложений для подборки. Посмотрите полный каталог.`,
+    description,
     url: pageUrl,
     type: "website" as const,
     locale: "ru_RU",
@@ -118,6 +129,9 @@ export default async function CollectionPage({
   ]);
   const col = collections.find((c) => c.slug === slug);
   if (!col) notFound();
+
+  const shoppingStatus = getShoppingDayStatus();
+  const bfStatus = getBlackFridayStatus();
 
   const list = getCollectionCoupons(col, all);
   const storeNames = [...new Set(list.map((c) => c.store.name))];
@@ -227,14 +241,77 @@ export default async function CollectionPage({
             ? `${list.length} предложений с условиями и датами действия. Проверяйте итоговую сумму перед заказом.`
             : "Сейчас действующих предложений в подборке нет. Откройте полный каталог."}
         </p>
-        {col.slug === "black-friday" && (
-          <div className="mt-5 max-w-3xl rounded-2xl bg-ink p-5 text-white shadow-xs">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400">
-              <span>Распродажа Чёрная Пятница 2026</span>
+        {col.slug === "den-shopinga-11-11" && (
+          <div className="mt-6 max-w-4xl rounded-3xl border border-yellow/30 bg-gradient-to-br from-amber-50 via-yellow/10 to-white p-5 sm:p-7 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-ink shadow-2xs">
+                <span>🔥</span>
+                <span>{shoppingStatus.badgeText}</span>
+              </span>
+              <span className="text-xs font-semibold text-ink/70">
+                Период: {shoppingStatus.formattedTargetDate}
+              </span>
             </div>
-            <p className="mt-2 text-sm leading-relaxed text-white/90">
-              Главный период скидок года. Промокоды маркетплейсов и магазинов обновляются по мере старта акций. Добавляйте товары в корзину и проверяйте промокоды до оплаты.
+            <h2 className="mt-3 font-display text-lg sm:text-xl font-extrabold text-ink">
+              {shoppingStatus.headline}
+            </h2>
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-ink/75">
+              Всемирный день шопинга 11.11 — крупнейшая распродажа осени. Промокоды магазинов одежды, косметики, электроники и маркетплейсов уже проверены. Сохраняйте товары в корзину и активируйте промокоды на старте акции.
             </p>
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="rounded-xl border border-yellow/40 bg-white/90 p-3">
+                <span className="text-[11px] font-bold text-yellow-800 uppercase tracking-wider block">1 этап: до 10 ноября</span>
+                <span className="mt-1 font-bold text-xs sm:text-sm text-ink block">Разогрев и сбор корзины</span>
+                <span className="mt-1 text-[11px] text-ink/65 block">Фиксация цен и выбор купонов</span>
+              </div>
+              <div className="rounded-xl border border-red/40 bg-red/5 p-3">
+                <span className="text-[11px] font-bold text-red uppercase tracking-wider block">2 этап: 11–13 ноября</span>
+                <span className="mt-1 font-bold text-xs sm:text-sm text-ink block">Пик скидок 11.11</span>
+                <span className="mt-1 text-[11px] text-ink/65 block">Активация главных кодов</span>
+              </div>
+              <div className="rounded-xl border border-line bg-white/80 p-3">
+                <span className="text-[11px] font-bold text-ink/50 uppercase tracking-wider block">3 этап: 14–15 ноября</span>
+                <span className="mt-1 font-bold text-xs sm:text-sm text-ink block">Финальный дисконт</span>
+                <span className="mt-1 text-[11px] text-ink/65 block">Распродажа остатков</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {col.slug === "black-friday" && (
+          <div className="mt-6 max-w-4xl rounded-3xl border border-ink/10 bg-gradient-to-br from-ink to-ink/95 p-5 sm:p-7 text-white shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-red px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-white shadow-2xs">
+                <span>🖤</span>
+                <span>{bfStatus.badgeText}</span>
+              </span>
+              <span className="text-xs font-semibold text-white/70">
+                Период: {bfStatus.formattedTargetDate}
+              </span>
+            </div>
+            <h2 className="mt-3 font-display text-lg sm:text-xl font-extrabold text-white">
+              {bfStatus.headline} — скидки до -90%
+            </h2>
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-white/80">
+              Главный период распродаж года. Промокоды маркетплейсов, магазинов техники, моды и парфюмерии обновляются по мере запуска предраспродаж. Добавляйте товары в избранное заранее.
+            </p>
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="rounded-xl border border-white/15 bg-white/10 p-3">
+                <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider block">С 20 ноября</span>
+                <span className="mt-1 font-bold text-xs sm:text-sm text-white block">Предраспродажа</span>
+                <span className="mt-1 text-[11px] text-white/70 block">Ранний доступ к закрытым акциям</span>
+              </div>
+              <div className="rounded-xl border border-red/60 bg-red/20 p-3">
+                <span className="text-[11px] font-bold text-red-300 uppercase tracking-wider block">26–27 ноября</span>
+                <span className="mt-1 font-bold text-xs sm:text-sm text-white block">Чёрная Пятница (Пик)</span>
+                <span className="mt-1 text-[11px] text-white/70 block">Максимальный дисконт года</span>
+              </div>
+              <div className="rounded-xl border border-white/15 bg-white/10 p-3">
+                <span className="text-[11px] font-bold text-white/60 uppercase tracking-wider block">30 ноября</span>
+                <span className="mt-1 font-bold text-xs sm:text-sm text-white block">Киберпонедельник</span>
+                <span className="mt-1 text-[11px] text-white/70 block">Финальные скидки на гаджеты</span>
+              </div>
+            </div>
           </div>
         )}
 

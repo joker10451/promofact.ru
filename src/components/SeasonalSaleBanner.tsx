@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getShoppingDayStatus, getBlackFridayStatus } from "@/lib/seasonalEvents";
 
 interface SeasonalSaleBannerProps {
   blackFridayCount?: number;
@@ -7,8 +8,11 @@ interface SeasonalSaleBannerProps {
 
 export default function SeasonalSaleBanner({
   blackFridayCount = 73,
-  shoppingDayCount = 18,
+  shoppingDayCount = 23,
 }: SeasonalSaleBannerProps) {
+  const shoppingStatus = getShoppingDayStatus();
+  const bfStatus = getBlackFridayStatus();
+
   return (
     <section
       aria-label="Главные распродажи сезона"
@@ -48,7 +52,7 @@ export default function SeasonalSaleBanner({
           <div>
             <div className="flex items-center justify-between gap-2">
               <span className="rounded-full bg-red px-3 py-1 text-xs font-extrabold tracking-wide uppercase text-white shadow-xs">
-                Скидки до -90%
+                {bfStatus.stage === "active" ? "Скидки до -90%" : bfStatus.badgeText}
               </span>
               <span className="text-xs font-semibold text-white/70">
                 {blackFridayCount} предложений
@@ -79,7 +83,7 @@ export default function SeasonalSaleBanner({
           <div>
             <div className="flex items-center justify-between gap-2">
               <span className="rounded-full bg-yellow px-3 py-1 text-xs font-extrabold tracking-wide uppercase text-ink shadow-xs">
-                Старт 11 ноября
+                {shoppingStatus.badgeText}
               </span>
               <span className="text-xs font-semibold text-ink/65">
                 {shoppingDayCount} предложений
@@ -90,7 +94,7 @@ export default function SeasonalSaleBanner({
               Всемирный день шопинга 11.11
             </h3>
             <p className="mt-2 text-xs leading-relaxed text-ink/70 sm:text-sm">
-              Праздничные купоны и спецпредложения на популярные бренды: маркетплейсы, ювелирные изделия, мода и уют для дома.
+              Праздничные купоны и спецпредложения на популярные бренды: маркетплейсы, ювелирные изделия, мода, электроника и уют для дома.
             </p>
           </div>
 

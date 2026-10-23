@@ -205,14 +205,23 @@ export const COLLECTIONS: Collection[] = [
         q: "Какие товары выгоднее всего покупать на распродаже 11.11?",
         a: "Наибольшая экономия наблюдается в категориях электроники, гаджетов, верхней одежды, косметики и подарков к Новому году.",
       },
+      {
+        q: "Суммируются ли промокоды со скидками распродажи 11.11?",
+        a: "Большинство маркетплейсов и магазинов позволяют применить промокод поверх акционных цен 11.11, получая дополнительный дисконт 5–20% или бесплатную доставку. Точные правила указаны в карточке каждого купона.",
+      },
+      {
+        q: "Как подготовиться ко Дню шопинга 11.11, чтобы сэкономить максимум?",
+        a: "Добавляйте нужные товары в корзину заранее до 10 ноября, сравнивайте цены между маркетплейсами, проверяйте купоны на первый заказ и активируйте промокоды в первые часы 11 ноября, пока действуют лимиты применений.",
+      },
     ],
     relatedArticles: [
       { text: "Лайфхаки шопинга на маркетплейсах", href: "/sovety/laifhaki-shoppinga-na-marketpleysah" },
       { text: "Чёрная пятница 2026: гид по скидкам и промокодам", href: "/sovety/chernaya-pyatnica-2026" },
+      { text: "Кэшбэк банков 2026: как вернуть до 10% с покупок", href: "/sovety/cashbek-bankov-2026" },
     ],
     filter: (c) =>
-      ["marketpleysy", "odezhda-i-obuv", "kosmetika-i-parfyumeriya", "ukrasheniya", "vse-dlya-doma"].includes(c.store.categorySlug || "") ||
-      ["yandex-market", "cozy-home", "carte-blanche", "sunlight-ru", "zolotoe-yabloko"].includes(c.store.slug),
+      ["marketpleysy", "odezhda-i-obuv", "kosmetika-i-parfyumeriya", "ukrasheniya", "vse-dlya-doma", "elektronika-i-tehnika", "podarki"].includes(c.store.categorySlug || "") ||
+      ["yandex-market", "cozy-home", "carte-blanche", "sunlight-ru", "zolotoe-yabloko", "sberdevices"].includes(c.store.slug),
   },
   {
     slug: "finansy-i-karty",
