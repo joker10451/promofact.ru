@@ -15,6 +15,7 @@ import {
 const NAV = [
   { href: "/catalog", label: "Купоны" },
   { href: "/promokody", label: "Магазины" },
+  { href: "/collections", label: "Подборки" },
   { href: "/sovety", label: "Советы" },
 ];
 

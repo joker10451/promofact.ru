@@ -145,6 +145,63 @@ export const COLLECTIONS: Collection[] = [
       c.store.name.toLowerCase().includes("цвет") ||
       c.store.name.toLowerCase().includes("букет"),
   },
+  {
+    slug: "black-friday",
+    name: "Чёрная Пятница 2026",
+    emoji: "🔥",
+    description: "Главная распродажа года: максимальные скидки и промокоды на маркетплейсах, в магазинах одежды, косметики и электроники.",
+    buyerTips: [
+      "Сравните цену товара до скидки с предложениями в других магазинах, чтобы оценить реальную выгоду перед оплатой.",
+      "Проверьте правила суммирования: применяются ли промокоды к позициям с уже сниженной ценой или акциям дня.",
+      "Обратите внимание на сроки действия и лимиты активаций: на пике распродажи выгодные коды исчерпываются быстрее.",
+    ],
+    filter: (c) =>
+      ["marketpleysy", "odezhda-i-obuv", "kosmetika-i-parfyumeriya", "elektronika-i-tehnika", "vse-dlya-doma", "ukrasheniya"].includes(c.store.categorySlug || "") ||
+      Boolean(c.promocode.bonusName && /скидк|распродаж|акци/iu.test(c.promocode.bonusName)),
+  },
+  {
+    slug: "den-shopinga-11-11",
+    name: "День шопинга 11.11",
+    emoji: "🛍️",
+    description: "Специальные предложения и праздничные промокоды ко Всемирному дню шопинга 11.11 на популярные бренды и маркетплейсы.",
+    buyerTips: [
+      "Сохраняйте понравившиеся товары в корзину или избранное заранее, чтобы успеть применить код на старте акции.",
+      "Уточните минимальную стоимость корзины и ограничения по категориям товаров для применения праздничного кода.",
+      "Проверяйте условия гарантийного обслуживания и правила возврата при покупке товаров с повышенным дисконтом.",
+    ],
+    filter: (c) =>
+      ["marketpleysy", "odezhda-i-obuv", "kosmetika-i-parfyumeriya", "ukrasheniya", "vse-dlya-doma"].includes(c.store.categorySlug || "") ||
+      ["yandex-market", "cozy-home", "carte-blanche", "sunlight-ru", "zolotoe-yabloko"].includes(c.store.slug),
+  },
+  {
+    slug: "finansy-i-karty",
+    name: "Банковские карты и финансы",
+    emoji: "💳",
+    description: "Выгодные дебетовые карты с кэшбэком, детские карты, накопительные счета с высокими ставками и финансовые сервисы с бонусами.",
+    buyerTips: [
+      "Ознакомьтесь с тарифами на обслуживание: необходимым ежемесячным оборотом или остатком для бесплатного ведения счета.",
+      "Проверьте точную ставку, срок начисления процентов и правила досрочного изъятия средств по вкладам или счетам.",
+      "Уточните категории повышенного кэшбэка и порядок выплаты приветственного вознаграждения за оформление продукта.",
+    ],
+    filter: (c) =>
+      c.store.categorySlug === "servisy-i-podpiski" ||
+      ["sber", "otp", "t-bank", "vklad", "plati-po-vsemu-miru"].some((k) => (c.store.slug || "").includes(k) || (c.store.name || "").toLowerCase().includes(k)) ||
+      Boolean(c.promocode.bonusName && /кэшбэк|руб|бонус|вклад|карт/iu.test(c.promocode.bonusName)),
+  },
+  {
+    slug: "odezhda-i-obuv",
+    name: "Одежда и обувь",
+    emoji: "👗",
+    description: "Скидки и секретные промокоды на модную одежду, обувь и аксессуары от ведущих брендов и магазинов.",
+    buyerTips: [
+      "Сверяйте размерные таблицы конкретного производителя и уточняйте возможность частичного выкупа при доставке.",
+      "Проверьте, действует ли промокод на товары из раздела финальной распродажи или только на позиции по полной цене.",
+      "Сравните итоговую стоимость корзины с порогом бесплатной курьерской доставки или доставки в пункт выдачи заказов.",
+    ],
+    filter: (c) =>
+      c.store.categorySlug === "odezhda-i-obuv" ||
+      ["befree", "love-republic", "street-beat", "mark-formelle", "poizon", "carte-blanche", "cozy-home"].includes(c.store.slug),
+  },
 ];
 
 export async function getCollections(): Promise<Collection[]> {

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
@@ -127,7 +129,8 @@ export default async function CollectionPage({
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Главная", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: col.name, item: pageUrl },
+      { "@type": "ListItem", position: 2, name: "Подборки", item: `${SITE_URL}/collections` },
+      { "@type": "ListItem", position: 3, name: col.name, item: pageUrl },
     ],
   };
 
@@ -185,7 +188,9 @@ export default async function CollectionPage({
   };
 
   return (
-    <main>
+    <>
+      <Header />
+      <main className="min-h-screen pb-16">
       <JsonLd data={breadcrumb} />
       <JsonLd data={collectionJsonLd} />
       <JsonLd data={faqJsonLd} />
@@ -198,6 +203,12 @@ export default async function CollectionPage({
         >
           <Link href="/" className="hover:text-ink transition-colors">
             Главная
+          </Link>
+          <span className="mx-2" aria-hidden="true">
+            /
+          </span>
+          <Link href="/collections" className="hover:text-ink transition-colors">
+            Подборки
           </Link>
           <span className="mx-2" aria-hidden="true">
             /
@@ -283,5 +294,7 @@ export default async function CollectionPage({
         </section>
       </div>
     </main>
+      <Footer />
+    </>
   );
 }

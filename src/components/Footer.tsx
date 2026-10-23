@@ -118,7 +118,25 @@ export default async function Footer() {
                 Маркетплейсы и гипермаркеты
               </Link>
             </li>
+            <li>
+              <Link href="/collections/black-friday" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                Чёрная Пятница 2026
+              </Link>
+            </li>
+            <li>
+              <Link href="/collections/finansy-i-karty" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                Карты и вклады
+              </Link>
+            </li>
           </ul>
+          <Link
+            href="/collections"
+            className="mt-4 inline-block font-semibold text-white/70 hover:text-white transition-colors"
+          >
+            Все подборки скидок →
+          </Link>
         </nav>
 
         <div>
@@ -129,13 +147,22 @@ export default async function Footer() {
             {[
               ["Москва", "/gorod/moskva"],
               ["Санкт-Петербург", "/gorod/spb"],
-              ["Казань", "/gorod/kazan"],
+              ["Новосибирск", "/gorod/novosibirsk"],
               ["Екатеринбург", "/gorod/ekaterinburg"],
-              ["Краснодар", "/gorod/krasnodar"],
-              ["Самара", "/gorod/samara"],
+              ["Казань", "/gorod/kazan"],
               ["Нижний Новгород", "/gorod/nizhniy-novgorod"],
+              ["Челябинск", "/gorod/chelyabinsk"],
+              ["Красноярск", "/gorod/krasnoyarsk"],
+              ["Самара", "/gorod/samara"],
               ["Уфа", "/gorod/ufa"],
+              ["Ростов-на-Дону", "/gorod/rostov-na-donu"],
+              ["Краснодар", "/gorod/krasnodar"],
+              ["Омск", "/gorod/omsk"],
               ["Воронеж", "/gorod/voronezh"],
+              ["Пермь", "/gorod/perm"],
+              ["Волгоград", "/gorod/volgograd"],
+              ["Саратов", "/gorod/saratov"],
+              ["Тюмень", "/gorod/tyumen"],
             ].map(([label, href]) => (
               <li key={href}>
                 <Link href={href} className={footerLink}>
@@ -145,6 +172,12 @@ export default async function Footer() {
               </li>
             ))}
           </ul>
+          <Link
+            href="/gorod"
+            className="mt-4 inline-block font-semibold text-white/70 hover:text-white transition-colors"
+          >
+            Все города и регионы →
+          </Link>
         </div>
 
         <div className="md:col-span-1">
