@@ -78,7 +78,73 @@ const ROSGOSSTRAKH_AFFILIATE: Coupon["affiliate"] = {
   ordText: 'Реклама. ПАО СК "Росгосстрах", ИНН 7707067683 erid: 2RanyknSz51',
 };
 
+// PERFLUENCE / Samokat Birthday: approved PromoFact site placement (post 17345615, project 305).
+const SAMOKAT_LINK = "https://vml8.adj.st/main?showcaseType=MINIMARKET&adj_t=14mofhu6&adj_campaign=CPA&adj_adgroup=3074542&adj_fallback=https%3A%2F%2Fsamokat.ru%3Futm_source%3Dperfluence%26utm_medium%3Dcpa%26utm_campaign%3D3074542&adj_redirect_macos=https%3A%2F%2Fsamokat.ru%3Futm_source%3Dperfluence%26utm_medium%3Dcpa%26utm_campaign%3D3074542&erid=2RanymVswDd";
+const SAMOKAT_ERID = "2RanymVswDd";
+const SAMOKAT_STORE: Coupon["store"] = {
+  id: 305,
+  name: "Самокат",
+  slug: "samokat",
+  logo: "/brands/samokat.png",
+  category: "Доставка продуктов",
+  categorySlug: "dostavka-produktov",
+  about: "«Самокат» — сервис мгновенной доставки продуктов, готовой еды и полезных мелочей для дома от 15 минут.",
+  conditions: "Промокод действует на первый заказ в приложении и на сайте Самоката. Суммируется со скидками на товары внутри каталога.",
+  site: "https://samokat.ru",
+  activeBloggers: 2500,
+};
+const SAMOKAT_AFFILIATE: Coupon["affiliate"] = {
+  link: SAMOKAT_LINK,
+  landingLink: SAMOKAT_LINK,
+  ordMarker: SAMOKAT_ERID,
+  ordText: 'Реклама. ООО "Умный Ритейл", ИНН 7811657720. erid: 2RanymVswDd',
+};
+
 export const CUSTOM_COUPONS: Coupon[] = [
+  {
+    id: 1734561501,
+    promocode: {
+      id: 1734561501,
+      code: "GZP8FU6",
+      bonusName: "Скидка 35% от 1 000 ₽ на первый заказ",
+      terms: "Промокод GZP8FU6: скидка 35% от 1 000 ₽ на первый заказ в Самокате (максимальная скидка 500 ₽). Промокод суммируется со скидками на товары внутри сервиса. При скидке более 35% на товары применяется наиболее выгодная цена. Действует до 31 октября 2026 года 23:59.",
+      expires: "2026-10-31",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Первый заказ",
+      minimumOrder: { value: 1000, currency: "RUB" },
+      region: "Россия",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "Доставка продуктов",
+    },
+    store: SAMOKAT_STORE,
+    affiliate: SAMOKAT_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 1734561502,
+    promocode: {
+      id: 1734561502,
+      code: "GQCWSD2",
+      bonusName: "Скидка 500 ₽ от 2 000 ₽ на первый заказ",
+      terms: "Промокод GQCWSD2: скидка 500 ₽ от 2 000 ₽ на первый заказ в сервисе Самокат. Промокод суммируется со скидками на товары внутри каталога. Действует до 31 октября 2026 года 23:59.",
+      expires: "2026-10-31",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Первый заказ",
+      minimumOrder: { value: 2000, currency: "RUB" },
+      region: "Россия",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "Доставка продуктов",
+    },
+    store: SAMOKAT_STORE,
+    affiliate: SAMOKAT_AFFILIATE,
+    extraLinks: [],
+  },
   {
     id: 435414513,
     promocode: {
@@ -297,13 +363,13 @@ export const CUSTOM_COUPONS: Coupon[] = [
     promocode: {
       id: 50032,
       code: "dcjutya4",
-      bonusName: "45 дней доступа к PREMIER + RUTUBE за 1 ₽",
-      terms: "Подписка на 45 дней доступа к онлайн-кинотеатру PREMIER и библиотеке RUTUBE всего за 1 ₽ по эксклюзивному промокоду dcjutya4. Действует для новых пользователей или зрителей без активной подписки более 180 дней.",
+      bonusName: "50 дней доступа к PREMIER + RUTUBE за 1 ₽",
+      terms: "Подписка на 50 дней доступа к онлайн-кинотеатру PREMIER и библиотеке RUTUBE всего за 1 ₽ по эксклюзивному промокоду dcjutya4. Действует для новых пользователей или зрителей без активной подписки более 90 дней (или подписка на 1 месяц за 99 ₽ для неактивных менее 90 дней, далее 399 ₽/мес).",
       expires: "2027-01-19T23:59:59+03:00",
       isHit: true,
       isUniversal: true,
       isFirstOrderOnly: false,
-      customerTypeLabel: "Новые пользователи или >180 дней без подписки",
+      customerTypeLabel: "Новые зрители или >90 дней без подписки",
       region: "RU",
       isBarcode: false,
       barcodeImage: null,

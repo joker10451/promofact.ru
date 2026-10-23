@@ -604,10 +604,10 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "activeBloggers": 2503
   },
   "samokat": {
-    "id": 100002,
+    "id": 305,
     "slug": "samokat",
     "name": "Самокат",
-    "logo": "https://favicon.yandex.net/favicon/v2/samokat.ru?size=120",
+    "logo": "/brands/samokat.png",
     "category": "Доставка продуктов",
     "categorySlug": "dostavka-produktov",
     "about": "«Самокат» - сервис мгновенной доставки продуктов и товаров для дома от 15 минут.",
