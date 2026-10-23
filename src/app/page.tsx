@@ -7,6 +7,8 @@ import SberCampaignTeasers from "@/components/SberCampaignTeasers";
 import HomeOffersPreview from "@/components/HomeOffersPreview";
 import HomeResourcesPreview from "@/components/HomeResourcesPreview";
 import CategoryPreview from "@/components/CategoryPreview";
+import SeasonalSaleBanner from "@/components/SeasonalSaleBanner";
+import { COLLECTIONS, getCollectionCoupons } from "@/lib/collections";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import Reveal from "@/components/Reveal";
@@ -51,6 +53,11 @@ export default async function Home() {
     : [...stores, { ...STABLE_STORES.winlab, activeBloggers: STABLE_STORES.winlab.activeBloggers ?? 0 }];
   const searchIndex = buildSearchIndex(searchStores, coupons);
 
+  const bfCol = COLLECTIONS.find((c) => c.slug === "black-friday");
+  const shoppingCol = COLLECTIONS.find((c) => c.slug === "den-shopinga-11-11");
+  const bfCount = bfCol ? getCollectionCoupons(bfCol, coupons).length : 73;
+  const shoppingCount = shoppingCol ? getCollectionCoupons(shoppingCol, coupons).length : 18;
+
   return (
     <>
       <JsonLd
@@ -86,6 +93,13 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 sm:pt-8">
           <Reveal>
             <CategoryPreview />
+          </Reveal>
+        </div>
+
+        {/* Главные сезонные распродажи (11.11 и Чёрная Пятница 2026) */}
+        <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8">
+          <Reveal>
+            <SeasonalSaleBanner blackFridayCount={bfCount} shoppingDayCount={shoppingCount} />
           </Reveal>
         </div>
 
