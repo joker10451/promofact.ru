@@ -469,6 +469,20 @@ async function fetchSnapshot(): Promise<Coupon[]> {
 export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
   const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ПИРОГ"]);
 
+    // Site-specific Perfluence links renewed 23 October 2026.
+    // Reject stale widget links / ERIDs and any unconfirmed codes for these projects.
+    if (c.store.slug === "yandeks-tsvety") {
+      return c.promocode.code.trim().toUpperCase() === "QX7GZZ" &&
+        c.affiliate.link === "https://yaflowers.prfl.me/sites/oluvpa?erid=2RanymRX1bZ" &&
+        c.affiliate.ordMarker === "2RanymRX1bZ" &&
+        c.affiliate.ordText.includes("ИНН 9705114405");
+    }
+    if (c.store.slug === "yandex-eda") {
+      return ["PAF250", "LMJ210"].includes(c.promocode.code.trim().toUpperCase()) &&
+        c.affiliate.link === "https://edayandex.prfl.me/sites/tndr3w?erid=2RanymUUzAF" &&
+        c.affiliate.ordMarker === "2RanymUUzAF" &&
+        c.affiliate.ordText.includes("ИНН 9705114405");
+    }
     // Approved Gold Apple placement 21 October 2026.
     if (c.store.slug === "zolotoe-yabloko") {
       const code = c.promocode.code.trim().toUpperCase();

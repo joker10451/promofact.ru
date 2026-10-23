@@ -100,7 +100,51 @@ const SAMOKAT_AFFILIATE: Coupon["affiliate"] = {
   ordText: 'Реклама. ООО "Умный Ритейл", ИНН 7811657720. erid: 2RanymVswDd',
 };
 
+
+/** Perfluence website placements renewed 23 Oct 2026, explicitly approved for promofact.ru.
+ * Do not infer minimum order, user segment, or max discount from the dashboard.
+ */
+const YANDEX_FLOWERS_OCT23_LINK = "https://yaflowers.prfl.me/sites/oluvpa?erid=2RanymRX1bZ";
+const YANDEX_EDA_OCT23_LINK = "https://edayandex.prfl.me/sites/tndr3w?erid=2RanymUUzAF";
+const YANDEX_FLOWERS_OCT23_STORE: Coupon["store"] = { ...STABLE_STORES["yandeks-tsvety"], activeBloggers: STABLE_STORES["yandeks-tsvety"].activeBloggers ?? 0 };
+const YANDEX_EDA_OCT23_STORE: Coupon["store"] = { ...STABLE_STORES["yandex-eda"], activeBloggers: STABLE_STORES["yandex-eda"].activeBloggers ?? 0 };
+const YANDEX_FLOWERS_OCT23_AFFILIATE: Coupon["affiliate"] = {
+  link: YANDEX_FLOWERS_OCT23_LINK, landingLink: YANDEX_FLOWERS_OCT23_LINK,
+  ordMarker: "2RanymRX1bZ",
+  ordText: 'Реклама. ООО "ЯНДЕКС.ЕДА", ИНН 9705114405. erid: 2RanymRX1bZ',
+};
+const YANDEX_EDA_OCT23_AFFILIATE: Coupon["affiliate"] = {
+  link: YANDEX_EDA_OCT23_LINK, landingLink: YANDEX_EDA_OCT23_LINK,
+  ordMarker: "2RanymUUzAF",
+  ordText: 'Реклама. ООО "ЯНДЕКС.ЕДА", ИНН 9705114405. erid: 2RanymUUzAF',
+};
+function approvedYandexOct23Coupon(
+  id: number, store: Coupon["store"], affiliate: Coupon["affiliate"],
+  code: string, bonusName: string, expires: string,
+): Coupon {
+  return {
+    id,
+    promocode: {
+      id, code, bonusName,
+      terms: `Предложение действует до ${new Date(expires).toLocaleDateString("ru-RU", { timeZone: "Europe/Moscow" })}, 23:59 МСК. Применимость, ограничения и итоговую скидку проверяйте при оформлении заказа.`,
+      expires, isHit: false, isUniversal: false, isFirstOrderOnly: false,
+      customerTypeLabel: "По условиям предложения", region: "RU",
+      isBarcode: false, barcodeImage: null, group: "perfluence",
+    },
+    store, affiliate, extraLinks: [],
+  };
+}
+const YANDEX_OCT23_APPROVED_OFFERS: Coupon[] = [
+  approvedYandexOct23Coupon(826375001, YANDEX_FLOWERS_OCT23_STORE, YANDEX_FLOWERS_OCT23_AFFILIATE,
+    "QX7GZZ", "Скидка 1 100 ₽ в Яндекс Цветах", "2026-12-31T23:59:59+03:00"),
+  approvedYandexOct23Coupon(826138401, YANDEX_EDA_OCT23_STORE, YANDEX_EDA_OCT23_AFFILIATE,
+    "paf250", "Скидка 520 ₽ в Яндекс Еде Рестораны", "2026-11-15T23:59:59+03:00"),
+  approvedYandexOct23Coupon(826138402, YANDEX_EDA_OCT23_STORE, YANDEX_EDA_OCT23_AFFILIATE,
+    "lmj210", "Скидка 520 ₽ в Яндекс Еде Рестораны", "2026-11-01T23:59:59+03:00"),
+];
+
 export const CUSTOM_COUPONS: Coupon[] = [
+  ...YANDEX_OCT23_APPROVED_OFFERS,
   {
     id: 1734561501,
     promocode: {

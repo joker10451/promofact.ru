@@ -142,7 +142,7 @@ export const COLLECTIONS: Collection[] = [
     slug: "tsvety-i-podarki",
     name: "Цветы и подарки",
     emoji: "💐",
-    description: "Скидки на доставку свежих букетов, авторских композиций и подарков: Яндекс Цветы, Flowwow, Flor2u и AMF.",
+    description: "Скидки на доставку свежих букетов, цветочных композиций и подарков. Проверяйте условия каждого предложения на отдельной странице магазина.",
     filter: (c) =>
       c.store.categorySlug === "tsvety" ||
       ["yandex-tsvety", "flowwow", "flor2u", "amf", "fmart"].includes(c.store.slug) ||
