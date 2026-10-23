@@ -319,7 +319,7 @@ export function formatGoldAppleHalloweenPost(): {
   text: string;
   buttons: TelegramButton[][];
 } {
-  const affiliateUrl = "https://gldppl.prfl.me/smart_zakupka/lr8e4c?erid=2Ranyo8yEMy";
+  const affiliateUrl = "https://gldppl.prfl.me/smart_zakupka/3pfp4h?erid=2RanykjEuHD";
   const storeUrl = `${SITE_URL}/store/zolotoe-yabloko`;
 
   const text = [
@@ -347,7 +347,7 @@ export function formatGoldAppleHalloweenPost(): {
     "• ❗️ Есть бренды-исключения.",
     "• Сроки действия: «МИНУС» и «ПРАЗДНИК» до 29 октября, «PERF» до 31 октября 2026.",
     "",
-    '<i>Реклама. ООО "ЕКАТЕРИНБУРГ ЯБЛОКО", адрес: г. Екатеринбург, ул. Сакко и Ванцетти, 62, ОГРН 1126670019585 erid: 2Ranyo8yEMy</i>',
+    '<i>Реклама. ООО "ЕКАТЕРИНБУРГ ЯБЛОКО", адрес: г. Екатеринбург, ул. Сакко и Ванцетти, 62, ОГРН 1126670019585 erid: 2RanykjEuHD</i>',
   ].join("\n");
 
   const buttons: TelegramButton[][] = [
