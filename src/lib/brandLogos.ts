@@ -55,6 +55,8 @@ export const LOCAL_BRAND_ICONS: Record<string, string> = {
   "pyaterochka": "/brands/pyaterochka.png",
   "randewoo": "/brands/randewoo.png",
   "riv-gosh": "/brands/riv-gosh.png",
+  "rosgosstrakh": "/brands/rosgosstrakh.png",
+  "rgs": "/brands/rosgosstrakh.png",
   "rutube": "/brands/rutube.png",
   "samokat": "/brands/samokat.png",
   "sberbank": "/brands/sberbank.png",
@@ -104,6 +106,13 @@ export function getLocalBrandLogo(slug: string): string | null {
 
 
 export const BRAND_REGISTRY: Record<string, BrandMeta> = {
+  "rosgosstrakh": {
+    logoUrl: "/brands/rosgosstrakh.png",
+    emoji: "🛡️",
+    bgGradient: "from-red-800 to-rose-950",
+    textColor: "text-white",
+    domain: "rgs.ru",
+  },
   "podruzhka": {
     logoUrl: "/brands/podruzhka-mark.svg",
     emoji: "💜",

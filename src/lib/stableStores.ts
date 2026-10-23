@@ -29,6 +29,18 @@ export interface StableStoreMeta {
 }
 
 export const STABLE_STORES: Record<string, StableStoreMeta> = {
+  "rosgosstrakh": {
+    id: 4463,
+    slug: "rosgosstrakh",
+    name: "Росгосстрах",
+    logo: "/brands/rosgosstrakh.png",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+    about: "«Росгосстрах» — одна из старейших и крупнейших страховых компаний России. Онлайн-оформление туристических, имущественных и спортивных страховых полисов за несколько минут с круглосуточной поддержкой 24/7.",
+    conditions: "Скидка по промокоду применяется при оформлении страхового полиса онлайн на официальном сайте. Суммируется с действующими акциями.",
+    site: "https://rgs.online/",
+    activeBloggers: 1200,
+  },
   "sberbank": {
     id: 4383,
     slug: "sberbank",

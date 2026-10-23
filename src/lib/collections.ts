@@ -104,7 +104,7 @@ export const COLLECTIONS: Collection[] = [
     ],
     filter: (c) =>
       c.store.categorySlug === "puteshestviya-i-turizm" ||
-      ["otello", "yandeks-puteshestviya", "yandex-travel", "yandeks-prokat-ru"].includes(c.store.slug),
+      ["otello", "yandeks-puteshestviya", "yandex-travel", "yandeks-prokat-ru", "rosgosstrakh"].includes(c.store.slug),
   },
   {
     slug: "marketpleysy",
@@ -235,7 +235,7 @@ export const COLLECTIONS: Collection[] = [
     ],
     filter: (c) =>
       c.store.categorySlug === "servisy-i-podpiski" ||
-      ["sber", "otp", "t-bank", "vklad", "plati-po-vsemu-miru"].some((k) => (c.store.slug || "").includes(k) || (c.store.name || "").toLowerCase().includes(k)) ||
+      ["sber", "otp", "t-bank", "vklad", "plati-po-vsemu-miru", "rosgosstrakh"].some((k) => (c.store.slug || "").includes(k) || (c.store.name || "").toLowerCase().includes(k)) ||
       Boolean(c.promocode.bonusName && /кэшбэк|руб|бонус|вклад|карт/iu.test(c.promocode.bonusName)),
   },
   {

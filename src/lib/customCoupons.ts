@@ -56,7 +56,50 @@ const PODRUZHKA_STORE: Coupon["store"] = {
       activeBloggers: 3120,
     };
 
+// PERFLUENCE / Rosgosstrakh Online: approved PromoFact site placement.
+const ROSGOSSTRAKH_LINK = "https://rosgostravel.prfl.me/sites/4cawc2?erid=2RanyknSz51";
+const ROSGOSSTRAKH_ERID = "2RanyknSz51";
+const ROSGOSSTRAKH_STORE: Coupon["store"] = {
+  id: 4463,
+  name: "Росгосстрах",
+  slug: "rosgosstrakh",
+  logo: "/brands/rosgosstrakh.png",
+  category: "Сервисы и подписки",
+  categorySlug: "servisy-i-podpiski",
+  about: "«Росгосстрах» — одна из старейших и крупнейших страховых компаний России. Онлайн-оформление туристических, имущественных и спортивных страховых полисов за несколько минут с круглосуточной поддержкой 24/7.",
+  conditions: "Скидка по промокоду применяется при покупке страхового полиса онлайн на официальном сайте. Суммируется с действующими акциями.",
+  site: "https://rgs.online/",
+  activeBloggers: 1200,
+};
+const ROSGOSSTRAKH_AFFILIATE: Coupon["affiliate"] = {
+  link: ROSGOSSTRAKH_LINK,
+  landingLink: ROSGOSSTRAKH_LINK,
+  ordMarker: ROSGOSSTRAKH_ERID,
+  ordText: 'Реклама. ПАО СК "Росгосстрах", ИНН 7707067683 erid: 2RanyknSz51',
+};
+
 export const CUSTOM_COUPONS: Coupon[] = [
+  {
+    id: 435414513,
+    promocode: {
+      id: 435414513,
+      code: "PF1V34P",
+      bonusName: "Скидка 10% на страховой полис для путешествий",
+      terms: "Скидка 10% на каждую покупку страхового полиса для путешествий (любой период действия). Полис оформляется онлайн за 2 минуты, действует по России и всему миру с русскоязычной поддержкой 24/7. Включает медицинскую помощь и компенсацию расходов на лекарства. Суммируется с акциями на сайте.",
+      expires: "2026-10-31",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Все клиенты",
+      region: "Россия",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "Страхование путешествий",
+    },
+    store: ROSGOSSTRAKH_STORE,
+    affiliate: ROSGOSSTRAKH_AFFILIATE,
+    extraLinks: [],
+  },
   // Updated Ivi Perfluence placement for promofact.ru, 15 October 2026.
   // Do not reuse the old FILM35 coupon or old tracking link.
   {
