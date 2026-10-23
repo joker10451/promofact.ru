@@ -134,27 +134,30 @@ export default async function CollectionPage({
     ],
   };
 
+  const defaultFaq = [
+    {
+      q: `Где искать промокоды ${col.name.toLowerCase()}?`,
+      a: `На этой странице показаны предложения, доступные в каталоге. Состав обновляется по мере синхронизации с партнёрами; условия нужно проверить у магазина.`,
+    },
+    {
+      q: `Как применить промокод ${col.name.toLowerCase()}?`,
+      a: "Скопируйте код кнопкой «Копировать» на карточке, перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Магазин покажет итоговую сумму до оплаты, если предложение подходит вашему заказу.",
+    },
+  ];
+
+  const faqList = col.faq && col.faq.length > 0 ? col.faq : defaultFaq;
+
   const faqJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: `Где искать промокоды ${col.name.toLowerCase()}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `На этой странице показаны предложения, доступные в каталоге. Состав обновляется по мере синхронизации с партнёрами; условия нужно проверить у магазина.`,
-        },
+    mainEntity: faqList.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
       },
-      {
-        "@type": "Question",
-        name: `Как применить промокод ${col.name.toLowerCase()}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Скопируйте код кнопкой «Копировать» на карточке, перейдите в магазин по нашей ссылке и вставьте код в поле «Промокод» на этапе оплаты. Магазин покажет итоговую сумму до оплаты, если предложение подходит вашему заказу.",
-        },
-      },
-    ],
+    })),
   };
 
   const listing: Record<string, unknown> = {
@@ -224,6 +227,16 @@ export default async function CollectionPage({
             ? `${list.length} предложений с условиями и датами действия. Проверяйте итоговую сумму перед заказом.`
             : "Сейчас действующих предложений в подборке нет. Откройте полный каталог."}
         </p>
+        {col.slug === "black-friday" && (
+          <div className="mt-5 max-w-3xl rounded-2xl bg-ink p-5 text-white shadow-xs">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400">
+              <span>Распродажа Чёрная Пятница 2026</span>
+            </div>
+            <p className="mt-2 text-sm leading-relaxed text-white/90">
+              Главный период скидок года. Промокоды маркетплейсов и магазинов обновляются по мере старта акций. Добавляйте товары в корзину и проверяйте промокоды до оплаты.
+            </p>
+          </div>
+        )}
 
         {list.length === 0 && (
           <Link href="/catalog" className="mt-5 inline-flex rounded-xl bg-red px-4 py-3 text-sm font-bold text-white">
@@ -251,6 +264,23 @@ export default async function CollectionPage({
             </ol>
           </section>
         )}
+        {col.relatedArticles && col.relatedArticles.length > 0 && (
+          <section aria-label="Полезные статьи и гиды" className="mt-12 max-w-3xl rounded-2xl border border-line bg-white p-5 sm:p-7">
+            <h2 className="font-display text-xl font-extrabold text-ink">Полезные статьи и гиды по теме</h2>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {col.relatedArticles.map((art) => (
+                <Link
+                  key={art.href}
+                  href={art.href}
+                  className="flex items-center justify-between p-3.5 rounded-xl border border-line/70 hover:border-mint hover:bg-mint/5 transition-colors group"
+                >
+                  <span className="text-sm font-semibold text-ink group-hover:text-ink">{art.text}</span>
+                  <span className="text-ink/40 group-hover:text-ink text-sm">→</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
         <article className="mt-14 max-w-3xl">
           <h2 className="font-display text-lg font-extrabold">
             Купоны на {col.name.toLowerCase()} — что учесть перед покупкой
@@ -264,32 +294,23 @@ export default async function CollectionPage({
 
         <section className="mt-12 max-w-3xl" aria-label="Частые вопросы">
           <h2 className="font-display text-xl font-extrabold">
-            Частые вопросы про купоны {col.name.toLowerCase()}
+            {col.name.toLowerCase().includes("чёрн") || col.name.toLowerCase().includes("день")
+              ? `Частые вопросы: ${col.name}`
+              : `Частые вопросы про купоны ${col.name.toLowerCase()}`}
           </h2>
           <div className="mt-5 space-y-3">
-            <details className="group rounded-2xl border border-line bg-white px-5 py-4">
-              <summary className="cursor-pointer list-none font-bold text-ink">
-                Где искать промокоды {col.name.toLowerCase()}?
-                <span className="float-right text-red group-open:hidden">+</span>
-                <span className="float-right text-red hidden group-open:inline">−</span>
-              </summary>
-              <p className="mt-3 text-sm leading-relaxed text-ink/70">
-                На этой странице собраны предложения, доступные в каталоге.
-                Список меняется по мере обновления партнёрских программ. Проверяйте условия у магазина.
-              </p>
-            </details>
-            <details className="group rounded-2xl border border-line bg-white px-5 py-4">
-              <summary className="cursor-pointer list-none font-bold text-ink">
-                Как применить промокод {col.name.toLowerCase()}?
-                <span className="float-right text-red group-open:hidden">+</span>
-                <span className="float-right text-red hidden group-open:inline">−</span>
-              </summary>
-              <p className="mt-3 text-sm leading-relaxed text-ink/70">
-                Скопируйте код кнопкой «Копировать» на карточке, перейдите в
-                магазин по нашей ссылке и вставьте код в поле «Промокод» на
-                этапе оплаты. Магазин покажет итоговую сумму до оплаты, если предложение подходит вашему заказу.
-              </p>
-            </details>
+            {faqList.map((item) => (
+              <details key={item.q} className="group rounded-2xl border border-line bg-white px-5 py-4">
+                <summary className="cursor-pointer list-none font-bold text-ink">
+                  {item.q}
+                  <span className="float-right text-red group-open:hidden">+</span>
+                  <span className="float-right text-red hidden group-open:inline">−</span>
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-ink/70">
+                  {item.a}
+                </p>
+              </details>
+            ))}
           </div>
         </section>
       </div>
