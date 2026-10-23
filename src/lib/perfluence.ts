@@ -507,9 +507,12 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.ordMarker === "2RanykFbMxo" &&
         c.affiliate.ordText.includes("erid: 2RanykFbMxo");
     }
-    // Current WinLab publisher URL lacks an ERID in the supplied account view.
-    // Suppress legacy codes until the current token is supplied and checked.
-    if (c.store.slug === "winlab") return false;
+    // Approved WinLab placement for promofact.ru, post 17313895
+    if (c.store.slug === "winlab") {
+      const code = c.promocode.code.trim().toUpperCase();
+      return ["10PFNS5229", "WCPFOKT9920", "5OKTPF9920"].includes(code) &&
+        c.affiliate.link === "https://winelab.prfl.me/sites/gittf8";
+    }
     // Only the newly approved affiliate URL/ERID can revive the previously
     // suppressed 2,500 RUB code. An outdated Perfluence snapshot remains blocked.
     // MTS Music co-promotion is prohibited elsewhere in publisherPlacementRules.
