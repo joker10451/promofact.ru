@@ -317,6 +317,35 @@ export const CUSTOM_COUPONS: Coupon[] = [
     },
     extraLinks: [],
   },
+  {
+    id: 82643831,
+    promocode: {
+      id: 82643831,
+      code: "СПАСИБО",
+      bonusName: "Розыгрыш 18,5 млн бонусов Спасибо за вклад в Сбере",
+      terms: "Откройте любой вклад в Сбере по ссылке и станьте участником розыгрыша 18,5 млн бонусов Спасибо. Всего 1000 победителей! Ставка до 13,5% годовых на срок 3–7 месяцев.",
+      expires: "2026-11-30",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Для всех клиентов",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["vklad-v-sbere"],
+      activeBloggers: STABLE_STORES["vklad-v-sbere"].activeBloggers ?? 0,
+    },
+    affiliate: {
+      link: "https://sberbank1.prfl.me/sites/iqsdgq?erid=2RanykueVCo",
+      landingLink: "https://sberbank1.prfl.me/sites/iqsdgq?erid=2RanykueVCo",
+      ordMarker: "2RanykueVCo",
+      ordText: "Реклама. Рекламодатель: ПАО Сбербанк. ИНН: 7707083893, Ген. лицензия ЦБ РФ № 1481 от 11.08.2015 г. erid: 2RanykueVCo",
+    },
+    extraLinks: [],
+  },
 ];
 
 /**

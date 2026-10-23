@@ -29,6 +29,30 @@ export interface StableStoreMeta {
 }
 
 export const STABLE_STORES: Record<string, StableStoreMeta> = {
+  "sberbank": {
+    id: 4383,
+    slug: "sberbank",
+    name: "СберБанк",
+    logo: "https://favicon.yandex.net/favicon/v2/sberbank.ru?size=120",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+    about: "СберБанк — крупнейший банк в России. Вклады с повышенной доходностью, кредиты, дебетовые и кредитные карты.",
+    conditions: "Условия начисления бонусов Спасибо и процентные ставки по вкладам определяются ПАО Сбербанк.",
+    site: "https://sberbank.ru",
+    activeBloggers: 10000,
+  },
+  "vklad-v-sbere": {
+    id: 4383,
+    slug: "vklad-v-sbere",
+    name: "Вклад в Сбере",
+    logo: "https://favicon.yandex.net/favicon/v2/sberbank.ru?size=120",
+    category: "Сервисы и подписки",
+    categorySlug: "servisy-i-podpiski",
+    about: "Вклад в Сбере — открытие любого вклада со ставкой до 13,5% годовых и участие в розыгрыше 18,5 млн бонусов Спасибо.",
+    conditions: "Откройте вклад в Сбере и станьте участником розыгрыша 18,5 млн бонусов Спасибо.",
+    site: "https://sberbank.ru",
+    activeBloggers: 10000,
+  },
   // Approved SberDevices Perfluence partner. Evergreen metadata only;
   // expiring offer codes, affiliate link and ERID belong outside this registry.
   "sberdevaysy": {
