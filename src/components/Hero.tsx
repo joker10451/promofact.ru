@@ -123,7 +123,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-paper via-white to-paper pt-6 pb-6 sm:pt-12 sm:pb-12 border-b border-line">
+    <section className="relative bg-gradient-to-b from-paper via-white to-paper pt-3.5 pb-3 sm:pt-12 sm:pb-12 border-b border-line">
       {/* Декоративные световые пятна с ограничением по ширине */}
       <div
         className="pointer-events-none absolute -left-20 top-10 h-56 w-56 max-w-full rounded-full bg-yellow/15 blur-3xl"
@@ -136,10 +136,10 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
 
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 relative z-10">
         {/* Заголовок */}
-        <h1 className="font-display text-[clamp(1.65rem,7.4vw,2.1rem)] leading-[1.13] sm:text-5xl md:text-[3.55rem] font-extrabold tracking-tight text-ink sm:leading-[1.12]">
+        <h1 className="font-display text-[clamp(1.45rem,6.4vw,1.95rem)] leading-[1.1] sm:text-5xl md:text-[3.55rem] font-extrabold tracking-tight text-ink sm:leading-[1.12]">
           Найдите скидку. <br />
           <span className="text-red">Заплатите меньше.</span>
-          <span className="mt-3 block text-sm sm:text-lg md:text-xl font-semibold tracking-normal text-ink/80">
+          <span className="mt-1.5 sm:mt-3 block text-xs sm:text-lg md:text-xl font-semibold tracking-normal text-ink/80">
             Актуальные промокоды и купоны на скидку
           </span>
         </h1>
@@ -150,7 +150,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </p>
 
         {/* Главная поисковая строка */}
-        <div ref={containerRef} className="relative mx-auto mt-4 sm:mt-6 max-w-2xl">
+        <div ref={containerRef} className="relative mx-auto mt-2.5 sm:mt-6 max-w-2xl">
           <form onSubmit={handleSubmit} className="relative flex items-center">
             <div className="relative w-full">
               <span className="pointer-events-none absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-lg sm:text-xl text-ink/40">
@@ -167,11 +167,11 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
                   setSelectedIndex(0);
                 }}
                 placeholder="Магазин или промокод"
-                className="h-14 sm:h-16 w-full rounded-2xl border-2 border-ink/15 bg-white pl-12 sm:pl-14 pr-24 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
+                className="h-12 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-ink/15 bg-white pl-11 sm:pl-14 pr-22 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
               />
               <button
                 type="submit"
-                className="absolute right-2 sm:right-2.5 top-2 sm:top-2.5 bottom-2 sm:bottom-2.5 flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-red to-red-dark px-3.5 sm:px-5 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:brightness-105 active:scale-[0.98] transition-all cursor-pointer"
+                className="absolute right-1.5 sm:right-2.5 top-1.5 sm:top-2.5 bottom-1.5 sm:bottom-2.5 flex items-center justify-center gap-1 rounded-lg sm:rounded-xl bg-gradient-to-r from-red to-red-dark px-3 sm:px-5 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:brightness-105 active:scale-[0.98] transition-all cursor-pointer"
               >
                 <span>Найти</span>
                 <span>→</span>
@@ -264,14 +264,14 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </div>
 
         {/* Быстрые теги (реальные магазины) */}
-        <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs font-semibold text-ink/70">
+        <div className="mt-2 sm:mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold text-ink/70">
           <span className="hidden text-ink/40 sm:inline">Популярное:</span>
           {suggestions.map((store, index) => (
             <button
               key={store.slug}
               type="button"
               onClick={() => submitSearch(store.name)}
-              className={`${index >= 2 ? "hidden sm:inline-flex" : "inline-flex"} min-h-8 items-center rounded-lg bg-white border border-line px-3 py-1 text-ink/80 hover:border-red/30 hover:text-red transition-colors cursor-pointer`}
+              className={`${index >= 2 ? "hidden sm:inline-flex" : "inline-flex"} min-h-7 sm:min-h-8 items-center rounded-lg bg-white border border-line px-2.5 sm:px-3 py-0.5 sm:py-1 text-ink/80 hover:border-red/30 hover:text-red transition-colors cursor-pointer`}
             >
               {store.name}
             </button>
@@ -279,7 +279,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
         </div>
 
         {/* Real, useful product facts; no decorative or unverified trust badges. */}
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-line/60 pt-3 text-xs font-semibold text-ink/70 sm:mt-7 sm:pt-4">
+        <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 border-t border-line/60 pt-2 text-[11px] sm:text-xs font-semibold text-ink/70 sm:mt-7 sm:pt-4">
           <span className="inline-flex items-center gap-1.5">
             <Icon name="tag" size={14} className="text-red" />
             {couponCount} предложений по последнему обновлению

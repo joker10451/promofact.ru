@@ -49,9 +49,9 @@ export default async function PopularStores() {
   }
 
   return (
-    <section aria-label="Популярные магазины" className="rounded-[22px] border border-line bg-white py-5 shadow-[0_12px_48px_-38px_rgba(11,16,43,0.35)] sm:rounded-[28px] sm:py-8">
+    <section aria-label="Популярные магазины" className="rounded-[20px] border border-line bg-white py-3.5 sm:py-8 shadow-[0_12px_48px_-38px_rgba(11,16,43,0.35)] sm:rounded-[28px]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3 sm:mb-6">
+        <div className="mb-2.5 sm:mb-6 flex flex-wrap items-end justify-between gap-3">
           <div className="flex items-center gap-2">
             <Icon name="store" size={19} className="text-ink/50" />
             <div>
@@ -77,7 +77,7 @@ export default async function PopularStores() {
             <Link
               key={s.slug}
               href={`/store/${s.slug}`}
-              className={`${index >= 6 ? "hidden sm:flex" : "flex"} group min-w-0 flex-col items-center justify-center rounded-2xl border border-line bg-paper/35 px-2 py-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-red/40 hover:bg-white hover:shadow-[0_12px_28px_-16px_rgba(11,16,43,0.3)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red`}
+              className={`${index >= 6 ? "hidden sm:flex" : "flex"} group min-w-0 flex-col items-center justify-center rounded-2xl border border-line bg-paper/35 px-2 py-2.5 sm:py-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-red/40 hover:bg-white hover:shadow-[0_12px_28px_-16px_rgba(11,16,43,0.3)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red`}
             >
               <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 border border-line group-hover:border-red/35 transition-colors">
                 <StoreLogo
