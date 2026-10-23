@@ -52,6 +52,8 @@ coupon-video/
 
 # sensitive perfluence session data & debug screenshots
 data/perfluence_session.json
+data/*.har
+*.har
 data/debug/
 data/banners/
 data/flash_deals.json
