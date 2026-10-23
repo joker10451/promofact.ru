@@ -39,11 +39,16 @@ export function withoutForbiddenTanukiCoPromotion(coupons: Coupon[]): Coupon[] {
  * standalone stores or neutral searchable directories.
  */
 export function withoutForbiddenFloristBeautyCoPromotion(coupons: Coupon[]): Coupon[] {
+  // Yandex Flowers must not share a curated promo selection with Flowwow or FMART.
+  const hasIncompatibleFlowers = coupons.some(c =>
+    ["flowwow", "fmart", "flauwau", "flau-vau"].includes(c.store.slug) ||
+    /(?:flowwow|флау(?:вау|вау)|fmart)/iu.test(c.store.name));
   const hasFlor2u = coupons.some(c => c.store.slug === "flor2u" ||
     /(?:^|\W)flor2u(?:$|\W)/iu.test(c.store.name));
   const hasGoldApple = coupons.some(c => c.store.slug === "zolotoe-yabloko" ||
     /золотое\s+яблоко/iu.test(c.store.name));
   return coupons.filter(c =>
+    !(hasIncompatibleFlowers && c.store.slug === "yandeks-tsvety") &&
     !(hasFlor2u && c.store.slug === "fmart") &&
     !(hasGoldApple && c.store.slug === "letual"));
 }
