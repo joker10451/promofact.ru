@@ -67,6 +67,24 @@ export default async function Home() {
           name: SITE_NAME,
           url: SITE_URL,
           inLanguage: "ru-RU",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: `${SITE_URL}/catalog?q={search_term_string}#catalog`,
+            },
+            "query-input": "required name=search_term_string",
+          },
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: SITE_NAME,
+          url: SITE_URL,
+          logo: `${SITE_URL}/icon.png`,
+          description: "Агрегатор проверенных промокодов, скидок и акций интернет-магазинов и сервисов доставки России.",
         }}
       />
 

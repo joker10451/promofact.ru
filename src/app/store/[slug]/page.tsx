@@ -360,6 +360,12 @@ export default async function StorePage({
     "@context": "https://schema.org",
     "@type": "HowTo",
     name: `Как применить промокод ${store.name}`,
+    totalTime: "PT2M",
+    estimatedCost: {
+      "@type": "MonetaryAmount",
+      currency: "RUB",
+      value: "0",
+    },
     step: [
       {
         "@type": "HowToStep",

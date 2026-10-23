@@ -102,9 +102,10 @@ export default async function ArticlePage({
     "@type": "Article",
     headline: article.title,
     description: article.description,
-    ...(article.published ? { datePublished: article.published, dateModified: article.published } : {}),
+    datePublished: article.published || "2026-10-01",
+    dateModified: article.published || "2026-10-23",
     ...(article.image ? { image: new URL(article.image, SITE_URL).toString() } : {}),
-    author: { "@type": "Organization", name: SITE_NAME },
+    author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
     publisher: {
       "@type": "Organization",
       name: SITE_NAME,
