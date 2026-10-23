@@ -288,6 +288,35 @@ export const CUSTOM_COUPONS: Coupon[] = [
     },
     extraLinks: [],
   },
+  {
+    id: 82641761,
+    promocode: {
+      id: 82641761,
+      code: "PERF79WJXX5E",
+      bonusName: "Скидка 12% на первый заказ в Poizon (ДЭВУ)",
+      terms: "Скидка 12% (не более 4 000 ₽) на первый заказ на сайте и в мобильном приложении Poizon по промокоду PERF79WJXX5E. Суммируется со скидками, без минимальной суммы заказа. Действует до 31 октября 2026 года.",
+      expires: "2026-10-31",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Только на первый заказ",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["poizon"],
+      activeBloggers: STABLE_STORES["poizon"].activeBloggers ?? 0,
+    },
+    affiliate: {
+      link: "https://poizon.prfl.me/sites/08vmlg?erid=2Ranyo4fyN3",
+      landingLink: "https://poizon.prfl.me/sites/08vmlg?erid=2Ranyo4fyN3",
+      ordMarker: "2Ranyo4fyN3",
+      ordText: "Реклама. Poizon erid: 2Ranyo4fyN3",
+    },
+    extraLinks: [],
+  },
 ];
 
 /**
