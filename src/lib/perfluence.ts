@@ -472,7 +472,7 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // Approved Gold Apple placement 21 October 2026.
     if (c.store.slug === "zolotoe-yabloko") {
       const code = c.promocode.code.trim().toUpperCase();
-      return ["ПРАЗДНИК", "PERF"].includes(code) &&
+      return ["МИНУС", "ПРАЗДНИК", "PERF"].includes(code) &&
         c.affiliate.link === "https://gldppl.prfl.me/smart_zakupka/lr8e4c?erid=2Ranyo8yEMy" &&
         c.affiliate.ordMarker === "2Ranyo8yEMy" &&
         c.affiliate.ordText.includes("erid: 2Ranyo8yEMy");
