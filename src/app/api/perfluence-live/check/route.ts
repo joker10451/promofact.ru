@@ -75,27 +75,37 @@ async function handleCheck(req: NextRequest) {
     let alertError: string | undefined;
 
     if (shouldNotify && hotEvents.length > 0 && !dryRun) {
-      const lines = [
-        "🚨 <b>Perfluence Live Radar: обнаружены свежие акции!</b>",
-        "",
-        ...hotEvents.slice(0, 5).map((e) => {
-          const badge = e.isFlashDeal ? "⚡️ ФЛЕШ-АКЦИЯ" : e.isNewPromo ? "🎟 НОВЫЙ ПРОМОКОД" : "🔥 НОВЫЙ БОНУС";
-          const proj = e.projectName ? `[${e.projectName}]` : "";
-          return `<b>${badge} ${proj}</b>\n${e.message}\n🔗 <a href="${e.link}">Перейти к новости в Perfluence</a>\n`;
-        }),
-        "<i>PromoFact Radar Automation</i>",
-      ];
+      const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+      if (!adminChatId) {
+        console.warn("[radar] TELEGRAM_ADMIN_CHAT_ID не настроен. Служебный алерт в публичный канал отправлен НЕ будет.");
+        alertError = "TELEGRAM_ADMIN_CHAT_ID is not configured; public channel suppressed";
+      } else {
+        const lines = [
+          "🚨 <b>Perfluence Live Radar: обнаружены свежие акции!</b>",
+          "",
+          ...hotEvents.slice(0, 5).map((e) => {
+            const badge = e.isFlashDeal ? "⚡️ ФЛЕШ-АКЦИЯ" : e.isNewPromo ? "🎟 НОВЫЙ ПРОМОКОД" : "🔥 НОВЫЙ БОНУС";
+            const proj = e.projectName ? `[${e.projectName}]` : "";
+            return `<b>${badge} ${proj}</b>\n${e.message}\n🔗 <a href="${e.link}">Перейти к новости в Perfluence</a>\n`;
+          }),
+          "<i>PromoFact Radar Automation</i>",
+        ];
 
-      const alertRes = await sendCustomPostToTelegram({
-        text: lines.join("\n"),
-        buttons: [
-          [{ text: "🔍 Открыть личный кабинет Perfluence", url: "https://dash.perfluence.net" }],
-          [{ text: "🌐 promofact.ru", url: "https://promofact.ru" }],
-        ],
-      });
+        const alertRes = await sendCustomPostToTelegram(
+          {
+            text: lines.join("\n"),
+            buttons: [
+              [{ text: "🔍 Открыть личный кабинет Perfluence", url: "https://dash.perfluence.net" }],
+              [{ text: "🌐 promofact.ru", url: "https://promofact.ru" }],
+            ],
+          },
+          undefined,
+          { channelId: adminChatId },
+        );
 
-      alertSent = alertRes.ok;
-      alertError = alertRes.error;
+        alertSent = alertRes.ok;
+        alertError = alertRes.error;
+      }
     }
 
     return NextResponse.json({
