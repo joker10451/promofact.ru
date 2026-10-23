@@ -1,0 +1,41 @@
+name: Perfluence Live Radar (Auto-Check)
+
+on:
+  schedule:
+    # Запуск каждые 2 часа с 08:00 до 22:00 МСК (05:00 - 19:00 UTC)
+    - cron: '0 5,7,9,11,13,15,17,19 * * *'
+  workflow_dispatch:
+    inputs:
+      notify:
+        description: 'Send Telegram alert if hot events found'
+        type: boolean
+        default: true
+      limit:
+        description: 'Number of notifications to scan'
+        type: string
+        default: '15'
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Perfluence Live Radar
+        run: |
+          NOTIFY="${{ github.event.inputs.notify || 'true' }}"
+          LIMIT="${{ github.event.inputs.limit || '15' }}"
+          
+          URL="https://promofact.ru/api/perfluence-live/check?notify=${NOTIFY}&limit=${LIMIT}"
+          echo "Scanning Perfluence Live at $URL..."
+          
+          AUTH_SECRET=$(printf '%s' "${{ secrets.TELEGRAM_POSTING_SECRET }}" | tr -d '\r\n')
+          
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X GET "$URL" \
+            -H "Authorization: Bearer $AUTH_SECRET")
+          
+          echo "Response HTTP Status: $HTTP_STATUS"
+          cat response.json
+          
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "::error::Radar API request failed with status $HTTP_STATUS"
+            exit 1
+          fi

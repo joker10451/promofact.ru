@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCoupons } from "@/lib/perfluence";
-import { sendCouponToTelegram, sendCustomPostToTelegram, deleteTelegramMessage, formatGoldAppleHalloweenPost } from "@/lib/telegram";
+import { sendCouponToTelegram, sendCustomPostToTelegram, deleteTelegramMessage, formatGoldAppleHalloweenPost, formatFmartFlashPost } from "@/lib/telegram";
 import { isBearerAuthorized } from "@/lib/apiAuth";
 import { selectBestCouponToPost, recordPosting } from "@/lib/postingEngine";
 import { getFlor2uTelegramOffers, getGoldAppleTelegramOffers } from "@/lib/perfluenceOct18Telegram";
@@ -47,7 +47,7 @@ async function handlePost(req: NextRequest) {
           dryRun: true,
           mode: "store_multi_post",
           store: "Золотое Яблоко",
-          codes: ["PERF", "ПРАЗДНИК"],
+          codes: ["МИНУС", "PERF", "ПРАЗДНИК"],
           text: post.text,
           buttons: post.buttons,
         });
@@ -55,7 +55,7 @@ async function handlePost(req: NextRequest) {
 
       const res = await sendCustomPostToTelegram(
         post,
-        { storeId: 1707, storeName: "Золотое Яблоко", promoCodes: ["PERF", "ПРАЗДНИК"] },
+        { storeId: 1707, storeName: "Золотое Яблоко", promoCodes: ["МИНУС", "PERF", "ПРАЗДНИК"] },
       );
 
       if (res.ok) {
@@ -78,7 +78,7 @@ async function handlePost(req: NextRequest) {
         results: [
           {
             store: "Золотое Яблоко",
-            codes: ["PERF", "ПРАЗДНИК"],
+            codes: ["МИНУС", "PERF", "ПРАЗДНИК"],
             status: res.ok ? "posted" : "failed",
             messageId: res.messageId,
             error: res.error,
@@ -86,6 +86,58 @@ async function handlePost(req: NextRequest) {
         ],
       });
     }
+    // Если запрошен FMART by Flowwow и не указан конкретный одиночный код —
+    // публикуем объединенный флеш-пост (скидка 30% + промокоды 23% и 900 ₽)
+    if (storeSlug === "fmart" && !requestedCode) {
+      const post = formatFmartFlashPost();
+      const fmartCodes = ["Скидка 30%", "FMARTPE23khl6x", "FMARTPE900btr9u"];
+      if (dryRun) {
+        return NextResponse.json({
+          dryRun: true,
+          mode: "store_multi_post",
+          store: "FMART",
+          codes: fmartCodes,
+          text: post.text,
+          buttons: post.buttons,
+        });
+      }
+
+      const res = await sendCustomPostToTelegram(
+        post,
+        { storeId: 4579, storeName: "FMART", promoCodes: fmartCodes },
+      );
+
+      if (res.ok) {
+        coupons.forEach((c) => {
+          if (c.store.slug === "fmart") {
+            recordPosting({
+              id: c.id,
+              code: c.promocode.code,
+              store: c.store.name,
+              storeSlug: c.store.slug,
+              categorySlug: c.store.categorySlug,
+              date: new Date().toISOString(),
+              messageId: res.messageId,
+              channel: "telegram",
+            });
+          }
+        });
+      }
+
+      return NextResponse.json({
+        success: res.ok,
+        results: [
+          {
+            store: "FMART",
+            codes: fmartCodes,
+            status: res.ok ? "posted" : "failed",
+            messageId: res.messageId,
+            error: res.error,
+          },
+        ],
+      });
+    }
+
 
     // The one-day 35% Flor2u campaign ends tonight; the generic 48-hour
     // posting threshold would incorrectly reject it. Use only the current

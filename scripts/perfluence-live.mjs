@@ -62,66 +62,69 @@ export async function fetchLiveNotifications(limit = 20) {
   }));
 }
 
-export async function fetchProjectDetails(projectId, targetAccount = 'smart_zakupka') {
+export async function fetchProjectDetails(projectId, targetAccount = "smart_zakupka") {
   const cookie = getCookieString();
-  if (!cookie) throw new Error('Perfluence session not found');
+  if (!cookie) throw new Error("Perfluence session not found");
 
   const res = await fetch(`https://dash.perfluence.net/project/${projectId}/posts`, {
     headers: {
-      'Cookie': cookie,
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      "Cookie": cookie,
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
   });
 
   if (!res.ok) throw new Error(`Project posts returned status ${res.status}`);
   const rawHtml = await res.text();
-
-  // Parse cards
   const cards = [];
-  const cardRegex = /<div class="[^"]*card-post\b[^"]*"[\s\S]*?<\/div><\/div><\/div><\/div>/g;
-  let match;
+  const parts = rawHtml.split('class="card-post-status"');
+  if (parts.length <= 1) return cards;
 
-  while ((match = cardRegex.exec(rawHtml)) !== null) {
-    const rawCard = match[0];
-    if (targetAccount && !rawCard.includes(targetAccount)) continue;
+  for (let i = 1; i < parts.length; i++) {
+    const rawChunk = parts[i].slice(0, 8000);
 
-    const cardHtml = decodeHtml(rawCard);
+    // Account
+    const accMatch = rawChunk.match(/title="Аккаунт ([^"]+)"/);
+    const account = accMatch ? accMatch[1].trim() : "";
 
-    // Extract status
-    const statusMatch = cardHtml.match(/class="card-post-status">([^<]+)<\/div>/);
-    const status = statusMatch ? statusMatch[1].trim() : 'Unknown';
+    if (targetAccount && account && !account.includes(targetAccount)) {
+      continue;
+    }
 
-    // Extract tracking link
-    const linkMatch = cardHtml.match(/https:\/\/[a-z0-9.]+\.prfl\.me\/[^\s"'>]+/);
-    const trackingUrl = linkMatch ? linkMatch[0].replace(/[",;]$/, '') : null;
+    // Status
+    const statusMatch = rawChunk.match(/^>([^<]+)<\/div>/);
+    const status = statusMatch ? statusMatch[1].trim() : "Unknown";
 
-    // Extract ERID
-    const eridMatch = trackingUrl ? trackingUrl.match(/erid=([a-zA-Z0-9]+)/) : null;
+    // Tracking links
+    const linkMatches = [...rawChunk.matchAll(/https:\/\/[a-z0-9.-]+\.prfl\.me\/[^\s"'<>\\]+/g)].map((m) => m[0]);
+    const cleanLink = linkMatches.length > 0 ? linkMatches[0].replace(/&quot.*$/, "").replace(/[,;]$/, "") : null;
+
+    // ERID
+    const eridMatch = cleanLink ? cleanLink.match(/erid=([a-zA-Z0-9]+)/) : null;
     const erid = eridMatch ? eridMatch[1] : null;
 
-    // Extract promo codes
+    // Promo codes
     const promos = [];
-    const promoRegex = /data-clipboard-text="([^"]+)"[\s\S]*?data-original-title="([^"]+)"/g;
-    let pMatch;
-    while ((pMatch = promoRegex.exec(cardHtml)) !== null) {
-      const code = pMatch[1].trim();
-      const rawTerms = pMatch[2].replace(/<[^>]+>/g, '').trim();
+    const promoMatches = [...rawChunk.matchAll(/data-clipboard-text=(?:&quot;|")([^"&]+)(?:&quot;|")/g)].map((m) => m[1]);
 
-      // Filter out links
-      if (!code.startsWith('http') && !promos.some(p => p.code === code)) {
-        promos.push({
-          code,
-          terms: rawTerms
-        });
+    for (const code of promoMatches) {
+      if (code.startsWith("http") || promos.some((p) => p.code === code)) continue;
+
+      // Find description / terms
+      let terms = "";
+      const titleMatch = rawChunk.match(new RegExp(`data-clipboard-text=(?:&quot;|")${code}(?:&quot;|")[\\s\\S]*?data-original-title=(?:&quot;|")([\\s\\S]*?)(?:&quot;|")`));
+      if (titleMatch) {
+        terms = decodeHtml(titleMatch[1]).replace(/<[^>]+>/g, "").trim();
       }
+
+      promos.push({ code, terms });
     }
 
     cards.push({
       status,
-      account: targetAccount,
-      trackingUrl,
+      account: account || targetAccount,
+      trackingUrl: cleanLink,
       erid,
-      promos
+      promos,
     });
   }
 
@@ -129,16 +132,16 @@ export async function fetchProjectDetails(projectId, targetAccount = 'smart_zaku
 }
 
 async function main() {
-  console.log('=== 1. ПРОВЕРКА ЛЕНТЫ УВЕДОМЛЕНИЙ PERFLUENCE ===');
+  console.log("=== 1. ПРОВЕРКА ЛЕНТЫ УВЕДОМЛЕНИЙ PERFLUENCE ===");
   const news = await fetchLiveNotifications(5);
   news.forEach(n => {
-    console.log(`[${n.date} ${n.timeText}] ${n.title} | ${n.projectName || 'Общее'}`);
+    console.log(`[${n.date} ${n.timeText}] ${n.title} | ${n.projectName || "Общее"}`);
     console.log(`  ${n.message}`);
     console.log(`  Ссылка: ${n.link}\n`);
   });
 
-  console.log('=== 2. ПРОВЕРКА ОФФЕРОВ ЗОЛОТОГО ЯБЛОКА (ID 1707) ===');
-  const projectPosts = await fetchProjectDetails(1707, 'smart_zakupka');
+  console.log("=== 2. ПРОВЕРКА ОФФЕРОВ ЗОЛОТОГО ЯБЛОКА (ID 1707) ===");
+  const projectPosts = await fetchProjectDetails(1707, "smart_zakupka");
   console.log(`Найдено карточек для smart_zakupka: ${projectPosts.length}`);
   projectPosts.forEach((p, idx) => {
     console.log(`\nКарточка #${idx + 1} (${p.status}):`);
@@ -149,4 +152,6 @@ async function main() {
   });
 }
 
-main().catch(console.error);
+if (process.argv[1] && process.argv[1].endsWith("perfluence-live.mjs")) {
+  main().catch(console.error);
+}
