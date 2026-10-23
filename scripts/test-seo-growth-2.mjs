@@ -7,12 +7,12 @@ import { isCouponActive } from "../src/lib/couponExpiry.ts";
 
 const when=Date.parse("2026-10-16T12:00:00+03:00");
 const candidates=PERFLUENCE_OCT16_APPROVED_OFFERS.filter(c=>c.store.slug==="fmart");
-assert.equal(candidates.length,3, "There must be three currently approved FMART codes");
+assert.equal(candidates.length, 4, "There must be four currently approved FMART codes");
 const merged=dedupeCoupons([{source:"custom",coupons:candidates},
   {source:"perfluence",coupons:candidates.map(c=>({...c,affiliate:{...c.affiliate,ordMarker:"STALE"}}))}]).coupons
   .filter(isApprovedOct16PublisherOffer)
   .filter(c=>isCouponActive(c.promocode.expires,when));
-assert.equal(merged.length,3,"All three approved FMART coupons must survive source priority and expiry");
+assert.equal(merged.length, 4, "All four approved FMART coupons must survive source priority and expiry");
 assert(merged.every(c=>c.affiliate.link==="https://fmart-flowers.prfl.me/sites/283ede?erid=2Ranynyf7r3"));
 assert(merged.every(c=>c.affiliate.ordMarker==="2Ranynyf7r3"));
 

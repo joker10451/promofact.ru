@@ -16,6 +16,7 @@ const plan = {
     ["PC078BC488BA", "20%", "2026-10-31T23:59:59+03:00"],
   ],
   fmart: [
+    ["FMART30", "30%", "2026-10-26T23:59:59+03:00"],
     ["FMARTPE23khl6x", "23%", "2026-10-31T23:59:59+03:00"],
     ["FMARTPE900btr9u", "900 ₽", "2026-10-31T23:59:59+03:00"],
     ["fmartpe2063dcr", "20%", "2026-10-31T23:59:59+03:00"],
@@ -30,9 +31,9 @@ const plan = {
     ["Sberdv71", "5%", "2026-10-31"],
   ],
 };
-assert.equal(PERFLUENCE_OCT16_APPROVED_OFFERS.length,7);
+assert.equal(PERFLUENCE_OCT16_APPROVED_OFFERS.length, 8);
 const all=CUSTOM_COUPONS.filter(c=>Object.hasOwn(plan,c.store.slug));
-assert.equal(all.length,9, "Exactly nine site-approved coupons across four projects");
+assert.equal(all.length, 10, "Exactly ten site-approved coupons across four projects");
 
 for (const [slug, codes] of Object.entries(plan)) {
   const p=PERFLUENCE_OCT16_PLACEMENTS[slug];

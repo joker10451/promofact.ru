@@ -140,6 +140,43 @@ export const CUSTOM_COUPONS: Coupon[] = [
   },
 
   {
+    id: 50029,
+    promocode: {
+      id: 50029,
+      code: "", // Скидка по ссылке
+      bonusName: "СберПрайм на 60 дней за 2 ₽ + 185 бонусов Спасибо в подарок",
+      terms: "Подписка СберПрайм на 60 дней всего за 2 рубля и 185 бонусов Спасибо в приветствие! Повышенный кешбэк до 37% бонусами Спасибо за покупки в «Ашан», «Gloria Jeans», «Вкусно и точка». Действует для новых пользователей или клиентов без активной подписки более 150 дней при оплате картой Сбербанка.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Новые пользователи или >150 дней без подписки",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: "/images/sberprime.png",
+      group: "perfluence",
+    },
+    store: {
+      id: 5030,
+      name: "СберПрайм",
+      slug: "sberprime",
+      logo: "https://favicon.yandex.net/favicon/v2/sberbank.ru?size=120",
+      category: "Сервисы и подписки",
+      categorySlug: "servisy-i-podpiski",
+      about: "СберПрайм — единая подписка на сервисы: фильмы в Okko, музыка в Звуке, бесплатная доставка продуктов и повышенный кэшбэк бонусами Спасибо на покупки.",
+      conditions: "Промокод не требуется. Перейдите по официальной ссылке и подключите подписку на 60 дней за 2 ₽.",
+      site: "https://sberbank1.prfl.me/sites/96qfi8?erid=2RanynswGSF",
+      activeBloggers: 15400,
+    },
+    affiliate: {
+      link: "https://sberbank1.prfl.me/sites/96qfi8?erid=2RanynswGSF",
+      landingLink: "https://sberbank1.prfl.me/sites/96qfi8?erid=2RanynswGSF",
+      ordMarker: "2RanynswGSF",
+      ordText: "Реклама. Рекламодатель — АО «ЦПЛ» (ОГРН: 1117746689840, г. Москва). erid: 2RanynswGSF",
+    },
+    extraLinks: [],
+  },
+  {
     id: 50030,
     promocode: {
       id: 50030,

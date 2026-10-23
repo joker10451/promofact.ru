@@ -10,7 +10,7 @@ console.log("=== Testing Gold Apple (Золотое Яблоко) Website Placem
 assert.equal(GOLDAPPLE_OCT21_LINK, "https://gldppl.prfl.me/smart_zakupka/lr8e4c?erid=2Ranyo8yEMy");
 assert.equal(GOLDAPPLE_OCT21_ERID, "2Ranyo8yEMy");
 assert.equal(GOLDAPPLE_OCT21_LEGAL, 'Реклама. ООО "ЕКАТЕРИНБУРГ ЯБЛОКО", адрес: г. Екатеринбург, ул. Сакко и Ванцетти, 62, ОГРН 1126670019585 erid: 2Ranyo8yEMy');
-assert.equal(GOLDAPPLE_ROTATED_OFFERS.length, 2);
+assert.equal(GOLDAPPLE_ROTATED_OFFERS.length, 3);
 
 // 2. Policy: isApprovedPublicCouponPlacement
 for (const c of GOLDAPPLE_ROTATED_OFFERS) {
@@ -41,10 +41,10 @@ assert.equal(isApprovedPublicCouponPlacement(badErid), false, "Wrong ERID must b
 // 3. Merged coupons in catalog
 const combined = await getCombinedCoupons();
 const goldAppleCoupons = combined.filter((c) => c.store.slug === "zolotoe-yabloko");
-assert.equal(goldAppleCoupons.length, 2, "Both Gold Apple coupons must be present in combined coupons");
+assert.equal(goldAppleCoupons.length, 3, "All 3 Gold Apple coupons must be present in combined coupons");
 
 const codes = goldAppleCoupons.map((c) => c.promocode.code).sort();
-assert.deepEqual(codes, ["PERF", "ПРАЗДНИК"].sort(), "Both PERF and ПРАЗДНИК must be present");
+assert.deepEqual(codes, ["МИНУС", "PERF", "ПРАЗДНИК"].sort(), "All three codes must be present");
 
 for (const c of goldAppleCoupons) {
   assert.equal(c.affiliate.link, GOLDAPPLE_OCT21_LINK);
@@ -58,7 +58,7 @@ const allStores = await getAllStores();
 const goldAppleStore = allStores.find((s) => s.slug === "zolotoe-yabloko");
 assert.ok(goldAppleStore, "Золотое Яблоко must be present in getAllStores()");
 assert.equal(goldAppleStore.name, "Золотое Яблоко");
-assert.equal(goldAppleStore.coupons.length, 2, "Золотое Яблоко store must have 2 coupons");
+assert.equal(goldAppleStore.coupons.length, 3, "Золотое Яблоко store must have 3 coupons");
 
 // 5. Publisher co-promotion restriction with Letual
 const curated = withoutForbiddenFloristBeautyCoPromotion(combined);

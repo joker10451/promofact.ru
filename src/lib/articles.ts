@@ -29,12 +29,12 @@ export type Article = {
   };
 };
 
-const SBERPRIME_GIVEAWAY_LINK = "https://sberbank1.prfl.me/sites/dgaeim?erid=2RanymxNatT";
+const SBERPRIME_GIVEAWAY_LINK = "https://sberbank1.prfl.me/sites/96qfi8?erid=2RanynswGSF";
 const SBERPRIME_GIVEAWAY_ORD =
-  "Реклама. Рекламодатель — АО «ЦПЛ» (ОГРН: 1117746689840, г. Москва). erid: 2RanymxNatT";
+  "Реклама. Рекламодатель — АО «ЦПЛ» (ОГРН: 1117746689840, г. Москва). erid: 2RanynswGSF";
 
-const DODO_LINK = "https://dodo1.prfl.me/smart_zakupka/w1bkb5?erid=2RanynSb36T";
-const DODO_ORD = "Реклама. ИП Гринев Денис Петрович, ИНН 615400951595. erid: 2RanynSb36T";
+const DODO_LINK = "https://dodo1.prfl.me/sites/5worzz?erid=2RanynisbQ7";
+const DODO_ORD = "Реклама. ИП Гринев Денис Петрович, ИНН 615400951595. erid: 2RanynisbQ7";
 
 /* Офферы сентябрьской серии: ссылка и маркировка берутся из кабинета. */
 const LAVKA_LINK = "https://yalavka.prfl.me/sites/6twglo?erid=2RanykUgmfH";
