@@ -448,6 +448,7 @@ export default async function StorePage({
                 site={store.site}
                 size={56}
                 className="max-h-full max-w-full object-contain"
+                priority={true}
               />
             </div>
             <div className="min-w-0 flex-1">
