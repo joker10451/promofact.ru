@@ -47,6 +47,13 @@ export const PERFLUENCE_REPEAT_OCT24: readonly RepeatPlacement[] = [
     erid: "2RanymGPzCb", legal: YANDEX_LEGAL,
   },
   {
+    id: 826223202, slug: "yandex-music", code: "5XMGA7H6M6",
+    bonus: "45 дней доступа к Яндекс Музыке по условиям акции",
+    terms: "Промокод на бесплатный период Яндекс Музыки до 45 дней. Условия участия и автопродление уточняйте при активации. До 31 октября 2026 года, 23:59 МСК.",
+    expires: oct31, link: "https://yamuz45.prfl.me/sites/c9oxgw?erid=2RanymEuzvF",
+    erid: "2RanymEuzvF", legal: YANDEX_LEGAL,
+  },
+  {
     id: 826316101, slug: "avito-puteshestviya", code: "",
     bonus: "Скидка 1 000 ₽ на бронирование жилья",
     terms: "Перейдите по ссылке для проверки скидки 1 000 ₽ при бронировании жилья в Авито Путешествиях. В зависимости от условий предложения может понадобиться персональный промокод из уведомлений Авито. Срок действия и минимальная сумма в карточке Perfluence не указаны — проверьте итоговую цену перед оплатой.",
@@ -109,7 +116,7 @@ function storeFor(slug: string): Coupon["store"] {
     return {
       id: 223202, slug, name: "Яндекс Музыка",
       logo: "https://favicon.yandex.net/favicon/v2/music.yandex.ru?size=120",
-      category: "Подписки и сервисы", categorySlug: "podpiski-i-servisy",
+      category: "Подписки и сервисы", categorySlug: "servisy-i-podpiski",
       about: "Музыкальный сервис Яндекса.", conditions: null,
       site: "https://music.yandex.ru", activeBloggers: 0,
     };
@@ -136,12 +143,10 @@ export const PERFLUENCE_REPEAT_OCT24_OFFERS: Coupon[] = PERFLUENCE_REPEAT_OCT24.
 
 /** Fail closed for legacy widget offers and historical post-specific links. */
 export function isApprovedOct24Repost(c: Coupon): boolean {
-  if (c.store.slug === "yandex-music") return false;
   if (!managedSlugs.has(c.store.slug)) return true;
   // Publisher-confirmed expired/invalid placements remain denied even if their
   // original expiry date or the legacy widget still claims they are active.
   if (c.store.slug === "sberzdorovie" && c.promocode.code.toUpperCase() === "PERPREGA309361") return false;
-  if (c.store.slug === "yandex-music") return false; // No currently confirmed replacement code
   const matching = PERFLUENCE_REPEAT_OCT24.find(p =>
     p.slug === c.store.slug &&
     (p.code ? p.code.toUpperCase() === c.promocode.code.trim().toUpperCase() :

@@ -31,11 +31,23 @@ for (const item of selected) assert.equal(item.affiliate.link, links.get(item.af
   "Travel collection must never reuse stale Avito widget attribution");
 
 const music = stores.find(s => s.slug === "yandex-music");
-assert.ok(music, "Music landing remains available without an unverified coupon");
-assert.equal(music.coupons.length, 0);
-assert.equal(music.categorySlug, "servisy-i-podpiski", "Music fallback must link to canonical live category");
-assert.equal(catalog.filter(c => c.store.slug === "yandex-music").length, 0);
-assert.equal(getActivePromoBanners({ storeSlug: "yandex-music" }).length, 0);
+assert.ok(music, "Music landing is available");
+assert.equal(music.categorySlug, "servisy-i-podpiski");
+assert.equal(music.coupons.length, 1, "Exactly one approved Music promo");
+assert.equal(music.coupons[0].promocode.code, "5XMGA7H6M6");
+assert.equal(music.coupons[0].affiliate.link, "https://yamuz45.prfl.me/sites/c9oxgw?erid=2RanymEuzvF");
+assert.equal(music.coupons[0].affiliate.ordMarker, "2RanymEuzvF");
+assert.equal(music.coupons[0].promocode.expires, "2026-10-31T23:59:59+03:00");
+assert.equal(catalog.filter(c => c.store.slug === "yandex-music").length, 1);
+assert.equal(getActivePromoBanners({ storeSlug: "yandex-music" }).filter(b => b.id === "yandex-music-45days").length, 1);
+const books = stores.find(s => s.slug === "yandex-knigi");
+assert.ok(books, "Books landing is available");
+assert.equal(books.coupons.length, 1, "No duplicate Books offers");
+assert.equal(books.coupons[0].promocode.code, "ZSLWVWXUC8");
+assert.equal(books.coupons[0].affiliate.link, "https://yabooks45.prfl.me/sites/hw769q?erid=2RanymGPzCb");
+assert.equal(books.coupons[0].affiliate.ordMarker, "2RanymGPzCb");
+assert.equal(books.coupons[0].promocode.expires, "2026-10-31T23:59:59+03:00");
+assert.equal(catalog.filter(c => c.store.slug === "yandex-knigi").length, 1);
 const sber = stores.find(s => s.slug === "sberzdorovie");
 assert.ok(sber);
 assert.deepEqual(sber.coupons.map(c => c.promocode.code).sort(),
