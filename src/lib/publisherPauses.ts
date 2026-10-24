@@ -12,6 +12,7 @@ export const DELIMOBIL_PAUSED_FROM = "2026-10-16T14:11:00+03:00";
 // WinLab: online third-party alcohol affiliate promotions require legal review;
 // an ERID (present or absent) cannot make a prohibited placement publishable.
 // Keep historic records in the repository for audit, not on public surfaces.
+// Perfluence 24 October 2026, 08:00 MSK: Dodo Pizza South campaign paused.
 const PAUSED_STORE_SLUGS: ReadonlySet<string> = new Set(["delimobil", "winlab"]);
 
 export function isPausedPublisherStore(slug: string): boolean {
