@@ -52,5 +52,6 @@ assert(e2e.includes("SCENARIO 13: FMART"));
 assert(e2e.includes('page.locator(\'article[id^="coupon-"] button[aria-label^="Скопировать промокод "]\')'));
 assert(e2e.includes("FMART must use approved ERID"));
 const pause=fs.readFileSync("src/lib/publisherPauses.ts","utf8");
-assert(pause.includes('new Set(["delimobil"])'),"No paused campaign may be resurrected by new links");
+assert(pause.includes('new Set(["delimobil", "winlab"])'),
+  "Both the halted carsharing campaign and the alcohol advertiser must remain blocked");
 console.log("SEO-GROWTH-2: live inventory links, separate FMART attribution, safe expiry-based metadata and UI regression PASS");
