@@ -1,8 +1,11 @@
 // Отправляет все URL из sitemap.xml в Яндекс/Bing через /api/indexnow (протокол IndexNow)
 // Запуск: node scripts/indexnow-push.mjs [baseUrl]
+import "./load-env.cjs";
 const BASE = process.argv[2] || "https://promofact.ru";
+const secret = process.env.INDEXNOW_SECRET || process.env.CRON_SECRET;
 
 async function main() {
+  if (!secret) throw new Error("INDEXNOW_SECRET or CRON_SECRET required");
   const sitemapUrl = `${BASE}/sitemap.xml?t=${Date.now()}`;
   const res = await fetch(sitemapUrl, { headers: { "Cache-Control": "no-cache" } });
   if (!res.ok) {
@@ -23,10 +26,11 @@ async function main() {
     const batch = urls.slice(i, i + CHUNK);
     const r = await fetch(`${BASE}/api/indexnow`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
       body: JSON.stringify({ urlList: batch }),
     });
     const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) throw new Error(`IndexNow rejected batch: HTTP ${r.status}`);
     sent += batch.length;
     console.log(`Пачка ${Math.floor(i / CHUNK) + 1}: ${r.status} ${JSON.stringify(j)}`);
   }

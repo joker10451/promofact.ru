@@ -169,9 +169,11 @@ let passed = 0;
   assert.ok(emptyGeoCategories.length > 0, "Должны быть пустые гео-категории для изоляции");
 
   // Проверяем фактический sitemap.xml.body из сборки если существует
-  const sitemapBodyPath = path.join(".next", "server", "app", "sitemap.xml.body");
-  if (fs.existsSync(sitemapBodyPath)) {
-    const sitemapContent = fs.readFileSync(sitemapBodyPath, "utf-8");
+  // Exercise the real generator against the same source snapshot as assertions.
+  // A previous build's sitemap can legitimately contain a different catalog.
+  const { default: generateSitemap } = await import("@/app/sitemap");
+  {
+    const sitemapContent = (await generateSitemap()).map(entry => `<loc>${entry.url}</loc>`).join("\n");
 
     // Ни одна пустая гео-категория не должна быть в sitemap
     for (const emptyUrl of emptyGeoCategories) {

@@ -4,6 +4,7 @@ import { sendCouponToTelegram, sendCustomPostToTelegram, deleteTelegramMessage, 
 import { isBearerAuthorized } from "@/lib/apiAuth";
 import { selectBestCouponToPost, recordPosting } from "@/lib/postingEngine";
 import { getFlor2uTelegramOffers, getGoldAppleTelegramOffers } from "@/lib/perfluenceOct18Telegram";
+import { deliverOnce } from "@/lib/postingDelivery";
 
 export const dynamic = "force-dynamic";
 
@@ -178,7 +179,7 @@ async function handlePost(req: NextRequest) {
       });
     }
 
-    const res = await sendCouponToTelegram(coupon);
+    const res = await deliverOnce("telegram", coupon, () => sendCouponToTelegram(coupon), r => r.messageId);
 
     if (res.ok) {
       recordPosting({
