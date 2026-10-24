@@ -535,6 +535,21 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // MTS Music co-promotion is prohibited elsewhere in publisherPlacementRules.
     if (c.store.slug === "yandeks-puteshestviya") {
       const code = c.promocode.code.trim().toUpperCase();
+      // This guard originally covered Perfluence alone but also ran over the
+      // fully merged Admitad catalog, hiding legitimately published offers.
+      // Explicitly allow only these two currently approved Admitad placements;
+      // keep Perfluence's website-specific ERID restrictions unchanged.
+      if (c.promocode.group === "admitad") {
+        const approvedAdmitadLinks: Record<string, string> = {
+          "ADM-ALL-2027": "https://uknty.com/g/nevqu0gdl5c7dde8999c6b3b8b6079/?i=3&erid=2bL9aMPo2e49hMef4rrUYJtCP6",
+          "ADM-PREMIUMPRO2O27": "https://uknty.com/g/42hf24sehic7dde8999c6b3b8b6079/?i=3&erid=2bL9aMPo2e49hMef4rrUYJtCP8",
+        };
+        const link = approvedAdmitadLinks[code];
+        return !!link &&
+          c.affiliate.link === link &&
+          c.affiliate.ordMarker === new URL(link).searchParams.get("erid") &&
+          c.affiliate.ordText.includes(c.affiliate.ordMarker);
+      }
       if (code === "PF-PREMIUMPRO-B66N2") {
         return c.affiliate.link === "https://yandextravel.prfl.me/sites/t21yi1?erid=2RanynSc5X1" &&
           c.affiliate.ordMarker === "2RanynSc5X1" &&
