@@ -47,7 +47,7 @@ const href=getAttributedCouponHref(night,"store_summary","store");
 const u=new URL(href);
 assert.equal(u.searchParams.get("erid"),base.ord_marker);
 assert.equal(u.searchParams.get("subid"),"store_summary");
-assert.equal(u.searchParams.get("subid1"),"store");
+assert.equal(u.searchParams.get("subid1"),"promofact:store");
 assert.equal(u.searchParams.get("subid2"),String(night.id));
 assert.equal(u.searchParams.get("subid3"),"promofact");
 const original=night.affiliate.link;

@@ -535,9 +535,11 @@ export function decorateAdmitadUrl(
     if (options.placement) {
       url.searchParams.set("subid", options.placement);
     }
-    if (options.pageType) {
-      url.searchParams.set("subid1", options.pageType);
-    }
+    // Admitad overwrites SubID3 with personal/unique promo attribution.
+    // Carry our publisher marker independently in SubID1, while retaining
+    // page type for diagnostics and old SubID3 for backward compatibility.
+    // Admitad imposes a 50-char maximum for SubID1.
+    url.searchParams.set("subid1", "promofact:" + (options.pageType || "unknown").slice(0, 40));
     if (options.couponId !== undefined) {
       url.searchParams.set("subid2", String(options.couponId));
     }

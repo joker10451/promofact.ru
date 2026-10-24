@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import {isPublicAdmitadRow} from "../src/lib/admitadPublicVisibility.ts";
+import {isPublicAdmitadRow,DENIED_ADMITAD_CAMPAIGN_IDS} from "../src/lib/admitadPublicVisibility.ts";
 import {isRealPromoCode} from "../src/lib/dedupe.ts";
 const now=Date.parse("2026-10-14T12:00:00Z");
 const ok={
@@ -18,6 +18,15 @@ const ok={
   ord_text:"Реклама. ООО «Тест», ИНН 1234567890. erid: TEST_MARKER_2026",
 };
 assert.equal(isPublicAdmitadRow(ok,now),true);
+// A valid ERID, an active database row and site-scoped API response do not
+// override the actual publisher's denied campaign access (Mitgo 14 Oct).
+for(const campaignId of ["2402","19773","19328"]){
+  assert(DENIED_ADMITAD_CAMPAIGN_IDS.has(campaignId));
+  assert.equal(isPublicAdmitadRow({...ok,source_campaign_id:campaignId},now),false,
+    "Support-denied publisher campaign must never appear, even with a valid affiliate link");
+}
+assert.equal(isPublicAdmitadRow({...ok,source_campaign_id:"28532"},now),true,
+  "Publisher-denied campaigns must not hide unrelated Befree placements");
 assert.equal(isPublicAdmitadRow({...ok,source_campaign_id:"783218",store_slug:"admitad-783218-new-store"},now),true,
   "Site-scoped new program is visible without a legacy pilot allowlist");
 assert.equal(isPublicAdmitadRow({...ok,is_active:false},now),false);

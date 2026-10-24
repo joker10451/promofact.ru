@@ -7,6 +7,7 @@
  */
 import fs from "node:fs";
 import { createClient } from "@supabase/supabase-js";
+import { DENIED_ADMITAD_CAMPAIGN_IDS } from "../src/lib/admitadPublicVisibility.ts";
 
 const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -61,11 +62,13 @@ async function main() {
   const today = moscowDate();
   const active = rows.filter(r => r.is_active === true);
   const eligible = active.filter(r => !r.expires || String(r.expires).slice(0,10) >= today);
+  const restricted = eligible.filter(r => DENIED_ADMITAD_CAMPAIGN_IDS.has(String(r.source_campaign_id || "")));
+  const publiclyEligible = eligible.filter(r => !DENIED_ADMITAD_CAMPAIGN_IDS.has(String(r.source_campaign_id || "")));
   const expiredActive = active.filter(r => r.expires && String(r.expires).slice(0,10) < today);
-  const broken = eligible.filter(r => !validLink(r));
-  const unexpectedPublisher = eligible.filter(r => !String(r.affiliate_link || r.affiliate_url || "").includes("c7dde8999c"));
+  const broken = publiclyEligible.filter(r => !validLink(r));
+  const unexpectedPublisher = publiclyEligible.filter(r => !String(r.affiliate_link || r.affiliate_url || "").includes("c7dde8999c"));
   const campaignMap = new Map();
-  for (const row of eligible) {
+  for (const row of publiclyEligible) {
     const id = String(row.source_campaign_id || "");
     if (!campaignMap.has(id)) campaignMap.set(id, new Set());
     campaignMap.get(id).add(row.store_slug);
@@ -95,10 +98,13 @@ async function main() {
   const report = {
     admitad: {
       stored: rows.length, markedActive: active.length, notExpiredActive: eligible.length,
+      deniedByPublisherAccount: restricted.length,
+      actuallyEligibleForPublicRead: publiclyEligible.length,
       expiredButStillMarkedActive: expiredActive.length,
       failedFormatOrErid: broken.length, differentPublisherFragment: unexpectedPublisher.length,
       crossStoreCampaigns: crossStoreCampaigns.length,
-      sample: [...expiredActive.map(r => issueSample(r,"EXPIRED_ACTIVE")),
+      sample: [...restricted.map(r => issueSample(r,"PUBLISHER_ACCOUNT_DENIED")),
+        ...expiredActive.map(r => issueSample(r,"EXPIRED_ACTIVE")),
         ...broken.map(r => issueSample(r,"BAD_LINK_OR_ERID")),
         ...unexpectedPublisher.map(r => issueSample(r,"PUBLISHER_FRAGMENT_DIFFERENT"))].slice(0,20),
       lastSuccess: successAt || null, hoursSinceSync, syncStatus: metaResult.data?.last_status || null,

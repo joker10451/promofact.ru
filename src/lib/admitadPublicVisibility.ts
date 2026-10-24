@@ -4,6 +4,18 @@
  * verified row in Supabase, NOT the historical initial campaign allowlist.
  * Do not call this for untrusted imported data before atomic publication.
  */
+/**
+ * 14 Oct 2026: Admitad/Mitgo support explicitly denied publisher access to
+ * these three RU-only programs for the existing publisher account because
+ * of its registered country. A site-scoped coupons API row is NOT proof
+ * of authorization (case in support correspondence dated 2026-10-14).
+ *
+ * Keep historical rows for audit; never serve them to visitors until
+ * eligibility is independently confirmed for this actual account.
+ * Do not reuse this list as an account-agnostic global advertiser blacklist.
+ */
+export const DENIED_ADMITAD_CAMPAIGN_IDS = new Set(["2402", "19773", "19328"]);
+
 export function isPublicAdmitadRow(row: Record<string, unknown>, nowMs = Date.now()): boolean {
   if (row.is_active !== true || row.sync_status !== "PUBLISHABLE" ||
       row.legal_status !== "PRESENT" || row.erid_status !== "PRESENT") return false;
@@ -11,6 +23,8 @@ export function isPublicAdmitadRow(row: Record<string, unknown>, nowMs = Date.no
   const legalText = String(row.ord_text || "").trim();
   const slug = String(row.store_slug || "").trim();
   const campaignId = String(row.source_campaign_id || "").trim();
+  // Publisher account restriction overrides technical validity and API presence.
+  if (DENIED_ADMITAD_CAMPAIGN_IDS.has(campaignId)) return false;
   if (!marker || !legalText.includes(marker) ||
       !legalText.toLowerCase().includes("реклама") ||
       !slug || slug === "unmapped" || !/^[0-9]{1,12}$/.test(campaignId)) return false;

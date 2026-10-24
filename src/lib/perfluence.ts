@@ -789,8 +789,9 @@ export const getCachedAdmitadCoupons = unstable_cache(
       return [];
     }
   },
-  // Break the old pilot-only cache: published 437 offers were invisible there.
-   ["promofact", "admitad-snapshot-coupons-v2-publication"],
+  // Publisher eligibility changed: stale persistent data cache must not
+  // keep previously published but now explicitly denied advertiser programs.
+   ["promofact", "admitad-snapshot-coupons-v3-publisher-rights"],
   { revalidate: 900 },
 );
 

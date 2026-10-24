@@ -201,7 +201,7 @@ export default async function RevenueDashboardPage({
                 <Stat title="Зафиксированных действий" value={String(summary.actions)}
                   hint={"Продажи: " + summary.sales + " · лиды: " + summary.leads} />
                 <Stat title="С маркером ПромоФакта" value={String(summary.tagged)}
-                  hint="SubID3=promofact, когда сеть передала маркер" />
+                  hint="SubID3 или резервная метка SubID1; персональные коды могут менять SubID3" />
                 <Stat title="Без маркера ПромоФакта" value={String(summary.unattributed)}
                   hint="Не приписываем эти действия конкретному переходу" />
               </div>
