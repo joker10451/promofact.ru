@@ -246,8 +246,8 @@ export default async function ArticlePage({
                 <div className="min-w-0">
                   <a
                     href={article.ctaButton.href}
-                    target="_blank"
-                    rel="noopener nofollow sponsored"
+                    target={article.ctaButton.href.startsWith("/") ? undefined : "_blank"}
+                    rel={article.ctaButton.href.startsWith("/") ? undefined : "noopener nofollow sponsored"}
                     className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red hover:bg-red/90 text-white px-6 py-3.5 font-display text-sm sm:text-base font-extrabold shadow-offset transition-transform active:translate-x-0.5 active:translate-y-0.5"
                   >
                     <span>{article.ctaButton.text}</span>
