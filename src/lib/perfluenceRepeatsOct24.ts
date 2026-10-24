@@ -47,13 +47,6 @@ export const PERFLUENCE_REPEAT_OCT24: readonly RepeatPlacement[] = [
     erid: "2RanymGPzCb", legal: YANDEX_LEGAL,
   },
   {
-    id: 826223202, slug: "yandex-music", code: "5XMGA7H6M6",
-    bonus: "45 дней доступа к Яндекс Музыке по условиям акции",
-    terms: "Промокод на пробный доступ к Яндекс Музыке. Условия участия, автопродление и доступность предложения проверяйте перед активацией. До 31 октября 2026 года, 23:59 МСК.",
-    expires: oct31, link: "https://yamuz45.prfl.me/sites/c9oxgw?erid=2RanymEuzvF",
-    erid: "2RanymEuzvF", legal: YANDEX_LEGAL,
-  },
-  {
     id: 826316101, slug: "avito-puteshestviya", code: "",
     bonus: "Скидка 1 000 ₽ на бронирование жилья",
     terms: "Бронирование жилья на сайте или в приложении Авито Путешествия со скидкой 1 000 ₽ по условиям проекта. Срок действия в предоставленных данных не указан. Применимость уточняйте при бронировании.",
@@ -143,13 +136,12 @@ export const PERFLUENCE_REPEAT_OCT24_OFFERS: Coupon[] = PERFLUENCE_REPEAT_OCT24.
 
 /** Fail closed for legacy widget offers and historical post-specific links. */
 export function isApprovedOct24Repost(c: Coupon): boolean {
+  if (c.store.slug === "yandex-music") return false;
   if (!managedSlugs.has(c.store.slug)) return true;
-  // Distinct previously approved SberZdorovie Pregnancy campaign remains live
-  // with its OWN ERID and site placement: no cross-campaign link rotation.
-  if (c.store.slug === "sberzdorovie" && c.promocode.code === "PERPREGA309361") {
-    return c.affiliate.link === "https://sberanalizy.prfl.me/sites/jhtq64?erid=2Ranym5xMV5" &&
-      c.affiliate.ordMarker === "2Ranym5xMV5";
-  }
+  // Publisher-confirmed expired/invalid placements remain denied even if their
+  // original expiry date or the legacy widget still claims they are active.
+  if (c.store.slug === "sberzdorovie" && c.promocode.code.toUpperCase() === "PERPREGA309361") return false;
+  if (c.store.slug === "yandex-music") return false; // No currently confirmed replacement code
   const matching = PERFLUENCE_REPEAT_OCT24.find(p =>
     p.slug === c.store.slug &&
     (p.code ? p.code.toUpperCase() === c.promocode.code.trim().toUpperCase() :
