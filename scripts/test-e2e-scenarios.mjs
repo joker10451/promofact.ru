@@ -743,6 +743,8 @@ async function run() {
           }
           if (pathUrl === "/store/m-kosmetik") {
             // Codes rotate independently; never require an offer after its Moscow expiry.
+            // Чай expired at the end of 22 October Moscow time, so later runs
+            // must not demand it.
             const offers = [
               { code: "Чай", endsAt: "2026-10-22T23:59:59+03:00" },
               { code: "PK4GMWJUK", endsAt: "2026-10-31T23:59:59+03:00" },
