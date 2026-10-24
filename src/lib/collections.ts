@@ -153,7 +153,7 @@ export const COLLECTIONS: Collection[] = [
     slug: "black-friday",
     name: "Чёрная Пятница 2026",
     emoji: "🔥",
-    description: "Главная распродажа года: максимальные скидки и промокоды на маркетплейсах, в магазинах одежды, косметики и электроники.",
+    description: "Только предложения, в условиях которых прямо подтверждена Чёрная пятница 2026. До появления таких акций подборка может быть пустой.",
     buyerTips: [
       "Сравните цену товара до скидки с предложениями в других магазинах, чтобы оценить реальную выгоду перед оплатой.",
       "Проверьте правила суммирования: применяются ли промокоды к позициям с уже сниженной ценой или акциям дня.",
@@ -182,9 +182,9 @@ export const COLLECTIONS: Collection[] = [
       { text: "Лайфхаки шопинга на маркетплейсах: Ozon, WB, Маркет", href: "/sovety/laifhaki-shoppinga-na-marketpleysah" },
       { text: "Кэшбэк банков 2026: как вернуть до 10% с покупок", href: "/sovety/cashbek-bankov-2026" },
     ],
-    filter: (c) =>
-      ["marketpleysy", "odezhda-i-obuv", "kosmetika-i-parfyumeriya", "elektronika-i-tehnika", "vse-dlya-doma", "ukrasheniya"].includes(c.store.categorySlug || "") ||
-      Boolean(c.promocode.bonusName && /скидк|распродаж|акци/iu.test(c.promocode.bonusName)),
+    // An ordinary discount is not a confirmed Black Friday promotion.
+    filter: (c) => /(?:ч[её]рная\s+пятница|black[\s-]*friday|blackfriday)/iu
+      .test([c.promocode.bonusName, c.promocode.terms].filter(Boolean).join(" ")),
   },
   {
     slug: "den-shopinga-11-11",
@@ -233,10 +233,12 @@ export const COLLECTIONS: Collection[] = [
       "Проверьте точную ставку, срок начисления процентов и правила досрочного изъятия средств по вкладам или счетам.",
       "Уточните категории повышенного кэшбэка и порядок выплаты приветственного вознаграждения за оформление продукта.",
     ],
+    // Financial products only: don't pull in Netprint, streaming and other
+    // subscriptions merely because their copy mentions money or bonuses.
     filter: (c) =>
-      c.store.categorySlug === "servisy-i-podpiski" ||
-      ["sber", "otp", "t-bank", "vklad", "plati-po-vsemu-miru", "rosgosstrakh"].some((k) => (c.store.slug || "").includes(k) || (c.store.name || "").toLowerCase().includes(k)) ||
-      Boolean(c.promocode.bonusName && /кэшбэк|руб|бонус|вклад|карт/iu.test(c.promocode.bonusName)),
+      ["finansy", "banki", "banki-i-finansy"].includes(c.store.categorySlug || "") ||
+      /^(?:sberbank|sberkarta|sber-karta|vklad-v-sbere|t-bank|otp|rosgosstrakh|plati-po-vsemu-miru)(?:$|-)/iu
+        .test(c.store.slug || ""),
   },
   {
     slug: "odezhda-i-obuv",

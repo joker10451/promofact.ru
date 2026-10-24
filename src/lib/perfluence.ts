@@ -521,11 +521,24 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.ordMarker === "2RanykFbMxo" &&
         c.affiliate.ordText.includes("erid: 2RanykFbMxo");
     }
-    // Approved WinLab placement for promofact.ru, post 17313895
+    // The confirmed website placement has no source ERID yet (24 Oct audit).
+    // Keep it available to diagnostic monitoring, never public promotion
+    // until both the affiliate URL and advertising disclosure carry the
+    // exact, publisher-supplied ERID. Never synthesize a marker.
     if (c.store.slug === "winlab") {
       const code = c.promocode.code.trim().toUpperCase();
-      return ["10PFNS5229", "WCPFOKT9920", "5OKTPF9920"].includes(code) &&
-        c.affiliate.link === "https://winelab.prfl.me/sites/gittf8";
+      if (!["10PFNS5229", "WCPFOKT9920", "5OKTPF9920"].includes(code)) return false;
+      const marker = c.affiliate.ordMarker.trim();
+      if (!marker || !c.affiliate.ordText.includes(marker)) return false;
+      try {
+        const link = new URL(c.affiliate.link);
+        return link.protocol === "https:" &&
+          link.hostname === "winelab.prfl.me" &&
+          link.pathname === "/sites/gittf8" &&
+          link.searchParams.get("erid") === marker;
+      } catch {
+        return false;
+      }
     }
     // Only the newly approved affiliate URL/ERID can revive the previously
     // suppressed 2,500 RUB code. An outdated Perfluence snapshot remains blocked.

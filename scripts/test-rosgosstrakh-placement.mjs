@@ -58,6 +58,13 @@ console.log('✓ 5. SEO метаданные и FAQ покупателя про�
 // 6. Collections matching
 const financeCol = COLLECTIONS.find(c => c.slug === 'finansy-i-karty');
 assert.ok(financeCol && financeCol.filter(coupon), 'Купон Росгосстраха должен попадать в подборку "Банковские карты и финансы"');
+const unrelatedSubscription = { ...coupon, store: { ...coupon.store, slug: 'netprint', categorySlug: 'servisy-i-podpiski' }, promocode: { ...coupon.promocode, bonusName: 'Бонус 500 руб' } };
+assert.equal(financeCol.filter(unrelatedSubscription), false, 'Netprint and generic subscription bonuses must not appear as bank products');
+const blackFriday = COLLECTIONS.find(c => c.slug === 'black-friday');
+assert.ok(blackFriday, 'Black Friday selection must exist');
+assert.equal(blackFriday.filter(unrelatedSubscription), false, 'Generic shop bonus must not impersonate Black Friday');
+assert.equal(blackFriday.filter({ ...coupon, promocode: { ...coupon.promocode, bonusName: 'Чёрная пятница: скидка' } }), true,
+  'Only explicitly marked Black Friday offers are eligible');
 const travelCol = COLLECTIONS.find(c => c.slug === 'vygodnye-oteli');
 assert.ok(travelCol && travelCol.filter(coupon), 'Купон Росгосстраха должен попадать в подборку "Отели и путешествия"');
 console.log('✓ 6. Фильтрация в подборках финансов и путешествий подтверждена (PASS)');

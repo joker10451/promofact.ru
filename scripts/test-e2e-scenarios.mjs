@@ -742,18 +742,26 @@ async function run() {
             }
           }
           if (pathUrl === "/store/m-kosmetik") {
-            const expected = ["Чай", "PK4GMWJUK", "PF21K0T5LF"];
-            for (const code of expected) {
-              assert.ok((await page.locator('article[id^="coupon-"]').allInnerTexts())
-                .some((content) => content.includes(code)),
-                `Missing current M.Kosmetik code ${code} at ${res.width}px`);
+            // Codes rotate independently; never require an offer after its Moscow expiry.
+            const offers = [
+              { code: "Чай", endsAt: "2026-10-22T23:59:59+03:00" },
+              { code: "PK4GMWJUK", endsAt: "2026-10-31T23:59:59+03:00" },
+              { code: "PF21K0T5LF", endsAt: "2026-10-31T23:59:59+03:00" },
+            ];
+            const cards = page.locator('article[id^="coupon-"]');
+            const now = Date.now();
+            const active = offers.filter(({ endsAt }) => now <= Date.parse(endsAt));
+            const texts = await cards.allInnerTexts();
+            for (const { code, endsAt } of offers) {
+              const matches = texts.filter((content) => content.includes(code));
+              assert.equal(matches.length, now <= Date.parse(endsAt) ? 1 : 0,
+                `M.Kosmetik ${code} visibility must match expiry at ${res.width}px`);
             }
-            const merchantCodes = page.locator('article[id^="coupon-"]');
-            assert.ok((await merchantCodes.count()) >= 3,
-              "M.Kosmetik page must contain all three approved current coupons");
+            assert.ok(await cards.count() >= active.length,
+              "M.Kosmetik must keep its non-expired approved coupons");
             const publisherDisclosure = page.getByText(/2Ranymz3211/);
-            assert.ok(await publisherDisclosure.count() >= 3,
-              "Every M.Kosmetik offer must display current Perfluence ERID");
+            assert.ok(await publisherDisclosure.count() >= active.length,
+              "Active M.Kosmetik offers must display approved Perfluence ERID");
           }
           if (pathUrl === "/store/podruzhka") {
             const retailCard = page.locator("#coupon-50042");
@@ -1221,8 +1229,11 @@ async function run() {
       assert.match(await page.locator("h1").innerText(), /FMART/i);
       const codes = page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]');
       await page.waitForTimeout(550);
-      assert.equal(await codes.count(), expected.length,
-        "FMART active cards must reflect approved expiry, never a stale widget");
+      // FMART may add separately approved codes (e.g. October 23 FMART30).
+      // Guard each known expiry and required code, but do not mistake a new
+      // legitimate fourth offer for a stale widget.
+      assert.ok(await codes.count() >= expected.length,
+        "FMART must retain all currently approved, non-expired codes");
       for (const item of expected) {
         const code = item[0];
         assert.equal(await page.locator('button[aria-label="Скопировать промокод ' + code + '"]').count(), 1,

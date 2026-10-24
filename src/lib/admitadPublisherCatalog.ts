@@ -75,11 +75,15 @@ export function baselineStillEligible(expires: string | null | undefined, atMs =
  * another live independent 404 confirmation immediately before a publish.
  */
 const REVIEWED_MISSING_WEBSITE_COUPONS: Readonly<Record<string, {
-  campaign: string; expires: string;
+  campaign: string; expires: string; lastSeen?: string;
 }>> = Object.freeze({
   "901876": { campaign: "25224", expires: "2026-10-31" },
   "939051": { campaign: "25224", expires: "2026-10-31" },
   "940388": { campaign: "25224", expires: "2026-10-31" },
+  // Befree: absent from site-scoped list on 2026-10-24; still expires today.
+  // Retirement is NOT approved by this entry alone: the worker MUST obtain
+  // a fresh authoritative site-scoped 404 immediately before publishing.
+  "967695": { campaign: "28532", expires: "2026-10-24", lastSeen: "2026-10-23" },
 });
 
 export function isReviewedMissingWebsiteCoupon(row: {
@@ -94,5 +98,5 @@ export function isReviewedMissingWebsiteCoupon(row: {
   return Boolean(approved && row.id === "adm_" + id &&
     String(row.source_campaign_id) === approved.campaign &&
     row.expires === approved.expires &&
-    String(row.last_seen_at || "").slice(0, 10) === "2026-10-16");
+    String(row.last_seen_at || "").slice(0, 10) === (approved.lastSeen || "2026-10-16"));
 }
