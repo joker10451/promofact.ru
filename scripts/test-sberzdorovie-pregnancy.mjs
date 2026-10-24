@@ -71,8 +71,8 @@ const telemedActive = activeBanners.some((b) => b.id === "sberzdorovie-telemed-2
 assert.equal(telemedActive, false, "Старый баннер телемедицины sberzdorovie-telemed-2026 должен быть неактивен");
 
 const pregnancyActive = activeBanners.some((b) => b.id === "sberzdorovie-pregnancy-2026");
-assert.equal(pregnancyActive, true, "Новый баннер sberzdorovie-pregnancy-2026 должен быть активен");
-console.log("✓ Подтверждено: старый баннер скрыт, новый баннер активен");
+assert.equal(pregnancyActive, false, "Устаревший баннер беременности должен быть снят с публикации по уточнению владельца площадки");
+console.log("✓ Подтверждено: исторический рекламный макет сохранён, но не публикуется");
 
 // 7. Проверка карточки купона в каталоге
 const stores = await getAllStores();
@@ -80,7 +80,8 @@ const sberStore = stores.find((s) => s.slug === "sberzdorovie");
 assert.ok(sberStore, "Магазин sberzdorovie должен присутствовать в каталоге");
 
 const pregnancyCoupon = sberStore.coupons.find((c) => c.promocode.code === "PERPREGA309361");
-assert.ok(pregnancyCoupon, "Купон PERPREGA309361 должен присутствовать в купонах магазина sberzdorovie");
-console.log("✓ Подтверждено: купон PERPREGA309361 отображается в StoreCouponBrowser для sberzdorovie");
+assert.equal(pregnancyCoupon, undefined, "Устаревший PERPREGA309361 не должен появляться на опубликованной странице");
+assert.deepEqual(sberStore.coupons.map(c => c.promocode.code).sort(), ["PERE7A4E5", "PERPREGT259702", "SPPA2EFFE"].sort());
+console.log("✓ Подтверждено: остаются только 3 рабочих кода, указанных владельцем");
 
 console.log("🎉 Все проверки пройдены успешно!");

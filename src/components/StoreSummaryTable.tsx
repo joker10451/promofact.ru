@@ -16,13 +16,13 @@ interface StoreSummaryTableProps {
   subtitle?: string;
 }
 
-function TableCopyButton({ code }: { code: string }) {
+function TableCopyButton({ code, noCodeLabel = "Не требуется" }: { code: string; noCodeLabel?: string }) {
   const [copied, setCopied] = useState(false);
 
   if (!code) {
     return (
       <span className="text-[11px] font-bold text-ink/40 italic">
-        Не требуется
+        {noCodeLabel}
       </span>
     );
   }
@@ -169,7 +169,7 @@ export default function StoreSummaryTable({
 
                   {/* 2. Промокод с копированием */}
                   <td className="px-4 sm:px-5 py-3.5">
-                    <TableCopyButton code={code} />
+                    <TableCopyButton code={code} noCodeLabel={storeSlug === "avito-puteshestviya" ? "По ссылке" : "Не требуется"} />
                   </td>
 
                   {/* 3. Условия */}

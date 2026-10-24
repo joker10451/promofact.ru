@@ -263,7 +263,7 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "category": "Путешествия и туризм",
     "categorySlug": "puteshestviya-i-turizm",
     "about": "Авито Путешествия - сервис онлайн-бронирования с более 300 тысячами доступных объектов частного жилья по всей России, который помогает быстро и безопасно снимать посуточно квартиры, дома и апартаменты.",
-    "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
+    "conditions": "Для жилья и отелей действуют отдельные партнёрские предложения. Возможность автоматической скидки или персонального кода и сроки уточняйте в Авито перед подтверждением бронирования.",
     "site": "https://www.avito.ru/moskva/travel",
     "activeBloggers": 3420
   },
@@ -808,6 +808,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
     "site": "https://eda.yandex.ru/collections/flowers_department",
     "activeBloggers": 2196
+  },
+  "yandex-music": {
+    "id": 223202,
+    "slug": "yandex-music",
+    "name": "Яндекс Музыка",
+    "logo": "https://favicon.yandex.net/favicon/v2/music.yandex.ru?size=120",
+    "category": "Подписки и сервисы",
+    "categorySlug": "podpiski-i-servisy",
+    "about": "Музыкальный сервис Яндекса с доступом по подписке.",
+    "conditions": "Сейчас нет подтверждённого действующего промокода для размещения ПромоФакта. Условия подписки проверяйте в сервисе.",
+    "site": "https://music.yandex.ru",
+    "activeBloggers": 0
   },
   "yandex-eda": {
     "id": 1384,

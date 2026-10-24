@@ -582,7 +582,7 @@ export default function CouponTicket({
             <div className="rounded-xl bg-blue-50/60 border border-blue-100 px-3 py-1.5 text-center text-[11px] font-bold text-blue-700">
               {offer.missingCodeClaim
                 ? "В описании упомянут промокод, но код не указан — уточните условия"
-                : "Акция без кода — ознакомьтесь с условиями у магазина"}
+                : store.slug === "avito-puteshestviya" ? "Предложение по ссылке — проверьте способ получения скидки в Авито" : "Акция без кода — ознакомьтесь с условиями у магазина"}
             </div>
             <a
               href={outgoingUrl}
@@ -591,7 +591,7 @@ export default function CouponTicket({
               onClick={handleDirectCtaClick}
               className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red to-red-dark text-white text-xs sm:text-sm font-bold shadow-offset-red hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] transition-all cursor-pointer px-4"
             >
-              <span>Перейти к предложению →</span>
+              <span>{store.slug === "avito-puteshestviya" ? "Проверить скидку в Авито →" : "Перейти к предложению →"}</span>
             </a>
           </div>
         )}

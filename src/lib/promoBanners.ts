@@ -46,7 +46,7 @@ export interface PromoBanner {
 }
 
 /** Perfluence notice 19 October 2026: Ulybatl resumed. Winlab draw remains paused. */
-export const PAUSED_PROMO_BANNER_IDS = new Set(["winlab-rozygrysh-2026"]);
+export const PAUSED_PROMO_BANNER_IDS = new Set(["winlab-rozygrysh-2026", "yandex-music-45days", "sberzdorovie-pregnancy-2026"]);
 
 export const PROMO_BANNERS: PromoBanner[] = [
   {
