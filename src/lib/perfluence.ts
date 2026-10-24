@@ -581,6 +581,25 @@ async function fetchData(): Promise<Coupon[]> {
   if (failedAt && Date.now() - failedAt < RETRY_AFTER_MS) return cache ?? [];
 
   pendingPromise = (async () => {
+    // The Perfluence widget repeatedly times out from Vercel's production
+    // regions. Public pages must never wait 15 seconds for an external feed.
+    // The weekly audited sync bundles a snapshot at deploy time; publisher-
+    // approved site-specific updates are merged separately from customCoupons.
+    // Keep live widget fetching for local audits and the scheduled sync worker.
+    if (process.env.VERCEL === "1" && process.env.NODE_ENV === "production" &&
+        bundledFeed && typeof bundledFeed === "object" && "data" in bundledFeed) {
+      try {
+        const savedCoupons = parsePayload(JSON.stringify(bundledFeed));
+        if (savedCoupons.length > 0) {
+          cache = savedCoupons;
+          cacheFilledAt = Date.now();
+          cacheFailed = false;
+          return cache;
+        }
+      } catch (error) {
+        console.error("[perfluence] bundled feed parse failed; trying live source:", error);
+      }
+    }
     if (!isPerfluenceConfigured()) {
       // Если URL API не задан (в CI или offline), приоритетно используем локальный сохранённый фид
       if (bundledFeed && typeof bundledFeed === "object" && "data" in bundledFeed) {
