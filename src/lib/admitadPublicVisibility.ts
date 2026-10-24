@@ -25,6 +25,10 @@ export function isPublicAdmitadRow(row: Record<string, unknown>, nowMs = Date.no
   const campaignId = String(row.source_campaign_id || "").trim();
   // Publisher account restriction overrides technical validity and API presence.
   if (DENIED_ADMITAD_CAMPAIGN_IDS.has(campaignId)) return false;
+  // Admitad still marks this undated, September-only Teachers' Day Aroma Box
+  // campaign as PUBLISHABLE. Do not present old school-season copy in October.
+  // This blocks exactly the known stale offer, not the Randewoo programme.
+  if (campaignId === "22484" && String(row.source_coupon_id ?? "") === "938879") return false;
   if (!marker || !legalText.includes(marker) ||
       !legalText.toLowerCase().includes("реклама") ||
       !slug || slug === "unmapped" || !/^[0-9]{1,12}$/.test(campaignId)) return false;
