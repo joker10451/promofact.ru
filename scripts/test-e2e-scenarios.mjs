@@ -742,18 +742,26 @@ async function run() {
             }
           }
           if (pathUrl === "/store/m-kosmetik") {
-            const expected = ["Чай", "PK4GMWJUK", "PF21K0T5LF"];
-            for (const code of expected) {
-              assert.ok((await page.locator('article[id^="coupon-"]').allInnerTexts())
-                .some((content) => content.includes(code)),
-                `Missing current M.Kosmetik code ${code} at ${res.width}px`);
+            // The Чай offer expired at the end of 22 October Moscow time.
+            // E2E tests must not demand expired vouchers on later runs.
+            const offers = [
+              { code: "Чай", endsAt: "2026-10-22T23:59:59+03:00" },
+              { code: "PK4GMWJUK", endsAt: "2026-10-31T23:59:59+03:00" },
+              { code: "PF21K0T5LF", endsAt: "2026-10-31T23:59:59+03:00" },
+            ];
+            const cards = page.locator('article[id^="coupon-"]');
+            const active = offers.filter(x => Date.now() <= Date.parse(x.endsAt));
+            const texts = await cards.allInnerTexts();
+            for (const { code, endsAt } of offers) {
+              const matches = texts.filter(content => content.includes(code));
+              assert.equal(matches.length, Date.now() <= Date.parse(endsAt) ? 1 : 0,
+                `M.Kosmetik ${code} visibility must match coupon expiry at ${res.width}px`);
             }
-            const merchantCodes = page.locator('article[id^="coupon-"]');
-            assert.ok((await merchantCodes.count()) >= 3,
-              "M.Kosmetik page must contain all three approved current coupons");
+            assert.ok((await cards.count()) >= active.length,
+              "M.Kosmetik must retain its non-expired approved coupons");
             const publisherDisclosure = page.getByText(/2Ranymz3211/);
-            assert.ok(await publisherDisclosure.count() >= 3,
-              "Every M.Kosmetik offer must display current Perfluence ERID");
+            assert.ok(await publisherDisclosure.count() >= active.length,
+              "Active M.Kosmetik offers must display approved Perfluence ERID");
           }
           if (pathUrl === "/store/podruzhka") {
             const retailCard = page.locator("#coupon-50042");
