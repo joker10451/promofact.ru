@@ -1852,7 +1852,7 @@ function publishMs(a: Article): number {
  * статьи только отсюда, а не из массива напрямую.
  */
 export function getArticles(now: number = Date.now()): Article[] {
-  return ARTICLES.filter((a) => publishMs(a) <= now);
+  return ARTICLES.filter((a) => publishMs(a) <= now && a.slug !== "promokody-dodo-pizza");
 }
 
 export function getArticle(slug: string, now: number = Date.now()): Article | undefined {

@@ -10,6 +10,7 @@ import { STABLE_STORES } from "@/lib/stableStores";
 import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
 import { isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
+import { isApprovedOct24Repost } from "@/lib/perfluenceRepeatsOct24";
 import { isPausedPublisherStore, withoutPausedPublisherOffers } from "@/lib/publisherPauses";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
@@ -467,6 +468,7 @@ async function fetchSnapshot(): Promise<Coupon[]> {
  * apply it, so blocked records remain available for health monitoring.
  */
 export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
+  if (!isApprovedOct24Repost(c)) return false;
   const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ПИРОГ"]);
 
     // Site-specific Perfluence links renewed 23 October 2026.

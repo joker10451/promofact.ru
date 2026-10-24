@@ -6,6 +6,7 @@ import { VKUSVILL_OCT18_SITE_OFFERS } from "@/lib/perfluenceOct18Scheduled";
 import { PERFLUENCE_OCT18_BATCH_OFFERS } from "@/lib/perfluenceOct18Batch";
 import { FOODBAND_OFFERS } from "@/lib/foodbandOffers";
 import { isCouponActive } from "@/lib/couponExpiry";
+import { PERFLUENCE_REPEAT_OCT24_OFFERS } from "@/lib/perfluenceRepeatsOct24";
 import { isPausedPublisherStore } from "@/lib/publisherPauses";
 
 /**
@@ -145,6 +146,7 @@ const YANDEX_OCT23_APPROVED_OFFERS: Coupon[] = [
 ];
 
 export const CUSTOM_COUPONS: Coupon[] = [
+  ...PERFLUENCE_REPEAT_OCT24_OFFERS,
   ...YANDEX_OCT23_APPROVED_OFFERS,
   {
     id: 1734561501,
