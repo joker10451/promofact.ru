@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCoupons, getStores } from "@/lib/perfluence";
 import { matchStoreSearch, normalizeSearchTerm, convertKeyboardLayout } from "@/lib/searchUtils";
-import { STABLE_STORES } from "@/lib/stableStores";
 
 export const dynamic = "force-dynamic";
 
@@ -26,11 +25,8 @@ export async function GET(request: Request) {
   const q = normalizeSearchTerm(rawQ);
   const convertedQ = normalizeSearchTerm(convertKeyboardLayout(rawQ));
 
-  // Фильтруем магазины с учётом псевдонимов и раскладки клавиатуры
-  const searchableStores = stores.some((store) => store.slug === "winlab")
-    ? stores
-    : [...stores, { ...STABLE_STORES.winlab, activeBloggers: STABLE_STORES.winlab.activeBloggers ?? 0, coupons: [] }];
-  const matchingStores = searchableStores
+  // Only shops approved by the shared public-catalogue gate appear in search.
+  const matchingStores = stores
     .filter((s) => matchStoreSearch(s, rawQ))
     .slice(0, 6)
     .map((s) => ({
