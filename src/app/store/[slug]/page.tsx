@@ -193,6 +193,8 @@ export default async function StorePage({
   const pageUrl = `${SITE_URL}/store/${slug}`;
   const { codes: realCodeCount, codeFree: codeFreeCount, barcodes: barcodeCount } = getStoreHeadlineOfferCounts(store.coupons);
   const offerCountLabel = formatStoreOfferCounts(realCodeCount, codeFreeCount, barcodeCount);
+  const avitoByLink = slug === "avito-puteshestviya" && realCodeCount === 0 && codeFreeCount > 0;
+  const noKnownExpiry = store.coupons.length > 0 && store.coupons.every(c => !c.promocode.expires);
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
@@ -310,7 +312,12 @@ export default async function StorePage({
   const faqItems = [
     ...customFaqItems,
     ...searchIntentFaq,
-    realCodeCount > 0
+    avitoByLink
+      ? {
+          q: "Как получить скидку в Авито Путешествиях?",
+          a: "Перейдите по ссылке конкретного предложения, авторизуйтесь в Авито и проверьте условия акции. Скидка может применяться по ссылке или потребовать персональный код из уведомлений Авито. Убедитесь в итоговой цене до оплаты.",
+        }
+      : realCodeCount > 0
       ? {
           q: `Как применить промокод ${store.name}?`,
           a: `Скопируйте код кнопкой «Копировать» на этой странице, перейдите в магазин ${store.name} по нашей ссылке и вставьте код в поле «Промокод» на этапе оформления заказа. Если условия выполнены, скидка отобразится в корзине до оплаты.`,
@@ -357,14 +364,18 @@ export default async function StorePage({
   const howToJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    name: `Как применить промокод ${store.name}`,
+    name: avitoByLink ? "Как получить скидку в Авито Путешествиях" : `Как применить промокод ${store.name}`,
     totalTime: "PT2M",
     estimatedCost: {
       "@type": "MonetaryAmount",
       currency: "RUB",
       value: "0",
     },
-    step: [
+    step: avitoByLink ? [
+      { "@type": "HowToStep", name: "Откройте предложение", text: "Перейдите по партнёрской ссылке предложения для жилья или отеля." },
+      { "@type": "HowToStep", name: "Проверьте способ активации", text: "Авторизуйтесь в Авито и выполните условия акции. Если сервис требует персональный код, найдите его в доступных уведомлениях." },
+      { "@type": "HowToStep", name: "Проверьте итоговую цену", text: "Перед оплатой проверьте сумму, сборы и условия отмены бронирования." },
+    ] : [
       {
         "@type": "HowToStep",
         name: "Скопируйте промокод",
@@ -451,14 +462,14 @@ export default async function StorePage({
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">
-                {`${barcodeCount > 0 ? "Промокоды и штрихкоды" : realCodeCount > 0 ? (codeFreeCount > 0 ? "Промокоды и акции" : "Промокоды") : "Акции"} ${store.name} на ${monthYear}${maxDisc ? ` — скидки ${maxDisc}` : ""}`}
+                {`${barcodeCount > 0 ? "Промокоды и штрихкоды" : realCodeCount > 0 ? (codeFreeCount > 0 ? "Промокоды и акции" : "Промокоды") : "Акции"} ${store.name} на ${monthYear}${avitoByLink ? " — 1 000 ₽ на жильё / 5% на отели" : maxDisc ? ` — скидки ${maxDisc}` : ""}`}
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
-                {offerCountLabel}. Срок действия указан в карточке.
+                {offerCountLabel}. {noKnownExpiry ? "Срок действия партнёром не указан — проверьте в магазине." : "Срок действия указан в карточке."}
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
-                  Сроки и ограничения — в карточках
+                  {noKnownExpiry ? "Срок и ограничения уточняйте у партнёра" : "Сроки и ограничения — в карточках"}
                 </span>
                 {storeProofCount > 0 && (
                   <span className="rounded-full bg-red/10 border border-red/30 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/70">
@@ -558,9 +569,9 @@ export default async function StorePage({
             <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-ink">{store.coupons.length}</div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">{maxDisc ? "Макс. скидка" : "Тип предложения"}</div>
+            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">{avitoByLink ? "Выгода" : maxDisc ? "Макс. скидка" : "Тип предложения"}</div>
             <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-red">
-              {maxDisc ? maxDisc : hasGift ? "Подарок" : "Акция"}
+              {avitoByLink ? "1 000 ₽ / 5%" : maxDisc ? maxDisc : hasGift ? "Подарок" : "Акция"}
             </div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
@@ -682,7 +693,7 @@ export default async function StorePage({
           </div>
         </section>
 
-        <HowToApply />
+        <HowToApply variant={avitoByLink ? "avito-links" : "code"} />
 
         <section className="mt-10 max-w-3xl rounded-2xl border border-mint/30 bg-mint/10 p-5">
           <Link
