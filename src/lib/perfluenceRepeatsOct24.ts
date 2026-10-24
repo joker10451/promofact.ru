@@ -144,6 +144,12 @@ export const PERFLUENCE_REPEAT_OCT24_OFFERS: Coupon[] = PERFLUENCE_REPEAT_OCT24.
 /** Fail closed for legacy widget offers and historical post-specific links. */
 export function isApprovedOct24Repost(c: Coupon): boolean {
   if (!managedSlugs.has(c.store.slug)) return true;
+  // Distinct previously approved SberZdorovie Pregnancy campaign remains live
+  // with its OWN ERID and site placement: no cross-campaign link rotation.
+  if (c.store.slug === "sberzdorovie" && c.promocode.code === "PERPREGA309361") {
+    return c.affiliate.link === "https://sberanalizy.prfl.me/sites/jhtq64?erid=2Ranym5xMV5" &&
+      c.affiliate.ordMarker === "2Ranym5xMV5";
+  }
   const matching = PERFLUENCE_REPEAT_OCT24.find(p =>
     p.slug === c.store.slug &&
     (p.code ? p.code.toUpperCase() === c.promocode.code.trim().toUpperCase() :
