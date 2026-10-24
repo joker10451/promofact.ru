@@ -285,8 +285,13 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   // Конкретный контекст для посадочной страницы, которая уже получает показы по
   // запросу «tasty coffee промокод», но не клики (данные GSC).
   if (input.name.trim().toLowerCase() === "tasty coffee") {
-    const specific = `${head} Кофе, чай и аксессуары: условия акций, промокоды и сроки действия.`;
-    return specific.length <= 160 ? specific : head;
+    return `Промокоды и акции Tasty Coffee на ${input.monthRu}: ${countLabel}. Кофе, чай, аксессуары. Проверяйте минимальную сумму и исключения для сортов.`;
+  }
+  if (input.name.trim().toLowerCase() === "randewoo") {
+    return `Промокоды и акции Randewoo на ${input.monthRu}: ${countLabel}. Парфюмерия и косметика; сравните условия скидок и подборок брендов.`;
+  }
+  if (input.name.trim().toLowerCase() === "яндекс путешествия") {
+    return `Промокоды Яндекс Путешествия на ${input.monthRu}: ${countLabel}. Уточните отели, даты проживания, сумму заказа и условия отмены.`;
   }
   const tail = ` Актуально на ${input.monthRu}.`;
   const full = `${head}${input.hasGiftOffer && !input.maxDiscount ? " Подарки к заказу при выполнении условий." : ""}${best ? ` ${best}.` : ""}${tail}`;
