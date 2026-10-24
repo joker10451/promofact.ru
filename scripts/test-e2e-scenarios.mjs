@@ -1222,6 +1222,8 @@ async function run() {
       assert.equal(response?.status(), 200, "FMART store must resolve independently of Flowwow");
       const now = Date.now();
       const expected = [
+        // Publisher-approved flash offer valid 23–26 October only.
+        ["FMART30", "2026-10-26T23:59:59+03:00"],
         ["FMARTPE23khl6x", "2026-10-31T23:59:59+03:00"],
         ["FMARTPE900btr9u", "2026-10-31T23:59:59+03:00"],
         ["fmartpe2063dcr", "2026-10-31T23:59:59+03:00"],
@@ -1229,11 +1231,10 @@ async function run() {
       assert.match(await page.locator("h1").innerText(), /FMART/i);
       const codes = page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]');
       await page.waitForTimeout(550);
-      // FMART may add separately approved codes (e.g. October 23 FMART30).
-      // Guard each known expiry and required code, but do not mistake a new
-      // legitimate fourth offer for a stale widget.
-      assert.ok(await codes.count() >= expected.length,
-        "FMART must retain all currently approved, non-expired codes");
+      // Fail closed on stale / unexpected offers, and require all current
+      // approved publisher codes; the short-lived FMART30 expires separately.
+      assert.equal(await codes.count(), expected.length,
+        "FMART cards must match currently approved codes and Moscow expiries");
       for (const item of expected) {
         const code = item[0];
         assert.equal(await page.locator('button[aria-label="Скопировать промокод ' + code + '"]').count(), 1,
