@@ -3,6 +3,8 @@ import { isPublicAdmitadRow } from "../src/lib/admitadPublicVisibility.ts";
 import { ARTICLES } from "../src/lib/articles.ts";
 import { buildStoreDescription } from "../src/lib/storeSeoContent.ts";
 import { formatPriorityStoreTitle } from "../src/lib/storeOfferHeadline.ts";
+import { isApprovedPublicCouponPlacement } from "../src/lib/perfluence.ts";
+import { YANDEX_TRAVEL_ROTATED_OFFERS } from "../src/lib/perfluenceRotatedOffers.ts";
 
 const randewoo = {
   is_active: true, sync_status: "PUBLISHABLE", legal_status: "PRESENT",
@@ -51,4 +53,23 @@ assert.match(travel,/даты проживания/i);
 for(const [slug] of [["tasty-coffee"],["randewoo"],["yandeks-puteshestviya"]]) {
   assert.match(formatPriorityStoreTitle({slug,month:"октябрь 2026",codes:1,codeFree:1}),/^Промокоды /);
 }
+// Publisher-origin verification: a Perfluence-only code allowlist must never
+// suppress separately published Admitad codes on the same canonical brand page.
+const perfluenceSample = YANDEX_TRAVEL_ROTATED_OFFERS.find(c => c.promocode.code === "BOLSHE");
+assert.ok(perfluenceSample);
+assert.equal(isApprovedPublicCouponPlacement(perfluenceSample), true);
+for (const [code,link,erid] of [
+  ["ADM-ALL-2027","https://uknty.com/g/nevqu0gdl5c7dde8999c6b3b8b6079/?i=3&erid=2bL9aMPo2e49hMef4rrUYJtCP6","2bL9aMPo2e49hMef4rrUYJtCP6"],
+  ["ADM-PREMIUMPRO2O27","https://uknty.com/g/42hf24sehic7dde8999c6b3b8b6079/?i=3&erid=2bL9aMPo2e49hMef4rrUYJtCP8","2bL9aMPo2e49hMef4rrUYJtCP8"],
+]) {
+  const coupon = {...perfluenceSample,
+    promocode:{...perfluenceSample.promocode,code,group:"admitad"},
+    affiliate:{...perfluenceSample.affiliate,link,landingLink:link,ordMarker:erid,ordText:"Реклама. Яндекс Путешествия erid: "+erid},
+  };
+  assert.equal(isApprovedPublicCouponPlacement(coupon),true, "Verified Admitad travel code hidden: "+code);
+  assert.equal(isApprovedPublicCouponPlacement({...coupon,affiliate:{...coupon.affiliate,link:"https://untrusted.example/"}}),false);
+  assert.equal(isApprovedPublicCouponPlacement({...coupon,promocode:{...coupon.promocode,code:"UNAPPROVED2027"}}),false);
+}
+console.log("PASS: verified Yandex Travel Admitad codes coexist with Perfluence without weakening ERID checks");
+
 console.log("PASS: current SEO copy, stale Randewoo campaign blocked, Yandex Travel evergreen CTA");
