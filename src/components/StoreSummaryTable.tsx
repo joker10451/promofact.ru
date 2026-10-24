@@ -7,6 +7,7 @@ import { refineOffer } from "@/lib/offerRefiner";
 import { isRealPromoCode } from "@/lib/dedupe";
 import { isCouponActive } from "@/lib/couponExpiry";
 import { getAttributedCouponHref, prepareAttributedCouponClick } from "@/lib/admitadOutboundLink";
+import { ymReachGoal } from "@/components/YandexMetrika";
 
 interface StoreSummaryTableProps {
   coupons: Coupon[];
@@ -206,7 +207,18 @@ export default function StoreSummaryTable({
                   <td className="px-4 sm:px-5 py-3.5 text-right whitespace-nowrap">
                     <a
                       href={affLink}
-                       onClick={(event) => prepareAttributedCouponClick(event.currentTarget, coupon, "store_summary", "store")}
+                       onClick={(event) => {
+                        prepareAttributedCouponClick(event.currentTarget, coupon, "store_summary", "store");
+                        ymReachGoal("affiliate_click", {
+                          store: storeSlug,
+                          coupon_id: coupon.id,
+                          placement: "store_summary",
+                          page_path: `/store/${storeSlug}`,
+                          page_type: "store",
+                          offer_type: code ? "promo" : "deal",
+                          source_component: "store_summary",
+                        });
+                      }}
                        target="_blank"
                       rel="nofollow sponsored noopener"
                       className="inline-flex items-center gap-1 rounded-lg bg-red px-2.5 py-1 text-xs font-bold text-white shadow-2xs hover:bg-red/90 transition-all"
