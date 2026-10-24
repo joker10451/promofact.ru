@@ -618,16 +618,20 @@ export default async function StorePage({
             </p>
           ))}
           <p className="mt-3 leading-relaxed text-ink/70">
-            Открыть официальный сайт {store.name} можно{" "}
-            <a
-              href={store.site}
-              target="_blank"
-              rel="noopener nofollow sponsored"
-              className="font-semibold text-ink underline underline-offset-2 hover:text-red transition-colors"
-            >
-              по этой ссылке
-            </a>
-            . Если купон перестал действовать — оставьте заявку, и мы обновим подборку {store.name} в ближайшее время.
+            {store.coupons.length > 0 ? (
+              <>
+                Для перехода к {store.name}{" "}
+                <a
+                  href="#offers"
+                  className="font-semibold text-ink underline underline-offset-2 hover:text-red transition-colors"
+                >
+                  выберите действующее предложение выше
+                </a>
+                . Переходите в магазин по партнёрской ссылке из карточки с условиями.
+              </>
+            ) : (
+              <>Сейчас у нас нет подтверждённых предложений {store.name}. Проверяйте обновления каталога.</>
+            )}
           </p>
         </article>
 
