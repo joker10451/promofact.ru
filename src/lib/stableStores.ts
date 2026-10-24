@@ -809,6 +809,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://eda.yandex.ru/collections/flowers_department",
     "activeBloggers": 2196
   },
+  "yandex-music": {
+    "id": 223202,
+    "slug": "yandex-music",
+    "name": "Яндекс Музыка",
+    "logo": "https://favicon.yandex.net/favicon/v2/music.yandex.ru?size=120",
+    "category": "Подписки и сервисы",
+    "categorySlug": "podpiski-i-servisy",
+    "about": "Музыкальный сервис Яндекса с доступом по подписке.",
+    "conditions": "Сейчас нет подтверждённого действующего промокода для размещения ПромоФакта. Условия подписки проверяйте в сервисе.",
+    "site": "https://music.yandex.ru",
+    "activeBloggers": 0
+  },
   "yandex-eda": {
     "id": 1384,
     "slug": "yandex-eda",
