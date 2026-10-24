@@ -397,7 +397,7 @@ console.log("===================================================================
   const url = new URL(decorated);
   assert.strictEqual(url.searchParams.get("erid"), "2RanyTest");
   assert.strictEqual(url.searchParams.get("subid"), "store_coupon");
-  assert.strictEqual(url.searchParams.get("subid1"), "store");
+  assert.strictEqual(url.searchParams.get("subid1"), "promofact:store");
   assert.strictEqual(url.searchParams.get("subid2"), "12345");
   assert.strictEqual(url.searchParams.get("subid3"), "promofact");
   assert.strictEqual(url.searchParams.get("subid4"), clickId);

@@ -1287,7 +1287,7 @@ async function run() {
               const rendered = new URL(await link.getAttribute("href"));
               assert.equal(rendered.searchParams.get("erid"), "TestERIDAdmitad2026");
               assert.equal(rendered.searchParams.get("subid"), "store_coupon");
-              assert.equal(rendered.searchParams.get("subid1"), "store");
+              assert.equal(rendered.searchParams.get("subid1"), "promofact:store");
               assert.equal(rendered.searchParams.get("subid2"), "99233303");
               assert.equal(rendered.searchParams.get("subid3"), "promofact");
               assert.equal(await link.getAttribute("target"), "_blank");

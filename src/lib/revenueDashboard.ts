@@ -44,6 +44,7 @@ type Action = {
   payment?: unknown;
   currency?: unknown;
   action_type?: unknown;
+  subid1?: unknown;
   subid3?: unknown;
   paid?: unknown;
 };
@@ -148,7 +149,11 @@ export function summarizeRevenueActions(
     const state = status(action.status);
     const cents = moneyCents(action.payment);
     const kind = String(action.action_type ?? "other");
-    const tagged = action.subid3 === "promofact";
+    // Personal-code attribution can replace SubID3 inside Admitad.
+    // New links carry an independent publisher marker in SubID1.
+    const tagged = action.subid3 === "promofact" ||
+      (typeof action.subid1 === "string" &&
+        /^promofact:(?:[a-z0-9_-]{1,40})$/.test(action.subid1));
     const paid = action.paid === 1 || action.paid === "1" || action.paid === true;
     const clean = { status: state, cents, kind, tagged, paid };
 
@@ -189,7 +194,7 @@ export function summarizeRevenueActions(
       })),
     campaigns: [...campaigns.values()].sort((a,b) =>
       b.summary.approved - a.summary.approved || a.name.localeCompare(b.name)),
-    attributionNote: "tagged = SubID3 «promofact», остальные действия площадки неатрибутированы; это не число кликов и не выручка",
+    attributionNote: "tagged = SubID3 «promofact» или SubID1 «promofact:<тип страницы>». Admitad может заменять SubID3 для персональных кодов. Без метки = источник не подтверждён, а не доказательство чужого перехода.",
   };
 }
 

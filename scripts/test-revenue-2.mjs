@@ -42,7 +42,7 @@ for(const k of ['import "server-only"','getAdmitadAccessToken',
   'scopes: "statistics"','statistics/actions/',
   'searchParams.set("website", website)','cache: "no-store"',
   "MAX_ACTIONS = 5000","Date.UTC","summarizeRevenueActions",
-  'action.subid3 === "promofact"','action.action_date',
+  'action.subid3 === "promofact"','action.subid1','action.action_date',
   'if (seen.has(id)) return fail()'])assert(dash.includes(k),k);
 for(const k of ["getSupabaseAdmin","SUPABASE_SERVICE_ROLE_KEY",
   "localStorage","action.subid4","action.promocode","res.text()"])assert(!dash.includes(k),k);

@@ -53,7 +53,11 @@ export function normalizeAdmitadAction(raw) {
   const kind = raw.action_type === "sale" ? "sale"
     : raw.action_type === "lead" ? "lead" : "other";
   const paid = raw.paid === 1 || raw.paid === "1" || raw.paid === true;
-  const sourceTag = raw.subid3 === "promofact" ? "promofact" : "unattributed";
+  // Admitad may overwrite SubID3 when attributing personal coupons.
+  const sourceTag = raw.subid3 === "promofact" ||
+    (typeof raw.subid1 === "string" &&
+      /^promofact:(?:[a-z0-9_-]{1,40})$/.test(raw.subid1))
+    ? "promofact" : "unattributed";
   // Do not include any original order ID, coupon code, email, click ID or SubID.
   return {
     id,
@@ -114,7 +118,7 @@ export function aggregateAdmitadActions(input) {
   return {
     source: "admitad",
     recordType: "actions",
-    attribution: "website-scoped; sourceTag indicates SubID3=promofact",
+    attribution: "website-scoped; sourceTag indicates SubID3=promofact or SubID1=promofact:<page>",
     currencies: Object.fromEntries([...currencies.entries()].sort()
       .map(([key, val]) => [key, centsAsMoney(val)])),
     campaigns: [...byCampaign.values()]

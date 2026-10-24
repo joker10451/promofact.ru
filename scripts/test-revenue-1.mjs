@@ -24,6 +24,17 @@ const examples=[
 ];
 const clean=normalizeAdmitadAction(base);
 assert.equal(clean.sourceTag,"promofact");
+const personalCodeAction = normalizeAdmitadAction({
+  ...base, action_id: 108, subid3: "PERSONAL_CODE_OVERRIDE",
+  subid1: "promofact:store",
+});
+assert.equal(personalCodeAction.sourceTag,"promofact",
+  "Personal coupon override of SubID3 must not erase publisher attribution");
+const unrelatedAction = normalizeAdmitadAction({
+  ...base, action_id: 109, subid3: "PERSONAL_CODE_OVERRIDE", subid1: "store",
+});
+assert.equal(unrelatedAction.sourceTag,"unattributed",
+  "Old pageType-only SubID1 cannot by itself prove source");
 assert.deepEqual(Object.keys(clean).sort(),[
   "campaignId","cents","currency","id","kind","paid","sourceTag","state",
 ].sort());
