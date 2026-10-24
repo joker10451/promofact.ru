@@ -32,9 +32,10 @@ export function withoutForbiddenTanukiCoPromotion(coupons: Coupon[]): Coupon[] {
 
 
 /**
- * Perfluence restrictions 16 October 2026:
+ * Perfluence restrictions:
  * FMART by flowwow may not be advertised in a curated selection with Flor2u.
  * ЛЭТУАЛЬ may not be advertised with Золотое Яблоко.
+ * Яндекс Цветы may not be advertised with Flowwow / FMART.
  * This controls curated homepage and article-like collection blocks, NOT
  * standalone stores or neutral searchable directories.
  */
@@ -47,18 +48,21 @@ export function withoutForbiddenFloristBeautyCoPromotion(coupons: Coupon[]): Cou
     /(?:^|\W)flor2u(?:$|\W)/iu.test(c.store.name));
   const hasGoldApple = coupons.some(c => c.store.slug === "zolotoe-yabloko" ||
     /золотое\s+яблоко/iu.test(c.store.name));
+  const hasFlowwow = coupons.some(c => c.store.slug === "fmart" || c.store.slug === "flowwow" ||
+    /(?:flowwow|флаувау)/iu.test(c.store.name));
   return coupons.filter(c =>
     !(hasIncompatibleFlowers && c.store.slug === "yandeks-tsvety") &&
     !(hasFlor2u && c.store.slug === "fmart") &&
-    !(hasGoldApple && c.store.slug === "letual"));
+    !(hasGoldApple && c.store.slug === "letual") &&
+    !(hasFlowwow && c.store.slug === "yandeks-tsvety"));
 }
 
-/** Perfluence: VkusVill Delivery must not share a curated promo collection with Pyaterochka. */
+/** Perfluence: VkusVill Delivery and Samokat must not share a curated promo collection with Pyaterochka. */
 export function withoutForbiddenGroceryCoPromotion(coupons: Coupon[]): Coupon[] {
   const hasPyaterochka = coupons.some(c =>
     c.store.slug === "pyaterochka" || c.store.slug === "pyaterochka-dostavka" ||
     /пят[её]рочк/iu.test(c.store.name));
   if (!hasPyaterochka) return coupons;
-  // Keep the original Pyaterochka placement; publish VkusVill separately.
-  return coupons.filter(c => c.store.slug !== "vkusvill-dostavka");
+  // Keep the original Pyaterochka placement; publish VkusVill and Samokat separately.
+  return coupons.filter(c => c.store.slug !== "vkusvill-dostavka" && c.store.slug !== "samokat");
 }
