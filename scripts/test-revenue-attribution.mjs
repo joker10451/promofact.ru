@@ -105,6 +105,17 @@ assert.ok(
 );
 console.log("✓ ОРД/erid маркировка не обрезается через line-clamp-1");
 
+// Store guide must not bypass coupon tracking with a raw merchant URL.
+// Link back to approved offer cards: they own the tracked outbound CTAs.
+const merchantPageSource = fs.readFileSync(
+  path.join(rootDir, "src/app/store/[slug]/page.tsx"), "utf8"
+);
+assert.match(merchantPageSource, /href="#offers"/,
+  "Store guide must send visitors to approved coupon cards");
+assert.doesNotMatch(merchantPageSource, /Открыть официальный сайт \{store\.name\} можно/,
+  "Store guide must not advertise an untracked merchant-site link");
+console.log("✓ Store guide does not bypass tracked affiliate coupon CTAs");
+
 // 2. Проверка защиты чувствительных ключей в YandexMetrika.tsx
 const metrikaSource = fs.readFileSync(
   path.join(rootDir, "src/components/YandexMetrika.tsx"),
