@@ -16,14 +16,34 @@ const STEPS = [
   },
 ];
 
-export default function HowToApply() {
+const AVITO_STEPS = [
+  {
+    n: "1",
+    title: "Открой предложение",
+    text: "Перейди по ссылке на нужную акцию Авито Путешествий: жильё или отель.",
+  },
+  {
+    n: "2",
+    title: "Проверь условия в Авито",
+    text: "Войди в аккаунт. Если сервис выдаёт персональный код или требует активацию скидки, выполни эти условия.",
+  },
+  {
+    n: "3",
+    title: "Проверь цену до оплаты",
+    text: "Сравни окончательную стоимость, сборы и правила отмены. Бронируй только если выгода подтверждена.",
+  },
+];
+
+export default function HowToApply({ variant = "code" }: { variant?: "code" | "avito-links" }) {
+  const isAvito = variant === "avito-links";
+  const steps = isAvito ? AVITO_STEPS : STEPS;
   return (
     <section className="mt-12" aria-labelledby="how-apply">
       <h2 id="how-apply" className="font-display text-lg font-extrabold">
-        Как применить код
+        {isAvito ? "Как получить скидку в Авито Путешествиях" : "Как применить код"}
       </h2>
       <ol className="mt-4 grid gap-3 sm:grid-cols-3">
-        {STEPS.map((step) => (
+        {steps.map((step) => (
           <li key={step.n} className="rounded-2xl bg-white border border-line px-5 py-5">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow font-display text-sm font-extrabold shadow-offset">
               {step.n}
