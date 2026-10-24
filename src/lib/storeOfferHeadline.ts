@@ -61,9 +61,9 @@ export function formatPriorityStoreTitle({
   if (codes + codeFree <= 0) return null;
   const counts = formatStoreOfferCounts(codes, codeFree);
   switch (slug) {
-    case "tasty-coffee": return `Tasty Coffee: ${counts} — ${month}`;
-    case "randewoo": return `Randewoo: ${counts}`;
-    case "yandeks-puteshestviya": return `Яндекс Путешествия: ${counts}`;
+    case "tasty-coffee": return `${codes > 0 ? "Промокоды" : "Акции"} Tasty Coffee: ${counts} — ${month}`;
+    case "randewoo": return `${codes > 0 ? "Промокоды" : "Акции"} Randewoo: ${counts}`;
+    case "yandeks-puteshestviya": return `${codes > 0 ? "Промокоды" : "Акции"} Яндекс Путешествия: ${counts}`;
     case "pyaterochka": return codes > 0
       ? `Промокоды Пятёрочки Доставка: ${counts}`
       : `Акции Пятёрочки Доставка: ${counts}`;
