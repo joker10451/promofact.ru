@@ -93,9 +93,11 @@ assert(pregnancyAudit.findings.some((f) => f.severity === "warning" &&
   f.detail.includes("Исходная ссылка Perfluence без erid")),
   "Audit must detect a missing ERID in the untouched source URL");
 const winlabAudit = inspectCoupons([winlab], "perfluence", timestamp);
-assert(winlabAudit.findings.some((f) => f.severity === "critical" &&
-  f.detail.includes("без параметра erid")),
-  "The unknown WinLab marker must still cause a critical incident");
+assert.equal(winlabAudit.criticalTotal, 0,
+  "WinLab's absent ERID is not a technical outage for an alcohol advertiser");
+assert(winlabAudit.findings.some((f) => f.severity === "warning" &&
+  f.detail.includes("Алкогольная категория")),
+  "WinLab's regulated category must trigger a publication warning");
 
 const { getPerfluenceCoupons, getPerfluenceAuditCoupons, normalizeAffiliateLink } =
   await import("../src/lib/perfluence.ts");
