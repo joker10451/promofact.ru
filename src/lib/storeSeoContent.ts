@@ -285,7 +285,7 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   // Конкретный контекст для посадочной страницы, которая уже получает показы по
   // запросу «tasty coffee промокод», но не клики (данные GSC).
   if (input.name.trim().toLowerCase() === "tasty coffee") {
-    return `Промокоды Tasty Coffee на ${input.monthRu}: ${countLabel}. Кофе, чай, аксессуары. Проверяйте минимальную сумму и исключения для сортов.`;
+    return `Промокоды Tasty Coffee на ${input.monthRu}: ${countLabel}${input.maxDiscount ? `, скидка ${input.maxDiscount}` : input.hasGiftOffer ? ", подарки к заказу" : ""}. Кофе, чай и аксессуары: проверяйте условия.`;
   }
   if (input.name.trim().toLowerCase() === "randewoo") {
     return `Промокоды и акции Randewoo на ${input.monthRu}: ${countLabel}. Парфюмерия и косметика; сравните условия скидок и подборок брендов.`;
