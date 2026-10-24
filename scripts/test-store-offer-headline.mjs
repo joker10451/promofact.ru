@@ -70,7 +70,7 @@ assert.doesNotMatch(buildStoreDescription(onlyDeals), /2 кода/);
 
 const storeSource = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
 assert.ok(storeSource.includes("const offerCountLabel = formatStoreOfferCounts(realCodeCount, codeFreeCount, barcodeCount)"));
-assert.ok(storeSource.includes("{offerCountLabel}. Срок действия указан в карточке."));
+assert.ok(storeSource.includes('noKnownExpiry ? "Срок действия партнёром не указан'), "Page must show honest unknown-expiry status");
 assert.ok(storeSource.includes("Предложений сегодня"));
 const browserSource = fs.readFileSync("src/components/StoreCouponBrowser.tsx", "utf8");
 assert.ok(browserSource.includes("formatStoreOfferCounts(codes, codeFree)"));
