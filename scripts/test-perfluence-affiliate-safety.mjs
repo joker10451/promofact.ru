@@ -93,9 +93,11 @@ assert(pregnancyAudit.findings.some((f) => f.severity === "warning" &&
   f.detail.includes("Исходная ссылка Perfluence без erid")),
   "Audit must detect a missing ERID in the untouched source URL");
 const winlabAudit = inspectCoupons([winlab], "perfluence", timestamp);
-assert(winlabAudit.findings.some((f) => f.severity === "critical" &&
-  f.detail.includes("без параметра erid")),
-  "The unknown WinLab marker must still cause a critical incident");
+assert.equal(winlabAudit.criticalTotal, 0,
+  "WinLab's absent ERID is not a technical outage for an alcohol advertiser");
+assert(winlabAudit.findings.some((f) => f.severity === "warning" &&
+  f.detail.includes("Алкогольная категория")),
+  "WinLab's regulated category must trigger a publication warning");
 
 const { getPerfluenceCoupons, getPerfluenceAuditCoupons, normalizeAffiliateLink } =
   await import("../src/lib/perfluence.ts");
@@ -122,6 +124,17 @@ assert.equal(isPublicPerfluenceWidgetCoupon(validWinLab), true,
   "A syntactically valid ERID alone cannot certify a paused advertiser");
 assert.equal(isApprovedPublicCouponPlacement(validWinLab), false,
   "WinLab must remain blocked even after a token is present in the Perfluence feed");
+const siteWinLabMissingErid = { ...validWinLab,
+  promocode: { ...validWinLab.promocode, code: "10PFNS5229" },
+  affiliate: { ...validWinLab.affiliate, link: "https://winelab.prfl.me/sites/gittf8", ordMarker: "", ordText: "Реклама. АО ВИНЛАБ" } };
+assert.equal(isApprovedPublicCouponPlacement(siteWinLabMissingErid), false,
+  "The WinLab alcohol category must not be advertised");
+const markedWinLab = { ...siteWinLabMissingErid,
+  affiliate: { ...siteWinLabMissingErid.affiliate,
+    link: "https://winelab.prfl.me/sites/gittf8?erid=2RanyMOCK123",
+    ordMarker: "2RanyMOCK123", ordText: "Реклама. erid: 2RanyMOCK123" } };
+assert.equal(isApprovedPublicCouponPlacement(markedWinLab), false,
+  "Artificially adding an ERID must not enable online alcohol promotion");
 const oldIvi = { ...validWinLab, store: { ...validWinLab.store, slug: "ivi" },
   promocode: { ...validWinLab.promocode, code: "FILM35" } };
 assert.equal(isApprovedPublicCouponPlacement(oldIvi), false,

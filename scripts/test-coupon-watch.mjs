@@ -59,6 +59,22 @@ const noErid = inspectCoupons([coupon(1, "SAVE15", "2026-10-31", {
 })], "manual", timestamp);
 assert(noErid.findings.some(f => f.severity === "critical"));
 
+// Missing ERID for an alcohol advertiser is not a formatting outage;
+// public promotion remains forbidden by the shared publication policy.
+const winlab = coupon(5, "10PFNS5229", "2026-10-31", {
+  link: "https://winelab.prfl.me/sites/gittf8", marker: "",
+  text: "Реклама. АО ВИНЛАБ, 18+",
+});
+winlab.store.slug = "winlab";
+const alcoholAudit = inspectCoupons([winlab], "manual", timestamp);
+assert.equal(alcoholAudit.criticalTotal, 0, "Alcohol retailer's absent ERID is not a feed failure");
+assert(alcoholAudit.findings.some(f => f.severity === "warning" && f.detail.includes("Алкогольная категория")),
+  "Alcohol category still needs an explicit blocked-placement warning");
+// No bypass for a spoofed WinLab slug pointing to a different host.
+const spoofedAlcohol = { ...winlab, affiliate: { ...winlab.affiliate, link: "https://unknown.prfl.me/sites/gittf8" } };
+assert(inspectCoupons([spoofedAlcohol], "manual", timestamp).criticalTotal > 0,
+  "Unknown domains must not inherit the alcohol-category ERID exception");
+
 const unsafe = inspectCoupons([coupon(1, "SAVE15", "2026-10-31", { link: "javascript:alert(1)" })],
   "manual", timestamp);
 assert(unsafe.findings.some(f => f.detail.includes("HTTP")));

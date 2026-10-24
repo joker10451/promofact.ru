@@ -16,7 +16,6 @@ import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickExpiringDeals, offerKey, isPromoHighlightEligible } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
 import { isRealPromoCode } from "@/lib/dedupe";
-import { STABLE_STORES } from "@/lib/stableStores";
 import { withoutForbiddenTravelCoPromotion, withoutForbiddenTanukiCoPromotion, withoutForbiddenFloristBeautyCoPromotion, withoutForbiddenGroceryCoPromotion } from "@/lib/publisherPlacementRules";
 
 import { SITE_NAME, SITE_URL } from "@/lib/site";
@@ -48,10 +47,9 @@ export default async function Home() {
   // Поиск в шапке работает на клиенте, поэтому получает лёгкий индекс, а не
   // полные объекты купонов и магазинов: иначе весь каталог уезжает в RSC-поток
   // и скачивается вместе с HTML каждым посетителем и каждым роботом.
-  const searchStores = stores.some((store) => store.slug === "winlab")
-    ? stores
-    : [...stores, { ...STABLE_STORES.winlab, activeBloggers: STABLE_STORES.winlab.activeBloggers ?? 0 }];
-  const searchIndex = buildSearchIndex(searchStores, coupons);
+  // Only published stores belong in the search index. Do not force an
+  // alcohol retailer with no eligible public offers into homepage search.
+  const searchIndex = buildSearchIndex(stores, coupons);
 
   const bfCol = COLLECTIONS.find((c) => c.slug === "black-friday");
   const shoppingCol = COLLECTIONS.find((c) => c.slug === "den-shopinga-11-11");
