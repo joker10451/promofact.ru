@@ -3,6 +3,7 @@ import { getCoupons } from "@/lib/perfluence";
 import { sendCouponToVk, formatVkPost } from "@/lib/vk";
 import { isBearerAuthorized } from "@/lib/apiAuth";
 import { selectBestCouponToPost, recordPosting } from "@/lib/postingEngine";
+import { deliverOnce } from "@/lib/postingDelivery";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ async function handlePost(req: NextRequest) {
       });
     }
 
-    const res = await sendCouponToVk(coupon);
+    const res = await deliverOnce("vk", coupon, () => sendCouponToVk(coupon), r => r.postId);
 
     if (res.ok) {
       recordPosting({

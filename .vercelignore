@@ -6,3 +6,12 @@ scripts/
 docs/
 *.log
 *.mp4
+.env*
+*.pem
+*.har
+.youtube-token.json
+data/*
+!data/posted_promos.json
+audit/
+audit-screenshots/
+.git/

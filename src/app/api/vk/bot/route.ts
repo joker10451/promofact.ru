@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { getCoupons } from "@/lib/perfluence";
 import { getVkBotKeyboard, sendVkBotMessage } from "@/lib/vk";
 import { SITE_URL } from "@/lib/site";
+import { safeEqual } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -11,11 +12,19 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const secret = process.env.VK_CALLBACK_SECRET;
+    const groupId = process.env.VK_GROUP_ID;
+    if (!secret || !groupId) return new Response("Webhook not configured", { status: 503 });
+    if (!body || typeof body !== "object" || typeof body.secret !== "string" ||
+        !safeEqual(body.secret, secret) || String(body.group_id) !== groupId) {
+      return new Response("Unauthorized", { status: 401 });
+    }
     const type = body.type;
 
     // 1. Подтверждение адреса сервера для ВКонтакте (confirmation)
     if (type === "confirmation") {
-      const confirmationCode = (process.env.VK_CONFIRMATION_CODE || "be170407").trim().replace(/^\uFEFF/, "");
+      const confirmationCode = (process.env.VK_CONFIRMATION_CODE || "").trim().replace(/^\uFEFF/, "");
+      if (!confirmationCode) return new Response("Confirmation not configured", { status: 503 });
       return new Response(confirmationCode, {
         status: 200,
         headers: { "Content-Type": "text/plain; charset=utf-8" },
@@ -28,6 +37,7 @@ export async function POST(req: NextRequest) {
       if (!message) return new Response("ok", { headers: { "Content-Type": "text/plain" } });
 
       const userId = message.from_id;
+      if (!Number.isSafeInteger(userId) || userId <= 0) return new Response("Invalid sender", { status: 400 });
       const text = (message.text || "").trim().toLowerCase();
       let payload: { command?: string; slug?: string } = {};
 

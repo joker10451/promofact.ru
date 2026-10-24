@@ -4,6 +4,7 @@ import fs from "node:fs";
 import ts from "typescript";
 
 export async function resolve(specifier, context, nextResolve) {
+  if (specifier === "next/server") return nextResolve("next/server.js", context);
   if (specifier === "server-only") {
     return {
       url: "data:text/javascript,export default {};",

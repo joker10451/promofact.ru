@@ -100,7 +100,7 @@ for (const reason of [
     source.includes(`: "${reason}"`),
     `Missing fallback diagnostic: ${reason}`);
 }
-const recorder = source.match(/function recordTeleportOutcome\([\s\S]*?\n}\n/);
+const recorder = source.match(/function recordTeleportOutcome\([\s\S]*?\r?\n}\r?\n/);
 assert.ok(recorder, "Structured event recorder missing");
 assert.doesNotMatch(recorder[0], /req\.|headers|cookie|ip_addr|user_agent|clickId|couponId|\.toString\(/);
 assert.match(source, /reason: string/);

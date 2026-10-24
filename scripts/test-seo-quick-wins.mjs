@@ -45,6 +45,10 @@ const { getCategories, getAllStores, getCoupons } = await import("@/lib/perfluen
 const { getArticles } = await import("@/lib/articles");
 const { SITE_NAME, SITE_URL } = await import("@/lib/site");
 const { canonicalCategorySlug } = await import("@/lib/categoryTaxonomy");
+// Build artifacts belong to one exact inventory snapshot. Opt in only after
+// building with matching environment/data; ordinary unit runs must not read
+// arbitrary HTML left by a different commit or source snapshot.
+const checkBuildArtifacts = process.env.SEO_CHECK_BUILD_ARTIFACTS === "true";
 
 console.log("================================================================================");
 console.log("🚀 ЗАПУСК РЕГРЕССИОННЫХ ТЕСТОВ SEO QUICK-WINS (P2.2)");
@@ -57,7 +61,7 @@ let passed = 0;
 // -----------------------------------------------------------------------------
 {
   const appBuildDir = path.join(".next", "server", "app");
-  if (fs.existsSync(appBuildDir)) {
+  if (checkBuildArtifacts && fs.existsSync(appBuildDir)) {
     // Проверяем скомпилированные HTML файлы категорий, коллекций и городов
     const sampleFiles = [
       path.join(appBuildDir, "category", "dostavka-produktov.html"),
@@ -169,9 +173,11 @@ let passed = 0;
   assert.ok(emptyGeoCategories.length > 0, "Должны быть пустые гео-категории для изоляции");
 
   // Проверяем фактический sitemap.xml.body из сборки если существует
-  const sitemapBodyPath = path.join(".next", "server", "app", "sitemap.xml.body");
-  if (fs.existsSync(sitemapBodyPath)) {
-    const sitemapContent = fs.readFileSync(sitemapBodyPath, "utf-8");
+  // Exercise the real generator against the same source snapshot as assertions.
+  // A previous build's sitemap can legitimately contain a different catalog.
+  const { default: generateSitemap } = await import("@/app/sitemap");
+  {
+    const sitemapContent = (await generateSitemap()).map(entry => `<loc>${entry.url}</loc>`).join("\n");
 
     // Ни одна пустая гео-категория не должна быть в sitemap
     for (const emptyUrl of emptyGeoCategories) {
@@ -207,7 +213,7 @@ let passed = 0;
 // -----------------------------------------------------------------------------
 {
   const appBuildDir = path.join(".next", "server", "app");
-  if (fs.existsSync(appBuildDir)) {
+  if (checkBuildArtifacts && fs.existsSync(appBuildDir)) {
     const [categories, allCoupons] = await Promise.all([getCategories(), getCoupons()]);
     let dynamicEmpty = null;
     let dynamicThin = null;
@@ -796,7 +802,7 @@ let passed = 0;
 
   // 3. Проверка robots policy в артефактах сборки HTML (если сборка есть)
   const appBuildDir = path.join(".next", "server", "app");
-  if (fs.existsSync(appBuildDir)) {
+  if (checkBuildArtifacts && fs.existsSync(appBuildDir)) {
     for (const store of allStores) {
       const htmlPath = path.join(appBuildDir, "store", `${store.slug}.html`);
       if (fs.existsSync(htmlPath)) {

@@ -264,7 +264,7 @@ console.log("PromoFact responsive coupon ticket: legibility, disclosure and bala
 
 
 // Editorial FARFOR CTA must track the same approved placement as its coupon cards.
-const farforGuide = fs.readFileSync("src/lib/articles.ts", "utf8");
+const farforGuide = fs.readFileSync("src/lib/articles.ts", "utf8").replace(/\r\n/g, "\n");
 const farforSource = fs.readFileSync("src/lib/perfluenceOct18Batch.ts", "utf8");
 const approvedFarforLink = farforSource.match(/link: "(https:\/\/farfor1\.prfl\.me\/sites\/[^"]+)"/)?.[1];
 const articleFarforLink = farforGuide.match(/const FARFOR_LINK = "([^"]+)"/)?.[1];

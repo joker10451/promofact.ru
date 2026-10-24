@@ -55,17 +55,21 @@ async function main() {
     if (st !== 200) lines.push(`⚠️ /store/${s} отвечает ${st}`);
   }
 
-  // 4. IndexNow push (уведомляем Яндекс обо всех URL)
+  // 4. Explicit opt-in only: diagnostics must not submit URLs.
+  if (process.argv.includes("--indexnow")) {
   try {
+    const secret = process.env.INDEXNOW_SECRET || process.env.CRON_SECRET;
+    if (!secret) throw new Error("INDEXNOW_SECRET or CRON_SECRET required");
     const r = await fetch(`${BASE}/api/indexnow`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
       body: JSON.stringify({ urlList: urls }),
     });
     const j = await r.json().catch(() => ({}));
     lines.push(`📡 IndexNow: ${r.status} ${JSON.stringify(j).slice(0, 120)}`);
   } catch (e) {
     lines.push(`⚠️ IndexNow не прошёл: ${e.message}`);
+  }
   }
 
   console.log(lines.join("\n"));

@@ -64,7 +64,6 @@ function getMonthRuPrep(): string {
 }
 
 // Даты фиксируем на уровне модуля — стабильны для SSR и клиента
-const TODAY_ISO = new Date().toISOString();
 const TODAY_RU = new Date().toLocaleDateString("ru-RU", {
   day: "numeric",
   month: "long",
@@ -195,7 +194,6 @@ export default async function StorePage({
   const { codes: realCodeCount, codeFree: codeFreeCount, barcodes: barcodeCount } = getStoreHeadlineOfferCounts(store.coupons);
   const offerCountLabel = formatStoreOfferCounts(realCodeCount, codeFreeCount, barcodeCount);
   const storeProofCount = uses.usesByStore.get(store.id) ?? 0;
-  const todayIso = TODAY_ISO;
   const monthYear = getCapitalizedMonthYear();
   const monthRu = getMonthRuPrep();
   const maxDisc = getMaxVerifiedDiscount(store.coupons);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isBearerAuthorized } from "@/lib/apiAuth";
 
 const INDEXNOW_KEY = "c62c55b32f449cc4602687e29849f898";
 const HOST = "promofact.ru";
@@ -10,6 +11,9 @@ const ENDPOINTS = [
 ];
 
 export async function POST(req: NextRequest) {
+  if (!isBearerAuthorized(req.headers.get("authorization"), [process.env.INDEXNOW_SECRET, process.env.CRON_SECRET])) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
   let urls: string[] = [];
   try {
     const body = await req.json();
@@ -20,9 +24,15 @@ export async function POST(req: NextRequest) {
   }
 
   // Фильтруем URL: разрешены только канонические страницы с нашего домена
-  const cleanUrls = urls
+  if (urls.length > 10000) return NextResponse.json({ ok: false, error: "Too many URLs" }, { status: 400 });
+  const cleanUrls = [...new Set(urls
     .map((u) => (typeof u === "string" ? u.trim() : ""))
-    .filter((u) => u.startsWith(`https://${HOST}`) || u.startsWith(`https://www.${HOST}`));
+    .filter((u) => {
+      try {
+        const parsed = new URL(u);
+        return parsed.protocol === "https:" && parsed.hostname === HOST && !parsed.port && !parsed.username && !parsed.password;
+      } catch { return false; }
+    }))];
 
   if (!cleanUrls.length) {
     return NextResponse.json({ ok: false, error: "no valid URLs for host " + HOST }, { status: 400 });
@@ -41,12 +51,14 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10000),
       })
     )
   );
 
-  const sent = results.filter((r) => r.status === "fulfilled").length;
-  return NextResponse.json({ ok: true, sent, total: ENDPOINTS.length });
+  const statuses = results.map((r) => r.status === "fulfilled" ? r.value.status : null);
+  const sent = results.filter((r) => r.status === "fulfilled" && r.value.ok).length;
+  return NextResponse.json({ ok: sent > 0, sent, total: ENDPOINTS.length, statuses }, { status: sent > 0 ? 200 : 502 });
 }
 
 // Защита: GET не обрабатываем (ключ публикуется как .txt в public)

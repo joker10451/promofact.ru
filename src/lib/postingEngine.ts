@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Coupon } from "@/lib/types";
+import { expiryTimestamp } from "@/lib/couponExpiry";
 
 export interface PostingRecord {
   id: number;
@@ -106,6 +107,7 @@ export interface SelectionOptions {
 export function selectBestCouponToPost(
   coupons: Coupon[],
   opts: SelectionOptions = {},
+  history: PostingHistory = loadPostingHistory(),
 ): { coupon: Coupon; reason: string; stats: Record<string, unknown> } | null {
   if (!coupons || coupons.length === 0) return null;
 
@@ -113,7 +115,6 @@ export function selectBestCouponToPost(
   const minStoreCooldownMs = (opts.minHoursBetweenStorePosts ?? 168) * 60 * 60 * 1000;
   const minCodeCooldownMs = 14 * 24 * 60 * 60 * 1000; // 14 дней для одинакового кода
 
-  const history = loadPostingHistory();
   const recentStorePostTime = new Map<string, number>();
   const recentCodes = new Set<string>();
 
@@ -123,7 +124,7 @@ export function selectBestCouponToPost(
       recentStorePostTime.set(h.storeSlug, postTime);
     }
     if (now - postTime < minCodeCooldownMs) {
-      recentCodes.add(h.code.trim().toUpperCase());
+      recentCodes.add(`${h.storeSlug}::${h.code.trim().toUpperCase()}`);
     }
   }
 
@@ -139,12 +140,12 @@ export function selectBestCouponToPost(
 
     // Срок действия должен быть не менее 48 часов от текущего момента
     if (c.promocode.expires) {
-      const expTime = new Date(`${c.promocode.expires}T23:59:59`).getTime();
-      if (expTime - now < 48 * 60 * 60 * 1000) return false;
+      const expTime = expiryTimestamp(c.promocode.expires);
+      if (!Number.isFinite(expTime) || expTime - now < 48 * 60 * 60 * 1000) return false;
     }
 
     // Исключаем код, если он постился за последние 14 дней
-    if (recentCodes.has(c.promocode.code.trim().toUpperCase())) {
+    if (recentCodes.has(`${c.store.slug}::${c.promocode.code.trim().toUpperCase()}`)) {
       return false;
     }
 
@@ -152,16 +153,7 @@ export function selectBestCouponToPost(
   });
 
   if (validCoupons.length === 0) {
-    // Если строгий фильтр исключил всё, пробуем ослабить фильтр по кодам
-    const fallbackCoupons = coupons.filter(
-      (c) => c.promocode.code && (!opts.storeSlug || c.store.slug === opts.storeSlug),
-    );
-    if (fallbackCoupons.length === 0) return null;
-    return {
-      coupon: fallbackCoupons[0],
-      reason: "Резервный выбор (все купоны уже публиковались)",
-      stats: { total: coupons.length, valid: 0 },
-    };
+    return null;
   }
 
   // 2. Группируем по магазинам и отбираем лучший купон для каждого магазина

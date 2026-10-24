@@ -18,4 +18,7 @@ jobs:
           node-version: '20'
 
       - name: Ping Search Engines (IndexNow)
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          INDEXNOW_SECRET: ${{ secrets.INDEXNOW_SECRET }}
         run: node scripts/indexnow-push.mjs https://promofact.ru
