@@ -5,11 +5,19 @@ import {
   withoutPausedPublisherOffers,
 } from "../src/lib/publisherPauses.ts";
 import { STABLE_STORES } from "../src/lib/stableStores.ts";
+import { getCustomCoupons } from "../src/lib/customCoupons.ts";
+import { getActivePromoBanners } from "../src/lib/promoBanners.ts";
 
 assert.equal(DELIMOBIL_PAUSED_FROM, "2026-10-16T14:11:00+03:00");
 assert.equal(isPausedPublisherStore("delimobil"),true);
 assert.equal(isPausedPublisherStore(" DELIMOBIL "),true);
 assert.equal(isPausedPublisherStore("citydrive"),false);
+assert.equal(isPausedPublisherStore("winlab"),true);
+assert.equal(isPausedPublisherStore(" WINLAB "),true);
+assert.equal(getCustomCoupons().some(c => c.store.slug === "winlab"), false,
+  "Manual WinLab coupons must never be available for public publication");
+assert.equal(getActivePromoBanners({storeSlug:"winlab"}).length, 0,
+  "New banner IDs must not bypass the paused publisher policy");
 
 // The blackout must remove all codes and even no-code affiliate promotions.
 const offers=[
@@ -17,6 +25,8 @@ const offers=[
   { id:113,store:{slug:"delimobil"},promocode:{code:""},affiliate:{link:"https://delimobil.prfl.me/sites/dux1e5"} },
   { id:114,store:{slug:"citydrive"},promocode:{code:"SAVE1480"},affiliate:{link:"https://citydrive.prfl.me"} },
 ];
+offers.push({ id: 115, store:{slug:"winlab"}, promocode:{code:"10PFNS5229"},
+  affiliate:{link:"https://winelab.prfl.me/sites/gittf8"} });
 assert.deepEqual(withoutPausedPublisherOffers(offers).map(c=>c.id),[114]);
 assert.equal(withoutPausedPublisherOffers(offers.filter(c=>c.store.slug==="delimobil")).length,0);
 assert.equal(isPausedPublisherStore("tanukifamily"),false);
@@ -47,6 +57,12 @@ assert(snap.includes('"Cache-Control": "no-store, max-age=0, must-revalidate"'),
 assert(!snap.includes("stale-while-revalidate"),"Do not let CDN serve halted offers as stale");
 assert.equal(route.split("if (isPausedPublisherStore(slug)) notFound()").length-1,2,
  "Both store page and metadata must 404 without showing affiliate buttons or old SEO text");
+assert(!articles.includes('href: "/store/winlab"'),
+ "No related-article navigation to a blocked alcohol advertiser");
+const catalogue = fs.readFileSync("src/app/promokody/page.tsx","utf8");
+const search = fs.readFileSync("src/app/api/search/route.ts","utf8");
+assert(!catalogue.includes("pendingWinlab") && !search.includes("STABLE_STORES.winlab"),
+ "Shop directory and search must not reinsert the blocked retailer");
 assert(!articles.includes('href: "/store/delimobil"'),
  "Historic article cross-promotion must be removed");
 // Protect against accidental regression by historic (non-public) fixtures.

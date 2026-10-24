@@ -123,4 +123,9 @@ assert(workflow.includes("hashFiles('audit-results/coupon-watch-state.json')"),
   "Do not lose last successful source snapshot or failure counters when today reports an incident");
 assert(!workflow.includes("git push") && !workflow.includes("vercel deploy"),
   "Daily read-only monitoring must never trigger a repo push or Vercel build");
+const watcher = fs.readFileSync("scripts/daily-coupon-watch.mjs", "utf8");
+assert(watcher.includes('!isPausedPublisherStore(c.slug)'),
+  "Deliberately blocked campaigns must not show as missing active offers");
+assert(!watcher.includes("...newOffers.map(getMessageLine)"),
+  "New approved coupons are ordinary changes, not incident notifications");
 console.log("COUPON-WATCH: expiry, attribution, changes, outages safety and daily workflow PASS");

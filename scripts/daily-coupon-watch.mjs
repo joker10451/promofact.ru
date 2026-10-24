@@ -7,6 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { getCustomCoupons } from "../src/lib/customCoupons.ts";
+import { isPausedPublisherStore } from "../src/lib/publisherPauses.ts";
 import { inspectCoupons, compareInventories, checkSourceCompleteness, checkPerfluenceAuditProvenance, reconcileCrossSourceChanges } from "./coupon-watch-core.mjs";
 
 const OUTPUT = path.resolve("audit-results");
@@ -142,13 +143,14 @@ await inspectSource("admitad", getPublishedAdmitad);
 
 const reconciledChanges = reconcileCrossSourceChanges(changes, state.sources, healthySources);
 const critical = findings.filter((f) => f.severity === "critical");
-const majorChanges = reconciledChanges.filter((c) => ["removed", "changed"].includes(c.type));
-const newOffers = reconciledChanges.filter((c) => c.type === "new");
+// A deliberately blocked campaign disappearing from the source is not an outage.
+// New, valid offers belong in the JSON change log, not in an incident Issue.
+const majorChanges = reconciledChanges.filter((c) =>
+  ["removed", "changed"].includes(c.type) && !isPausedPublisherStore(c.slug));
 const outages = errors.filter((e) => e.consecutiveFailures >= 2 || e.anomaly);
 const attention = [
   ...critical.map(getMessageLine),
   ...majorChanges.map(getMessageLine),
-  ...newOffers.map(getMessageLine),
   ...outages.map((e) => "- **" + e.source + "** — " + (e.anomaly ? e.message : "источник недоступен " + e.consecutiveFailures + " запуска подряд")),
   ...expiring.filter((e) => e.remainingHours <= 24).map(
     (e) => "- **" + e.slug + " / " + e.code + "** — заканчивается в ближайшие 24 часа: " + e.expires),

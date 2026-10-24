@@ -6,6 +6,7 @@ import { VKUSVILL_OCT18_SITE_OFFERS } from "@/lib/perfluenceOct18Scheduled";
 import { PERFLUENCE_OCT18_BATCH_OFFERS } from "@/lib/perfluenceOct18Batch";
 import { FOODBAND_OFFERS } from "@/lib/foodbandOffers";
 import { isCouponActive } from "@/lib/couponExpiry";
+import { isPausedPublisherStore } from "@/lib/publisherPauses";
 
 /**
  * Ручные купоны от рекламодателей и партнёрских сетей.
@@ -610,7 +611,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
     },
     extraLinks: [],
   },
-  // Approved WinLab placement for promofact.ru, post 17313895
+  // Historic WinLab data retained for audit only; publication is blocked centrally.
   {
     id: 81409001,
     promocode: {
@@ -798,6 +799,8 @@ const PUBLISH_FROM: Record<number, string> = {};
 
 export function getCustomCoupons(now = Date.now()): Coupon[] {
   return CUSTOM_COUPONS.filter((c) => {
+    // One publication stop for all consumer paths, not just the merged catalogue.
+    if (isPausedPublisherStore(c.store.slug)) return false;
     const from = PUBLISH_FROM[c.id];
     if (from && now < new Date(from).getTime()) return false;
     return isCouponActive(c.promocode.expires, now);

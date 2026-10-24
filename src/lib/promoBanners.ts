@@ -1,3 +1,5 @@
+import { isPausedPublisherStore } from "@/lib/publisherPauses";
+
 /**
  * Рекламные баннеры партнёров с датами показа.
  *
@@ -418,6 +420,7 @@ export function getActivePromoBanners(opts: { storeSlug?: string; now?: number }
   return PROMO_BANNERS.filter(
     (b) =>
       !PAUSED_PROMO_BANNER_IDS.has(b.id) &&
+      !isPausedPublisherStore(b.storeSlug) &&
       now >= bannerStartMs(b) - PREFETCH_MS &&
       now <= mskDayEnd(b.endsAt) &&
       (!opts.storeSlug ||
