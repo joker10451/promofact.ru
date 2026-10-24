@@ -45,6 +45,10 @@ const { getCategories, getAllStores, getCoupons } = await import("@/lib/perfluen
 const { getArticles } = await import("@/lib/articles");
 const { SITE_NAME, SITE_URL } = await import("@/lib/site");
 const { canonicalCategorySlug } = await import("@/lib/categoryTaxonomy");
+// Build artifacts belong to one exact inventory snapshot. Opt in only after
+// building with matching environment/data; ordinary unit runs must not read
+// arbitrary HTML left by a different commit or source snapshot.
+const checkBuildArtifacts = process.env.SEO_CHECK_BUILD_ARTIFACTS === "true";
 
 console.log("================================================================================");
 console.log("🚀 ЗАПУСК РЕГРЕССИОННЫХ ТЕСТОВ SEO QUICK-WINS (P2.2)");
@@ -57,7 +61,7 @@ let passed = 0;
 // -----------------------------------------------------------------------------
 {
   const appBuildDir = path.join(".next", "server", "app");
-  if (fs.existsSync(appBuildDir)) {
+  if (checkBuildArtifacts && fs.existsSync(appBuildDir)) {
     // Проверяем скомпилированные HTML файлы категорий, коллекций и городов
     const sampleFiles = [
       path.join(appBuildDir, "category", "dostavka-produktov.html"),
@@ -209,7 +213,7 @@ let passed = 0;
 // -----------------------------------------------------------------------------
 {
   const appBuildDir = path.join(".next", "server", "app");
-  if (fs.existsSync(appBuildDir)) {
+  if (checkBuildArtifacts && fs.existsSync(appBuildDir)) {
     const [categories, allCoupons] = await Promise.all([getCategories(), getCoupons()]);
     let dynamicEmpty = null;
     let dynamicThin = null;
@@ -798,7 +802,7 @@ let passed = 0;
 
   // 3. Проверка robots policy в артефактах сборки HTML (если сборка есть)
   const appBuildDir = path.join(".next", "server", "app");
-  if (fs.existsSync(appBuildDir)) {
+  if (checkBuildArtifacts && fs.existsSync(appBuildDir)) {
     for (const store of allStores) {
       const htmlPath = path.join(appBuildDir, "store", `${store.slug}.html`);
       if (fs.existsSync(htmlPath)) {

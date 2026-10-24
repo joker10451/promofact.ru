@@ -27,7 +27,7 @@ export async function deliverOnce<T extends { ok: boolean }>(
   if (result.ok) {
     const { error: writeError } = await db.from("posting_deliveries").update({
       status: "sent", sent_at: new Date().toISOString(), message_id: messageId(result) ?? null,
-    }).eq("delivery_key", key);
+    }).eq("delivery_key", key).select("delivery_key").single();
     if (writeError) throw new Error("Delivery sent but ledger completion failed; do not retry");
   }
   return result;

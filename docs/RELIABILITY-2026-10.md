@@ -8,7 +8,7 @@
 4. Consolidate campaign data: replace date-named modules incrementally with source/placement/expiry/last-confirmed records. Start with one advertiser and preserve approved URL/ERID/audience pairs through regression tests.
 5. Product quality: remove empty seasonal promotion claims in the deployed version, expose factual source-refresh dates, then trial opt-in store-specific alerts only after the funnel baseline exists.
 
-The seasonal promotion observed on production is absent from this local homepage. Confirm deployed revision before patching or claiming it fixed. No redesign or mass page generation is part of the reliability patch.
+Release branch rebased onto production commit `311bbe2` (56 commits ahead of the original local baseline), preserving current publisher placements. SeasonalSaleBanner now defaults to zero counts, labels empty collections as preparation and removes unsupported 90% claims. CLI upload excludes env files, session files and local audit data.
 
 ## Completed locally
 
@@ -21,10 +21,10 @@ The seasonal promotion observed on production is absent from this local homepage
 
 Migration `20261024200813_posting_delivery_ledger` is applied to the verified `promofact` project (`vdfkouxsvnbjjsndrqcb`). Transactional checks of initial reservation, duplicate rejection, sent cooldown and 15-day release passed with rollback. Confirmed RLS enabled, no public SELECT/UPDATE/EXECUTE, service_role RPC access, and SECURITY INVOKER. The table contains zero rows. The advisor reports INFO for RLS with no policies, intentional for this service-role-only table.
 
-Application activation remains pending: set `POSTING_LEDGER_ENABLED=true` only after verifying the production server-only service-role key and deployment. Until enabled the existing delivery behavior is retained.
+Vercel team access restored. Production metadata confirms the server-only Supabase service-role key and CRON_SECRET exist (values not read). POSTING_LEDGER_ENABLED=true is configured for the next production deployment. VK callback settings are absent: webhook remains fail-closed until the same callback secret is configured in Vercel and the community settings.
 
 The reservation RPC and table are service-role only; RLS blocks public access. One atomic reservation per channel/store/code prevents parallel deliveries. A successful delivery is eligible again after 14 days. Failed or ambiguous sends remain pending for manual review: automatically retrying a network timeout can duplicate a real message. Check provider history before releasing such reservations.
 
 The ledger complements the existing selection history: file-based category/store rotation remains a heuristic, not a global guarantee. Only the generic Telegram/VK posting endpoints are wrapped; standalone publishing scripts need separate migration before claiming complete idempotency.
 
-Before application activation verify simultaneous reservations and the real service-role HTTP client. No separate staging branch exists. Database migration is applied; no channel publication was performed. Vercel team access currently returns 403 and requires user consent for `team_oU8tBbTx4hBpkctrqvrOkySu`. Local environment has no Supabase service-role key or VK callback secret, so those production settings could not be verified.
+Two concurrent service_role reservations were executed against the applied RPC: exactly one true and one false. The single synthetic row was deleted after verification. No separate staging branch exists. Database migration is applied; no channel publication was performed. HTTP credential validity must be checked separately from metadata presence; no claim of live channel delivery is made.

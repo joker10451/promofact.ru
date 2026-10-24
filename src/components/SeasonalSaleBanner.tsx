@@ -7,8 +7,8 @@ interface SeasonalSaleBannerProps {
 }
 
 export default function SeasonalSaleBanner({
-  blackFridayCount = 73,
-  shoppingDayCount = 23,
+  blackFridayCount = 0,
+  shoppingDayCount = 0,
 }: SeasonalSaleBannerProps) {
   const shoppingStatus = getShoppingDayStatus();
   const bfStatus = getBlackFridayStatus();
@@ -28,7 +28,7 @@ export default function SeasonalSaleBanner({
             Главные распродажи осени: 11.11 и Чёрная Пятница
           </h2>
           <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-ink/70 sm:text-sm">
-            Подготовили проверенные промокоды к пику распродаж. Сравнивайте условия и экономьте до 90% на покупках в маркетплейсах, магазинах одежды, косметики и подарков.
+            Готовьтесь к сезонным распродажам: сравнивайте доступные предложения и проверяйте сроки, минимальную сумму заказа и ограничения каждой акции.
           </p>
         </div>
 
@@ -52,10 +52,10 @@ export default function SeasonalSaleBanner({
           <div>
             <div className="flex items-center justify-between gap-2">
               <span className="rounded-full bg-red px-3 py-1 text-xs font-extrabold tracking-wide uppercase text-white shadow-xs">
-                {bfStatus.stage === "active" ? "Скидки до -90%" : bfStatus.badgeText}
+                {bfStatus.badgeText}
               </span>
               <span className="text-xs font-semibold text-white/70">
-                {blackFridayCount} предложений
+                {blackFridayCount > 0 ? `${blackFridayCount} предложений` : "Подборка готовится"}
               </span>
             </div>
 
@@ -63,12 +63,14 @@ export default function SeasonalSaleBanner({
               Чёрная Пятница 2026
             </h3>
             <p className="mt-2 text-xs leading-relaxed text-white/75 sm:text-sm">
-              Максимальные скидки года на одежду, косметику, технику и товары для дома. Секретные промокоды и акции дня.
+              {blackFridayCount > 0
+                ? "Предложения на одежду, косметику, технику и товары для дома. Размер выгоды и условия смотрите в карточках."
+                : "Подтверждённых предложений пока нет. В подборке появятся акции с указанными сроками и условиями."}
             </p>
           </div>
 
           <div className="mt-6 flex items-center justify-between border-t border-white/15 pt-3.5 text-xs font-bold text-yellow group-hover:translate-x-1 transition-transform">
-            <span>Смотреть купоны Чёрной Пятницы</span>
+            <span>{blackFridayCount > 0 ? "Смотреть купоны Чёрной Пятницы" : "О распродаже и подготовке"}</span>
             <span aria-hidden="true">→</span>
           </div>
         </Link>
@@ -86,7 +88,7 @@ export default function SeasonalSaleBanner({
                 {shoppingStatus.badgeText}
               </span>
               <span className="text-xs font-semibold text-ink/65">
-                {shoppingDayCount} предложений
+                {shoppingDayCount > 0 ? `${shoppingDayCount} предложений` : "Подборка готовится"}
               </span>
             </div>
 
