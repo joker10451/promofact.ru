@@ -51,7 +51,7 @@ export function inspectCoupons(coupons, source, now = Date.now()) {
       // Never fabricate/require ERID as a fix for prohibited online alcohol ads.
       // Scope this exception to the two known Perfluence hosts, not slug alone.
       regulatedAlcoholPlacement = slug === "winlab" &&
-        domain === "winelab.prfl.me";
+        ["winlab.prfl.me", "winelab.prfl.me"].includes(domain);
       if (domain === "prfl.me" || domain.endsWith(".prfl.me")) {
         if (!linkToken && !regulatedAlcoholPlacement) {
           findings.push({ severity: "critical", source, code, slug, detail: "Партнёрская ссылка prfl.me без параметра erid" });
