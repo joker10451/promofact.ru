@@ -815,7 +815,7 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "name": "Яндекс Музыка",
     "logo": "https://favicon.yandex.net/favicon/v2/music.yandex.ru?size=120",
     "category": "Подписки и сервисы",
-    "categorySlug": "podpiski-i-servisy",
+    "categorySlug": "servisy-i-podpiski",
     "about": "Музыкальный сервис Яндекса с доступом по подписке.",
     "conditions": "Сейчас нет подтверждённого действующего промокода для размещения ПромоФакта. Условия подписки проверяйте в сервисе.",
     "site": "https://music.yandex.ru",

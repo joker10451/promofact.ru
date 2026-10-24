@@ -33,6 +33,7 @@ for (const item of selected) assert.equal(item.affiliate.link, links.get(item.af
 const music = stores.find(s => s.slug === "yandex-music");
 assert.ok(music, "Music landing remains available without an unverified coupon");
 assert.equal(music.coupons.length, 0);
+assert.equal(music.categorySlug, "servisy-i-podpiski", "Music fallback must link to canonical live category");
 assert.equal(catalog.filter(c => c.store.slug === "yandex-music").length, 0);
 assert.equal(getActivePromoBanners({ storeSlug: "yandex-music" }).length, 0);
 const sber = stores.find(s => s.slug === "sberzdorovie");
