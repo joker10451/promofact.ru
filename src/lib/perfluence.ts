@@ -521,25 +521,13 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.ordMarker === "2RanykFbMxo" &&
         c.affiliate.ordText.includes("erid: 2RanykFbMxo");
     }
-    // The confirmed website placement has no source ERID yet (24 Oct audit).
-    // Keep it available to diagnostic monitoring, never public promotion
-    // until both the affiliate URL and advertising disclosure carry the
-    // exact, publisher-supplied ERID. Never synthesize a marker.
-    if (c.store.slug === "winlab") {
-      const code = c.promocode.code.trim().toUpperCase();
-      if (!["10PFNS5229", "WCPFOKT9920", "5OKTPF9920"].includes(code)) return false;
-      const marker = c.affiliate.ordMarker.trim();
-      if (!marker || !c.affiliate.ordText.includes(marker)) return false;
-      try {
-        const link = new URL(c.affiliate.link);
-        return link.protocol === "https:" &&
-          link.hostname === "winelab.prfl.me" &&
-          link.pathname === "/sites/gittf8" &&
-          link.searchParams.get("erid") === marker;
-      } catch {
-        return false;
-      }
-    }
+    // Alcohol advertiser: a missing ERID is NOT an integration error and
+    // cannot be "fixed" by inventing a marker. Russia's advertising law,
+    // art. 21(2)(8), prohibits online alcohol advertising. A third-party
+    // affiliate coupon placement is not the retailer's informational catalog.
+    // Keep diagnostic data accessible, but fail closed for every public
+    // promotional surface regardless of ERID until legal clearance.
+    if (c.store.slug === "winlab") return false;
     // Only the newly approved affiliate URL/ERID can revive the previously
     // suppressed 2,500 RUB code. An outdated Perfluence snapshot remains blocked.
     // MTS Music co-promotion is prohibited elsewhere in publisherPlacementRules.

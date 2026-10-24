@@ -41,18 +41,28 @@ export function inspectCoupons(coupons, source, now = Date.now()) {
     const dateMs = expiryTimestamp(expires);
     let domain = "";
     let linkToken = "";
+    let regulatedAlcoholPlacement = false;
     try {
       const url = new URL(link);
       if (!["https:", "http:"].includes(url.protocol)) throw new Error("bad protocol");
       domain = url.hostname.toLowerCase();
       linkToken = url.searchParams.get("erid") || "";
+      // WinLab is an alcohol retailer, not an unmarked ordinary advertiser.
+      // Never fabricate/require ERID as a fix for prohibited online alcohol ads.
+      // Scope this exception to the two known Perfluence hosts, not slug alone.
+      regulatedAlcoholPlacement = slug === "winlab" &&
+        (domain === "winelab.prfl.me" || domain === "winlab.prfl.me");
       if (domain === "prfl.me" || domain.endsWith(".prfl.me")) {
-        if (!linkToken) {
+        if (!linkToken && !regulatedAlcoholPlacement) {
           findings.push({ severity: "critical", source, code, slug, detail: "Партнёрская ссылка prfl.me без параметра erid" });
         }
       }
     } catch {
       findings.push({ severity: "critical", source, code, slug, detail: "Отсутствует корректная ссылка HTTP(S)" });
+    }
+    if (regulatedAlcoholPlacement) {
+      findings.push({ severity: "warning", source, code, slug,
+        detail: "Алкогольная категория: отсутствие ERID само по себе не сбой. Сторонняя интернет-реклама алкоголя запрещена; предложение нельзя публиковать без отдельной правовой проверки" });
     }
     if (source === "perfluence") {
       if (!originalLink) {
@@ -96,7 +106,7 @@ export function inspectCoupons(coupons, source, now = Date.now()) {
     if (linkToken && (declared || fromText) && linkToken !== (declared || fromText)) {
       findings.push({ severity: "critical", source, code, slug, detail: "ERID в ссылке отличается от маркировки" });
     }
-    if (!declared && !fromText && !linkToken) {
+    if (!declared && !fromText && !linkToken && !regulatedAlcoholPlacement) {
       // Ingestion may place the disclosure on the campaign group rather than
       // individual coupons: do not claim that such a record is definitely illegal.
       findings.push({ severity: source === "manual" ? "critical" : "warning", source, code, slug, detail: "ERID не найден в данных предложения, нужна ручная проверка" });

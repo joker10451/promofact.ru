@@ -126,7 +126,13 @@ const siteWinLabMissingErid = { ...validWinLab,
   promocode: { ...validWinLab.promocode, code: "10PFNS5229" },
   affiliate: { ...validWinLab.affiliate, link: "https://winelab.prfl.me/sites/gittf8", ordMarker: "", ordText: "Реклама. АО ВИНЛАБ" } };
 assert.equal(isApprovedPublicCouponPlacement(siteWinLabMissingErid), false,
-  "The approved WinLab site URL without an ERID must not be advertised");
+  "The WinLab alcohol category must not be advertised");
+const markedWinLab = { ...siteWinLabMissingErid,
+  affiliate: { ...siteWinLabMissingErid.affiliate,
+    link: "https://winelab.prfl.me/sites/gittf8?erid=2RanyMOCK123",
+    ordMarker: "2RanyMOCK123", ordText: "Реклама. erid: 2RanyMOCK123" } };
+assert.equal(isApprovedPublicCouponPlacement(markedWinLab), false,
+  "Artificially adding an ERID must not enable online alcohol promotion");
 const oldIvi = { ...validWinLab, store: { ...validWinLab.store, slug: "ivi" },
   promocode: { ...validWinLab.promocode, code: "FILM35" } };
 assert.equal(isApprovedPublicCouponPlacement(oldIvi), false,
