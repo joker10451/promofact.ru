@@ -101,10 +101,8 @@ assert(winlabAudit.findings.some((f) => f.severity === "warning" &&
 
 const { getPerfluenceCoupons, getPerfluenceAuditCoupons, normalizeAffiliateLink } =
   await import("../src/lib/perfluence.ts");
-const safeCoupon = (await getPerfluenceCoupons()).find((c) => c.promocode.code === "PERPREGA309361");
-assert.ok(safeCoupon, "The accepted SberHealth coupon must remain publicly available");
-assert.equal(safeCoupon.affiliate.sourceLink, undefined,
-  "Original source-only URL must not be shipped in public catalog JSON");
+const outdatedSberCoupon = (await getPerfluenceCoupons()).find((c) => c.promocode.code === "PERPREGA309361");
+assert.equal(outdatedSberCoupon, undefined, "Publisher-confirmed obsolete SberHealth coupon must not be public");
 const auditCoupon = (await getPerfluenceAuditCoupons()).find((c) => c.promocode.code === "PERPREGA309361");
 assert.ok(auditCoupon?.affiliate.sourceLink, "Unfiltered audit feed retains provenance");
 const malicious = "https://evilprfl.me/sites/fake?source=js-widget";
