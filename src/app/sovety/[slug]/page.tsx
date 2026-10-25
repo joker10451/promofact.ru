@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { isGoneArticle } from "@/lib/goneArticles";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
@@ -73,6 +74,18 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  // Намеренно удалённые статьи отдают 410 Gone, а не 404: это прямой сигнал
+  // поисковику, что страница убрана сознательно, и она выпадает из индекса
+  // быстрее. Неизвестный slug по-прежнему 404 — его могла просто никогда
+  // не существовать.
+  if (isGoneArticle(slug)) {
+    return new Response("Эта статья удалена. Актуальные материалы — в разделе «Советы»: /sovety", {
+      status: 410,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Robots-Tag": "noindex" },
+    });
+  }
+
   const article = getArticle(slug);
   if (!article) notFound();
 
