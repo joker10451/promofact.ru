@@ -46,6 +46,8 @@ const { getArticles } = await import("@/lib/articles");
 const { SITE_NAME, SITE_URL } = await import("@/lib/site");
 const { canonicalCategorySlug } = await import("@/lib/categoryTaxonomy");
 const { selectGeoOffers } = await import("@/lib/geoIndexing");
+// Город ищем и по region, и по тексту условий — sitemap.ts передаёт этот список.
+const GEO_CITY_NAMES = CITIES_SEO.map((c) => ({ slug: c.slug, name: c.name }));
 // Build artifacts belong to one exact inventory snapshot. Opt in only after
 // building with matching environment/data; ordinary unit runs must not read
 // arbitrary HTML left by a different commit or source snapshot.
@@ -150,7 +152,7 @@ let passed = 0;
       }
       seenGeoKeys.add(geoKey);
 
-      const selection = selectGeoOffers(coupons, city.name, cat.slug);
+      const selection = selectGeoOffers(coupons, city.name, cat.slug, GEO_CITY_NAMES);
         const list = selection.offers;
 
       const url = `${SITE_URL}/gorod/${city.slug}/${canonicalSlug}`;
@@ -217,7 +219,7 @@ let passed = 0;
 
     for (const city of CITIES_SEO) {
       for (const cat of categories) {
-        const selection = selectGeoOffers(allCoupons, city.name, cat.slug);
+        const selection = selectGeoOffers(allCoupons, city.name, cat.slug, GEO_CITY_NAMES);
         const list = selection.offers;
         if (list.length === 0 && !dynamicEmpty) {
           dynamicEmpty = { citySlug: city.slug, catSlug: cat.slug, count: 0 };
@@ -868,11 +870,11 @@ let passed = 0;
   const sitemapSrc = fs.readFileSync(path.resolve("src/app/sitemap.ts"), "utf-8");
 
   assert.ok(
-    pageSrc.includes("indexable: isIndexable } = selectGeoOffers"),
+    /indexable: isIndexable \} = selectGeoOffers\([\s\S]*?\)/.test(pageSrc),
     "page.tsx обязан проверять порог list.length >= 3 для isIndexable"
   );
   assert.ok(
-    sitemapSrc.includes("selectGeoOffers(coupons, city.name, canonicalSlug).indexable"),
+    /selectGeoOffers\(coupons, city\.name, canonicalSlug,[\s\S]*?\)\.indexable/.test(sitemapSrc),
     "sitemap.ts обязан проверять порог list.length >= 3 для включения в sitemap"
   );
 
@@ -905,7 +907,7 @@ let passed = 0;
 
     for (const city of CITIES_SEO) {
       for (const cat of categories) {
-        const selection = selectGeoOffers(allCoupons, city.name, cat.slug);
+        const selection = selectGeoOffers(allCoupons, city.name, cat.slug, GEO_CITY_NAMES);
         const list = selection.offers;
         if (list.length === 0 && !sampleEmpty) {
           sampleEmpty = { city: city.slug, cat: cat.slug, count: 0 };
