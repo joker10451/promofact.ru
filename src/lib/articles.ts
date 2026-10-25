@@ -508,7 +508,7 @@ export const ARTICLES: Article[] = [
     related: [
       { text: "Все промокоды Додо Пиццы", href: "/store/dodo-pizza" },
       { text: "Доставка из ресторанов", href: "/category/dostavka-iz-restoranov" },
-      { text: "Как экономить на доставке еды", href: "/sovety/kak-ekonomit-na-dostavke-edy-i-sushi" },
+      { text: "Как экономить на доставке еды", href: "/sovety/kak-ekonomit-na-produktah" },
     ],
   },
   {
@@ -1000,7 +1000,7 @@ export const ARTICLES: Article[] = [
     related: [
       { text: "Детские аксессуары Сбера", href: "/store/detskie-platezhnye-aksessuary-ot-sbera" },
       { text: "Скидки на первый заказ", href: "/collections/first-order" },
-      { text: "Как не переплачивать на распродажах", href: "/sovety/ne-pereplychivat-na-rasprodazhah" },
+      { text: "Как не переплачивать на распродажах", href: "/sovety/chernaya-pyatnica-2026" },
     ],
   },
   {
@@ -1112,7 +1112,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Все советы по экономии", href: "/sovety" },
-      { text: "Как не переплатить на распродажах", href: "/sovety/ne-pereplychivat-na-rasprodazhah" },
+      { text: "Как не переплатить на распродажах", href: "/sovety/chernaya-pyatnica-2026" },
     ],
   },
   {
@@ -1132,7 +1132,7 @@ export const ARTICLES: Article[] = [
       "Наконец, подпишитесь на уведомления о росте тарифов в вашем регионе. Когда они меняются — успеваете подстроить расход.",
     ],
     related: [
-      { text: "Семейный бюджет: 10 привычек", href: "/sovety/semnyy-byudzhet-10-privychek" },
+      { text: "Семейный бюджет: 10 привычек", href: "/sovety/cashbek-bankov-2026" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],
   },
@@ -1192,7 +1192,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Что такое промокод", href: "/sovety/chto-takoe-promokod" },
-      { text: "Как не переплатить на распродажах", href: "/sovety/ne-pereplychivat-na-rasprodazhah" },
+      { text: "Как не переплатить на распродажах", href: "/sovety/chernaya-pyatnica-2026" },
     ],
   },
   {
@@ -1211,7 +1211,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды на доставку продуктов", href: "/category/dostavka-produktov" },
-      { text: "Как экономить на доставке еды", href: "/sovety/ekonomim-na-dostavke-edy" },
+      { text: "Как экономить на доставке еды", href: "/sovety/kak-ekonomit-na-produktah" },
     ],
   },
   {
@@ -1229,7 +1229,7 @@ export const ARTICLES: Article[] = [
       "Не покупайте сертификаты у случайных лиц в соцсетях. Только проверенные площадки, иначе рискуете кодом, который уже активировали.",
     ],
     related: [
-      { text: "Подписки со скидкой", href: "/sovety/podpiski-so-skidkoy" },
+      { text: "Подписки со скидкой", href: "/collections/vecher-kino" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],
   },
@@ -1248,7 +1248,7 @@ export const ARTICLES: Article[] = [
       "Главное: считайте не деньги, а цену часа. Бесплатная пара ради экономии 50 рублей на доставке — плохая сделка. Тратьте время на учёбу, экономьте на подписках.",
     ],
     related: [
-      { text: "Семейный бюджет: 10 привычек", href: "/sovety/semnyy-byudzhet-10-privychek" },
+      { text: "Семейный бюджет: 10 привычек", href: "/sovety/cashbek-bankov-2026" },
       { text: "Промокоды на доставку продуктов", href: "/category/dostavka-produktov" },
     ],
   },
@@ -1267,7 +1267,7 @@ export const ARTICLES: Article[] = [
       "Важно: замену препарата согласуйте с врачом. Экономия не стоит самолечения. А вот где купить дешевле — решайте сами.",
     ],
     related: [
-      { text: "Как экономить на аптеке", href: "/sovety/ekonomim-na-apteke" },
+      { text: "Как экономить на аптеке", href: "/collections/apteki-i-zdorove" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],
   },
@@ -1287,7 +1287,7 @@ export const ARTICLES: Article[] = [
       "Главное: не платите за то, чем не пользуетесь. Отмена одной забытой подписки за год даёт пару тысяч.",
     ],
     related: [
-      { text: "Подписки со скидкой", href: "/sovety/podpiski-so-skidkoy" },
+      { text: "Подписки со скидкой", href: "/collections/vecher-kino" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],
   },
@@ -1307,8 +1307,8 @@ export const ARTICLES: Article[] = [
       "Главное: всё это не «халява», а ваши права. Потратьте час на изучение — вернёте тысячи.",
     ],
     related: [
-      { text: "Как экономить на ЖКХ", href: "/sovety/ekonomim-na-zhkh" },
-      { text: "Семейный бюджет: 10 привычек", href: "/sovety/semnyy-byudzhet-10-privychek" },
+      { text: "Как экономить на ЖКХ", href: "/sovety/kak-ekonomit-na-produktah" },
+      { text: "Семейный бюджет: 10 привычек", href: "/sovety/cashbek-bankov-2026" },
     ],
   },
   {
@@ -1328,7 +1328,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Промокоды Wildberries 2026", href: "/sovety/promokody-wildberries-2026" },
-      { text: "Как не переплатить на распродажах", href: "/sovety/ne-pereplychivat-na-rasprodazhah" },
+      { text: "Как не переплатить на распродажах", href: "/sovety/chernaya-pyatnica-2026" },
     ],
   },
   {
@@ -1347,7 +1347,7 @@ export const ARTICLES: Article[] = [
       "Главное: начните с малого. 10% от зарплаты автоматом через полгода дадут ощутимую сумму.",
     ],
     related: [
-      { text: "Семейный бюджет: 10 привычек", href: "/sovety/semnyy-byudzhet-10-privychek" },
+      { text: "Семейный бюджет: 10 привычек", href: "/sovety/cashbek-bankov-2026" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],
   },
@@ -1389,7 +1389,7 @@ export const ARTICLES: Article[] = [
     ],
     related: [
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
-      { text: "Как экономить в интернете", href: "/sovety/kak-ekonomit-v-internete" },
+      { text: "Как экономить в интернете", href: "/sovety/chto-takoe-promokod" },
     ],
   },
   {
