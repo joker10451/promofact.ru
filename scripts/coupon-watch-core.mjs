@@ -111,7 +111,7 @@ export function inspectCoupons(coupons, source, now = Date.now()) {
       // individual coupons: do not claim that such a record is definitely illegal.
       findings.push({ severity: source === "manual" ? "critical" : "warning", source, code, slug, detail: "ERID не найден в данных предложения, нужна ручная проверка" });
     }
-    const recordFingerprint = fingerprint([link, declared, fromText, expires, toStr(p.bonusName), toStr(p.terms)].join("|"));
+    const recordFingerprint = fingerprint([link, declared, fromText, expires, toStr(p.bonusName)].join("|"));
     // Ignore transient widget tracking parameters when comparing provenance.
     let sourceLinkFingerprint;
     if (originalLink) {
@@ -164,7 +164,8 @@ export function compareInventories(previous, current, now = Date.now()) {
       changes.push({ type: "new", source: entry.source, slug: entry.slug, code: entry.code, detail: "Новое предложение или промокод" });
     } else if (old[key].fingerprint !== entry.fingerprint ||
       (old[key].sourceLinkFingerprint && entry.sourceLinkFingerprint &&
-        old[key].sourceLinkFingerprint !== entry.sourceLinkFingerprint)) {
+        old[key].sourceLinkFingerprint !== entry.sourceLinkFingerprint) ||
+      (old[key].termsFingerprint && old[key].termsFingerprint !== entry.termsFingerprint)) {
       changes.push({ type: "changed", source: entry.source, slug: entry.slug, code: entry.code,
         detail: old[key].erid !== entry.erid || old[key].domain !== entry.domain
           ? "Изменилась партнёрская ссылка / ERID"
