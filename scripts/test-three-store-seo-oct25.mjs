@@ -23,14 +23,17 @@ assert.equal(isPublicAdmitadRow({...randewoo, store_slug: "another-store",
   source_campaign_id: "99999", source_coupon_id: "938879"}), true,
   "Stale-offer exclusion must not block unrelated merchants");
 
-const article = ARTICLES.find(x => x.slug === "yandeks-puteshestviya-oteli-promokod");
-assert.ok(article, "Historical SEO article must remain accessible");
-assert.ok(article.title.includes("Яндекс Путешествия"));
-assert.ok(article.body.join(" ").includes("ADM-PREMIUMPRO2O27"));
-assert.ok(article.body.join(" ").includes("25 000 ₽"));
-assert.ok(article.body.join(" ").includes("30 ноября 2026"));
-assert.equal(article.ctaButton?.href, "/store/yandeks-puteshestviya#offers",
-  "Evergreen article CTA must lead to verified offer cards, not obsolete affiliate attribution");
+// Статья про Яндекс Путешествия гашена как тонкая (215 слов) — теперь это
+// транзакционная страница магазина. Проверяем, что обновлённый CTA и очистка
+// от устаревших офферов живут на ней, а не в статье.
+const article = ARTICLES.find(x => x.slug === "ekonomim-na-puteshestviyah-i-biletah");
+assert.ok(article, "Travel economics article must remain accessible");
+const renderedTravel = JSON.stringify(article);
+assert.ok(renderedTravel.includes("/store/yandeks-puteshestviya"),
+  "Travel article must link to the verified store page");
+for(const stale of ["ADM-PREMIUMPRO2O27", "PF-PREMIUMPRO-B66N2", "2RanynC1c4T", "sites/hmthkf"]) {
+  assert.equal(renderedTravel.includes(stale), false, "Stale promotion reference in travel article: "+stale);
+}
 const renderedArticle = JSON.stringify(article);
 for(const stale of ["PF-PREMIUMPRO-B66N2", "2RanynC1c4T", "sites/hmthkf"]) {
   assert.equal(renderedArticle.includes(stale), false, "Obsolete promotion reference: "+stale);
