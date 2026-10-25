@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Required to diff the previous main commit for new article notifications.
+          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -35,6 +38,7 @@ jobs:
           npm run test:trust
           npm run test:reliability
           npm run test:geo-indexing
+          node scripts/test-indexnow-push.mjs
 
       # В CI нет ключей Perfluence — Next.js использует DEV-моки (см. perfluence.ts).
       # Этот шаг гарантирует, что код компилируется и все страницы (вкл. SSG
@@ -89,14 +93,35 @@ jobs:
       # в CI — он валиден только в прод-окружении Vercel, где задан
       # PERFLUENCE_WIDGET_URL. Там он уже срабатывает как прод-гейт.
 
-      # IndexNow: уведомляем Яндекс/Bing об изменениях после деплоя.
-      # Только на push в main (не на PR), с паузой, чтобы Vercel успел задеплоить.
+      # IndexNow delivery is external infrastructure, not a code/build test.
+      # Public key verification replaces missing GitHub bearer-token secrets.
       - name: IndexNow push new articles (instant)
+        id: indexnow_new
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        continue-on-error: true
         run: node scripts/indexnow-new.mjs ${{ github.event.before }} ${{ github.sha }}
 
       - name: IndexNow push all (main only)
+        id: indexnow_all
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        continue-on-error: true
         run: |
           sleep 60
           node scripts/indexnow-push.mjs https://promofact.ru
+
+      - name: IndexNow delivery status
+        if: ${{ always() && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+        env:
+          NEW_OUTCOME: ${{ steps.indexnow_new.outcome }}
+          FULL_OUTCOME: ${{ steps.indexnow_all.outcome }}
+        run: |
+          if [ "$NEW_OUTCOME" = "failure" ]; then
+            echo "::warning::Targeted IndexNow notification failed; inspect the preceding step."
+            echo "⚠️ Targeted IndexNow failed; article URLs may need resubmission." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "$FULL_OUTCOME" = "success" ]; then
+            echo "✅ Full-sitemap IndexNow accepted by at least one provider per batch (indexation not guaranteed)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::Full-sitemap IndexNow delivery failed; inspect the preceding step."
+            echo "⚠️ Full-sitemap IndexNow failed; code and SEO tests remain independent." >> "$GITHUB_STEP_SUMMARY"
+          fi
