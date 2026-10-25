@@ -139,6 +139,8 @@ export function inspectCoupons(coupons, source, now = Date.now()) {
       key, source, slug, code, kind, expires,
       domain, erid: declared || fromText || linkToken,
       bonus: toStr(p.bonusName).slice(0, 100),
+      linkFingerprint: fingerprint(link),
+      termsFingerprint: fingerprint(toStr(p.bonusName) + "|" + toStr(p.terms)),
       fingerprint: recordFingerprint,
       ...(sourceLinkFingerprint ? { sourceLinkFingerprint } : {}),
     };
@@ -162,14 +164,21 @@ export function compareInventories(previous, current, now = Date.now()) {
       changes.push({ type: "new", source: entry.source, slug: entry.slug, code: entry.code, detail: "Новое предложение или промокод" });
     } else if (old[key].fingerprint !== entry.fingerprint ||
       (old[key].sourceLinkFingerprint && entry.sourceLinkFingerprint &&
-        old[key].sourceLinkFingerprint !== entry.sourceLinkFingerprint)) {
+        old[key].sourceLinkFingerprint !== entry.sourceLinkFingerprint) ||
+      (old[key].termsFingerprint && old[key].termsFingerprint !== entry.termsFingerprint)) {
       changes.push({ type: "changed", source: entry.source, slug: entry.slug, code: entry.code,
         detail: old[key].erid !== entry.erid || old[key].domain !== entry.domain
           ? "Изменилась партнёрская ссылка / ERID"
           : old[key].sourceLinkFingerprint && entry.sourceLinkFingerprint &&
             old[key].sourceLinkFingerprint !== entry.sourceLinkFingerprint
             ? "Изменился исходный партнёрский URL Perfluence"
-            : "Изменились условия, ссылка или срок действия" });
+            : old[key].expires !== entry.expires
+              ? "Изменился срок действия"
+              : old[key].linkFingerprint && old[key].linkFingerprint !== entry.linkFingerprint
+                ? "Изменился партнёрский URL"
+                : old[key].termsFingerprint && old[key].termsFingerprint !== entry.termsFingerprint
+                  ? "Изменились условия предложения"
+                  : "Изменились данные предложения (проверить ссылку и условия)" });
     }
   }
   for (const [key, entry] of Object.entries(old)) {

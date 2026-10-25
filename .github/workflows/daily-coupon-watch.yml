@@ -111,8 +111,11 @@ jobs:
                 '',
                 'Исправления и подтверждения от партнёра вносить вручную. Автоматической публикации нет.'
               ].join('\n');
+              const normalize = (value) => (value || '').replace(/Последняя проверка: [^\n]+/, 'Последняя проверка: <timestamp>');
               if (existing) {
-                await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+                if (normalize(existing.body) !== normalize(body)) {
+                  await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+                }
               } else {
                 await github.rest.issues.create({ owner, repo, title, body });
               }
