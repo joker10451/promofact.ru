@@ -31,9 +31,9 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
   samokat: {
     requiredActiveCodes: ["GZP8FU6", "GQCWSD2"],
     customTitle: (monthRu, monthYear) =>
-      `Промокоды Самокат на ${monthYear || monthRu} 2026: скидка 35% и 500 ₽ на первый заказ`,
+      `Промокоды Самокат на ${monthYear || monthRu}: скидка 35% и 500 ₽ на первый заказ`,
     customDescription: (monthRu, monthYear) =>
-      `Рабочие промокоды Самокат на ${monthYear || monthRu} 2026 года. Скидка 35% от 1000 ₽ и 500 ₽ от 2000 ₽ на первый заказ с бесплатной доставкой от 15 минут.`,
+      `Рабочие промокоды Самокат на ${monthYear || monthRu}. Скидка 35% от 1000 ₽ и 500 ₽ от 2000 ₽ на первый заказ с бесплатной доставкой от 15 минут.`,
     faq: [
       {
         q: "Как применить промокод в Самокате?",
@@ -52,9 +52,9 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
   rosgosstrakh: {
     requiredActiveCodes: ["PF1V34P"],
     customTitle: (monthRu, monthYear) =>
-      `Промокоды Росгосстрах на ${monthYear || monthRu} 2026: скидка 10% на страховку`,
+      `Промокоды Росгосстрах на ${monthYear || monthRu}: скидка 10% на страховку`,
     customDescription: (monthRu, monthYear) =>
-      `Действующий промокод Росгосстрах на ${monthYear || monthRu} 2026 года. Скидка 10% на туристическую страховку онлайн. Быстрое оформление за 2 минуты, полис с покрытием по России и миру.`,
+      `Действующий промокод Росгосстрах на ${monthYear || monthRu}. Скидка 10% на туристическую страховку онлайн. Быстрое оформление за 2 минуты, полис с покрытием по России и миру.`,
     faq: [
       {
         q: "Как активировать промокод в Росгосстрахе?",
