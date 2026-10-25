@@ -15,10 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Ping Search Engines (IndexNow)
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          INDEXNOW_SECRET: ${{ secrets.INDEXNOW_SECRET }}
         run: node scripts/indexnow-push.mjs https://promofact.ru

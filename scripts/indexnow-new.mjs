@@ -4,10 +4,11 @@
 const BASE = process.argv[2] || process.env.GITHUB_SHA || "HEAD~1";
 const HEAD = process.argv[3] || "HEAD";
 const SITE = "https://promofact.ru";
+import { submitIndexNowBatch } from "./indexnow-push.mjs";
 
 import { execSync } from "node:child_process";
 
-function main() {
+async function main() {
   let diff;
   try {
     diff = execSync(`git diff --name-only ${BASE} ${HEAD}`, { encoding: "utf8" });
@@ -37,32 +38,14 @@ function main() {
   }
 
   console.log(`Найдено новых статей: ${urls.length}. Пушим в IndexNow...`);
-  // Используем общий скрипт пуша с конкретным списком через stdin неудобно —
-  // дублируем мини-логику здесь для точечности.
-  const KEY = "c62c55b32f449cc4602687e29849f898";
-  const payload = {
-    host: "promofact.ru",
-    key: KEY,
-    keyLocation: `https://promofact.ru/${KEY}.txt`,
-    urlList: urls,
-  };
-  const endpoints = [
-    "https://yandex.com/indexnow",
-    "https://www.bing.com/indexnow",
-    "https://api.indexnow.org/indexnow",
-  ];
-  Promise.allSettled(
-    endpoints.map((ep) =>
-      fetch(ep, {
-        method: "POST",
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify(payload),
-      })
-    )
-  ).then((results) => {
-    const ok = results.filter((r) => r.status === "fulfilled").length;
-    console.log(`Точечный IndexNow: отправлено ${urls.length} URL, endpoint отвечало ${ok}/${endpoints.length}`);
-  });
+  const result = await submitIndexNowBatch(urls);
+  if (!result.accepted) {
+    throw new Error("IndexNow providers rejected article URLs: " + JSON.stringify(result.statuses));
+  }
+  console.log("Targeted IndexNow: " + urls.length + " URLs, accepted by " +
+    result.accepted + "/" + result.total + " providers (indexation not guaranteed)");
 }
-
-main();
+main().catch(error => {
+  console.error("Targeted IndexNow failed:", error);
+  process.exitCode = 1;
+});
