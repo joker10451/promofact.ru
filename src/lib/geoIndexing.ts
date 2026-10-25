@@ -19,3 +19,14 @@ export function selectGeoOffers(coupons: Coupon[], city: string, category?: stri
   // Nationwide offers alone do not distinguish one city's page from another.
   return { offers, local, indexable: offers.length >= 3 && local.length > 0 };
 }
+
+/**
+ * Регион означает «вся страна» (или не задан вовсе).
+ * Такие акции не стоит подписывать в карточке как «· Россия»: ограничения по
+ * региону у них нет, и метка только шумит. Регион печатаем лишь тогда, когда
+ * предложение действительно привязано к городу/области.
+ */
+export function isNationwideRegion(region?: string | null): boolean {
+  const normalized = (region || "").trim().toLowerCase();
+  return !normalized || /^(ru|rus|россия|вся россия|рф|вся рф|russia)$/.test(normalized);
+}

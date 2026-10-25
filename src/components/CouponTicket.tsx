@@ -15,6 +15,7 @@ import type { CatalogCoupon } from "@/lib/catalogCoupon";
 import { decorateAdmitadUrl, generateClickId } from "@/lib/admitadAutopilot";
 import { getConsent } from "@/lib/cookieConsent";
 import BarcodeEan13 from "@/components/BarcodeEan13";
+import { isNationwideRegion } from "@/lib/geoIndexing";
 
 const SBER_MED_WARNING = "ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА";
 
@@ -600,7 +601,9 @@ export default function CouponTicket({
         <div className="mt-3 flex flex-wrap items-center justify-between gap-1 text-[11px] font-medium leading-relaxed text-ink/65">
           <span>
             {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Первый заказ" : "Уточните условия")}
-            {promocode.region?.trim() && <> · {promocode.region.trim().toUpperCase() === "RU" ? "Россия" : promocode.region.trim()}</>}
+            {/* Всероссийские акции не печатаем как «· Россия»: это шум в каждой карточке,
+                а регион полезен только когда предложение действительно ограничено городом. */}
+            {promocode.region?.trim() && !isNationwideRegion(promocode.region) && <> · {promocode.region.trim()}</>}
           </span>
           <span>
             {promocode.expires
