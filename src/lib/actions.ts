@@ -69,8 +69,8 @@ export const ACTIONS: ActionPage[] = [
     ],
     links: [
       { text: "Маркетплейсы", href: "/category/marketpleysy" },
-      { text: "Скидки на книги и обучение", href: "/sovety/skidki-na-knigi" },
-      { text: "Экономия семейного бюджета", href: "/sovety/semnyy-byudzhet-10-privychek" },
+      { text: "Скидки на книги и обучение", href: "/category/onlayn-obrazovanie" },
+      { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
     ],
   },
 ];

@@ -82,8 +82,12 @@ async function runInternalGraphSuite() {
           if (entry.name === "categoryTaxonomy.ts" || entry.name === "legacyRedirects.ts") continue;
           const content = fs.readFileSync(fullPath, "utf-8");
           for (const alias of aliases) {
+            // Граница сегмента обязательна: подстрока /category/elektronika
+            // встречается внутри /category/elektronika-i-tehnika, и без неё
+            // проверка требовала бы отказаться от канонического слага.
+            const aliasLink = new RegExp(`/category/${alias}(?![\\w-])`);
             assert(
-              !content.includes(`/category/${alias}`),
+              !aliasLink.test(content),
               `Файл ${fullPath} содержит внутреннюю ссылку на alias-категорию /category/${alias}`
             );
           }

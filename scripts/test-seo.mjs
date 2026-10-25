@@ -107,8 +107,11 @@ async function runSeoRegressionSuite() {
   test("Search-led guides avoid unverified subscription and grocery discounts", () => {
     const articles = fs.readFileSync(path.resolve("src/lib/articles.ts"), "utf-8");
     const grocery = articles.split('slug: "kak-vygodno-zakazyvat-v-pyaterochke"')[1]?.split('slug: "sekrety-ekonomii-v-otello"')[0] ?? "";
-    const streaming = articles.split('slug: "promokody-kinopoisk-yandex-plus"')[1]?.split('slug: "kak-vygodno-zakazyvat-v-pyaterochke"')[0] ?? "";
-    const travel = articles.split('slug: "sekrety-ekonomii-v-otello"')[1]?.split('slug: "kak-poluchit-skidku-na-tsvety"')[0] ?? "";
+    // Статья про Яндекс Плюс объединена с гидом по Кинопоиску (promokody-kinopoisk-yandex-plus
+    // гашена как дубль), поэтому проверяем выжившую страницу.
+    const streaming = articles.split('slug: "promokod-kinopoisk-45-dney"')[1]?.split('slug: "promokody-iv-roshe"')[0] ?? "";
+    // Последняя статья в массиве: маркера «следующая статья» после неё нет.
+    const travel = articles.split('slug: "sekrety-ekonomii-v-otello"')[1]?.split('slug: "promokody-sberprime-2026"')[0] ?? "";
     assert(grocery.includes("## Где получить промокод Пятёрочки Доставка"));
     assert(grocery.includes("faq: ["));
     assert(grocery.includes('href: "/store/pyaterochka"'));
