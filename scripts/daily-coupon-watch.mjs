@@ -147,7 +147,7 @@ const critical = findings.filter((f) => f.severity === "critical");
 // New, valid offers belong in the JSON change log, not in an incident Issue.
 const majorChanges = reconciledChanges.filter((c) =>
   ["removed", "changed"].includes(c.type) && !isPausedPublisherStore(c.slug));
-const outages = errors.filter((e) => e.consecutiveFailures >= 2 || e.anomaly);
+const outages = errors.filter((e) => e.consecutiveFailures >= 2);
 const attention = [
   ...critical.map(getMessageLine),
   ...majorChanges.map(getMessageLine),
@@ -198,4 +198,7 @@ fs.writeFileSync(MARKDOWN_PATH, lines.join("\n") + "\n");
 fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2) + "\n");
 console.log(lines.join("\n"));
 console.log("JSON report:", JSON_PATH);
-if (totalCriticalFindings || outages.length) process.exitCode = 1;
+// Catalog incidents are reported in JSON and Issue #102; a successful audit
+// must not be misclassified as a broken GitHub Actions execution.
+// Two consecutive source failures remain an operational failure.
+if (outages.length) process.exitCode = 1;
