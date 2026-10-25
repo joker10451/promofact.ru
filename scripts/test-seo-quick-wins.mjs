@@ -45,6 +45,7 @@ const { getCategories, getAllStores, getCoupons } = await import("@/lib/perfluen
 const { getArticles } = await import("@/lib/articles");
 const { SITE_NAME, SITE_URL } = await import("@/lib/site");
 const { canonicalCategorySlug } = await import("@/lib/categoryTaxonomy");
+const { selectGeoOffers } = await import("@/lib/geoIndexing");
 // Build artifacts belong to one exact inventory snapshot. Opt in only after
 // building with matching environment/data; ordinary unit runs must not read
 // arbitrary HTML left by a different commit or source snapshot.
@@ -149,16 +150,11 @@ let passed = 0;
       }
       seenGeoKeys.add(geoKey);
 
-      const list = coupons.filter((c) => {
-        const r = (c.promocode?.region || "").toLowerCase();
-        const isAllRu = !r || r === "вся россия" || r === "ru" || r.includes("россия");
-        const matchesCity = r.includes(city.name.toLowerCase());
-        const storeCat = canonicalCategorySlug(c.store.categorySlug || "");
-        return (isAllRu || matchesCity) && storeCat === canonicalSlug;
-      });
+      const selection = selectGeoOffers(coupons, city.name, cat.slug);
+        const list = selection.offers;
 
       const url = `${SITE_URL}/gorod/${city.slug}/${canonicalSlug}`;
-      if (list.length >= 3) {
+      if (selection.indexable) {
         validGeoCategories.push({ url, count: list.length });
       } else if (list.length > 0) {
         thinGeoCategories.push({ url, count: list.length });
@@ -169,7 +165,7 @@ let passed = 0;
   }
 
   // Проверяем пороги
-  assert.ok(validGeoCategories.length > 0, "Должны быть валидные гео-категории");
+  // A nationwide-only catalog may legitimately have no indexable geo pages.
   assert.ok(emptyGeoCategories.length > 0, "Должны быть пустые гео-категории для изоляции");
 
   // Проверяем фактический sitemap.xml.body из сборки если существует
@@ -221,17 +217,13 @@ let passed = 0;
 
     for (const city of CITIES_SEO) {
       for (const cat of categories) {
-        const list = allCoupons.filter((c) => {
-          const r = (c.promocode.region || "").toLowerCase();
-          const isAllRu = !r || r === "ru" || r === "россия";
-          const matchesCity = r.includes(city.name.toLowerCase());
-          return (isAllRu || matchesCity) && c.store.categorySlug === cat.slug;
-        });
+        const selection = selectGeoOffers(allCoupons, city.name, cat.slug);
+        const list = selection.offers;
         if (list.length === 0 && !dynamicEmpty) {
           dynamicEmpty = { citySlug: city.slug, catSlug: cat.slug, count: 0 };
         } else if (list.length >= 1 && list.length <= 2 && !dynamicThin) {
           dynamicThin = { citySlug: city.slug, catSlug: cat.slug, count: list.length };
-        } else if (list.length >= 3 && !dynamicRich) {
+        } else if (selection.indexable && !dynamicRich) {
           dynamicRich = { citySlug: city.slug, catSlug: cat.slug, count: list.length };
         }
       }
@@ -876,11 +868,11 @@ let passed = 0;
   const sitemapSrc = fs.readFileSync(path.resolve("src/app/sitemap.ts"), "utf-8");
 
   assert.ok(
-    pageSrc.includes("const isIndexable = list.length >= 3;"),
+    pageSrc.includes("indexable: isIndexable } = selectGeoOffers"),
     "page.tsx обязан проверять порог list.length >= 3 для isIndexable"
   );
   assert.ok(
-    sitemapSrc.includes("list.length >= 3"),
+    sitemapSrc.includes("selectGeoOffers(coupons, city.name, canonicalSlug).indexable"),
     "sitemap.ts обязан проверять порог list.length >= 3 для включения в sitemap"
   );
 
@@ -888,8 +880,9 @@ let passed = 0;
   // Любая гео-категория с count < 3 => !isIndexable (noindex, follow)
   // Любая гео-категория с count >= 3 => isIndexable (index, follow)
   for (let count = 0; count <= 6; count++) {
-    const isIndexableSim = count >= 3;
-    const isSitemapIncludedSim = count >= 3;
+    const fixtures = Array.from({ length: count }, () => ({ store: { categorySlug: "tsvety" }, promocode: { region: "Москва" } }));
+    const isIndexableSim = selectGeoOffers(fixtures, "Москва", "tsvety").indexable;
+    const isSitemapIncludedSim = selectGeoOffers(fixtures, "Москва", "tsvety").indexable;
     assert.strictEqual(
       isIndexableSim,
       isSitemapIncludedSim,
@@ -904,7 +897,7 @@ let passed = 0;
 
   // D. Динамическая проверка артефактов сборки HTML (если папка .next существует)
   const appBuildDir = path.join(".next", "server", "app");
-  if (fs.existsSync(appBuildDir)) {
+  if (checkBuildArtifacts && fs.existsSync(appBuildDir)) {
     const [categories, allCoupons] = await Promise.all([getCategories(), getCoupons()]);
     let sampleEmpty = null;
     let sampleThin = null;
@@ -912,17 +905,13 @@ let passed = 0;
 
     for (const city of CITIES_SEO) {
       for (const cat of categories) {
-        const list = allCoupons.filter((c) => {
-          const r = (c.promocode.region || "").toLowerCase();
-          const isAllRu = !r || r === "ru" || r === "россия";
-          const matchesCity = r.includes(city.name.toLowerCase());
-          return (isAllRu || matchesCity) && c.store.categorySlug === cat.slug;
-        });
+        const selection = selectGeoOffers(allCoupons, city.name, cat.slug);
+        const list = selection.offers;
         if (list.length === 0 && !sampleEmpty) {
           sampleEmpty = { city: city.slug, cat: cat.slug, count: 0 };
         } else if (list.length >= 1 && list.length <= 2 && !sampleThin) {
           sampleThin = { city: city.slug, cat: cat.slug, count: list.length };
-        } else if (list.length >= 3 && !sampleRich) {
+        } else if (selection.indexable && !sampleRich) {
           sampleRich = { city: city.slug, cat: cat.slug, count: list.length };
         }
       }

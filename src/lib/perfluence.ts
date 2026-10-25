@@ -1093,7 +1093,7 @@ export function parseResults(payloadJson: string): Result[] {
 }
 
 async function devMockResultsFallback(reason: string): Promise<Result[]> {
-  if (isResultsConfigured()) return [];
+  if (isResultsConfigured() || process.env.E2E_FIXTURES !== "true") return [];
   console.warn(`[perfluence/results] ${reason} — отдаю DEV-мок`);
   return (await import("@/lib/mockCoupons")).DEV_MOCK_RESULTS;
 }
@@ -1103,10 +1103,11 @@ function isResultsConfigured(): boolean {
 }
 
 let resultsCache: Result[] | null = null;
+let resultsCacheExpiresAt = 0;
 let pendingResultsPromise: Promise<Result[]> | null = null;
 
 export async function fetchResults(): Promise<Result[]> {
-  if (resultsCache) return resultsCache;
+  if (resultsCache && Date.now() < resultsCacheExpiresAt) return resultsCache;
   if (pendingResultsPromise) return pendingResultsPromise;
 
   if (!isResultsConfigured())
@@ -1117,6 +1118,7 @@ export async function fetchResults(): Promise<Result[]> {
       const res = await fetch(RESULTS_URL, {
         headers: { Accept: "application/json" },
         next: { revalidate: RESULTS_REVALIDATE },
+        signal: AbortSignal.timeout(20000),
       });
       const text = await res.text();
       if (!res.ok)
@@ -1130,14 +1132,12 @@ export async function fetchResults(): Promise<Result[]> {
         results.length,
       );
 
-      if (results.length === 0)
-        return devMockResultsFallback("API вернул пустой список заказов");
-
       resultsCache = results;
+      resultsCacheExpiresAt = Date.now() + RESULTS_REVALIDATE * 1000;
       return results;
     } catch (e) {
-      console.error("[perfluence/results] fetch failed:", e);
-      return devMockResultsFallback("запрос упал: " + (e as Error).message);
+      console.error("[perfluence/results] источник временно недоступен", e instanceof Error ? e.name : "UnknownError");
+      return [];
     } finally {
       pendingResultsPromise = null;
     }
@@ -1154,13 +1154,7 @@ export interface UsesStats {
 }
 
 export async function getUsesStats(): Promise<UsesStats> {
-  const results = await fetchResults();
-  const usesByCode = new Map<string, number>();
-  const usesByStore = new Map<number, number>();
-  for (const r of results) {
-    const n = r.stackedCount > 0 ? r.stackedCount : 1;
-    usesByCode.set(r.promocode, (usesByCode.get(r.promocode) ?? 0) + n);
-    usesByStore.set(r.project.id, (usesByStore.get(r.project.id) ?? 0) + n);
-  }
-  return { usesByCode, usesByStore };
+  // The results feed has no verified approval schema. Do not turn its rows
+  // (or test fixtures) into claims of confirmed customer orders.
+  return { usesByCode: new Map(), usesByStore: new Map() };
 }

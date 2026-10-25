@@ -83,7 +83,6 @@ function formatExpiryDate(rawExpires: string | null | undefined): string {
 export default function StoreSummaryTable({
   coupons,
   storeName,
-  storeSlug,
   title,
   subtitle,
 }: StoreSummaryTableProps) {

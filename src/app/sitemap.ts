@@ -7,6 +7,7 @@ import { COLLECTIONS, getCollectionCoupons, MIN_INDEXABLE_COLLECTION_OFFERS } fr
 import { SITE_URL } from "@/lib/site";
 import { canonicalCategorySlug } from "@/lib/categoryTaxonomy";
 import syncMeta from "@/data/sync-meta.json";
+import { selectGeoOffers } from "@/lib/geoIndexing";
 
 // sitemap.ts — Dynamic Route Handler
 // Содержит ТОЛЬКО канонические, индексируемые страницы.
@@ -87,7 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
   // Города: региональные страницы без выдуманных дат
-  const citiesMap: MetadataRoute.Sitemap = CITIES_SEO.map((city) => ({
+  const citiesMap: MetadataRoute.Sitemap = CITIES_SEO.filter((city) => selectGeoOffers(coupons, city.name).indexable).map((city) => ({
     url: `${SITE_URL}/gorod/${city.slug}`,
     changeFrequency: "weekly" as const,
     priority: 0.85,
@@ -107,14 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         continue;
       }
 
-      const list = coupons.filter((c) => {
-        const r = (c.promocode?.region || "").toLowerCase();
-        const isAllRu = !r || r === "вся россия" || r === "ru" || r.includes("россия");
-        const matchesCity = r.includes(city.name.toLowerCase());
-        const storeCat = canonicalCategorySlug(c.store.categorySlug || "");
-        return (isAllRu || matchesCity) && storeCat === canonicalSlug;
-      });
-      if (list.length >= 3) {
+      if (selectGeoOffers(coupons, city.name, canonicalSlug).indexable) {
         seenGeoCategories.add(geoKey);
         geoCategoryMap.push({
           url: `${SITE_URL}/gorod/${city.slug}/${canonicalSlug}`,

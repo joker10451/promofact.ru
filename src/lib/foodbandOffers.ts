@@ -1,5 +1,4 @@
 import type { Coupon } from "@/lib/types";
-import { STABLE_STORES } from "@/lib/stableStores";
 
 export const FOODBAND_OCTOBER_EXPIRES = "2026-10-31";
 export const FOODBAND_ANNUAL_EXPIRES = "2026-12-31";

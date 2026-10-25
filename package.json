@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "test:trust": "node --loader ./scripts/ts-loader.mjs scripts/test-trust-boundaries.mjs",
+    "test:geo-indexing": "node --loader ./scripts/ts-loader.mjs scripts/test-geo-indexing.mjs",
     "dev": "next dev",
     "test:reliability": "node --loader ./scripts/ts-loader.mjs scripts/test-posting-reliability.mjs",
     "build": "next build",

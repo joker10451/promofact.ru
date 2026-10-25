@@ -30,6 +30,12 @@ jobs:
       - name: Unit & Regression Tests
         run: npm test
 
+      - name: Security, posting reliability and geo indexing
+        run: |
+          npm run test:trust
+          npm run test:reliability
+          npm run test:geo-indexing
+
       # В CI нет ключей Perfluence — Next.js использует DEV-моки (см. perfluence.ts).
       # Этот шаг гарантирует, что код компилируется и все страницы (вкл. SSG
       # /store, /category) успешно пререндерятся на мок-данных.

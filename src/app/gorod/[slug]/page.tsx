@@ -11,8 +11,9 @@ import { getCoupons, getUsesStats, getCategories } from "@/lib/perfluence";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { toCatalogCoupon } from "@/lib/catalogCoupon";
+import { selectGeoOffers } from "@/lib/geoIndexing";
 
-export const revalidate = false;
+export const revalidate = 900;
 
 const CITY_COUPON_LIMIT = 24;
 
@@ -28,6 +29,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const city = CITIES_SEO.find((c) => c.slug === slug);
   if (!city) return {};
+  const { indexable } = selectGeoOffers(await getCoupons(), city.name);
 
   const now = new Date();
   const months = [
@@ -42,6 +44,7 @@ export async function generateMetadata({
 
   return {
     title: pageTitle,
+    robots: { index: indexable, follow: true },
     description,
     keywords: [
       `промокоды ${city.name.toLowerCase()}`,
@@ -83,20 +86,15 @@ export default async function CityPage({
   ]);
 
   // Фильтруем купоны, действующие в этом городе (или по всей РФ)
-  const cityCoupons = allCoupons.filter((c) => {
-    const r = (c.promocode.region || "").toLowerCase();
-    const isAllRu = !r || r === "ru" || r === "россия";
-    const matchesCity = r.includes(city.name.toLowerCase());
-    return isAllRu || matchesCity;
-  });
+  const { offers: cityCoupons } = selectGeoOffers(allCoupons, city.name);
 
   // Категории с достаточным количеством купонов в данном городе (>= 3)
   const cityCategories = categories
     .map((cat) => {
-      const count = cityCoupons.filter((c) => c.store.categorySlug === cat.slug).length;
-      return { cat, count };
+      const selection = selectGeoOffers(allCoupons, city.name, cat.slug);
+      return { cat, count: selection.offers.length, indexable: selection.indexable };
     })
-    .filter((item) => item.count >= 3);
+    .filter((item) => item.indexable);
 
   const proofsByCode = Object.fromEntries(uses.usesByCode);
   const proofsByStore = Object.fromEntries(uses.usesByStore);

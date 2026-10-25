@@ -10,6 +10,7 @@ import {
 } from "../src/lib/perfluenceOct18Scheduled.ts";
 import { getCustomCoupons } from "../src/lib/customCoupons.ts";
 import { PERFLUENCE_OCT18_BATCH_OFFERS } from "../src/lib/perfluenceOct18Batch.ts";
+import { selectGeoOffers } from "../src/lib/geoIndexing.ts";
 import { withoutForbiddenGroceryCoPromotion } from "../src/lib/publisherPlacementRules.ts";
 import { isCouponActive } from "../src/lib/couponExpiry.ts";
 import { getFlor2uTelegramOffers, FLOR2U_OCT18_TELEGRAM_LINK, FLOR2U_OCT18_TELEGRAM_ERID } from "../src/lib/perfluenceOct18Telegram.ts";
@@ -122,6 +123,19 @@ console.log("PASS: VkusVill website approvals and anti-co-promotion; Flor2u Tele
 // the new exact creative ERID is provided by this post's moderation card.
 const dodoPostErid = "2RanynisbQ7";
 const dodoLegal = "Реклама. Индивидуальный предприниматель Гринев Денис Петрович, ИНН 615400951595. erid: " + dodoPostErid;
+const fishCards = getCustomCoupons().filter(c => c.store.slug === "vazhnaya-ryba");
+assert.equal(fishCards.length, 5);
+assert(fishCards.every(c => c.promocode.region === "Санкт-Петербург"), "Local delivery must not be advertised nationwide");
+const tempura = fishCards.find(c => c.promocode.code === "ТЕМПУРА291");
+assert.equal(tempura.promocode.isFirstOrderOnly, true);
+assert.equal(tempura.promocode.isUniversal, false);
+assert.equal(tempura.promocode.customerTypeLabel, "Только первый заказ");
+assert.match(tempura.promocode.terms, /первом заказе от 2 999/);
+assert(fishCards.filter(c => c !== tempura).every(c => c.promocode.isUniversal && !c.promocode.isFirstOrderOnly));
+assert.equal(selectGeoOffers(fishCards, "Москва").offers.length, 0);
+assert.equal(selectGeoOffers(fishCards, "Санкт-Петербург").offers.length, 5);
+assert.equal(selectGeoOffers(fishCards, "Санкт-Петербург").indexable, true);
+
 const dodoCards = PERFLUENCE_OCT18_BATCH_OFFERS.filter(c => c.store.slug === "dodo-pizza");
 assert.equal(dodoCards.length, 4, "All four Dodo coupons must carry the approved creative");
 for (const coupon of dodoCards) {
