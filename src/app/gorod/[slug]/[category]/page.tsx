@@ -50,7 +50,12 @@ export async function generateMetadata({
   const cat = categories.find((c) => c.slug === catSlug);
   if (!cat) return {};
 
-  const { offers: list, indexable: isIndexable } = selectGeoOffers(all, city.name, catSlug);
+  const { offers: list, indexable: isIndexable } = selectGeoOffers(
+    all,
+    city.name,
+    catSlug,
+    CITIES_SEO.map((c) => ({ slug: c.slug, name: c.name })),
+  );
 
   const pageUrl = `${SITE_URL}/gorod/${citySlug}/${catSlug}`;
   const title = `Промокоды на ${cat.name.toLowerCase()} ${city.inCity} — скидки ${MONTH_YEAR}`;
@@ -104,7 +109,12 @@ export default async function CityCategoryPage({
   if (!cat) notFound();
 
   // Двойная фильтрация: город (регион) И категория
-  const { offers: list } = selectGeoOffers(all, city.name, catSlug);
+  const { offers: list } = selectGeoOffers(
+    all,
+    city.name,
+    catSlug,
+    CITIES_SEO.map((c) => ({ slug: c.slug, name: c.name })),
+  );
 
   const pageUrl = `${SITE_URL}/gorod/${citySlug}/${catSlug}`;
 

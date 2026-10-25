@@ -87,8 +87,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-  // Города: региональные страницы без выдуманных дат
-  const citiesMap: MetadataRoute.Sitemap = CITIES_SEO.filter((city) => selectGeoOffers(coupons, city.name).indexable).map((city) => ({
+  // Города: региональные страницы без выдуманных дат.
+  // Города ищем и по полю region, и по тексту условий: фид регион почти не отдаёт.
+  const CITY_NAMES = CITIES_SEO.map((city) => ({ slug: city.slug, name: city.name }));
+  const citiesMap: MetadataRoute.Sitemap = CITIES_SEO.filter((city) =>
+    selectGeoOffers(coupons, city.name, undefined, CITY_NAMES).indexable,
+  ).map((city) => ({
     url: `${SITE_URL}/gorod/${city.slug}`,
     changeFrequency: "weekly" as const,
     priority: 0.85,
@@ -108,7 +112,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         continue;
       }
 
-      if (selectGeoOffers(coupons, city.name, canonicalSlug).indexable) {
+      if (selectGeoOffers(coupons, city.name, canonicalSlug, CITY_NAMES).indexable) {
         seenGeoCategories.add(geoKey);
         geoCategoryMap.push({
           url: `${SITE_URL}/gorod/${city.slug}/${canonicalSlug}`,

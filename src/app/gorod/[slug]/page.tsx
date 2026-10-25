@@ -86,12 +86,13 @@ export default async function CityPage({
   ]);
 
   // Фильтруем купоны, действующие в этом городе (или по всей РФ)
-  const { offers: cityCoupons } = selectGeoOffers(allCoupons, city.name);
+  const cityNames = CITIES_SEO.map((c) => ({ slug: c.slug, name: c.name }));
+  const { offers: cityCoupons } = selectGeoOffers(allCoupons, city.name, undefined, cityNames);
 
   // Категории с достаточным количеством купонов в данном городе (>= 3)
   const cityCategories = categories
     .map((cat) => {
-      const selection = selectGeoOffers(allCoupons, city.name, cat.slug);
+      const selection = selectGeoOffers(allCoupons, city.name, cat.slug, cityNames);
       return { cat, count: selection.offers.length, indexable: selection.indexable };
     })
     .filter((item) => item.indexable);
