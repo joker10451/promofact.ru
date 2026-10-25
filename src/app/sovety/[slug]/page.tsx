@@ -246,7 +246,7 @@ export default async function ArticlePage({
                   )}
                   {i === Math.max(3, Math.floor(article.body.length / 2)) && (
                     <YandexAdBlock
-                      blockId={process.env.NEXT_PUBLIC_YANDEX_ARTICLE_AD_ID || "R-A-1234567-5"}
+                      blockId={process.env.NEXT_PUBLIC_YANDEX_ARTICLE_AD_ID || ""}
                       className="my-6"
                     />
                   )}
@@ -352,7 +352,7 @@ export default async function ArticlePage({
             blockId={
               process.env.NEXT_PUBLIC_YANDEX_ARTICLE_BOTTOM_AD_ID ||
               process.env.NEXT_PUBLIC_YANDEX_ARTICLE_AD_ID ||
-              "R-A-1234567-6"
+              ""
             }
             className="my-8"
           />

@@ -244,7 +244,7 @@ export default async function CityCategoryPage({
         )}
 
         <YandexAdBlock
-          blockId={process.env.NEXT_PUBLIC_YANDEX_CATEGORY_AD_ID || "R-A-1234567-3"}
+          blockId={process.env.NEXT_PUBLIC_YANDEX_CATEGORY_AD_ID || ""}
           className="my-10"
         />
 

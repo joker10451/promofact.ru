@@ -9,6 +9,7 @@ import HowToApply from "@/components/HowToApply";
 import JsonLd from "@/components/JsonLd";
 import OtherStores from "@/components/OtherStores";
 import YandexAdBlock from "@/components/YandexAdBlock";
+import { isAdAllowedOnPath } from "@/lib/adPlacements";
 import StoreLogo from "@/components/StoreLogo";
 import StoreCouponBrowser from "@/components/StoreCouponBrowser";
 import StoreSummaryTable from "@/components/StoreSummaryTable";
@@ -586,10 +587,16 @@ export default async function StorePage({
           </div>
         </div>
 
-        <YandexAdBlock
-          blockId={process.env.NEXT_PUBLIC_YANDEX_STORE_AD_ID || "R-A-1234567-4"}
-          className="my-10"
-        />
+        {/* Реклама на карточке купонов работает против конверсии: человек
+            пришёл скопировать код и уйти в магазин, а баннер рядом с кодом
+            уводит его с CPA-перехода. Показываем только ниже, после всех
+            предложений магазина, и только если ID блока реально задан. */}
+        {isAdAllowedOnPath(`/store/${slug}`) && (
+          <YandexAdBlock
+            blockId={process.env.NEXT_PUBLIC_YANDEX_STORE_AD_ID || ""}
+            className="my-10"
+          />
+        )}
 
         {/* Сводная таблица для Быстрого ответа (Колдунщика) Яндекса и Google */}
         <StoreSummaryTable

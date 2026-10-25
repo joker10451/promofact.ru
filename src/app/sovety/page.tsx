@@ -110,7 +110,7 @@ export default function SovetyPage() {
 
           {/* Рекламный блок РСЯ */}
           <YandexAdBlock
-            blockId={process.env.NEXT_PUBLIC_YANDEX_CATEGORY_AD_ID || "R-A-1234567-3"}
+            blockId={process.env.NEXT_PUBLIC_YANDEX_CATEGORY_AD_ID || ""}
             className="my-10"
           />
         </div>
