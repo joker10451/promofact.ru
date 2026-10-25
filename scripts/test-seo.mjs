@@ -111,7 +111,8 @@ async function runSeoRegressionSuite() {
     // гашена как дубль), поэтому проверяем выжившую страницу.
     const streaming = articles.split('slug: "promokod-kinopoisk-45-dney"')[1]?.split('slug: "promokody-iv-roshe"')[0] ?? "";
     // Последняя статья в массиве: маркера «следующая статья» после неё нет.
-    const travel = articles.split('slug: "sekrety-ekonomii-v-otello"')[1]?.split('slug: "promokody-sberprime-2026"')[0] ?? "";
+    // Проверяем статью о путешествиях: она теперь несёт прямую ссылку на магазин.
+    const travel = articles.split('slug: "ekonomim-na-puteshestviyah-i-biletah"')[1]?.split('slug: "promokody-na-taksi-i-karshering"')[0] ?? "";
     assert(grocery.includes("## Где получить промокод Пятёрочки Доставка"));
     assert(grocery.includes("faq: ["));
     assert(grocery.includes('href: "/store/pyaterochka"'));
