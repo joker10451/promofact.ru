@@ -321,12 +321,18 @@ export default function ChatHelper() {
     // An input may receive focus before React hydration attaches focusin.
     // Recover its current state so the mobile helper cannot obscure a CTA.
     const focused = document.activeElement as HTMLElement | null;
+    let initialFocusFrame: number | undefined;
     if (focused && (focused.tagName === "INPUT" || focused.tagName === "TEXTAREA") &&
         !focused.closest("[data-chat-helper]")) {
-      setIsKeyboardOpen(true);
+      initialFocusFrame = requestAnimationFrame(() => {
+        const active = document.activeElement as HTMLElement | null;
+        if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA") &&
+            !active.closest("[data-chat-helper]")) setIsKeyboardOpen(true);
+      });
     }
 
     return () => {
+      if (initialFocusFrame !== undefined) cancelAnimationFrame(initialFocusFrame);
       window.visualViewport?.removeEventListener("resize", handleResize);
       window.removeEventListener("focusin", handleFocusIn);
       window.removeEventListener("focusout", handleFocusOut);

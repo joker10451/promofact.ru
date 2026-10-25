@@ -117,11 +117,11 @@ async function handleCheck(req: NextRequest) {
       alertSent,
       alertError,
     });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Failed to check Perfluence Live",
+        error: "Failed to check Perfluence Live",
       },
       { status: 500 },
     );

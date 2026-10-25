@@ -89,7 +89,11 @@ export async function fetchLiveNotifications(limit = 20): Promise<LiveNotificati
 
   const json = await res.json();
 
-  return (json.data || []).map((item: any) => ({
+  return (json.data || []).map((item: {
+    id: number; entry_id: number; date: string; time_text: string;
+    title: string; message: string; link: string;
+    project?: { id: number; name: string; status: string };
+  }) => ({
     id: item.id,
     entryId: item.entry_id,
     date: item.date,

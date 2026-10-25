@@ -8,6 +8,7 @@ import YandexAdBlock from "@/components/YandexAdBlock";
 import { getCategories, getCoupons, getUsesStats } from "@/lib/perfluence";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { selectGeoOffers } from "@/lib/geoIndexing";
 
 const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
   month: "long",
@@ -16,7 +17,7 @@ const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = false;
+export const revalidate = 900;
 
 export async function generateStaticParams() {
   const categories = await getCategories();
@@ -49,12 +50,7 @@ export async function generateMetadata({
   const cat = categories.find((c) => c.slug === catSlug);
   if (!cat) return {};
 
-  const list = all.filter((c) => {
-    const r = (c.promocode.region || "").toLowerCase();
-    const isAllRu = !r || r === "ru" || r === "россия";
-    const matchesCity = r.includes(city.name.toLowerCase());
-    return (isAllRu || matchesCity) && c.store.categorySlug === catSlug;
-  });
+  const { offers: list, indexable: isIndexable } = selectGeoOffers(all, city.name, catSlug);
 
   const pageUrl = `${SITE_URL}/gorod/${citySlug}/${catSlug}`;
   const title = `Промокоды на ${cat.name.toLowerCase()} ${city.inCity} — скидки ${MONTH_YEAR}`;
@@ -66,7 +62,6 @@ export async function generateMetadata({
     "актуальных предложений",
   )} от магазинов-партнёров. Копируй код и экономь уже сегодня.`;
 
-  const isIndexable = list.length >= 3;
 
   return {
     title,
@@ -109,12 +104,7 @@ export default async function CityCategoryPage({
   if (!cat) notFound();
 
   // Двойная фильтрация: город (регион) И категория
-  const list = all.filter((c) => {
-    const r = (c.promocode.region || "").toLowerCase();
-    const isAllRu = !r || r === "ru" || r === "россия";
-    const matchesCity = r.includes(city.name.toLowerCase());
-    return (isAllRu || matchesCity) && c.store.categorySlug === catSlug;
-  });
+  const { offers: list } = selectGeoOffers(all, city.name, catSlug);
 
   const pageUrl = `${SITE_URL}/gorod/${citySlug}/${catSlug}`;
 

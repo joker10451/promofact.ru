@@ -599,7 +599,8 @@ export default function CouponTicket({
         {/* 5. Мета-данные и реклама */}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-1 text-[11px] font-medium leading-relaxed text-ink/65">
           <span>
-            {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Первый заказ" : "Уточните условия")} · RU
+            {promocode.customerTypeLabel || (promocode.isFirstOrderOnly ? "Первый заказ" : "Уточните условия")}
+            {promocode.region?.trim() && <> · {promocode.region.trim().toUpperCase() === "RU" ? "Россия" : promocode.region.trim()}</>}
           </span>
           <span>
             {promocode.expires

@@ -8,10 +8,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const rouble = (n: number) =>
+const formatSourceAmount = (n: number) =>
   new Intl.NumberFormat("ru-RU", {
-    style: "currency",
-    currency: "RUB",
     maximumFractionDigits: n % 1 === 0 ? 0 : 1,
   }).format(n);
 
@@ -84,16 +82,18 @@ export default async function StatsPage() {
         </p>
         <h1 className="mt-1 font-display text-3xl font-extrabold">Статистика партнёрок</h1>
         <p className="mt-2 text-sm text-ink/50">
-          Комиссии по заказам через промокоды. Обновляется раз в 5 минут.
+          Непроверенные показатели фида Perfluence. Кэш обновляется через 12 часов.
+          Статусы подтверждения и валюта не проверены: значения fee ниже не являются
+          подтверждённым доходом или выплаченными средствами и показаны без валюты.
         </p>
       </header>
 
       <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Комиссия всего", value: rouble(kpi.totalFee) },
-          { label: "За 30 дней", value: rouble(kpi.fee30) },
-          { label: "Заказов всего", value: String(kpi.orders) },
-          { label: "Средний чек комиссии", value: rouble(kpi.avgFee) },
+          { label: "Сумма fee из фида", value: formatSourceAmount(kpi.totalFee) },
+          { label: "За 30 дней", value: formatSourceAmount(kpi.fee30) },
+          { label: "Количество по stacked_count", value: String(kpi.orders) },
+          { label: "Среднее fee на единицу", value: formatSourceAmount(kpi.avgFee) },
         ].map((c) => (
           <div
             key={c.label}
@@ -108,14 +108,14 @@ export default async function StatsPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-xl font-extrabold">Комиссия по дням · 30 дней</h2>
+        <h2 className="font-display text-xl font-extrabold">Значения fee по дням · 30 дней</h2>
         <div className="mt-4 flex h-40 items-end gap-1 rounded-2xl border border-line bg-white p-4">
           {days.map((d) => (
             <div
               key={d.label}
               className="flex-1 rounded-t bg-yellow transition-colors hover:bg-yellow-dark"
               style={{ height: `${Math.max((d.fee / maxDay) * 100, 2)}%` }}
-              title={`${d.label}: ${rouble(d.fee)}`}
+              title={`${d.label}: ${formatSourceAmount(d.fee)}`}
             />
           ))}
         </div>
@@ -128,8 +128,8 @@ export default async function StatsPage() {
             <thead>
               <tr className="border-b border-line text-[11px] uppercase tracking-widest text-ink/45">
                 <th className="px-5 py-3 font-bold">Магазин</th>
-                <th className="px-5 py-3 font-bold">Заказы</th>
-                <th className="px-5 py-3 font-bold">Комиссия</th>
+                <th className="px-5 py-3 font-bold">Количество из фида</th>
+                <th className="px-5 py-3 font-bold">Значение fee</th>
               </tr>
             </thead>
             <tbody>
@@ -155,7 +155,7 @@ export default async function StatsPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3">{s.orders}</td>
-                  <td className="px-5 py-3 font-bold text-mint">{rouble(s.fee)}</td>
+                  <td className="px-5 py-3 font-bold text-mint">{formatSourceAmount(s.fee)}</td>
                 </tr>
               ))}
             </tbody>
@@ -170,8 +170,8 @@ export default async function StatsPage() {
             <thead>
               <tr className="border-b border-line text-[11px] uppercase tracking-widest text-ink/45">
                 <th className="px-5 py-3 font-bold">Промокод</th>
-                <th className="px-5 py-3 font-bold">Заказы</th>
-                <th className="px-5 py-3 font-bold">Комиссия</th>
+                <th className="px-5 py-3 font-bold">Количество из фида</th>
+                <th className="px-5 py-3 font-bold">Значение fee</th>
               </tr>
             </thead>
             <tbody>
@@ -179,7 +179,7 @@ export default async function StatsPage() {
                 <tr key={code} className="border-b border-line/60 last:border-0">
                   <td className="px-5 py-3 font-display font-bold tracking-widest">{code}</td>
                   <td className="px-5 py-3">{v.orders}</td>
-                  <td className="px-5 py-3 font-bold text-mint">{rouble(v.fee)}</td>
+                  <td className="px-5 py-3 font-bold text-mint">{formatSourceAmount(v.fee)}</td>
                 </tr>
               ))}
             </tbody>
@@ -195,7 +195,7 @@ export default async function StatsPage() {
           <>
             <p className="mt-2 text-sm leading-relaxed text-ink/70">
               Топ-3 магазина по выручке:{" "}
-              {top3.map((s, i) => `${i + 1}. ${s.name} (${rouble(s.fee)})`).join(", ")}.
+              {top3.map((s, i) => `${i + 1}. ${s.name} (${formatSourceAmount(s.fee)})`).join(", ")}.
             </p>
             <p className="mt-2 text-sm leading-relaxed text-ink/70">
               Рекомендация: сделайте упор на SEO-страницы этих магазинов —{" "}
