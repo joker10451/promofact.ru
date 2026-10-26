@@ -40,14 +40,14 @@ assert.equal(isGoneArticle('kak-kopit-dengi'), true);
 assert.equal(isGoneArticle('chto-takoe-promokod'), false);
 assert.equal(isGoneArticle('nesushchestvuyushchiy-slug'), false);
 
-// 5. Страница действительно возвращает 410, до вызова notFound
+// 5. HTTP 410 must be served by proxy before rendering; Next.js pages cannot return Response.
 const pageSrc = fs.readFileSync(path.resolve('src/app/sovety/[slug]/page.tsx'), 'utf-8');
-assert.ok(pageSrc.includes('isGoneArticle(slug)'), 'Страница статьи должна проверять isGoneArticle');
-assert.ok(pageSrc.includes('status: 410'), 'Удалённая статья должна отдавать статус 410');
-const goneIdx = pageSrc.indexOf('isGoneArticle(slug)');
-const notFoundIdx = pageSrc.indexOf('if (!article) notFound();');
-assert.ok(goneIdx > 0 && notFoundIdx > goneIdx,
-  'Проверка 410 обязана идти до notFound(), иначе страница отдаст 404');
+const proxySrc = fs.readFileSync(path.resolve('src/proxy.ts'), 'utf-8');
+assert.ok(proxySrc.includes('isGoneArticle(goneMatch[1])'), 'Proxy must check removed article slugs');
+assert.ok(proxySrc.includes('status: 410'), 'Proxy must return HTTP 410');
+assert.ok(proxySrc.includes('"/sovety/:path*"'), 'Proxy matcher must cover removed articles');
+assert.ok(pageSrc.includes('if (isGoneArticle(slug)) notFound();'), 'Page must have 404 fallback without returning Response');
+assert.ok(!pageSrc.includes('return new Response('), 'Page must only return React nodes to pass Next.js build typing');
 
 // 6. Удалённые статьи не должны попадать в sitemap и ленты
 for (const file of ['src/app/sitemap.ts', 'src/app/rss.xml/route.ts', 'src/app/dzen.xml/route.ts']) {
