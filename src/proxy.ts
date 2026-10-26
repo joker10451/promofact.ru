@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isGoneArticle } from "@/lib/goneArticles";
 import {
   LEGACY_STORE_REDIRECTS,
   LEGACY_CATEGORY_REDIRECTS,
@@ -17,6 +18,19 @@ async function sha256Hex(input: string): Promise<string> {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Return the intended 410 before the page renderer; React pages cannot return Response.
+  const goneMatch = pathname.match(/^\/sovety\/([^/]+)\/?$/);
+  if (goneMatch && isGoneArticle(goneMatch[1])) {
+    return new NextResponse("Эта статья удалена. Актуальные материалы — в разделе «Советы»: /sovety", {
+      status: 410,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Robots-Tag": "noindex",
+        "Cache-Control": "no-store",
+      },
+    });
+  }
 
   if (pathname === "/stats" || pathname.startsWith("/stats/")) {
     if (pathname === "/stats/login") return NextResponse.next();
@@ -54,5 +68,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/stats/:path*", "/store/:path*", "/category/:path*"],
+  matcher: ["/stats/:path*", "/store/:path*", "/category/:path*", "/sovety/:path*"],
 };
