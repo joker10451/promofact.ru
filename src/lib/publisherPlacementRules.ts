@@ -50,11 +50,14 @@ export function withoutForbiddenFloristBeautyCoPromotion(coupons: Coupon[]): Cou
     /золотое\s+яблоко/iu.test(c.store.name));
   const hasFlowwow = coupons.some(c => c.store.slug === "fmart" || c.store.slug === "flowwow" ||
     /(?:flowwow|флаувау)/iu.test(c.store.name));
+  // Perfluence prohibits Carte Blanche || Gala + COZY HOME on Ozon in one promotional selection.
+  const hasCozyHome = coupons.some(c => c.store.slug === "cozy-home");
   return coupons.filter(c =>
     !(hasIncompatibleFlowers && c.store.slug === "yandeks-tsvety") &&
     !(hasFlor2u && c.store.slug === "fmart") &&
     !(hasGoldApple && c.store.slug === "letual") &&
-    !(hasFlowwow && c.store.slug === "yandeks-tsvety"));
+    !(hasFlowwow && c.store.slug === "yandeks-tsvety") &&
+    !(hasCozyHome && c.store.slug === "carte-blanche"));
 }
 
 /** Perfluence: VkusVill Delivery and Samokat must not share a curated promo collection with Pyaterochka. */
