@@ -23,7 +23,7 @@ const plan = {
   ],
   letual: [
     ["НАБЕРИ", "20 000 ₽", "2026-10-31T23:59:59+03:00"],
-    ["УДАЧА", "3 000 ₽", "2026-10-23T23:59:59+03:00"],
+    ["ШАНС", "3 000 ₽", "2026-11-30T23:59:59+03:00"],
     ["ОКТЯБРЬ", null, "2026-10-31T23:59:59+03:00"],
   ],
   sberdevaysy: [
@@ -80,10 +80,10 @@ for (const [slug, codes] of Object.entries(plan)) {
 }
 
 const naberi=all.find(c=>c.promocode.code==="НАБЕРИ");
-const udacha=all.find(c=>c.promocode.code==="УДАЧА");
+const shans=all.find(c=>c.promocode.code==="ШАНС");
 const october=all.find(c=>c.promocode.code==="ОКТЯБРЬ");
 assert(naberi.promocode.terms.includes("не скидка 20 000 ₽ на любой заказ"));
-assert(udacha.promocode.terms.includes("не предоставлены"));
+assert(shans.promocode.terms.includes("скидка 3 000 ₽ при заказе от 7 000 ₽"));
 assert(october.promocode.terms.includes("не указаны"));
 assert.equal(all.some(c=>c.promocode.code==="FMARTPE403c8la"),false,
   "Expired 40% FMART offer must stay retired after the link rotation");

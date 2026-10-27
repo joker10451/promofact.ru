@@ -41,6 +41,7 @@ export const LOCAL_BRAND_ICONS: Record<string, string> = {
   "magnit-dostavka": "/brands/magnit-dostavka.png",
   "mark-formelle": "/brands/mark-formelle.png",
   "megamarket": "/brands/megamarket.png",
+  "netology": "/brands/netology.png",
   "netprint": "/brands/netprint.png",
   "ostrovok": "/brands/ostrovok.png",
   "otello": "/brands/otello.png",
@@ -266,6 +267,13 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     bgGradient: "from-amber-600 to-amber-800",
     textColor: "text-white",
     domain: "cozyhome.ru",
+  },
+  "netology": {
+    logoUrl: "/brands/netology.png",
+    emoji: "🎓",
+    bgGradient: "from-blue-600 to-indigo-700",
+    textColor: "text-white",
+    domain: "netology.ru",
   },
   "netprint": {
     logoUrl: "/brands/netprint.png",

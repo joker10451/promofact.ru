@@ -90,6 +90,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     site: "https://cozyhome.ru",
     activeBloggers: 4200,
   },
+  "netology": {
+    "id": 115556,
+    "slug": "netology",
+    "name": "Нетология",
+    "logo": "/brands/netology.png",
+    "category": "Онлайн-образование",
+    "categorySlug": "onlayn-obrazovanie",
+    "about": "«Нетология» — одна из ведущих образовательных платформ в России. Обучение востребованным профессиям в IT, интернет-маркетинге, дизайне, менеджменте и аналитике с дипломами и помощью в трудоустройстве.",
+    "conditions": "Скидка по промокоду действует при оформлении онлайн-курса на официальном сайте netology.ru.",
+    "site": "https://netology.ru",
+    "activeBloggers": 2400
+  },
   "netprint": {
     id: 504,
     slug: "netprint",

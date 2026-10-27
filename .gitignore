@@ -58,6 +58,11 @@ data/debug/
 data/banners/
 data/flash_deals.json
 data/notified_orders.json
+data/*.png
+data/*.txt
+data/*.html
+data/*.json
+!data/posted_promos.json
 scripts/debug-*.mjs
 scripts/inspect-*.mjs
 scripts/post-*.mjs
