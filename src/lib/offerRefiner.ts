@@ -99,6 +99,19 @@ export function refineOffer(
 
   const minOrder = extractMinimumOrder(combined);
 
+  // Two-tier subscription PRICES are not monetary savings.
+  const plusTrial = storeName === "Яндекс Плюс"
+    ? title.match(/(\d+)\s*дн(?:ей|я|ь)[\s\S]*?бесплатн[а-яё]*\s+или\s+(\d+)\s*дн(?:ей|я|ь)\s+за\s+(\d+)\s*(?:₽|руб)/iu)
+    : null;
+  if (plusTrial) {
+    return {
+      type: "subscription",
+      discount: `${plusTrial[1]} дней бесплатно / ${plusTrial[2]} дней за ${plusTrial[3]} ₽`,
+      condition: "45 дней — новым пользователям; 30 дней — без активной подписки",
+      fullTerms: terms || title,
+      isNoCode,
+    };
+  }
   // 1. Фиксированные спец-предложения и подписки (Иви, СберПрайм, Яндекс Плюс, Start.ru, Premier)
   const daysMatch = title.match(/(\d+)\s*(?:дней|дня|день)/i);
   if (
@@ -262,7 +275,10 @@ export function refineOffer(
     terms.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
     terms.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i);
 
-  if (rubMatch) {
+  // "за 1 ₽" is a price of a subscription/trial, not a saving of 1 ₽.
+  const oneRublePrice = /(?:за|по цене)\s*1\s*(?:₽|руб)/iu.test(combined) &&
+    !/скидк[а-яё]*\s*1\s*(?:₽|руб)/iu.test(combined);
+  if (rubMatch && !(oneRublePrice && Number(rubMatch[1].replace(/\s/g, "")) === 1)) {
     const rubVal = parseInt(rubMatch[1].replace(/\s/g, ""), 10);
     const formattedRub = rubVal.toLocaleString("ru-RU").replace(/\s/g, " ") + " ₽";
     let cleaned = cleanConditionText(title, rubMatch[0]);
