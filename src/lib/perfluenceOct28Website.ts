@@ -81,7 +81,7 @@ export const PERFLUENCE_OCT28_PLACEMENTS: readonly Placement[] = [
   },
 ];
 
-const managedSlugs = new Set(PERFLUENCE_OCT28_PLACEMENTS.map((p) => p.slug));
+const managedSlugs = new Set<string>(PERFLUENCE_OCT28_PLACEMENTS.map((p) => p.slug));
 
 export const PERFLUENCE_OCT28_OFFERS: Coupon[] = PERFLUENCE_OCT28_PLACEMENTS.map((p) => {
   const store = STABLE_STORES[p.slug];
