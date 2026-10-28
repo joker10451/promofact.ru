@@ -25,7 +25,7 @@ const RUTUBE_LEGAL = 'Реклама. Рекламодатель: ООО "Руф
 export const PERFLUENCE_OCT28_PLACEMENTS: readonly Placement[] = [
   {
     id: 826223301, slug: "yandex-plus", code: "FYBSF2X94G",
-    bonus: "Яндекс Плюс по промокоду FYBSF2X94G",
+    bonus: "45 дней Яндекс Плюс бесплатно или 30 дней за 1 ₽",
     terms: "В Perfluence указаны 45 дней доступа бесплатно для новых пользователей или 30 дней за 1 ₽ для пользователей без активной мультиподписки. Условия применимости, необходимость привязки карты и автопродление проверяйте при активации.",
     expires: "2026-12-31T23:59:59+03:00",
     link: "https://yaplus45.prfl.me/sites/e6efea?erid=2RanymRXMTZ",
