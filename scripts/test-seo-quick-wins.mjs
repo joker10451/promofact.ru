@@ -359,15 +359,14 @@ let passed = 0;
 {
   const { getStoreExtra, hasActiveRequiredCoupons } = await import("@/lib/storeExtras");
 
-  // 1. Проверяем Островок: требуются PFRUS414 и PFWOR417
+  // 1. Проверяем Островок: требуется PF4ALL80
   const ostrovokExtra = getStoreExtra("ostrovok");
   assert.ok(ostrovokExtra, "Островок должен иметь storeExtra");
-  assert.deepStrictEqual(ostrovokExtra.requiredActiveCodes, ["PFRUS414", "PFWOR417"]);
+  assert.deepStrictEqual(ostrovokExtra.requiredActiveCodes, ["PF4ALL80"]);
 
   // Активные купоны -> true
   const activeCoupons = [
-    { promocode: { code: "PFRUS414", expires: "2026-10-31" } },
-    { promocode: { code: "PFWOR417", expires: "2026-10-31" } },
+    { promocode: { code: "PF4ALL80", expires: "2026-11-30" } },
   ];
   assert.strictEqual(
     hasActiveRequiredCoupons(ostrovokExtra, activeCoupons, new Date("2026-10-01").getTime()),
@@ -377,8 +376,7 @@ let passed = 0;
 
   // Один купон истек -> false (fallback на нейтральный генератор)
   const expiredCoupons = [
-    { promocode: { code: "PFRUS414", expires: "2026-09-30" } }, // истек
-    { promocode: { code: "PFWOR417", expires: "2026-10-31" } },
+    { promocode: { code: "PF4ALL80", expires: "2026-09-30" } }, // истек
   ];
   assert.strictEqual(
     hasActiveRequiredCoupons(ostrovokExtra, expiredCoupons, new Date("2026-10-01").getTime()),
