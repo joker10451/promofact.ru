@@ -34,13 +34,32 @@ const AVITO_STEPS = [
   },
 ];
 
-export default function HowToApply({ variant = "code" }: { variant?: "code" | "avito-links" }) {
+const SUBSCRIPTION_STEPS = [
+  {
+    n: "1",
+    title: "Выбери вариант подписки",
+    text: "Проверь, на какой пробный период и по какой цене ты подходишь.",
+  },
+  {
+    n: "2",
+    title: "Открой Яндекс Плюс",
+    text: "Перейди по партнёрской ссылке из карточки и войди в свой аккаунт.",
+  },
+  {
+    n: "3",
+    title: "Проверь условия",
+    text: "Введи промокод, если потребуется. До подтверждения проверь оплату и автопродление.",
+  },
+];
+
+export default function HowToApply({ variant = "code" }: { variant?: "code" | "avito-links" | "subscription" }) {
   const isAvito = variant === "avito-links";
-  const steps = isAvito ? AVITO_STEPS : STEPS;
+  const isSubscription = variant === "subscription";
+  const steps = isAvito ? AVITO_STEPS : isSubscription ? SUBSCRIPTION_STEPS : STEPS;
   return (
     <section className="mt-12" aria-labelledby="how-apply">
       <h2 id="how-apply" className="font-display text-lg font-extrabold">
-        {isAvito ? "Как получить скидку в Авито Путешествиях" : "Как применить код"}
+        {isAvito ? "Как получить скидку в Авито Путешествиях" : isSubscription ? "Как подключить Яндекс Плюс по промокоду" : "Как применить код"}
       </h2>
       <ol className="mt-4 grid gap-3 sm:grid-cols-3">
         {steps.map((step) => (
