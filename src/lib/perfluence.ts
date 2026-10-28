@@ -473,6 +473,15 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
   if (!isApprovedOct24Repost(c)) return false;
   if (!isApprovedOct26WebsitePlacement(c)) return false;
   if (!isApprovedOct28PublisherPlacement(c)) return false;
+  // The publisher dashboard confirms only the Perfluence placement here.
+  // Five earlier Admitad rows appeared with the empty headline "по промокоду",
+  // no specified expiry and a misleading price-as-discount "−1 ₽". Quarantine
+  // exactly these low-information records until their benefit and eligibility
+  // are checked, without deleting partner links or touching the database.
+  if (c.store.slug === "yandex-plus" && c.promocode.group === "admitad" &&
+      new Set(["3CL7UZV8DB", "JJVKYHYSX5", "PC2F8F2ALL", "P2U2VHZDD6", "SKG7PFYYMN"])
+        .has(c.promocode.code.trim().toUpperCase())) return false;
+
   const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ПИРОГ"]);
 
     // Site-specific Perfluence links renewed 23 October 2026.
