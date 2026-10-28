@@ -54,7 +54,8 @@ assert.equal(deduped.find(x=>x.promocode.code==="25GFC1TL4")?.affiliate.link,MAG
 
 const merged=await getCombinedCoupons();
 const magnit=merged.filter(c=>c.store.slug==="magnit-dostavka");
-assert.equal(magnit.length,3,"Current site catalog should contain exactly three approved Magnit offers");
+assert.equal(magnit.length, MAGNIT_ROTATED_OFFERS.filter(c=>isCouponActive(c.promocode.expires)).length,
+  "Current site catalog must contain only currently active approved Magnit offers");
 for(const item of magnit) {
  assert(current[item.promocode.code], "Unexpected Magnit code visible to visitors: "+item.promocode.code);
  assert.equal(item.affiliate.link,MAGNIT_OCT21_LINK);

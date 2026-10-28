@@ -1,5 +1,6 @@
 import { MAGNIT_ROTATED_OFFERS, M_KOSMETIK_ROTATED_OFFERS, CITYDRIVE_APPROVED_OFFERS, YANDEX_TRAVEL_ROTATED_OFFERS, TANUKI_OCT16_OFFERS, PEREKRESTOK_OCT16_OFFERS, GOLDAPPLE_ROTATED_OFFERS } from "@/lib/perfluenceRotatedOffers";
 import type { Coupon } from "@/lib/types";
+import { PERFLUENCE_OCT28_OFFERS } from "@/lib/perfluenceOct28Website";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { PERFLUENCE_OCT16_APPROVED_OFFERS } from "@/lib/perfluenceOct16Offers";
 import { VKUSVILL_OCT18_SITE_OFFERS } from "@/lib/perfluenceOct18Scheduled";
@@ -147,6 +148,7 @@ const YANDEX_OCT23_APPROVED_OFFERS: Coupon[] = [
 ];
 
 export const CUSTOM_COUPONS: Coupon[] = [
+  ...PERFLUENCE_OCT28_OFFERS,
   ...PERFLUENCE_OCT26_WEBSITE_OFFERS,
   ...PERFLUENCE_REPEAT_OCT24_OFFERS,
   ...YANDEX_OCT23_APPROVED_OFFERS,
