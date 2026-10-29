@@ -61,7 +61,7 @@ export default function StoreLogo({
           aria-label={name}
           role="img"
         >
-          <span>{letter}</span>
+          <span aria-hidden="true" data-initial={letter} className="before:content-[attr(data-initial)]" />
         </span>
       </span>
     );
@@ -78,7 +78,7 @@ export default function StoreLogo({
           aria-hidden="true"
           className={`absolute inset-0 flex items-center justify-center rounded-lg bg-gradient-to-br ${brandMeta.bgGradient} ${brandMeta.textColor} font-display text-sm font-black`}
         >
-          {letter}
+          <span data-initial={letter} className="before:content-[attr(data-initial)]" />
         </span>
       )}
       {/* Assets originate from multiple CPA CDNs with dynamic domains. */}

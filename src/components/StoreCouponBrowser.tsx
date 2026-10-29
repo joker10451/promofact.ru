@@ -97,6 +97,11 @@ export default function StoreCouponBrowser({
     [activeCoupons],
   );
 
+  const unknownCoupons = useMemo(
+    () => activeCoupons.filter((c) => getCouponAudience(c.promocode) === "unknown"),
+    [activeCoupons],
+  );
+
   const hasRetailBarcodeOffer = storeName === "Подружка" && activeCoupons.some((c) => c.promocode.isBarcode);
   const hasOnlinePromoOffer = hasRetailBarcodeOffer && activeCoupons.some((c) => !c.promocode.isBarcode && !!c.promocode.code);
 
@@ -108,10 +113,12 @@ export default function StoreCouponBrowser({
         return repeatOrderCoupons;
       case "universal":
         return universalCoupons;
+      case "unknown":
+        return unknownCoupons;
       default:
         return activeCoupons;
     }
-  }, [activeFilter, activeCoupons, firstOrderCoupons, repeatOrderCoupons, universalCoupons]);
+  }, [activeFilter, activeCoupons, firstOrderCoupons, repeatOrderCoupons, universalCoupons, unknownCoupons]);
 
   return (
     <>
@@ -122,6 +129,7 @@ export default function StoreCouponBrowser({
           firstCount={firstOrderCoupons.length}
           repeatCount={repeatOrderCoupons.length}
           universalCount={universalCoupons.length}
+          unknownCount={unknownCoupons.length}
           onTabChange={handleFilterChange}
         />
       )}

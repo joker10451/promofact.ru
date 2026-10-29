@@ -16,6 +16,12 @@ const STEPS = [
   },
 ];
 
+const MAGNIT_STEPS = [
+  { n: "1", title: "Скопируй код", text: "Скопируй выбранный промокод из карточки вместе с условиями." },
+  { n: "2", title: "Открой приложение «Магнит»", text: "Перейди по ссылке и выбери нужный раздел: «Экспресс» или «Гипермаркет»." },
+  { n: "3", title: "Проверь сумму заказа", text: "Собери корзину, введи код и убедись, что скидка отобразилась до оплаты." },
+];
+
 const AVITO_STEPS = [
   {
     n: "1",
@@ -52,14 +58,14 @@ const SUBSCRIPTION_STEPS = [
   },
 ];
 
-export default function HowToApply({ variant = "code" }: { variant?: "code" | "avito-links" | "subscription" }) {
+export default function HowToApply({ variant = "code" }: { variant?: "code" | "avito-links" | "subscription" | "magnit-app" }) {
   const isAvito = variant === "avito-links";
   const isSubscription = variant === "subscription";
-  const steps = isAvito ? AVITO_STEPS : isSubscription ? SUBSCRIPTION_STEPS : STEPS;
+  const steps = variant === "magnit-app" ? MAGNIT_STEPS : isAvito ? AVITO_STEPS : isSubscription ? SUBSCRIPTION_STEPS : STEPS;
   return (
     <section className="mt-12" aria-labelledby="how-apply">
       <h2 id="how-apply" className="font-display text-lg font-extrabold">
-        {isAvito ? "Как получить скидку в Авито Путешествиях" : isSubscription ? "Как подключить Яндекс Плюс по промокоду" : "Как применить код"}
+        {variant === "magnit-app" ? "Как применить промокод в приложении «Магнит»" : isAvito ? "Как получить скидку в Авито Путешествиях" : isSubscription ? "Как подключить Яндекс Плюс по промокоду" : "Как применить код"}
       </h2>
       <ol className="mt-4 grid gap-3 sm:grid-cols-3">
         {steps.map((step) => (

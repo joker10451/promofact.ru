@@ -575,7 +575,7 @@ export default function CouponTicket({
               onClick={handleDirectCtaClick}
               className="flex items-center justify-center gap-1 py-1.5 text-center text-xs font-semibold leading-snug text-ink/70 transition-colors hover:text-red hover:underline"
             >
-              <span>Перейти на сайт {store.name} →</span>
+              <span>{store.slug === "magnit-dostavka" ? "Перейти к предложению «Магнит» →" : `Перейти на сайт ${store.name} →`}</span>
             </a>
           </div>
         ) : (

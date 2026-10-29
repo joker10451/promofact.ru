@@ -6,7 +6,8 @@ import { toCatalogCoupon } from "../src/lib/catalogCoupon.ts";
 
 const p = (label, first = false) => ({ customerTypeLabel: label, isFirstOrderOnly: first });
 assert.equal(getCouponAudience(p("Для всех")), "universal");
-assert.equal(getCouponAudience(p(null)), "universal");
+assert.equal(getCouponAudience(p(null)), "unknown");
+assert.equal(getCouponAudience(p("По условиям акции")), "unknown");
 assert.equal(getCouponAudience(p("Первый заказ", true)), "first-order");
 assert.equal(getCouponAudience(p("Повторные заказы")), "repeat-order");
 assert.equal(getCouponAudience(p("Для постоянных клиентов")), "repeat-order");

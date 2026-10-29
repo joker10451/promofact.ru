@@ -59,8 +59,10 @@ const page = fs.readFileSync("src/app/store/[slug]/page.tsx","utf8");
 const ticket = fs.readFileSync("src/components/CouponTicket.tsx","utf8");
 const howto = fs.readFileSync("src/components/HowToApply.tsx","utf8");
 const seo = fs.readFileSync("src/lib/storeSeoContent.ts","utf8");
-assert.ok(page.includes('variant={slug === "yandex-plus" ? "subscription" : avitoByLink ? "avito-links" : "code"}'),
-  "Avito flow must remain intact while Yandex Plus uses subscription steps");
+assert.ok(page.includes('avitoByLink ? "avito-links" : "code"}') &&
+  page.includes('slug === "yandex-plus" ? "subscription"') &&
+  page.includes('slug === "magnit-dostavka" ? "magnit-app"'),
+  "Avito and Yandex Plus flows must remain intact when adding the Magnit app steps");
 assert.ok(page.includes('noKnownExpiry ? "Срок действия партнёром не указан'));
 assert.ok(ticket.includes('"Проверить скидку в Авито →"'));
 assert.ok(howto.includes("Как получить скидку в Авито Путешествиях"));

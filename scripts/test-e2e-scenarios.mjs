@@ -990,14 +990,16 @@ async function run() {
       const repeatCount = parseInt(repeatCountText.trim(), 10);
        const universalBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Для всех")');
        const universalCount = parseInt((await universalBtn.locator("span:last-child").innerText()).trim(), 10);
+       const unknownBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Условия уточняются")');
+       const unknownCount = parseInt((await unknownBtn.locator("span:last-child").innerText()).trim(), 10);
 
-      if (isNaN(allCount) || isNaN(firstCount) || isNaN(repeatCount) || isNaN(universalCount)) {
+      if (isNaN(allCount) || isNaN(firstCount) || isNaN(repeatCount) || isNaN(universalCount) || isNaN(unknownCount)) {
         throw new Error(`Не удалось распарсить бейджи счётчиков: all=${allCountText}, first=${firstCountText}, repeat=${repeatCountText}`);
       }
 
-      // Инвариант: allCount === firstCount + repeatCount
-      if (allCount !== firstCount + repeatCount + universalCount) {
-        throw new Error(`Инвариант нарушен: allCount (${allCount}) !== firstCount (${firstCount}) + repeatCount (${repeatCount}) + universalCount (${universalCount})`);
+      // Все предложения разбиты на взаимоисключающие группы, включая неизвестную аудиторию.
+      if (allCount !== firstCount + repeatCount + universalCount + unknownCount) {
+        throw new Error(`Счётчики не сходятся: all=${allCount}, first=${firstCount}, repeat=${repeatCount}, universal=${universalCount}, unknown=${unknownCount}`);
       }
 
       // Карточки купонов в сетке (article с id^="coupon-")
@@ -1072,6 +1074,13 @@ async function run() {
       await page.waitForTimeout(300);
       if (await cards.count() !== universalCount) {
         throw new Error(`Ожидалось ${universalCount} универсальных купонов, получено ${await cards.count()}`);
+      }
+
+      // 3c. Неизвестная аудитория показана отдельно, а не как "Для всех".
+      await unknownBtn.click();
+      await page.waitForTimeout(300);
+      if (await cards.count() !== unknownCount) {
+        throw new Error(`Ожидалось ${unknownCount} купонов с неподтверждённой аудиторией, получено ${await cards.count()}`);
       }
 
       // 4. Клик "Все акции"
