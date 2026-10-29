@@ -238,9 +238,9 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
   if (slug === "magnit-dostavka" && input.couponCount > 0) {
     const codes = new Set(input.coupons.map(c => c.code.trim().toLocaleUpperCase("ru-RU")));
     const details: string[] = [];
-    if (codes.has("25GFC1TL4")) details.push("Код 25GFC1TL4 даёт 31% на каждый заказ от 1 700 ₽ в «Экспрессе» либо от 2 500 ₽ в «Гипермаркете» до 31 октября, 23:59 МСК.");
-    if (codes.has("SGPFB7JJGY")) details.push("Код SGPFB7JJGY даёт 26% при заказе от 2 000 ₽ до 31 октября, 23:59 МСК.");
-    if (codes.has("ДОЖДЬ")) details.push("Для кода «Дождь» до 3 ноября размер бонуса партнёром не указан — уточняйте его в приложении.");
+    if (codes.has("25GFC1TL4")) details.push("Код 25GFC1TL4 даёт 31% только новому пользователю на первый заказ от 2 000 ₽ в «Гипермаркете» до 31 октября, 23:59 МСК.");
+    if (codes.has("SGPFB7JJGY")) details.push("Код SGPFB7JJGY даёт 26% на один любой заказ от 2 000 ₽ в «Гипермаркете» при самовывозе до 31 октября, 23:59 МСК.");
+    if (codes.has("ДОЖДЬ")) details.push("Общий промокод «Дождь» даёт 31% на каждый заказ от 1 700 ₽ в «Экспрессе» или от 2 500 ₽ в «Гипермаркете» до 3 ноября, 23:59 МСК.");
     return [
       `На странице Магнит Доставка сейчас доступно ${offerCounts}. Промокоды предназначены для оформления в приложении «Магнит»; применимость зависит от условий каждого предложения.`,
       ...details,

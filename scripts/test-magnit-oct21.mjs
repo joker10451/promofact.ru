@@ -10,7 +10,7 @@ import { dedupeCoupons } from "../src/lib/dedupe.ts";
 const current = {
   "25GFC1TL4": { value: "31%", until: "2026-10-31T23:59:59+03:00" },
   "SGPFB7JJGY": { value: "26%", until: "2026-10-31T23:59:59+03:00" },
-  "Дождь": { value: "Дождь", until: "2026-11-03T23:59:59+03:00" },
+  "Дождь": { value: "31%", until: "2026-11-03T23:59:59+03:00" },
 };
 const old = "https://mgntgm.prfl.me/sites/vjjrfu?erid=2RanynuJXUf";
 assert.equal(MAGNIT_OCT29_LINK, "https://mgntgm.prfl.me/sites/b2dnbt?erid=2Ranykq7AeF");
@@ -35,16 +35,31 @@ for(const item of MAGNIT_ROTATED_OFFERS) {
   assert.equal(isCouponActive(c.expires, Date.parse(c.expires)-1), true);
   assert.equal(isCouponActive(c.expires, Date.parse(c.expires)+1), false);
   assert.equal(c.isBarcode, false);
-  assert.equal(c.isFirstOrderOnly, false, "Do not invent first order requirement");
+  assert.equal(c.isFirstOrderOnly, c.code === "25GFC1TL4", "Only 25GFC1TL4 is restricted to new customers / first order");
 }
 
 const named = Object.fromEntries(MAGNIT_ROTATED_OFFERS.map(x => [x.promocode.code, x]));
-assert.match(named["25GFC1TL4"].promocode.terms, /1 700 ₽.*Экспресс.*2 500 ₽.*Гипермаркет/s);
-assert.match(named["SGPFB7JJGY"].promocode.terms, /2 000 ₽/);
+assert.match(named["25GFC1TL4"].promocode.terms, /31%.*первый заказ от 2 000 ₽.*Гипермаркет.*нового пользователя/);
+assert.equal(getCouponAudience(named["25GFC1TL4"].promocode), "first-order");
+assert.match(named["SGPFB7JJGY"].promocode.terms, /26%.*один любой заказ от 2 000 ₽.*Гипермаркет.*самовывоз/);
+assert.equal(getCouponAudience(named["SGPFB7JJGY"].promocode), "unknown");
+assert.match(named["Дождь"].promocode.terms, /31%.*каждый заказ от 1 700 ₽.*Экспресс.*2 500 ₽.*Гипермаркет/s);
 assert.equal(getCouponAudience(named["Дождь"].promocode), "unknown");
-const rain = refineOffer(named["Дождь"].promocode.bonusName, named["Дождь"].promocode.terms, "Дождь", "Магнит Доставка", false);
-assert.equal(rain.discount, "Размер бонуса уточняется");
-assert.notEqual(rain.condition, "по промокоду");
+for (const [code, expectedCondition] of [
+  ["25GFC1TL4", /первый заказ от 2 000 ₽.*Гипермаркет.*нового пользователя/],
+  ["SGPFB7JJGY", /один любой заказ от 2 000 ₽.*Гипермаркет.*самовывоз/],
+  ["Дождь", /каждый заказ от 1 700 ₽.*Экспресс.*2 500 ₽.*Гипермаркет/],
+]) {
+  const item = named[code].promocode;
+  const display = refineOffer(item.bonusName, item.terms, code, "Магнит Доставка", item.isFirstOrderOnly);
+  assert.match(display.discount, /^−(?:26|31)%$/);
+  assert.match(display.condition, expectedCondition);
+  assert.equal(display.fullTerms, item.terms);
+}
+const seo = fs.readFileSync("src/lib/storeSeoContent.ts", "utf8");
+assert(seo.includes("Код 25GFC1TL4 даёт 31% только новому пользователю"));
+assert(seo.includes("SGPFB7JJGY даёт 26% на один любой заказ"));
+assert(seo.includes("Общий промокод «Дождь» даёт 31% на каждый заказ"));
 
 const sample=MAGNIT_ROTATED_OFFERS[0];
 const stale={...sample,id:1998258,
