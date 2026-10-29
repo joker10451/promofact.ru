@@ -1,0 +1,26 @@
+name: Publish Pyaterochka Summation Deal to Telegram (@smart_zakupka)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - public/banners/pyaterochka_oct2026.jpg
+      - scripts/publish-pyaterochka-action.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run posting script
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: node scripts/publish-pyaterochka-action.mjs

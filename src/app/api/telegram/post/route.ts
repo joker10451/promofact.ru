@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCoupons } from "@/lib/perfluence";
-import { sendCouponToTelegram, sendCustomPostToTelegram, deleteTelegramMessage, formatGoldAppleHalloweenPost, formatFmartFlashPost } from "@/lib/telegram";
+import { sendCouponToTelegram, sendCustomPostToTelegram, deleteTelegramMessage, formatGoldAppleHalloweenPost, formatFmartFlashPost, formatPyaterochkaSummationPost } from "@/lib/telegram";
 import { isBearerAuthorized } from "@/lib/apiAuth";
 import { selectBestCouponToPost, recordPosting } from "@/lib/postingEngine";
 import { getFlor2uTelegramOffers, getGoldAppleTelegramOffers } from "@/lib/perfluenceOct18Telegram";
@@ -131,6 +131,57 @@ async function handlePost(req: NextRequest) {
           {
             store: "FMART",
             codes: fmartCodes,
+            status: res.ok ? "posted" : "failed",
+            messageId: res.messageId,
+            error: res.error,
+          },
+        ],
+      });
+    }
+    // Если запрошена Пятёрочка Доставка и не указан конкретный одиночный код —
+    // публикуем срочный пост о суммировании промокодов со скидками до конца октября
+    if (storeSlug === "pyaterochka" && !requestedCode) {
+      const post = formatPyaterochkaSummationPost();
+      const pyaterochkaCodes = ["4pmhdjrhsp7", "6wrhnueusp6"];
+      if (dryRun) {
+        return NextResponse.json({
+          dryRun: true,
+          mode: "store_multi_post",
+          store: "Пятёрочка Доставка",
+          codes: pyaterochkaCodes,
+          text: post.text,
+          buttons: post.buttons,
+        });
+      }
+
+      const res = await sendCustomPostToTelegram(
+        post,
+        { storeId: 4264, storeName: "Пятёрочка Доставка", promoCodes: pyaterochkaCodes },
+      );
+
+      if (res.ok) {
+        coupons.forEach((c) => {
+          if (c.store.slug === "pyaterochka") {
+            recordPosting({
+              id: c.id,
+              code: c.promocode.code,
+              store: c.store.name,
+              storeSlug: c.store.slug,
+              categorySlug: c.store.categorySlug,
+              date: new Date().toISOString(),
+              messageId: res.messageId,
+              channel: "telegram",
+            });
+          }
+        });
+      }
+
+      return NextResponse.json({
+        success: res.ok,
+        results: [
+          {
+            store: "Пятёрочка Доставка",
+            codes: pyaterochkaCodes,
             status: res.ok ? "posted" : "failed",
             messageId: res.messageId,
             error: res.error,

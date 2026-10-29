@@ -399,6 +399,44 @@ export function formatFmartFlashPost(): {
   return { text, buttons };
 }
 
+/**
+ * Формирование срочного поста Пятёрочка Доставка (суммирование со скидками до конца октября)
+ */
+export function formatPyaterochkaSummationPost(): {
+  text: string;
+  buttons: TelegramButton[][];
+} {
+  const affiliateUrl = "https://pyaterochka.prfl.me/smart_zakupka/tatilo?erid=2Ranyng8Q3m";
+  const storeUrl = `${SITE_URL}/store/pyaterochka`;
+
+  const text = [
+    "🛒 <b>СУММИРУЕТСЯ СО СКИДКАМИ: промокоды в Пятёрочка Доставка!</b>",
+    "",
+    "Только до конца октября действует редкая акция — промокоды <b>суммируются со всеми скидками каталога</b>! Двойная экономия на свежих продуктах и угощениях к чаю 🥐☕️",
+    "",
+    "🔥 <b>Горячие промокоды:</b>",
+    "",
+    "⚡️ <code>4pmhdjrhsp7</code> — скидка <b>750 ₽</b> на первый заказ от 1 500 ₽",
+    "⚡️ <code>6wrhnueusp6</code> — скидка <b>55%</b> на первый заказ от 700 ₽ <i>(макс. скидка 600 ₽)</i>",
+    "",
+    "<i>(нажмите на промокод — он скопируется в буфер)</i>",
+    "",
+    "👥 <b>Действуют и на старых аккаунтах</b>, если вы не совершали заказ более года!",
+    "",
+    "📌 Зона и время доставки ограничены. Имеются ограничения по условиям бесплатной доставки. Подробности в приложении «Пятёрочка Доставка» 18+.",
+    "",
+    "────────────────────",
+    "<tg-spoiler><i>Реклама. ООО «Агроторг». ИНН 7825706086 erid: 2Ranyng8Q3m</i></tg-spoiler>",
+  ].join("\n");
+
+  const buttons: TelegramButton[][] = [
+    [{ text: "🛍 Заказать в Пятёрочке →", url: affiliateUrl }],
+    [{ text: "🌐 Все скидки Пятёрочки на сайте", url: storeUrl }],
+  ];
+
+  return { text, buttons };
+}
+
 export async function sendCustomPostToTelegram(
   post: { text: string; buttons?: TelegramButton[][] },
   meta?: { storeId?: number; storeName?: string; promoCodes?: string[] },
