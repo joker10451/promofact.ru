@@ -3,7 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { PROMO_BANNERS, getActivePromoBanners } from "../src/lib/promoBanners.ts";
-import { getAllStores } from "../src/lib/perfluence.ts";
+import { getAllStores, isApprovedPublicCouponPlacement } from "../src/lib/perfluence.ts";
+import { SBER_ANALIZY_OCT29_OFFERS, isApprovedOct29SberAnalizyPlacement } from "../src/lib/perfluenceSberAnalizyOct29.ts";
+import { withoutForbiddenSberAnalizyCreditCardCoPromotion } from "../src/lib/publisherPlacementRules.ts";
 
 console.log("=== Тестирование акции СберЗдоровье (Беременность 30%) ===");
 
@@ -79,9 +81,35 @@ const stores = await getAllStores();
 const sberStore = stores.find((s) => s.slug === "sberzdorovie");
 assert.ok(sberStore, "Магазин sberzdorovie должен присутствовать в каталоге");
 
-const pregnancyCoupon = sberStore.coupons.find((c) => c.promocode.code === "PERPREGA309361");
-assert.equal(pregnancyCoupon, undefined, "Устаревший PERPREGA309361 не должен появляться на опубликованной странице");
-assert.deepEqual(sberStore.coupons.map(c => c.promocode.code).sort(), ["PERE7A4E5", "PERPREGT259702", "SPPA2EFFE"].sort());
-console.log("✓ Подтверждено: остаются только 3 рабочих кода, указанных владельцем");
+const expectedSberCodes = ["PERE7A4E5", "PERPREGT259702", "SPPA2EFFE", "PERPREGA309361", "SHD56E28"];
+assert.deepEqual(sberStore.coupons.map(c => c.promocode.code).sort(), expectedSberCodes.sort());
+const approved = new Map(SBER_ANALIZY_OCT29_OFFERS.map(c => [c.promocode.code, c]));
+assert.equal(approved.size, 2);
+const pregnancyCoupon = approved.get("PERPREGA309361");
+const analysesCoupon = approved.get("SHD56E28");
+assert.ok(pregnancyCoupon && analysesCoupon);
+assert.match(pregnancyCoupon.promocode.bonusName, /30%.*первые и все повторные анализы для беременных/);
+assert.match(analysesCoupon.promocode.bonusName, /20%.*анализы/);
+assert.equal(pregnancyCoupon.promocode.expires, "2026-11-30T23:59:59+03:00");
+assert.equal(analysesCoupon.promocode.expires, "2026-11-30T23:59:59+03:00");
+assert.equal(pregnancyCoupon.affiliate.link, "https://sberanalizy.prfl.me/sites/t3zwt2?erid=2RanymUSyoZ");
+assert.equal(analysesCoupon.affiliate.link, "https://sberanalizy.prfl.me/sites/n9dpk3?erid=2RanymSxzXD");
+for (const coupon of approved.values()) {
+  assert.equal(coupon.affiliate.landingLink, coupon.affiliate.link);
+  assert.equal(new URL(coupon.affiliate.link).searchParams.get("erid"), coupon.affiliate.ordMarker);
+  assert.ok(coupon.affiliate.ordText.includes("ОГРН 1197746310618"));
+  assert.ok(coupon.affiliate.ordText.includes("ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ"));
+  assert.equal(isApprovedPublicCouponPlacement(coupon), true);
+  assert.equal(isApprovedOct29SberAnalizyPlacement(coupon), true);
+  assert.equal(isApprovedPublicCouponPlacement({ ...coupon, affiliate: { ...coupon.affiliate, link: "https://sberanalizy.prfl.me/sites/jhtq64?erid=2Ranym5xMV5" } }), false,
+    "Историческая партнерская ссылка не должна восстановиться");
+  assert.equal(isApprovedPublicCouponPlacement({ ...coupon, affiliate: { ...coupon.affiliate, ordMarker: "WRONG" } }), false);
+}
+const fakeCredit = { ...pregnancyCoupon, store: { ...pregnancyCoupon.store, slug: "kreditnaya-sberkarta", name: "Кредитная СберКарта" } };
+const curated = withoutForbiddenSberAnalizyCreditCardCoPromotion([...SBER_ANALIZY_OCT29_OFFERS, fakeCredit]);
+assert.ok(curated.some(c => c.store.slug === "kreditnaya-sberkarta"));
+assert.equal(curated.some(c => ["PERPREGA309361", "SHD56E28"].includes(c.promocode.code) && c.store.slug === "sberzdorovie"), false);
+assert.equal(withoutForbiddenSberAnalizyCreditCardCoPromotion(SBER_ANALIZY_OCT29_OFFERS).length, 2);
+console.log("✓ Два новых согласованных промокода с разными ссылками, проверкой маркировки и ограничением совместной рекламы");
 
 console.log("🎉 Все проверки пройдены успешно!");

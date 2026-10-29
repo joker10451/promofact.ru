@@ -51,7 +51,7 @@ assert.equal(catalog.filter(c => c.store.slug === "yandex-knigi").length, 1);
 const sber = stores.find(s => s.slug === "sberzdorovie");
 assert.ok(sber);
 assert.deepEqual(sber.coupons.map(c => c.promocode.code).sort(),
-  ["PERPREGT259702", "SPPA2EFFE", "PERE7A4E5"].sort());
+  ["PERPREGT259702", "SPPA2EFFE", "PERE7A4E5", "PERPREGA309361", "SHD56E28"].sort());
 assert.equal(getActivePromoBanners({ storeSlug: "sberzdorovie" })
   .some(b => b.code === "PERPREGA309361"), false);
 

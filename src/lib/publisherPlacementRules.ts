@@ -69,3 +69,19 @@ export function withoutForbiddenGroceryCoPromotion(coupons: Coupon[]): Coupon[] 
   // Keep the original Pyaterochka placement; publish VkusVill and Samokat separately.
   return coupons.filter(c => c.store.slug !== "vkusvill-dostavka" && c.store.slug !== "samokat");
 }
+
+/**
+ * Perfluence: SberZdorovie (Analizy) cannot be included in the same curated
+ * advertising selection as the Credit SberCard.
+ * Standalone store pages and the neutral searchable directory remain intact.
+ */
+export function withoutForbiddenSberAnalizyCreditCardCoPromotion(coupons: Coupon[]): Coupon[] {
+  const hasCreditSberCard = coupons.some(c =>
+    ["kreditnaya-sberkarta", "sberkarta"].includes(c.store.slug) ||
+    /кредитн[а-яё]*\s+сберкарт/iu.test(c.store.name));
+  if (!hasCreditSberCard) return coupons;
+  const analysisCodes = new Set(["PERPREGA309361", "SHD56E28"]);
+  return coupons.filter(c =>
+    !(c.store.slug === "sberzdorovie" &&
+      analysisCodes.has(c.promocode.code.trim().toUpperCase())));
+}
