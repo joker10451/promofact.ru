@@ -1,9 +1,9 @@
 import type { Coupon } from "@/lib/types";
 import { STABLE_STORES } from "@/lib/stableStores";
 
-/** Approved Magnet promo codes and refreshed PromoFact website URL from 21 October 2026. */
-export const MAGNIT_OCT21_LINK = "https://mgntgm.prfl.me/sites/gdpiqn?erid=2RanymKnUcb";
-export const MAGNIT_OCT21_ERID = "2RanymKnUcb";
+/** Approved Magnit promo codes and refreshed PromoFact website URL from 29 October 2026. */
+export const MAGNIT_OCT29_LINK = "https://mgntgm.prfl.me/sites/b2dnbt?erid=2Ranykq7AeF";
+export const MAGNIT_OCT29_ERID = "2Ranykq7AeF";
 // Site-specific WinLab publisher link renewed 16 October 2026; ERID has NOT been supplied.
 // These staged offers remain excluded from production until the token is verified.
 export const WINLAB_LINK_PENDING_ERID = "https://winelab.prfl.me/sites/gittf8";
@@ -21,10 +21,10 @@ const yandexTravel: Coupon["store"] = { ...STABLE_STORES["yandeks-puteshestviya"
 const tanuki: Coupon["store"] = { ...STABLE_STORES["tanukifamily"], activeBloggers: STABLE_STORES["tanukifamily"].activeBloggers ?? 0 };
 const perekrestok: Coupon["store"] = { ...STABLE_STORES["perekrestok-dostavka"], activeBloggers: STABLE_STORES["perekrestok-dostavka"].activeBloggers ?? 0 };
 const magnitAd: Coupon["affiliate"] = {
-  link: MAGNIT_OCT21_LINK,
-  landingLink: MAGNIT_OCT21_LINK,
-  ordMarker: MAGNIT_OCT21_ERID,
-  ordText: 'Реклама. АО "Тандер", ИНН 2310031475. erid: 2RanymKnUcb',
+  link: MAGNIT_OCT29_LINK,
+  landingLink: MAGNIT_OCT29_LINK,
+  ordMarker: MAGNIT_OCT29_ERID,
+  ordText: 'Реклама. АО "Тандер", ИНН 2310031475. erid: 2Ranykq7AeF',
 };
 const mKosmetikAd: Coupon["affiliate"] = {
   link: M_KOSMETIK_LINK,
@@ -107,8 +107,8 @@ function offer(
   };
 }
 
-/** Perfluence publisher dashboard for promofact.ru, 21 October 2026.
- * The 14 Oct placement vjjrfu has been superseded by gdpiqn.
+/** Perfluence publisher dashboard for promofact.ru, 29 October 2026.
+ * The 21 Oct placement gdpiqn has been superseded by b2dnbt.
  * Do not infer a minimum basket, first-order requirements or the product gift
  * from the promo code alone. All three must use this site-approved URL/ERID.
  */
@@ -119,9 +119,9 @@ export const MAGNIT_ROTATED_OFFERS: Coupon[] = [
   offer(82580142, magnit, magnitAd, "SGPFB7JJGY",
     "Скидка 26% в приложении «Магнит»", "2026-10-31T23:59:59+03:00", "По условиям акции",
     "Промокод SGPFB7JJGY: скидка 26% в приложении «Магнит», по условиям подборки. Действует до 31 октября 2026 года, 23:59 по Москве. Минимальную сумму, ограничения по товарам и итоговую скидку проверяйте при оформлении."),
-  offer(82580143, magnit, magnitAd, "Пирог",
-    "Промокод «Пирог» в приложении «Магнит»", "2026-10-27T23:59:59+03:00", "По условиям акции",
-    "Промокод «Пирог» указан в согласованной подборке «Магнит: акции и доставка» до 27 октября 2026 года, 23:59 по Москве. Вид и условия бонуса, минимальную сумму и доступность по адресу уточняйте при оформлении — детали в уведомлении не приведены."),
+  offer(82580143, magnit, magnitAd, "Дождь",
+    "Промокод «Дождь» в приложении «Магнит»", "2026-11-03T23:59:59+03:00", "По условиям акции",
+    "Промокод «Дождь» указан в обновлённой подборке «Магнит: акции и доставка» до 3 ноября 2026 года, 23:59 по Москве. Вид и условия бонуса, минимальную сумму и доступность по адресу уточняйте при оформлении — детали в уведомлении не приведены."),
 ];
 
 /**
