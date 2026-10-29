@@ -36,6 +36,18 @@ export function refineOffer(
     .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
   const isNoCode = !isRealPromoCode(code);
 
+  // Approved Magnit placement: preserve first-order, pickup and both basket thresholds
+  // in the visible offer card; the generic single-minimum normalizer would drop them.
+  if (storeName === "Магнит Доставка" && ["25GFC1TL4", "SGPFB7JJGY", "Дождь"].includes(code) && /^Скидка 31%|^Скидка 26%/iu.test(title)) {
+    const value = title.match(/Скидка\s+(\d+)%/iu)?.[1];
+    if (value) return {
+      type: "percent", discount: `−${value}%`,
+      condition: title.replace(/^Скидка\s+\d+%\s*/iu, "").trim(),
+      fullTerms: terms || title,
+      isNoCode,
+    };
+  }
+
   // No verified benefit: do not render a tautological "по промокоду" tagline.
   if (/размер бонуса уточняется/iu.test(title)) {
     return { type: "default", discount: "Размер бонуса уточняется",
