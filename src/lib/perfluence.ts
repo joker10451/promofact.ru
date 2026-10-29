@@ -482,7 +482,7 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
       new Set(["3CL7UZV8DB", "JJVKYHYSX5", "PC2F8F2ALL", "P2U2VHZDD6", "SKG7PFYYMN"])
         .has(c.promocode.code.trim().toUpperCase())) return false;
 
-  const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ПИРОГ"]);
+  const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ДОЖДЬ"]);
 
     // Site-specific Perfluence links renewed 23 October 2026.
     // Reject stale widget links / ERIDs and any unconfirmed codes for these projects.
@@ -511,12 +511,12 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // attribute their clicks to the old PromoFact placement and outdated ERID.
     if (c.store.slug === "magnit-dostavka") {
       return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase()) &&
-        c.affiliate.link === "https://mgntgm.prfl.me/sites/gdpiqn?erid=2RanymKnUcb" &&
-        c.affiliate.landingLink === "https://mgntgm.prfl.me/sites/gdpiqn?erid=2RanymKnUcb" &&
-        c.affiliate.ordMarker === "2RanymKnUcb" &&
+        c.affiliate.link === "https://mgntgm.prfl.me/sites/b2dnbt?erid=2Ranykq7AeF" &&
+        c.affiliate.landingLink === "https://mgntgm.prfl.me/sites/b2dnbt?erid=2Ranykq7AeF" &&
+        c.affiliate.ordMarker === "2Ranykq7AeF" &&
         c.affiliate.ordText.includes('АО "Тандер"') &&
         c.affiliate.ordText.includes("ИНН 2310031475") &&
-        c.affiliate.ordText.includes("erid: 2RanymKnUcb");
+        c.affiliate.ordText.includes("erid: 2Ranykq7AeF");
     }
     // New site-specific Tanuki publication supersedes the stale widget URL and
     // historical ERID. Deny unknown/historical codes until reviewed.
