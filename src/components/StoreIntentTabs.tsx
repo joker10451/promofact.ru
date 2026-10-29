@@ -1,6 +1,6 @@
 import Icon from "@/components/Icon";
 
-export type IntentFilter = "all" | "first-order" | "repeat-order" | "universal";
+export type IntentFilter = "all" | "first-order" | "repeat-order" | "universal" | "unknown";
 
 interface StoreIntentTabsProps {
   activeTab: IntentFilter;
@@ -8,6 +8,7 @@ interface StoreIntentTabsProps {
   firstCount: number;
   repeatCount: number;
   universalCount: number;
+  unknownCount: number;
   onTabChange: (tab: IntentFilter) => void;
 }
 
@@ -17,6 +18,7 @@ export default function StoreIntentTabs({
   firstCount,
   repeatCount,
   universalCount,
+  unknownCount,
   onTabChange,
 }: StoreIntentTabsProps) {
   return (
@@ -82,6 +84,22 @@ export default function StoreIntentTabs({
         <Icon name="check" size={14} />
         <span>Для всех</span>
         <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${activeTab === "universal" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>{universalCount}</span>
+      </button>
+
+      {/* Неизвестные ограничения не превращаем в "для всех". */}
+      <button
+        type="button"
+        aria-pressed={activeTab === "unknown"}
+        onClick={() => onTabChange("unknown")}
+        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+          activeTab === "unknown"
+            ? "bg-ink text-white font-extrabold shadow-xs"
+            : "border border-line bg-white text-ink/70 hover:border-ink hover:text-ink"
+        }`}
+      >
+        <Icon name="bulb" size={14} />
+        <span>Условия уточняются</span>
+        <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${activeTab === "unknown" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>{unknownCount}</span>
       </button>
 
       {/* 3. Повторные заказы */}
