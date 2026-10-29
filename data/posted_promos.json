@@ -6,7 +6,8 @@
     50040,
     16990201,
     829200351,
-    829200252
+    829200252,
+    17371293
   ],
   "history": [
     {
@@ -187,6 +188,17 @@
       "postUrl": "https://t.me/smart_zakupka/85",
       "date": "2026-10-18T15:31:20.849Z",
       "messageId": 85
+    },
+    {
+      "id": 17371293,
+      "code": "4pmhdjrhsp7, 6wrhnueusp6",
+      "store": "Пятёрочка Доставка",
+      "storeSlug": "pyaterochka",
+      "postUrl": "https://t.me/smart_zakupka/91",
+      "link": "https://pyaterochka.prfl.me/smart_zakupka/tatilo?erid=2Ranyng8Q3m",
+      "erid": "2Ranyng8Q3m",
+      "date": "2026-10-29T15:03:57.404Z",
+      "messageId": 91
     }
   ]
 }
