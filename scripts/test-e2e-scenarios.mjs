@@ -981,7 +981,7 @@ async function run() {
       const allCountText = await allBtn.locator("span:last-child").innerText();
       const allCount = parseInt(allCountText.trim(), 10);
 
-      const firstOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("На первый заказ")');
+      const firstOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Только первый заказ")');
       const firstCountText = await firstOrderBtn.locator("span:last-child").innerText();
       const firstCount = parseInt(firstCountText.trim(), 10);
 

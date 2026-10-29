@@ -437,7 +437,7 @@ export default function CouponTicket({
           ) : (
             <span className="inline-flex min-w-0 items-center gap-1.5 text-xs font-semibold text-ink/75">
               <span className="inline-block h-2 w-2 rounded-full bg-mint" />
-              Официальное предложение
+              {store.slug === "sberzdorovie" ? "Предложение партнёра" : "Официальное предложение"}
             </span>
           )}
           <button

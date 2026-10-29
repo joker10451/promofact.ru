@@ -14,6 +14,7 @@ type RepeatPlacement = {
   code: string;
   bonus: string;
   terms: string;
+  audience?: string;
   expires: string | null;
   link: string;
   erid: string;
@@ -71,6 +72,7 @@ export const PERFLUENCE_REPEAT_OCT24: readonly RepeatPlacement[] = [
   {
     id: 826346801, slug: "sberzdorovie", code: "PERPREGT259702",
     bonus: "Скидка 30% на онлайн-консультации для беременных",
+    audience: "Первый и повторный заказ · консультация для беременных",
     terms: "Скидка 30% на онлайн-консультации для беременных при первом и повторных заказах по условиям проекта. До 31 октября 2026 года, 23:59 МСК.",
     expires: oct31, link: "https://sberanalizy.prfl.me/sites/l7bd3c?erid=2RanymYhrJP",
     erid: "2RanymYhrJP", legal: SBER_LEGAL,
@@ -78,6 +80,7 @@ export const PERFLUENCE_REPEAT_OCT24: readonly RepeatPlacement[] = [
   {
     id: 826346802, slug: "sberzdorovie", code: "SPPA2EFFE",
     bonus: "Скидка 30% на онлайн-консультации психолога",
+    audience: "Первая и повторная консультация психолога",
     terms: "Скидка 30% на первую и повторные онлайн-консультации психолога по условиям проекта. До 31 октября 2026 года, 23:59 МСК.",
     expires: oct31, link: "https://sberanalizy.prfl.me/sites/bclp7x?erid=2RanymXDs23",
     erid: "2RanymXDs23", legal: SBER_LEGAL,
@@ -85,6 +88,7 @@ export const PERFLUENCE_REPEAT_OCT24: readonly RepeatPlacement[] = [
   {
     id: 826346803, slug: "sberzdorovie", code: "PERE7A4E5",
     bonus: "Скидка 35% на онлайн-консультации врача",
+    audience: "Онлайн-консультация врача · ограничения уточняются",
     terms: "Промокод на онлайн-консультацию врача по условиям проекта. До 31 октября 2026 года, 23:59 МСК.",
     expires: oct31, link: "https://sberanalizy.prfl.me/sites/1a557k?erid=2RanymVjsjh",
     erid: "2RanymVjsjh", legal: SBER_LEGAL,
@@ -131,7 +135,7 @@ export const PERFLUENCE_REPEAT_OCT24_OFFERS: Coupon[] = PERFLUENCE_REPEAT_OCT24.
     id: p.id, code: p.code, bonusName: p.bonus, terms: p.terms,
     expires: p.expires,
     isHit: false, isUniversal: false, isFirstOrderOnly: false,
-    customerTypeLabel: "По условиям акции", region: "RU",
+    customerTypeLabel: p.audience ?? "По условиям акции", region: "RU",
     isBarcode: false, barcodeImage: null, group: "perfluence",
   },
   store: storeFor(p.slug),
