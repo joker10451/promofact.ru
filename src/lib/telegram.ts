@@ -405,9 +405,11 @@ export function formatFmartFlashPost(): {
 export function formatPyaterochkaSummationPost(): {
   text: string;
   buttons: TelegramButton[][];
+  photoUrl: string;
 } {
   const affiliateUrl = "https://pyaterochka.prfl.me/smart_zakupka/tatilo?erid=2Ranyng8Q3m";
   const storeUrl = `${SITE_URL}/store/pyaterochka`;
+  const photoUrl = `${SITE_URL}/banners/pyaterochka_oct2026.jpg`;
 
   const text = [
     "🛒 <b>СУММИРУЕТСЯ СО СКИДКАМИ: промокоды в Пятёрочка Доставка!</b>",
@@ -434,11 +436,11 @@ export function formatPyaterochkaSummationPost(): {
     [{ text: "🌐 Все скидки Пятёрочки на сайте", url: storeUrl }],
   ];
 
-  return { text, buttons };
+  return { text, buttons, photoUrl };
 }
 
 export async function sendCustomPostToTelegram(
-  post: { text: string; buttons?: TelegramButton[][] },
+  post: { text: string; buttons?: TelegramButton[][]; photoUrl?: string },
   meta?: { storeId?: number; storeName?: string; promoCodes?: string[] },
   opts?: TelegramPostOptions,
 ): Promise<{ ok: boolean; messageId?: number; error?: string }> {
@@ -455,8 +457,8 @@ export async function sendCustomPostToTelegram(
   } : undefined;
 
   try {
-    const endpoint = `https://api.telegram.org/bot${token}/sendMessage`;
-    const body: Record<string, unknown> = {
+    let endpoint = `https://api.telegram.org/bot${token}/sendMessage`;
+    let body: Record<string, unknown> = {
       chat_id: chatId,
       text: post.text,
       parse_mode: "HTML",
@@ -466,6 +468,17 @@ export async function sendCustomPostToTelegram(
     if (replyMarkup) {
       body.reply_markup = replyMarkup;
     }
+    if (post.photoUrl && post.photoUrl.startsWith("http")) {
+      endpoint = `https://api.telegram.org/bot${token}/sendPhoto`;
+      body = {
+        chat_id: chatId,
+        photo: post.photoUrl,
+        caption: post.text,
+        parse_mode: "HTML",
+        reply_markup: replyMarkup,
+        disable_notification: true,
+      };
+    }
 
     const res = await fetch(endpoint, {
       method: "POST",
@@ -473,7 +486,25 @@ export async function sendCustomPostToTelegram(
       body: JSON.stringify(body),
     });
 
-    const data = await res.json();
+    let data = await res.json();
+    if (!data.ok && endpoint.includes("sendPhoto")) {
+      const fallbackRes = await fetch(
+        `https://api.telegram.org/bot${token}/sendMessage`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: post.text,
+            parse_mode: "HTML",
+            reply_markup: replyMarkup,
+            disable_notification: true,
+            disable_web_page_preview: true,
+          }),
+        },
+      );
+      data = await fallbackRes.json();
+    }
     if (!data.ok) {
       return {
         ok: false,
