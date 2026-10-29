@@ -716,7 +716,7 @@ export default async function StorePage({
           </div>
         </section>
 
-        <HowToApply variant={slug === "yandex-plus" ? "subscription" : avitoByLink ? "avito-links" : "code"} />
+        <HowToApply variant={slug === "magnit-dostavka" ? "magnit-app" : slug === "yandex-plus" ? "subscription" : avitoByLink ? "avito-links" : "code"} />
 
         <section className="mt-10 max-w-3xl rounded-2xl border border-mint/30 bg-mint/10 p-5">
           <Link

@@ -36,6 +36,13 @@ export function refineOffer(
     .replace(/(^|[\s,.:;!?-])се(?=[\s,.:;!?-]|$)/gi, "$1все");
   const isNoCode = !isRealPromoCode(code);
 
+  // No verified benefit: do not render a tautological "по промокоду" tagline.
+  if (/размер бонуса уточняется/iu.test(title)) {
+    return { type: "default", discount: "Размер бонуса уточняется",
+      condition: `Промокод «${code}»: условия проверьте в приложении`,
+      fullTerms: terms || "Проверьте размер бонуса до оформления заказа.", isNoCode };
+  }
+
 
   // A free-shipping minimum (e.g. 3,000 ₽) is not a ruble discount.
   if (/^Бесплатная доставка/iu.test(title) && /бесплатн[а-яё]*\s+доставк/iu.test(terms)) {

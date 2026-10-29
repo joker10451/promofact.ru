@@ -3,6 +3,8 @@ import fs from "node:fs";
 import { MAGNIT_ROTATED_OFFERS, MAGNIT_OCT29_LINK, MAGNIT_OCT29_ERID } from "../src/lib/perfluenceRotatedOffers.ts";
 import { isApprovedPublicCouponPlacement, getCombinedCoupons } from "../src/lib/perfluence.ts";
 import { isCouponActive } from "../src/lib/couponExpiry.ts";
+import { refineOffer } from "../src/lib/offerRefiner.ts";
+import { getCouponAudience } from "../src/lib/storeCouponAudience.ts";
 import { dedupeCoupons } from "../src/lib/dedupe.ts";
 
 const current = {
@@ -35,6 +37,14 @@ for(const item of MAGNIT_ROTATED_OFFERS) {
   assert.equal(c.isBarcode, false);
   assert.equal(c.isFirstOrderOnly, false, "Do not invent first order requirement");
 }
+
+const named = Object.fromEntries(MAGNIT_ROTATED_OFFERS.map(x => [x.promocode.code, x]));
+assert.match(named["25GFC1TL4"].promocode.terms, /1 700 ₽.*Экспресс.*2 500 ₽.*Гипермаркет/s);
+assert.match(named["SGPFB7JJGY"].promocode.terms, /2 000 ₽/);
+assert.equal(getCouponAudience(named["Дождь"].promocode), "unknown");
+const rain = refineOffer(named["Дождь"].promocode.bonusName, named["Дождь"].promocode.terms, "Дождь", "Магнит Доставка", false);
+assert.equal(rain.discount, "Размер бонуса уточняется");
+assert.notEqual(rain.condition, "по промокоду");
 
 const sample=MAGNIT_ROTATED_OFFERS[0];
 const stale={...sample,id:1998258,
