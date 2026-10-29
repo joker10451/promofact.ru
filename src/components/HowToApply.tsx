@@ -16,6 +16,12 @@ const STEPS = [
   },
 ];
 
+const SBER_MEDICAL_STEPS = [
+  { n: "1", title: "Выбери медицинскую услугу", text: "Уточни, нужен ли промокод на анализы или онлайн-консультацию. У этих услуг разные предложения." },
+  { n: "2", title: "Открой соответствующее предложение", text: "Скопируй код из карточки и перейди по её партнёрской ссылке в СберЗдоровье." },
+  { n: "3", title: "Проверь применение кода", text: "Введи промокод при оформлении, если сервис предоставляет такое поле. Проверь применимость, стоимость и условия до подтверждения." },
+];
+
 const MAGNIT_STEPS = [
   { n: "1", title: "Скопируй код", text: "Скопируй выбранный промокод из карточки вместе с условиями." },
   { n: "2", title: "Открой приложение «Магнит»", text: "Перейди по ссылке и выбери нужный раздел: «Экспресс» или «Гипермаркет»." },
@@ -58,14 +64,14 @@ const SUBSCRIPTION_STEPS = [
   },
 ];
 
-export default function HowToApply({ variant = "code" }: { variant?: "code" | "avito-links" | "subscription" | "magnit-app" }) {
+export default function HowToApply({ variant = "code" }: { variant?: "code" | "avito-links" | "subscription" | "magnit-app" | "sber-medical" }) {
   const isAvito = variant === "avito-links";
   const isSubscription = variant === "subscription";
-  const steps = variant === "magnit-app" ? MAGNIT_STEPS : isAvito ? AVITO_STEPS : isSubscription ? SUBSCRIPTION_STEPS : STEPS;
+  const steps = variant === "sber-medical" ? SBER_MEDICAL_STEPS : variant === "magnit-app" ? MAGNIT_STEPS : isAvito ? AVITO_STEPS : isSubscription ? SUBSCRIPTION_STEPS : STEPS;
   return (
     <section className="mt-12" aria-labelledby="how-apply">
       <h2 id="how-apply" className="font-display text-lg font-extrabold">
-        {variant === "magnit-app" ? "Как применить промокод в приложении «Магнит»" : isAvito ? "Как получить скидку в Авито Путешествиях" : isSubscription ? "Как подключить Яндекс Плюс по промокоду" : "Как применить код"}
+        {variant === "sber-medical" ? "Как использовать промокод СберЗдоровья" : variant === "magnit-app" ? "Как применить промокод в приложении «Магнит»" : isAvito ? "Как получить скидку в Авито Путешествиях" : isSubscription ? "Как подключить Яндекс Плюс по промокоду" : "Как применить код"}
       </h2>
       <ol className="mt-4 grid gap-3 sm:grid-cols-3">
         {steps.map((step) => (

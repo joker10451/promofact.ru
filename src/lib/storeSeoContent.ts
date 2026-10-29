@@ -235,6 +235,26 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
     ];
   }
 
+  if (slug === "sberzdorovie") {
+    const active = input.coupons.filter(c => !c.isBarcode && isRealPromoCode(c.code));
+    if (!active.length) return [
+      "Сейчас для СберЗдоровья нет опубликованных действующих промокодов. Проверяйте предложения перед записью на медицинские услуги.",
+      "Для анализов и консультаций условия могут различаться. Проверяйте цену и ограничения до оформления.",
+    ];
+    const analysisCodes = new Set(["PERPREGA309361", "SHD56E28"]);
+    const analyses = active.filter(c => analysisCodes.has(c.code.trim().toUpperCase()));
+    const consultations = active.filter(c => !analysisCodes.has(c.code.trim().toUpperCase()));
+    const details = (items: typeof active) =>
+      items.map(c => `«${c.code}» — ${c.bonusName || "условия указаны в карточке"}`).join("; ");
+    return [
+      `Для СберЗдоровья опубликовано ${offerCounts} на медицинские анализы и онлайн-консультации. Это разные услуги с отдельными условиями применения промокодов.`,
+      ...(analyses.length ? [`Промокоды на анализы: ${details(analyses)}. Для PERPREGA309361 указаны первые и все повторные анализы для беременных; у SHD56E28 отдельные ограничения нужно проверить перед оплатой.`] : []),
+      ...(consultations.length ? [`Промокоды на онлайн-консультации: ${details(consultations)}. Тип консультации и подходящий код нужно сверить до оформления.`] : []),
+      "Выберите соответствующую услугу по партнёрской ссылке из карточки, введите код там, где его принимает сервис, и проверьте итоговую стоимость до подтверждения. Не каждый код подходит для любой медицинской услуги.",
+      "Имеются противопоказания, необходима консультация специалиста. ПромоФакт может получить партнёрскую комиссию, но пользоваться промокодами на сайте бесплатно.",
+    ];
+  }
+
   if (slug === "magnit-dostavka" && input.couponCount > 0) {
     const codes = new Set(input.coupons.map(c => c.code.trim().toLocaleUpperCase("ru-RU")));
     const details: string[] = [];

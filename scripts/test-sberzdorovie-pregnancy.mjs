@@ -6,6 +6,8 @@ import { PROMO_BANNERS, getActivePromoBanners } from "../src/lib/promoBanners.ts
 import { getAllStores, isApprovedPublicCouponPlacement } from "../src/lib/perfluence.ts";
 import { SBER_ANALIZY_OCT29_OFFERS, isApprovedOct29SberAnalizyPlacement } from "../src/lib/perfluenceSberAnalizyOct29.ts";
 import { withoutForbiddenSberAnalizyCreditCardCoPromotion } from "../src/lib/publisherPlacementRules.ts";
+import { getCouponAudience } from "../src/lib/storeCouponAudience.ts";
+import { buildStoreArticle } from "../src/lib/storeSeoContent.ts";
 
 console.log("=== Тестирование акции СберЗдоровье (Беременность 30%) ===");
 
@@ -111,5 +113,38 @@ assert.ok(curated.some(c => c.store.slug === "kreditnaya-sberkarta"));
 assert.equal(curated.some(c => ["PERPREGA309361", "SHD56E28"].includes(c.promocode.code) && c.store.slug === "sberzdorovie"), false);
 assert.equal(withoutForbiddenSberAnalizyCreditCardCoPromotion(SBER_ANALIZY_OCT29_OFFERS).length, 2);
 console.log("✓ Два новых согласованных промокода с разными ссылками, проверкой маркировки и ограничением совместной рекламы");
+
+const codes = new Map(sberStore.coupons.map(c => [c.promocode.code, c]));
+assert.equal(getCouponAudience(codes.get("PERPREGT259702").promocode), "repeat-order");
+assert.equal(getCouponAudience(codes.get("SPPA2EFFE").promocode), "repeat-order");
+assert.equal(getCouponAudience(codes.get("PERPREGA309361").promocode), "repeat-order");
+assert.equal(getCouponAudience(codes.get("SHD56E28").promocode), "unknown");
+assert.equal(getCouponAudience(codes.get("PERE7A4E5").promocode), "unknown");
+assert.equal(sberStore.coupons.filter(c => getCouponAudience(c.promocode) === "first-order").length, 0);
+const article = buildStoreArticle({
+  name: sberStore.name,
+  category: sberStore.category,
+  categorySlug: sberStore.categorySlug,
+  coupons: sberStore.coupons.map(c => ({
+    code: c.promocode.code, bonusName: c.promocode.bonusName, isBarcode: c.promocode.isBarcode,
+  })),
+  couponCount: sberStore.coupons.length,
+  maxDiscount: "до 35%",
+  isFirstOrder: false,
+  activeBloggers: 0,
+  monthYear: "Октябрь 2026",
+  monthRu: "октябрь 2026",
+  todayRu: "29 октября 2026",
+}, "sberzdorovie").join("\n");
+for (const code of expectedSberCodes) assert.ok(article.includes(code), `SEO must mention live code ${code}`);
+assert.doesNotMatch(article, /витамины|БАДов|уменьшает сумму чека|вставьте код в корзину/iu);
+assert.match(article, /медицинские анализы и онлайн-консультации/iu);
+assert.match(article, /Имеются противопоказания, необходима консультация специалиста/);
+const howTo = fs.readFileSync("src/components/HowToApply.tsx", "utf8");
+const page = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
+assert(howTo.includes('variant === "sber-medical"'));
+assert(page.includes('slug === "sberzdorovie" ? "sber-medical"'));
+assert(page.includes('slug === "sberzdorovie" ? sberFaqItems'));
+console.log("✓ СберЗдоровье: правильные ярлыки, все 5 кодов в SEO, отдельный медицинский FAQ и сценарий");
 
 console.log("🎉 Все проверки пройдены успешно!");

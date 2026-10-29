@@ -310,7 +310,33 @@ export default async function StorePage({
           ]
         : [];
 
-  const faqItems = slug === "yandex-plus" ? [
+  const activeSberCodes = store.coupons.filter(c => isRealPromoCode(c.promocode.code));
+  const sberAnalysisCodes = activeSberCodes.filter(c => ["PERPREGA309361", "SHD56E28"].includes(c.promocode.code.trim().toUpperCase()));
+  const sberConsultationCodes = activeSberCodes.filter(c => !["PERPREGA309361", "SHD56E28"].includes(c.promocode.code.trim().toUpperCase()));
+  const sberFaqItems = [
+    {
+      q: "Какие промокоды действуют на анализы в СберЗдоровье?",
+      a: sberAnalysisCodes.length
+        ? `Для медицинских анализов указаны: ${sberAnalysisCodes.map(c => c.promocode.code).join(", ")}. Код PERPREGA309361 относится к первым и повторным анализам для беременных, а применимость остальных кодов уточняйте в сервисе. У каждого предложения собственная ссылка и ограничения.`
+        : "На этой странице сейчас нет действующих промокодов на медицинские анализы. Проверяйте текущие предложения перед оформлением.",
+    },
+    {
+      q: "Какие промокоды действуют на онлайн-консультации?",
+      a: sberConsultationCodes.length
+        ? `Для онлайн-консультаций доступны: ${sberConsultationCodes.map(c => c.promocode.code).join(", ")}. Конкретная скидка зависит от вида консультации; условия каждого кода указаны в его карточке.`
+        : "Сейчас действующих промокодов на онлайн-консультации в этом каталоге нет.",
+    },
+    {
+      q: "Как применить код на медицинскую услугу?",
+      a: "Выберите нужные анализы или онлайн-консультацию, скопируйте подходящий код и откройте ссылку именно из его карточки. При оформлении проверьте доступность поля для промокода, окончательную стоимость и ограничения до подтверждения.",
+    },
+    {
+      q: "Что проверить перед оформлением?",
+      a: "Промокоды на анализы и онлайн-консультации не взаимозаменяемы. Сверьте вид услуги, ограничения, срок действия и цену. Имеются противопоказания, необходима консультация специалиста.",
+    },
+  ];
+
+  const faqItems = slug === "sberzdorovie" ? sberFaqItems : slug === "yandex-plus" ? [
     ...customFaqItems,
     {
       q: "Как активировать промокод Яндекс Плюс?",
@@ -381,14 +407,18 @@ export default async function StorePage({
   const howToJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    name: avitoByLink ? "Как получить скидку в Авито Путешествиях" : `Как применить промокод ${store.name}`,
-    totalTime: "PT2M",
-    estimatedCost: {
+    name: slug === "sberzdorovie" ? "Как применить промокод на медицинские услуги СберЗдоровья" : avitoByLink ? "Как получить скидку в Авито Путешествиях" : `Как применить промокод ${store.name}`,
+    totalTime: slug === "sberzdorovie" ? undefined : "PT2M",
+    estimatedCost: slug === "sberzdorovie" ? undefined : {
       "@type": "MonetaryAmount",
       currency: "RUB",
       value: "0",
     },
-    step: avitoByLink ? [
+    step: slug === "sberzdorovie" ? [
+      { "@type": "HowToStep", name: "Выберите медицинскую услугу", text: "Определите, нужен ли промокод на анализы или на онлайн-консультацию." },
+      { "@type": "HowToStep", name: "Откройте предложение", text: "Скопируйте соответствующий код и перейдите по ссылке его карточки." },
+      { "@type": "HowToStep", name: "Проверьте условия", text: "При необходимости введите код и проверьте применимость, цену и ограничения до подтверждения." },
+    ] : avitoByLink ? [
       { "@type": "HowToStep", name: "Откройте предложение", text: "Перейдите по партнёрской ссылке предложения для жилья или отеля." },
       { "@type": "HowToStep", name: "Проверьте способ активации", text: "Авторизуйтесь в Авито и выполните условия акции. Если сервис требует персональный код, найдите его в доступных уведомлениях." },
       { "@type": "HowToStep", name: "Проверьте итоговую цену", text: "Перед оплатой проверьте сумму, сборы и условия отмены бронирования." },
@@ -716,7 +746,7 @@ export default async function StorePage({
           </div>
         </section>
 
-        <HowToApply variant={slug === "magnit-dostavka" ? "magnit-app" : slug === "yandex-plus" ? "subscription" : avitoByLink ? "avito-links" : "code"} />
+        <HowToApply variant={slug === "sberzdorovie" ? "sber-medical" : slug === "magnit-dostavka" ? "magnit-app" : slug === "yandex-plus" ? "subscription" : avitoByLink ? "avito-links" : "code"} />
 
         <section className="mt-10 max-w-3xl rounded-2xl border border-mint/30 bg-mint/10 p-5">
           <Link

@@ -60,7 +60,7 @@ export default function StoreIntentTabs({
         }`}
       >
         <Icon name="gift" size={14} />
-        <span>На первый заказ</span>
+        <span>Только первый заказ</span>
         <span
           className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
             activeTab === "first-order" ? "bg-white/20 text-white" : "bg-paper text-ink/60"
