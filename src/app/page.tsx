@@ -16,7 +16,7 @@ import { getCoupons, getStores, getUsesStats } from "@/lib/perfluence";
 import { pickExpiringDeals, offerKey, isPromoHighlightEligible } from "@/lib/hotDeals";
 import { buildSearchIndex } from "@/lib/searchIndex";
 import { isRealPromoCode } from "@/lib/dedupe";
-import { withoutForbiddenTravelCoPromotion, withoutForbiddenTanukiCoPromotion, withoutForbiddenFloristBeautyCoPromotion, withoutForbiddenGroceryCoPromotion } from "@/lib/publisherPlacementRules";
+import { withoutForbiddenTravelCoPromotion, withoutForbiddenTanukiCoPromotion, withoutForbiddenFloristBeautyCoPromotion, withoutForbiddenGroceryCoPromotion, withoutForbiddenSberAnalizyCreditCardCoPromotion } from "@/lib/publisherPlacementRules";
 
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -36,7 +36,7 @@ export default async function Home() {
   // Не повторяем горящие коды и не показываем несколько карт одного магазина.
   // Publisher restrictions: Yandex Travel cannot appear with MTS Music;
   // Tanuki cannot be featured alongside FARFOR or Ёёёёёёё/Ёбидоёби.
-  const curatedCoupons = withoutForbiddenGroceryCoPromotion(withoutForbiddenFloristBeautyCoPromotion(withoutForbiddenTanukiCoPromotion(withoutForbiddenTravelCoPromotion(coupons))));
+  const curatedCoupons = withoutForbiddenSberAnalizyCreditCardCoPromotion(withoutForbiddenGroceryCoPromotion(withoutForbiddenFloristBeautyCoPromotion(withoutForbiddenTanukiCoPromotion(withoutForbiddenTravelCoPromotion(coupons)))));
   const hotDeals = pickExpiringDeals(curatedCoupons, 4);
   const excludedOffers = new Set(hotDeals.map(offerKey));
   const excludedStores = new Set(hotDeals.map((c) => c.store.slug));

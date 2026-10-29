@@ -1,5 +1,6 @@
 import type { Coupon } from "@/lib/types";
 import { STABLE_STORES } from "@/lib/stableStores";
+import { isApprovedOct29SberAnalizyPlacement } from "@/lib/perfluenceSberAnalizyOct29";
 
 /**
  * Re-publications explicitly approved for promofact.ru in Perfluence on 24 Oct 2026.
@@ -146,7 +147,9 @@ export function isApprovedOct24Repost(c: Coupon): boolean {
   if (!managedSlugs.has(c.store.slug)) return true;
   // Publisher-confirmed expired/invalid placements remain denied even if their
   // original expiry date or the legacy widget still claims they are active.
-  if (c.store.slug === "sberzdorovie" && c.promocode.code.toUpperCase() === "PERPREGA309361") return false;
+  if (c.store.slug === "sberzdorovie" && ["PERPREGA309361", "SHD56E28"].includes(c.promocode.code.trim().toUpperCase())) {
+    return isApprovedOct29SberAnalizyPlacement(c);
+  }
   const matching = PERFLUENCE_REPEAT_OCT24.find(p =>
     p.slug === c.store.slug &&
     (p.code ? p.code.toUpperCase() === c.promocode.code.trim().toUpperCase() :

@@ -8,6 +8,7 @@ import { PERFLUENCE_OCT18_BATCH_OFFERS } from "@/lib/perfluenceOct18Batch";
 import { FOODBAND_OFFERS } from "@/lib/foodbandOffers";
 import { isCouponActive } from "@/lib/couponExpiry";
 import { PERFLUENCE_REPEAT_OCT24_OFFERS } from "@/lib/perfluenceRepeatsOct24";
+import { SBER_ANALIZY_OCT29_OFFERS } from "@/lib/perfluenceSberAnalizyOct29";
 import { PERFLUENCE_OCT26_WEBSITE_OFFERS } from "@/lib/perfluenceOct26Website";
 import { isPausedPublisherStore } from "@/lib/publisherPauses";
 
@@ -151,6 +152,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
   ...PERFLUENCE_OCT28_OFFERS,
   ...PERFLUENCE_OCT26_WEBSITE_OFFERS,
   ...PERFLUENCE_REPEAT_OCT24_OFFERS,
+  ...SBER_ANALIZY_OCT29_OFFERS,
   ...YANDEX_OCT23_APPROVED_OFFERS,
   {
     id: 1734561501,

@@ -1,12 +1,14 @@
 import type { Coupon } from "@/lib/types";
-import { withoutForbiddenTanukiCoPromotion, withoutForbiddenFloristBeautyCoPromotion, withoutForbiddenGroceryCoPromotion } from "@/lib/publisherPlacementRules";
+import { withoutForbiddenTanukiCoPromotion, withoutForbiddenFloristBeautyCoPromotion, withoutForbiddenGroceryCoPromotion, withoutForbiddenSberAnalizyCreditCardCoPromotion } from "@/lib/publisherPlacementRules";
 
 export const MIN_INDEXABLE_COLLECTION_OFFERS = 3;
 
 export function getCollectionCoupons(collection: Collection, coupons: Coupon[]): Coupon[] {
-  return withoutForbiddenGroceryCoPromotion(
-    withoutForbiddenFloristBeautyCoPromotion(
-      withoutForbiddenTanukiCoPromotion(coupons.filter(collection.filter)),
+  return withoutForbiddenSberAnalizyCreditCardCoPromotion(
+    withoutForbiddenGroceryCoPromotion(
+      withoutForbiddenFloristBeautyCoPromotion(
+        withoutForbiddenTanukiCoPromotion(coupons.filter(collection.filter)),
+      ),
     ),
   );
 }
