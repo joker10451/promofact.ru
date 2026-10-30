@@ -609,6 +609,33 @@ export default async function StorePage({
           </div>
         ))}
 
+        {/* Telegram-канал с промокодами магазина */}
+        <div className="mt-8 rounded-3xl border border-[#0088cc]/20 bg-gradient-to-br from-[#0088cc]/10 via-white to-paper p-5 sm:p-6 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#0088cc] text-white shadow-[0_4px_12px_-2px_rgba(0,136,204,0.4)]">
+                <Icon name="send" size={20} />
+              </div>
+              <div>
+                <h3 className="font-display text-base sm:text-lg font-extrabold text-ink">
+                  Свежие промокоды {store.name} в Telegram
+                </h3>
+                <p className="mt-0.5 text-xs sm:text-sm text-ink/65 leading-relaxed">
+                  Публикуем закрытые акции, промокоды с суммированием и секретные скидки в канале @smart_zakupka
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://t.me/smart_zakupka"
+              target="_blank"
+              rel="noopener nofollow"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-[#0088cc] hover:bg-[#0077b5] px-6 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-[0_4px_14px_-3px_rgba(0,136,204,0.5)] transition-all hover:translate-y-[1px] shrink-0"
+            >
+              Подписаться на канал →
+            </a>
+          </div>
+        </div>
+
         {/* 2. Быстрая сводка (Quick Facts) для SEO и сниппетов */}
         <div className="mt-8 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
           <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">

@@ -531,20 +531,39 @@ export default function CouponTicket({
 
             {/* Основная кнопка действия */}
             {copied ? (
-              <a
-                href={outgoingUrl}
-                target="_blank"
-                rel="noopener sponsored nofollow"
-                onClick={handleDirectCtaClick}
-                className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-mint hover:bg-mint-dark text-white text-xs sm:text-sm font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer px-4"
-              >
-                <CheckIcon className="h-4 w-4" />
-                <span className="truncate">
-                  {promocode.isBarcode
-                    ? `Штрихкод скопирован! Перейти в ${store.name} →`
-                    : `Код скопирован! Перейти в ${store.name} →`}
-                </span>
-              </a>
+              <>
+                <a
+                  href={outgoingUrl}
+                  target="_blank"
+                  rel="noopener sponsored nofollow"
+                  onClick={handleDirectCtaClick}
+                  className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-mint hover:bg-mint-dark text-white text-xs sm:text-sm font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer px-4"
+                >
+                  <CheckIcon className="h-4 w-4" />
+                  <span className="truncate">
+                    {promocode.isBarcode
+                      ? `Штрихкод скопирован! Перейти в ${store.name} →`
+                      : `Код скопирован! Перейти в ${store.name} →`}
+                  </span>
+                </a>
+                <a
+                  href={CHANNELS.telegram}
+                  target="_blank"
+                  rel="noopener nofollow"
+                  onClick={() => ymReachGoal("tg_subscribe_click", { source: "card_copied", store: store.name })}
+                  className="mt-2 flex items-center justify-between gap-2 rounded-xl bg-[#0088cc]/10 hover:bg-[#0088cc]/15 border border-[#0088cc]/25 px-3 py-2 text-xs transition-all"
+                >
+                  <span className="flex items-center gap-2 text-ink/80 text-[11px] font-medium min-w-0">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0088cc] text-white">
+                      <Icon name="send" size={10} />
+                    </span>
+                    <span className="truncate">Новые коды {store.name} — в Telegram</span>
+                  </span>
+                  <span className="shrink-0 rounded-md bg-[#0088cc] px-2 py-0.5 text-[10px] font-bold text-white">
+                    Канал →
+                  </span>
+                </a>
+              </>
             ) : copyError ? (
               <button
                 type="button"

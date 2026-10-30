@@ -317,6 +317,33 @@ export default async function ArticlePage({
               </div>
             )}
 
+            {/* Призыв подписаться в Telegram */}
+            <div className="mt-8 rounded-2xl bg-gradient-to-r from-[#0088cc]/10 via-[#0088cc]/5 to-transparent border border-[#0088cc]/25 p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0088cc] text-white shadow-xs">
+                    <Icon name="send" size={18} />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-sm sm:text-base font-extrabold text-ink">
+                      Свежие промокоды моментально — в Telegram
+                    </h3>
+                    <p className="mt-0.5 text-xs text-ink/70 leading-relaxed">
+                      Горячие скидки, промокоды с суммированием и закрытые акции выкладываем в канале @smart_zakupka
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="https://t.me/smart_zakupka"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] px-5 py-2 text-xs font-extrabold text-white shadow-xs transition-all shrink-0"
+                >
+                  Подписаться →
+                </a>
+              </div>
+            </div>
+
             {/* Внутренние ссылки на промокоды */}
             {article.related.length > 0 && (
               <div className="mt-8 rounded-2xl bg-yellow/15 border border-yellow/50 p-5">
