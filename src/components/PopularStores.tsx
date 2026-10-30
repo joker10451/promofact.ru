@@ -86,6 +86,7 @@ export default async function PopularStores() {
                   logo={s.logo}
                   site={s.site}
                   size={40}
+                  priority={index < 6}
                   className="max-h-full max-w-full object-contain"
                 />
               </div>

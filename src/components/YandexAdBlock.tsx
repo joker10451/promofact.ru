@@ -23,6 +23,7 @@ interface YandexAdBlockProps {
 /**
  * Адаптивный рекламный блок Яндекс РСЯ (Рекламная сеть Яндекса)
  * Отображается только при наличии валидного ID рекламного блока (не заглушки).
+ * Резервирует минимальную высоту (min-h-[100px]) для предотвращения сдвига вёрстки (CLS).
  */
 export default function YandexAdBlock({ blockId, className = "" }: YandexAdBlockProps) {
   const [mounted, setMounted] = useState(false);
@@ -53,7 +54,7 @@ export default function YandexAdBlock({ blockId, className = "" }: YandexAdBlock
   }
 
   return (
-    <div className={`my-4 flex w-full items-center justify-center overflow-hidden text-center transition-all ${className}`}>
+    <div className={`my-4 flex min-h-[100px] sm:min-h-[140px] w-full items-center justify-center overflow-hidden text-center transition-all ${className}`}>
       <div id={containerId} className="w-full flex justify-center" />
     </div>
   );

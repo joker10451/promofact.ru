@@ -73,6 +73,7 @@ export default async function Header() {
                 alt=""
                 width={20}
                 height={20}
+                priority
                 className="h-5 w-5 brightness-0 invert"
               />
             </span>
@@ -130,4 +131,3 @@ export default async function Header() {
     </header>
   );
 }
-

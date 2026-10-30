@@ -157,6 +157,8 @@ export default function HeaderSearch() {
                         <img
                           src={store.logo}
                           alt={store.name}
+                          width={20}
+                          height={20}
                           className="h-5 w-5 rounded-full object-contain bg-white"
                           loading="lazy"
                         />
@@ -168,8 +170,7 @@ export default function HeaderSearch() {
                       <span className="font-bold text-ink">{store.name}</span>
                     </div>
                     <span className="text-[11px] font-medium text-ink/40">
-                      {store.couponCount}{" "}
-                      {store.couponCount === 1 ? "купон" : "купонов"}
+                      {store.couponCount} {store.couponCount === 1 ? "акция" : store.couponCount < 5 ? "акции" : "акций"} →
                     </span>
                   </Link>
                 ))}
@@ -180,7 +181,7 @@ export default function HeaderSearch() {
           {!loading && coupons.length > 0 && (
             <div>
               <div className="mb-1.5 px-2 text-[10px] font-extrabold uppercase tracking-wider text-ink/45">
-                Промокоды
+                Промокоды и купоны
               </div>
               <div className="space-y-1">
                 {coupons.map((coupon) => (

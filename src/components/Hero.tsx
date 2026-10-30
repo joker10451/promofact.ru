@@ -231,7 +231,14 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
                               {s.logo ? (
                                 // Логотипы витрины приходят с динамических CDN.
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img src={s.logo} alt="" className="h-6 w-6 rounded-lg object-contain" />
+                                <img
+                                  src={s.logo}
+                                  alt=""
+                                  width={24}
+                                  height={24}
+                                  loading="lazy"
+                                  className="h-6 w-6 rounded-lg object-contain"
+                                />
                               ) : (
                                 <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-yellow text-xs font-bold">
                                   {s.name[0]}

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import YandexMetrika from "@/components/YandexMetrika";
 import YandexAds from "@/components/YandexAds";
@@ -127,12 +128,15 @@ export default function RootLayout({
           name="mitgo-verification"
           content="65f662ae-8b60-472f-bb3c-d5c04488f5ce"
         />
-        <script src="https://telegram.org/js/telegram-web-app.js" async defer />
         {/* Очередь колбэков РСЯ объявляем сразу — это просто массив.
             Сам context.js грузит <YandexAds /> и только после согласия. */}
         <script dangerouslySetInnerHTML={{ __html: "window.yaContextCb=window.yaContextCb||[]" }} />
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans pb-14 md:pb-0">
+        <Script
+          src="https://telegram.org/js/telegram-web-app.js"
+          strategy="lazyOnload"
+        />
         <ScrollProgress />
         <TelegramWebAppInit />
         <YandexMetrika />
