@@ -2,6 +2,8 @@ import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import CouponTicket from "@/components/CouponTicket";
 import JsonLd from "@/components/JsonLd";
 import OtherCategories from "@/components/OtherCategories";
@@ -14,6 +16,7 @@ import { plural } from "@/lib/format";
 import { canonicalCategorySlug, getCategoryDef } from "@/lib/categoryTaxonomy";
 import { getMaxVerifiedDiscount } from "@/lib/storeDiscount";
 import { isRealPromoCode } from "@/lib/dedupe";
+import { getCategoryFaq } from "@/lib/categoryFaq";
 
 const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
   month: "long",
@@ -154,30 +157,7 @@ export default async function CategoryPage({
   const maxDisc = getMaxVerifiedDiscount(list);
   const hasFirstOrderOffer = list.some((c) => c.promocode.isFirstOrderOnly);
 
-  const faqItems = [
-    {
-      q: `Где искать рабочие промокоды в категории «${catName}»?`,
-      a: `Все действующие купоны и скидки в категории «${catName}» собраны на этой странице. Предложения обновляются по данным партнёрских программ. Срок и условия указаны в карточке каждого промокода.`,
-    },
-    {
-      q: `Есть ли скидки на первый заказ в магазинах категории «${catName}»?`,
-      a: hasFirstOrderOffer
-        ? `В категории «${catName}» есть предложения на первый заказ. Смотрите условия конкретных купонов с отметкой «Первый заказ».`
-        : `Сейчас в категории «${catName}» нет предложений, отмеченных как доступные исключительно на первый заказ. Другие акции могут подходить новым покупателям — проверяйте условия.`,
-    },
-    {
-      q: `Суммируются ли промокоды с распродажами и акциями?`,
-      a: `Условия зависят от правил конкретного магазина: часть промокодов действует на товары со скидками и распродажи, а часть активируется только при полной стоимости позиций. Точные условия указаны в карточке каждого предложения.`,
-    },
-    {
-      q: `Как получить бесплатную доставку заказов в категории «${catName}»?`,
-      a: `Бесплатная доставка предоставляется при выполнении условий минимальной суммы заказа либо по специальному промокоду. Выбирайте предложения со значком «Бесплатная доставка» в каталоге выше.`,
-    },
-    {
-      q: `Как применить промокод при оформлении заказа?`,
-      a: `Нажмите кнопку «Копировать» на карточке купона, перейдите в магазин по нашей ссылке и вставьте промокод в поле «Промокод» или «Купон» в корзине до оплаты. Условия скидки или подарка будут применены, если заказ соответствует требованиям акции.`,
-    },
-  ];
+  const faqItems = getCategoryFaq(slug, catName, hasFirstOrderOffer);
 
   const breadcrumb: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -221,134 +201,148 @@ export default async function CategoryPage({
     })),
   };
 
+  const collectionJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `Промокоды ${catName}: каталог скидок на ${MONTH_YEAR}`,
+    description: `Каталог действующих промокодов и акций в категории «${catName}»: ${list.length} предложений от официальных брендов и сервисов. Предложения обновляются по данным партнёрских программ.`,
+    url: pageUrl,
+    mainEntity: listing,
+  };
+
   return (
-    <main>
-      <JsonLd data={breadcrumb} />
-      <JsonLd data={faqJsonLd} />
-      <JsonLd data={listing} />
+    <>
+      <Header />
+      <main className="min-h-screen">
+        <JsonLd data={breadcrumb} />
+        <JsonLd data={collectionJsonLd} />
+        <JsonLd data={faqJsonLd} />
+        <JsonLd data={listing} />
 
-      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-        <Breadcrumbs
-          items={[
-            { label: "Главная", href: "/" },
-            { label: catName },
-          ]}
-          className="mb-2"
-        />
+        <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+          <Breadcrumbs
+            items={[
+              { label: "Главная", href: "/" },
+              { label: catName },
+            ]}
+            className="mb-2"
+          />
 
-        <div className="mt-6">
-          <h1 className="font-display text-2xl font-extrabold leading-tight text-ink sm:text-3xl md:text-4xl">
-            Промокоды и купоны: {catName}{maxDisc ? ` — скидки ${maxDisc}` : ""}
-          </h1>
-          {def?.blurb ? (
-            <p className="mt-2 text-sm font-medium text-ink/75 max-w-3xl">{def.blurb}</p>
-          ) : null}
-          <p className="mt-2 text-xs sm:text-sm text-ink/65 max-w-3xl">
-            Собрали актуальные промокоды и акции на {MONTH_YEAR}: {list.length}{" "}
-            {plural(list.length, "предложение", "предложения", "предложений")} ({realCodeCount} {plural(realCodeCount, "промокод", "промокода", "промокодов")} и {codeFreeCount} {plural(codeFreeCount, "акция", "акции", "акций")}) от {categoryStores.length}{" "}
-            {plural(categoryStores.length, "магазина-партнёра", "магазинов-партнёров", "магазинов-партнёров")}.
-          </p>
+          <div className="mt-6">
+            <h1 className="font-display text-2xl font-extrabold leading-tight text-ink sm:text-3xl md:text-4xl">
+              Промокоды и купоны: {catName}{maxDisc ? ` — скидки ${maxDisc}` : ""}
+            </h1>
+            {def?.blurb ? (
+              <p className="mt-2 text-sm font-medium text-ink/75 max-w-3xl">{def.blurb}</p>
+            ) : null}
+            <p className="mt-2 text-xs sm:text-sm text-ink/65 max-w-3xl">
+              Собрали актуальные промокоды и акции на {MONTH_YEAR}: {list.length}{" "}
+              {plural(list.length, "предложение", "предложения", "предложений")} ({realCodeCount} {plural(realCodeCount, "промокод", "промокода", "промокодов")} и {codeFreeCount} {plural(codeFreeCount, "акция", "акции", "акций")}) от {categoryStores.length}{" "}
+              {plural(categoryStores.length, "магазина-партнёра", "магазинов-партнёров", "магазинов-партнёров")}. Предложения обновляются по данным партнёрских программ.
+            </p>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
-              {maxDisc ? `Скидки ${maxDisc}` : "Акции и купоны"}
-            </span>
-            <span className="rounded-full bg-red/10 border border-red/30 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/70">
-              {list.length} {plural(list.length, "купон", "купона", "купонов")}
-            </span>
-          </div>
-
-          {/* Быстрые ссылки на магазины категории (SILO перелинковка) */}
-          {categoryStores.length > 0 && (
-            <div className="mt-6 pt-5 border-t border-line/60">
-              <div className="text-xs font-extrabold uppercase tracking-wider text-ink/45 mb-2.5 flex items-center gap-1.5">
-                <Icon name="store" size={16} />
-                <span>Магазины в категории «{catName}»:</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 pb-2">
-                {categoryStores.map(({ store, count }) => (
-                  <Link
-                    key={store.slug}
-                    href={`/store/${store.slug}`}
-                    className="inline-flex min-w-0 max-w-full items-center gap-2 rounded-2xl border border-line bg-white px-3 py-1.5 text-xs font-bold text-ink shadow-2xs hover:border-ink hover:shadow-xs transition-all group"
-                  >
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-line/60 bg-paper p-0.5">
-                      <StoreLogo
-                        slug={store.slug}
-                        name={store.name}
-                        logo={store.logo}
-                        site={store.site}
-                        size={18}
-                      />
-                    </div>
-                    <span className="min-w-0 break-words [overflow-wrap:anywhere] group-hover:text-red transition-colors">{store.name}</span>
-                    <span className="rounded-full bg-paper px-1.5 py-0.2 text-[10px] font-mono text-ink/60">
-                      {count}
-                    </span>
-                  </Link>
-                ))}
-              </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
+                {maxDisc ? `Скидки ${maxDisc}` : "Акции и купоны"}
+              </span>
+              <span className="rounded-full bg-red/10 border border-red/30 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/70">
+                {list.length} {plural(list.length, "купон", "купона", "купонов")}
+              </span>
             </div>
-          )}
-        </div>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {list.map((coupon) => (
-            <CouponTicket
-              key={`${coupon.id}-${coupon.promocode.code}`}
-              coupon={coupon}
-              placement="category_coupon"
-              proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
-              storeProofCount={uses.usesByStore.get(coupon.store.id) ?? 0}
-            />
-          ))}
-        </div>
+            {/* Быстрые ссылки на магазины категории (SILO перелинковка) */}
+            {categoryStores.length > 0 && (
+              <div className="mt-6 pt-5 border-t border-line/60">
+                <div className="text-xs font-extrabold uppercase tracking-wider text-ink/45 mb-2.5 flex items-center gap-1.5">
+                  <Icon name="store" size={16} />
+                  <span>Магазины в категории «{catName}»:</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 pb-2">
+                  {categoryStores.map(({ store, count }) => (
+                    <Link
+                      key={store.slug}
+                      href={`/store/${store.slug}`}
+                      className="inline-flex min-w-0 max-w-full items-center gap-2 rounded-2xl border border-line bg-white px-3 py-1.5 text-xs font-bold text-ink shadow-2xs hover:border-ink hover:shadow-xs transition-all group"
+                    >
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-line/60 bg-paper p-0.5">
+                        <StoreLogo
+                          slug={store.slug}
+                          name={store.name}
+                          logo={store.logo}
+                          site={store.site}
+                          size={18}
+                        />
+                      </div>
+                      <span className="min-w-0 break-words [overflow-wrap:anywhere] group-hover:text-red transition-colors">{store.name}</span>
+                      <span className="rounded-full bg-paper px-1.5 py-0.2 text-[10px] font-mono text-ink/60">
+                        {count}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
-        <YandexAdBlock
-          blockId={process.env.NEXT_PUBLIC_YANDEX_CATEGORY_AD_ID || ""}
-          className="my-10"
-        />
-
-        <OtherCategories current={cat.slug} />
-
-        <article className="mt-14 max-w-3xl rounded-3xl border border-line bg-white p-6 sm:p-8">
-          <h2 className="font-display text-xl font-extrabold text-ink">
-            Купоны в категории «{catName}» — что учесть перед покупкой
-          </h2>
-          <div className="mt-4 space-y-3 text-sm text-ink/70 leading-relaxed">
-            {paragraphs.map((p, i) => (
-              <p key={i}>
-                {p}
-              </p>
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {list.map((coupon) => (
+              <CouponTicket
+                key={`${coupon.id}-${coupon.promocode.code}`}
+                coupon={coupon}
+                placement="category_coupon"
+                proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
+                storeProofCount={uses.usesByStore.get(coupon.store.id) ?? 0}
+              />
             ))}
           </div>
-        </article>
 
-        {/* Интерактивный FAQ с разметкой Schema.org FAQPage */}
-        <section className="mt-12 max-w-3xl" aria-label="Частые вопросы">
-          <h2 className="font-display text-xl font-extrabold text-ink">
-            Частые вопросы о скидках в категории «{catName}»
-          </h2>
-          <div className="mt-5 space-y-3">
-            {faqItems.map((item) => (
-              <details
-                key={item.q}
-                className="group rounded-2xl border border-line bg-white p-4 transition-colors open:border-ink/20"
-              >
-                <summary className="flex cursor-pointer items-center justify-between font-display text-sm font-bold text-ink">
-                  {item.q}
-                  <span className="text-xs text-ink/40 transition-transform group-open:rotate-180">
-                    ▼
-                  </span>
-                </summary>
-                <p className="mt-3 text-xs sm:text-sm text-ink/70 leading-relaxed border-t border-line/60 pt-3">
-                  {item.a}
+          <YandexAdBlock
+            blockId={process.env.NEXT_PUBLIC_YANDEX_CATEGORY_AD_ID || ""}
+            className="my-10"
+          />
+
+          <OtherCategories current={cat.slug} />
+
+          <article className="mt-14 max-w-3xl rounded-3xl border border-line bg-white p-6 sm:p-8">
+            <h2 className="font-display text-xl font-extrabold text-ink">
+              Купоны в категории «{catName}» — что учесть перед покупкой
+            </h2>
+            <div className="mt-4 space-y-3 text-sm text-ink/70 leading-relaxed">
+              {paragraphs.map((p, i) => (
+                <p key={i}>
+                  {p}
                 </p>
-              </details>
-            ))}
-          </div>
-        </section>
-      </div>
-    </main>
+              ))}
+            </div>
+          </article>
+
+          {/* Интерактивный FAQ с разметкой Schema.org FAQPage */}
+          <section className="mt-12 max-w-3xl" aria-label="Частые вопросы">
+            <h2 className="font-display text-xl font-extrabold text-ink">
+              Частые вопросы о скидках в категории «{catName}»
+            </h2>
+            <div className="mt-5 space-y-3">
+              {faqItems.map((item) => (
+                <details
+                  key={item.q}
+                  className="group rounded-2xl border border-line bg-white p-4 transition-colors open:border-ink/20"
+                >
+                  <summary className="flex cursor-pointer items-center justify-between font-display text-sm font-bold text-ink">
+                    {item.q}
+                    <span className="text-xs text-ink/40 transition-transform group-open:rotate-180">
+                      ▼
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-xs sm:text-sm text-ink/70 leading-relaxed border-t border-line/60 pt-3">
+                    {item.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </section>
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }
