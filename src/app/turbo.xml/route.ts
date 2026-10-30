@@ -27,7 +27,8 @@ export async function GET() {
     </header>`;
     
     const bodyText = a.body?.map(p => p.startsWith("## ") ? `<h2>${escapeXml(p.slice(3))}</h2>` : `<p>${escapeXml(p.replace(/\*\*/g, ""))}</p>`).join("") || "";
-    const content = `${header}${bodyText}`;
+    const footerText = `<p>Все действующие промокоды — <a href="${url}">на сайте ${escapeXml(SITE_NAME)}</a>. Свежие скидки первыми выкладываем в Telegram <a href="https://t.me/smart_zakupka">@smart_zakupka</a>.</p>`;
+    const content = `${header}${bodyText}${footerText}`;
 
     return `    <item turbo="true">
       <link>${url}</link>

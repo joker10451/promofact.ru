@@ -70,7 +70,7 @@ function contentHtml(a: Article, url: string): string {
     if (a.ctaButton.disclaimer) parts.push(`<p>${escapeXml(a.ctaButton.disclaimer)}</p>`);
   }
   parts.push(
-    `<p>Все действующие промокоды и подробные условия — <a href="${escapeXml(url)}">на сайте ${escapeXml(SITE_NAME)}</a>.</p>`,
+    `<p>Все действующие промокоды и подробные условия — <a href="${escapeXml(url)}">на сайте ${escapeXml(SITE_NAME)}</a>. А свежие скидки и закрытые акции первыми публикуем в Telegram-канале <a href="https://t.me/smart_zakupka">@smart_zakupka</a>.</p>`,
   );
   return parts.join("\n");
 }

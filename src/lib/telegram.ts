@@ -115,11 +115,18 @@ export function formatTelegramPost(coupon: Coupon): {
   lines.push("📌 <b>Условия:</b>");
   conditions.forEach((c) => lines.push(`• ${c}`));
 
-  // 4. Аккуратная маркировка ОРД (Закон о рекламе) одной строкой
+  // Выводим условия и подробности акции ДО маркировки
+  if (coupon.promocode.terms) {
+    lines.push("");
+    lines.push("ℹ️ " + escapeHtml(stripHtml(coupon.promocode.terms)));
+  }
+
+  // 4. Аккуратная маркировка ОРД (Закон о рекламе) в самом низу поста
   const ordText = escapeHtml(coupon.affiliate.ordText);
   const ordMarker = escapeHtml(coupon.affiliate.ordMarker);
 
   lines.push("");
+  lines.push("────────────────────");
   if (ordText) {
     const markerStr = ordMarker && !ordText.includes(ordMarker) ? ` erid: ${ordMarker}` : "";
     lines.push(`<i>${ordText}${markerStr}</i>`);
@@ -127,11 +134,6 @@ export function formatTelegramPost(coupon: Coupon): {
     lines.push(`<i>Реклама. erid: ${ordMarker}</i>`);
   } else {
     lines.push(`<i>Реклама. ${storeName}</i>`);
-  }
-
-  // Выводим условия и подробности акции
-  if (coupon.promocode.terms) {
-    lines.push("ℹ️ " + escapeHtml(stripHtml(coupon.promocode.terms)));
   }
   const affiliateUrl = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site;
   const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
