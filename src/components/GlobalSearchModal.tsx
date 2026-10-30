@@ -26,14 +26,14 @@ interface SearchCoupon {
 }
 
 const POPULAR_SEARCH_TAGS = [
-  "SUNLIGHT",
+  "Тануки",
+  "Яндекс Афиша",
   "Пятёрочка",
-  "Яндекс Цветы",
+  "SUNLIGHT",
+  "Золотое Яблоко",
   "Отелло",
   "Кинопоиск",
-  "Ив Роше",
-  "Важная Рыба",
-  "Fix Price",
+  "СберЗдоровье",
 ];
 
 export default function GlobalSearchModal() {
@@ -310,6 +310,40 @@ export default function GlobalSearchModal() {
 
         {/* Список результатов */}
         <div className="overflow-y-auto p-3 space-y-4 flex-1">
+          {/* Умная подсказка сезонных распродаж */}
+          {Boolean(query && /11|шопинг|черн|пятниц|год|подар/i.test(query)) && (
+            <div className="rounded-2xl bg-gradient-to-r from-red/10 via-yellow/10 to-red/10 border border-red/25 p-3">
+              <div className="text-[11px] font-bold text-red uppercase tracking-wider mb-1">🔥 Сезонная распродажа</div>
+              {/11|шопинг/i.test(query) ? (
+                <Link
+                  href="/akcii/den-shopinga-11-11"
+                  onClick={closeSearch}
+                  className="flex items-center justify-between text-sm font-extrabold text-ink hover:text-red transition-colors"
+                >
+                  <span>Всемирный день шопинга 11.11 (все промокоды)</span>
+                  <span>→</span>
+                </Link>
+              ) : /черн|пятниц/i.test(query) ? (
+                <Link
+                  href="/akcii/chernaya-pyatnica-2026"
+                  onClick={closeSearch}
+                  className="flex items-center justify-between text-sm font-extrabold text-ink hover:text-red transition-colors"
+                >
+                  <span>Чёрная Пятница 2026 (скидки года)</span>
+                  <span>→</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/akcii/novogodnie-skidki-2027"
+                  onClick={closeSearch}
+                  className="flex items-center justify-between text-sm font-extrabold text-ink hover:text-red transition-colors"
+                >
+                  <span>Новогодние распродажи и подарки 2027</span>
+                  <span>→</span>
+                </Link>
+              )}
+            </div>
+          )}
           {loading && (
             <div className="py-8 text-center text-xs font-bold text-ink/40">
               Поиск...
