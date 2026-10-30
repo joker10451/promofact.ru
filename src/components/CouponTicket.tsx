@@ -158,11 +158,30 @@ export default function CouponTicket({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [expiredAttempt, setExpiredAttempt] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [voted, setVoted] = useState<"positive" | "negative" | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    queueMicrotask(() => setMounted(true));
-  }, []);
+    queueMicrotask(() => {
+      setMounted(true);
+      try {
+        const saved = localStorage.getItem(`coupon_vote_${coupon.id}`);
+        if (saved === "positive" || saved === "negative") {
+          setVoted(saved);
+        }
+      } catch {}
+    });
+  }, [coupon.id]);
+
+  const handleFeedback = (type: "positive" | "negative") => {
+    if (voted !== null) return;
+    setVoted(type);
+    try {
+      localStorage.setItem(`coupon_vote_${coupon.id}`, type);
+    } catch {}
+    const ctx = getAnalyticsContext();
+    ymReachGoal(type === "positive" ? "coupon_vote_positive" : "coupon_vote_negative", ctx);
+  };
 
   // Блокировка скролла страницы и закрытие по Escape при открытой модалке
   useEffect(() => {
@@ -615,6 +634,41 @@ export default function CouponTicket({
             </a>
           </div>
         )}
+
+        {/* Интерактивный фидбек: Код сработал? */}
+        <div className="mt-3 flex items-center justify-between rounded-xl bg-paper/60 px-3 py-1.5 text-[11px] text-ink/70 border border-line/40">
+          <span className="font-medium">Код сработал?</span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => handleFeedback("positive")}
+              disabled={voted !== null}
+              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-all ${
+                voted === "positive"
+                  ? "bg-mint text-white"
+                  : "bg-white border border-line/70 hover:border-mint text-ink/80 hover:text-mint-dark active:scale-95 cursor-pointer"
+              }`}
+              title="Да, промокод сработал"
+            >
+              <span>👍</span>
+              <span>{voted === "positive" ? "Сработал!" : "Да"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleFeedback("negative")}
+              disabled={voted !== null}
+              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-all ${
+                voted === "negative"
+                  ? "bg-red text-white"
+                  : "bg-white border border-line/70 hover:border-red text-ink/80 hover:text-red active:scale-95 cursor-pointer"
+              }`}
+              title="Нет, промокод не сработал"
+            >
+              <span>👎</span>
+              <span>{voted === "negative" ? "Записали" : "Нет"}</span>
+            </button>
+          </div>
+        </div>
 
         {/* 5. Мета-данные и реклама */}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-1 text-[11px] font-medium leading-relaxed text-ink/65">
