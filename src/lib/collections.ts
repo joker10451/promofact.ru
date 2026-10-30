@@ -185,7 +185,7 @@ export const COLLECTIONS: Collection[] = [
       { text: "Кэшбэк банков 2026: как вернуть до 10% с покупок", href: "/sovety/cashbek-bankov-2026" },
     ],
     // An ordinary discount is not a confirmed Black Friday promotion.
-    filter: (c) => /(?:ч[её]рная\s+пятница|black[\s-]*friday|blackfriday)/iu
+    filter: (c) => /(?:ч[её]рн\S*\s+пятниц\S*|black[\s-]*friday|blackfriday)/iu
       .test([c.promocode.bonusName, c.promocode.terms].filter(Boolean).join(" ")),
   },
   {

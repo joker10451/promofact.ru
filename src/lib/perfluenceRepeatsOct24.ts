@@ -35,8 +35,8 @@ export const PERFLUENCE_REPEAT_OCT24: readonly RepeatPlacement[] = [
     [826110004, "pfs1587883", "Скидка 1 500 ₽"],
   ] as const).map(([id, code, bonus]) => ({
     id, slug: "sunlight-ru", code, bonus,
-    terms: `Промокод ${code} в SUNLIGHT. ${caution} Действует до 31 октября 2026 года, 23:59 МСК.`,
-    expires: oct31,
+    terms: `Промокод ${code} в SUNLIGHT ко Всемирному дню шопинга 11.11 и Чёрной Пятнице 2026. ${caution} Действует до 30 ноября 2026 года, 23:59 МСК.`,
+    expires: "2026-11-30T23:59:59+03:00",
     link: "https://sunlight.prfl.me/sites/9w76ri?erid=2RanymAU35D",
     erid: "2RanymAU35D",
     legal: SUNLIGHT_LEGAL,
