@@ -28,6 +28,7 @@ interface SearchCoupon {
 const POPULAR_SEARCH_TAGS = [
   "Тануки",
   "Яндекс Афиша",
+  "Подружка",
   "Пятёрочка",
   "SUNLIGHT",
   "Золотое Яблоко",
@@ -289,21 +290,55 @@ export default function GlobalSearchModal() {
 
         {/* Быстрые подсказки / Теги при пустом запросе */}
         {!query && (
-          <div className="px-4 py-3 border-b border-line/60 bg-white">
-            <span className="text-xs font-bold text-ink/50 uppercase tracking-wider block mb-2">
-              Популярные магазины:
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {POPULAR_SEARCH_TAGS.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => setQuery(tag)}
-                  className="rounded-full bg-paper border border-line px-3 py-1 text-xs font-bold text-ink/75 hover:border-red hover:text-red transition-all cursor-pointer"
+          <div className="px-4 py-3 border-b border-line/60 bg-white space-y-3">
+            <div>
+              <span className="text-[11px] font-bold text-red uppercase tracking-wider block mb-1.5">
+                🔥 Главные распродажи:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/collections/den-shopinga-11-11"
+                  onClick={closeSearch}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-red px-3 py-1 text-xs font-bold text-white shadow-2xs hover:opacity-95 transition-all"
                 >
-                  {tag}
-                </button>
-              ))}
+                  <span>🔥</span>
+                  <span>11.11 День шопинга</span>
+                </Link>
+                <Link
+                  href="/collections/black-friday"
+                  onClick={closeSearch}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1 text-xs font-bold text-white shadow-2xs hover:bg-ink/80 transition-all"
+                >
+                  <span>🖤</span>
+                  <span>Чёрная Пятница 2026</span>
+                </Link>
+                <Link
+                  href="/akcii/novogodnie-skidki-2027"
+                  onClick={closeSearch}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-mint/20 border border-mint/40 px-3 py-1 text-xs font-bold text-teal-800 hover:bg-mint/30 transition-all"
+                >
+                  <span>🎄</span>
+                  <span>Новый год 2027</span>
+                </Link>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-xs font-bold text-ink/50 uppercase tracking-wider block mb-1.5">
+                Популярные магазины:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {POPULAR_SEARCH_TAGS.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setQuery(tag)}
+                    className="rounded-full bg-paper border border-line px-3 py-1 text-xs font-bold text-ink/75 hover:border-red hover:text-red transition-all cursor-pointer"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -311,25 +346,25 @@ export default function GlobalSearchModal() {
         {/* Список результатов */}
         <div className="overflow-y-auto p-3 space-y-4 flex-1">
           {/* Умная подсказка сезонных распродаж */}
-          {Boolean(query && /11|шопинг|черн|пятниц|год|подар/i.test(query)) && (
+          {Boolean(query && /11|шопинг|черн|пятниц|год|подар|black|friday/i.test(query)) && (
             <div className="rounded-2xl bg-gradient-to-r from-red/10 via-yellow/10 to-red/10 border border-red/25 p-3">
               <div className="text-[11px] font-bold text-red uppercase tracking-wider mb-1">🔥 Сезонная распродажа</div>
               {/11|шопинг/i.test(query) ? (
                 <Link
-                  href="/akcii/den-shopinga-11-11"
+                  href="/collections/den-shopinga-11-11"
                   onClick={closeSearch}
                   className="flex items-center justify-between text-sm font-extrabold text-ink hover:text-red transition-colors"
                 >
-                  <span>Всемирный день шопинга 11.11 (все промокоды)</span>
+                  <span>Всемирный день шопинга 11.11 (20 промокодов)</span>
                   <span>→</span>
                 </Link>
-              ) : /черн|пятниц/i.test(query) ? (
+              ) : /черн|пятниц|black|friday/i.test(query) ? (
                 <Link
-                  href="/akcii/chernaya-pyatnica-2026"
+                  href="/collections/black-friday"
                   onClick={closeSearch}
                   className="flex items-center justify-between text-sm font-extrabold text-ink hover:text-red transition-colors"
                 >
-                  <span>Чёрная Пятница 2026 (скидки года)</span>
+                  <span>Чёрная Пятница 2026 (7 проверенных скидок)</span>
                   <span>→</span>
                 </Link>
               ) : (

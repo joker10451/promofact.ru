@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CouponTicket from "@/components/CouponTicket";
+import CollectionFilterContainer from "@/components/CollectionFilterContainer";
 import JsonLd from "@/components/JsonLd";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { getCollections, getCollectionCoupons, MIN_INDEXABLE_COLLECTION_OFFERS } from "@/lib/collections";
@@ -320,17 +321,25 @@ export default async function CollectionPage({
             Посмотреть все предложения →
           </Link>
         )}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {list.map((coupon) => (
-            <CouponTicket
-              key={`${coupon.id}-${coupon.promocode.code}`}
-              coupon={coupon}
-              placement="collection_coupon"
-              proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
-              storeProofCount={uses.usesByStore.get(coupon.store.id) ?? 0}
-            />
-          ))}
-        </div>
+        <CollectionFilterContainer
+          items={list.map((coupon) => ({
+            id: `${coupon.id}-${coupon.promocode.code}`,
+            storeSlug: coupon.store.slug,
+            storeName: coupon.store.name,
+            storeLogo: coupon.store.logo,
+            isFirstOrder: Boolean(coupon.promocode.isFirstOrderOnly || /перв/i.test(coupon.promocode.terms || "")),
+            isTop: Boolean(coupon.promocode.isHit || /30%|50%|1\s*₽|500|1000|подарок/i.test(coupon.promocode.bonusName || "")),
+            element: (
+              <CouponTicket
+                key={`${coupon.id}-${coupon.promocode.code}`}
+                coupon={coupon}
+                placement="collection_coupon"
+                proofCount={uses.usesByCode.get(coupon.promocode.code) ?? 0}
+                storeProofCount={uses.usesByStore.get(coupon.store.id) ?? 0}
+              />
+            ),
+          }))}
+        />
 
         
         {col.buyerTips && (
