@@ -977,6 +977,66 @@ export const CUSTOM_COUPONS: Coupon[] = [
     },
     extraLinks: [],
   },
+  // Подтверждённый партнёрский оффер Randewoo (Admitad ID 22484)
+  {
+    id: 2248401,
+    promocode: {
+      id: 2248401,
+      code: "RND7",
+      bonusName: "Скидка 7% на заказы от 3 000 ₽ в Randewoo",
+      terms: "Скидка 7% на парфюмерию и косметику по промокоду RND7 при заказе от 3 000 ₽ в интернет-магазине Randewoo. Действует до 11 февраля 2027 года 23:59.",
+      expires: "2027-02-11T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Все пользователи",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "admitad",
+    },
+    store: {
+      ...STABLE_STORES["randewoo"],
+      activeBloggers: STABLE_STORES["randewoo"].activeBloggers ?? 0,
+    },
+    affiliate: {
+      link: "https://bywiola.com/g/zo4r4l1htlc7dde8999c0dd11956d5/?i=3&erid=2bL9aMPo2e49hMef4rqyKXgYCe",
+      landingLink: "https://bywiola.com/g/zo4r4l1htlc7dde8999c0dd11956d5/?i=3&erid=2bL9aMPo2e49hMef4rqyKXgYCe",
+      ordMarker: "2bL9aMPo2e49hMef4rqyKXgYCe",
+      ordText: "Реклама. ООО «Рандеву». erid: 2bL9aMPo2e49hMef4rqyKXgYCe",
+    },
+    extraLinks: [],
+  },
+  // PERFLUENCE / Т-Путешествия. Отели: подтверждённое размещение сайта (ID 3285)
+  {
+    id: 328501,
+    promocode: {
+      id: 328501,
+      code: "",
+      bonusName: "Скидка 15% на первое бронирование отелей в Т-Путешествиях",
+      terms: "Скидка 15% на первое бронирование отеля для новых пользователей сервиса на сайте или в приложении Т-Банка в разделе «Т-Путешествия» (максимальная скидка 3 000 ₽). Действует до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Первый заказ",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["t-puteshestviya-oteli"],
+      activeBloggers: STABLE_STORES["t-puteshestviya-oteli"].activeBloggers ?? 0,
+    },
+    affiliate: {
+      link: "https://tinkoff.prfl.me/sites/x3cow9?erid=2RanyoF7adh",
+      landingLink: "https://tinkoff.prfl.me/sites/x3cow9?erid=2RanyoF7adh",
+      ordMarker: "2RanyoF7adh",
+      ordText: "Реклама. АО «ТБанк», ИНН 7710140679. erid: 2RanyoF7adh",
+    },
+    extraLinks: [],
+  },
 ];
 
 /**
