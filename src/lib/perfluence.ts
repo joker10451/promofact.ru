@@ -520,12 +520,19 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     }
     // New site-specific Tanuki publication supersedes the stale widget URL and
     // historical ERID. Deny unknown/historical codes until reviewed.
+    if (c.store.slug === "yandeks-afisha") {
+      const code = c.promocode.code.trim().toUpperCase();
+      return ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
+        c.affiliate.link === "https://yandafisha.prfl.me/sites/xocz1q?erid=2RanynJD4PD" &&
+        c.affiliate.ordMarker === "2RanynJD4PD" &&
+        c.affiliate.ordText.includes("erid: 2RanynJD4PD");
+    }
     if (c.store.slug === "tanukifamily") {
       const code = c.promocode.code.trim().toUpperCase();
-      return ["20FU1416", "15FU1416", "FU1417", "ZB1177"].includes(code) &&
-        c.affiliate.link === "https://tanuki.prfl.me/sites/wyy3z6?erid=2RanymqYc6X" &&
-        c.affiliate.ordMarker === "2RanymqYc6X" &&
-        c.affiliate.ordText.includes("erid: 2RanymqYc6X");
+      return ["20SA1244", "15SA1244", "ZB1177", "SA1244"].includes(code) &&
+        c.affiliate.link === "https://tanukifamily.prfl.me/sites/jyhh6e?erid=2RanyoGYb6K" &&
+        c.affiliate.ordMarker === "2RanyoGYb6K" &&
+        c.affiliate.ordText.includes("erid: 2RanyoGYb6K");
     }
     // Perfluence's old widget contains conflicting codes, expiry dates, URL
     // and ERID. Only explicitly approved project website placement survives.

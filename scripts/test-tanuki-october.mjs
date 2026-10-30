@@ -6,13 +6,13 @@ import { dedupeCoupons } from "../src/lib/dedupe.ts";
 import { withoutForbiddenTanukiCoPromotion } from "../src/lib/publisherPlacementRules.ts";
 
 const expected = {
-  "20FU1416": { expires:"2026-10-29T23:59:59+03:00", percent:"20%", min:"1 090", first:true },
-  "15FU1416": { expires:"2026-10-29T23:59:59+03:00", percent:"15%", min:"1 490", first:false },
-  "FU1417": { expires:"2026-10-18T23:59:59+03:00", percent:"Ролл Фурай", min:"1 490", first:false },
+  "20SA1244": { expires:"2026-11-26T23:59:59+03:00", percent:"20%", min:"1 090", first:true },
+  "15SA1244": { expires:"2026-11-26T23:59:59+03:00", percent:"15%", min:"1 490", first:false },
   "ZB1177": { expires:"2026-11-01T23:59:59+03:00", percent:"Запечённый краб", min:"1 490", first:false },
+  "SA1244": { expires:"2026-11-15T23:59:59+03:00", percent:"Мега-ролл", min:"1 490", first:false },
 };
-assert.equal(TANUKI_OCT16_LINK, "https://tanuki.prfl.me/sites/wyy3z6?erid=2RanymqYc6X");
-assert.equal(TANUKI_OCT16_ERID, "2RanymqYc6X");
+assert.equal(TANUKI_OCT16_LINK, "https://tanukifamily.prfl.me/sites/jyhh6e?erid=2RanyoGYb6K");
+assert.equal(TANUKI_OCT16_ERID, "2RanyoGYb6K");
 assert.equal(TANUKI_OCT16_OFFERS.length,4);
 assert.deepEqual(new Set(TANUKI_OCT16_OFFERS.map(c=>c.promocode.code)),new Set(Object.keys(expected)));
 for (const coupon of TANUKI_OCT16_OFFERS) {
@@ -47,8 +47,8 @@ const stale={...old,id:992390, promocode:{...old.promocode,id:992390},
   ordMarker:"2RanymzKnrw",ordText:"Реклама. erid: 2RanymzKnrw"}};
 const deduped=dedupeCoupons([{source:"custom",coupons:TANUKI_OCT16_OFFERS},
   {source:"perfluence",coupons:[stale]}]);
-assert.equal(deduped.coupons.filter(c=>c.promocode.code==="20FU1416").length,1);
-assert.equal(deduped.coupons.find(c=>c.promocode.code==="20FU1416")?.affiliate.link,TANUKI_OCT16_LINK);
+assert.equal(deduped.coupons.filter(c=>c.promocode.code==="20SA1244").length,1);
+assert.equal(deduped.coupons.find(c=>c.promocode.code==="20SA1244")?.affiliate.link,TANUKI_OCT16_LINK);
 
 const farfor={...old, store:{...old.store,name:"FARFOR",slug:"farfor"}};
 const yobido={...old, store:{...old.store,name:"Ёёёёёёё (ex. Ёбидоёби)",slug:"yobidoyobi"}};
