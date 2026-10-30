@@ -9,6 +9,7 @@ import HomeResourcesPreview from "@/components/HomeResourcesPreview";
 import CategoryPreview from "@/components/CategoryPreview";
 import SeasonalSaleBanner from "@/components/SeasonalSaleBanner";
 import { COLLECTIONS, getCollectionCoupons } from "@/lib/collections";
+import NewsletterBox from "@/components/NewsletterBox";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import Reveal from "@/components/Reveal";
@@ -142,6 +143,13 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-11">
           <Reveal>
             <HomeResourcesPreview />
+          </Reveal>
+        </div>
+
+        {/* Email и Telegram подписка на свежие промокоды недели */}
+        <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 sm:pb-16">
+          <Reveal>
+            <NewsletterBox source="home_bottom" />
           </Reveal>
         </div>
       </main>
