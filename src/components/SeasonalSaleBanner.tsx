@@ -44,7 +44,7 @@ export default function SeasonalSaleBanner({
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Карточка 1: Чёрная Пятница */}
         <Link
-          href="/collections/black-friday"
+          href="/akcii/chernaya-pyatnica-2026"
           className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-ink/10 bg-gradient-to-br from-ink to-ink/95 p-5 text-white shadow-sm transition-all hover:-translate-y-1 hover:border-red/60 hover:shadow-lg sm:p-6"
         >
           <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-red/20 blur-2xl group-hover:bg-red/30 transition-all" />
@@ -77,7 +77,7 @@ export default function SeasonalSaleBanner({
 
         {/* Карточка 2: 11.11 Всемирный день шопинга */}
         <Link
-          href="/collections/den-shopinga-11-11"
+          href="/akcii/den-shopinga-11-11"
           className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-red/40 hover:shadow-lg sm:p-6"
         >
           <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-yellow/25 blur-2xl group-hover:bg-yellow/40 transition-all" />

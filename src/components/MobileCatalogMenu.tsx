@@ -87,6 +87,33 @@ export default function MobileCatalogMenu({ groups }: { groups: MegaMenuGroup[] 
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2">
+              {/* Быстрый доступ: 11.11 и Telegram */}
+              <div className="mb-3 grid grid-cols-2 gap-2 px-1">
+                <Link
+                  href="/akcii/den-shopinga-11-11"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 rounded-xl bg-red/10 border border-red/20 px-3 py-2 text-xs font-bold text-red hover:bg-red/15 transition-all"
+                >
+                  <span className="text-base">🔥</span>
+                  <div className="min-w-0">
+                    <span className="block truncate text-ink font-extrabold text-[12px]">11.11 Скидки</span>
+                    <span className="block truncate text-[10px] text-red font-medium">Главный шопинг</span>
+                  </div>
+                </Link>
+                <a
+                  href="https://t.me/smart_zakupka"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 rounded-xl bg-[#2AABEE]/10 border border-[#2AABEE]/25 px-3 py-2 text-xs font-bold text-[#1d8fc8] hover:bg-[#2AABEE]/15 transition-all"
+                >
+                  <span className="text-base">📢</span>
+                  <div className="min-w-0">
+                    <span className="block truncate text-ink font-extrabold text-[12px]">TG-канал</span>
+                    <span className="block truncate text-[10px] text-[#1d8fc8] font-medium">Секретные коды</span>
+                  </div>
+                </a>
+              </div>
+
               {groups.map((g) => {
                 const isOpen = expanded === g.id;
                 return (
