@@ -10,7 +10,7 @@ const ENDPOINTS_TO_CHECK = [
   "/store/otello",
   "/store/vazhnaya-ryba",
   "/store/yandeks-afisha",
-  "/store/dodo-pizza",
+  "/akcii/den-shopinga-11-11",
   "/store/start-ru",
   "/store/vkusvill-dostavka",
   "/store/librederm",
