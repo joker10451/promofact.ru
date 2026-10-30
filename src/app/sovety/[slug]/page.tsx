@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import CouponTicket from "@/components/CouponTicket";
+import NewsletterBox from "@/components/NewsletterBox";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import { getArticles, getArticle } from "@/lib/articles";
@@ -419,6 +420,11 @@ export default async function ArticlePage({
               Подписаться на канал →
             </a>
           </section>
+
+          {/* Email дайджест лучших скидок */}
+          <div className="mt-6">
+            <NewsletterBox source={`article_${slug}`} />
+          </div>
 
           <div className="mt-8 flex items-center justify-between">
             <Link
