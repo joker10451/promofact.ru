@@ -102,6 +102,30 @@ export default async function CollectionsIndexPage() {
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink/65 sm:text-base">
               Специальные подборки предложений для удобного шопинга: скидки на первый заказ, бесплатная доставка, онлайн-кинотеатры, повышенный кэшбэк и главные распродажи сезона.
             </p>
+
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              <Link
+                href="/akcii/den-shopinga-11-11"
+                className="inline-flex items-center gap-1.5 rounded-full bg-red/10 border border-red/25 px-3 py-1.5 text-xs font-bold text-red hover:bg-red/15 transition-all"
+              >
+                <span>🔥</span>
+                <span>День шопинга 11.11</span>
+              </Link>
+              <Link
+                href="/akcii/chernaya-pyatnica-2026"
+                className="inline-flex items-center gap-1.5 rounded-full bg-ink/10 border border-ink/20 px-3 py-1.5 text-xs font-bold text-ink hover:bg-ink/15 transition-all"
+              >
+                <span>⚡</span>
+                <span>Чёрная Пятница 2026</span>
+              </Link>
+              <Link
+                href="/akcii/novogodnie-skidki-2027"
+                className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/30 px-3 py-1.5 text-xs font-bold text-mint-dark hover:bg-mint/25 transition-all"
+              >
+                <span>🎄</span>
+                <span>Новогодние скидки 2027</span>
+              </Link>
+            </div>
           </div>
         </div>
 
