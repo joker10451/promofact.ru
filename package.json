@@ -91,7 +91,8 @@
     "test:gone-articles": "node --loader ./scripts/ts-loader.mjs scripts/test-gone-articles.mjs",
     "test:three-store-seo": "node --loader ./scripts/ts-loader.mjs scripts/test-three-store-seo-oct25.mjs",
     "test:oct24": "node --loader ./scripts/ts-loader.mjs scripts/test-oct24-updates.mjs",
-    "test:oct27": "node --loader ./scripts/ts-loader.mjs scripts/test-oct27-updates.mjs"
+    "test:oct27": "node --loader ./scripts/ts-loader.mjs scripts/test-oct27-updates.mjs",
+    "test:seo-audit": "node --loader ./scripts/ts-loader.mjs scripts/test-seo-indexing-audit.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

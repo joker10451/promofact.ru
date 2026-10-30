@@ -136,31 +136,52 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  const PEAK_GUIDE_SLUGS = new Set([
+    "gid-po-rasprodazhe-11-11-2026",
+    "chernaya-pyatnica-2026",
+    "podarki-na-novyy-god-2027-skidki",
+    "laifhaki-shoppinga-na-marketpleysah",
+    "promokody-yandeks-afisha-bilety",
+    "promokody-sberzdorovie-analizy-apteki",
+    "cashbek-bankov-2026",
+  ]);
+
   const tipsMap: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/sovety`,
       ...(latestArticleDate ? { lastModified: latestArticleDate } : {}),
       changeFrequency: "weekly" as const,
-      priority: 0.7,
+      priority: 0.8,
     },
     ...allArticles.map((a) => {
       const pubDate = a.published ? new Date(a.published) : undefined;
       const validPubDate = pubDate && !isNaN(pubDate.getTime()) ? pubDate : undefined;
+      const isPeakGuide = PEAK_GUIDE_SLUGS.has(a.slug);
       return {
         url: `${SITE_URL}/sovety/${a.slug}`,
         ...(validPubDate ? { lastModified: validPubDate } : {}),
-        changeFrequency: "monthly" as const,
-        priority: 0.6,
+        changeFrequency: isPeakGuide ? ("weekly" as const) : ("monthly" as const),
+        priority: isPeakGuide ? 0.8 : 0.6,
       };
     }),
   ];
 
-  // Сезонные акции (без фиктивных дат)
-  const actionsMap: MetadataRoute.Sitemap = ACTIONS.map((a) => ({
-    url: `${SITE_URL}/akcii/${a.slug}`,
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }));
+  // Сезонные акции (без фиктивных дат): для активных распродаж осени/зимы приоритет 0.9 и ежедневный обход
+  const PEAK_ACTION_SLUGS = new Set([
+    "den-shopinga-11-11",
+    "chernaya-pyatnica-2026",
+    "novogodnie-skidki-2027",
+  ]);
+
+  const actionsMap: MetadataRoute.Sitemap = ACTIONS.map((a) => {
+    const isPeakAction = PEAK_ACTION_SLUGS.has(a.slug);
+    return {
+      url: `${SITE_URL}/akcii/${a.slug}`,
+      ...(isPeakAction && CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
+      changeFrequency: isPeakAction ? ("daily" as const) : ("monthly" as const),
+      priority: isPeakAction ? 0.9 : 0.6,
+    };
+  });
 
   // Служебные и партнёрские страницы (исключены /admin и тестовые /partner/yookassa)
   const miscMap: MetadataRoute.Sitemap = [
