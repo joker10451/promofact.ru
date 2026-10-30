@@ -31,34 +31,21 @@ function stripHtml(text: string | null | undefined): string {
 function formatDate(iso: string | null): string {
   if (!iso) return "бессрочно";
   const str = String(iso).trim();
-  const ru = str.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
-  let d = "", m = "";
-  if (ru) {
-    [, d, m] = ru;
-  } else {
-    const parts = str.split("-");
-    if (parts.length === 3) {
-      [, m, d] = parts;
-    } else {
-      return str;
-    }
-  }
   const months = [
-    "января",
-    "февраля",
-    "марта",
-    "апреля",
-    "мая",
-    "июня",
-    "июля",
-    "августа",
-    "сентября",
-    "октября",
-    "ноября",
-    "декабря",
+    "января", "февраля", "марта", "апреля", "мая", "июня",
+    "июля", "августа", "сентября", "октября", "ноября", "декабря",
   ];
-  const mi = Number(m) - 1;
-  return `${Number(d)} ${months[mi] ?? m}`;
+  const ru = str.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+  if (ru) {
+    const [, d, m] = ru;
+    return `${Number(d)} ${months[Number(m) - 1] ?? m}`;
+  }
+  const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const [, , m, d] = isoMatch;
+    return `${Number(d)} ${months[Number(m) - 1] ?? m}`;
+  }
+  return str;
 }
 
 /**
