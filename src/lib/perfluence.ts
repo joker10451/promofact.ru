@@ -487,7 +487,13 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // Site-specific Perfluence links renewed 23 October 2026.
     // Reject stale widget links / ERIDs and any unconfirmed codes for these projects.
     if (c.store.slug === "yandeks-tsvety") {
-      return c.promocode.code.trim().toUpperCase() === "QX7GZZ" &&
+      const flowerCode = c.promocode.code.trim().toUpperCase();
+      if (flowerCode === "OXH702") {
+        return c.affiliate.link === "https://yaflowers.prfl.me/sites/x09eol?erid=2RanyoMvJ99" &&
+          c.affiliate.ordMarker === "2RanyoMvJ99" &&
+          c.affiliate.ordText.includes("erid: 2RanyoMvJ99");
+      }
+      return flowerCode === "QX7GZZ" &&
         c.affiliate.link === "https://yaflowers.prfl.me/sites/oluvpa?erid=2RanymRX1bZ" &&
         c.affiliate.ordMarker === "2RanymRX1bZ" &&
         c.affiliate.ordText.includes("ИНН 9705114405");
@@ -510,7 +516,16 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // Fail closed: old Perfluence widgets may contain still-working codes but
     // attribute their clicks to the old PromoFact placement and outdated ERID.
     if (c.store.slug === "magnit-dostavka") {
-      return currentMagnitCodes.has(c.promocode.code.trim().toUpperCase()) &&
+      const magnitCode = c.promocode.code.trim().toUpperCase();
+      if (magnitCode === "PFAD7EACMD") {
+        return c.affiliate.link === "https://mgntgm.prfl.me/sites/833avo?erid=2RanyoHULJ7" &&
+          c.affiliate.landingLink === "https://mgntgm.prfl.me/sites/833avo?erid=2RanyoHULJ7" &&
+          c.affiliate.ordMarker === "2RanyoHULJ7" &&
+          c.affiliate.ordText.includes('АО "Тандер"') &&
+          c.affiliate.ordText.includes("ИНН 2310031475") &&
+          c.affiliate.ordText.includes("erid: 2RanyoHULJ7");
+      }
+      return currentMagnitCodes.has(magnitCode) &&
         c.affiliate.link === "https://mgntgm.prfl.me/sites/b2dnbt?erid=2Ranykq7AeF" &&
         c.affiliate.landingLink === "https://mgntgm.prfl.me/sites/b2dnbt?erid=2Ranykq7AeF" &&
         c.affiliate.ordMarker === "2Ranykq7AeF" &&
