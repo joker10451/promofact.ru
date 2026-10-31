@@ -458,6 +458,90 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async headers() {
+    return [
+      // 1. Проксированные логотипы сетей и бренды — кэшируем на Cloudflare на 30 дней (immutable)
+      {
+        source: "/media/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=2592000, s-maxage=2592000, stale-while-revalidate=86400, immutable",
+          },
+          {
+            key: "CDN-Cache-Control",
+            value: "public, s-maxage=2592000, stale-while-revalidate=86400",
+          },
+          {
+            key: "Cloudflare-CDN-Cache-Control",
+            value: "public, s-maxage=2592000, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/brands/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=2592000, s-maxage=2592000, stale-while-revalidate=86400, immutable",
+          },
+          {
+            key: "CDN-Cache-Control",
+            value: "public, s-maxage=2592000, stale-while-revalidate=86400",
+          },
+          {
+            key: "Cloudflare-CDN-Cache-Control",
+            value: "public, s-maxage=2592000, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      // 2. Статические файлы Next.js (js/css/шрифты) — кэшируем на 1 год
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, s-maxage=31536000, immutable",
+          },
+        ],
+      },
+      // 3. API и админка — строго dynamic, без кэширования
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate",
+          },
+        ],
+      },
+      {
+        source: "/admin/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate",
+          },
+        ],
+      },
+      // 4. HTML страницы каталога, магазинов, категорий, статей и городов
+      // Cloudflare держит в кэше 24 часа со stale-while-revalidate.
+      // Посетители и боты получают страницу моментально из CDN, Vercel Origin не вызывается.
+      {
+        source: "/:path((?!api|admin|_next/image).*)",
+        headers: [
+          {
+            key: "CDN-Cache-Control",
+            value: "public, s-maxage=86400, stale-while-revalidate=86400",
+          },
+          {
+            key: "Cloudflare-CDN-Cache-Control",
+            value: "public, s-maxage=86400, stale-while-revalidate=86400",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
