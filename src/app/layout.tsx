@@ -128,6 +128,16 @@ export default function RootLayout({
           name="mitgo-verification"
           content="65f662ae-8b60-472f-bb3c-d5c04488f5ce"
         />
+        <meta
+          name="yandex-verification"
+          content="8d1qy6ygiotilnuj"
+        />
+        <meta
+          name="yandex-distribution-verification"
+          content="8d1qy6ygiotilnuj"
+        />
+        {/* Yandex Distribution verification token */}
+        <div style={{ display: "none" }} aria-hidden="true">8d1qy6ygiotilnuj</div>
         {/* Очередь колбэков РСЯ объявляем сразу — это просто массив.
             Сам context.js грузит <YandexAds /> и только после согласия. */}
         <script dangerouslySetInnerHTML={{ __html: "window.yaContextCb=window.yaContextCb||[]" }} />
