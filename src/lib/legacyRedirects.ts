@@ -5,6 +5,7 @@
  * на ближайшую по смыслу живую категорию.
  */
 export const LEGACY_STORE_REDIRECTS: Record<string, string> = {
+  "admitad-25914-yandex": "/store/yandex-practicum",
   ostin: "/category/marketpleysy",
   hoff: "/category/marketpleysy",
   "m-video": "/category/elektronika-i-tehnika",
