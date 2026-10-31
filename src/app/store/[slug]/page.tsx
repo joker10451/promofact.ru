@@ -548,6 +548,26 @@ export default async function StorePage({
             </Link>
           </aside>
         )}
+        {slug === "sberzdorovie" && (
+          <aside aria-label="Медицинские анализы и консультации" className="mt-5 rounded-2xl border border-emerald-500/30 bg-emerald-50/50 p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-extrabold text-ink flex items-center gap-2">
+                  <span>🔬</span> Скидки на медицинские анализы и онлайн-врачей
+                </p>
+                <p className="mt-1 text-xs sm:text-sm text-ink/75 leading-relaxed">
+                  На этой странице собраны все официальные промокоды проекта «СберЗдоровье (Анализы)»: скидки до 40% на любые лабораторные чекапы, 30% на анализы для беременных и консультации специалистов.
+                </p>
+              </div>
+              <Link
+                href="/sovety/promokody-sberzdorovie-analizy-apteki"
+                className="inline-flex min-h-[38px] items-center justify-center shrink-0 rounded-xl bg-white border border-emerald-500/40 px-4 py-2 text-xs font-bold text-emerald-800 shadow-2xs hover:bg-emerald-50 transition-colors"
+              >
+                Гид по анализам →
+              </Link>
+            </div>
+          </aside>
+        )}
         {slug === "fmart" && (
           <p className="mt-4 rounded-xl border border-line bg-paper/60 px-4 py-3 text-xs leading-relaxed text-ink/75 sm:text-sm">
             Это предложения FMART by flowwow, а не отдельные промокоды сервиса Flowwow.

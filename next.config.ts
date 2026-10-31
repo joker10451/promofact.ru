@@ -128,6 +128,36 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/store/sberanalizy/:path*",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sberanalizy",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sber-analizy/:path*",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sber-analizy",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sberzdorovie-analizy/:path*",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
+        source: "/store/sberzdorovie-analizy",
+        destination: "/store/sberzdorovie",
+        permanent: true,
+      },
+      {
         source: "/store/geltek-diagnostika-kozhi/:path*",
         destination: "/store/geltek",
         permanent: true,
