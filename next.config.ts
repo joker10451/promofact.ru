@@ -38,6 +38,9 @@ const SHORT_LINKS: Record<string, string> = {
   kinopoisk: "/store/kinopoisk",
   start: "/store/start-ru",
   cozy: "/store/cozy-home",
+  premier: "/store/premier",
+  practicum: "/store/yandex-practicum",
+  magnit: "/store/magnit-dostavka",
 };
 
 const nextConfig: NextConfig = {
