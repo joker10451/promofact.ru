@@ -2,11 +2,8 @@ import type { Coupon } from "@/lib/types";
 import { STABLE_STORES } from "@/lib/stableStores";
 
 /**
- * New publisher-approved Perfluence website placements for promofact.ru,
- * supplied by the publisher on 29 Oct 2026 (project: SberZdorovie / Analizy).
- * These supersede the historical PERPREGA309361 link, not the Oct24
- * telemedicine placement. Do not revive old creatives or fabricate minimum
- * order amounts not present in the new approval.
+ * Publisher-approved Perfluence website placements for promofact.ru (project: SberZdorovie / Analizy).
+ * Updated 31 Oct 2026 with new verified links for PERPREGA309361 and the new 40% flash-sale SH40NOV0I6VB.
  */
 const legal = 'Реклама. ООО Инновационная медицина, 115432, г.Москва, вн.тер.г. муниципальный округ Даниловский, пр-кт Андропова, д. 10, помещ. 115, ОГРН 1197746310618';
 const medicalWarning = 'ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА';
@@ -20,6 +17,7 @@ type Placement = {
   audience: string;
   link: string;
   erid: string;
+  expires?: string;
 };
 
 export const SBER_ANALIZY_OCT29_PLACEMENTS: readonly Placement[] = [
@@ -27,10 +25,11 @@ export const SBER_ANALIZY_OCT29_PLACEMENTS: readonly Placement[] = [
     id: 826233201,
     code: "PERPREGA309361",
     title: "Скидка 30% на первые и все повторные анализы для беременных",
-    terms: "Скидка 30% на первые и все повторные анализы для беременных по промокоду PERPREGA309361 в проекте «СберЗдоровье (Анализы)». Минимальная сумма заказа в новом согласованном размещении не указана; проверяйте условия перед оплатой. До 30 ноября 2026 года, 23:59 МСК.",
+    terms: "Скидка 30% на первые и все повторные анализы для беременных по промокоду PERPREGA309361 в проекте «СберЗдоровье (Анализы)». Согласовано для promofact.ru. До 30 ноября 2026 года, 23:59 МСК.",
     audience: "Первые и повторные анализы для беременных",
-    link: "https://sberanalizy.prfl.me/sites/t3zwt2?erid=2RanymUSyoZ",
-    erid: "2RanymUSyoZ",
+    link: "https://sberanalizy.prfl.me/sites/2gt5s4?erid=2RanyoFuJno",
+    erid: "2RanyoFuJno",
+    expires: "2026-11-30T23:59:59+03:00",
   },
   {
     id: 826233202,
@@ -40,6 +39,17 @@ export const SBER_ANALIZY_OCT29_PLACEMENTS: readonly Placement[] = [
     audience: "Анализы · ограничения уточняются",
     link: "https://sberanalizy.prfl.me/sites/n9dpk3?erid=2RanymSxzXD",
     erid: "2RanymSxzXD",
+    expires: "2026-11-30T23:59:59+03:00",
+  },
+  {
+    id: 826233203,
+    code: "SH40NOV0I6VB",
+    title: "Скидка до 40% на любые анализы + бесплатная расшифровка с врачом",
+    terms: "Флеш-акция в проекте «СберЗдоровье (Анализы)»: скидка до 40% на любые анализы, а также бесплатная расшифровка результатов анализов с врачом по промокоду SH40NOV0I6VB. Действует с 31 октября по 1 ноября 2026 года, 23:59 МСК.",
+    audience: "Все пользователи · любые анализы",
+    link: "https://sberanalizy.prfl.me/sites/ljtzj2?erid=2RanyoHPJ59",
+    erid: "2RanyoHPJ59",
+    expires: "2026-11-01T23:59:59+03:00",
   },
 ];
 
@@ -52,8 +62,8 @@ export const SBER_ANALIZY_OCT29_OFFERS: Coupon[] = SBER_ANALIZY_OCT29_PLACEMENTS
     code: p.code,
     bonusName: p.title,
     terms: p.terms,
-    expires: expiry,
-    isHit: false,
+    expires: p.expires ?? expiry,
+    isHit: p.code === "SH40NOV0I6VB",
     isUniversal: false,
     isFirstOrderOnly: false,
     customerTypeLabel: p.audience,

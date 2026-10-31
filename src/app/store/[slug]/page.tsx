@@ -311,13 +311,13 @@ export default async function StorePage({
         : [];
 
   const activeSberCodes = store.coupons.filter(c => isRealPromoCode(c.promocode.code));
-  const sberAnalysisCodes = activeSberCodes.filter(c => ["PERPREGA309361", "SHD56E28"].includes(c.promocode.code.trim().toUpperCase()));
-  const sberConsultationCodes = activeSberCodes.filter(c => !["PERPREGA309361", "SHD56E28"].includes(c.promocode.code.trim().toUpperCase()));
+  const sberAnalysisCodes = activeSberCodes.filter(c => ["PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"].includes(c.promocode.code.trim().toUpperCase()));
+  const sberConsultationCodes = activeSberCodes.filter(c => !["PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"].includes(c.promocode.code.trim().toUpperCase()));
   const sberFaqItems = [
     {
       q: "Какие промокоды действуют на анализы в СберЗдоровье?",
       a: sberAnalysisCodes.length
-        ? `Для медицинских анализов указаны: ${sberAnalysisCodes.map(c => c.promocode.code).join(", ")}. Код PERPREGA309361 относится к первым и повторным анализам для беременных, а применимость остальных кодов уточняйте в сервисе. У каждого предложения собственная ссылка и ограничения.`
+        ? `Для медицинских анализов указаны: ${sberAnalysisCodes.map(c => c.promocode.code).join(", ")}. Код PERPREGA309361 относится к первым и повторным анализам для беременных, SH40NOV0I6VB — флеш-акция до 40% с бесплатной расшифровкой результатов врачом, а применимость остальных кодов уточняйте в сервисе. У каждого предложения собственная ссылка и ограничения.`
         : "На этой странице сейчас нет действующих промокодов на медицинские анализы. Проверяйте текущие предложения перед оформлением.",
     },
     {

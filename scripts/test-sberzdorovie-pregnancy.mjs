@@ -83,19 +83,23 @@ const stores = await getAllStores();
 const sberStore = stores.find((s) => s.slug === "sberzdorovie");
 assert.ok(sberStore, "Магазин sberzdorovie должен присутствовать в каталоге");
 
-const expectedSberCodes = ["PERE7A4E5", "PERPREGT259702", "SPPA2EFFE", "PERPREGA309361", "SHD56E28"];
+const expectedSberCodes = ["PERE7A4E5", "PERPREGT259702", "SPPA2EFFE", "PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"];
 assert.deepEqual(sberStore.coupons.map(c => c.promocode.code).sort(), expectedSberCodes.sort());
 const approved = new Map(SBER_ANALIZY_OCT29_OFFERS.map(c => [c.promocode.code, c]));
-assert.equal(approved.size, 2);
+assert.equal(approved.size, 3);
 const pregnancyCoupon = approved.get("PERPREGA309361");
 const analysesCoupon = approved.get("SHD56E28");
-assert.ok(pregnancyCoupon && analysesCoupon);
+const flashCoupon = approved.get("SH40NOV0I6VB");
+assert.ok(pregnancyCoupon && analysesCoupon && flashCoupon);
 assert.match(pregnancyCoupon.promocode.bonusName, /30%.*первые и все повторные анализы для беременных/);
 assert.match(analysesCoupon.promocode.bonusName, /20%.*анализы/);
+assert.match(flashCoupon.promocode.bonusName, /40%.*анализы/);
 assert.equal(pregnancyCoupon.promocode.expires, "2026-11-30T23:59:59+03:00");
 assert.equal(analysesCoupon.promocode.expires, "2026-11-30T23:59:59+03:00");
-assert.equal(pregnancyCoupon.affiliate.link, "https://sberanalizy.prfl.me/sites/t3zwt2?erid=2RanymUSyoZ");
+assert.equal(flashCoupon.promocode.expires, "2026-11-01T23:59:59+03:00");
+assert.equal(pregnancyCoupon.affiliate.link, "https://sberanalizy.prfl.me/sites/2gt5s4?erid=2RanyoFuJno");
 assert.equal(analysesCoupon.affiliate.link, "https://sberanalizy.prfl.me/sites/n9dpk3?erid=2RanymSxzXD");
+assert.equal(flashCoupon.affiliate.link, "https://sberanalizy.prfl.me/sites/ljtzj2?erid=2RanyoHPJ59");
 for (const coupon of approved.values()) {
   assert.equal(coupon.affiliate.landingLink, coupon.affiliate.link);
   assert.equal(new URL(coupon.affiliate.link).searchParams.get("erid"), coupon.affiliate.ordMarker);
@@ -110,9 +114,9 @@ for (const coupon of approved.values()) {
 const fakeCredit = { ...pregnancyCoupon, store: { ...pregnancyCoupon.store, slug: "kreditnaya-sberkarta", name: "Кредитная СберКарта" } };
 const curated = withoutForbiddenSberAnalizyCreditCardCoPromotion([...SBER_ANALIZY_OCT29_OFFERS, fakeCredit]);
 assert.ok(curated.some(c => c.store.slug === "kreditnaya-sberkarta"));
-assert.equal(curated.some(c => ["PERPREGA309361", "SHD56E28"].includes(c.promocode.code) && c.store.slug === "sberzdorovie"), false);
-assert.equal(withoutForbiddenSberAnalizyCreditCardCoPromotion(SBER_ANALIZY_OCT29_OFFERS).length, 2);
-console.log("✓ Два новых согласованных промокода с разными ссылками, проверкой маркировки и ограничением совместной рекламы");
+assert.equal(curated.some(c => ["PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"].includes(c.promocode.code) && c.store.slug === "sberzdorovie"), false);
+assert.equal(withoutForbiddenSberAnalizyCreditCardCoPromotion(SBER_ANALIZY_OCT29_OFFERS).length, 3);
+console.log("✓ Три согласованных промокода с разными ссылками, проверкой маркировки и ограничением совместной рекламы");
 
 const codes = new Map(sberStore.coupons.map(c => [c.promocode.code, c]));
 assert.equal(getCouponAudience(codes.get("PERPREGT259702").promocode), "repeat-order");
@@ -129,7 +133,7 @@ const article = buildStoreArticle({
     code: c.promocode.code, bonusName: c.promocode.bonusName, isBarcode: c.promocode.isBarcode,
   })),
   couponCount: sberStore.coupons.length,
-  maxDiscount: "до 35%",
+  maxDiscount: "до 40%",
   isFirstOrder: false,
   activeBloggers: 0,
   monthYear: "Октябрь 2026",
@@ -145,6 +149,6 @@ const page = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
 assert(howTo.includes('variant === "sber-medical"'));
 assert(page.includes('slug === "sberzdorovie" ? "sber-medical"'));
 assert(page.includes('slug === "sberzdorovie" ? sberFaqItems'));
-console.log("✓ СберЗдоровье: правильные ярлыки, все 5 кодов в SEO, отдельный медицинский FAQ и сценарий");
+console.log("✓ СберЗдоровье: правильные ярлыки, все 6 кодов в SEO, отдельный медицинский FAQ и сценарий");
 
 console.log("🎉 Все проверки пройдены успешно!");

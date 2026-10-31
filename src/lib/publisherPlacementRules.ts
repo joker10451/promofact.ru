@@ -80,7 +80,7 @@ export function withoutForbiddenSberAnalizyCreditCardCoPromotion(coupons: Coupon
     ["kreditnaya-sberkarta", "sberkarta"].includes(c.store.slug) ||
     /кредитн[а-яё]*\s+сберкарт/iu.test(c.store.name));
   if (!hasCreditSberCard) return coupons;
-  const analysisCodes = new Set(["PERPREGA309361", "SHD56E28"]);
+  const analysisCodes = new Set(["PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"]);
   return coupons.filter(c =>
     !(c.store.slug === "sberzdorovie" &&
       analysisCodes.has(c.promocode.code.trim().toUpperCase())));

@@ -151,7 +151,7 @@ export function isApprovedOct24Repost(c: Coupon): boolean {
   if (!managedSlugs.has(c.store.slug)) return true;
   // Publisher-confirmed expired/invalid placements remain denied even if their
   // original expiry date or the legacy widget still claims they are active.
-  if (c.store.slug === "sberzdorovie" && ["PERPREGA309361", "SHD56E28"].includes(c.promocode.code.trim().toUpperCase())) {
+  if (c.store.slug === "sberzdorovie" && ["PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"].includes(c.promocode.code.trim().toUpperCase())) {
     return isApprovedOct29SberAnalizyPlacement(c);
   }
   const matching = PERFLUENCE_REPEAT_OCT24.find(p =>
