@@ -77,14 +77,7 @@ export const PERFLUENCE_REPEAT_OCT24: readonly RepeatPlacement[] = [
     expires: oct31, link: "https://sberanalizy.prfl.me/sites/l7bd3c?erid=2RanymYhrJP",
     erid: "2RanymYhrJP", legal: SBER_LEGAL,
   },
-  {
-    id: 826346802, slug: "sberzdorovie", code: "SPPA2EFFE",
-    bonus: "Скидка 30% на онлайн-консультации психолога",
-    audience: "Первая и повторная консультация психолога",
-    terms: "Скидка 30% на первую и повторные онлайн-консультации психолога по условиям проекта. До 31 октября 2026 года, 23:59 МСК.",
-    expires: oct31, link: "https://sberanalizy.prfl.me/sites/bclp7x?erid=2RanymXDs23",
-    erid: "2RanymXDs23", legal: SBER_LEGAL,
-  },
+  
   {
     id: 826346803, slug: "sberzdorovie", code: "PERE7A4E5",
     bonus: "Скидка 35% на онлайн-консультации врача",

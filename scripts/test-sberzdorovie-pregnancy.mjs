@@ -83,7 +83,7 @@ const stores = await getAllStores();
 const sberStore = stores.find((s) => s.slug === "sberzdorovie");
 assert.ok(sberStore, "Магазин sberzdorovie должен присутствовать в каталоге");
 
-const expectedSberCodes = ["PERE7A4E5", "PERPREGT259702", "SPPA2EFFE", "PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"];
+const expectedSberCodes = ["PERE7A4E5", "PERPREGT259702", "PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"];
 assert.deepEqual(sberStore.coupons.map(c => c.promocode.code).sort(), expectedSberCodes.sort());
 const approved = new Map(SBER_ANALIZY_OCT29_OFFERS.map(c => [c.promocode.code, c]));
 assert.equal(approved.size, 3);
@@ -120,7 +120,6 @@ console.log("✓ Три согласованных промокода с раз�
 
 const codes = new Map(sberStore.coupons.map(c => [c.promocode.code, c]));
 assert.equal(getCouponAudience(codes.get("PERPREGT259702").promocode), "repeat-order");
-assert.equal(getCouponAudience(codes.get("SPPA2EFFE").promocode), "repeat-order");
 assert.equal(getCouponAudience(codes.get("PERPREGA309361").promocode), "repeat-order");
 assert.equal(getCouponAudience(codes.get("SHD56E28").promocode), "unknown");
 assert.equal(getCouponAudience(codes.get("PERE7A4E5").promocode), "unknown");
@@ -149,6 +148,6 @@ const page = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf8");
 assert(howTo.includes('variant === "sber-medical"'));
 assert(page.includes('slug === "sberzdorovie" ? "sber-medical"'));
 assert(page.includes('slug === "sberzdorovie" ? sberFaqItems'));
-console.log("✓ СберЗдоровье: правильные ярлыки, все 6 кодов в SEO, отдельный медицинский FAQ и сценарий");
+console.log("✓ СберЗдоровье: правильные ярлыки, все 5 кодов в SEO, отдельный медицинский FAQ и сценарий");
 
 console.log("🎉 Все проверки пройдены успешно!");

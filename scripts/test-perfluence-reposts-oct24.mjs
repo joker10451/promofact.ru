@@ -8,10 +8,10 @@ const expected = new Map([
   ["pfs568042", "2RanymAU35D"], ["pfs1587883", "2RanymAU35D"],
   ["ZSLWVWXUC8", "2RanymGPzCb"], ["5XMGA7H6M6", "2RanymEuzvF"],
   ["WOW-EEFN", "2Ranymbfps5"], ["PERPREGT259702", "2RanymYhrJP"],
-  ["SPPA2EFFE", "2RanymXDs23"], ["PERE7A4E5", "2RanymVjsjh"],
+  ["PERE7A4E5", "2RanymVjsjh"],
 ]);
-assert.equal(PERFLUENCE_REPEAT_OCT24.length, 12);
-assert.equal(PERFLUENCE_REPEAT_OCT24_OFFERS.length, 12);
+assert.equal(PERFLUENCE_REPEAT_OCT24.length, 11);
+assert.equal(PERFLUENCE_REPEAT_OCT24_OFFERS.length, 11);
 for (const c of PERFLUENCE_REPEAT_OCT24_OFFERS) {
   const e = c.affiliate.ordMarker;
   assert.equal(new URL(c.affiliate.link).searchParams.get("erid"), e);
@@ -24,4 +24,4 @@ for (const c of PERFLUENCE_REPEAT_OCT24_OFFERS) {
 }
 assert.equal(isPausedPublisherStore("dodo-pizza"), true);
 assert.equal(getCustomCoupons().some(c => c.store.slug === "dodo-pizza"), false);
-console.log("PASS: 12 approved repost placements, Books and Music correctly attributed, Dodo paused");
+console.log("PASS: 11 approved repost placements, Books and Music correctly attributed, Dodo paused");
