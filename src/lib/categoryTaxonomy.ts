@@ -231,6 +231,8 @@ export const BRAND_CATEGORY: Record<string, string> = {
   инглекс: "onlayn-obrazovanie",
   productstar: "onlayn-obrazovanie",
   "яндекс практикум": "onlayn-obrazovanie",
+  "yandex-practicum": "onlayn-obrazovanie",
+  practicum: "onlayn-obrazovanie",
   uchmet: "onlayn-obrazovanie",
   seneca: "onlayn-obrazovanie",
   квантастика: "onlayn-obrazovanie",

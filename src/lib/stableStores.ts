@@ -881,6 +881,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://plus.yandex.ru",
     "activeBloggers": 4676
   },
+  "yandex-practicum": {
+    "id": 100011,
+    "slug": "yandex-practicum",
+    "name": "Яндекс Практикум",
+    "logo": "/brands/yandex-practicum.png",
+    "category": "Онлайн-образование",
+    "categorySlug": "onlayn-obrazovanie",
+    "about": "Яндекс Практикум — сервис онлайн-образования для освоения востребованных цифровых профессий: программирование на Python, веб-разработка, анализ данных, Data Science, QA-тестирование, менеджмент и дизайн. Интерактивные тренажеры, код-ревью экспертов, реальные кейсы в портфолио и поддержка Центра карьеры в трудоустройстве.",
+    "conditions": "Вводные модули всех программ и интерактивные тесты на профориентацию бесплатны. Скидки до 20% при единовременной оплате и беспроцентная рассрочка (Сплит) применяются на официальном сайте practicum.yandex.ru.",
+    "site": "https://practicum.yandex.ru",
+    "activeBloggers": 1250
+  },
   "zolotoe-yabloko": {
     "id": 100008,
     "slug": "zolotoe-yabloko",

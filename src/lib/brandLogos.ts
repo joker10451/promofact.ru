@@ -97,7 +97,8 @@ export const LOCAL_BRAND_ICONS: Record<string, string> = {
   "befree": "/brands/befree-ru.png",
   "t-bank": "/brands/t-bank-junior.png",
   "fmart-by-flowwow": "/brands/fmart.png",
-  "yandex-travel": "/brands/yandeks-puteshestviya.png"
+  "yandex-travel": "/brands/yandeks-puteshestviya.png",
+  "yandex-practicum": "/brands/yandex-practicum.png"
 };
 
 export function getLocalBrandLogo(slug: string): string | null {
@@ -225,6 +226,13 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     bgGradient: "from-pink-500 to-rose-600",
     textColor: "text-white",
     domain: "market.yandex.ru",
+  },
+  "yandex-practicum": {
+    logoUrl: "/brands/yandex-practicum.png",
+    emoji: "🎓",
+    bgGradient: "from-indigo-600 via-purple-600 to-violet-700",
+    textColor: "text-white",
+    domain: "practicum.yandex.ru",
   },
   "yandeks-puteshestviya": {
     logoUrl: "/brands/yandeks-puteshestviya.png",

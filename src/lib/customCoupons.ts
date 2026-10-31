@@ -28,6 +28,14 @@ import { isPausedPublisherStore } from "@/lib/publisherPauses";
 // Both codes were supplied from the approved project; do not invent restrictions.
 // The official site is informational; all outward CTA links MUST use the updated
 // project-specific Perfluence tracking URL with the same approved ERID.
+const YANDEX_PRACTICUM_LINK = "https://practicum.yandex.ru/?affiliate_clid=15523679&utm_source=distribution&utm_medium=cpa&utm_campaign=15523679";
+const YANDEX_PRACTICUM_AFFILIATE: Coupon["affiliate"] = {
+  link: YANDEX_PRACTICUM_LINK,
+  landingLink: YANDEX_PRACTICUM_LINK,
+  ordMarker: "clid15523679",
+  ordText: 'Реклама. АНО ДПО "Образовательные технологии Яндекса", ИНН 7704282033',
+};
+
 const SBERDEVICES_LINK = "https://sberdevaysy1.prfl.me/sites/fq4aly?erid=2RanymNsVkw";
 const SBERDEVICES_ERID = "2RanymNsVkw";
 const SBERDEVICES_STORE: Coupon["store"] = {
@@ -150,6 +158,103 @@ const YANDEX_OCT23_APPROVED_OFFERS: Coupon[] = [
 ];
 
 export const CUSTOM_COUPONS: Coupon[] = [
+  // Яндекс Практикум (Официальная партнерская программа Яндекс Дистрибуция ID 15523679)
+  {
+    id: 155236791,
+    promocode: {
+      id: 155236791,
+      code: "",
+      bonusName: "Бесплатный вводный курс и тест на профориентацию в IT",
+      terms: "Бесплатный доступ к интерактивному онлайн-тренажеру на 20+ часов практики, пробным урокам по Python, аналитике, дизайну и тесту на определение подходящей профессии.",
+      expires: "2027-12-31T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Для всех",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "yandex",
+    },
+    store: {
+      ...STABLE_STORES["yandex-practicum"],
+      activeBloggers: STABLE_STORES["yandex-practicum"].activeBloggers ?? 0,
+    },
+    affiliate: YANDEX_PRACTICUM_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 155236792,
+    promocode: {
+      id: 155236792,
+      code: "",
+      bonusName: "Скидка до 20% при единовременной оплате любого курса",
+      terms: "Специальная сниженная цена на полный курс при оплате одним платежом. Экономия до 35 000 ₽ на популярных профессиях: веб-разработка, QA, Data Science, маркетинг.",
+      expires: "2027-12-31T23:59:59+03:00",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Новый ученик",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "yandex",
+    },
+    store: {
+      ...STABLE_STORES["yandex-practicum"],
+      activeBloggers: STABLE_STORES["yandex-practicum"].activeBloggers ?? 0,
+    },
+    affiliate: YANDEX_PRACTICUM_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 155236793,
+    promocode: {
+      id: 155236793,
+      code: "",
+      bonusName: "Обучение в рассрочку без переплат от 3 500 ₽/мес (Яндекс Сплит)",
+      terms: "Беспроцентная рассрочка и Сплит от Яндекса на срок до 36 месяцев. Без первого взноса, без скрытых страховок и комиссий. Первый платеж списывается только через месяц.",
+      expires: "2027-12-31T23:59:59+03:00",
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Рассрочка",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "yandex",
+    },
+    store: {
+      ...STABLE_STORES["yandex-practicum"],
+      activeBloggers: STABLE_STORES["yandex-practicum"].activeBloggers ?? 0,
+    },
+    affiliate: YANDEX_PRACTICUM_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 155236794,
+    promocode: {
+      id: 155236794,
+      code: "",
+      bonusName: "Налоговый вычет 13%: возврат до 19 500 ₽ от государства",
+      terms: "Официальная образовательная лицензия № Л035-01298-77/00185314. Яндекс Практикум предоставляет полный пакет документов и справок для возврата НДФЛ в налоговой.",
+      expires: "2027-12-31T23:59:59+03:00",
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Господдержка",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "yandex",
+    },
+    store: {
+      ...STABLE_STORES["yandex-practicum"],
+      activeBloggers: STABLE_STORES["yandex-practicum"].activeBloggers ?? 0,
+    },
+    affiliate: YANDEX_PRACTICUM_AFFILIATE,
+    extraLinks: [],
+  },
   ...PERFLUENCE_OCT31_OFFERS,
   ...PERFLUENCE_OCT28_OFFERS,
   ...PERFLUENCE_OCT26_WEBSITE_OFFERS,
