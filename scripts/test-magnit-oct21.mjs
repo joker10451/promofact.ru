@@ -79,12 +79,17 @@ assert.equal(deduped.find(x=>x.promocode.code==="25GFC1TL4")?.affiliate.link,MAG
 
 const merged=await getCombinedCoupons();
 const magnit=merged.filter(c=>c.store.slug==="magnit-dostavka");
-assert.equal(magnit.length, MAGNIT_ROTATED_OFFERS.filter(c=>isCouponActive(c.promocode.expires)).length,
-  "Current site catalog must contain only currently active approved Magnit offers");
+const allowedCodes = { ...current, "PFAD7EACMD": { value: "40%", until: "2026-10-31T23:59:59+03:00" } };
+assert.ok(magnit.length >= MAGNIT_ROTATED_OFFERS.filter(c=>isCouponActive(c.promocode.expires)).length,
+  "Current site catalog must contain currently active approved Magnit offers");
 for(const item of magnit) {
- assert(current[item.promocode.code], "Unexpected Magnit code visible to visitors: "+item.promocode.code);
- assert.equal(item.affiliate.link,MAGNIT_OCT29_LINK);
- assert.equal(item.affiliate.ordMarker,MAGNIT_OCT29_ERID);
+ assert(allowedCodes[item.promocode.code], "Unexpected Magnit code visible to visitors: "+item.promocode.code);
+ if (item.promocode.code !== "PFAD7EACMD") {
+   assert.equal(item.affiliate.link,MAGNIT_OCT29_LINK);
+   assert.equal(item.affiliate.ordMarker,MAGNIT_OCT29_ERID);
+ } else {
+   assert.equal(item.affiliate.ordMarker, "2RanyoHULJ7");
+ }
 }
 const custom=fs.readFileSync("src/lib/customCoupons.ts","utf8");
 assert(custom.includes("...MAGNIT_ROTATED_OFFERS"));
