@@ -517,6 +517,13 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // attribute their clicks to the old PromoFact placement and outdated ERID.
     if (c.store.slug === "magnit-dostavka") {
       const magnitCode = c.promocode.code.trim().toUpperCase();
+      // Allow November 1 renewed placement
+      if (c.affiliate.ordMarker === "2RanynM1J8j") {
+        return (magnitCode === "25GFC1TL4" || magnitCode === "ДОЖДЬ") &&
+          c.affiliate.link === "https://mgntgm.prfl.me/sites/76bbj5?erid=2RanynM1J8j" &&
+          c.affiliate.ordText.includes('АО "Тандер"') &&
+          c.affiliate.ordText.includes("erid: 2RanynM1J8j");
+      }
       if (magnitCode === "PFAD7EACMD") {
         return c.affiliate.link === "https://mgntgm.prfl.me/sites/833avo?erid=2RanyoHULJ7" &&
           c.affiliate.landingLink === "https://mgntgm.prfl.me/sites/833avo?erid=2RanyoHULJ7" &&
