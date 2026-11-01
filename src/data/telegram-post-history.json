@@ -5,5 +5,35 @@
     "store": "otello",
     "date": "2026-10-30T13:07:36.249Z",
     "message_id": 99
+  },
+  {
+    "store": "yandeks-tsvety",
+    "code": "OXH702",
+    "message_id": 101,
+    "date": "2026-11-01T00:37:11.248Z"
+  },
+  {
+    "store": "yandex-practicum",
+    "code": "PRACTICUM-FREE",
+    "message_id": 102,
+    "date": "2026-11-01T00:37:11.249Z"
+  },
+  {
+    "store": "premier",
+    "code": "PREMIER-1RUB",
+    "message_id": 103,
+    "date": "2026-11-01T00:37:11.249Z"
+  },
+  {
+    "store": "magnit-dostavka",
+    "code": "ПФАД7ЕАСМД",
+    "message_id": 104,
+    "date": "2026-11-01T00:37:11.249Z"
+  },
+  {
+    "store": "m-kosmetik",
+    "code": "31OFGB3JRC",
+    "message_id": 105,
+    "date": "2026-11-01T00:37:11.249Z"
   }
 ]

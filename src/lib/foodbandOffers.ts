@@ -1,6 +1,6 @@
 import type { Coupon } from "@/lib/types";
 
-export const FOODBAND_OCTOBER_EXPIRES = "2026-10-31";
+export const FOODBAND_OCTOBER_EXPIRES = "2026-11-30";
 export const FOODBAND_ANNUAL_EXPIRES = "2026-12-31";
 
 const foodbandStore: Coupon["store"] = {

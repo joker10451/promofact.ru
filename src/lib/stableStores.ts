@@ -904,5 +904,29 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "conditions": "Промокоды вводятся на шаге оплаты в интернет-магазине Золотое Яблоко.",
     "site": "https://goldapple.ru",
     "activeBloggers": 16
+  },
+  "flowwow": {
+    "id": 3690,
+    "slug": "flowwow",
+    "name": "Флаувау",
+    "logo": "https://favicon.yandex.net/favicon/v2/flowwow.com?size=120",
+    "category": "Цветы и подарки",
+    "categorySlug": "tsvety",
+    "about": "Flowwow — маркетплейс локальных брендов, цветов, авторских букетов, десертов, подарков и хендмейда с доставкой от 30 минут.",
+    "conditions": "Промокод действует при первом заказе в мобильном приложении. Проверяйте условия в корзине перед оплатой.",
+    "site": "https://flowwow.com/",
+    "activeBloggers": 2500
+  },
+  "platipomiru": {
+    "id": 4362,
+    "slug": "platipomiru",
+    "name": "Плати по всему миру",
+    "logo": "https://favicon.yandex.net/favicon/v2/platipomiru.ru?size=120",
+    "category": "Сервисы и подписки",
+    "categorySlug": "servisy-i-podpiski",
+    "about": "«Плати по всему миру» — сервис оформления международных виртуальных и пластиковых карт для оплаты зарубежных сервисов, покупок и путешествий.",
+    "conditions": "Условия выпуска карт и тарифы уточняйте на официальном сайте сервиса.",
+    "site": "https://platipomiru.ru/",
+    "activeBloggers": 450
   }
 };
