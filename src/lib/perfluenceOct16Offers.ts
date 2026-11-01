@@ -125,9 +125,9 @@ export const PERFLUENCE_OCT16_APPROVED_OFFERS: Coupon[] = [
     "2026-11-30T23:59:59+03:00",
   ),
   offer(
-    82602663, "letual", "ОКТЯБРЬ",
-    "Промокод «ОКТЯБРЬ» в ЛЭТУАЛЬ",
-    "Промокод ОКТЯБРЬ подтверждён для одобренной публикации до 31 октября. Размер скидки/бонуса и другие ограничения не указаны — проверьте результат применения перед оплатой.",
+    82602663, "letual", "ПЯТНИЦА",
+    "Промокод «ПЯТНИЦА» в ЛЭТУАЛЬ",
+    "Промокод ПЯТНИЦА: скидка 20% от 4 000 ₽, 30% от 7 000 ₽ или 40% от 12 000 ₽ на заказы в ЛЭТУАЛЬ в ноябре.",
     "2026-10-31T23:59:59+03:00",
   ),
 ];
@@ -136,7 +136,7 @@ export const PERFLUENCE_OCT16_APPROVED_OFFERS: Coupon[] = [
 export const PERFLUENCE_OCT16_CODES: Record<keyof typeof PERFLUENCE_OCT16_PLACEMENTS, readonly string[]> = {
   librederm: ["PC078BC488BA"],
   fmart: ["FMART30", "FMARTPE23khl6x", "FMARTPE900btr9u", "fmartpe2063dcr"],
-  letual: ["НАБЕРИ", "ШАНС", "ОКТЯБРЬ"],
+  letual: ["НАБЕРИ", "ШАНС", "ПЯТНИЦА"],
   sberdevaysy: ["Sberdv171", "Sberdv71"],
 };
 
