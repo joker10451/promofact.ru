@@ -50,6 +50,22 @@ export const PAUSED_PROMO_BANNER_IDS = new Set(["winlab-rozygrysh-2026", "sberzd
 
 export const PROMO_BANNERS: PromoBanner[] = [
   {
+    id: "yandex-flowers-hero",
+    storeSlug: "yandeks-tsvety",
+    storeSlugs: ["yandeks-tsvety", "tsvety", "tsvety-i-podarki"],
+    label: "Праздничная доставка",
+    title: "Яндекс Цветы: Скидка 40% на первый заказ букетов",
+    subtitle: "Свежие авторские композиции из проверенных салонов города с обязательным фото букета перед отправкой курьером.",
+    badge: "Скидка до 1 200 ₽",
+    note: "Промокод: oxh702 на первый заказ от 3 000 ₽. Экспресс-доставка от 30 минут и начисление баллов Яндекс Плюс.",
+    cta: "Выбрать букет со скидкой 40%",
+    code: "oxh702",
+    link: "https://yaflowers.prfl.me/sites/x09eol?erid=2RanyoMvJ99",
+    ordText: 'Реклама. ООО "ЯНДЕКС.ЕДА", ИНН 9705114405. erid: 2RanyoMvJ99',
+    startsAt: "2026-10-01",
+    endsAt: "2026-12-31",
+  },
+  {
     id: "yandex-practicum-hero",
     storeSlug: "yandex-practicum",
     storeSlugs: ["yandex-practicum", "yandex-plus", "onlayn-obrazovanie"],
