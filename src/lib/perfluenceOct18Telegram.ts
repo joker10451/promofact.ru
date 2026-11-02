@@ -16,7 +16,7 @@ const campaigns = [
     id: 829200252, code: "KRL_4G44HH5",
     title: "Скидка 25% в приложении Flor2u",
     terms: "В сохранённых условиях Perfluence указано: при заказе от 1 500 ₽ в приложении, для первого и повторных заказов. Уточняйте условия при оформлении.",
-    expires: "2026-10-31T23:59:59+03:00", isFirstOrderOnly: false, isUniversal: true,
+    expires: "2026-11-30T23:59:59+03:00", isFirstOrderOnly: false, isUniversal: true,
   },
 ] as const;
 
