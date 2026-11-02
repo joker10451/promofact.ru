@@ -493,10 +493,14 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
           c.affiliate.ordMarker === "2RanyoMvJ99" &&
           c.affiliate.ordText.includes("erid: 2RanyoMvJ99");
       }
-      return flowerCode === "QX7GZZ" &&
-        c.affiliate.link === "https://yaflowers.prfl.me/sites/oluvpa?erid=2RanymRX1bZ" &&
-        c.affiliate.ordMarker === "2RanymRX1bZ" &&
-        c.affiliate.ordText.includes("ИНН 9705114405");
+      if (flowerCode === "QX7GZZ") {
+        const isNov02 = c.affiliate.link === "https://yaflowers.prfl.me/sites/ur289i?erid=2RanykWBevG" &&
+          c.affiliate.ordMarker === "2RanykWBevG";
+        const isOct23 = c.affiliate.link === "https://yaflowers.prfl.me/sites/oluvpa?erid=2RanymRX1bZ" &&
+          c.affiliate.ordMarker === "2RanymRX1bZ";
+        return (isNov02 || isOct23) && c.affiliate.ordText.includes("ИНН 9705114405");
+      }
+      return false;
     }
     if (c.store.slug === "yandex-eda") {
       return ["PAF250", "LMJ210"].includes(c.promocode.code.trim().toUpperCase()) &&

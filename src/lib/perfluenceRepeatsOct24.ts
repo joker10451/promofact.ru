@@ -144,6 +144,7 @@ export function isApprovedOct24Repost(c: Coupon): boolean {
   // Allow newly renewed November 1 verified placements
   if (c.store.slug === "sunlight-ru" && c.affiliate.ordMarker === "2RanynGZLHh") return true;
   if (c.store.slug === "geltek" && c.affiliate.ordMarker === "2RanynUREYT") return true;
+  if (c.store.slug === "yandex-music" && c.affiliate.ordMarker === "2RanymYz9vC") return true;
 
   if (!managedSlugs.has(c.store.slug)) return true;
   // Publisher-confirmed expired/invalid placements remain denied even if their

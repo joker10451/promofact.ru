@@ -1,9 +1,9 @@
 import type { Coupon } from "@/lib/types";
 
 /** Approved ONLY for Telegram @smart_zakupka (not promofact.ru). */
-export const FLOR2U_OCT18_TELEGRAM_LINK = "https://flor2u.prfl.me/smart_zakupka/c4kk2w?erid=2RanynYVgRh";
-export const FLOR2U_OCT18_TELEGRAM_ERID = "2RanynYVgRh";
-export const FLOR2U_OCT18_TELEGRAM_LEGAL = "Реклама. ООО «ПРАЙМФЛОРА», ИНН 9724208955. erid: 2RanynYVgRh";
+export const FLOR2U_OCT18_TELEGRAM_LINK = "https://flor2u.prfl.me/smart_zakupka/7z0p97?erid=2Ranynq7CXW";
+export const FLOR2U_OCT18_TELEGRAM_ERID = "2Ranynq7CXW";
+export const FLOR2U_OCT18_TELEGRAM_LEGAL = "Реклама. ООО «ПРАЙМФЛОРА», ИНН 9724208955. erid: 2Ranynq7CXW";
 
 const campaigns = [
   {
