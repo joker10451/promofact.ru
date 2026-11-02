@@ -8,7 +8,7 @@ export const MAGNIT_OCT29_ERID = "2Ranykq7AeF";
 // These staged offers remain excluded from production until the token is verified.
 export const WINLAB_LINK_PENDING_ERID = "https://winelab.prfl.me/sites/gittf8";
 const M_KOSMETIK_LINK = "https://mgntksm1.prfl.me/sites/1sq4qx?erid=2Ranymz3211";
-const CITYDRIVE_FIRST_LINK = "https://citydrive.prfl.me/sites/tnp7jq?erid=2Ranykexfns";
+const CITYDRIVE_FIRST_LINK = "https://citydrive.prfl.me/sites/uf2lsb?erid=2RanymUeEjv";
 const CITYDRIVE_APP_LINK = "https://citydrive.prfl.me/sites/pqng58?erid=2RanykbzhEB";
 const YANDEX_TRAVEL_LINK = "https://travelyandex.prfl.me/sites/k9msuz?erid=2RanykJ47QF";
 // Separately renewed promofact.ru publisher placement, supplied 15 October 2026.
@@ -36,8 +36,8 @@ const citydriveLegal = "Реклама. Рекламодатель: ООО «Н�
 const citydriveFirstAd: Coupon["affiliate"] = {
   link: CITYDRIVE_FIRST_LINK,
   landingLink: CITYDRIVE_FIRST_LINK,
-  ordMarker: "2Ranykexfns",
-  ordText: `${citydriveLegal} erid: 2Ranykexfns`,
+  ordMarker: "2RanymUeEjv",
+  ordText: `${citydriveLegal} erid: 2RanymUeEjv`,
 };
 const citydriveAppAd: Coupon["affiliate"] = {
   link: CITYDRIVE_APP_LINK,
@@ -145,9 +145,9 @@ export const M_KOSMETIK_ROTATED_OFFERS: Coupon[] = [
  */
 export const CITYDRIVE_APPROVED_OFFERS: Coupon[] = [
   offer(81483071, citydrive, citydriveFirstAd, "PERFCITY107",
-    "Первая поездка в Ситидрайв с сертификатом OZON", "2026-10-31",
+    "Первая поездка в Ситидрайв: скидка 500 ₽ + сертификат 700 ₽ в OZON", "2026-11-30",
     "Только первая поездка",
-    "Оформите первую поездку в Ситидрайв по условиям согласованной акции, чтобы получить сертификат OZON. Размер сертификата, допустимые тарифы и порядок выдачи уточняйте у рекламодателя. Промокод действует до 31 октября 2026 года.",
+    "Скидка 500 ₽ на первую поездку и сертификат на 700 ₽ в OZON по промокоду PERFCITY107 при заказе каршеринга Ситидрайв. Действует до 30 ноября 2026 года.",
     true),
   offer(81483072, citydrive, citydriveAppAd, "SAVE1480",
     "Скидка 50% в приложении Ситидрайв", "2026-10-31",
