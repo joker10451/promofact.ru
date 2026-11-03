@@ -145,6 +145,13 @@ export const PERFLUENCE_OCT16_CODES: Record<keyof typeof PERFLUENCE_OCT16_PLACEM
  * codes cannot override the user's CURRENT approved publisher placement.
  */
 export function isApprovedOct16PublisherOffer(c: Coupon): boolean {
+  if (c.store.slug === "librederm") {
+    if (c.promocode.code.trim() === "FD3FE2AA13BA" &&
+        c.affiliate.ordMarker === "2RanykUPCJY" &&
+        c.affiliate.link === "https://librederm2.prfl.me/sites/hkhgrh?erid=2RanykUPCJY") {
+      return true;
+    }
+  }
   const slug = c.store.slug as keyof typeof PERFLUENCE_OCT16_PLACEMENTS;
   const ref = PERFLUENCE_OCT16_PLACEMENTS[slug];
   if (!ref) return true;

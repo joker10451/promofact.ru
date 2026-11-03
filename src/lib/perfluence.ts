@@ -564,10 +564,15 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // and ERID. Only explicitly approved project website placement survives.
     if (c.store.slug === "perekrestok-dostavka") {
       const code = c.promocode.code.trim().toUpperCase();
-      return ["171LREDEY", "172E2Y5TJ", "174NYBBJV", "178PQJL7A"].includes(code) &&
+      const isNov03 = ["1975VWVT7", "198N7PARH", "195GYDL34", "196DULY6U"].includes(code) &&
+        c.affiliate.link === "https://perekrestok.prfl.me/sites/fciupl?erid=2RanynvigKW" &&
+        c.affiliate.ordMarker === "2RanynvigKW" &&
+        c.affiliate.ordText.includes("erid: 2RanynvigKW");
+      const isOct = ["171LREDEY", "172E2Y5TJ", "174NYBBJV", "178PQJL7A"].includes(code) &&
         c.affiliate.link === "https://perekrestok.prfl.me/sites/me2ds4?erid=2RanykFbMxo" &&
         c.affiliate.ordMarker === "2RanykFbMxo" &&
         c.affiliate.ordText.includes("erid: 2RanykFbMxo");
+      return isNov03 || isOct;
     }
     // Alcohol advertiser: a missing ERID is NOT an integration error and
     // cannot be "fixed" by inventing a marker. Russia's advertising law,
