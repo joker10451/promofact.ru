@@ -142,6 +142,7 @@ export const PERFLUENCE_REPEAT_OCT24_OFFERS: Coupon[] = PERFLUENCE_REPEAT_OCT24.
 /** Fail closed for legacy widget offers and historical post-specific links. */
 export function isApprovedOct24Repost(c: Coupon): boolean {
   // Allow newly renewed November 1 verified placements
+  if (c.store.slug === "avito-puteshestviya" && c.affiliate.ordMarker === "2RanymoSY9J") return true;
   if (c.store.slug === "sunlight-ru" && c.affiliate.ordMarker === "2RanynGZLHh") return true;
   if (c.store.slug === "geltek" && c.affiliate.ordMarker === "2RanynUREYT") return true;
   if (c.store.slug === "yandex-music" && c.affiliate.ordMarker === "2RanymYz9vC") return true;

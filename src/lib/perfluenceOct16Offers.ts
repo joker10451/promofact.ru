@@ -145,6 +145,7 @@ export const PERFLUENCE_OCT16_CODES: Record<keyof typeof PERFLUENCE_OCT16_PLACEM
  * codes cannot override the user's CURRENT approved publisher placement.
  */
 export function isApprovedOct16PublisherOffer(c: Coupon): boolean {
+  if (c.store.slug === "fmart" && c.affiliate.ordMarker === "2RanymizaJG") return true;
   if (c.store.slug === "librederm") {
     if (c.promocode.code.trim() === "FD3FE2AA13BA" &&
         c.affiliate.ordMarker === "2RanykUPCJY" &&
