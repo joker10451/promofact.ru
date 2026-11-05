@@ -1,5 +1,6 @@
 import { MAGNIT_ROTATED_OFFERS, M_KOSMETIK_ROTATED_OFFERS, CITYDRIVE_APPROVED_OFFERS, YANDEX_TRAVEL_ROTATED_OFFERS, TANUKI_OCT16_OFFERS, PEREKRESTOK_OCT16_OFFERS, GOLDAPPLE_ROTATED_OFFERS } from "@/lib/perfluenceRotatedOffers";
 import type { Coupon } from "@/lib/types";
+import { PERFLUENCE_NOV05_OFFERS } from "@/lib/perfluenceNov05Offers";
 import { PERFLUENCE_NOV04_OFFERS } from "@/lib/perfluenceNov04Offers";
 import { PERFLUENCE_NOV03_OFFERS } from "@/lib/perfluenceNov03Offers";
 import { PERFLUENCE_NOV02_OFFERS } from "@/lib/perfluenceNov02Offers";
@@ -259,6 +260,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
     affiliate: YANDEX_PRACTICUM_AFFILIATE,
     extraLinks: [],
   },
+  ...PERFLUENCE_NOV05_OFFERS,
   ...PERFLUENCE_NOV04_OFFERS,
   ...PERFLUENCE_NOV03_OFFERS,
   ...PERFLUENCE_NOV02_OFFERS,
