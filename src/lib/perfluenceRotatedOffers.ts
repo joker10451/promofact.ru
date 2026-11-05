@@ -2,8 +2,8 @@ import type { Coupon } from "@/lib/types";
 import { STABLE_STORES } from "@/lib/stableStores";
 
 /** Approved Magnit promo codes and refreshed PromoFact website URL from 29 October 2026. */
-export const MAGNIT_OCT29_LINK = "https://mgntgm.prfl.me/sites/b2dnbt?erid=2Ranykq7AeF";
-export const MAGNIT_OCT29_ERID = "2Ranykq7AeF";
+export const MAGNIT_OCT29_LINK = "https://mgntgm.prfl.me/sites/76bbj5?erid=2RanynM1J8j";
+export const MAGNIT_OCT29_ERID = "2RanynM1J8j";
 // Site-specific WinLab publisher link renewed 16 October 2026; ERID has NOT been supplied.
 // These staged offers remain excluded from production until the token is verified.
 export const WINLAB_LINK_PENDING_ERID = "https://winelab.prfl.me/sites/gittf8";
@@ -24,7 +24,7 @@ const magnitAd: Coupon["affiliate"] = {
   link: MAGNIT_OCT29_LINK,
   landingLink: MAGNIT_OCT29_LINK,
   ordMarker: MAGNIT_OCT29_ERID,
-  ordText: 'Реклама. АО "Тандер", ИНН 2310031475. erid: 2Ranykq7AeF',
+  ordText: 'Реклама. АО "Тандер", ИНН 2310031475. erid: 2RanynM1J8j',
 };
 const mKosmetikAd: Coupon["affiliate"] = {
   link: M_KOSMETIK_LINK,
@@ -114,14 +114,14 @@ function offer(
  */
 export const MAGNIT_ROTATED_OFFERS: Coupon[] = [
   offer(82580141, magnit, magnitAd, "25GFC1TL4",
-    "Скидка 31% на первый заказ от 2 000 ₽ в разделе «Гипермаркет» для нового пользователя", "2026-10-31T23:59:59+03:00", "Первый заказ, новым пользователям",
-    "Промокод 25GFC1TL4: скидка 31% на первый заказ от 2 000 ₽ в разделе «Гипермаркет» приложения «Магнит» только для нового пользователя. Действует до 31 октября 2026 года, 23:59 МСК. Проверяйте итоговую сумму до оплаты.", true),
+    "Скидка 31% на первый заказ от 2 000 ₽ в разделе «Гипермаркет» для нового пользователя", "2026-11-30T23:59:59+03:00", "Первый заказ, новым пользователям",
+    "Промокод 25GFC1TL4: скидка 31% на первый заказ от 2 000 ₽ в разделе «Гипермаркет» приложения «Магнит» только для нового пользователя. Действует до 30 ноября 2026 года, 23:59 МСК. Проверяйте итоговую сумму до оплаты.", true),
   offer(82580142, magnit, magnitAd, "SGPFB7JJGY",
     "Скидка 26% на один любой заказ от 2 000 ₽ в «Гипермаркете» при самовывозе", "2026-10-31T23:59:59+03:00", "Один заказ, самовывоз",
     "Промокод SGPFB7JJGY: скидка 26% на один любой заказ от 2 000 ₽ в разделе «Гипермаркет» приложения «Магнит» при самовывозе. Действует до 31 октября 2026 года, 23:59 МСК. Проверяйте итоговую сумму до оплаты."),
-  offer(82580143, magnit, magnitAd, "Дождь",
-    "Скидка 31% на каждый заказ от 1 700 ₽ в «Экспрессе» или от 2 500 ₽ в «Гипермаркете»", "2026-11-03T23:59:59+03:00", "Общий промокод, каждый заказ",
-    "Промокод «Дождь»: скидка 31% на каждый заказ от 1 700 ₽ в разделе «Экспресс» или от 2 500 ₽ в разделе «Гипермаркет» приложения «Магнит». Общий промокод из подборки «Магнит». Действует до 3 ноября 2026 года, 23:59 МСК. Проверяйте итоговую сумму до оплаты."),
+  offer(82580143, magnit, magnitAd, "НОЯБРЬ",
+    "Скидка 31% на любой заказ от 1 700 ₽ товаров из подборки «Магнит»", "2026-11-30T23:59:59+03:00", "Общий промокод, суммируется со скидками",
+    "Промокод «НОЯБРЬ»: скидка 31% на любой заказ от 1 700 ₽ товаров из специальной подборки «Магнит». Промокод суммируется со скидками! Действует в мобильном приложении «Магнит» до 30 ноября 2026 года, 23:59 МСК. Проверяйте итоговую сумму до оплаты.", true),
 ];
 
 /**

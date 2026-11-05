@@ -482,7 +482,7 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
       new Set(["3CL7UZV8DB", "JJVKYHYSX5", "PC2F8F2ALL", "P2U2VHZDD6", "SKG7PFYYMN"])
         .has(c.promocode.code.trim().toUpperCase())) return false;
 
-  const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ДОЖДЬ"]);
+  const currentMagnitCodes = new Set(["25GFC1TL4", "SGPFB7JJGY", "ДОЖДЬ", "НОЯБРЬ"]);
 
     // Site-specific Perfluence links renewed 23 October 2026.
     // Reject stale widget links / ERIDs and any unconfirmed codes for these projects.
@@ -523,7 +523,7 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
       const magnitCode = c.promocode.code.trim().toUpperCase();
       // Allow November 1 renewed placement
       if (c.affiliate.ordMarker === "2RanynM1J8j") {
-        return (magnitCode === "25GFC1TL4" || magnitCode === "ДОЖДЬ") &&
+        return (magnitCode === "25GFC1TL4" || magnitCode === "ДОЖДЬ" || magnitCode === "НОЯБРЬ") &&
           c.affiliate.link === "https://mgntgm.prfl.me/sites/76bbj5?erid=2RanynM1J8j" &&
           c.affiliate.ordText.includes('АО "Тандер"') &&
           c.affiliate.ordText.includes("erid: 2RanynM1J8j");

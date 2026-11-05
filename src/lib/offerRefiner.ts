@@ -38,7 +38,7 @@ export function refineOffer(
 
   // Approved Magnit placement: preserve first-order, pickup and both basket thresholds
   // in the visible offer card; the generic single-minimum normalizer would drop them.
-  if (storeName === "Магнит Доставка" && ["25GFC1TL4", "SGPFB7JJGY", "Дождь"].includes(code) && /^Скидка 31%|^Скидка 26%/iu.test(title)) {
+  if (storeName === "Магнит Доставка" && ["25GFC1TL4", "SGPFB7JJGY", "Дождь", "НОЯБРЬ"].includes(code) && /^Скидка 31%|^Скидка 26%/iu.test(title)) {
     const value = title.match(/Скидка\s+(\d+)%/iu)?.[1];
     if (value) return {
       type: "percent", discount: `−${value}%`,
