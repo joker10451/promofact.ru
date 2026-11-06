@@ -291,6 +291,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://www.ozon.ru/seller/carelygroup/",
     "activeBloggers": 708
   },
+  "chistaya-liniya": {
+    id: 4526,
+    slug: "chistaya-liniya",
+    name: "Чистая Линия",
+    logo: "https://favicon.yandex.net/favicon/v2/www.ozon.ru?size=120",
+    category: "Косметика и парфюмерия",
+    categorySlug: "kosmetika-i-parfyumeriya",
+    about: "«Чистая Линия» (Арнест ЮниРусь) — российский бренд натуральной косметики для ухода за кожей и волосами на основе растительных экстрактов.",
+    conditions: "Скидка по промокоду применяется в официальном магазине на маркетплейсе Ozon.",
+    site: "https://www.ozon.ru/",
+    activeBloggers: 650
+  },
   "citydrive": {
     "id": 1483,
     "slug": "citydrive",
