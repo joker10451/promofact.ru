@@ -42,7 +42,7 @@ const articles=fs.readFileSync("src/lib/articles.ts","utf8");
 
 assert(source.includes("return withoutPausedPublisherOffers(await fetchData())"),
  "Direct API snapshots must not leak paused promo links");
-assert(/return withoutPausedPublisherOffers\(coupons\)\s*\.filter\(isApprovedOct16PublisherOffer\)/.test(source),
+assert(/return withoutPausedPublisherOffers\(coupons\)\s*\.filter\(\(c\) => widgetCoupons\.has\(c\)\s*\?\s*isPublishableWidgetOffer\(c\)\s*:\s*isApprovedOct16PublisherOffer\(c\)/.test(source),
  "Every source bucket, including cached/supabase/admitad, must still be filtered after merge");
 assert(source.includes(".filter(isApprovedPublicCouponPlacement)"),
  "Shared publisher placement approvals must apply after merged source filtering");

@@ -1,3 +1,4 @@
+import { canonicalCategorySlug } from "@/lib/categoryTaxonomy";
 import Icon from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -238,7 +239,7 @@ export default async function StorePage({
         "@type": "ListItem",
         position: 2,
         name: store.category,
-        item: `${SITE_URL}/category/${store.categorySlug}`,
+        item: `${SITE_URL}/category/${canonicalCategorySlug(store.categorySlug)}`,
       },
       { "@type": "ListItem", position: 3, name: store.name, item: pageUrl },
     ],
@@ -488,7 +489,7 @@ export default async function StorePage({
         <Breadcrumbs
           items={[
             { label: "Главная", href: "/" },
-            { label: store.category, href: `/category/${store.categorySlug}` },
+            { label: store.category, href: `/category/${canonicalCategorySlug(store.categorySlug)}` },
             { label: store.name },
           ]}
           className="mb-2"
@@ -797,7 +798,7 @@ export default async function StorePage({
 
         <section className="mt-10 max-w-3xl rounded-2xl border border-mint/30 bg-mint/10 p-5">
           <Link
-            href={`/category/${store.categorySlug}`}
+            href={`/category/${canonicalCategorySlug(store.categorySlug)}`}
             className="flex items-center justify-between gap-3 group"
           >
             <div>

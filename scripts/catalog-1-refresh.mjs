@@ -50,7 +50,7 @@ async function main() {
   const preview = await runAdmitadSafeSync({
     ...options, skipDbWrite: true,
   });
-  const expected = assertSafeResult(preview, before);
+  const expected = assertSafeResult(preview, before, options.maxNewOffers);
   console.info("CATALOG_1_PREVIEW_PASS " + JSON.stringify({
     proposedActive: expected, activeBefore: before.count,
     oldExpired: before.expired, newCampaignsAllowed: 0,
@@ -66,7 +66,7 @@ async function main() {
   // Publisher scope must be validated by runAdmitadSafeSync against the actual
   // authenticated website; only pre-approved original campaign IDs may grow.
   const applied = await runAdmitadSafeSync(options);
-  const publishedCount = assertSafeResult(applied, before);
+  const publishedCount = assertSafeResult(applied, before, options.maxNewOffers);
   const after = await readSnapshot();
   const previouslyApproved = new Set(before.campaigns);
   if (after.campaigns.some(id => !previouslyApproved.has(id)) ||

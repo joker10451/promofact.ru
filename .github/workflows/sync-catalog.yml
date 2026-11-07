@@ -1,11 +1,10 @@
-name: Weekly Safe Catalog Sync & Deploy
+name: Perfluence Feed Auto-Sync & Deploy
 
 on:
-  # One scheduled Perfluence snapshot/release per week instead of 4/day.
-  # Perfluence uses a bundled feed and long-lived cache; this update needs
-  # a real build to become visible. Keep manual dispatch for urgent corrections.
+  # Every 6 hours. A commit (and Vercel deploy) happens only when the feed
+  # changed substantively (check-feed-changes), so quiet runs cost nothing.
   schedule:
-    - cron: '5 3 * * 1'
+    - cron: '5 1,7,13,19 * * *'
   workflow_dispatch: # Возможность запустить вручную
 
 concurrency:
@@ -18,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
 
     steps:
       - name: Checkout repository
@@ -62,9 +62,18 @@ jobs:
         id: verify_sync
         run: node scripts/verify-sync-status.mjs
 
-      # 5. npm test
-      - name: Run unit & regression tests (npm test)
-        run: npm test
+      # 5. Only feed-relevant tests: this job changes data, not code (code on
+      # main is already gated by CI). Date-bound campaign tests once blocked
+      # the feed for three weeks, so they must not gate it again.
+      - name: Feed safety tests
+        run: |
+          npm run test:normalizer
+          npm run test:expiry
+          npm run test:trust
+          npm run test:perfluence-affiliate-safety
+          npm run test:runtime-perfluence
+          npm run test:visitor-freshness
+          npm run test:links
 
       # 6. npm run lint
       - name: Run linter (npm run lint)
@@ -99,4 +108,28 @@ jobs:
           git add src/data/perfluence-feed.json src/data/sync-meta.json
           git commit -m "chore(catalog): регулярное автообновление каталога партнерских предложений"
           git push origin main
+
+      # One persistent issue instead of silent failures; closed on next success.
+      - name: Report feed sync status
+        if: always() && github.event_name == 'schedule'
+        continue-on-error: true
+        uses: actions/github-script@v7
+        env:
+          JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const title = '[Фид Perfluence] Автосинхронизация не прошла';
+            const { owner, repo } = context.repo;
+            const open = await github.paginate(github.rest.issues.listForRepo, { owner, repo, state: 'open', per_page: 100 });
+            const existing = open.find(i => !i.pull_request && i.title === title);
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+            if (process.env.JOB_STATUS !== 'success') {
+              const body = 'Сайт продолжает показывать прошлый фид. Неудачный запуск: ' + runUrl +
+                '\n\nЧастые причины: истёк PERFLUENCE_SESSION_B64, недоступен виджет, упал тест безопасности фида.';
+              if (existing) await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+              else await github.rest.issues.create({ owner, repo, title, body });
+            } else if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number,
+                state: 'closed', state_reason: 'completed', body: 'Синхронизация снова работает: ' + runUrl });
+            }
 

@@ -1,5 +1,6 @@
 import type { Coupon } from "@/lib/types";
 import { STABLE_STORES } from "@/lib/stableStores";
+import { VKUSVILL_NOV06_SITE_LINK, VKUSVILL_NOV06_SITE_ERID } from "@/lib/perfluenceNov06Offers";
 
 /**
  * Only publisher-approved, platform-specific links may be advertised on
@@ -63,6 +64,11 @@ export function isApprovedOct18WebsitePlacement(c: Coupon): boolean {
     return false;
   }
   if (c.store.slug !== "vkusvill-dostavka") return true;
+  // 6 Nov renewed site placement; without this every VkusVill code was hidden.
+  if (c.affiliate.link === VKUSVILL_NOV06_SITE_LINK &&
+      c.affiliate.landingLink === VKUSVILL_NOV06_SITE_LINK &&
+      c.affiliate.ordMarker === VKUSVILL_NOV06_SITE_ERID &&
+      c.affiliate.ordText.includes("erid: " + VKUSVILL_NOV06_SITE_ERID)) return true;
   return VKUSVILL_OCT18_VALID_CODES.includes(c.promocode.code.trim() as typeof VKUSVILL_OCT18_VALID_CODES[number]) &&
     c.affiliate.link === VKUSVILL_OCT18_SITE_LINK &&
     c.affiliate.ordMarker === VKUSVILL_OCT18_ERID &&

@@ -307,8 +307,8 @@ export function parsePayload(payloadJson: string): Coupon[] {
             name: "Яндекс Книги",
             slug: "yandex-knigi",
             logo: proxiedLogo("https://favicon.yandex.net/favicon/v2/books.yandex.ru?size=120"),
-            category: "Книги",
-            categorySlug: "knigi",
+            category: "Онлайн-образование",
+            categorySlug: "onlayn-obrazovanie", // canonical slug; "knigi" is only an alias
             about: "Сервис электронных и аудиокниг от Яндекса с каталогом бестселлеров, эксклюзивов и комиксов.",
             conditions: store.conditions,
             site: "https://books.yandex.ru",
@@ -320,8 +320,8 @@ export function parsePayload(payloadJson: string): Coupon[] {
             name: "Яндекс Музыка",
             slug: "yandex-music",
             logo: proxiedLogo("https://favicon.yandex.net/favicon/v2/music.yandex.ru?size=120"),
-            category: "Подписки и сервисы",
-            categorySlug: "podpiski-i-servisy",
+            category: "Сервисы и подписки",
+            categorySlug: "servisy-i-podpiski",
             about: "Стриминговый сервис музыки и подкастов с персональной волной рекомендаций «Моя волна».",
             conditions: store.conditions,
             site: "https://music.yandex.ru",
@@ -615,6 +615,16 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     }
     return true;
 
+}
+
+/**
+ * Hard bans that apply even to verified widget offers: alcohol advertising is
+ * prohibited online (WinLab), and Flor2u's promofact.ru placement is under review.
+ */
+const WIDGET_BLOCKED_STORES = new Set(["winlab", "flor2u"]);
+
+export function isPublishableWidgetOffer(c: Coupon): boolean {
+  return isPublicPerfluenceWidgetCoupon(c) && !WIDGET_BLOCKED_STORES.has(c.store.slug);
 }
 
 /** Raw, read-only diagnostics: never consume this result for publication. */
@@ -926,11 +936,17 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     );
   }
 
-  // Publisher restrictions apply identically to site pages and snapshot.
+  // The publisher's Perfluence widget is the source of truth: a widget offer
+  // that already passed isPublicPerfluenceWidgetCoupon (matching ERID in field,
+  // prfl.me link and legal text) publishes without a hand-kept code list.
+  // Dated allowlists still govern custom and Admitad offers.
+  const widgetCoupons = new Set(sources.find((s) => s.source === "perfluence")?.coupons ?? []);
   return withoutPausedPublisherOffers(coupons)
-    .filter(isApprovedOct16PublisherOffer)
-    .filter(isApprovedOct18WebsitePlacement)
-    .filter(isApprovedPublicCouponPlacement).map((c) => {
+    .filter((c) => widgetCoupons.has(c)
+      ? isPublishableWidgetOffer(c)
+      : isApprovedOct16PublisherOffer(c) && isApprovedOct18WebsitePlacement(c) &&
+        isApprovedPublicCouponPlacement(c))
+    .map((c) => {
     const logo = proxiedLogo(c.store.logo);
     const ordText = withErid(c.affiliate.ordText, c.affiliate.ordMarker);
     if (logo === c.store.logo && ordText === c.affiliate.ordText) return c;

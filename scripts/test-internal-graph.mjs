@@ -32,7 +32,7 @@ async function runInternalGraphSuite() {
   // 1. Проверка связности Store -> Category
   test("Каждая страница магазина ссылается на родительскую категорию", () => {
     const storePage = fs.readFileSync(path.resolve("src/app/store/[slug]/page.tsx"), "utf-8");
-    assert(storePage.includes("href={`/category/${store.categorySlug}`}"), "Store must link to its category");
+    assert(storePage.includes("href={`/category/${canonicalCategorySlug(store.categorySlug)}`}"), "Store must link to its canonical category");
   });
 
   // 2. Проверка связности Store -> Related Articles
