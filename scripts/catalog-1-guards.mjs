@@ -88,10 +88,13 @@ export function examinePublisherSnapshot(rows, meta, nowMs = Date.now()) {
 }
 
 /** No new merchant campaign: only existing publisher campaigns may add coupons. */
-export function refreshOptions(overview, mode, explicitlyApproved) {
+export function refreshOptions(overview, mode, explicitlyApproved, allowStaleBaseline = false) {
   if (!overview || overview.invalid > 0 || overview.invalidDates > 0)
     fail("CATALOG_INVALID_ACTIVE_ROWS");
-  if (overview.ageHours > CATALOG_MAX_BASELINE_AGE_HOURS)
+  // Preview writes nothing, so a stale baseline must not hide its diagnostics.
+  // A stale publish needs a separate manual override, or the sync can never recover.
+  if (mode === "publish" && !allowStaleBaseline &&
+      overview.ageHours > CATALOG_MAX_BASELINE_AGE_HOURS)
     fail("CATALOG_BASELINE_TOO_OLD");
   if (mode !== "preview" && mode !== "publish") fail("CATALOG_INVALID_MODE");
   if (mode === "publish" && explicitlyApproved !== true)

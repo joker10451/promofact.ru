@@ -38,7 +38,8 @@ async function main() {
   }
 
   const before = await readSnapshot();
-  const options = refreshOptions(before, mode, explicitlyApproved);
+  const options = refreshOptions(before, mode, explicitlyApproved,
+    process.env.ADMITAD_CATALOG_ALLOW_STALE_BASELINE === "true");
   console.info("CATALOG_1_BASELINE " + JSON.stringify({
     activeOffers: before.count, campaigns: before.campaignCount,
     pastDateRows: before.expired, invalidRows: before.invalid,

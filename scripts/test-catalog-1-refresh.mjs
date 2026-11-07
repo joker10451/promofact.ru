@@ -64,6 +64,10 @@ const withBadDate = examinePublisherSnapshot([{...base,expires:"bad-date"},expir
 assert.equal(withBadDate.invalidDates,1);
 assert.throws(() => refreshOptions(withBadDate,"preview",false),/CATALOG_INVALID_ACTIVE_ROWS/);
 assert.throws(() => refreshOptions({...original,ageHours:200},"publish",true),/CATALOG_BASELINE_TOO_OLD/);
+assert.equal(refreshOptions({...original,ageHours:200},"preview",false).skipDbWrite,true,
+  "Read-only preview still runs on a stale baseline");
+assert.equal(refreshOptions({...original,ageHours:200},"publish",true,true).skipDbWrite,false,
+  "Manual stale-baseline override allows recovery");
 assert.equal(redactedFailure(new Error("SECRET https://example?token=abc")),"CATALOG_OPERATION_FAILED");
 
 const worker = fs.readFileSync("src/lib/admitadSyncWorker.ts","utf8");
