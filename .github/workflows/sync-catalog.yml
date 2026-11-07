@@ -57,6 +57,19 @@ jobs:
           PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}
         run: node scripts/sync-catalog.mjs
 
+      # 3b. Earnings order for byScore (ids/codes only; the repo is public).
+      - name: Sync earnings rank
+        id: earnings
+        env:
+          PERFLUENCE_RESULTS_URL: ${{ secrets.PERFLUENCE_RESULTS_URL }}
+        run: |
+          node scripts/sync-earnings-rank.mjs
+          if git diff --quiet -- src/data/earnings-rank.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       # 4. Проверка результата синхронизации (success vs fallback/failed)
       - name: Verify sync status
         id: verify_sync
@@ -101,11 +114,11 @@ jobs:
 
       # 11. Автоматический коммит и пуш в main при наличии подтвержденных изменений каталога
       - name: Commit and push changes directly to main
-        if: success() && steps.check_changes.outputs.has_changes == 'true'
+        if: success() && (steps.check_changes.outputs.has_changes == 'true' || steps.earnings.outputs.changed == 'true')
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/perfluence-feed.json src/data/sync-meta.json
+          git add src/data/perfluence-feed.json src/data/sync-meta.json src/data/earnings-rank.json
           git commit -m "chore(catalog): регулярное автообновление каталога партнерских предложений"
           git push origin main
 

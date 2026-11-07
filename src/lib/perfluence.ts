@@ -16,6 +16,7 @@ import { isApprovedOct28PublisherPlacement } from "@/lib/perfluenceOct28Website"
 import { isPausedPublisherStore, withoutPausedPublisherOffers } from "@/lib/publisherPauses";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
+import earningsRank from "@/data/earnings-rank.json";
 
 const WIDGET_URL = process.env.PERFLUENCE_WIDGET_URL ?? "";
 const RESULTS_URL = process.env.PERFLUENCE_RESULTS_URL ?? "";
@@ -800,12 +801,31 @@ const PRIORITY_STORES = [
   "polzaru",
 ];
 
-function byScore(a: Coupon, b: Coupon): number {
+// Order only (no fees): written by scripts/sync-earnings-rank.mjs from Perfluence results.
+const EARNED_PROJECT_RANK = new Map(earningsRank.projects.map((id, i) => [Number(id), i]));
+const EARNED_CODE_RANK = new Map(earningsRank.codes.map((code, i) => [String(code).toUpperCase(), i]));
+const UNRANKED = Number.MAX_SAFE_INTEGER;
+
+/**
+ * Best earners first: stores by their Perfluence project's earnings, then the
+ * manual priority list, then codes that earned within a store, then hits.
+ * shortcut: stores are matched by project id only, so a brand split across
+ * several Perfluence projects ranks by the id the site uses; add a slug map if that matters.
+ */
+export function byScore(a: Coupon, b: Coupon): number {
+  const aEarn = EARNED_PROJECT_RANK.get(a.store.id) ?? UNRANKED;
+  const bEarn = EARNED_PROJECT_RANK.get(b.store.id) ?? UNRANKED;
+  if (aEarn !== bEarn) return aEarn - bEarn;
+
   const aPri = PRIORITY_STORES.indexOf(a.store.slug);
   const bPri = PRIORITY_STORES.indexOf(b.store.slug);
   const aRank = aPri === -1 ? 999 : aPri;
   const bRank = bPri === -1 ? 999 : bPri;
   if (aRank !== bRank) return aRank - bRank;
+
+  const aCode = EARNED_CODE_RANK.get(a.promocode.code.trim().toUpperCase()) ?? UNRANKED;
+  const bCode = EARNED_CODE_RANK.get(b.promocode.code.trim().toUpperCase()) ?? UNRANKED;
+  if (aCode !== bCode) return aCode - bCode;
 
   const ah = a.promocode.isHit ? 1 : 0;
   const bh = b.promocode.isHit ? 1 : 0;
