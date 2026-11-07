@@ -63,7 +63,8 @@ assert.equal(winlab.affiliate.sourceLink,
   "https://winlab.prfl.me/sites/test123?source=js-widget",
   "Source URL must preserve the original WinLab link without ERID");
 
-const feed = JSON.parse(fs.readFileSync("src/data/perfluence-feed.json", "utf8"));
+// Fixed fixture: the bundled feed is refreshed every 6h and must not change this check.
+const feed = { data: [JSON.parse(fs.readFileSync("scripts/fixtures/perfluence-sberanalizy-widget-item.json", "utf8"))] };
 const approvedSample = feed.data.find((item) => JSON.stringify(item).includes("PERPREGA309361"));
 assert.ok(approvedSample);
 const pregnancy = parsePayload(JSON.stringify({ data: [approvedSample] }))

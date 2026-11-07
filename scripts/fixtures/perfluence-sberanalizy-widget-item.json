@@ -1,0 +1,76 @@
+{
+  "project": {
+    "id": 2332,
+    "logo": "https://s3sc.perfluence.net/logos/16897557412103.png",
+    "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/0/b/1/0b1c5095-840c-4497-8ab2-453afda4a88b.png",
+    "name": "Сберздоровье (Анализы)",
+    "type": "cpa",
+    "img": "https://s3sc.perfluence.net/img_widget/c/6/8/c688fb31-f368-4323-912b-6c676785d49f.png",
+    "category_id": 268,
+    "category_name": "Здоровый образ жизни",
+    "activeBloggers": 5581,
+    "product_info": "<p>СберЗдоровье Анализы – это сервис поиска и подбора лабораторий для выгодной сдачи анализов. Сервис сотрудничает с более 3500 лабораториями-партнерами по всей России.</p>",
+    "subscribers_condition": "",
+    "site": "https://sberhealth.ru/",
+    "info": "<p>СберЗдоровье — компания №1 в сфере цифровой медицины, которая предоставляет услуги по поиску и подбору врачей, онлайн-консультациям с врачами, дистанционному мониторингу. Сервис также дает возможность записаться на анализы в лабораторию.</p>",
+    "advantages": [
+      " Возможность бесплатно проконсультироваться с врачом после сдачи анализа, чтобы получить расшифровку (стоимость услуги без сдачи анализов — 1990 рублей)",
+      "Возможность оплатить анализы сразу или сделать это после сдачи в лаборатории",
+      "Результаты анализов подгружаются автоматически в онлайн-медкарту"
+    ],
+    "subscriber_guide": "<p>СберЗдоровье — компания №1 в сфере цифровой медицины, которая предоставляет услуги по поиску и подбору врачей, онлайн-консультациям с врачами, дистанционному мониторингу. Сервис также дает возможность записаться на анализы в лабораторию.</p>",
+    "regions": [
+      "Россия"
+    ],
+    "pf": 1,
+    "rsp": 55
+  },
+  "groups": [
+    {
+      "links_for_subscribers": [
+        {
+          "id": 18591494,
+          "title": "Получить скидку 30% на первые и все повторные анализы для беременных",
+          "link": "https://sberanalizy.prfl.me/sites/jhtq64?source=js-widget&source_id=8842",
+          "landing_terms": ""
+        }
+      ],
+      "landing": [],
+      "promocodes": [
+        {
+          "project_id": 2332,
+          "code": "PERPREGA309361",
+          "is_barcode": false,
+          "image": "",
+          "comment": "Скидка 30% на анализы для беременных от 1000 ₽ на первые и все повторные заказы",
+          "date": "31.10.2026 23:59",
+          "group": "",
+          "is_hit": false,
+          "is_hiting": false,
+          "hit_custom_text": "",
+          "hit_bg_color": null,
+          "hit_color": null,
+          "bonus_id": 17208,
+          "is_universal": false,
+          "name": "Скидка 30% на анализы для беременных от 1000 ₽ на первые и все повторные заказы",
+          "promo_terms": "",
+          "region_promo": [
+            "RU"
+          ],
+          "repeat_order": true,
+          "post_id": 17237040,
+          "ord_marker": "2Ranym5xMV5",
+          "ord_custom_text": "Реклама. ООО Инновационная медицина, 115432, г.Москва, вн.тер.г. муниципальный округ Даниловский, пр-кт Андропова, д. 10, помещ. 115, ОГРН 1197746310618",
+          "discount": 30,
+          "btn_text": null,
+          "show": "https://pawss-api.perfluence.net/source-view?post_id=17237040&widget_id=8842&user_id=861964&source=js-widget",
+          "expires": "31.10.2026 23:59"
+        }
+      ],
+      "has_widget_subscribers_promo": false,
+      "widget_subscribers_codes_count": 0,
+      "widget_subscriber_codes": [],
+      "ord_marker": "2Ranym5xMV5"
+    }
+  ]
+}
