@@ -2166,7 +2166,6 @@ export const ARTICLES: Article[] = [
       { text: "Промокоды SUNLIGHT", href: "/store/sunlight-ru" },
       { text: "Промокоды Золотое Яблоко", href: "/store/zolotoe-yabloko" },
       { text: "Промокоды Cozy Home", href: "/store/cozy-home" },
-      { text: "Промокоды Netprint", href: "/store/netprint" },
     ],
   },
 

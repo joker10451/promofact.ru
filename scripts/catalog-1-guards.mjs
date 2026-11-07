@@ -88,18 +88,25 @@ export function examinePublisherSnapshot(rows, meta, nowMs = Date.now()) {
 }
 
 /** No new merchant campaign: only existing publisher campaigns may add coupons. */
-export function refreshOptions(overview, mode, explicitlyApproved) {
+export function refreshOptions(overview, mode, explicitlyApproved, allowStaleBaseline = false) {
   if (!overview || overview.invalid > 0 || overview.invalidDates > 0)
     fail("CATALOG_INVALID_ACTIVE_ROWS");
-  if (overview.ageHours > CATALOG_MAX_BASELINE_AGE_HOURS)
+  // Preview writes nothing, so a stale baseline must not hide its diagnostics.
+  // A stale publish needs a separate manual override, or the sync can never recover.
+  if (mode === "publish" && !allowStaleBaseline &&
+      overview.ageHours > CATALOG_MAX_BASELINE_AGE_HOURS)
     fail("CATALOG_BASELINE_TOO_OLD");
   if (mode !== "preview" && mode !== "publish") fail("CATALOG_INVALID_MODE");
   if (mode === "publish" && explicitlyApproved !== true)
     fail("CATALOG_PUBLISH_NOT_APPROVED");
+  // After an outage the backlog of new coupons is larger: allow the same
+  // 25-per-day budget for each missed day (preview shows the recovery run).
+  const stale = overview.ageHours > CATALOG_MAX_BASELINE_AGE_HOURS &&
+    (mode === "preview" || allowStaleBaseline);
   return {
     skipDbWrite: mode !== "publish",
     requireActiveRetention: true,
-    maxNewOffers: CATALOG_MAX_NEW,
+    maxNewOffers: stale ? CATALOG_MAX_NEW * Math.ceil(overview.ageHours / 24) : CATALOG_MAX_NEW,
     onlyNewCampaignIds: overview.campaigns,
   };
 }
@@ -111,7 +118,7 @@ export function assertSnapshotUnchanged(before, after) {
     fail("CATALOG_SNAPSHOT_CHANGED");
 }
 
-export function assertSafeResult(result, overview) {
+export function assertSafeResult(result, overview, maxNew = CATALOG_MAX_NEW) {
   if (!result?.success || result.status !== "SUCCESS")
     fail("CATALOG_PREVIEW_REJECTED");
   const proposed = Number(result.aggregates?.publishable);
@@ -119,7 +126,7 @@ export function assertSafeResult(result, overview) {
     fail("CATALOG_RETENTION_CHECK_FAILED");
   // Belt and braces: the underlying worker also caps individual additions,
   // but a bad aggregate must never authorize a massive net increase.
-  if (proposed > overview.count + CATALOG_MAX_NEW)
+  if (proposed > overview.count + maxNew)
     fail("CATALOG_NEW_OFFER_CAP_EXCEEDED");
   return proposed;
 }

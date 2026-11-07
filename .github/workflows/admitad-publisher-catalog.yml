@@ -26,6 +26,11 @@ on:
         type: boolean
         required: true
         default: false
+      allow_stale_baseline:
+        description: "Recovery: publish even if the last successful sync is older than 7 days"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -63,6 +68,7 @@ jobs:
           ADMITAD_PUBLISH_WEBSITE_COUPONS: 'true'
           ADMITAD_PUBLISHER_CATALOG_DRY_RUN: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true)) && 'false' || 'true' }}
           ADMITAD_CATALOG_PUBLISH_APPROVED: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'publish' && inputs.confirm == true)) && 'true' || 'false' }}
+          ADMITAD_CATALOG_ALLOW_STALE_BASELINE: ${{ github.event_name == 'workflow_dispatch' && inputs.allow_stale_baseline == true && 'true' || 'false' }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node --loader ./scripts/ts-loader.mjs scripts/catalog-1-refresh.mjs

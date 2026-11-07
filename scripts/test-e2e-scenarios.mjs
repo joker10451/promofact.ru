@@ -279,7 +279,7 @@ async function run() {
       const expectedCode = (label || "").replace(/^Скопировать промокод\s+/, "").trim();
       if (!expectedCode) throw new Error("Не найден промокод в доступной кнопке");
 
-      const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
+      const copyBtn = firstCard.locator('button[aria-label^="Скопировать промокод "]').first(); // copy-only control
       await copyBtn.waitFor({ state: "visible" });
       await copyBtn.click();
 
@@ -301,6 +301,23 @@ async function run() {
         throw new Error(`Тост ошибочно утверждает, что магазин открыт, хотя перехода не было: ${toastText}`);
       }
       console.log("  ✓ Уведомление честно сообщает о копировании без ложного утверждения об открытии магазина");
+
+      // Main CTA: one tap copies the code and opens the partner link in a new tab.
+      await page.evaluate(() => navigator.clipboard.writeText(""));
+      const mainCta = firstCard.locator("a:has-text('Скопировать и перейти')");
+      await mainCta.waitFor({ state: "visible" });
+      const ctaHref = await mainCta.getAttribute("href");
+      if (!ctaHref || ctaHref.startsWith("#")) throw new Error("Главная кнопка должна вести на партнёрскую ссылку");
+      if ((await mainCta.getAttribute("target")) !== "_blank") throw new Error("Магазин должен открываться в новой вкладке");
+      const popupPromise = context.waitForEvent("page", { timeout: 5000 });
+      await mainCta.click();
+      const popup = await popupPromise;
+      await popup.close().catch(() => {});
+      const afterCta = await page.evaluate(() => navigator.clipboard.readText());
+      if (afterCta !== expectedCode) {
+        throw new Error(`Главная кнопка не скопировала код: ожидался "${expectedCode}", получен "${afterCta}"`);
+      }
+      console.log("  ✓ «Скопировать и перейти»: код в буфере и открыта вкладка партнёра");
 
       await context.close();
       passedTests++;
@@ -332,7 +349,7 @@ async function run() {
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
       const firstCard = page.locator("article").first();
-      const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
+      const copyBtn = firstCard.locator('button[aria-label^="Скопировать промокод "]').first();
       await copyBtn.waitFor({ state: "visible" });
       
       // Нажимаем копирование и ожидаем блок ручного ввода (с повтором, если в CI гидратация ещё завершалась)
@@ -388,7 +405,7 @@ async function run() {
         await helperBtn.waitFor({ state: "visible" });
         const helperBox = await helperBtn.boundingBox();
 
-        const firstCopyBtn = page.locator("button:has-text('Скопировать промокод')").first();
+        const firstCopyBtn = page.locator("a:has-text('Скопировать и перейти')").first(); // main CTA
         const copyBox = await firstCopyBtn.boundingBox();
 
         // Проверяем, что кнопка помощника прижата к правому краю (right-0)
@@ -724,20 +741,19 @@ async function run() {
             }
           }
           if (pathUrl === "/store/citydrive") {
-            const offers = page.locator('article[id^="coupon-"]');
-            assert.ok((await offers.count()) >= 4,
-              "Citydrive must show at least four publisher-approved codes");
+            // Expiries from perfluenceRotatedOffers.ts; expired codes must disappear.
             const expected = [
-              ["PERFCITY107", "2Ranykexfns"],
-              ["SAVE1480", "2RanykbzhEB"],
-              ["1500DRIVE202", "2RanykbzhEB"],
-              ["BACK163", "2RanykbzhEB"],
+              ["PERFCITY107", "2RanymUeEjv", "2026-11-30T23:59:59+03:00"],
+              ["SAVE1480", "2RanykbzhEB", "2026-10-31T23:59:59+03:00"],
+              ["1500DRIVE202", "2RanykbzhEB", "2026-10-31T23:59:59+03:00"],
+              ["BACK163", "2RanykbzhEB", "2026-10-31T23:59:59+03:00"],
             ];
-            for (const [code, erid] of expected) {
+            for (const [code, erid, endsAt] of expected) {
               const card = page.locator('article[id^="coupon-"]').filter({ hasText: code }).first();
-              assert.equal(await card.count(), 1,
-                `Missing Citydrive coupon ${code} at ${res.width}px`);
-              assert.ok((await card.innerText()).includes(erid),
+              const active = Date.now() <= Date.parse(endsAt);
+              assert.equal(await card.count(), active ? 1 : 0,
+                `Citydrive coupon ${code} visibility must match expiry at ${res.width}px`);
+              if (active) assert.ok((await card.innerText()).includes(erid),
                 `Incorrect Citydrive publishing ERID for ${code}`);
             }
           }
@@ -747,7 +763,8 @@ async function run() {
             // must not demand it.
             const offers = [
               { code: "Чай", endsAt: "2026-10-22T23:59:59+03:00" },
-              { code: "PK4GMWJUK", endsAt: "2026-10-31T23:59:59+03:00" },
+              // Renewed in the 1 November placement (perfluenceNov01Offers.ts).
+              { code: "PK4GMWJUK", endsAt: "2026-11-30T23:59:59+03:00" },
               { code: "PF21K0T5LF", endsAt: "2026-10-31T23:59:59+03:00" },
             ];
             const cards = page.locator('article[id^="coupon-"]');
@@ -761,7 +778,7 @@ async function run() {
             }
             assert.ok(await cards.count() >= active.length,
               "M.Kosmetik must keep its non-expired approved coupons");
-            const publisherDisclosure = page.getByText(/2Ranymz3211/);
+            const publisherDisclosure = page.getByText(/2Ranymz3211|2RanynNVHR5/);
             assert.ok(await publisherDisclosure.count() >= active.length,
               "Active M.Kosmetik offers must display approved Perfluence ERID");
           }
@@ -901,12 +918,13 @@ async function run() {
             for (let i = 0; i < await visibleCards.count(); i++) {
               const logoState = await visibleCards.nth(i).evaluate((node) => {
                 const image = node.querySelector("img");
-                const initial = node.querySelector("span.absolute");
-                const fallback = node.querySelector('[role="img"]');
+                // StoreLogo draws the brand initial via ::before { content: attr(data-initial) }
+                // so stray letters stay out of link text; textContent is always empty there.
+                const letter = node.querySelector("[data-initial]");
+                const drawn = letter && getComputedStyle(letter, "::before").content;
                 return Boolean(
                   (image?.complete && image.naturalWidth > 0 && getComputedStyle(image).opacity === "1") ||
-                  (initial && initial.textContent?.trim()) ||
-                  (fallback && fallback.textContent?.trim()),
+                  (letter?.getAttribute("data-initial")?.trim() && drawn && drawn !== "none" && drawn !== '""'),
                 );
               });
               assert.ok(logoState, "No popular store should display a blank logo circle: " + (await visibleCards.nth(i).getAttribute("href")));
@@ -1177,12 +1195,18 @@ async function run() {
         throw new Error(`В 2030 году купоны с ограниченным сроком должны были исчезнуть. Было: ${initialCount}, стало: ${futureCount}`);
       }
 
-      // Проверяем, что счётчик в табе "Все акции" синхронизирован
-      const allCountText = await futurePage.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Все акции") span.rounded-full').textContent();
-      if (parseInt(allCountText || "0", 10) !== futureCount) {
-        throw new Error(`Счётчик таба 'Все акции' (${allCountText}) не совпадает с числом карточек (${futureCount})`);
+      // Проверяем, что счётчик в табе "Все акции" синхронизирован. Если фильтрам
+      // нечего сужать, StoreIntentTabs скрывает блок целиком — это ожидаемо.
+      const futureNav = futurePage.locator('nav[aria-label="Фильтр купонов по типу заказа"]');
+      if (await futureNav.count() > 0) {
+        const allCountText = await futureNav.locator('button:has-text("Все акции") span.rounded-full').textContent();
+        if (parseInt(allCountText || "0", 10) !== futureCount) {
+          throw new Error(`Счётчик таба 'Все акции' (${allCountText}) не совпадает с числом карточек (${futureCount})`);
+        }
+        console.log(`  ✓ Счётчик таба 'Все акции' (${allCountText}) синхронизирован с карточками (${futureCount})`);
+      } else {
+        console.log(`  ✓ Фильтры скрыты: при ${futureCount} купонах им нечего сужать`);
       }
-      console.log(`  ✓ Счётчик таба 'Все акции' (${allCountText}) синхронизирован с карточками (${futureCount})`);
 
       await futureContext.close();
       await context.close();
@@ -1237,7 +1261,7 @@ async function run() {
         ["FMART30", "2026-10-26T23:59:59+03:00"],
         ["FMARTPE23khl6x", "2026-10-31T23:59:59+03:00"],
         ["FMARTPE900btr9u", "2026-10-31T23:59:59+03:00"],
-        ["fmartpe2063dcr", "2026-10-31T23:59:59+03:00"],
+        ["fmartpe2063dcr", "2026-11-08T23:59:59+03:00"], // renewed in perfluenceNov04Offers.ts
       ].filter((item) => now <= Date.parse(item[1]));
       assert.match(await page.locator("h1").innerText(), /FMART/i);
       const codes = page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]');
@@ -1252,7 +1276,7 @@ async function run() {
           "Publisher code must be visible: " + code);
       }
       if (expected.length > 0) {
-        assert((await page.content()).includes("2Ranynyf7r3"), "FMART must use approved ERID");
+        assert(/2Ranynyf7r3|2RanymizaJG/.test(await page.content()), "FMART must use approved ERID"); // 2RanymizaJG: Nov 4 site placement
         await page.screenshot({ path: path.resolve("./audit-screenshots/after/polish-fmart-390.png"), fullPage: true, animations: "disabled" });
         const home = await page.goto(BASE_URL + "/", { waitUntil: "domcontentloaded" });
         assert.equal(home?.status(), 200);
@@ -1348,13 +1372,16 @@ async function run() {
         const page = await context.newPage();
         const response = await page.goto(BASE_URL + "/store/vkusvill-dostavka", { waitUntil: "domcontentloaded" });
         assert.equal(response?.status(), 200);
-        const codes = ["VSTCLCZ", "30V8RX3X", "VSYGG5G", "VSDJR76", "35VEM5EY"];
+        // 6 Nov site placement (perfluenceNov06Offers.ts), valid to 30 Nov;
+        // the five 18 Oct codes expired on 31 Oct.
+        const codes = Date.now() <= Date.parse("2026-11-30T23:59:59+03:00")
+          ? ["VSTCLCZ", "30V8RX3X", "35VEM5EY"] : [];
         for(const code of codes) {
           assert.equal(await page.locator('button[aria-label="Скопировать промокод ' + code + '"]').count(), 1, code);
         }
-        assert.equal(await page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]').count(), 5);
+        assert.equal(await page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]').count(), codes.length);
         const html = await page.content();
-        assert(html.includes("2RanyncweGj"), "VkusVill must use current approved site ERID");
+        if (codes.length) assert(html.includes("2RanynbTrL4"), "VkusVill must use current approved site ERID");
         assert(!html.includes("2RanynjH547"), "Never restore stale Telegram marker");
         assert(!html.includes("vksvl.prfl.me/smart_zakupka"), "Never route website clicks through Telegram");
         await page.screenshot({

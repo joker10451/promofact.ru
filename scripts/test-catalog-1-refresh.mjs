@@ -64,6 +64,18 @@ const withBadDate = examinePublisherSnapshot([{...base,expires:"bad-date"},expir
 assert.equal(withBadDate.invalidDates,1);
 assert.throws(() => refreshOptions(withBadDate,"preview",false),/CATALOG_INVALID_ACTIVE_ROWS/);
 assert.throws(() => refreshOptions({...original,ageHours:200},"publish",true),/CATALOG_BASELINE_TOO_OLD/);
+assert.equal(refreshOptions({...original,ageHours:200},"preview",false).skipDbWrite,true,
+  "Read-only preview still runs on a stale baseline");
+assert.equal(refreshOptions({...original,ageHours:289},"publish",true,true).maxNewOffers,CATALOG_MAX_NEW*13,
+  "Recovery allows the daily new-coupon budget for each missed day");
+assert.equal(refreshOptions({...original,ageHours:20},"publish",true).maxNewOffers,CATALOG_MAX_NEW,
+  "Normal daily run keeps the standard cap");
+assert.throws(() => assertSafeResult({success:true,status:"SUCCESS",
+  aggregates:{publishable:original.count+CATALOG_MAX_NEW+1}},original,CATALOG_MAX_NEW),/CATALOG_NEW_OFFER_CAP_EXCEEDED/);
+assert.equal(assertSafeResult({success:true,status:"SUCCESS",
+  aggregates:{publishable:original.count+CATALOG_MAX_NEW+1}},original,CATALOG_MAX_NEW*2),original.count+CATALOG_MAX_NEW+1);
+assert.equal(refreshOptions({...original,ageHours:200},"publish",true,true).skipDbWrite,false,
+  "Manual stale-baseline override allows recovery");
 assert.equal(redactedFailure(new Error("SECRET https://example?token=abc")),"CATALOG_OPERATION_FAILED");
 
 const worker = fs.readFileSync("src/lib/admitadSyncWorker.ts","utf8");

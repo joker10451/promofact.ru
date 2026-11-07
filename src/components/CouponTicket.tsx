@@ -593,16 +593,20 @@ export default function CouponTicket({
                 <span className="truncate">Повторить копирование</span>
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => copyCode(promocode.code)}
+              // One tap copies the code AND opens the partner link, so the
+              // affiliate cookie is set even if the shopper never comes back.
+              <a
+                href={outgoingUrl}
+                target="_blank"
+                rel="noopener sponsored nofollow"
+                onClick={(e) => copyAndOpen(e, promocode.code)}
                 className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red to-red-dark text-white text-xs sm:text-sm font-bold shadow-offset-red hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] transition-all cursor-pointer px-4"
               >
                 <Icon name="copy" size={16} />
                 <span className="truncate">
-                  {promocode.isBarcode ? "Скопировать номер штрихкода" : "Скопировать промокод"}
+                  {promocode.isBarcode ? "Скопировать штрихкод и перейти →" : "Скопировать и перейти →"}
                 </span>
-              </button>
+              </a>
             )}
 
             {/* Прямой переход по ссылке */}

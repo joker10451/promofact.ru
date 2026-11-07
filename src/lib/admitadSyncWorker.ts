@@ -25,7 +25,7 @@ import {
   normalizeAdmitadCoupon,
 } from "@/lib/admitadNormalizer";
 import { STABLE_STORES } from "@/lib/stableStores";
-import { verifiedPublisherWebsite, resolvePublisherStore, validPublisherAffiliateLink, baselineStillEligible, isReviewedMissingWebsiteCoupon } from "@/lib/admitadPublisherCatalog";
+import { verifiedPublisherWebsite, resolvePublisherStore, validPublisherAffiliateLink, baselineStillEligible } from "@/lib/admitadPublisherCatalog";
 import {
   isAdmitadPublishable,
   evaluateSnapshotSafety,
@@ -465,11 +465,12 @@ export async function runAdmitadSafeSync(options: {
           return { id: row.id, sourceCouponId: safeId,
             result: "REJECTED_DURING_VALIDATION" };
         }
-        if (!isReviewedMissingWebsiteCoupon(row)) {
-          return { id: row.id, sourceCouponId: safeId, result: "NOT_REVIEWED" };
+        if (safeId === "INVALID_ID") {
+          return { id: row.id, sourceCouponId: safeId, result: "LOOKUP_UNVERIFIED" };
         }
-        // Authoritative, site-scoped coupon detail endpoint: 404 is the only
-        // proof that can activate this narrowly reviewed retirement.
+        // Authoritative, site-scoped coupon detail endpoint: a fresh 404 is the
+        // only proof that can retire a still-valid coupon. A manual allowlist
+        // used to be required too and blocked the whole catalog for 11 days.
         try {
           await admitadFetch<unknown>(
             `/coupons/${sourceId}/website/${website.id}/`,

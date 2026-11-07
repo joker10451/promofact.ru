@@ -83,7 +83,13 @@ const stores = await getAllStores();
 const sberStore = stores.find((s) => s.slug === "sberzdorovie");
 assert.ok(sberStore, "Магазин sberzdorovie должен присутствовать в каталоге");
 
-const expectedSberCodes = ["PERE7A4E5", "PERPREGT259702", "PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"];
+// Catalog hides expired codes, so expect only those still valid today.
+const sberCodeExpiry = {
+  PERE7A4E5: "2026-10-31T23:59:59+03:00", PERPREGT259702: "2026-10-31T23:59:59+03:00",
+  PERPREGA309361: "2026-11-30T23:59:59+03:00", SHD56E28: "2026-11-30T23:59:59+03:00",
+  SH40NOV0I6VB: "2026-11-01T23:59:59+03:00",
+};
+const expectedSberCodes = Object.keys(sberCodeExpiry).filter((code) => Date.parse(sberCodeExpiry[code]) > Date.now());
 assert.deepEqual(sberStore.coupons.map(c => c.promocode.code).sort(), expectedSberCodes.sort());
 const approved = new Map(SBER_ANALIZY_OCT29_OFFERS.map(c => [c.promocode.code, c]));
 assert.equal(approved.size, 3);
@@ -119,10 +125,10 @@ assert.equal(withoutForbiddenSberAnalizyCreditCardCoPromotion(SBER_ANALIZY_OCT29
 console.log("✓ Три согласованных промокода с разными ссылками, проверкой маркировки и ограничением совместной рекламы");
 
 const codes = new Map(sberStore.coupons.map(c => [c.promocode.code, c]));
-assert.equal(getCouponAudience(codes.get("PERPREGT259702").promocode), "repeat-order");
-assert.equal(getCouponAudience(codes.get("PERPREGA309361").promocode), "repeat-order");
-assert.equal(getCouponAudience(codes.get("SHD56E28").promocode), "unknown");
-assert.equal(getCouponAudience(codes.get("PERE7A4E5").promocode), "unknown");
+const expectedAudience = { PERPREGT259702: "repeat-order", PERPREGA309361: "repeat-order", SHD56E28: "unknown", PERE7A4E5: "unknown" };
+for (const [code, audience] of Object.entries(expectedAudience)) {
+  if (codes.has(code)) assert.equal(getCouponAudience(codes.get(code).promocode), audience);
+}
 assert.equal(sberStore.coupons.filter(c => getCouponAudience(c.promocode) === "first-order").length, 0);
 const article = buildStoreArticle({
   name: sberStore.name,
