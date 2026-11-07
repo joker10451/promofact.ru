@@ -279,7 +279,7 @@ async function run() {
       const expectedCode = (label || "").replace(/^Скопировать промокод\s+/, "").trim();
       if (!expectedCode) throw new Error("Не найден промокод в доступной кнопке");
 
-      const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
+      const copyBtn = firstCard.locator('button[aria-label^="Скопировать промокод "]').first(); // copy-only control
       await copyBtn.waitFor({ state: "visible" });
       await copyBtn.click();
 
@@ -301,6 +301,23 @@ async function run() {
         throw new Error(`Тост ошибочно утверждает, что магазин открыт, хотя перехода не было: ${toastText}`);
       }
       console.log("  ✓ Уведомление честно сообщает о копировании без ложного утверждения об открытии магазина");
+
+      // Main CTA: one tap copies the code and opens the partner link in a new tab.
+      await page.evaluate(() => navigator.clipboard.writeText(""));
+      const mainCta = firstCard.locator("a:has-text('Скопировать и перейти')");
+      await mainCta.waitFor({ state: "visible" });
+      const ctaHref = await mainCta.getAttribute("href");
+      if (!ctaHref || ctaHref.startsWith("#")) throw new Error("Главная кнопка должна вести на партнёрскую ссылку");
+      if ((await mainCta.getAttribute("target")) !== "_blank") throw new Error("Магазин должен открываться в новой вкладке");
+      const popupPromise = context.waitForEvent("page", { timeout: 5000 });
+      await mainCta.click();
+      const popup = await popupPromise;
+      await popup.close().catch(() => {});
+      const afterCta = await page.evaluate(() => navigator.clipboard.readText());
+      if (afterCta !== expectedCode) {
+        throw new Error(`Главная кнопка не скопировала код: ожидался "${expectedCode}", получен "${afterCta}"`);
+      }
+      console.log("  ✓ «Скопировать и перейти»: код в буфере и открыта вкладка партнёра");
 
       await context.close();
       passedTests++;
@@ -332,7 +349,7 @@ async function run() {
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
       const firstCard = page.locator("article").first();
-      const copyBtn = firstCard.locator("button:has-text('Скопировать промокод')");
+      const copyBtn = firstCard.locator('button[aria-label^="Скопировать промокод "]').first();
       await copyBtn.waitFor({ state: "visible" });
       
       // Нажимаем копирование и ожидаем блок ручного ввода (с повтором, если в CI гидратация ещё завершалась)
@@ -388,7 +405,7 @@ async function run() {
         await helperBtn.waitFor({ state: "visible" });
         const helperBox = await helperBtn.boundingBox();
 
-        const firstCopyBtn = page.locator("button:has-text('Скопировать промокод')").first();
+        const firstCopyBtn = page.locator("a:has-text('Скопировать и перейти')").first(); // main CTA
         const copyBox = await firstCopyBtn.boundingBox();
 
         // Проверяем, что кнопка помощника прижата к правому краю (right-0)
@@ -1178,12 +1195,18 @@ async function run() {
         throw new Error(`В 2030 году купоны с ограниченным сроком должны были исчезнуть. Было: ${initialCount}, стало: ${futureCount}`);
       }
 
-      // Проверяем, что счётчик в табе "Все акции" синхронизирован
-      const allCountText = await futurePage.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Все акции") span.rounded-full').textContent();
-      if (parseInt(allCountText || "0", 10) !== futureCount) {
-        throw new Error(`Счётчик таба 'Все акции' (${allCountText}) не совпадает с числом карточек (${futureCount})`);
+      // Проверяем, что счётчик в табе "Все акции" синхронизирован. Если фильтрам
+      // нечего сужать, StoreIntentTabs скрывает блок целиком — это ожидаемо.
+      const futureNav = futurePage.locator('nav[aria-label="Фильтр купонов по типу заказа"]');
+      if (await futureNav.count() > 0) {
+        const allCountText = await futureNav.locator('button:has-text("Все акции") span.rounded-full').textContent();
+        if (parseInt(allCountText || "0", 10) !== futureCount) {
+          throw new Error(`Счётчик таба 'Все акции' (${allCountText}) не совпадает с числом карточек (${futureCount})`);
+        }
+        console.log(`  ✓ Счётчик таба 'Все акции' (${allCountText}) синхронизирован с карточками (${futureCount})`);
+      } else {
+        console.log(`  ✓ Фильтры скрыты: при ${futureCount} купонах им нечего сужать`);
       }
-      console.log(`  ✓ Счётчик таба 'Все акции' (${allCountText}) синхронизирован с карточками (${futureCount})`);
 
       await futureContext.close();
       await context.close();

@@ -21,10 +21,15 @@ export default function StoreIntentTabs({
   unknownCount,
   onTabChange,
 }: StoreIntentTabsProps) {
+  // Filters that cannot narrow the list only push the first coupon below the fold.
+  const canNarrow = [firstCount, repeatCount, universalCount, unknownCount]
+    .some((n) => n > 0 && n < allCount);
+  if (!canNarrow && activeTab === "all") return null;
+
   return (
     <nav
       aria-label="Фильтр купонов по типу заказа"
-      className="flex flex-wrap items-center gap-2 mb-5"
+      className="mb-5 flex items-center gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0 [&>button]:shrink-0 [&>button]:whitespace-nowrap"
     >
       {/* 1. Все предложения */}
       <button
