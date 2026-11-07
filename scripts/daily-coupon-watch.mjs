@@ -40,8 +40,12 @@ let totalFindings = 0;
 let totalCriticalFindings = 0;
 
 async function fetchJson(url) {
+  const secret = process.env.TELEGRAM_POSTING_SECRET || process.env.CRON_SECRET;
   const response = await fetch(url, {
-    headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+    headers: {
+      Accept: "application/json", "Cache-Control": "no-cache",
+      ...(secret ? { Authorization: "Bearer " + secret } : {}),
+    },
     signal: AbortSignal.timeout(20_000),
     cache: "no-store",
   });

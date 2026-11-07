@@ -527,22 +527,8 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // 4. HTML страницы каталога, магазинов, категорий, статей и городов
-      // Cloudflare держит в кэше 24 часа со stale-while-revalidate.
-      // Посетители и боты получают страницу моментально из CDN, Vercel Origin не вызывается.
-      {
-        source: "/:path((?!api|admin|_next/image).*)",
-        headers: [
-          {
-            key: "CDN-Cache-Control",
-            value: "public, s-maxage=86400, stale-while-revalidate=86400",
-          },
-          {
-            key: "Cloudflare-CDN-Cache-Control",
-            value: "public, s-maxage=86400, stale-while-revalidate=86400",
-          },
-        ],
-      },
+      // HTML намеренно без CDN-Cache-Control: сутки на CDN Vercel перекрывали
+      // ISR (revalidate 600–1800), и страницы с кодами жили до следующего деплоя.
     ];
   },
 };

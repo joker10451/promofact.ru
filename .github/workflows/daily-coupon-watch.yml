@@ -49,6 +49,7 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_POSTING_SECRET: ${{ secrets.TELEGRAM_POSTING_SECRET }}
         run: node --loader ./scripts/ts-loader.mjs scripts/daily-coupon-watch.mjs
 
       - name: Write GitHub Actions summary
