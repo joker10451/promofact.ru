@@ -88,7 +88,7 @@ const PEREKRESTOK_NOV06_AFFILIATE: Coupon["affiliate"] = {
 // --- 7. ЯНДЕКС АФИША ---
 export const YANDEX_AFISHA_NOV06_SITE_LINK = "https://yandafisha.prfl.me/sites/p3q5ez?erid=2RanynfupB6";
 export const YANDEX_AFISHA_NOV06_SITE_ERID = "2RanynfupB6";
-export const YANDEX_AFISHA_NOV06_SITE_LEGAL = 'Реклама. ООО "ЯНДЕКС МУЗЫКА", ИНН 9705121980 erid: 2RanynfupB6';
+export const YANDEX_AFISHA_NOV06_SITE_LEGAL = 'Реклама. ООО "ЯНДЕКС МУЗЫКА", ИНН 9705121040 erid: 2RanynfupB6';
 
 const YANDEX_AFISHA_NOV06_AFFILIATE: Coupon["affiliate"] = {
   link: YANDEX_AFISHA_NOV06_SITE_LINK,
@@ -393,6 +393,31 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
       isFirstOrderOnly: true,
       customerTypeLabel: "Первый заказ",
       minimumOrder: { value: 3000, currency: "RUB" },
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["yandeks-afisha"],
+      activeBloggers: STABLE_STORES["yandeks-afisha"]?.activeBloggers ?? 4180,
+    },
+    affiliate: YANDEX_AFISHA_NOV06_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 196504,
+    promocode: {
+      id: 196504,
+      code: "MM009981",
+      bonusName: "Скидка 300 ₽ на первую покупку билетов от 2 000 ₽ в Яндекс Афише",
+      terms: "Промокод MM009981 даёт скидку 300 ₽ при первом заказе билетов от 2 000 ₽ на сайте и в мобильном приложении Яндекс Афиша. Действует до 5 марта 2027 года 23:59.",
+      expires: "2027-03-05T23:59:59+03:00",
+      isHit: false,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Первый заказ",
+      minimumOrder: { value: 2000, currency: "RUB" },
       region: "RU",
       isBarcode: false,
       barcodeImage: null,

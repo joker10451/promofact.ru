@@ -549,10 +549,15 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // historical ERID. Deny unknown/historical codes until reviewed.
     if (c.store.slug === "yandeks-afisha") {
       const code = c.promocode.code.trim().toUpperCase();
-      return ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
+      const isNov06 = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
+        c.affiliate.link === "https://yandafisha.prfl.me/sites/p3q5ez?erid=2RanynfupB6" &&
+        c.affiliate.ordMarker === "2RanynfupB6" &&
+        c.affiliate.ordText.includes("9705121040");
+      const isOct = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
         c.affiliate.link === "https://yandafisha.prfl.me/sites/xocz1q?erid=2RanynJD4PD" &&
         c.affiliate.ordMarker === "2RanynJD4PD" &&
         c.affiliate.ordText.includes("erid: 2RanynJD4PD");
+      return isNov06 || isOct;
     }
     if (c.store.slug === "tanukifamily") {
       const code = c.promocode.code.trim().toUpperCase();
