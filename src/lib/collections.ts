@@ -223,7 +223,7 @@ export const COLLECTIONS: Collection[] = [
     ],
     filter: (c) =>
       ["marketpleysy", "odezhda-i-obuv", "kosmetika-i-parfyumeriya", "ukrasheniya", "vse-dlya-doma", "elektronika-i-tehnika", "podarki"].includes(c.store.categorySlug || "") ||
-      ["yandex-market", "cozy-home", "carte-blanche", "sunlight-ru", "zolotoe-yabloko", "sberdevices"].includes(c.store.slug),
+      ["yandex-market", "cozy-home", "carte-blanche", "sunlight-ru", "zolotoe-yabloko", "sberdevices", "pyaterochka", "randewoo", "poizon", "mark-formelle"].includes(c.store.slug),
   },
   {
     slug: "finansy-i-karty",

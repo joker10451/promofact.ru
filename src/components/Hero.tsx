@@ -36,7 +36,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
   const stores = search?.stores ?? [];
   const coupons = search?.coupons ?? [];
   // Suggested shops must really exist in our live index; no stale static names.
-  const preferredSlugs = ["sunlight-ru", "pyaterochka", "ivi", "otello", "kinopoisk", "farfor"];
+  const preferredSlugs = ["pyaterochka", "randewoo", "letual", "sunlight-ru", "yandeks-afisha", "dodo-pizza"];
   const preferred = preferredSlugs
     .map((slug) => stores.find((store) => store.slug === slug))
     .filter((store): store is (typeof stores)[number] => Boolean(store));
@@ -145,7 +145,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-red"></span>
             </span>
-            <span>🔥 Сезон 11.11 открыт: промокоды ко Дню шопинга</span>
+            <span>🔥 Разогрев 11.11: скидки до −55% и промокоды ко Дню шопинга</span>
             <span className="group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
         </div>

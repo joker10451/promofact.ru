@@ -65,7 +65,7 @@ export default async function ActionPage({
   if (action.targetCollectionSlug) {
     const col = COLLECTIONS.find((c) => c.slug === action.targetCollectionSlug);
     if (col) {
-      sampleCoupons = getCollectionCoupons(col, allCoupons).slice(0, 3);
+      sampleCoupons = getCollectionCoupons(col, allCoupons).slice(0, 12);
     }
   }
 
