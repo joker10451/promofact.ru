@@ -152,6 +152,19 @@ export function isApprovedOct16PublisherOffer(c: Coupon): boolean {
         c.affiliate.link === "https://librederm2.prfl.me/sites/hkhgrh?erid=2RanykUPCJY") {
       return true;
     }
+    // Allow November 6 Flash 30% Librederm placement
+    if (c.promocode.code.trim() === "LAAA77B64992" &&
+        c.affiliate.ordMarker === "2Ranym5zahi" &&
+        c.affiliate.link === "https://librederm30.prfl.me/sites/f1lndu?erid=2Ranym5zahi") {
+      return true;
+    }
+  }
+  // Allow November 6 renewed Letual placement
+  if (c.store.slug === "letual") {
+    if (c.affiliate.ordMarker === "2RanykjF6Ep" &&
+        c.affiliate.link === "https://letu.prfl.me/sites/ga9rax?erid=2RanykjF6Ep") {
+      return true;
+    }
   }
   const slug = c.store.slug as keyof typeof PERFLUENCE_OCT16_PLACEMENTS;
   const ref = PERFLUENCE_OCT16_PLACEMENTS[slug];

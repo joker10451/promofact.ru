@@ -501,6 +501,11 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
           c.affiliate.ordMarker === "2RanymRX1bZ";
         return (isNov02 || isOct23) && c.affiliate.ordText.includes("ИНН 9705114405");
       }
+      if (flowerCode === "MDK403") {
+        return c.affiliate.link === "https://yaflowers.prfl.me/sites/koqnjw?erid=2RanykhkmUY" &&
+          c.affiliate.ordMarker === "2RanykhkmUY" &&
+          c.affiliate.ordText.includes("ИНН 9705114405");
+      }
       return false;
     }
     if (c.store.slug === "yandex-eda") {
@@ -570,6 +575,10 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // and ERID. Only explicitly approved project website placement survives.
     if (c.store.slug === "perekrestok-dostavka") {
       const code = c.promocode.code.trim().toUpperCase();
+      const isNov06 = ["199EMTVUS"].includes(code) &&
+        c.affiliate.link === "https://perekrestok.prfl.me/sites/2gduvk?erid=2RanynLdyWc" &&
+        c.affiliate.ordMarker === "2RanynLdyWc" &&
+        c.affiliate.ordText.includes("erid: 2RanynLdyWc");
       const isNov03 = ["1975VWVT7", "198N7PARH", "195GYDL34", "196DULY6U"].includes(code) &&
         c.affiliate.link === "https://perekrestok.prfl.me/sites/fciupl?erid=2RanynvigKW" &&
         c.affiliate.ordMarker === "2RanynvigKW" &&
@@ -578,7 +587,7 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.link === "https://perekrestok.prfl.me/sites/me2ds4?erid=2RanykFbMxo" &&
         c.affiliate.ordMarker === "2RanykFbMxo" &&
         c.affiliate.ordText.includes("erid: 2RanykFbMxo");
-      return isNov03 || isOct;
+      return isNov06 || isNov03 || isOct;
     }
     // Alcohol advertiser: a missing ERID is NOT an integration error and
     // cannot be "fixed" by inventing a marker. Russia's advertising law,

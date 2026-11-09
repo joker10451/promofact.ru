@@ -51,6 +51,16 @@ export const SBER_ANALIZY_OCT29_PLACEMENTS: readonly Placement[] = [
     erid: "2RanyoHPJ59",
     expires: "2026-11-01T23:59:59+03:00",
   },
+  {
+    id: 826233204,
+    code: "PERE7A4E5",
+    title: "Скидка 35% на первую или повторную онлайн-консультацию врача",
+    terms: "Промокод PERE7A4E5 даёт скидку 35% на первую или любую повторную онлайн-консультацию дежурного терапевта, педиатра или узкопрофильного специалиста в сервисе СберЗдоровье. Действует до 30 ноября 2026 года, 23:59 МСК.",
+    audience: "Все пользователи · консультации",
+    link: "https://sberanalizy.prfl.me/sites/1a557k?erid=2RanymVjsjh",
+    erid: "2RanymVjsjh",
+    expires: "2026-11-30T23:59:59+03:00",
+  },
 ];
 
 const store = STABLE_STORES["sberzdorovie"];
