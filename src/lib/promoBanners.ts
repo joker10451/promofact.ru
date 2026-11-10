@@ -221,28 +221,6 @@ https://www.sberbank.ru/common/img/uploaded/cards/sberkarta_kids/pravila_akcii_b
     endsAt: "2026-09-30",
   },
   {
-    id: "sber-detskiy-aksessuar-2026",
-    storeSlug: "detskie-platezhnye-aksessuary-ot-sbera",
-    storeSlugs: ["detskie-platezhnye-aksessuary-ot-sbera", "sberbank-detskaya-karta", "sberprime"],
-    label: "Акция от Сбера",
-    title: "Детский платёжный аксессуар: +4 000 на счёт",
-    subtitle:
-      "Выберите стильный брелок или яркий стикер от Сбера. Оплачивайте товары к школе до 30.09 по совместному счёту или детскими аксессуарами и получайте до 4 000 бонусов Спасибо на счёт.",
-    badge: "+4 000 бонусов на счёт",
-    note: "Ребёнок может получить до 2 000 бонусов и родители до 1 000 бонусов каждый. Срок акции: до 30.09.2026",
-    cta: "Оформить детский аксессуар",
-    link: "https://sberbank1.prfl.me/sites/zn01im?erid=2RanykEC3Sj",
-    image: "/images/sber-detskiy-aksessuar.webp",
-    imageAlt: "Детский платёжный аксессуар от Сбера: брелок или стикер и до 4 000 бонусов Спасибо на счёт",
-    imageWidth: 1400,
-    imageHeight: 1000,
-    ordText:
-      "Реклама. Рекламодатель: ПАО Сбербанк. ИНН: 7707083893. Ген. лицензия Банка России на осуществление банковских операций № 1481 от 11.08.2015 г. erid: 2RanykEC3Sj",
-    // Публикация на сайте согласована в Perfluence на 22.09.2026 12:00
-    startsAt: "2026-09-22T12:00",
-    endsAt: "2026-09-30",
-  },
-  {
     id: "ivi-35-days-2026",
     storeSlug: "ivi",
     label: "Онлайн-кинотеатр",

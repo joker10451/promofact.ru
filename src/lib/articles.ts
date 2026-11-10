@@ -37,8 +37,8 @@ const DODO_LINK = "https://dodo1.prfl.me/sites/5worzz?erid=2RanynisbQ7";
 const DODO_ORD = "Реклама. ИП Гринев Денис Петрович, ИНН 615400951595. erid: 2RanynisbQ7";
 
 /* Офферы сентябрьской серии: ссылка и маркировка берутся из кабинета. */
-const LAVKA_LINK = "https://yalavka.prfl.me/sites/6twglo?erid=2RanykUgmfH";
-const LAVKA_ORD = "Реклама. ООО «Яндекс.Лавка», ИНН 9718101499. erid: 2RanykUgmfH";
+const LAVKA_LINK = "https://yalavka.prfl.me/sites/ixzlwz?erid=2RanyoHVWwN";
+const LAVKA_ORD = "Реклама. ООО «Яндекс.Лавка», ИНН 9718101499. erid: 2RanyoHVWwN";
 
 const PEREKRESTOK_LINK = "https://perekrestok.prfl.me/sites/me2ds4?erid=2RanykFbMxo";
 const PEREKRESTOK_ORD = "Реклама. ООО \"ИКС 5 ДИДЖИТАЛ\", ИНН 9722010808 erid: 2RanykFbMxo";
@@ -51,14 +51,10 @@ const VKUSVILL_ORD =
 const FARFOR_LINK = "https://farfor1.prfl.me/sites/4jt3nt?erid=2RanynrHXoq";
 const FARFOR_ORD = "Реклама. ООО «Фарфор Франчайзинг», ИНН 0276147339. erid: 2RanynrHXoq";
 
-const TUTU_LINK = "https://tutuu.prfl.me/smart_zakupka/9c7z27?erid=2RanykDb6uR";
-const TUTU_ORD = "Реклама. ООО «НТТ», ОГРН 1147746826468, г. Москва. erid: 2RanykDb6uR";
 
 const KINOPOISK_LINK = "https://kp45.prfl.me/sites/ncwwn8?erid=2RanykMXK6B";
 const KINOPOISK_ORD = "Реклама. ООО «ЯНДЕКС», ИНН 7736207543 erid: 2RanykMXK6B";
 
-const IVROSHE_LINK = "https://yves-rocher.prfl.me/sites/jqf96z?erid=2Ranyn4bfej";
-const IVROSHE_ORD = "Реклама. ООО «ИВ РОШЕ ВОСТОК», ИНН 7710217064. erid: 2Ranyn4bfej";
 
 export const ARTICLES: Article[] = [
   {
@@ -114,12 +110,6 @@ export const ARTICLES: Article[] = [
         a: "Только корпусом: стикер клеится на телефон или чехол, брелок вешается на рюкзак или ключи. Внутри оба — детская СберКарта.",
       },
     ],
-    ctaButton: {
-      text: "Оформить детский аксессуар",
-      href: "https://sberbank1.prfl.me/sites/zn01im?erid=2RanykEC3Sj",
-      disclaimer:
-        "Реклама. Рекламодатель: ПАО Сбербанк. ИНН: 7707083893. Ген. лицензия Банка России на осуществление банковских операций № 1481 от 11.08.2015 г. erid: 2RanykEC3Sj. Правила акции: sberbank.ru/common/img/uploaded/cards/sberkarta_kids/pravila_akcii_bonus_osen.pdf",
-    },
     related: [
       { text: "Кредитная СберКарта", href: "/sberkarta" },
       { text: "Детские аксессуары Сбера", href: "/store/detskie-platezhnye-aksessuary-ot-sbera" },
@@ -129,7 +119,7 @@ export const ARTICLES: Article[] = [
   },
   {
     slug: "promokody-yandeks-lavka",
-    title: "Промокоды Яндекс Лавки: −50% на первый заказ и −300 ₽ без минималки",
+    title: "Промокоды Яндекс Лавки: −50% на первый заказ и −300 ₽ от 600 ₽",
     description:
       "50LUT558 — скидка 50% на первый заказ от 800 ₽, до 600 ₽. 300DS789 — 300 ₽ от 600 ₽. 55REG14 — 55% в Новосибирске и Ростове-на-Дону. 40ASD556 — для тех, кто не заказывал больше года.",
     published: "2026-09-20",
@@ -530,11 +520,6 @@ export const ARTICLES: Article[] = [
         a: "Нет, в заказе применяется только один код. Выбирайте тот, у которого порог ближе к вашей сумме.",
       },
     ],
-    ctaButton: {
-      text: "Купить в Ив Роше",
-      href: IVROSHE_LINK,
-      disclaimer: IVROSHE_ORD,
-    },
     related: [
       { text: "Все промокоды Ив Роше", href: "/store/iv-roshe" },
       { text: "Косметика и парфюмерия", href: "/category/kosmetika-i-parfyumeriya" },
@@ -1924,9 +1909,9 @@ export const ARTICLES: Article[] = [
     ],
     ctaButton: {
       text: "Активировать подписку PREMIER на 45 дней за 1 ₽",
-      href: "https://premier.prfl.me/sites/gsj9qt?erid=2Ranymq94ZR",
+      href: "https://premier.prfl.me/sites/chp8bj?erid=2RanykSwE92",
       disclaimer:
-        'Реклама. Рекламодатель: ООО "ПРЕМЬЕР" 16+ ИНН 9702011190 erid: 2Ranymq94ZR',
+        'Реклама. Рекламодатель: ООО "ПРЕМЬЕР" 16+ ИНН 9702011190 erid: 2RanykSwE92',
     },
     related: [
       { text: "Все скидки PREMIER", href: "/store/premier" },
