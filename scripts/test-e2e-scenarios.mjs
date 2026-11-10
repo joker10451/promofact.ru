@@ -530,7 +530,21 @@ async function run() {
 
       // Открываем модальное окно деталей/условий купона
       const detailsBtn = firstCard.locator("button:has-text('Условия акции')");
-      await detailsBtn.click();
+      // The card is visible in the server HTML before React attaches its handlers, so on a slow
+      // CI machine the first click can be lost (and role=dialog also matches other dialogs, e.g.
+      // the cookie banner). Retry until the terms dialog with its copy link really is open.
+      const copyLinkInDialog = page
+        .locator("div[role='dialog'] button:has-text('Скопировать'), div[role='dialog'] a:has-text('Скопировать')")
+        .first();
+      for (let attempt = 0; attempt < 5; attempt++) {
+        await detailsBtn.click();
+        try {
+          await copyLinkInDialog.waitFor({ state: "visible", timeout: 2500 });
+          break;
+        } catch {
+          await page.waitForTimeout(500);
+        }
+      }
 
       // Ожидаем появление модального окна деталей в DOM (через createPortal)
       const modal = page.locator("div[role='dialog']").last();
