@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import CouponTicket from "@/components/CouponTicket";
 import NewsletterBox from "@/components/NewsletterBox";
-import { ACTIONS, getAction } from "@/lib/actions";
+import { ACTIONS, getAction, isActionExpired } from "@/lib/actions";
 import { getCoupons } from "@/lib/perfluence";
 import { COLLECTIONS, getCollectionCoupons } from "@/lib/collections";
 import type { Coupon } from "@/lib/types";
@@ -32,6 +32,8 @@ export async function generateMetadata({
     title: action.title,
     description: action.description.slice(0, 160),
     alternates: { canonical: pageUrl },
+    // The sale is over: keep the URL working, but ask engines to drop it.
+    robots: { index: !isActionExpired(action), follow: true },
     openGraph: {
       title: action.title,
       description: action.description.slice(0, 160),

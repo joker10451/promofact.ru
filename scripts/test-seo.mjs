@@ -74,7 +74,7 @@ async function runSeoRegressionSuite() {
     const page = fs.readFileSync(path.resolve("src/app/store/[slug]/page.tsx"), "utf-8");
     assert(page.includes('n > 0 && slug === "tasty-coffee"'));
     assert(page.includes('Промокод Tasty Coffee на'));
-    assert(page.includes("index: n > 0"), "Empty offers must remain noindex");
+    assert(page.includes("index: isStoreIndexable(slug, n)"), "Empty offers must remain noindex");
   });
 
   // 4. Проверка канонических ссылок в каталоге /promokody

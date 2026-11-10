@@ -25,6 +25,7 @@ import { getOfferSchema, getOfferDisplayName } from "@/lib/seoOfferSchema";
 import { isRealPromoCode } from "@/lib/dedupe";
 import { formatStoreOfferTitle, formatPriorityStoreTitle, getStoreHeadlineOfferCounts, formatStoreOfferCounts } from "@/lib/storeOfferHeadline";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { isStoreIndexable } from "@/lib/storeIndexing";
 
 // New site-scoped Admitad stores arrive after deployment. Do not 404 on
 // slugs absent from generateStaticParams at build time.
@@ -168,7 +169,7 @@ export async function generateMetadata({
     description: safeOgDescription,
     alternates: { canonical: pageUrl },
     robots: {
-      index: n > 0,
+      index: isStoreIndexable(slug, n),
       follow: true,
     },
     openGraph: og,

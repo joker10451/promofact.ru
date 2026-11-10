@@ -1,5 +1,7 @@
 export interface ActionPage {
   slug: string;
+  /** Last day of the sale, YYYY-MM-DD (Moscow). After it the page is noindex and leaves the sitemap. Omit for evergreen pages. */
+  expires?: string;
   title: string;
   description: string;
   h1: string;
@@ -15,6 +17,7 @@ export interface ActionPage {
 export const ACTIONS: ActionPage[] = [
   {
     slug: "leto-2026",
+    expires: "2026-08-31",
     title: "Летние распродажи 2026: промокоды и скидки лета",
     description:
       "Летние распродажи 2026 — подборка промокодов на товары для отдыха, путешествий, дачи и дома. Где искать скидки летом и как не переплатить.",
@@ -58,6 +61,7 @@ export const ACTIONS: ActionPage[] = [
   },
   {
     slug: "pervoe-sentyabrya",
+    expires: "2026-09-30",
     title: "Подготовка к 1 сентября 2026: промокоды на всё для школы",
     description:
       "Промокоды к 1 сентября 2026: скидки на канцелярию, одежду, обувь, книги и гаджеты для школьников. Как собрать ребёнка в школу дешевле.",
@@ -79,6 +83,7 @@ export const ACTIONS: ActionPage[] = [
   },
   {
     slug: "den-shopinga-11-11",
+    expires: "2026-11-30",
     title: "Распродажа 11.11 в 2026 году: промокоды, скидки и гид по Дню шопинга",
     description:
       "Все промокоды и скидки на Всемирный день шопинга 11.11 в 2026 году. Как подготовить корзину, применить промокоды на маркетплейсах и сэкономить максимум.",
@@ -123,6 +128,7 @@ export const ACTIONS: ActionPage[] = [
   },
   {
     slug: "chernaya-pyatnica-2026",
+    expires: "2026-12-10",
     title: "Чёрная Пятница 2026: промокоды, даты распродажи и максимальные скидки",
     description:
       "Главная распродажа года — Чёрная Пятница 2026 в России. Проверенные промокоды, скидки на маркетплейсах, в магазинах одежды, косметики и техники.",
@@ -167,6 +173,7 @@ export const ACTIONS: ActionPage[] = [
   },
   {
     slug: "novogodnie-skidki-2027",
+    expires: "2027-01-20",
     title: "Новогодние распродажи 2027: промокоды на подарки, еду и праздничный стол",
     description:
       "Новогодние скидки и промокоды 2026–2027. Как выгодно купить подарки близким, заказать продукты к праздничному столу и сэкономить на доставке.",
@@ -211,4 +218,11 @@ export const ACTIONS: ActionPage[] = [
 
 export function getAction(slug: string): ActionPage | undefined {
   return ACTIONS.find((a) => a.slug === slug);
+}
+
+/** True once the whole last day (Moscow time) has passed. Pages without `expires` never expire. */
+export function isActionExpired(action: Pick<ActionPage, "expires">, now = Date.now()): boolean {
+  if (!action.expires) return false;
+  const end = Date.parse(`${action.expires}T23:59:59+03:00`);
+  return Number.isFinite(end) && now > end;
 }

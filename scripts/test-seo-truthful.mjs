@@ -48,7 +48,7 @@ for (const originalWebsite of ["https://www.askona.ru/", "https://polza.ru/"]) {
   assert.ok(stableRegistry.includes(`site: "${originalWebsite}"`), "Uses verified official merchant destination");
 }
 assert.ok(!stableRegistry.includes('code: "ASKONA"'), "Do not fabricate an Askona promo code");
-assert.ok(store.includes("index: n > 0"), "Never index a store without live offers");
+assert.ok(store.includes("index: isStoreIndexable(slug, n)"), "Never index a store without live offers");
 assert.ok(store.includes("Подтверждённых промокодов для {store.name} пока нет"), "Empty-state text must be truthful");
 assert.ok(!store.includes("в магазине действуют сезонные скидки"), "Do not imply unverified promotions exist");
 

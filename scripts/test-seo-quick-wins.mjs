@@ -839,8 +839,8 @@ let passed = 0;
   // 5. Проверка кода генерации robots в src/app/store/[slug]/page.tsx
   const storePageSrc = fs.readFileSync("src/app/store/[slug]/page.tsx", "utf-8");
   assert.ok(
-    storePageSrc.includes("index: n > 0") && storePageSrc.includes("follow: true"),
-    "src/app/store/[slug]/page.tsx обязан выставлять robots: { index: n > 0, follow: true }"
+    storePageSrc.includes("index: isStoreIndexable(slug, n)") && storePageSrc.includes("follow: true"),
+    "src/app/store/[slug]/page.tsx обязан выставлять robots: { index: isStoreIndexable(slug, n), follow: true } (0 предложений = noindex)"
   );
 
   console.log(`✓ Тест 13: Инварианты индексации стабильных магазинов подтверждены (${liveStoresCount} live в sitemap, ${zeroStoresCount} zero noindex/исключены, Tutu сценарии A/B PASS)`);
