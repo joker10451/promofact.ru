@@ -47,6 +47,7 @@ export default async function CatalogPage() {
               Ищите действующие предложения по магазину, категории, региону и условиям заказа. Точное количество обновляется в каталоге ниже.
             </p>
             <div className="mt-4 flex flex-wrap gap-3 text-xs font-bold">
+              <Link href="/promokody/segodnya" className="text-red hover:underline">Промокоды на сегодня →</Link>
               <Link href="/promokody" className="text-red hover:underline">Список магазинов →</Link>
               <Link href="/category" className="text-red hover:underline">Категории скидок →</Link>
             </div>

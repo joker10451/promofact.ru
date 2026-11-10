@@ -77,6 +77,12 @@ export default async function Footer() {
           </div>
           <ul className="mt-4 space-y-2.5 text-sm">
             <li>
+              <Link href="/promokody/segodnya" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                Промокоды на сегодня
+              </Link>
+            </li>
+            <li>
               <Link href="/collections/first-order" className={footerLink}>
                 <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
                 Скидки на первый заказ

@@ -68,6 +68,7 @@ export type CouponTicketPlacement =
   | "collection_coupon"
   | "geo_city_coupon"
   | "geo_category_coupon"
+  | "today_coupon"
   | "coupon_detail"
   | "unknown";
 
@@ -87,6 +88,8 @@ function getPageTypeFromPlacement(placement: CouponTicketPlacement): string {
     case "geo_city_coupon":
     case "geo_category_coupon":
       return "geo";
+    case "today_coupon":
+      return "today";
     case "coupon_detail":
       return "coupon_detail";
     default:

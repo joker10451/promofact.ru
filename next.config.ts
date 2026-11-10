@@ -76,7 +76,7 @@ const nextConfig: NextConfig = {
       // dynamic route's build-time generateStaticParams omitted that store.
       // A Next config redirect runs before route matching and avoids 404s.
       {
-        source: "/promokody/:slug",
+        source: "/promokody/:slug((?!segodnya$)[^/]+)", // segodnya is a real page, not a store slug
         destination: "/store/:slug",
         permanent: true,
       },

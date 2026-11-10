@@ -3,6 +3,7 @@ import { getCategories, getAllStores, getCoupons } from "@/lib/perfluence";
 import { getArticles } from "@/lib/articles";
 import { ACTIONS, isActionExpired } from "@/lib/actions";
 import { isStoreIndexable } from "@/lib/storeIndexing";
+import { MIN_TODAY_OFFERS, selectTodayOffers, todayOfferCount } from "@/lib/todayOffers";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { COLLECTIONS, getCollectionCoupons, MIN_INDEXABLE_COLLECTION_OFFERS } from "@/lib/collections";
 import { SITE_URL } from "@/lib/site";
@@ -221,6 +222,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.75,
     },
+    // Daily page; listed only while it has enough offers, the same rule as its robots meta.
+    ...(todayOfferCount(selectTodayOffers(coupons, Date.now())) >= MIN_TODAY_OFFERS
+      ? [{
+          url: `${SITE_URL}/promokody/segodnya`,
+          ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
+          changeFrequency: "daily" as const,
+          priority: 0.9,
+        }]
+      : []),
     {
       url: `${SITE_URL}/collections`,
       ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
