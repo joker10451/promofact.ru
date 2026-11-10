@@ -11,6 +11,7 @@ import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
 import { isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
 import { isRegulatedAdvertiser, meetsMandatoryDisclaimers } from "@/lib/regulatedAds";
+import { carriesOverduePlacement } from "@/lib/overduePlacements";
 import { isApprovedOct24Repost } from "@/lib/perfluenceRepeatsOct24";
 import { isApprovedOct26WebsitePlacement } from "@/lib/perfluenceOct26Website";
 import { isApprovedOct28PublisherPlacement } from "@/lib/perfluenceOct28Website";
@@ -964,6 +965,12 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
       console.error("[perfluence] admitad merge error:", e);
     }
   }
+
+  // Placements Perfluence asks us to remove (30 days after the post, ORD reporting stops) are
+  // dropped here, BEFORE de-duplication: otherwise a stale hand-coded entry would win the
+  // de-duplication against the widget's fresh placement of the same offer and then be removed,
+  // leaving nothing.
+  for (const s of sources) s.coupons = s.coupons.filter((c) => !carriesOverduePlacement(c));
 
   const { coupons, stats } = dedupeCoupons(sources);
 

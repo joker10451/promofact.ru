@@ -14,7 +14,6 @@ import { selectGeoOffers } from "@/lib/geoIndexing";
 // sitemap.ts — Dynamic Route Handler
 // Содержит ТОЛЬКО канонические, индексируемые страницы.
 // Исключены неканонические подстраницы /store/[slug]/[code] (их canonical -> /store/[slug]).
-// Исключены служебные и закрытые страницы (/admin, /partner/yookassa).
 // Исключены пустые (0) и тонкие (< 3) страницы гео-категорий /gorod/[slug]/[category].
 //
 // Политика lastModified:
@@ -187,7 +186,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  // Служебные и партнёрские страницы (исключены /admin и тестовые /partner/yookassa)
   const miscMap: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/sitemap-html`,
@@ -200,7 +198,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/guide`, changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${SITE_URL}/contacts`, changeFrequency: "monthly" as const, priority: 0.3 },
     { url: `${SITE_URL}/privacy`, changeFrequency: "monthly" as const, priority: 0.2 },
-    { url: `${SITE_URL}/partner/netprint`, changeFrequency: "monthly" as const, priority: 0.4 },
   ];
 
   const promokodyMap: MetadataRoute.Sitemap = [
