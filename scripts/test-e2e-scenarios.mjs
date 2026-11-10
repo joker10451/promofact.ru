@@ -95,7 +95,7 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 15;
+    const totalTests = 16;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
@@ -1368,6 +1368,35 @@ async function run() {
       } finally {
         await context.close();
       }
+      passedTests++;
+    }
+
+    // --- SCENARIO 16: "Promo codes for today" is a real page, not swallowed by the /promokody/:slug redirect ---
+    console.log("\n[Test 16] Today's promo codes: page resolves, dated heading, marked cards, internal links");
+    {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const page = await context.newPage();
+      const response = await page.goto(BASE_URL + "/promokody/segodnya", { waitUntil: "domcontentloaded" });
+      assert.equal(response?.status(), 200, "/promokody/segodnya must not redirect to a store page or 404");
+      assert.equal(new URL(page.url()).pathname, "/promokody/segodnya");
+      assert.match(await page.locator("h1").innerText(), /Промокоды на сегодня, \d{1,2} [а-я]+ 20\d\d/);
+      const cards = page.locator('article[id^="coupon-"]');
+      const shown = await cards.count();
+      for (let i = 0; i < shown; i++) {
+        assert.match(await cards.nth(i).innerText(), /erid:\s*\w{8,}/i,
+          `Every card on the daily page must show its advertising marking at ${i}`);
+      }
+      assert.ok(await page.locator('a[href="/catalog"]').count() > 0, "Daily page must link to the catalog");
+      // A store slug must still redirect, and the footer must expose the page site-wide.
+      const legacy = await page.goto(BASE_URL + "/promokody/farfor", { waitUntil: "domcontentloaded" });
+      assert.equal(new URL(page.url()).pathname, "/store/farfor", "Legacy /promokody/<store> must still redirect");
+      assert.ok(legacy && legacy.status() < 400);
+      // Store pages render no footer, so check the pages that do.
+      await page.goto(BASE_URL + "/", { waitUntil: "domcontentloaded" });
+      await page.locator('footer a[href="/promokody/segodnya"]').first()
+        .waitFor({ state: "attached", timeout: 10000 })
+        .catch(() => assert.fail("Footer must link to the daily page"));
+      await context.close();
       passedTests++;
     }
 
