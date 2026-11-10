@@ -361,11 +361,6 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: "/store/kassir-ru/:path*",
-        destination: "/category/razvlecheniya",
-        permanent: false,
-      },
-      {
         source: "/sovety/pyaterochka-dostavka-55",
         destination: "/store/pyaterochka",
         permanent: true,

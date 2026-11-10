@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getCategories, getAllStores, getCoupons } from "@/lib/perfluence";
 import { getArticles } from "@/lib/articles";
-import { ACTIONS } from "@/lib/actions";
+import { ACTIONS, isActionExpired } from "@/lib/actions";
+import { isStoreIndexable } from "@/lib/storeIndexing";
 import { CITIES_SEO } from "@/lib/citiesSeo";
 import { COLLECTIONS, getCollectionCoupons, MIN_INDEXABLE_COLLECTION_OFFERS } from "@/lib/collections";
 import { SITE_URL } from "@/lib/site";
@@ -41,10 +42,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Магазины: в sitemap включаются ТОЛЬКО страницы с живыми промокодами (store.coupons.length > 0).
-  // Магазины с 0 активных предложений исключаются из XML sitemap (для них действует robots: noindex, follow).
+  // Магазины: в sitemap включаются ТОЛЬКО страницы, которые сама страница отдаёт индексируемыми
+  // (isStoreIndexable: общее правило с robots-метаданными, чтобы sitemap и noindex не расходились).
   const storeMap: MetadataRoute.Sitemap = stores
-    .filter((store) => Array.isArray(store.coupons) && store.coupons.length > 0)
+    .filter((store) => Array.isArray(store.coupons) && isStoreIndexable(store.slug, store.coupons.length))
     .map((store) => ({
       url: `${SITE_URL}/store/${store.slug}`,
       ...(CATALOG_SYNC_DATE ? { lastModified: CATALOG_SYNC_DATE } : {}),
@@ -173,7 +174,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "novogodnie-skidki-2027",
   ]);
 
-  const actionsMap: MetadataRoute.Sitemap = ACTIONS.map((a) => {
+  // Закончившиеся акции (лето, 1 сентября) остаются доступны по ссылке, но не в sitemap:
+  // Яндекс исключал их как «малоценные».
+  const actionsMap: MetadataRoute.Sitemap = ACTIONS.filter((a) => !isActionExpired(a)).map((a) => {
     const isPeakAction = PEAK_ACTION_SLUGS.has(a.slug);
     return {
       url: `${SITE_URL}/akcii/${a.slug}`,

@@ -29,7 +29,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const city = CITIES_SEO.find((c) => c.slug === slug);
   if (!city) return {};
-  const { indexable } = selectGeoOffers(await getCoupons(), city.name);
+  // Same inputs as the page body and the sitemap. Without the city list, offers whose
+  // region is only named in their terms were not counted, so Kazan, Samara and Ufa
+  // were noindex while listed in the sitemap.
+  const cityNames = CITIES_SEO.map((c) => ({ slug: c.slug, name: c.name }));
+  const { indexable } = selectGeoOffers(await getCoupons(), city.name, undefined, cityNames);
 
   const now = new Date();
   const months = [
