@@ -24,14 +24,13 @@ for (const [slug, erid] of Object.entries(fresh)) {
 
 // Hand-written pages (articles, banners): no overdue ERID outside the denylist and the raw feed data.
 // promoBanners: expired banners are hidden by endsAt. AdminClient: placeholder text.
-// sberkarta/page.tsx: credit SberCard has no renewed placement yet (needs a new post in Perfluence).
 const skip = new Set(["overduePlacements.ts", "promoBanners.ts", "AdminClient.tsx"]);
 const hits = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d, { withFileTypes: true })) {
     const p = path.join(d, f.name);
     if (f.isDirectory()) walk(p);
-    else if (/\.(tsx?)$/.test(f.name) && !skip.has(f.name) && !p.endsWith(path.join("sberkarta","page.tsx")) && f.name !== "customCoupons.ts") {
+    else if (/\.(tsx?)$/.test(f.name) && !skip.has(f.name) && f.name !== "customCoupons.ts") {
       const t = fs.readFileSync(p, "utf8");
       for (const e of OVERDUE_PLACEMENT_ERIDS) if (t.includes(e)) hits.push(`${p}: ${e}`);
     }
