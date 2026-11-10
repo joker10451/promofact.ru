@@ -42,6 +42,11 @@ export function rankEarnings(payload, nowMs = Date.now()) {
 }
 
 async function main() {
+  // The results feed is only a slice (~21 rows), so it would overwrite the dashboard-based order.
+  if (!process.env.EARNINGS_RANK_FROM_FEED) {
+    console.log("ℹ️ Рейтинг дохода задан по дашборду вручную; автообновление из ленты выключено");
+    return;
+  }
   const url = process.env.PERFLUENCE_RESULTS_URL;
   if (!url) {
     console.log("ℹ️ PERFLUENCE_RESULTS_URL не задан — рейтинг дохода не обновляется");
