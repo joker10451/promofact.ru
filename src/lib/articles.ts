@@ -111,7 +111,7 @@ export const ARTICLES: Article[] = [
       },
     ],
     related: [
-      { text: "Кредитная СберКарта", href: "/sberkarta" },
+      { text: "Дебетовая СберКарта", href: "/store/debetovaya-sberkarta" },
       { text: "Детские аксессуары Сбера", href: "/store/detskie-platezhnye-aksessuary-ot-sbera" },
       { text: "СберПрайм за 1 ₽", href: "/sovety/rozygrysh-sberprime-150000" },
       { text: "Сервисы и подписки", href: "/category/servisy-i-podpiski" },
@@ -1159,7 +1159,7 @@ export const ARTICLES: Article[] = [
       { text: "Скидки на первый заказ", href: "/collections/first-order" },
       { text: "Маркетплейсы и гипермаркеты", href: "/category/marketpleysy" },
       { text: "Как экономить на продуктах", href: "/sovety/kak-ekonomit-na-produktah" },
-      { text: "Кредитная СберКарта: 120 дней без %", href: "/sberkarta" },
+      { text: "Дебетовая СберКарта", href: "/store/debetovaya-sberkarta" },
     ],
   },
   {
@@ -1986,7 +1986,7 @@ export const ARTICLES: Article[] = [
       },
     ],
     related: [
-      { text: "Кредитная СберКарта: 120 дней без %", href: "/sberkarta" },
+      { text: "Дебетовая СберКарта", href: "/store/debetovaya-sberkarta" },
       { text: "Кэшбэк банков 2026", href: "/sovety/cashbek-bankov-2026" },
       { text: "Подборка: банковские карты и финансы", href: "/collections/finansy-i-karty" },
       { text: "СберПрайм: подписка со скидкой", href: "/sovety/promokody-sberprime-2026" },
