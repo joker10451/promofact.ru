@@ -1,0 +1,39 @@
+name: Pending removal watch
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Restore Perfluence session
+        env:
+          PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}
+        run: |
+          mkdir -p data
+          [ -n "$PERFLUENCE_SESSION_B64" ] && echo "$PERFLUENCE_SESSION_B64" | base64 -d > data/perfluence_session.json || echo "no session"
+      - name: Read the removal list
+        run: node scripts/check-pending-removal.mjs
+      - name: Open or update the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f pending-removal.md ] || exit 0
+          n=$(gh issue list --state open --label pending-removal --json number -q '.[0].number')
+          if [ -n "$n" ]; then gh issue edit "$n" --body-file pending-removal.md
+          else gh label create pending-removal --color B60205 2>/dev/null || true
+               gh issue create --title "Perfluence: публикации к удалению" --label pending-removal --body-file pending-removal.md; fi
