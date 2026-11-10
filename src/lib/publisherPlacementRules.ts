@@ -60,14 +60,32 @@ export function withoutForbiddenFloristBeautyCoPromotion(coupons: Coupon[]): Cou
     !(hasCozyHome && c.store.slug === "carte-blanche"));
 }
 
-/** Perfluence: VkusVill Delivery and Samokat must not share a curated promo collection with Pyaterochka. */
+/**
+ * Perfluence: Pyaterochka may not share a curated promo collection with VkusVill Delivery,
+ * Samokat, Kuper or Globus. The approved Pyaterochka placement (10 Nov 2026) names Kuper,
+ * Samokat and Globus; VkusVill was restricted earlier and stays restricted.
+ */
 export function withoutForbiddenGroceryCoPromotion(coupons: Coupon[]): Coupon[] {
   const hasPyaterochka = coupons.some(c =>
     c.store.slug === "pyaterochka" || c.store.slug === "pyaterochka-dostavka" ||
     /пят[её]рочк/iu.test(c.store.name));
   if (!hasPyaterochka) return coupons;
-  // Keep the original Pyaterochka placement; publish VkusVill and Samokat separately.
-  return coupons.filter(c => c.store.slug !== "vkusvill-dostavka" && c.store.slug !== "samokat");
+  // Keep the original Pyaterochka placement; publish the others separately.
+  return coupons.filter(c => !(
+    ["vkusvill-dostavka", "samokat", "kuper", "globus"].includes(c.store.slug) ||
+    /(?:^|[^а-яё])купер(?:$|[^а-яё])|глобус/iu.test(c.store.name)));
+}
+
+/**
+ * All curated-selection restrictions in the order the homepage applies them. Use this
+ * for any page that picks offers of several stores (the "promo codes for today" page).
+ */
+export function withoutForbiddenCoPromotions(coupons: Coupon[]): Coupon[] {
+  return withoutForbiddenSberAnalizyCreditCardCoPromotion(
+    withoutForbiddenGroceryCoPromotion(
+      withoutForbiddenFloristBeautyCoPromotion(
+        withoutForbiddenTanukiCoPromotion(
+          withoutForbiddenTravelCoPromotion(coupons)))));
 }
 
 /**

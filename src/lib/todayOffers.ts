@@ -1,5 +1,6 @@
 import type { Coupon } from "@/lib/types";
 import { expiryTimestamp, isCouponActive } from "@/lib/couponExpiry";
+import { withoutForbiddenCoPromotions } from "@/lib/publisherPlacementRules";
 
 const MSK = "Europe/Moscow";
 
@@ -70,12 +71,20 @@ export function selectTodayOffers(coupons: Coupon[], now: number, limit = DEFAUL
     if (!current || (!current.promocode.code && c.promocode.code)) firstByStore.set(c.store.slug, c);
   }
   const picked = [...firstByStore.values()];
-  const best = [
+  const bestCut = [
     ...picked.filter((c) => c.promocode.code),
     ...picked.filter((c) => !c.promocode.code),
   ].slice(0, Math.max(0, limit - endingToday.length));
 
-  return { endingToday, best, activeCount: active.length, storeCount: stores.size };
+  // This page is a curated selection of several stores, so the publishers' co-promotion bans
+  // apply to what is actually shown (e.g. Pyaterochka vs Samokat/Kuper/Globus), as on the homepage.
+  const allowed = new Set(withoutForbiddenCoPromotions([...endingToday, ...bestCut]));
+  return {
+    endingToday: endingToday.filter((c) => allowed.has(c)),
+    best: bestCut.filter((c) => allowed.has(c)),
+    activeCount: active.length,
+    storeCount: stores.size,
+  };
 }
 
 export function todayOfferCount(t: TodayOffers): number {

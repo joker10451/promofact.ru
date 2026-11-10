@@ -63,3 +63,29 @@ assert.equal(asRegex.test("/promokody/segodnya"), false, "/promokody/segodnya mu
 assert.equal(asRegex.test("/promokody/ozon"), true, "Store slugs still redirect to /store/<slug>");
 assert.equal(asRegex.test("/promokody/segodnya-x"), true, "Only the exact slug is excluded");
 console.log("Legacy redirect excludes the daily page PASS");
+
+// A curated selection must respect the publishers' co-promotion bans (same rules as the homepage).
+const named = (id, slug, name, code = "X" + id) => ({ id, store: { slug, name }, promocode: { code, expires: "2026-12-01" } });
+const grocery = [
+  named(101, "pyaterochka", "Пятёрочка"),
+  named(102, "samokat", "Самокат"),
+  named(103, "vkusvill-dostavka", "ВкусВилл Доставка"),
+  named(104, "kuper", "Купер"),
+  named(105, "globus", "ГЛОБУС"),
+  named(106, "farfor", "FARFOR"),
+  named(107, "tanukifamily", "ТАНУКИ"),
+];
+const shown = (cs) => [...cs.endingToday, ...cs.best].map((x) => x.store.slug);
+const withP = shown(selectTodayOffers(grocery, noon));
+for (const banned of ["samokat", "vkusvill-dostavka", "kuper", "globus"]) {
+  assert.ok(!withP.includes(banned), `${banned} must not be shown next to Pyaterochka`);
+}
+assert.ok(withP.includes("pyaterochka") && withP.includes("farfor"), "Unrelated stores stay");
+assert.ok(!withP.includes("tanukifamily"), "Tanuki must not be shown next to FARFOR");
+const withoutP = shown(selectTodayOffers(grocery.filter((x) => x.store.slug !== "pyaterochka"), noon));
+for (const kept of ["samokat", "vkusvill-dostavka", "kuper", "globus"]) {
+  assert.ok(withoutP.includes(kept), `${kept} is fine when Pyaterochka is not on the page`);
+}
+const { withoutForbiddenCoPromotions } = await import("../src/lib/publisherPlacementRules.ts");
+assert.equal(typeof withoutForbiddenCoPromotions, "function");
+console.log("Co-promotion bans on the daily page PASS");
