@@ -95,7 +95,7 @@ export const PROMO_BANNERS: PromoBanner[] = [
     link: "https://yaflowers.prfl.me/sites/x09eol?erid=2RanyoMvJ99",
     ordText: 'Реклама. ООО "ЯНДЕКС.ЕДА", ИНН 9705114405. erid: 2RanyoMvJ99',
     startsAt: "2026-10-01",
-    endsAt: "2026-12-31",
+    endsAt: "2026-10-31",
   },
   {
     id: "yandex-practicum-hero",

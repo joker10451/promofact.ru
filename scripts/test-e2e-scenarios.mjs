@@ -406,6 +406,7 @@ async function run() {
         const helperBox = await helperBtn.boundingBox();
 
         const firstCopyBtn = page.locator("a:has-text('Скопировать и перейти')").first(); // main CTA
+        await firstCopyBtn.waitFor({ state: "visible" });
         const copyBox = await firstCopyBtn.boundingBox();
 
         // Проверяем, что кнопка помощника прижата к правому краю (right-0)
