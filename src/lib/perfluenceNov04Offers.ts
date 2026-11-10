@@ -26,9 +26,9 @@ const COZY_HOME_NOV04_AFFILIATE: Coupon["affiliate"] = {
 };
 
 // --- 2. FMART BY FLOWWOW ---
-export const FMART_NOV04_LINK = "https://fmart-flowers.prfl.me/sites/g3vh3h?erid=2RanymizaJG";
-export const FMART_NOV04_ERID = "2RanymizaJG";
-export const FMART_NOV04_LEGAL = 'Реклама. ООО "ФМАРТ" ОГРН 1237700524060 г. Москва erid: 2RanymizaJG';
+export const FMART_NOV04_LINK = "https://fmart-flowers.prfl.me/sites/ajp7rz?erid=2RanyoC2SVJ";
+export const FMART_NOV04_ERID = "2RanyoC2SVJ";
+export const FMART_NOV04_LEGAL = 'Реклама. ООО "ФМАРТ" ОГРН 1237700524060 г. Москва erid: 2RanyoC2SVJ';
 
 export const FMART_NOV04_TG_LINK = "https://fmart-flowers.prfl.me/smart_zakupka/6xnxce?erid=2RanymkUZac";
 export const FMART_NOV04_TG_ERID = "2RanymkUZac";
@@ -125,10 +125,58 @@ export const PERFLUENCE_NOV04_OFFERS: Coupon[] = [
     id: 457901,
     promocode: {
       id: 457901,
-      code: "fmartpe2063dcr",
-      bonusName: "Скидка 20% на заказ цветов и подарков в FMART",
-      terms: "Промокод fmartpe2063dcr: скидка 20% на первый или один повторный заказ цветов и подарков в FMART by flowwow. Один промокод на одного пользователя. Срок действия до 8 ноября 2026 года 23:59 МСК.",
-      expires: "2026-11-08T23:59:59+03:00",
+      code: "FMARTPE70082e34",
+      bonusName: "Скидка 700 ₽ на заказ от 3 000 ₽ в FMART",
+      terms: "Промокод FMARTPE70082e34: скидка 700 ₽ на первый или один повторный заказ от 3 000 ₽ в сервисе доставки цветов и подарков FMART by flowwow. Действует до 30 ноября 2026 года 23:59 МСК.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Первый или повторный заказ",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["fmart"],
+      activeBloggers: STABLE_STORES["fmart"]?.activeBloggers ?? 380,
+    },
+    affiliate: FMART_NOV04_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 457902,
+    promocode: {
+      id: 457902,
+      code: "FMARTPE18x4eaz",
+      bonusName: "Скидка 18% на заказ цветов и подарков в FMART",
+      terms: "Промокод FMARTPE18x4eaz: скидка 18% на первый или один повторный заказ цветов и подарков в FMART by flowwow. Действует до 30 ноября 2026 года 23:59 МСК.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: false,
+      isUniversal: false,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Первый или повторный заказ",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["fmart"],
+      activeBloggers: STABLE_STORES["fmart"]?.activeBloggers ?? 380,
+    },
+    affiliate: FMART_NOV04_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 457903,
+    promocode: {
+      id: 457903,
+      code: "fmpez28xd",
+      bonusName: "Флеш-акция: Бесплатная доставка на заказ в FMART",
+      terms: "Флеш-акция с 10 по 13 ноября 2026 года! Промокод fmpez28xd даёт бесплатную доставку на первый или один повторный заказ цветов и подарков в FMART by flowwow в пределах стандартной зоны доставки. Действует до 13 ноября 2026 года 23:59 МСК.",
+      expires: "2026-11-13T23:59:59+03:00",
       isHit: true,
       isUniversal: false,
       isFirstOrderOnly: false,

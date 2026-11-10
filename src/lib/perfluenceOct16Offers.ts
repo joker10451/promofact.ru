@@ -135,7 +135,7 @@ export const PERFLUENCE_OCT16_APPROVED_OFFERS: Coupon[] = [
 /** Approved placement for all four brands, including the two existing SberDevices codes. */
 export const PERFLUENCE_OCT16_CODES: Record<keyof typeof PERFLUENCE_OCT16_PLACEMENTS, readonly string[]> = {
   librederm: ["PC078BC488BA"],
-  fmart: ["FMART30", "FMARTPE23khl6x", "FMARTPE900btr9u", "fmartpe2063dcr"],
+  fmart: ["FMART30", "FMARTPE23khl6x", "FMARTPE900btr9u", "fmartpe2063dcr", "FMARTPE70082e34", "FMARTPE18x4eaz", "fmpez28xd"],
   letual: ["НАБЕРИ", "ШАНС", "ПЯТНИЦА"],
   sberdevaysy: ["Sberdv171", "Sberdv71"],
 };
@@ -145,7 +145,7 @@ export const PERFLUENCE_OCT16_CODES: Record<keyof typeof PERFLUENCE_OCT16_PLACEM
  * codes cannot override the user's CURRENT approved publisher placement.
  */
 export function isApprovedOct16PublisherOffer(c: Coupon): boolean {
-  if (c.store.slug === "fmart" && c.affiliate.ordMarker === "2RanymizaJG") return true;
+  if (c.store.slug === "fmart" && (c.affiliate.ordMarker === "2RanymizaJG" || c.affiliate.ordMarker === "2RanyoC2SVJ")) return true;
   if (c.store.slug === "librederm") {
     if (c.promocode.code.trim() === "FD3FE2AA13BA" &&
         c.affiliate.ordMarker === "2RanykUPCJY" &&
