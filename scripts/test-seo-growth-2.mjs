@@ -50,9 +50,10 @@ assert(store.includes('slug === "flowwow"')&&store.includes('href="/store/fmart#
 assert(store.includes('slug === "fmart"')&&store.includes("а не отдельные промокоды"));
 assert(e2e.includes("SCENARIO 13: FMART"));
 assert(e2e.includes('page.locator(\'article[id^="coupon-"] button[aria-label^="Скопировать промокод "]\')'));
-assert(e2e.includes("FMART must use approved ERID"));
+assert(e2e.includes("FMART must show its advertising marking"));
 const pause=fs.readFileSync("src/lib/publisherPauses.ts","utf8");
-for (const slug of ["delimobil", "winlab", "dodo-pizza"]) {
+// dodo-pizza was taken off the pause list by the owner on 9 Nov 2026 (2d75916).
+for (const slug of ["delimobil", "winlab"]) {
   assert(pause.includes('"' + slug + '"'), "Paused project missing: " + slug);
 }
 console.log("SEO-GROWTH-2: live inventory links, separate FMART attribution, safe expiry-based metadata and UI regression PASS");

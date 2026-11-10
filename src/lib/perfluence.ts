@@ -10,6 +10,7 @@ import { STABLE_STORES } from "@/lib/stableStores";
 import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
 import { isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
+import { isRegulatedAdvertiser, meetsMandatoryDisclaimers } from "@/lib/regulatedAds";
 import { isApprovedOct24Repost } from "@/lib/perfluenceRepeatsOct24";
 import { isApprovedOct26WebsitePlacement } from "@/lib/perfluenceOct26Website";
 import { isApprovedOct28PublisherPlacement } from "@/lib/perfluenceOct28Website";
@@ -639,7 +640,10 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
 const WIDGET_BLOCKED_STORES = new Set(["winlab", "flor2u"]);
 
 export function isPublishableWidgetOffer(c: Coupon): boolean {
-  return isPublicPerfluenceWidgetCoupon(c) && !WIDGET_BLOCKED_STORES.has(c.store.slug);
+  return isPublicPerfluenceWidgetCoupon(c) &&
+    !WIDGET_BLOCKED_STORES.has(c.store.slug) &&
+    // Medicine, finance, insurance and payments keep the hand-reviewed rules.
+    !isRegulatedAdvertiser(c.store.slug);
 }
 
 /** Raw, read-only diagnostics: never consume this result for publication. */
@@ -975,11 +979,16 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // prfl.me link and legal text) publishes without a hand-kept code list.
   // Dated allowlists still govern custom and Admitad offers.
   const widgetCoupons = new Set(sources.find((s) => s.source === "perfluence")?.coupons ?? []);
+  // Regulated advertisers (medicine, finance, insurance, payments) never take the
+  // automatic widget path: a widget offer there goes through the reviewed rules.
+  const viaWidgetRule = (c: Coupon) => widgetCoupons.has(c) && !isRegulatedAdvertiser(c.store.slug);
   return withoutPausedPublisherOffers(coupons)
-    .filter((c) => widgetCoupons.has(c)
+    .filter((c) => viaWidgetRule(c)
       ? isPublishableWidgetOffer(c)
       : isApprovedOct16PublisherOffer(c) && isApprovedOct18WebsitePlacement(c) &&
         isApprovedPublicCouponPlacement(c))
+    // Whatever the path, a medical ad without its mandatory warning is not shown.
+    .filter(meetsMandatoryDisclaimers)
     .map((c) => {
     const logo = proxiedLogo(c.store.logo);
     const ordText = withErid(c.affiliate.ordText, c.affiliate.ordMarker);
