@@ -22,6 +22,8 @@ for (const [slug, erid] of Object.entries(fresh)) {
   assert.ok(s?.coupons.some((c) => c.affiliate.ordMarker === erid), `${slug} must carry ${erid}`);
 }
 
+assert.deepEqual(all.filter(([, c]) => c.promocode.code.toUpperCase() === "PERPREGA309361").length, 0, "exhausted code must not be shown");
+
 // Hand-written pages (articles, banners): no overdue ERID outside the denylist and the raw feed data.
 // promoBanners: expired banners are hidden by endsAt. AdminClient: placeholder text.
 const skip = new Set(["overduePlacements.ts", "promoBanners.ts", "AdminClient.tsx"]);

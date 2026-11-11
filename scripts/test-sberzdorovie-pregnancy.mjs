@@ -87,11 +87,12 @@ assert.ok(sberStore, "Магазин sberzdorovie должен присутст�
 // the approved codes are present, nothing unknown appears, and every medical ad
 // that is shown carries its mandatory warning.
 const shownSberCodes = sberStore.coupons.map(c => c.promocode.code);
-for (const required of ["PERPREGA309361", "SHD56E28"]) {
+for (const required of ["SHD56E28"]) { // PERPREGA309361: partner reported the codes used up on 11 Nov 2026
   if (Date.now() <= Date.parse("2026-11-30T23:59:59+03:00")) {
     assert.ok(shownSberCodes.includes(required), `${required} must stay in the catalog while it is valid`);
   }
 }
+assert.ok(!shownSberCodes.includes("PERPREGA309361"), "Exhausted PERPREGA309361 must not be shown");
 const knownSberCodes = new Set(["PERE7A4E5", "PERPREGT259702", "PERPREGA309361", "SHD56E28", "SH40NOV0I6VB"]);
 for (const coupon of sberStore.coupons) {
   assert.ok(knownSberCodes.has(coupon.promocode.code), `Unreviewed SberHealth code shown: ${coupon.promocode.code}`);
