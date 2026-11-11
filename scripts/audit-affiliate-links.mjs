@@ -8,6 +8,7 @@
 import fs from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import { DENIED_ADMITAD_CAMPAIGN_IDS } from "../src/lib/admitadPublicVisibility.ts";
+import { LEGACY_STORE_REDIRECTS } from "../src/lib/legacyRedirects.ts";
 
 const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -71,7 +72,9 @@ async function main() {
   for (const row of publiclyEligible) {
     const id = String(row.source_campaign_id || "");
     if (!campaignMap.has(id)) campaignMap.set(id, new Set());
-    campaignMap.get(id).add(row.store_slug);
+    // A legacy slug that 301-redirects to the canonical store is the same store, not a second one.
+    const canonical = String(LEGACY_STORE_REDIRECTS[row.store_slug] ?? row.store_slug).split("/").pop();
+    campaignMap.get(id).add(canonical);
   }
   const crossStoreCampaigns = [...campaignMap].filter(([, stores]) => stores.size > 1).map(([id]) => id);
 
