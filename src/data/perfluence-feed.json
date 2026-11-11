@@ -80,7 +80,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 76
+        "rsp": 67
       },
       "groups": [
         {
@@ -168,7 +168,7 @@
           "Калуга"
         ],
         "pf": 1,
-        "rsp": 429
+        "rsp": 428
       },
       "groups": [
         {
@@ -538,7 +538,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 68
+        "rsp": 60
       },
       "groups": [
         {
@@ -606,7 +606,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 379
+        "rsp": 380
       },
       "groups": [
         {
@@ -828,7 +828,7 @@
         "subscriber_guide": "",
         "regions": [],
         "pf": 1,
-        "rsp": 376
+        "rsp": 378
       },
       "groups": [
         {
@@ -906,7 +906,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 94
+        "rsp": 93
       },
       "groups": [
         {
@@ -957,262 +957,6 @@
     },
     {
       "project": {
-        "id": 4176,
-        "logo": "https://s3sc.perfluence.net/logos/5/9/6/5968d2f6-0a52-4df3-909c-6d9fdaa7efee.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/b/d/3bd10ee6-97e7-44cb-858a-c888cf1ad50b.webp",
-        "name": "Poizon (ДЭВУ)",
-        "type": "cpa",
-        "img": "https://s3sc.perfluence.net/img_widget/0/2/a/02a905e1-949c-4ee2-9d5e-6499ec48b303.webp",
-        "category_id": 293,
-        "category_name": "Маркетплейсы",
-        "activeBloggers": 2483,
-        "product_info": "<p>Poizon — это китайский маркетплейс, на котором можно купить более 2 млн товаров: оригинальную обувь, одежду и технику от частных продавцов, а также напрямую от производителя без комиссии по ценам на 40-50% дешевле, чем в российских розничных магазинах. 100% оригинальная продукция с быстрой доставкой от 10 дней. Первое и единственное официальное приложение в России.</p>",
-        "subscribers_condition": "",
-        "site": "https://bbmax.onelink.me/FPhq/v4qq7sf4",
-        "info": "",
-        "advantages": [
-          "Гарантия оригинала и качества: каждая коробка содержит эксклюзивный набор для защиты от подделок Poizon (ДЭВУ). Отсканируй QR-код на бирке и сертификате Poizon (ДЭВУ), чтобы узнать подробности.",
-          "Товар проходит проверку на оригинальность на складе в Китае.",
-          "Более 2 млн товаров и 1500 глобальных брендов.",
-          "Быстрая и бесплатная доставка, также есть вариант ускоренной доставки за дополнительную плату.",
-          "Доставка доступна в ближайший пункт выдачи 5Post и прямо до двери.",
-          "Оплата покупок картами любых российских банков."
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 1,
-        "rsp": 381
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18778299,
-              "title": "Оформить заказ на сайте и в приложении Poizon (ДЭВУ)",
-              "link": "https://poizon.prfl.me/sites/1us9t5?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 4176,
-              "code": "ENCEKY55M",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 8% (не более 4 000 ₽) на каждый повторный заказ на сайте и в приложении по промокоду",
-              "date": "31.03.2027 23:59",
-              "group": "17334",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17334,
-              "is_universal": true,
-              "name": "Скидка 8% (не более 4 000 ₽) на каждый повторный заказ на сайте и в приложении по промокоду",
-              "promo_terms": "<p>Ограничение по промокоду - 3 повторных заказа на одного пользователя, после смены промокодов пользователь может снова пользоваться скидкой</p>",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": false,
-              "post_id": 17409445,
-              "ord_marker": "2RanynpojsA",
-              "ord_custom_text": "Реклама. Филиал ПРО НЬЮ ВОРД (Гонг Конг) Лимитед\r\nНЗА 10250004545 ИНН 9909735626 КПП 774791001",
-              "discount": 8,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409445&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "31.03.2027 23:59"
-            },
-            {
-              "project_id": 4176,
-              "code": "PERF79WJXX5E",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 12% (не более 4 000 ₽) на первый заказ на сайте и в приложении по промокоду блогера",
-              "date": "31.12.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 15107,
-              "is_universal": false,
-              "name": "Скидка 12% (не более 4 000 ₽) на первый заказ на сайте и в приложении по промокоду блогера",
-              "promo_terms": "<p>Максимальная сумма скидки - 4 000 ₽. </p><p><br /></p>",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": false,
-              "post_id": 17409445,
-              "ord_marker": "2RanynpojsA",
-              "ord_custom_text": "Реклама. Филиал ПРО НЬЮ ВОРД (Гонг Конг) Лимитед\r\nНЗА 10250004545 ИНН 9909735626 КПП 774791001",
-              "discount": 12,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409445&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "31.12.2026 23:59"
-            },
-            {
-              "project_id": 4176,
-              "code": "ENCER8XKX",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 8% (не более 4 000 ₽) на каждый повторный заказ на сайте и в приложении по промокоду",
-              "date": "31.03.2027 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17334,
-              "is_universal": false,
-              "name": "Скидка 8% (не более 4 000 ₽) на каждый повторный заказ на сайте и в приложении по промокоду",
-              "promo_terms": "<p>Ограничение по промокоду - 3 повторных заказа на одного пользователя, после смены промокодов пользователь может снова пользоваться скидкой</p>",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": false,
-              "post_id": 17409445,
-              "ord_marker": "2RanynpojsA",
-              "ord_custom_text": "Реклама. Филиал ПРО НЬЮ ВОРД (Гонг Конг) Лимитед\r\nНЗА 10250004545 ИНН 9909735626 КПП 774791001",
-              "discount": 8,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409445&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "31.03.2027 23:59"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": [],
-          "ord_marker": "2RanynpojsA"
-        }
-      ]
-    },
-    {
-      "project": {
-        "id": 812,
-        "logo": "https://s3sc.perfluence.net/logos/17103376638461.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/4/4/d44656f4-ff4d-4237-becc-65dceee2834c.svg",
-        "name": "PREMIER",
-        "type": "cpa",
-        "img": "https://s3sc.perfluence.net/img_widget/b/d/f/bdf828cb-fdfb-4f5b-910d-1be8d2f87c71.webp",
-        "category_id": 310,
-        "category_name": "Онлайн кинотеатры",
-        "activeBloggers": 13266,
-        "product_info": "<p>Онлайн-кинотеатр с любовью к российской уникальности, который создаёт оригинальный контент и показывает его первым. Новинки и сериалы собственного производства PREMIER каждую неделю.</p>",
-        "subscribers_condition": "",
-        "site": "https://premier.one/",
-        "info": "",
-        "advantages": [
-          "Отдельный детский аккаунт, который можно настроить под своего ребенка",
-          "К одному аккаунту можно подключить до 5 устройств, у каждого профиля сохранится персональная история просмотра",
-          "Просмотр без интернета - кино можно взять в дорогу: скачать на смартфон или планшет",
-          "Весь контент онлайн-кинотеатра доступен в единой подписке без дополнительных платежей"
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 1,
-        "rsp": 417
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18778335,
-              "title": "Оформить бесплатный период на 45 дней доступа к сервисам RUTUBE + PREMIER или оформить подписку за 99 ₽",
-              "link": "https://premier.prfl.me/sites/chp8bj?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 812,
-              "code": "9t9tx6zt",
-              "is_barcode": false,
-              "image": "",
-              "comment": "45 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей, у которых не было активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
-              "date": "30.11.2026",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 15508,
-              "is_universal": false,
-              "name": "45 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей, у которых не было активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": false,
-              "post_id": 17409481,
-              "ord_marker": "2RanykSwE92",
-              "ord_custom_text": "Реклама. Рекламодатель: ООО \"ПРЕМЬЕР\" 16+ ИНН 9702011190",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409481&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        },
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18754243,
-              "title": "Оформить бесплатный период на 50 дней доступа к сервисам RUTUBE + PREMIER или оформить подписку за 99 ₽",
-              "link": "https://premier.prfl.me/smart_zakupka/5tl65x?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 812,
-              "code": "whkv64tj",
-              "is_barcode": false,
-              "image": "",
-              "comment": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей, у которых не было активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
-              "date": "30.11.2026",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 15507,
-              "is_universal": false,
-              "name": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей, у которых не было активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": false,
-              "post_id": 17388162,
-              "ord_marker": "2RanymnL3TJ",
-              "ord_custom_text": "Реклама. Рекламодатель: ООО \"ПРЕМЬЕР\" 16+ ИНН 9702011190",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17388162&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 1341,
         "logo": "https://s3sc.perfluence.net/logos/3/c/8/3c81cd39-b0c6-4b40-98fd-35b70dbdc178.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/0/0/0/000be91d-c539-42d3-8ddd-c8b20b47971f.png",
@@ -1239,7 +983,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 99
+        "rsp": 97
       },
       "groups": [
         {
@@ -1408,6 +1152,262 @@
     },
     {
       "project": {
+        "id": 4176,
+        "logo": "https://s3sc.perfluence.net/logos/5/9/6/5968d2f6-0a52-4df3-909c-6d9fdaa7efee.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/b/d/3bd10ee6-97e7-44cb-858a-c888cf1ad50b.webp",
+        "name": "Poizon (ДЭВУ)",
+        "type": "cpa",
+        "img": "https://s3sc.perfluence.net/img_widget/0/2/a/02a905e1-949c-4ee2-9d5e-6499ec48b303.webp",
+        "category_id": 293,
+        "category_name": "Маркетплейсы",
+        "activeBloggers": 2483,
+        "product_info": "<p>Poizon — это китайский маркетплейс, на котором можно купить более 2 млн товаров: оригинальную обувь, одежду и технику от частных продавцов, а также напрямую от производителя без комиссии по ценам на 40-50% дешевле, чем в российских розничных магазинах. 100% оригинальная продукция с быстрой доставкой от 10 дней. Первое и единственное официальное приложение в России.</p>",
+        "subscribers_condition": "",
+        "site": "https://bbmax.onelink.me/FPhq/v4qq7sf4",
+        "info": "",
+        "advantages": [
+          "Гарантия ориги��ала и качества: каждая коробка содержит эксклюзивный набор для защиты от подделок Poizon (ДЭВУ). Отсканируй QR-код на бирке и сертификате Poizon (ДЭВУ), чтобы узнать подробности.",
+          "Товар проходит проверку на оригинальность на складе в Китае.",
+          "Более 2 млн товаров и 1500 глобальных брендов.",
+          "Быстрая и бесплатная доставка, также есть вариант ускоренной доставки за дополнительную плату.",
+          "Доставка доступна в ближайший пункт выдачи 5Post и прямо до двери.",
+          "Оплата покупок картами любых российских банков."
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 1,
+        "rsp": 381
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18778299,
+              "title": "Оформить заказ на сайте и в приложении Poizon (ДЭВУ)",
+              "link": "https://poizon.prfl.me/sites/1us9t5?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 4176,
+              "code": "ENCEKY55M",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 8% (не более 4 000 ₽) на каждый повторный заказ на сайте и в приложении по промокоду",
+              "date": "31.03.2027 23:59",
+              "group": "17334",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17334,
+              "is_universal": true,
+              "name": "Скидка 8% (не более 4 000 ₽) на каждый повторный заказ на сайте и в приложении по промокоду",
+              "promo_terms": "<p>Ограничение по промокоду - 3 повторных заказа на одного пользователя, после смены промокодов пользователь может снова пользоваться скидкой</p>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17409445,
+              "ord_marker": "2RanynpojsA",
+              "ord_custom_text": "Реклама. Филиал ПРО НЬЮ ВОРД (Гонг Конг) Лимитед\r\nНЗА 10250004545 ИНН 9909735626 КПП 774791001",
+              "discount": 8,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409445&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "31.03.2027 23:59"
+            },
+            {
+              "project_id": 4176,
+              "code": "PERF79WJXX5E",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 12% (не более 4 000 ₽) на первый заказ на сайте и в приложении по промокоду блогера",
+              "date": "31.12.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 15107,
+              "is_universal": false,
+              "name": "Скидка 12% (не более 4 000 ₽) на первый заказ на сайте и в приложении по промокоду блогера",
+              "promo_terms": "<p>Максимальная сумма скидки - 4 000 ₽. </p><p><br /></p>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17409445,
+              "ord_marker": "2RanynpojsA",
+              "ord_custom_text": "Реклама. Филиал ПРО НЬЮ ВОРД (Гонг Конг) Лимитед\r\nНЗА 10250004545 ИНН 9909735626 КПП 774791001",
+              "discount": 12,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409445&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "31.12.2026 23:59"
+            },
+            {
+              "project_id": 4176,
+              "code": "ENCER8XKX",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 8% (не более 4 000 ₽) на каждый повторный заказ на сайте и в приложении по промокоду",
+              "date": "31.03.2027 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17334,
+              "is_universal": false,
+              "name": "Скидка 8% (не более 4 000 ₽) на каждый повторный заказ на сайте и в приложении по промокоду",
+              "promo_terms": "<p>Ограничение по промокоду - 3 повторных заказа на одного пользователя, после смены промокодов пользователь может снова пользоваться скидкой</p>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17409445,
+              "ord_marker": "2RanynpojsA",
+              "ord_custom_text": "Реклама. Филиал ПРО НЬЮ ВОРД (Гонг Конг) Лимитед\r\nНЗА 10250004545 ИНН 9909735626 КПП 774791001",
+              "discount": 8,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409445&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "31.03.2027 23:59"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": [],
+          "ord_marker": "2RanynpojsA"
+        }
+      ]
+    },
+    {
+      "project": {
+        "id": 812,
+        "logo": "https://s3sc.perfluence.net/logos/17103376638461.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/4/4/d44656f4-ff4d-4237-becc-65dceee2834c.svg",
+        "name": "PREMIER",
+        "type": "cpa",
+        "img": "https://s3sc.perfluence.net/img_widget/b/d/f/bdf828cb-fdfb-4f5b-910d-1be8d2f87c71.webp",
+        "category_id": 310,
+        "category_name": "Онлайн кинотеатры",
+        "activeBloggers": 13266,
+        "product_info": "<p>Онлайн-кинотеатр с любовью к российской уникальности, который создаёт оригинальный контент и показывает его первым. Новинки и сериалы собственного производства PREMIER каждую неделю.</p>",
+        "subscribers_condition": "",
+        "site": "https://premier.one/",
+        "info": "",
+        "advantages": [
+          "Отдельный детский аккаунт, который можно настроить под своего ребенка",
+          "К одному аккаунту можно подключить до 5 устройств, у каждого профиля сохранится персональная история просмотра",
+          "Просмотр без интернета - кино можно взять в дорогу: скачать на смартфон или планшет",
+          "Весь контент онлайн-кинотеатра доступен в единой подписке без дополнительных платежей"
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 1,
+        "rsp": 415
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18778335,
+              "title": "Оформить бесплатный период на 45 дней доступа к сервисам RUTUBE + PREMIER или оформить подписку за 99 ₽",
+              "link": "https://premier.prfl.me/sites/chp8bj?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 812,
+              "code": "9t9tx6zt",
+              "is_barcode": false,
+              "image": "",
+              "comment": "45 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей, у которых не было активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
+              "date": "30.11.2026",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 15508,
+              "is_universal": false,
+              "name": "45 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей, у которых не было активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17409481,
+              "ord_marker": "2RanykSwE92",
+              "ord_custom_text": "Реклама. Рекламодатель: ООО \"ПРЕМЬЕР\" 16+ ИНН 9702011190",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409481&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        },
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18754243,
+              "title": "Оформить бесплатный период на 50 дней доступа к сервисам RUTUBE + PREMIER или оформить подписку за 99 ₽",
+              "link": "https://premier.prfl.me/smart_zakupka/5tl65x?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 812,
+              "code": "whkv64tj",
+              "is_barcode": false,
+              "image": "",
+              "comment": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей, у которых не было активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
+              "date": "30.11.2026",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 15507,
+              "is_universal": false,
+              "name": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей, у которых не было активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": false,
+              "post_id": 17388162,
+              "ord_marker": "2RanymnL3TJ",
+              "ord_custom_text": "Реклама. Рекламодатель: ООО \"ПРЕМЬЕР\" 16+ ИНН 9702011190",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17388162&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
         "id": 3758,
         "logo": "https://s3sc.perfluence.net/logos/3/8/d/38dc11ee-7a6d-4395-93bb-00cf46b18629.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/f/7/b/f7ba5b73-56a6-4b60-8fdb-1c0f98daee21.png",
@@ -1433,7 +1433,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 420
+        "rsp": 419
       },
       "groups": [
         {
@@ -1496,7 +1496,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 123
+        "rsp": 126
       },
       "groups": [
         {
@@ -1570,7 +1570,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 23
+        "rsp": 27
       },
       "groups": [
         {
@@ -1787,7 +1787,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 136
+        "rsp": 133
       },
       "groups": [
         {
@@ -1816,7 +1816,7 @@
               "hit_color": null,
               "bonus_id": 15586,
               "is_universal": false,
-              "name": "30 дней доступа на START за 0 ₽ для новых по��ьзователей + скидка 50% на первое продление",
+              "name": "30 дней доступа на START за 0 ₽ для новых пользователей + скидка 50% на первое продление",
               "promo_terms": "",
               "region_promo": [
                 "RU"
@@ -1898,7 +1898,7 @@
           "Екатеринбург"
         ],
         "pf": 1,
-        "rsp": 96
+        "rsp": 99
       },
       "groups": [
         {
@@ -1931,7 +1931,7 @@
               "promo_terms": "",
               "region_promo": [
                 "Москва",
-                "Кр��снодар",
+                "Краснодар",
                 "Самара",
                 "Казань",
                 "Уфа",
@@ -2042,7 +2042,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 335
+        "rsp": 334
       },
       "groups": [
         {
@@ -2145,7 +2145,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 369
+        "rsp": 370
       },
       "groups": [
         {
@@ -2261,7 +2261,7 @@
               "repeat_order": true,
               "post_id": 17409482,
               "ord_marker": "2RanykURDRN",
-              "ord_custom_text": "Реклама. ООО «ЯНД��КС», ИНН 7736207543",
+              "ord_custom_text": "Реклама. ООО «ЯНДЕКС», ИНН 7736207543",
               "discount": null,
               "btn_text": null,
               "show": "https://pawss-api.perfluence.net/source-view?post_id=17409482&widget_id=8842&user_id=861964&source=js-widget",
@@ -2318,7 +2318,7 @@
           "Челябинск"
         ],
         "pf": 1,
-        "rsp": 366
+        "rsp": 368
       },
       "groups": [
         {
@@ -2446,7 +2446,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 336
+        "rsp": 340
       },
       "groups": [
         {
@@ -2523,7 +2523,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 115
+        "rsp": 116
       },
       "groups": [
         {
@@ -2624,7 +2624,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 353
+        "rsp": 354
       },
       "groups": [
         {
@@ -2908,7 +2908,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 151
+        "rsp": 162
       },
       "groups": [
         {
@@ -2976,7 +2976,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 368
+        "rsp": 363
       },
       "groups": [
         {
@@ -3078,7 +3078,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 370
+        "rsp": 369
       },
       "groups": [
         {
@@ -3179,7 +3179,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 414
+        "rsp": 412
       },
       "groups": [
         {
@@ -3561,14 +3561,14 @@
           "Санкт-Петербург"
         ],
         "pf": 0,
-        "rsp": 393
+        "rsp": 392
       },
       "groups": [
         {
           "links_for_subscribers": [
             {
               "id": 18778287,
-              "title": "Оформить заказ на сайте Важн��я Рыба",
+              "title": "Оформить заказ на сайте Важная Рыба",
               "link": "https://vipfish1.prfl.me/sites/g9tong?source=js-widget&source_id=8842",
               "landing_terms": null
             }
@@ -3743,7 +3743,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 392
+        "rsp": 393
       },
       "groups": [
         {
@@ -4069,7 +4069,7 @@
           "links_for_subscribers": [
             {
               "id": 18778216,
-              "title": "Ссылка для подписчиков",
+              "title": "Ссылка ��ля подписчиков",
               "link": "https://otello1.prfl.me/sites/cozmvm?source=js-widget&source_id=8842",
               "landing_terms": ""
             }
@@ -4448,7 +4448,7 @@
               "bonus_id": 17102,
               "is_universal": false,
               "name": "Скидка 30% на первую и каждую повторную онлайн-консультацию с психологом, а также при покупке пакета сессий",
-              "promo_terms": "<p>Промокод применяется единоразово для одного аккаунта. Повторная скидка возможна по новому промокоду.</p>",
+              "promo_terms": "<p>Промокод применяется единоразово для одного аккаунта. Повторная скидка возможна по нов��му промокоду.</p>",
               "region_promo": [
                 "RU"
               ],
@@ -4536,7 +4536,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 359
+        "rsp": 358
       },
       "groups": [
         {
@@ -4937,7 +4937,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 399
+        "rsp": 402
       },
       "groups": [
         {
