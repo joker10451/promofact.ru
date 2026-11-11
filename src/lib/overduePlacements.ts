@@ -121,3 +121,12 @@ export function carriesOverduePlacement(c: Pick<Coupon, "affiliate"> & { extraLi
   ];
   return found.some((e) => !!e && OVERDUE_PLACEMENT_ERIDS.has(e));
 }
+
+/** Codes the partner reports as used up ("закончились промокоды"); they must not be shown even while the widget still lists them. */
+export const EXHAUSTED_PROMO_CODES: ReadonlySet<string> = new Set([
+  "PERPREGA309361", // СберЗдоровье: 30% на анализы для беременных, 11 Nov 2026
+]);
+
+export function isExhaustedCode(c: Pick<Coupon, "promocode">): boolean {
+  return EXHAUSTED_PROMO_CODES.has(c.promocode.code.trim().toUpperCase());
+}

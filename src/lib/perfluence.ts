@@ -11,7 +11,7 @@ import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
 import { isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
 import { isRegulatedAdvertiser, meetsMandatoryDisclaimers } from "@/lib/regulatedAds";
-import { carriesOverduePlacement } from "@/lib/overduePlacements";
+import { carriesOverduePlacement, isExhaustedCode } from "@/lib/overduePlacements";
 import { isApprovedOct24Repost } from "@/lib/perfluenceRepeatsOct24";
 import { isApprovedOct26WebsitePlacement } from "@/lib/perfluenceOct26Website";
 import { isApprovedOct28PublisherPlacement } from "@/lib/perfluenceOct28Website";
@@ -970,7 +970,7 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // dropped here, BEFORE de-duplication: otherwise a stale hand-coded entry would win the
   // de-duplication against the widget's fresh placement of the same offer and then be removed,
   // leaving nothing.
-  for (const s of sources) s.coupons = s.coupons.filter((c) => !carriesOverduePlacement(c));
+  for (const s of sources) s.coupons = s.coupons.filter((c) => !carriesOverduePlacement(c) && !isExhaustedCode(c));
 
   const { coupons, stats } = dedupeCoupons(sources);
 
