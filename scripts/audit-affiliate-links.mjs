@@ -103,6 +103,7 @@ async function main() {
       expiredButStillMarkedActive: expiredActive.length,
       failedFormatOrErid: broken.length, differentPublisherFragment: unexpectedPublisher.length,
       crossStoreCampaigns: crossStoreCampaigns.length,
+      crossStoreDetail: [...campaignMap].filter(([, stores]) => stores.size > 1).map(([id, stores]) => ({ campaign: id, stores: [...stores] })),
       sample: [...restricted.map(r => issueSample(r,"PUBLISHER_ACCOUNT_DENIED")),
         ...expiredActive.map(r => issueSample(r,"EXPIRED_ACTIVE")),
         ...broken.map(r => issueSample(r,"BAD_LINK_OR_ERID")),
