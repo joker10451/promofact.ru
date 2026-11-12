@@ -32,12 +32,19 @@ async function main() {
   for (let p = 1; p <= 15; p++) {
     await page.goto("https://dash.perfluence.net/posts/list/pending_removal?page=" + p, { waitUntil: "domcontentloaded" });
     if (p === 1 && /login|auth/i.test(page.url())) { console.warn("⚠️ Сессия Perfluence истекла"); await browser.close(); return; }
+    if (p === 1) {
+      const text = await page.evaluate(() => document.body.innerText);
+      expected = Number((text.match(/Необходимо удалитьs*(d+)/) || [])[1] ?? NaN);
+      console.log(`page: ${await page.title()} · tr=${await page.locator("tr").count()} · label=${expected}`);
+    }
     const fresh = (await readRows(page)).filter((r) => !rows.some((x) => x.id === r.id));
     if (!fresh.length) break;
     rows.push(...fresh);
   }
   await browser.close();
   console.log("Публикаций к удалению: " + rows.length);
+  // The dashboard counter says there is something but the parser saw nothing: fail loudly, never report a silent zero.
+  if (expected > 0 && rows.length === 0) { console.error("Счётчик " + expected + ", строк 0: разметка или сессия не те"); process.exitCode = 1; }
   if (rows.length) fs.writeFileSync(REPORT_FILE, toMarkdown(rows));
 }
 
