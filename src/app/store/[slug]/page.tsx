@@ -30,7 +30,7 @@ import { isStoreIndexable } from "@/lib/storeIndexing";
 // New site-scoped Admitad stores arrive after deployment. Do not 404 on
 // slugs absent from generateStaticParams at build time.
 export const dynamicParams = true;
-export const revalidate = 600;
+export const revalidate = 21600;
 
 export async function generateStaticParams() {
   try {

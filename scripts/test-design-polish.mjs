@@ -209,7 +209,7 @@ assert.ok(mKosmetikEntries.includes('"Чай", "Скидка 41%') &&
   "Reinstate all three new M.Kosmetik Perfluence codes with verified affiliate URL, ERID and precise expiration dates");
 assert.ok(mergedOffers.includes("SOURCE_MEMORY_TTL_MS = 15 * 60 * 1000") &&
   mergedOffers.includes("Date.now() - cacheFilledAt < SOURCE_MEMORY_TTL_MS") &&
-  mergedOffers.includes("{ revalidate: 900 }"),
+  mergedOffers.includes("{ revalidate: 3600 }"),
   "Perfluence source caches must refresh so fresh valid vouchers cannot disappear permanently");
 console.log("M.Kosmetik restored partner offers and renewable source caches PASS");
 
