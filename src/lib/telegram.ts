@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, siteLink } from "@/lib/site";
 import type { Coupon } from "@/lib/types";
 
 export interface TelegramPostOptions {
@@ -123,7 +123,7 @@ export function formatTelegramPost(coupon: Coupon): {
     lines.push(`<i>Реклама. ${storeName}</i>`);
   }
   const affiliateUrl = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site;
-  const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
+  const storeUrl = siteLink(`/store/${coupon.store.slug}`, "telegram");
   const buttons: TelegramButton[][] = [
     [{ text: `🛍 В магазин ${coupon.store.name} →`, url: affiliateUrl }],
   ];
@@ -309,7 +309,7 @@ export function formatGoldAppleHalloweenPost(): {
   buttons: TelegramButton[][];
 } {
   const affiliateUrl = "https://gldppl.prfl.me/smart_zakupka/3pfp4h?erid=2RanykjEuHD";
-  const storeUrl = `${SITE_URL}/store/zolotoe-yabloko`;
+  const storeUrl = siteLink("/store/zolotoe-yabloko", "telegram");
 
   const text = [
     "💄 <b>До -50% в Золотом Яблоке: собрали все секретные промокоды октября!</b>",
@@ -354,7 +354,7 @@ export function formatFmartFlashPost(): {
   buttons: TelegramButton[][];
 } {
   const affiliateUrl = "https://fmart-flowers.prfl.me/smart_zakupka/ekef65?erid=2RanykURyUw";
-  const storeUrl = `${SITE_URL}/store/fmart`;
+  const storeUrl = siteLink("/store/fmart", "telegram");
 
   const text = [
     "🌸 <b>Скидка 30% на цветы и подарки в FMART by Flowwow!</b>",
@@ -397,7 +397,7 @@ export function formatPyaterochkaSummationPost(): {
   photoUrl: string;
 } {
   const affiliateUrl = "https://pyaterochka.prfl.me/smart_zakupka/tatilo?erid=2Ranyng8Q3m";
-  const storeUrl = `${SITE_URL}/store/pyaterochka`;
+  const storeUrl = siteLink("/store/pyaterochka", "telegram");
   const photoUrl = `${SITE_URL}/banners/pyaterochka_oct2026.jpg`;
 
   const text = [

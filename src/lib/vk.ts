@@ -1,5 +1,5 @@
 import "server-only";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, siteLink } from "@/lib/site";
 import type { Coupon } from "@/lib/types";
 
 const VK_API_VERSION = "5.199";
@@ -51,7 +51,7 @@ export function formatVkPost(coupon: Coupon): string {
   const emoji = CATEGORY_EMOJIS[coupon.store.categorySlug] || (coupon.promocode.isHit ? "🔥" : "🏷");
   const categoryTitle = (coupon.store.category || "Скидки и акции").toUpperCase();
   const bonus = coupon.promocode.bonusName || "Скидка по промокоду";
-  const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
+  const storeUrl = siteLink(`/store/${coupon.store.slug}`, "vk");
   const directLink = coupon.affiliate.link || coupon.affiliate.landingLink || coupon.store.site || storeUrl;
 
   const lines: string[] = [
@@ -125,7 +125,7 @@ export async function sendCouponToVk(coupon: Coupon): Promise<VkPostResult> {
   }
 
   const message = formatVkPost(coupon);
-  const storeUrl = `${SITE_URL}/store/${coupon.store.slug}`;
+  const storeUrl = siteLink(`/store/${coupon.store.slug}`, "vk");
 
   try {
     const params = new URLSearchParams({
@@ -267,7 +267,7 @@ export function getVkBotKeyboard() {
           action: {
             type: "open_link",
             label: "🌐 Сайт ПромоФакт",
-            link: SITE_URL,
+            link: siteLink("/", "vk", "bot"),
           },
         },
       ],
