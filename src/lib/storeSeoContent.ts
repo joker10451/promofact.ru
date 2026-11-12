@@ -363,13 +363,19 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   }
   const tail = ` Актуально на ${input.monthRu}.`;
   const full = `${head}${input.hasGiftOffer && !input.maxDiscount ? " Подарки к заказу при выполнении условий." : ""}${best ? ` ${best}.` : ""}${tail}`;
-  if (full.length <= 160) return full;
-  // Too long for a snippet: keep the concrete offer (cut at a word) instead of a generic "Актуально на…" tail.
+  // Code names are what people type ("промокод набери летуаль"); they are already visible on the page.
+  const codeNames = [...new Set(input.coupons.filter((c) => !c.isBarcode && isRealPromoCode(c.code)).map((c) => c.code.trim()))].slice(0, 3);
+  const codesPart = codeNames.length ? ` Коды: ${codeNames.join(", ")}.` : "";
+  const core = full.endsWith(tail) ? full.slice(0, full.length - tail.length) : full;
+  if (full.length <= 160) return codesPart && core.length + codesPart.length <= 160 ? core + codesPart : full;
+  // Too long for a snippet: keep the concrete offer (cut at a word) instead of a generic tail.
   if (best) {
-    const room = 160 - head.length - 2;
+    const room = 160 - head.length - codesPart.length - 2;
     if (room >= 25) {
-      const cut = best.slice(0, room).replace(/s+S*$/, "").replace(/[,;:s]+$/, "");
-      if (cut.length >= 20) return `${head} ${cut}…`;
+      const sliced = best.slice(0, room);
+      const sp = sliced.lastIndexOf(" ");
+      const cut = (sp > 15 ? sliced.slice(0, sp) : sliced).replace(/[,;: ]+$/, "");
+      if (cut.length >= 20) return `${head}${codesPart} ${cut}…`;
     }
   }
   return head + tail;
