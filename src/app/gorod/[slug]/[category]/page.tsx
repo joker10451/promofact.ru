@@ -17,7 +17,7 @@ const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = 900;
+export const revalidate = 21600;
 
 export async function generateStaticParams() {
   const categories = await getCategories();

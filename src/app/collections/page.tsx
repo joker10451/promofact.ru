@@ -7,7 +7,7 @@ import { getCollections, getCollectionCoupons } from "@/lib/collections";
 import { getCoupons } from "@/lib/perfluence";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-export const revalidate = 900;
+export const revalidate = 21600;
 
 export const metadata: Metadata = {
   title: "Тематические подборки промокодов и акций",
