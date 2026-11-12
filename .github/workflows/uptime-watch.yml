@@ -1,0 +1,47 @@
+name: Uptime watch
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe the live site
+        id: probe
+        run: |
+          fail=""
+          for path in / /store/premier /promokody/segodnya /sitemap.xml; do
+            ok=0
+            for try in 1 2 3; do
+              code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "https://promofact.ru$path?uptime=$RANDOM" || echo 000)
+              [ "$code" = "200" ] && ok=1 && break
+              sleep 10
+            done
+            [ "$ok" = "1" ] || fail="$fail $path($code)"
+          done
+          echo "fail=$fail" >> "$GITHUB_OUTPUT"
+          [ -z "$fail" ] || echo "Недоступно:$fail"
+
+      - name: Open or close the incident issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FAIL: ${{ steps.probe.outputs.fail }}
+        run: |
+          n=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label site-down --json number -q '.[0].number')
+          if [ -n "$FAIL" ]; then
+            body="promofact.ru не отвечает 200 по адресам:$FAIL (проверка $(date -u +%F\ %H:%M) UTC). Проверьте сервер: systemctl status promofact nginx; затем лимиты и оплату хостинга."
+            if [ -n "$n" ]; then gh issue comment "$n" --repo "$GITHUB_REPOSITORY" --body "$body"
+            else gh label create site-down --color B60205 --repo "$GITHUB_REPOSITORY" 2>/dev/null || true
+                 gh issue create --repo "$GITHUB_REPOSITORY" --label site-down --title "Сайт недоступен" --body "$body"; fi
+            exit 1
+          elif [ -n "$n" ]; then
+            gh issue close "$n" --repo "$GITHUB_REPOSITORY" --comment "Сайт снова отвечает 200."
+          fi
