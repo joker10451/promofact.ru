@@ -363,5 +363,14 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   }
   const tail = ` Актуально на ${input.monthRu}.`;
   const full = `${head}${input.hasGiftOffer && !input.maxDiscount ? " Подарки к заказу при выполнении условий." : ""}${best ? ` ${best}.` : ""}${tail}`;
-  return full.length <= 160 ? full : head + tail;
+  if (full.length <= 160) return full;
+  // Too long for a snippet: keep the concrete offer (cut at a word) instead of a generic "Актуально на…" tail.
+  if (best) {
+    const room = 160 - head.length - 2;
+    if (room >= 25) {
+      const cut = best.slice(0, room).replace(/s+S*$/, "").replace(/[,;:s]+$/, "");
+      if (cut.length >= 20) return `${head} ${cut}…`;
+    }
+  }
+  return head + tail;
 }
