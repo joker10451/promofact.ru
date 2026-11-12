@@ -13,7 +13,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { toCatalogCoupon } from "@/lib/catalogCoupon";
 import { selectGeoOffers } from "@/lib/geoIndexing";
 
-export const revalidate = 900;
+export const revalidate = 21600;
 
 const CITY_COUPON_LIMIT = 24;
 

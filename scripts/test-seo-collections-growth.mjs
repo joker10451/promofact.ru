@@ -43,8 +43,8 @@ assert.deepEqual(clean.map(c => c.store.slug), ["pyaterochka", "farfor"],
 
 const page = fs.readFileSync("src/app/collections/[slug]/page.tsx", "utf8");
 const sitemap = fs.readFileSync("src/app/sitemap.ts", "utf8");
-assert.match(page, /export const revalidate = 900;/);
-assert.match(sitemap, /export const revalidate = 900;/);
+assert.match(page, /export const revalidate = 21600;/);
+assert.match(sitemap, /export const revalidate = 21600;/);
 assert.match(page, /getCollectionCoupons\(col, all\)/);
 assert.match(page, /robots: \{ index: count >= MIN_INDEXABLE_COLLECTION_OFFERS, follow: true \}/);
 assert.match(sitemap, /getCollectionCoupons\(col, coupons\)\.length >= MIN_INDEXABLE_COLLECTION_OFFERS/);

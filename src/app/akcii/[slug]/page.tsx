@@ -13,7 +13,7 @@ import type { Coupon } from "@/lib/types";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = false;
-export const revalidate = 900;
+export const revalidate = 21600;
 
 export async function generateStaticParams() {
   return ACTIONS.map((a) => ({ slug: a.slug }));

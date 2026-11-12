@@ -8,7 +8,7 @@ import { toCatalogCoupon } from "@/lib/catalogCoupon";
 import { SITE_URL } from "@/lib/site";
 
 // Always share the same live active offers with the homepage and store pages.
-export const revalidate = 900; // SSR обновляется каждые 15 минут; карточки проверяют срок на клиенте.
+export const revalidate = 21600; // SSR обновляется раз в 6 часов (и после каждого деплоя); карточки проверяют срок на клиенте.
 
 export const metadata: Metadata = {
   title: "Все промокоды и купоны — каталог скидок",

@@ -13,7 +13,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 // Keep thematic pages current as partner catalog offers change.
 export const dynamicParams = false;
-export const revalidate = 900;
+export const revalidate = 21600;
 
 export async function generateStaticParams() {
   try {

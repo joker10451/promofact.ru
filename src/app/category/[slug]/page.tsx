@@ -24,7 +24,7 @@ const MONTH_YEAR = new Date().toLocaleDateString("ru-RU", {
 });
 
 export const dynamicParams = false;
-export const revalidate = 3600; // Обновление раз в час: актуальные акции не ждут следующего деплоя.
+export const revalidate = 21600; // Обновление раз в час: актуальные акции не ждут следующего деплоя.
 
 export async function generateStaticParams() {
   try {

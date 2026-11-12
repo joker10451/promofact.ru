@@ -906,7 +906,7 @@ const getCachedBaseSourceBuckets = unstable_cache(
     process.env.E2E_FIXTURES === "true" && process.env.VERCEL !== "1" && process.env.VERCEL_ENV !== "production" ? "e2e" : "prod",
   ],
   // Refresh approved partner offers rather than pinning an old snapshot forever.
-  { revalidate: 900 },
+  { revalidate: 3600 },
 );
 
 /**
@@ -928,7 +928,7 @@ export const getCachedAdmitadCoupons = unstable_cache(
   // Publisher eligibility changed: stale persistent data cache must not
   // keep previously published but now explicitly denied advertiser programs.
    ["promofact", "admitad-snapshot-coupons-v3-publisher-rights"],
-  { revalidate: 900 },
+  { revalidate: 3600 },
 );
 
 /**

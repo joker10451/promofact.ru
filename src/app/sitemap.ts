@@ -21,7 +21,7 @@ import { selectGeoOffers } from "@/lib/geoIndexing";
 //   магазины/категории/каталог -> дата подтверждённой синхронизации каталога syncMeta.lastSuccessSync).
 // - Для страниц без достоверных дат изменения lastModified опускается согласно стандарту sitemap.org.
 // - Запрещено использовать произвольные фиктивные даты.
-export const revalidate = 900; // Update indexable URLs as publisher snapshots change.
+export const revalidate = 21600; // Update indexable URLs as publisher snapshots change.
 
 const CATALOG_SYNC_DATE = syncMeta.lastSuccessSync ? new Date(syncMeta.lastSuccessSync) : undefined;
 
