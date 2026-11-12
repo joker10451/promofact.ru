@@ -1,5 +1,5 @@
 import { getArticles, type Article } from "@/lib/articles";
-import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_TAGLINE, SITE_URL, siteLink } from "@/lib/site";
 
 // Раз в час, а не в 12: рекламные статьи выходят по времени (publishAt),
 // и с 12-часовым кэшем статья попадала в ленту Дзена с опозданием на полдня.
@@ -70,7 +70,7 @@ function contentHtml(a: Article, url: string): string {
     if (a.ctaButton.disclaimer) parts.push(`<p>${escapeXml(a.ctaButton.disclaimer)}</p>`);
   }
   parts.push(
-    `<p>Все действующие промокоды и подробные условия — <a href="${escapeXml(url)}">на сайте ${escapeXml(SITE_NAME)}</a>. А свежие скидки и закрытые акции первыми публикуем в Telegram-канале <a href="https://t.me/smart_zakupka">@smart_zakupka</a>.</p>`,
+    `<p>Все действующие промокоды и подробные условия — <a href="${escapeXml(siteLink(`/sovety/${a.slug}`, "dzen", "article"))}">на сайте ${escapeXml(SITE_NAME)}</a>. А свежие скидки и закрытые акции первыми публикуем в Telegram-канале <a href="https://t.me/smart_zakupka">@smart_zakupka</a>.</p>`,
   );
   return parts.join("\n");
 }

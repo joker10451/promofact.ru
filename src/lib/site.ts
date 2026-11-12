@@ -7,6 +7,13 @@ function resolveSiteUrl(): string {
 }
 
 export const SITE_URL = resolveSiteUrl();
+
+/** Link to our own page from an outside channel, tagged so Metrika can tell channels apart (affiliate links never get these). */
+export function siteLink(path: string, source: string, medium = "social", campaign?: string): string {
+  const q = new URLSearchParams({ utm_source: source, utm_medium: medium });
+  if (campaign) q.set("utm_campaign", campaign);
+  return `${SITE_URL}${path}${path.includes("?") ? "&" : "?"}${q}`;
+}
 export const SITE_NAME = "ПромоФакт";
 export const SITE_TAGLINE = "Промокоды и купоны на скидку";
 
