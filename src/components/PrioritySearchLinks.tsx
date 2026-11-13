@@ -27,7 +27,7 @@ export default function PrioritySearchLinks({ stores }: { stores: StoreInfo[] })
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 id="priority-stores-heading" className="font-display text-lg font-extrabold text-ink sm:text-xl">
-            Что ищут чаще всего
+            Частые запросы
           </h2>
         </div>
         <Link href="/promokody" className="text-xs font-bold text-red underline-offset-4 hover:underline">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Icon from "@/components/Icon";
 import { ymReachGoal } from "@/components/YandexMetrika";
 
 interface NewsletterBoxProps {
@@ -63,22 +62,11 @@ export default function NewsletterBox({ source = "home" }: NewsletterBoxProps) {
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8 items-center">
         <div>
           <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-extrabold text-ink tracking-tight">
-            Свежие промокоды — раз в неделю на почту
+            Подборки промокодов на почту
           </h2>
           <p className="mt-2 text-xs sm:text-sm text-ink/70 leading-relaxed max-w-xl">
-            Раз в неделю собираем новые промокоды и акции магазинов в одно письмо. Отписаться можно в один клик.
+            Оставьте почту — пришлём подборку новых промокодов и акций. Новые коды также выходят в Telegram-канале.
           </p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs font-semibold text-ink/60">
-            <span className="flex items-center gap-1.5">
-              <Icon name="check" size={14} className="text-mint-dark" />
-              <span>Одно письмо в неделю</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Icon name="check" size={14} className="text-mint-dark" />
-              <span>Отписка в один клик</span>
-            </span>
-          </div>
         </div>
 
         <div className="flex flex-col gap-3">
@@ -89,7 +77,7 @@ export default function NewsletterBox({ source = "home" }: NewsletterBoxProps) {
                 Вы успешно подписались!
               </p>
               <p className="mt-1 text-xs text-ink/70">
-                Первое письмо придёт в ближайшем выпуске.
+                Пришлём подборку, когда она будет готова.
               </p>
             </div>
           ) : (

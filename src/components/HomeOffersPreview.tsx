@@ -5,6 +5,7 @@ import { isCouponActive } from "@/lib/couponExpiry";
 import { useCouponClock } from "@/lib/useCouponClock";
 import StoreLogo from "@/components/StoreLogo";
 import type { Coupon } from "@/lib/types";
+import { plural } from "@/lib/format";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import { homeCouponAnalyticsContext } from "@/lib/homeCouponAnalyticsContext";
 
@@ -27,10 +28,10 @@ export default function HomeOffersPreview({
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 id="home-offers-heading" className="font-display text-2xl font-extrabold text-ink sm:text-3xl">
-            Свежие промокоды
+            Промокоды из каталога
           </h2>
           <p className="mt-2 text-sm text-ink/60">
-            Четыре из {totalCount} предложений каталога. Остальные — с поиском и фильтрами.
+            {visibleCoupons.length} из {totalCount} {plural(totalCount, "предложения", "предложений", "предложений")}. Остальные — в каталоге с поиском и фильтрами.
           </p>
         </div>
         <Link href="/catalog#catalog"

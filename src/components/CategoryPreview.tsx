@@ -38,7 +38,7 @@ export default async function CategoryPreview() {
             Скидки по категориям
           </h2>
           <p className="mt-1 text-xs font-medium text-white/65 sm:text-sm">
-            Шесть самых больших разделов, остальные — по кнопке справа
+            Самые большие разделы, остальные — в «Все категории»
           </p>
         </div>
         <Link

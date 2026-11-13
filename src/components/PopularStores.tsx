@@ -59,7 +59,7 @@ export default async function PopularStores() {
                 Популярные магазины
               </h2>
               <p className="hidden text-xs text-ink/60 font-medium sm:block">
-                Промокоды Пятёрочки, Яндекс Еды, Самоката и других
+                Промокоды {top.slice(0, 3).map((s) => s.name).join(", ")} и других
               </p>
             </div>
           </div>
