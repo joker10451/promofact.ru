@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
-import { OPERATOR, SITE_NAME, SITE_URL } from "@/lib/site";
+import { CHANNELS, OPERATOR, SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "О проекте",
@@ -23,9 +23,9 @@ export default function AboutPage() {
       <section>
         <h2>Откуда берутся промокоды</h2>
         <p>
-          Коды и акции мы получаем из партнёрских программ магазинов — через сеть Perfluence
-          и напрямую от рекламодателей. На сайте показываются только предложения с
-          действующим сроком: когда срок заканчивается, карточка исчезает автоматически.
+          Коды и акции приходят из партнёрских сетей Admitad и Perfluence и напрямую от рекламодателей. Каталог
+          Perfluence обновляется автоматически четыре раза в сутки (в 4, 10, 16 и 22 часа по Москве).
+          Когда срок предложения заканчивается, карточка исчезает.
         </p>
         <p>
           Условия у каждой акции свои: минимальная сумма заказа, только первый заказ, регион. Они
@@ -52,10 +52,11 @@ export default function AboutPage() {
       </section>
 
       <section>
-        <h2>Кто стоит за сайтом</h2>
+        <h2>Кто ведёт сайт</h2>
         <p>
-          Проект ведёт {OPERATOR.name}. Вопросы, реклама и сотрудничество —{" "}
-          <Link href="/contacts">на странице контактов</Link>.
+          Сайт ведёт {OPERATOR.name}. Если код не сработал или акция уже закончилась, напишите —
+          почта и контакты на <Link href="/contacts">странице контактов</Link>. Подборки скидок
+          также выходят в <a href={CHANNELS.telegram} target="_blank" rel="noopener nofollow">Telegram-канале</a>.
         </p>
       </section>
     </LegalPage>

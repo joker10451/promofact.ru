@@ -150,7 +150,7 @@ export default async function ActionPage({
           {/* Рекомендации и советы */}
           <section className="mt-8 rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-xs">
             <h2 className="font-display text-lg sm:text-xl font-extrabold text-ink mb-4">
-              Как сэкономить максимум
+              Советы перед покупкой
             </h2>
             <div className="space-y-3">
               {action.body.map((para, i) => (

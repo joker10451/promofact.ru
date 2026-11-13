@@ -37,7 +37,7 @@ export default function CategoryIndexPage() {
               Каталог скидок по категориям
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink/65 sm:text-base">
-              Выберите интересующую тему: здесь собраны только разделы, в которых есть предложения. На страницах категорий — магазины, условия акций и действующие купоны.
+              Только разделы, где сейчас есть предложения. Внутри — магазины категории и купоны с условиями.
             </p>
             <Link href="/promokody" className="mt-5 inline-flex rounded-xl bg-red px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-red-dark">
               Посмотреть все магазины <span className="ml-2" aria-hidden="true">→</span>

@@ -236,9 +236,9 @@ export default async function CategoryPage({
               <p className="mt-2 text-sm font-medium text-ink/75 max-w-3xl">{def.blurb}</p>
             ) : null}
             <p className="mt-2 text-xs sm:text-sm text-ink/65 max-w-3xl">
-              Собрали актуальные промокоды и акции на {MONTH_YEAR}: {list.length}{" "}
-              {plural(list.length, "предложение", "предложения", "предложений")} ({realCodeCount} {plural(realCodeCount, "промокод", "промокода", "промокодов")} и {codeFreeCount} {plural(codeFreeCount, "акция", "акции", "акций")}) от {categoryStores.length}{" "}
-              {plural(categoryStores.length, "магазина-партнёра", "магазинов-партнёров", "магазинов-партнёров")}. Предложения обновляются по данным партнёрских программ.
+              {MONTH_YEAR}: {list.length}{" "}
+              {plural(list.length, "предложение", "предложения", "предложений")} — {realCodeCount} {plural(realCodeCount, "промокод", "промокода", "промокодов")} и {codeFreeCount} {plural(codeFreeCount, "акция", "акции", "акций")} без кода, {categoryStores.length}{" "}
+              {plural(categoryStores.length, "магазин", "магазина", "магазинов")}. Данные берём из партнёрских программ, истёкшие предложения убираем.
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -253,7 +253,7 @@ export default async function CategoryPage({
             {/* Быстрые ссылки на магазины категории (SILO перелинковка) */}
             {categoryStores.length > 0 && (
               <div className="mt-6 pt-5 border-t border-line/60">
-                <div className="text-xs font-extrabold uppercase tracking-wider text-ink/45 mb-2.5 flex items-center gap-1.5">
+                <div className="text-sm font-bold text-ink/60 mb-2.5 flex items-center gap-1.5">
                   <Icon name="store" size={16} />
                   <span>Магазины в категории «{catName}»:</span>
                 </div>

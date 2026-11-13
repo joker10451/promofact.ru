@@ -292,8 +292,8 @@ export default function GlobalSearchModal() {
         {!query && (
           <div className="px-4 py-3 border-b border-line/60 bg-white space-y-3">
             <div>
-              <span className="text-[11px] font-bold text-red uppercase tracking-wider block mb-1.5">
-                Главные распродажи:
+              <span className="text-xs font-bold text-red block mb-1.5">
+                Распродажи:
               </span>
               <div className="flex flex-wrap gap-2">
                 <Link
@@ -321,7 +321,7 @@ export default function GlobalSearchModal() {
             </div>
 
             <div>
-              <span className="text-xs font-bold text-ink/50 uppercase tracking-wider block mb-1.5">
+              <span className="text-xs font-bold text-ink/50 block mb-1.5">
                 Популярные магазины:
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -345,14 +345,14 @@ export default function GlobalSearchModal() {
           {/* Умная подсказка сезонных распродаж */}
           {Boolean(query && /11|шопинг|черн|пятниц|год|подар|black|friday/i.test(query)) && (
             <div className="rounded-2xl bg-gradient-to-r from-red/10 via-yellow/10 to-red/10 border border-red/25 p-3">
-              <div className="text-[11px] font-bold text-red uppercase tracking-wider mb-1">Сезонная распродажа</div>
+              <div className="text-xs font-bold text-red mb-1">Сезонная распродажа</div>
               {/11|шопинг/i.test(query) ? (
                 <Link
                   href="/collections/den-shopinga-11-11"
                   onClick={closeSearch}
                   className="flex items-center justify-between text-sm font-extrabold text-ink hover:text-red transition-colors"
                 >
-                  <span>Всемирный день шопинга 11.11 (20 промокодов)</span>
+                  <span>Подборка: День шопинга 11.11</span>
                   <span>→</span>
                 </Link>
               ) : /черн|пятниц|black|friday/i.test(query) ? (
@@ -361,7 +361,7 @@ export default function GlobalSearchModal() {
                   onClick={closeSearch}
                   className="flex items-center justify-between text-sm font-extrabold text-ink hover:text-red transition-colors"
                 >
-                  <span>Чёрная Пятница 2026 (7 проверенных скидок)</span>
+                  <span>Подборка: Чёрная Пятница 2026</span>
                   <span>→</span>
                 </Link>
               ) : (
