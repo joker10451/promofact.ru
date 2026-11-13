@@ -46,7 +46,10 @@ export default function NotFound() {
             </div>
           </div>
         </section>
-        <PopularStores />
+        {/* Секция без собственных полей: отступы и ширину задаёт обёртка, как на главной. */}
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+          <PopularStores />
+        </div>
         <VisualCategoryTiles />
       </main>
       <Footer />

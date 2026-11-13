@@ -73,7 +73,7 @@ export default async function PopularStores() {
 
         {/* Сетка популярных брендов в стиле Pikabu (круглые иконки, бейджи акций) */}
         <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-3 md:grid-cols-6">
-          {top.map((s, index) => (
+          {top.slice(0, 12).map((s, index) => (
             <Link
               key={s.slug}
               href={`/store/${s.slug}`}
