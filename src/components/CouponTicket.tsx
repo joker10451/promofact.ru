@@ -335,7 +335,9 @@ export default function CouponTicket({
       {/* 1. Верхняя строка: Логотип + Название + Бейджи */}
       <div>
         <div className="space-y-3">
-          {/* Название всегда получает ширину карточки: бейджи не могут его сжимать. */}
+          {/* Название всегда получает ширину карточки: бейджи не могут его сжимать.
+              На странице самого магазина шапка повторяла H1 в каждой карточке — там её нет. */}
+          {placement !== "store_coupon" && (
           <div className="flex min-w-0 items-start gap-3">
             <Link
               href={`/store/${store.slug}`}
@@ -366,6 +368,7 @@ export default function CouponTicket({
               </Link>
             </div>
           </div>
+          )}
           {/* Длинные условия переносятся на свою строку вместо сдавливания бренда. */}
           <div className="flex min-w-0 flex-wrap items-start gap-1.5">
             {promocode.isHit && (
@@ -448,20 +451,25 @@ export default function CouponTicket({
         {/* 3. Подтверждённые заказы (реальные данные партнёрской сети) и условия.
             Раньше здесь были сгенерированные «N раз сегодня», «Проверен 4 часа
             назад» и «Надёжность 98%» — за ними не стояло никаких данных. */}
+        {/* Серая плашка — только когда есть что показать (реальные заказы или
+            пометка партнёра). «Официальное предложение» на каждой карточке ничего
+            не сообщало и отодвигало код вниз. */}
         <div
-          className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl border border-line/60 bg-paper/70 px-3 py-2.5 text-xs"
+          className={proofCount > 0 || store.slug === "sberzdorovie"
+            ? "mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl border border-line/60 bg-paper/70 px-3 py-2.5 text-xs"
+            : "mt-1 flex text-xs"}
         >
           {proofCount > 0 ? (
             <span className="flex items-center gap-1.5 font-bold text-ink/80 text-[11px] sm:text-xs">
               <Icon name="check" size={13} className="text-mint-dark" />
               {proofCount} {pluralOrders(proofCount)} по коду
             </span>
-          ) : (
+          ) : store.slug === "sberzdorovie" ? (
             <span className="inline-flex min-w-0 items-center gap-1.5 text-xs font-semibold text-ink/75">
               <span className="inline-block h-2 w-2 rounded-full bg-mint" />
-              {store.slug === "sberzdorovie" ? "Предложение партнёра" : "Официальное предложение"}
+              Предложение партнёра
             </span>
-          )}
+          ) : null}
           <button
             type="button"
             onClick={() => {
@@ -607,7 +615,8 @@ export default function CouponTicket({
               >
                 <Icon name="copy" size={16} />
                 <span className="truncate">
-                  {promocode.isBarcode ? "Скопировать штрихкод и перейти →" : "Скопировать и перейти →"}
+                  {/* Без стрелки: в сетке из трёх колонок текст обрезался до «перейт…». */}
+                  {promocode.isBarcode ? "Скопировать штрихкод и перейти" : "Скопировать и перейти"}
                 </span>
               </a>
             )}
@@ -657,7 +666,6 @@ export default function CouponTicket({
               }`}
               title="Да, промокод сработал"
             >
-              <span>👍</span>
               <span>{voted === "positive" ? "Сработал!" : "Да"}</span>
             </button>
             <button
@@ -671,7 +679,6 @@ export default function CouponTicket({
               }`}
               title="Нет, промокод не сработал"
             >
-              <span>👎</span>
               <span>{voted === "negative" ? "Записали" : "Нет"}</span>
             </button>
           </div>
