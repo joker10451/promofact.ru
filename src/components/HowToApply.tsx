@@ -69,18 +69,14 @@ export default function HowToApply({ variant = "code" }: { variant?: "code" | "a
   const isSubscription = variant === "subscription";
   const steps = variant === "sber-medical" ? SBER_MEDICAL_STEPS : variant === "magnit-app" ? MAGNIT_STEPS : isAvito ? AVITO_STEPS : isSubscription ? SUBSCRIPTION_STEPS : STEPS;
   return (
-    <section className="mt-12" aria-labelledby="how-apply">
+    <section className="mt-10 max-w-5xl" aria-labelledby="how-apply">
       <h2 id="how-apply" className="font-display text-lg font-extrabold">
         {variant === "sber-medical" ? "Как использовать промокод СберЗдоровья" : variant === "magnit-app" ? "Как применить промокод в приложении «Магнит»" : isAvito ? "Как получить скидку в Авито Путешествиях" : isSubscription ? "Как подключить Яндекс Плюс по промокоду" : "Как применить код"}
       </h2>
-      <ol className="mt-4 grid gap-3 sm:grid-cols-3">
+      <ol className="mt-3 grid gap-x-8 gap-y-3 border-t border-line pt-4 sm:grid-cols-3">
         {steps.map((step) => (
-          <li key={step.n} className="rounded-2xl bg-white border border-line px-5 py-5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow font-display text-sm font-extrabold shadow-offset">
-              {step.n}
-            </span>
-            <div className="mt-3 font-bold">{step.title}</div>
-            <p className="mt-1 text-sm leading-snug text-ink/60">{step.text}</p>
+          <li key={step.n} className="text-sm leading-snug text-ink/65">
+            <span className="font-bold text-ink">{step.n}. {step.title}.</span> {step.text}
           </li>
         ))}
       </ol>
