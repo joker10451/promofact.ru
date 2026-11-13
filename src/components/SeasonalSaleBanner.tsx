@@ -20,15 +20,15 @@ export default function SeasonalSaleBanner({
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-red/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-red">
-            <span>🔥</span>
-            <span>Сезон больших скидок 2026</span>
-          </div>
-          <h2 className="mt-2 font-display text-xl font-extrabold text-ink sm:text-2xl">
+          <h2 className="font-display text-xl font-extrabold text-ink sm:text-2xl">
             Главные распродажи осени: 11.11 и Чёрная Пятница
           </h2>
           <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-ink/70 sm:text-sm">
-            Открыт разогрев ко Всемирному дню шопинга 11.11. Сравнивайте предложения, собирайте корзину заранее и активируйте промокоды до исчерпания лимитов.
+            {bfStatus.stage === "warmup"
+              ? "Чёрная Пятница стартует 26 ноября. Положите товары в корзину заранее и применяйте промокоды, пока не кончились лимиты."
+              : bfStatus.stage === "active"
+                ? "Чёрная Пятница идёт до 30 ноября. Применяйте промокоды, пока не кончились лимиты."
+                : "Промокоды прошедших распродаж собраны в подборках."}
           </p>
         </div>
 

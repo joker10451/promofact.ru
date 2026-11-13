@@ -159,11 +159,6 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
           </span>
         </h1>
 
-        {/* Подзаголовок */}
-        <p className="mx-auto mt-2.5 hidden max-w-2xl text-[13px] leading-[1.55] text-ink/70 sm:mt-3 sm:block sm:text-base">
-          Сравнивайте предложения магазинов и находите действующие промокоды с понятными условиями.
-        </p>
-
         {/* Главная поисковая строка */}
         <div ref={containerRef} className="relative mx-auto mt-2.5 sm:mt-6 max-w-2xl">
           <form onSubmit={handleSubmit} className="relative flex items-center">

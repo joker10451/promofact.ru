@@ -26,9 +26,8 @@ export default function PrioritySearchLinks({ stores }: { stores: StoreInfo[] })
     <section aria-labelledby="priority-stores-heading" className="rounded-[22px] border border-line bg-white px-4 py-5 sm:px-6 sm:py-6">
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-red">Быстрые переходы</p>
-          <h2 id="priority-stores-heading" className="mt-1 font-display text-lg font-extrabold text-ink sm:text-xl">
-            К промокодам популярных сервисов
+          <h2 id="priority-stores-heading" className="font-display text-lg font-extrabold text-ink sm:text-xl">
+            Частые запросы
           </h2>
         </div>
         <Link href="/promokody" className="text-xs font-bold text-red underline-offset-4 hover:underline">

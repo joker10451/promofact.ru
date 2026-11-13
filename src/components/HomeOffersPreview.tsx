@@ -5,6 +5,7 @@ import { isCouponActive } from "@/lib/couponExpiry";
 import { useCouponClock } from "@/lib/useCouponClock";
 import StoreLogo from "@/components/StoreLogo";
 import type { Coupon } from "@/lib/types";
+import { plural } from "@/lib/format";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import { homeCouponAnalyticsContext } from "@/lib/homeCouponAnalyticsContext";
 
@@ -26,14 +27,11 @@ export default function HomeOffersPreview({
     <section aria-labelledby="home-offers-heading">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="text-[11px] font-extrabold uppercase tracking-widest text-red">
-            Выбрано из актуального каталога
-          </span>
-          <h2 id="home-offers-heading" className="mt-1 font-display text-2xl font-extrabold text-ink sm:text-3xl">
-            Хорошие предложения — сразу к делу
+          <h2 id="home-offers-heading" className="font-display text-2xl font-extrabold text-ink sm:text-3xl">
+            Промокоды из каталога
           </h2>
           <p className="mt-2 text-sm text-ink/60">
-            Подборка из каталога ({totalCount} предложений по последнему обновлению). Полный список — с поиском и фильтрами.
+            {visibleCoupons.length} из {totalCount} {plural(totalCount, "предложения", "предложений", "предложений")}. Остальные — в каталоге с поиском и фильтрами.
           </p>
         </div>
         <Link href="/catalog#catalog"

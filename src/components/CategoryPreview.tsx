@@ -34,14 +34,11 @@ export default async function CategoryPreview() {
       <div className="pointer-events-none absolute -right-16 -top-24 h-60 w-60 rounded-full bg-red/15 blur-3xl" aria-hidden="true" />
       <div className="relative mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="mb-2 inline-flex rounded-full bg-yellow px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-ink">
-            Выбирайте по интересам
-          </span>
           <h2 className="font-display text-xl font-extrabold leading-tight sm:text-2xl">
             Скидки по категориям
           </h2>
           <p className="mt-1 text-xs font-medium text-white/65 sm:text-sm">
-            Сначала популярное — остальные разделы в полном каталоге
+            Самые большие разделы, остальные — в «Все категории»
           </p>
         </div>
         <Link
