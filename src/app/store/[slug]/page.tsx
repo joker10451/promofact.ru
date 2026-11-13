@@ -642,7 +642,7 @@ export default async function StorePage({
                   Свежие промокоды {store.name} в Telegram
                 </h3>
                 <p className="mt-0.5 text-xs sm:text-sm text-ink/65 leading-relaxed">
-                  Публикуем закрытые акции, промокоды с суммированием и секретные скидки в канале @smart_zakupka
+                  Новые промокоды и акции магазинов — в канале @smart_zakupka
                 </p>
               </div>
             </div>
@@ -657,29 +657,20 @@ export default async function StorePage({
           </div>
         </div>
 
-        {/* 2. Быстрая сводка (Quick Facts) для SEO и сниппетов */}
-        <div className="mt-8 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
-          <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Предложений сегодня</div>
-            <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-ink">{store.coupons.length}</div>
-          </div>
-          <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">{avitoByLink ? "Выгода" : maxDisc ? "Макс. скидка" : "Тип предложения"}</div>
-            <div className="mt-1 font-display text-lg sm:text-xl font-extrabold text-red">
-              {avitoByLink ? "1 000 ₽ / 5%" : maxDisc ? maxDisc : hasGift ? "Подарок" : "Акция"}
-            </div>
-          </div>
-          <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Кому подходит</div>
-            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">
-              Смотрите условия
-            </div>
-          </div>
-          <div className="rounded-2xl border border-line bg-white p-3 sm:p-4 text-center">
-            <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-ink/45">Оформление</div>
-            <div className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">По правилам магазина</div>
-          </div>
-        </div>
+        {/* Быстрая сводка: только то, что подтверждено данными */}
+        <p className="mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm text-ink/70">
+          <span>
+            Предложений сегодня: <b className="font-display font-extrabold text-ink">{store.coupons.length}</b>
+          </span>
+          {(avitoByLink || maxDisc || hasGift) && (
+            <span>
+              {avitoByLink ? "Выгода" : maxDisc ? "Макс. скидка" : "Бонус"}:{" "}
+              <b className="font-display font-extrabold text-red">
+                {avitoByLink ? "1 000 ₽ / 5%" : maxDisc ? maxDisc : "подарок к заказу"}
+              </b>
+            </span>
+          )}
+        </p>
 
         {/* Реклама на карточке купонов работает против конверсии: человек
             пришёл скопировать код и уйти в магазин, а баннер рядом с кодом
@@ -691,6 +682,31 @@ export default async function StorePage({
             className="my-10"
           />
         )}
+
+        <section className="mt-10 max-w-3xl rounded-2xl border border-mint/30 bg-mint/10 p-5">
+          <Link
+            href={`/category/${canonicalCategorySlug(store.categorySlug)}`}
+            className="flex items-center justify-between gap-3 group"
+          >
+            <div>
+              <div className="font-display font-extrabold group-hover:text-red transition-colors">
+                <Icon name="tag" size={14} className="inline" /> Все промокоды в категории «{store.category}»
+              </div>
+              <p className="mt-1 text-sm text-ink/55">
+                Смотреть скидки других магазинов в этой же категории
+              </p>
+            </div>
+            <span className="text-lg font-bold text-ink/30 group-hover:text-red transition-colors shrink-0">
+              →
+            </span>
+          </Link>
+        </section>
+
+        <OtherStores
+          current={store.slug}
+          category={store.categorySlug}
+          storeName={store.name}
+        />
 
         {/* Сводная таблица для Быстрого ответа (Колдунщика) Яндекса и Google */}
         <StoreSummaryTable
@@ -717,6 +733,8 @@ export default async function StorePage({
             </ol>
           </section>
         )}
+
+        <HowToApply variant={slug === "sberzdorovie" ? "sber-medical" : slug === "magnit-dostavka" ? "magnit-app" : slug === "yandex-plus" ? "subscription" : avitoByLink ? "avito-links" : "code"} />
 
         <article className="mt-12 max-w-3xl">
           <h2 className="font-display text-xl font-extrabold">
@@ -760,7 +778,7 @@ export default async function StorePage({
           </section>
         )}
 
-        {store.conditions && (
+        {store.conditions && store.conditions.trim() !== "Условия и сроки действия актуальных предложений указаны в карточках промокодов." && (
           <article className="mt-8 max-w-3xl">
             <div className="font-display text-lg font-extrabold">Условия</div>
             <p className="mt-3 leading-relaxed text-ink/70">
@@ -793,33 +811,6 @@ export default async function StorePage({
             ))}
           </div>
         </section>
-
-        <HowToApply variant={slug === "sberzdorovie" ? "sber-medical" : slug === "magnit-dostavka" ? "magnit-app" : slug === "yandex-plus" ? "subscription" : avitoByLink ? "avito-links" : "code"} />
-
-        <section className="mt-10 max-w-3xl rounded-2xl border border-mint/30 bg-mint/10 p-5">
-          <Link
-            href={`/category/${canonicalCategorySlug(store.categorySlug)}`}
-            className="flex items-center justify-between gap-3 group"
-          >
-            <div>
-              <div className="font-display font-extrabold group-hover:text-red transition-colors">
-                <Icon name="tag" size={14} className="inline" /> Все промокоды в категории «{store.category}»
-              </div>
-              <p className="mt-1 text-sm text-ink/55">
-                Смотреть скидки других магазинов в этой же категории
-              </p>
-            </div>
-            <span className="text-lg font-bold text-ink/30 group-hover:text-red transition-colors shrink-0">
-              →
-            </span>
-          </Link>
-        </section>
-
-        <OtherStores
-          current={store.slug}
-          category={store.categorySlug}
-          storeName={store.name}
-        />
 
         {/* Ссылки на статьи блога по теме магазина (Двунаправленный граф перелинковки) */}
         {(() => {
