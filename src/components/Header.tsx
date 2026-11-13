@@ -87,7 +87,7 @@ export default async function Header() {
 
           {/* Навигация */}
           <MegaMenu groups={groups} />
-          <MobileCatalogMenu groups={groups} />
+          <MobileCatalogMenu groups={groups} seasonal={seasonal} />
 
           <nav className="hidden lg:flex items-center gap-4 xl:gap-5 text-sm font-bold text-ink/70">
             {nav.map((item) => (

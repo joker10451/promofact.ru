@@ -76,6 +76,8 @@ export interface SeasonalPromo {
 /**
  * Какую распродажу показывать в шапке и Hero прямо сейчас.
  * Раньше «Разогрев 11.11» был зашит в разметку и висел после старта акции.
+ * Даты только на 2026 год: после 30.11 возвращает null — на следующий сезон
+ * нужно добавить новые константы выше.
  */
 export function getCurrentSeasonalPromo(now = new Date()): SeasonalPromo | null {
   const shopping = getShoppingDayStatus(now);
@@ -92,7 +94,7 @@ export function getCurrentSeasonalPromo(now = new Date()): SeasonalPromo | null 
   if (bf.stage !== "ended") {
     return {
       href: "/akcii/chernaya-pyatnica-2026",
-      navLabel: "Чёрная пятница",
+      navLabel: "Чёрная Пятница",
       heroText: bf.stage === "active"
         ? "Чёрная Пятница идёт до 30 ноября: промокоды на технику, одежду и доставку"
         : "Чёрная Пятница 26–30 ноября: собираем промокоды заранее",
