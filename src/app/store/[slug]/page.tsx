@@ -486,7 +486,7 @@ export default async function StorePage({
         <JsonLd key={(c.discountCode as string) ?? JSON.stringify(c)} data={c} />
       ))}
 
-      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 sm:pt-8">
         <Breadcrumbs
           items={[
             { label: "Главная", href: "/" },
@@ -496,9 +496,9 @@ export default async function StorePage({
           className="mb-2"
         />
 
-        <div className="mt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="mt-3 sm:mt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-            <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-1 shadow-2xs">
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-1 shadow-2xs">
               <StoreLogo
                 slug={store.slug}
                 name={store.name}
@@ -510,17 +510,16 @@ export default async function StorePage({
               />
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">
+              <h1 className="font-display text-lg sm:text-2xl md:text-3xl font-extrabold leading-tight text-ink break-words">
                 {`${barcodeCount > 0 ? "Промокоды и штрихкоды" : realCodeCount > 0 ? (codeFreeCount > 0 ? "Промокоды и акции" : "Промокоды") : "Акции"} ${store.name} на ${monthYear}${avitoByLink ? " — 1 000 ₽ на жильё / 5% на отели" : maxDisc ? ` — скидки ${maxDisc}` : ""}`}
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-ink/60">
                 {offerCountLabel}. {noKnownExpiry ? "Срок действия партнёром не указан — проверьте в магазине." : "Срок действия указан в карточке."}
               </p>
-              <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-paper border border-line px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/65">
-                  {noKnownExpiry ? "Срок и ограничения уточняйте у партнёра" : "Сроки и ограничения — в карточках"}
-                </span>
-                {storeProofCount > 0 && (
+              {/* Плашка «Сроки и ограничения — в карточках» повторяла строку выше
+                  и на телефоне отодвигала первый купон за первый экран. */}
+              {storeProofCount > 0 && (
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-red/10 border border-red/30 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink/70">
                     {storeProofCount}{" "}
                     {storeProofCount === 1
@@ -530,8 +529,8 @@ export default async function StorePage({
                         : "заказов оформлено"}{" "}
                     через нас
                   </span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
