@@ -184,7 +184,7 @@ export default async function CollectionsIndexPage() {
               <div>
                 <div className="font-bold text-ink">Реклама помечена</div>
                 <p className="mt-1">
-                  Ссылки на магазины партнёрские, у каждого предложения есть пометка «Реклама». Для вас цена не меняется.
+                  Ссылки на магазины партнёрские и помечены как реклама. Для вас цена не меняется.
                 </p>
               </div>
               <div>
