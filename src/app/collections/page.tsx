@@ -100,7 +100,7 @@ export default async function CollectionsIndexPage() {
               Тематические подборки промокодов
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink/65 sm:text-base">
-              Специальные подборки предложений для удобного шопинга: скидки на первый заказ, бесплатная доставка, онлайн-кинотеатры, повышенный кэшбэк и главные распродажи сезона.
+              Предложения сгруппированы по поводу: первый заказ, бесплатная доставка, кино и подписки, кэшбэк, распродажи сезона.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2.5">
@@ -176,21 +176,21 @@ export default async function CollectionsIndexPage() {
             </h2>
             <div className="mt-4 grid gap-6 sm:grid-cols-3 text-sm text-ink/70 leading-relaxed">
               <div>
-                <div className="font-bold text-ink">Только действующие коды</div>
+                <div className="font-bold text-ink">Срок действия</div>
                 <p className="mt-1">
-                  Каждый промокод и акция проходят автоматическую проверку срока действия и условий партнёра.
+                  Срок действия сверяется с данными партнёра. Когда он заканчивается, предложение пропадает из подборки.
                 </p>
               </div>
               <div>
-                <div className="font-bold text-ink">Реальная экономия</div>
+                <div className="font-bold text-ink">Реклама помечена</div>
                 <p className="mt-1">
-                  Мы отбираем предложения с максимальным дисконтом: от 10% до 90% или с бесплатной доставкой.
+                  Ссылки на магазины партнёрские и помечены как реклама. Для вас цена не меняется.
                 </p>
               </div>
               <div>
-                <div className="font-bold text-ink">Прозрачные правила</div>
+                <div className="font-bold text-ink">Условия на карточке</div>
                 <p className="mt-1">
-                  На карточке каждого купона указаны требования: минимальный чек, правила для новых клиентов и ограничения.
+                  Минимальный чек, только ли для новых клиентов, ограничения по региону — всё это написано на карточке купона.
                 </p>
               </div>
             </div>

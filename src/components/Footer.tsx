@@ -28,8 +28,7 @@ export default async function Footer() {
             ПРОМО<span className="text-red">·</span>ФАКТ
           </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/55">
-            Промокоды и купоны на скидку от магазинов-партнёров.
-            Только акции с действующим сроком.
+            Промокоды и акции магазинов из партнёрских сетей. Когда срок вышел, предложение убираем.
           </p>
           <a
             href="https://t.me/smart_zakupka"

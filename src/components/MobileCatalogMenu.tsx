@@ -118,7 +118,7 @@ export default function MobileCatalogMenu({
                   <Icon name="send" size={16} className="shrink-0" />
                   <div className="min-w-0">
                     <span className="block truncate text-ink font-extrabold text-[12px]">TG-канал</span>
-                    <span className="block truncate text-[10px] text-[#1d8fc8] font-medium">Новые коды</span>
+                    <span className="block truncate text-[10px] text-[#1d8fc8] font-medium">Скидки и новости</span>
                   </div>
                 </a>
               </div>
