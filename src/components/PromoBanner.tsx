@@ -118,8 +118,10 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
   const hasImage = Boolean(banner.image && banner.imageWidth && banner.imageHeight);
   const portrait = hasImage && banner.imageHeight! > banner.imageWidth!;
 
+  // Без картинки баннер — одна колонка: правая половина с гигантским повтором
+  // бейджа дублировала карточки купонов выше и обрезалась на 1440.
   const grid = !hasImage
-    ? "md:grid-cols-[1.15fr_1fr]"
+    ? ""
     : portrait
       ? "md:grid-cols-[minmax(0,300px)_1fr] md:items-center"
       : "md:grid-cols-[1.35fr_1fr] md:items-center";
@@ -157,7 +159,7 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
           >
             {banner.title}
           </h2>
-          <p className="text-sm text-white/70 sm:text-base">{banner.subtitle}</p>
+          <p className="max-w-2xl text-sm text-white/70 sm:text-base">{banner.subtitle}</p>
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full bg-gradient-to-r from-mint to-[#1fa3e0] px-5 py-2.5 font-display text-lg font-extrabold">
               {banner.badge}
@@ -174,16 +176,6 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
             {banner.cta} →
           </span>
         </div>
-        {!hasImage && (
-          <div
-            aria-hidden="true"
-            className="hidden items-center justify-center bg-gradient-to-br from-mint/30 via-ink-soft to-ink md:flex"
-          >
-            <span className="whitespace-nowrap font-display text-5xl font-extrabold text-mint/80 lg:text-6xl">
-              {banner.badge}
-            </span>
-          </div>
-        )}
       </a>
       {(() => {
         const { legalText, medicalWarning } = parseOrdAndWarning(banner.ordText);
