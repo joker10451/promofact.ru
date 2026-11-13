@@ -47,18 +47,8 @@ export default function NewsletterBox({ source = "home" }: NewsletterBoxProps) {
   return (
     <section
       aria-label="Подписка на дайджест промокодов"
-      className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-paper via-white to-sand/40 p-6 sm:p-10 shadow-xs"
+      className="border-t border-line pt-8 sm:pt-10"
     >
-      {/* Фоновые акценты */}
-      <div
-        className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-red/10 blur-3xl"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-yellow/15 blur-3xl"
-        aria-hidden="true"
-      />
-
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8 items-center">
         <div>
           <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-extrabold text-ink tracking-tight">

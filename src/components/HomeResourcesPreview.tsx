@@ -37,12 +37,12 @@ export default function HomeResourcesPreview() {
         </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3 md:gap-8">
         {RESOURCES.map((resource) => (
           <Link
             key={resource.href}
             href={resource.href}
-            className="group relative flex min-w-0 flex-col rounded-[20px] border border-line bg-white px-5 py-5 shadow-[0_8px_25px_-22px_rgba(11,16,43,0.2)] transition-all hover:-translate-y-0.5 hover:border-red/40 hover:shadow-[0_14px_30px_-20px_rgba(11,16,43,0.28)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red sm:px-6"
+            className="group relative flex min-w-0 flex-col border-t-2 border-ink/15 pt-4 transition-colors hover:border-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red"
           >
             <h3 className="font-display text-base font-extrabold text-ink">{resource.title}</h3>
             <p className="mt-1.5 text-xs leading-relaxed text-ink/65 sm:text-sm">{resource.description}</p>

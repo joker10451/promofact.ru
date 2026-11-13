@@ -23,7 +23,7 @@ export default function PrioritySearchLinks({ stores }: { stores: StoreInfo[] })
   if (items.length === 0) return null;
 
   return (
-    <section aria-labelledby="priority-stores-heading" className="rounded-[22px] border border-line bg-white px-4 py-5 sm:px-6 sm:py-6">
+    <section aria-labelledby="priority-stores-heading" className="border-t border-line pt-5 sm:pt-6">
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 id="priority-stores-heading" className="font-display text-lg font-extrabold text-ink sm:text-xl">
@@ -39,7 +39,7 @@ export default function PrioritySearchLinks({ stores }: { stores: StoreInfo[] })
           <Link
             key={item.slug}
             href={`/store/${item.slug}#offers`}
-            className="flex min-h-24 flex-col justify-between rounded-xl border border-line bg-paper/40 px-3 py-3 transition-colors hover:border-red/40 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red sm:min-h-28 sm:p-4"
+            className="flex min-h-24 flex-col justify-between border-l-2 border-line bg-transparent px-3 py-2 transition-colors hover:border-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red sm:min-h-24 sm:px-4"
           >
             <span className="text-sm font-extrabold leading-snug text-ink">{item.label}</span>
             <span className="mt-1 text-xs leading-snug text-ink/65">{item.description}</span>

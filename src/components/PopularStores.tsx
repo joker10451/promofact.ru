@@ -49,8 +49,8 @@ export default async function PopularStores() {
   }
 
   return (
-    <section aria-label="Популярные магазины" className="rounded-[20px] border border-line bg-white py-3.5 sm:py-8 shadow-[0_12px_48px_-38px_rgba(11,16,43,0.35)] sm:rounded-[28px]">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+    <section aria-label="Популярные магазины" className="py-1 sm:py-2">
+      <div>
         <div className="mb-2.5 sm:mb-6 flex flex-wrap items-end justify-between gap-3">
           <div className="flex items-center gap-2">
             <Icon name="store" size={19} className="text-ink/50" />
@@ -72,25 +72,25 @@ export default async function PopularStores() {
         </div>
 
         {/* Сетка популярных брендов в стиле Pikabu (круглые иконки, бейджи акций) */}
-        <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 xl:grid-cols-12">
+        <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-3 md:grid-cols-6">
           {top.map((s, index) => (
             <Link
               key={s.slug}
               href={`/store/${s.slug}`}
-              className={`${index >= 6 ? "hidden sm:flex" : "flex"} group min-w-0 flex-col items-center justify-center rounded-2xl border border-line bg-paper/35 px-2 py-2.5 sm:py-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-red/40 hover:bg-white hover:shadow-[0_12px_28px_-16px_rgba(11,16,43,0.3)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red`}
+              className={`${index >= 6 ? "hidden sm:flex" : "flex"} group min-w-0 flex-col items-center justify-center rounded-2xl border border-line bg-paper/35 px-2 py-3 sm:py-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-red/40 hover:bg-white hover:shadow-[0_12px_28px_-16px_rgba(11,16,43,0.3)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red`}
             >
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 border border-line group-hover:border-red/35 transition-colors">
+              <div className="flex h-16 w-16 sm:h-[72px] sm:w-[72px] shrink-0 items-center justify-center rounded-xl bg-white p-1.5 border border-line group-hover:border-red/35 transition-colors">
                 <StoreLogo
                   slug={s.slug}
                   name={s.name}
                   logo={s.logo}
                   site={s.site}
-                  size={40}
+                  size={56}
                   priority={index < 6}
                   className="max-h-full max-w-full object-contain"
                 />
               </div>
-              <span className="mt-2 block w-full truncate text-xs font-extrabold text-ink group-hover:text-red transition-colors">
+              <span className="mt-2.5 line-clamp-2 min-h-[2.4em] w-full break-words text-xs font-extrabold leading-tight sm:text-[13px] text-ink group-hover:text-red transition-colors">
                 {s.name}
               </span>
               <span className="mt-1 inline-block rounded-full bg-mint/10 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-mint-dark">

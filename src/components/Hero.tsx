@@ -124,16 +124,6 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
 
   return (
     <section className="relative bg-gradient-to-b from-paper via-white to-paper pt-3.5 pb-3 sm:pt-12 sm:pb-12 border-b border-line">
-      {/* Декоративные световые пятна с ограничением по ширине */}
-      <div
-        className="pointer-events-none absolute -left-20 top-10 h-56 w-56 max-w-full rounded-full bg-yellow/15 blur-3xl"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute right-0 top-12 h-56 w-56 max-w-full rounded-full bg-red/10 blur-3xl"
-        aria-hidden="true"
-      />
-
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 relative z-10">
         {/* Сезонная плашка 11.11 */}
         <div className="flex justify-center mb-2 sm:mb-3.5">
