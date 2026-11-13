@@ -41,7 +41,7 @@ export default function LatestTips({ limit = 3 }: { limit?: number }) {
                 <ArticleCover slug={a.slug} title={a.title} className="mb-4 h-24 w-full" />
                 <div className="flex items-center justify-between gap-2 text-[11px] font-bold text-ink/40 mb-3">
                   <span className="uppercase tracking-wider">Гайд по экономии</span>
-                  <span>⏱ 3 мин чтения</span>
+                  <span>3 мин чтения</span>
                 </div>
                 <h3 className="font-display text-base sm:text-lg font-bold text-ink group-hover:text-red transition-colors line-clamp-2 leading-snug">
                   {a.title}

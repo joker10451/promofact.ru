@@ -61,7 +61,6 @@ export default function SeasonalSaleBanner({
             </div>
 
             <h3 className="mt-4 font-display text-xl font-extrabold sm:text-2xl text-white group-hover:text-yellow transition-colors flex items-center gap-2">
-              <span>🛍️</span>
               <span>Всемирный день шопинга 11.11</span>
             </h3>
             <p className="mt-2 text-xs leading-relaxed text-white/80 sm:text-sm">
@@ -100,7 +99,6 @@ export default function SeasonalSaleBanner({
             </div>
 
             <h3 className="mt-4 font-display text-lg font-extrabold sm:text-xl text-ink group-hover:text-red transition-colors flex items-center gap-2">
-              <span>🖤</span>
               <span>Чёрная Пятница 2026</span>
             </h3>
             <p className="mt-2 text-xs leading-relaxed text-ink/70 sm:text-sm">

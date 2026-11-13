@@ -172,7 +172,7 @@ export default async function ArticlePage({
             <div className="flex items-center gap-2 text-[11px] font-bold text-ink/40 mb-3">
               <span className="uppercase tracking-wider">Гайд по экономии</span>
               <span>•</span>
-              <span>⏱ 3–4 мин чтения</span>
+              <span>3–4 мин чтения</span>
               <span>•</span>
               <span className="text-mint-dark"><Icon name="check" size={11} className="inline" /> Актуально</span>
             </div>

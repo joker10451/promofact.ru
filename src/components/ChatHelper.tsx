@@ -361,9 +361,11 @@ export default function ChatHelper() {
           isScrollingDown && !open
             ? "translate-x-full opacity-0 pointer-events-none md:translate-x-0 md:opacity-100 md:pointer-events-auto"
             : "translate-x-0 opacity-100"
-        } right-0 bottom-[68px] rounded-l-2xl py-2 px-2.5 md:bottom-4 md:right-4 md:h-12 md:w-12 md:rounded-full md:p-0 hover:scale-105 active:scale-95`}
+        } right-0 bottom-[68px] rounded-l-2xl py-2 px-2.5 md:bottom-4 md:right-4 md:h-11 md:gap-2 md:rounded-full md:px-4 md:py-0 hover:scale-105 active:scale-95`}
       >
         {open ? <Icon name="close" size={18} /> : <Icon name="bulb" size={18} />}
+        {/* Подпись на десктопе: безымянный красный круг читался как непонятная реклама. */}
+        {!open && <span className="hidden text-sm font-bold md:inline">Помощь</span>}
       </button>
 
       {open && (

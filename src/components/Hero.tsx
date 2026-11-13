@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ymReachGoal } from "@/components/YandexMetrika";
 import type { Coupon } from "@/lib/types";
 import type { SearchIndex } from "@/lib/searchIndex";
+import type { SeasonalPromo } from "@/lib/seasonalEvents";
 import { matchStoreSearch, normalizeSearchTerm, convertKeyboardLayout } from "@/lib/searchUtils";
 
 interface HeroProps {
@@ -20,6 +21,8 @@ interface HeroProps {
   /** Число активных акций приходит готовым: сам массив здесь не нужен. */
   couponCount?: number;
   proofTotal?: number;
+  /** Текущая распродажа считается на сервере, чтобы не расходиться при гидрации. */
+  seasonal?: SeasonalPromo | null;
 }
 
 /** Склонение «заказ/заказа/заказов». */
@@ -31,7 +34,7 @@ function pluralOrders(n: number): string {
   return "заказов";
 }
 
-export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroProps) {
+export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal = null }: HeroProps) {
   const router = useRouter();
   const stores = search?.stores ?? [];
   const coupons = search?.coupons ?? [];
@@ -135,20 +138,22 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0 }: HeroPr
       />
 
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 relative z-10">
-        {/* Сезонная плашка 11.11 */}
+        {/* Сезонная плашка: текущая распродажа или ничего */}
+        {seasonal && (
         <div className="flex justify-center mb-2 sm:mb-3.5">
           <Link
-            href="/akcii/den-shopinga-11-11"
+            href={seasonal.href}
             className="group inline-flex items-center gap-2 rounded-full bg-red/10 hover:bg-red/15 border border-red/25 px-3.5 py-1 text-xs font-extrabold text-red transition-all shadow-xs hover:scale-[1.02]"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-red"></span>
             </span>
-            <span>🔥 Разогрев 11.11: скидки до −55% и промокоды ко Дню шопинга</span>
+            <span>{seasonal.heroText}</span>
             <span className="group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
         </div>
+        )}
 
         {/* Заголовок */}
         <h1 className="font-display text-[clamp(1.45rem,6.4vw,1.95rem)] leading-[1.1] sm:text-5xl md:text-[3.55rem] font-extrabold tracking-tight text-ink sm:leading-[1.12]">

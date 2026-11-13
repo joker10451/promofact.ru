@@ -94,7 +94,7 @@ export default function MobileCatalogMenu({ groups }: { groups: MegaMenuGroup[] 
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2 rounded-xl bg-red/10 border border-red/20 px-3 py-2 text-xs font-bold text-red hover:bg-red/15 transition-all"
                 >
-                  <span className="text-base">🔥</span>
+                  <Icon name="flame" size={16} className="shrink-0" />
                   <div className="min-w-0">
                     <span className="block truncate text-ink font-extrabold text-[12px]">11.11 Скидки</span>
                     <span className="block truncate text-[10px] text-red font-medium">Главный шопинг</span>
@@ -106,10 +106,10 @@ export default function MobileCatalogMenu({ groups }: { groups: MegaMenuGroup[] 
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 rounded-xl bg-[#2AABEE]/10 border border-[#2AABEE]/25 px-3 py-2 text-xs font-bold text-[#1d8fc8] hover:bg-[#2AABEE]/15 transition-all"
                 >
-                  <span className="text-base">📢</span>
+                  <Icon name="send" size={16} className="shrink-0" />
                   <div className="min-w-0">
                     <span className="block truncate text-ink font-extrabold text-[12px]">TG-канал</span>
-                    <span className="block truncate text-[10px] text-[#1d8fc8] font-medium">Секретные коды</span>
+                    <span className="block truncate text-[10px] text-[#1d8fc8] font-medium">Новые коды</span>
                   </div>
                 </a>
               </div>
