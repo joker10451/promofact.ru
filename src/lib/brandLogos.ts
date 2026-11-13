@@ -90,6 +90,7 @@ export const LOCAL_BRAND_ICONS: Record<string, string> = {
   "yandex-plus": "/brands/yandex-plus.png",
   "zolotoe-yabloko": "/brands/zolotoe-yabloko.png",
   "sber": "/brands/sberbank.png",
+  "debetovaya-sberkarta": "/brands/sberbank.png",
   "tanuki": "/brands/tanukifamily.png",
   "perekrestok": "/brands/perekrestok-dostavka.png",
   "vkusvill": "/brands/vkusvill-dostavka.png",

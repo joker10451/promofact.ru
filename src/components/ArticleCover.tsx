@@ -1,4 +1,7 @@
 import Icon from "@/components/Icon";
+import StoreLogo from "@/components/StoreLogo";
+import type { ArticleLink } from "@/lib/articles";
+import { articleCoverFacts } from "@/lib/articleCover";
 
 /**
  * Обложка статьи, собираемая из её же данных.
@@ -59,15 +62,41 @@ function paletteIndex(slug: string): number {
 export default function ArticleCover({
   slug,
   title,
+  related,
   className = "",
   iconSize = 34,
 }: {
   slug: string;
   title: string;
+  related?: ArticleLink[];
   className?: string;
   iconSize?: number;
 }) {
   const palette = PALETTES[paletteIndex(slug)];
+  const { store, benefit } = articleCoverFacts(title, related);
+
+  // Статья про конкретный магазин: логотип и выгода из заголовка вместо
+  // одинаковой пастельной плашки с иконкой — карточки различаются по сути.
+  if (store) {
+    // Не крупнее 64 px: растровые логотипы из фида при увеличении размываются.
+    const logoSize = Math.min(64, Math.round(iconSize * 1.3));
+    return (
+      <div
+        className={`relative flex items-center justify-center gap-4 overflow-hidden rounded-xl bg-gradient-to-br ${palette} ${className}`}
+        aria-hidden
+      >
+        <span className="flex shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-1.5 shadow-2xs">
+          {/* На странице статьи обложка в первом экране — логотип грузим сразу. */}
+          <StoreLogo slug={store.slug} name={store.name} size={logoSize} priority={iconSize >= 60} />
+        </span>
+        {benefit && (
+          <span className={`font-display font-extrabold leading-none text-red ${iconSize >= 60 ? "text-4xl sm:text-5xl" : "text-2xl"}`}>
+            {benefit}
+          </span>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div

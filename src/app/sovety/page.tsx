@@ -66,12 +66,6 @@ export default function SovetyPage() {
                 {getArticles().length} практических инструкций: как выжимать максимум выгоды из промокодов, кэшбэка и акций любимых брендов.
               </p>
             </div>
-
-            <div className="flex items-center gap-2 text-xs font-bold text-ink/70">
-              <span className="rounded-full bg-mint/20 px-3 py-1 text-mint-dark">
-                <Icon name="check" size={11} className="inline" /> Обновлено в 2026
-              </span>
-            </div>
           </div>
 
           {/* Сетка статей */}
@@ -83,7 +77,7 @@ export default function SovetyPage() {
                 className="group flex flex-col justify-between rounded-2xl border border-line bg-white p-6 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-ink/25 hover:shadow-md"
               >
                 <div>
-                  <ArticleCover slug={a.slug} title={a.title} className="mb-4 h-24 w-full" />
+                  <ArticleCover slug={a.slug} title={a.title} related={a.related} className="mb-4 h-24 w-full" />
                   <div className="flex items-center justify-between text-[11px] font-bold text-ink/40 mb-3">
                     <span className="uppercase tracking-wider">Инструкция</span>
                     <span>3–4 мин</span>
@@ -100,9 +94,12 @@ export default function SovetyPage() {
                   <span className="text-xs font-bold text-red group-hover:underline">
                     Читать статью →
                   </span>
-                  <span className="text-[11px] font-semibold text-mint-dark">
-                    <Icon name="check" size={11} className="inline" /> Актуально
-                  </span>
+                  {/* Вместо «Актуально» на каждой карточке — настоящая дата публикации, если она есть. */}
+                  {a.published && /^\d{4}-\d{2}-\d{2}$/.test(a.published) && (
+                    <time dateTime={a.published} className="text-[11px] font-semibold text-ink/45">
+                      {new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", timeZone: "Europe/Moscow" }).format(new Date(`${a.published}T12:00:00+03:00`))}
+                    </time>
+                  )}
                 </div>
               </Link>
             ))}

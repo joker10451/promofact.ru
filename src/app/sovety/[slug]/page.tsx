@@ -200,6 +200,7 @@ export default async function ArticlePage({
               <ArticleCover
                 slug={article.slug}
                 title={article.title}
+                related={article.related}
                 iconSize={64}
                 className="mt-6 h-40 w-full rounded-3xl border border-line sm:h-52"
               />
