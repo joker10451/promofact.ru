@@ -142,7 +142,8 @@ export default function StoreCouponBrowser({
               : "Штрихкод для покупки в магазине"
             : storeName.length > 25 ? "Рабочие промокоды и акции" : `Рабочие промокоды и акции ${storeName}`}
         </h2>
-        <span className="text-xs font-bold text-ink/50 bg-paper px-2.5 py-1 rounded-full border border-line">
+        {/* На телефоне счётчик уже есть под H1, а плашка переносилась отдельной строкой. */}
+        <span className="hidden sm:inline text-xs font-bold text-ink/50 bg-paper px-2.5 py-1 rounded-full border border-line">
           {filteredCoupons.length === 0
             ? "0 предложений"
             : (() => {
