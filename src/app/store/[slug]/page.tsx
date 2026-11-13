@@ -554,7 +554,7 @@ export default async function StorePage({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-extrabold text-ink flex items-center gap-2">
-                  <span>🔬</span> Скидки на медицинские анализы и онлайн-врачей
+                  Скидки на медицинские анализы и онлайн-врачей
                 </p>
                 <p className="mt-1 text-xs sm:text-sm text-ink/75 leading-relaxed">
                   На этой странице собраны все официальные промокоды проекта «СберЗдоровье (Анализы)»: скидки до 40% на любые лабораторные чекапы, 30% на анализы для беременных и консультации специалистов.

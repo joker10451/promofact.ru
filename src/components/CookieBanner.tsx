@@ -22,12 +22,12 @@ export default function CookieBanner() {
   return (
     // На мобильном — одна компактная строка над нижней навигацией (~59px):
     // карточка в две строки с крупными кнопками закрывала четверть экрана.
-    // На десктопе стоит левее круглой кнопки помощника, чтобы не перекрывать её.
+    // На десктопе стоит левее кнопки помощника «Помощь», чтобы не перекрывать её.
     <div
       role="dialog"
       aria-live="polite"
       aria-label="Использование cookie"
-      className="fixed inset-x-2 bottom-[68px] z-50 mx-auto max-w-md animate-in slide-in-from-bottom-4 fade-in duration-300 sm:inset-x-auto sm:bottom-6 sm:right-20"
+      className="fixed inset-x-2 bottom-[68px] z-50 mx-auto max-w-md animate-in slide-in-from-bottom-4 fade-in duration-300 sm:inset-x-auto sm:bottom-6 sm:right-20 md:right-40"
     >
       <div className="flex items-center gap-2 rounded-2xl bg-white/95 py-2 pl-3.5 pr-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)] ring-1 ring-black/5 backdrop-blur-sm">
         <p className="min-w-0 flex-1 text-xs leading-snug text-ink/75">

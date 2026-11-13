@@ -127,7 +127,7 @@ export default async function Footer() {
             <li>
               <Link href="/akcii/den-shopinga-11-11" className={footerLink}>
                 <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
-                🔥 Всемирный день шопинга 11.11
+                Всемирный день шопинга 11.11
               </Link>
             </li>
             <li>

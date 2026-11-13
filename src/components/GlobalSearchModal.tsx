@@ -293,7 +293,7 @@ export default function GlobalSearchModal() {
           <div className="px-4 py-3 border-b border-line/60 bg-white space-y-3">
             <div>
               <span className="text-[11px] font-bold text-red uppercase tracking-wider block mb-1.5">
-                🔥 Главные распродажи:
+                Главные распродажи:
               </span>
               <div className="flex flex-wrap gap-2">
                 <Link
@@ -301,7 +301,6 @@ export default function GlobalSearchModal() {
                   onClick={closeSearch}
                   className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-red px-3 py-1 text-xs font-bold text-white shadow-2xs hover:opacity-95 transition-all"
                 >
-                  <span>🔥</span>
                   <span>11.11 День шопинга</span>
                 </Link>
                 <Link
@@ -309,7 +308,6 @@ export default function GlobalSearchModal() {
                   onClick={closeSearch}
                   className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1 text-xs font-bold text-white shadow-2xs hover:bg-ink/80 transition-all"
                 >
-                  <span>🖤</span>
                   <span>Чёрная Пятница 2026</span>
                 </Link>
                 <Link
@@ -317,7 +315,6 @@ export default function GlobalSearchModal() {
                   onClick={closeSearch}
                   className="inline-flex items-center gap-1.5 rounded-full bg-mint/20 border border-mint/40 px-3 py-1 text-xs font-bold text-teal-800 hover:bg-mint/30 transition-all"
                 >
-                  <span>🎄</span>
                   <span>Новый год 2027</span>
                 </Link>
               </div>
@@ -348,7 +345,7 @@ export default function GlobalSearchModal() {
           {/* Умная подсказка сезонных распродаж */}
           {Boolean(query && /11|шопинг|черн|пятниц|год|подар|black|friday/i.test(query)) && (
             <div className="rounded-2xl bg-gradient-to-r from-red/10 via-yellow/10 to-red/10 border border-red/25 p-3">
-              <div className="text-[11px] font-bold text-red uppercase tracking-wider mb-1">🔥 Сезонная распродажа</div>
+              <div className="text-[11px] font-bold text-red uppercase tracking-wider mb-1">Сезонная распродажа</div>
               {/11|шопинг/i.test(query) ? (
                 <Link
                   href="/collections/den-shopinga-11-11"

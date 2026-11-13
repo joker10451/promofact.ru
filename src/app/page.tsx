@@ -20,6 +20,7 @@ import { isRealPromoCode } from "@/lib/dedupe";
 import { withoutForbiddenTravelCoPromotion, withoutForbiddenTanukiCoPromotion, withoutForbiddenFloristBeautyCoPromotion, withoutForbiddenGroceryCoPromotion, withoutForbiddenSberAnalizyCreditCardCoPromotion } from "@/lib/publisherPlacementRules";
 
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { getCurrentSeasonalPromo } from "@/lib/seasonalEvents";
 
 export const revalidate = 3600; // Обновление не реже чем раз в час; клиент дополнительно скрывает истёкшие купоны.
 
@@ -92,7 +93,7 @@ export default async function Home() {
 
       <main className="min-h-screen">
         {/* 2. Hero + ЕДИНСТВЕННЫЙ крупный поиск + Trust bar */}
-        <Hero search={searchIndex} couponCount={coupons.length} proofTotal={proofTotal} />
+        <Hero search={searchIndex} couponCount={coupons.length} proofTotal={proofTotal} seasonal={getCurrentSeasonalPromo()} />
 
         {/* 3. Популярные магазины в стиле Пикабу — быстрый вход по круглым брендам */}
         <div className="mx-auto max-w-7xl px-4 pt-2.5 sm:pt-8">

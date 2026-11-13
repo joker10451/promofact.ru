@@ -130,7 +130,7 @@ export default async function ActionPage({
           <header className="mt-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-ink shadow-2xs">
-                {action.badge || "🔥 Сезонная акция"}
+                {action.badge || "Сезонная акция"}
               </span>
               {action.period && (
                 <span className="text-xs font-bold text-ink/70 bg-white border border-line rounded-full px-3 py-1">

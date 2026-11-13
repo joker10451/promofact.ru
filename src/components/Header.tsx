@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 import MegaMenu, { type MegaMenuGroup } from "@/components/MegaMenu";
+import Icon from "@/components/Icon";
+import { getCurrentSeasonalPromo } from "@/lib/seasonalEvents";
 import MobileCatalogMenu from "@/components/MobileCatalogMenu";
 import HeaderSearchTrigger from "@/components/HeaderSearchTrigger";
 import { getCategories } from "@/lib/perfluence";
@@ -13,7 +15,6 @@ import {
 
 // Прямые ссылки, которым не место в каталоге категорий.
 const NAV = [
-  { href: "/akcii/den-shopinga-11-11", label: "🔥 11.11", isHot: true },
   { href: "/catalog", label: "Купоны", isHot: false },
   { href: "/promokody", label: "Магазины", isHot: false },
   { href: "/collections", label: "Подборки", isHot: false },
@@ -57,6 +58,8 @@ async function buildGroups(): Promise<MegaMenuGroup[]> {
 
 export default async function Header() {
   const groups = await buildGroups();
+  const seasonal = getCurrentSeasonalPromo();
+  const nav = seasonal ? [{ href: seasonal.href, label: seasonal.navLabel, isHot: true }, ...NAV] : NAV;
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-line shadow-xs">
@@ -84,10 +87,10 @@ export default async function Header() {
 
           {/* Навигация */}
           <MegaMenu groups={groups} />
-          <MobileCatalogMenu groups={groups} />
+          <MobileCatalogMenu groups={groups} seasonal={seasonal} />
 
           <nav className="hidden lg:flex items-center gap-4 xl:gap-5 text-sm font-bold text-ink/70">
-            {NAV.map((item) => (
+            {nav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -97,6 +100,7 @@ export default async function Header() {
                     : "hover:text-ink after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:rounded-full after:bg-red after:transition-all hover:after:w-full"
                 }`}
               >
+                {item.isHot && <Icon name="flame" size={13} />}
                 {item.label}
               </Link>
             ))}

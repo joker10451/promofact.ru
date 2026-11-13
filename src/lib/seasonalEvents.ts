@@ -38,7 +38,7 @@ export function getShoppingDayStatus(now = new Date()): SeasonalEventStatus {
   if (nowMs >= targetMs && nowMs <= endMs) {
     return {
       daysLeft: 0,
-      badgeText: "🔥 Распродажа в разгаре",
+      badgeText: "Распродажа в разгаре",
       stage: "active",
       headline: "Главный пик скидок года 11.11 активен",
       formattedTargetDate: "11–14 ноября 2026",
@@ -60,11 +60,47 @@ export function getShoppingDayStatus(now = new Date()): SeasonalEventStatus {
 
   return {
     daysLeft,
-    badgeText: daysLeft <= 10 ? `🔥 До старта ${daysLeft} ${pluralDays(daysLeft)}` : `Старт через ${daysLeft} ${pluralDays(daysLeft)}`,
+    badgeText: daysLeft <= 10 ? `До старта ${daysLeft} ${pluralDays(daysLeft)}` : `Старт через ${daysLeft} ${pluralDays(daysLeft)}`,
     stage: "warmup",
     headline: "Разогрев распродажи 11.11: сбор корзины",
     formattedTargetDate: "11 ноября 2026",
   };
+}
+
+export interface SeasonalPromo {
+  href: string;
+  navLabel: string;
+  heroText: string;
+}
+
+/**
+ * Какую распродажу показывать в шапке и Hero прямо сейчас.
+ * Раньше «Разогрев 11.11» был зашит в разметку и висел после старта акции.
+ * Даты только на 2026 год: после 30.11 возвращает null — на следующий сезон
+ * нужно добавить новые константы выше.
+ */
+export function getCurrentSeasonalPromo(now = new Date()): SeasonalPromo | null {
+  const shopping = getShoppingDayStatus(now);
+  if (shopping.stage !== "ended") {
+    return {
+      href: "/akcii/den-shopinga-11-11",
+      navLabel: "11.11",
+      heroText: shopping.stage === "active"
+        ? "11.11 идёт до 14 ноября: скидки до −55% и промокоды ко Дню шопинга"
+        : "Разогрев 11.11: скидки до −55% и промокоды ко Дню шопинга",
+    };
+  }
+  const bf = getBlackFridayStatus(now);
+  if (bf.stage !== "ended") {
+    return {
+      href: "/akcii/chernaya-pyatnica-2026",
+      navLabel: "Чёрная Пятница",
+      heroText: bf.stage === "active"
+        ? "Чёрная Пятница идёт до 30 ноября: промокоды на технику, одежду и доставку"
+        : "Чёрная Пятница 26–30 ноября: собираем промокоды заранее",
+    };
+  }
+  return null;
 }
 
 /**
@@ -78,7 +114,7 @@ export function getBlackFridayStatus(now = new Date()): SeasonalEventStatus {
   if (nowMs >= targetMs && nowMs <= endMs) {
     return {
       daysLeft: 0,
-      badgeText: "🖤 Чёрная Пятница в разгаре",
+      badgeText: "Чёрная Пятница в разгаре",
       stage: "active",
       headline: "Максимальные скидки года активны",
       formattedTargetDate: "26–30 ноября 2026",
@@ -100,7 +136,7 @@ export function getBlackFridayStatus(now = new Date()): SeasonalEventStatus {
 
   return {
     daysLeft,
-    badgeText: daysLeft <= 7 ? `🖤 До старта ${daysLeft} ${pluralDays(daysLeft)}` : `Старт через ${daysLeft} ${pluralDays(daysLeft)}`,
+    badgeText: daysLeft <= 7 ? `До старта ${daysLeft} ${pluralDays(daysLeft)}` : `Старт через ${daysLeft} ${pluralDays(daysLeft)}`,
     stage: "warmup",
     headline: "Подготовка к главной распродаже года",
     formattedTargetDate: "26 ноября 2026",

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { MegaMenuGroup } from "@/components/MegaMenu";
 import { plural } from "@/lib/format";
 import Icon from "@/components/Icon";
+import type { SeasonalPromo } from "@/lib/seasonalEvents";
 
 /**
  * Каталог категорий для мобильных.
@@ -14,7 +15,13 @@ import Icon from "@/components/Icon";
  * Поэтому здесь отдельная выдвижная панель: разделы раскрываются гармошкой,
  * открыт по умолчанию только первый, чтобы список не превращался в простыню.
  */
-export default function MobileCatalogMenu({ groups }: { groups: MegaMenuGroup[] }) {
+export default function MobileCatalogMenu({
+  groups,
+  seasonal = null,
+}: {
+  groups: MegaMenuGroup[];
+  seasonal?: SeasonalPromo | null;
+}) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(groups[0]?.id ?? null);
 
@@ -87,29 +94,31 @@ export default function MobileCatalogMenu({ groups }: { groups: MegaMenuGroup[] 
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2">
-              {/* Быстрый доступ: 11.11 и Telegram */}
+              {/* Быстрый доступ: текущая распродажа (как в шапке) и Telegram */}
               <div className="mb-3 grid grid-cols-2 gap-2 px-1">
+                {seasonal && (
                 <Link
-                  href="/akcii/den-shopinga-11-11"
+                  href={seasonal.href}
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2 rounded-xl bg-red/10 border border-red/20 px-3 py-2 text-xs font-bold text-red hover:bg-red/15 transition-all"
                 >
-                  <span className="text-base">🔥</span>
+                  <Icon name="flame" size={16} className="shrink-0" />
                   <div className="min-w-0">
-                    <span className="block truncate text-ink font-extrabold text-[12px]">11.11 Скидки</span>
-                    <span className="block truncate text-[10px] text-red font-medium">Главный шопинг</span>
+                    <span className="block truncate text-ink font-extrabold text-[12px]">{seasonal.navLabel}</span>
+                    <span className="block truncate text-[10px] text-red font-medium">Распродажа</span>
                   </div>
                 </Link>
+                )}
                 <a
                   href="https://t.me/smart_zakupka"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 rounded-xl bg-[#2AABEE]/10 border border-[#2AABEE]/25 px-3 py-2 text-xs font-bold text-[#1d8fc8] hover:bg-[#2AABEE]/15 transition-all"
                 >
-                  <span className="text-base">📢</span>
+                  <Icon name="send" size={16} className="shrink-0" />
                   <div className="min-w-0">
                     <span className="block truncate text-ink font-extrabold text-[12px]">TG-канал</span>
-                    <span className="block truncate text-[10px] text-[#1d8fc8] font-medium">Секретные коды</span>
+                    <span className="block truncate text-[10px] text-[#1d8fc8] font-medium">Новые коды</span>
                   </div>
                 </a>
               </div>

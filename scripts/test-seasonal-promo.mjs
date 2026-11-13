@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { getCurrentSeasonalPromo } from "../src/lib/seasonalEvents.ts";
+const at = (s) => getCurrentSeasonalPromo(new Date(s));
+assert.match(at("2026-11-05T12:00:00+03:00").heroText, /^Разогрев 11\.11/);
+assert.match(at("2026-11-13T12:00:00+03:00").heroText, /^11\.11 идёт/);
+assert.equal(at("2026-11-15T12:00:00+03:00").href, "/akcii/chernaya-pyatnica-2026");
+assert.match(at("2026-11-15T12:00:00+03:00").heroText, /26–30 ноября/);
+assert.match(at("2026-11-27T12:00:00+03:00").heroText, /идёт до 30/);
+assert.equal(at("2026-12-02T12:00:00+03:00"), null);
+console.log("seasonal ok");

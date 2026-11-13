@@ -86,7 +86,7 @@ export default function SovetyPage() {
                   <ArticleCover slug={a.slug} title={a.title} className="mb-4 h-24 w-full" />
                   <div className="flex items-center justify-between text-[11px] font-bold text-ink/40 mb-3">
                     <span className="uppercase tracking-wider">Инструкция</span>
-                    <span>⏱ 3–4 мин</span>
+                    <span>3–4 мин</span>
                   </div>
                   <h2 className="font-display text-base sm:text-lg font-bold leading-snug text-ink group-hover:text-red transition-colors">
                     {a.title}
