@@ -118,7 +118,7 @@ const SAMOKAT_AFFILIATE: Coupon["affiliate"] = {
   link: SAMOKAT_LINK,
   landingLink: SAMOKAT_LINK,
   ordMarker: SAMOKAT_ERID,
-  ordText: 'Реклама. ООО «Умный ритейл», ИНН 7811657720. erid: 2RanymVswDd',
+  ordText: 'Реклама. Предложение действует с 15.10.2026 по 31.12.2026. Организатор: ООО «Умный ритейл», ИНН 7811657720. erid: 2RanymVswDd',
 };
 
 
