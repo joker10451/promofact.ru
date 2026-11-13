@@ -33,6 +33,9 @@ jobs:
       - name: Unit & Regression Tests
         run: npm test
 
+      - name: Store display names
+        run: npm run test:store-display-name
+
       - name: Security, posting reliability and geo indexing
         run: |
           npm run test:trust

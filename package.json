@@ -17,6 +17,7 @@
     "test:parity": "node --loader ./scripts/ts-loader.mjs scripts/test-perfluence-promo-parity.mjs",
     "test:perfluence-oct28": "node scripts/test-perfluence-oct28.mjs",
     "test:yandex-plus-truthful": "node scripts/test-yandex-plus-truthful.mjs",
+    "test:store-display-name": "node --loader ./scripts/ts-loader.mjs scripts/test-store-display-name.mjs",
     "test:winlab-pending-erid": "node --loader ./scripts/ts-loader.mjs scripts/test-winlab-pending-erid.mjs",
     "test:perfluence-oct26": "node scripts/test-perfluence-oct26.mjs",
     "test:admitad-api": "node --loader ./scripts/ts-loader.mjs scripts/test-admitad-api.mjs",

@@ -3,6 +3,7 @@ import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
 import StoreLogo from "@/components/StoreLogo";
 import { getStores } from "@/lib/perfluence";
+import { withoutLegacyTwins } from "@/lib/storeDisplayName";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { currentMonthYear, getMaxDiscount } from "@/lib/seoArticles";
 
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PromokodyIndexPage() {
-  const stores = await getStores();
+  const stores = withoutLegacyTwins(await getStores());
 
   const sorted = [...stores].sort(
     (a, b) => b.coupons.length - a.coupons.length

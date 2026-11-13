@@ -6,6 +6,7 @@ import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { isPublicAdmitadRow } from "@/lib/admitadPublicVisibility";
 import { isRealPromoCode } from "@/lib/dedupe";
+import { cleanStoreName } from "@/lib/storeDisplayName";
 import { resolveAdmitadOfferHeadline } from "@/lib/admitadOfferHeadline";
 import { resolveCustomerType } from "@/lib/admitadNormalizer";
 import fs from "node:fs";
@@ -53,7 +54,7 @@ export function isNotExpired(expires: string | null): boolean {
 export function rowToCoupon(row: Record<string, unknown>): Coupon | null {
   const rawCode = str(row.code);
   const code = isRealPromoCode(rawCode) ? rawCode : "";
-  const storeName = str(row.store).replace(/[\u200B-\u200D\uFEFF]/g, "").trim() || "Магазин";
+  const storeName = cleanStoreName(str(row.store).replace(/[\u200B-\u200D\uFEFF]/g, "").trim()) || "Магазин";
   const storeSlug = str(row.store_slug) ? translit(str(row.store_slug)) : translit(storeName) || "magazin";
 
   // Разделение сайтов и трекинговых ссылок (ADMITAD-2.1 Section 1)
