@@ -665,9 +665,9 @@ export default async function StorePage({
           </span>
           {(avitoByLink || maxDisc || hasGift) && (
             <span>
-              {avitoByLink ? "Выгода" : maxDisc ? "Макс. скидка" : "Есть"}:{" "}
+              {avitoByLink ? "Выгода" : maxDisc ? "Макс. скидка" : "Бонус"}:{" "}
               <b className="font-display font-extrabold text-red">
-                {avitoByLink ? "1 000 ₽ / 5%" : maxDisc ? maxDisc : "подарок"}
+                {avitoByLink ? "1 000 ₽ / 5%" : maxDisc ? maxDisc : "подарок к заказу"}
               </b>
             </span>
           )}
@@ -779,7 +779,7 @@ export default async function StorePage({
           </section>
         )}
 
-        {store.conditions && !store.conditions.startsWith("Условия и сроки действия актуальных предложений") && (
+        {store.conditions && store.conditions.trim() !== "Условия и сроки действия актуальных предложений указаны в карточках промокодов." && (
           <article className="mt-8 max-w-3xl">
             <div className="font-display text-lg font-extrabold">Условия</div>
             <p className="mt-3 leading-relaxed text-ink/70">
