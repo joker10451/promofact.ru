@@ -95,7 +95,7 @@ export default function SovetyPage() {
                     Читать статью →
                   </span>
                   {/* Вместо «Актуально» на каждой карточке — настоящая дата публикации, если она есть. */}
-                  {a.published && (
+                  {a.published && /^\d{4}-\d{2}-\d{2}$/.test(a.published) && (
                     <time dateTime={a.published} className="text-[11px] font-semibold text-ink/45">
                       {new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", timeZone: "Europe/Moscow" }).format(new Date(`${a.published}T12:00:00+03:00`))}
                     </time>

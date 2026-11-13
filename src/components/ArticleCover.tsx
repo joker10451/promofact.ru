@@ -86,7 +86,8 @@ export default function ArticleCover({
         aria-hidden
       >
         <span className="flex shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-1.5 shadow-2xs">
-          <StoreLogo slug={store.slug} name={store.name} size={logoSize} />
+          {/* На странице статьи обложка в первом экране — логотип грузим сразу. */}
+          <StoreLogo slug={store.slug} name={store.name} size={logoSize} priority={iconSize >= 60} />
         </span>
         {benefit && (
           <span className={`font-display font-extrabold leading-none text-red ${iconSize >= 60 ? "text-4xl sm:text-5xl" : "text-2xl"}`}>
