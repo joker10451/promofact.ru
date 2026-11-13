@@ -33,6 +33,9 @@ jobs:
       - name: Unit & Regression Tests
         run: npm test
 
+      - name: Article covers
+        run: npm run test:article-cover
+
       - name: Security, posting reliability and geo indexing
         run: |
           npm run test:trust
