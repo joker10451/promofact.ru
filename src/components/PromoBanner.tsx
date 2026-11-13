@@ -159,7 +159,7 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
           >
             {banner.title}
           </h2>
-          <p className="text-sm text-white/70 sm:text-base">{banner.subtitle}</p>
+          <p className="max-w-2xl text-sm text-white/70 sm:text-base">{banner.subtitle}</p>
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full bg-gradient-to-r from-mint to-[#1fa3e0] px-5 py-2.5 font-display text-lg font-extrabold">
               {banner.badge}
