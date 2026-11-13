@@ -62,25 +62,21 @@ export default function NewsletterBox({ source = "home" }: NewsletterBoxProps) {
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8 items-center">
         <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-red/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-red">
-            <span>📬</span>
-            <span>Дайджест экономии</span>
-          </div>
-          <h2 className="mt-2.5 font-display text-xl sm:text-2xl lg:text-3xl font-extrabold text-ink tracking-tight">
-            Лучшие промокоды недели — прямо на почту
+          <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-extrabold text-ink tracking-tight">
+            Свежие промокоды — раз в неделю на почту
           </h2>
           <p className="mt-2 text-xs sm:text-sm text-ink/70 leading-relaxed max-w-xl">
-            Раз в неделю отбираем проверенные секретные промокоды, закрытые скидки до 90% и подарки к заказам. Никакого спама, отписка в 1 клик.
+            Раз в неделю собираем новые промокоды и акции магазинов в одно письмо. Отписаться можно в один клик.
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-4 text-xs font-semibold text-ink/60">
             <span className="flex items-center gap-1.5">
               <Icon name="check" size={14} className="text-mint-dark" />
-              <span>Только проверенные промокоды</span>
+              <span>Одно письмо в неделю</span>
             </span>
             <span className="flex items-center gap-1.5">
               <Icon name="check" size={14} className="text-mint-dark" />
-              <span>Без спама и рекламы займов</span>
+              <span>Отписка в один клик</span>
             </span>
           </div>
         </div>
@@ -93,7 +89,7 @@ export default function NewsletterBox({ source = "home" }: NewsletterBoxProps) {
                 Вы успешно подписались!
               </p>
               <p className="mt-1 text-xs text-ink/70">
-                Первая подборка секретных скидок прилетит в ближайшем выпуске.
+                Первое письмо придёт в ближайшем выпуске.
               </p>
             </div>
           ) : (

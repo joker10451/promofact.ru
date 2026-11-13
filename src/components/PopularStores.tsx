@@ -59,7 +59,7 @@ export default async function PopularStores() {
                 Популярные магазины
               </h2>
               <p className="hidden text-xs text-ink/60 font-medium sm:block">
-                Быстрый вход к скидкам любимых брендов
+                Промокоды Пятёрочки, Яндекс Еды, Самоката и других
               </p>
             </div>
           </div>

@@ -72,14 +72,11 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
   return (
     <section id="expiring" aria-label="Скоро заканчиваются" className="scroll-mt-24 relative overflow-hidden rounded-3xl border-2 border-red/20 bg-gradient-to-br from-red-50/50 via-white to-amber-50/40 p-6 sm:p-8 shadow-[0_8px_30px_rgba(255,51,85,0.06)]">
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-red/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-red">
-          <Icon name="flame" size={12} /> Скоро заканчиваются
-        </div>
-        <h2 className="mt-2 font-display text-2xl font-black tracking-tight text-ink sm:text-3xl">
-          Успейте применить
+        <h2 className="font-display text-2xl font-black tracking-tight text-ink sm:text-3xl">
+          Скоро заканчиваются
         </h2>
         <p className="mt-1 text-sm font-medium text-ink/60">
-          Промокоды с ближайшим сроком действия — по одному от каждого магазина.
+          Ближайшие сроки окончания — по одному коду от магазина.
         </p>
       </div>
 
