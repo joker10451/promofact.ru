@@ -643,7 +643,7 @@ export default async function StorePage({
                   Свежие промокоды {store.name} в Telegram
                 </h3>
                 <p className="mt-0.5 text-xs sm:text-sm text-ink/65 leading-relaxed">
-                  Публикуем закрытые акции, промокоды с суммированием и секретные скидки в канале @smart_zakupka
+                  Новые промокоды и акции магазинов — в канале @smart_zakupka
                 </p>
               </div>
             </div>
