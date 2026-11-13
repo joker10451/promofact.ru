@@ -1,7 +1,8 @@
 import { getStores } from "@/lib/perfluence";
+import { withoutLegacyTwins } from "@/lib/storeDisplayName";
 
 export default async function StoresMarquee() {
-  const stores = await getStores();
+  const stores = withoutLegacyTwins(await getStores());
   if (stores.length === 0) return null;
   const names = stores.map((s) => s.name).join("  •  ");
 

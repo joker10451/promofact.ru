@@ -22,6 +22,7 @@
     "test:winlab-pending-erid": "node --loader ./scripts/ts-loader.mjs scripts/test-winlab-pending-erid.mjs",
     "test:perfluence-oct26": "node scripts/test-perfluence-oct26.mjs",
     "test:admitad-api": "node --loader ./scripts/ts-loader.mjs scripts/test-admitad-api.mjs",
+    "test:store-display-name": "node --loader ./scripts/ts-loader.mjs scripts/test-store-display-name.mjs",
     "test:admitad-autopilot": "node --loader ./scripts/ts-loader.mjs scripts/test-admitad-autopilot.mjs",
     "test:admitad-preflight": "node scripts/test-admitad-sync-preflight.mjs",
     "test:admitad-batch": "node --loader ./scripts/ts-loader.mjs scripts/test-admitad-batch.mjs",

@@ -2,6 +2,7 @@ import Icon from "@/components/Icon";
 import Link from "next/link";
 import { getStores } from "@/lib/perfluence";
 import StoreLogo from "@/components/StoreLogo";
+import { withoutLegacyTwins } from "@/lib/storeDisplayName";
 
 const POPULAR_SLUGS = [
   "sunlight-ru",
@@ -23,7 +24,7 @@ const POPULAR_SLUGS = [
 export default async function PopularStores() {
   let stores: Awaited<ReturnType<typeof getStores>> = [];
   try {
-    stores = await getStores();
+    stores = withoutLegacyTwins(await getStores());
   } catch {
     stores = [];
   }

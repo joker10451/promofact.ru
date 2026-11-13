@@ -41,6 +41,7 @@ jobs:
           npm run test:trust
           npm run test:reliability
           npm run test:geo-indexing
+          npm run test:store-display-name
           node scripts/test-indexnow-push.mjs
 
       # В CI нет ключей Perfluence — Next.js использует DEV-моки (см. perfluence.ts).
