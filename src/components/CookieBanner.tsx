@@ -31,9 +31,9 @@ export default function CookieBanner() {
     >
       <div className="flex items-center gap-2 rounded-2xl bg-white/95 py-2 pl-3.5 pr-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)] ring-1 ring-black/5 backdrop-blur-sm">
         <p className="min-w-0 flex-1 text-xs leading-snug text-ink/75">
-          {/* На телефоне полный текст занимал 4 строки и закрывал кнопку купона;
-              подробности — по ссылке «Подробнее». */}
-          <span className="sm:hidden">Cookie для аналитики и переходов через Admitad.</span>
+          {/* На телефоне полный текст занимал 4 строки и закрывал кнопку купона.
+              Короткий вариант сохраняет главное для согласия: IP и браузер уходят Admitad. */}
+          <span className="sm:hidden">Cookie для аналитики. При переходе IP и браузер передаются Admitad.</span>
           <span className="hidden sm:inline">
             Cookie для аналитики. При переходе через Admitad с вашего согласия передаются IP и данные браузера.
           </span>{" "}
