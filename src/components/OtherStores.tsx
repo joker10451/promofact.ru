@@ -74,17 +74,17 @@ export default async function OtherStores({
             )}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid pl-px pt-px sm:grid-cols-2 lg:grid-cols-3">
             {sameCategory.slice(0, 6).map((store) => {
               const maxDiscount = getMaxVerifiedDiscount(store.coupons);
               return (
                 <Link
                   key={store.slug}
                   href={`/store/${store.slug}`}
-                  className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-line p-3.5 sm:p-4 transition-all hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-[0_6px_0_rgba(11,16,43,0.06)]"
+                  className="group -ml-px -mt-px flex items-center justify-between gap-3 border border-line bg-white p-3.5 sm:p-4 transition-colors hover:bg-paper"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-paper p-1.5 transition-colors group-hover:border-ink/20">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line/70 bg-white p-1.5">
                       <StoreLogo
                         slug={store.slug}
                         name={store.name}
@@ -103,7 +103,7 @@ export default async function OtherStores({
                           {plural(store.coupons.length, "купон", "купона", "купонов")}
                         </span>
                         {maxDiscount && (
-                          <span className="inline-flex items-center rounded-md bg-mint/15 px-1.5 py-0.2 text-[10px] font-bold text-mint-dark">
+                          <span className="inline-flex items-center text-[11px] font-bold tabular-nums text-mint-dark">
                             {maxDiscount}
                           </span>
                         )}
@@ -111,7 +111,7 @@ export default async function OtherStores({
                     </div>
                   </div>
                   <span
-                    className="shrink-0 text-sm font-bold text-ink/30 transition-transform group-hover:translate-x-1 group-hover:text-red"
+                    className="shrink-0 text-sm font-bold text-ink/30 transition-colors group-hover:text-red"
                     aria-hidden="true"
                   >
                     →
@@ -139,7 +139,7 @@ export default async function OtherStores({
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid pl-px pt-px sm:grid-cols-2 lg:grid-cols-3">
           {(sameCategory.length > 0 ? otherStores.slice(0, 6) : stores.slice(0, 9)).map(
             (store) => {
               const maxDiscount = getMaxVerifiedDiscount(store.coupons);
@@ -147,10 +147,10 @@ export default async function OtherStores({
                 <Link
                   key={store.slug}
                   href={`/store/${store.slug}`}
-                  className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-line p-3.5 sm:p-4 transition-all hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-[0_6px_0_rgba(11,16,43,0.06)]"
+                  className="group -ml-px -mt-px flex items-center justify-between gap-3 border border-line bg-white p-3.5 sm:p-4 transition-colors hover:bg-paper"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-paper p-1.5 transition-colors group-hover:border-ink/20">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line/70 bg-white p-1.5">
                       <StoreLogo
                         slug={store.slug}
                         name={store.name}
@@ -169,7 +169,7 @@ export default async function OtherStores({
                           {plural(store.coupons.length, "купон", "купона", "купонов")}
                         </span>
                         {maxDiscount && (
-                          <span className="inline-flex items-center rounded-md bg-paper border border-line px-1.5 py-0.2 text-[10px] font-bold text-ink/70">
+                          <span className="inline-flex items-center text-[11px] font-bold tabular-nums text-ink/70">
                             {maxDiscount}
                           </span>
                         )}
@@ -177,7 +177,7 @@ export default async function OtherStores({
                     </div>
                   </div>
                   <span
-                    className="shrink-0 text-sm font-bold text-ink/30 transition-transform group-hover:translate-x-1 group-hover:text-red"
+                    className="shrink-0 text-sm font-bold text-ink/30 transition-colors group-hover:text-red"
                     aria-hidden="true"
                   >
                     →

@@ -276,7 +276,7 @@ export function resolveOfferDetails(
 
     return {
       type: "free_shipping",
-      discount: { value: null, unit: "shipping", formatted: "🚚 Бесплатная доставка" },
+      discount: { value: null, unit: "shipping", formatted: "Бесплатная доставка" },
       minimumOrder: minOrder,
       title: "Бесплатная доставка",
       shortDescription,

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
 import StoreLogo from "@/components/StoreLogo";
+import { plural } from "@/lib/format";
 import { getStores } from "@/lib/perfluence";
 import { withoutLegacyTwins } from "@/lib/storeDisplayName";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
@@ -72,7 +73,7 @@ export default async function PromokodyIndexPage() {
         — внутри таблица кодов, инструкция и FAQ.
       </p>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 pl-px pt-px sm:grid-cols-2 lg:grid-cols-3">
         {sorted.map((store) => {
           const n = store.coupons.length;
           const disc = getMaxDiscount(store.coupons);
@@ -81,9 +82,9 @@ export default async function PromokodyIndexPage() {
             <Link
               key={store.slug}
               href={`/store/${store.slug}`}
-              className="group flex items-start gap-4 rounded-2xl border border-line bg-white p-5 transition-all hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(11,16,43,0.08)]"
+              className="group -ml-px -mt-px flex items-start gap-4 border border-line bg-white p-5 transition-colors hover:bg-paper"
             >
-              <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl border border-line/50 bg-white p-1 shadow-2xs">
+              <div className="flex h-12 w-12 flex-none items-center justify-center rounded-lg border border-line/50 bg-white p-1">
                 <StoreLogo
                   slug={store.slug}
                   name={store.name}
@@ -99,8 +100,8 @@ export default async function PromokodyIndexPage() {
                 </h2>
                 <p className="mt-1 text-xs text-ink/45">{store.category}</p>
                 <div className="mt-2 flex items-center gap-2">
-                  <span className="rounded-full bg-yellow/80 px-2.5 py-1 text-xs font-bold">
-                    {n} {n === 1 ? "код" : n >= 2 && n <= 4 ? "кода" : "кодов"}
+                  <span className="text-xs font-bold tabular-nums text-ink">
+                    {n} {plural(n, "код", "кода", "кодов")}
                   </span>
                   <span className="text-xs font-semibold text-ink/50">
                     {disc}

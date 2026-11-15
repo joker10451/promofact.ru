@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Icon from "@/components/Icon";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getStores, getCategories } from "@/lib/perfluence";
@@ -110,7 +111,6 @@ export default async function HtmlSitemap() {
           {/* Сезонные акции и распродажи */}
           <section className="mt-8 rounded-3xl border border-line bg-white p-6 sm:p-7 shadow-xs">
             <h2 className="font-display text-lg sm:text-xl font-extrabold text-ink mb-4 flex items-center gap-2">
-              <span>🔥</span>
               <span>Сезонные акции и распродажи</span>
             </h2>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
@@ -132,7 +132,6 @@ export default async function HtmlSitemap() {
           {/* Тематические подборки */}
           <section className="mt-8 rounded-3xl border border-line bg-white p-6 sm:p-7 shadow-xs">
             <h2 className="font-display text-lg sm:text-xl font-extrabold text-ink mb-4 flex items-center gap-2">
-              <span>⭐</span>
               <span>Тематические подборки промокодов</span>
             </h2>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
@@ -142,7 +141,7 @@ export default async function HtmlSitemap() {
                   href={`/collections/${col.slug}`}
                   className="flex items-center gap-2.5 rounded-xl border border-line/70 bg-paper/40 px-3.5 py-3 text-sm font-medium text-ink hover:border-red hover:text-red hover:bg-white transition-colors"
                 >
-                  <span className="text-base">{col.emoji}</span>
+                  <Icon name={col.slug} size={16} className="shrink-0 text-ink/60" />
                   <span className="truncate">{col.name}</span>
                 </Link>
               ))}

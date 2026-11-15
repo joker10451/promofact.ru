@@ -62,7 +62,6 @@ export default function NewsletterBox({ source = "home" }: NewsletterBoxProps) {
         <div className="flex flex-col gap-3">
           {status === "success" ? (
             <div className="rounded-2xl border border-mint/40 bg-mint/10 p-5 text-center">
-              <span className="text-2xl">🎉</span>
               <p className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">
                 Вы успешно подписались!
               </p>
