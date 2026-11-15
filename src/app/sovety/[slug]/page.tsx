@@ -168,7 +168,7 @@ export default async function ArticlePage({
             className="mb-2"
           />
 
-          <article className="mt-6 rounded-3xl border border-line bg-white p-6 sm:p-10 shadow-xs">
+          <article className="mt-6 rounded-xl border border-line bg-white p-6 sm:p-10">
             <div className="flex items-center gap-2 text-[11px] font-bold text-ink/40 mb-3">
               <span className="uppercase tracking-wider">Гайд по экономии</span>
               <span>•</span>
@@ -185,7 +185,7 @@ export default async function ArticlePage({
             </p>
 
             {article.image ? (
-              <div className="mt-6 overflow-hidden rounded-3xl border border-line bg-paper/30 shadow-xs">
+              <div className="mt-6 overflow-hidden rounded-xl border border-line bg-paper/30">
                 <Image
                   src={article.image}
                   alt={article.title}
@@ -195,14 +195,14 @@ export default async function ArticlePage({
                 />
               </div>
             ) : (
-              /* Своей иллюстрации у статьи нет — вместо пустоты ставим
-                 обложку, собранную из её темы. */
+              /* Своей иллюстрации нет: у статьи про магазин — логотип и выгода,
+                 у остальных обложки нет. */
               <ArticleCover
                 slug={article.slug}
                 title={article.title}
                 related={article.related}
                 iconSize={64}
-                className="mt-6 h-40 w-full rounded-3xl border border-line sm:h-52"
+                className="mt-6 h-40 w-full sm:h-52"
               />
             )}
 
@@ -221,13 +221,13 @@ export default async function ArticlePage({
                     </p>
                   )}
                   {i === 1 && relevantCoupons[0] && (
-                    <div className="my-6 rounded-2xl bg-paper/90 border border-line p-4 sm:p-5 shadow-xs">
+                    <div className="my-6 border-y border-line py-4 sm:py-5">
                       <div className="flex items-center justify-between gap-2 mb-3">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-ink">
                           <Icon name="flame" size={15} />
                           <span>Горячий промокод к статье</span>
                         </div>
-                        <span className="text-[11px] font-bold text-mint-dark bg-mint/10 px-2 py-0.5 rounded-full">
+                        <span className="text-[11px] font-bold text-mint-dark">
                           Проверено сегодня
                         </span>
                       </div>
@@ -250,13 +250,13 @@ export default async function ArticlePage({
             </div>
 
             {article.ctaButton && (
-              <div className="mt-8 rounded-2xl bg-mint/10 border border-mint/40 p-5 sm:flex sm:items-center sm:justify-between gap-4">
+              <div className="mt-8 border-y border-line py-5 sm:flex sm:items-center sm:justify-between gap-4">
                 <div className="min-w-0">
                   <a
                     href={article.ctaButton.href}
                     target={article.ctaButton.href.startsWith("/") ? undefined : "_blank"}
                     rel={article.ctaButton.href.startsWith("/") ? undefined : "noopener nofollow sponsored"}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red hover:bg-red/90 text-white px-6 py-3.5 font-display text-sm sm:text-base font-extrabold shadow-offset transition-transform active:translate-x-0.5 active:translate-y-0.5"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-red hover:bg-red-dark text-white px-6 py-3.5 font-display text-sm sm:text-base font-extrabold transition-colors"
                   >
                     <span>{article.ctaButton.text}</span>
                   </a>
@@ -278,7 +278,7 @@ export default async function ArticlePage({
                   {article.faq.map((item) => (
                     <details
                       key={item.q}
-                      className="group rounded-2xl border border-line bg-white p-4 open:shadow-xs"
+                      className="group border-b border-line py-4"
                     >
                       <summary className="cursor-pointer list-none font-bold text-ink flex items-center justify-between gap-3">
                         <span>{item.q}</span>
@@ -301,7 +301,7 @@ export default async function ArticlePage({
                       Рабочие промокоды по теме статьи
                     </h2>
                   </div>
-                  <span className="text-xs font-bold text-mint-dark bg-mint/10 px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-bold text-mint-dark">
                     Действующие
                   </span>
                 </div>
@@ -320,10 +320,10 @@ export default async function ArticlePage({
             )}
 
             {/* Призыв подписаться в Telegram */}
-            <div className="mt-8 rounded-2xl bg-gradient-to-r from-[#0088cc]/10 via-[#0088cc]/5 to-transparent border border-[#0088cc]/25 p-5">
+            <div className="mt-8 border-y border-line py-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0088cc] text-white shadow-xs">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line text-[#0077b3]">
                     <Icon name="send" size={18} />
                   </div>
                   <div>
@@ -339,7 +339,7 @@ export default async function ArticlePage({
                   href="https://t.me/smart_zakupka"
                   target="_blank"
                   rel="noopener nofollow"
-                  className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] px-5 py-2 text-xs font-extrabold text-white shadow-xs transition-all shrink-0"
+                  className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-lg bg-[#0077b3] hover:bg-[#00649a] px-5 py-2 text-xs font-extrabold text-white transition-colors shrink-0"
                 >
                   Подписаться →
                 </a>
@@ -348,7 +348,7 @@ export default async function ArticlePage({
 
             {/* Внутренние ссылки на промокоды */}
             {article.related.length > 0 && (
-              <div className="mt-8 rounded-2xl bg-yellow/15 border border-yellow/50 p-5">
+              <div className="mt-8 border-y border-line py-5">
                 <div className="font-display text-sm font-bold text-ink mb-3 flex items-center gap-2">
                   <Icon name="tag" size={14} />
                   <span>Смотрите также скидки по магазинам:</span>
@@ -358,7 +358,7 @@ export default async function ArticlePage({
                     <Link
                       key={r.href}
                       href={r.href}
-                      className="inline-flex items-center gap-1 rounded-xl bg-white border border-line px-3.5 py-2 text-xs font-bold text-ink shadow-2xs hover:border-red hover:text-red transition-all"
+                      className="inline-flex items-center gap-1 rounded-lg bg-white border border-line px-3.5 py-2 text-xs font-bold text-ink hover:border-ink/40 transition-colors"
                     >
                       <span>{r.text}</span>
                       <span>→</span>
@@ -380,7 +380,7 @@ export default async function ArticlePage({
           />
 
           {/* Читайте также */}
-          <section className="mt-8 rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-xs">
+          <section className="mt-8 border-t border-line pt-6">
             <h2 className="font-display text-lg font-extrabold text-ink mb-4">
               Другие полезные гиды
             </h2>
@@ -389,7 +389,7 @@ export default async function ArticlePage({
                 <Link
                   key={a.slug}
                   href={`/sovety/${a.slug}`}
-                  className="group flex items-center justify-between rounded-xl border border-line/60 bg-paper/40 p-4 transition-all hover:bg-white hover:border-ink/20 hover:shadow-2xs"
+                  className="group flex items-center justify-between border-b border-line py-4"
                 >
                   <span className="font-display text-sm font-bold text-ink group-hover:text-red transition-colors">
                     {a.title}
@@ -403,20 +403,20 @@ export default async function ArticlePage({
           </section>
 
           {/* Соцсети */}
-          <section className="mt-6 rounded-3xl border border-mint/30 bg-mint/10 p-6 text-center sm:text-left sm:flex sm:items-center sm:justify-between gap-4">
+          <section className="mt-6 border-y border-line py-6 text-center sm:text-left sm:flex sm:items-center sm:justify-between gap-4">
             <div>
               <h2 className="font-display text-base font-bold text-ink">
                 Свежие промокоды в Telegram
               </h2>
               <p className="mt-1 text-xs text-ink/60">
-                Публикуем закрытые акции и сгорающие купоны каждый день
+                Новые промокоды и акции магазинов
               </p>
             </div>
             <a
               href={CHANNELS.telegram}
               target="_blank"
               rel="noopener nofollow"
-              className="mt-3 sm:mt-0 inline-flex items-center justify-center gap-1.5 shrink-0 rounded-xl bg-ink px-5 py-2.5 text-xs font-bold text-white shadow-offset-red transition-all hover:translate-y-[1px] hover:shadow-none"
+              className="mt-3 sm:mt-0 inline-flex items-center justify-center gap-1.5 shrink-0 rounded-lg bg-ink px-5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-ink-soft"
             >
               Подписаться на канал →
             </a>

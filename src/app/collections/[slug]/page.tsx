@@ -243,9 +243,9 @@ export default async function CollectionPage({
             : "Сейчас действующих предложений в подборке нет. Откройте полный каталог."}
         </p>
         {col.slug === "den-shopinga-11-11" && (
-          <div className="mt-6 max-w-4xl rounded-3xl border border-yellow/30 bg-gradient-to-br from-amber-50 via-yellow/10 to-white p-5 sm:p-7 shadow-xs">
+          <div className="mt-6 max-w-4xl rounded-xl border border-line bg-white p-5 sm:p-7">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-ink shadow-2xs">
+              <span className="text-xs font-bold text-red">
                 <span>{shoppingStatus.badgeText}</span>
               </span>
               <span className="text-xs font-semibold text-ink/70">
@@ -259,18 +259,18 @@ export default async function CollectionPage({
               Всемирный день шопинга 11.11 — крупнейшая распродажа осени. Промокоды магазинов одежды, косметики, электроники и маркетплейсов уже проверены. Сохраняйте товары в корзину и активируйте промокоды на старте акции.
             </p>
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <div className="rounded-xl border border-yellow/40 bg-white/90 p-3">
-                <span className="text-[11px] font-bold text-yellow-800 uppercase tracking-wider block">1 этап: до 10 ноября</span>
+              <div className="border-t border-line pt-3">
+                <span className="text-xs font-bold tabular-nums text-ink/60 block">1 этап: до 10 ноября</span>
                 <span className="mt-1 font-bold text-xs sm:text-sm text-ink block">Разогрев и сбор корзины</span>
                 <span className="mt-1 text-[11px] text-ink/65 block">Фиксация цен и выбор купонов</span>
               </div>
-              <div className="rounded-xl border border-red/40 bg-red/5 p-3">
-                <span className="text-[11px] font-bold text-red uppercase tracking-wider block">2 этап: 11–13 ноября</span>
+              <div className="border-t-2 border-red pt-3">
+                <span className="text-xs font-bold tabular-nums text-red block">2 этап: 11–13 ноября</span>
                 <span className="mt-1 font-bold text-xs sm:text-sm text-ink block">Пик скидок 11.11</span>
                 <span className="mt-1 text-[11px] text-ink/65 block">Активация главных кодов</span>
               </div>
-              <div className="rounded-xl border border-line bg-white/80 p-3">
-                <span className="text-[11px] font-bold text-ink/50 uppercase tracking-wider block">3 этап: 14–15 ноября</span>
+              <div className="border-t border-line pt-3">
+                <span className="text-xs font-bold tabular-nums text-ink/60 block">3 этап: 14–15 ноября</span>
                 <span className="mt-1 font-bold text-xs sm:text-sm text-ink block">Финальный дисконт</span>
                 <span className="mt-1 text-[11px] text-ink/65 block">Распродажа остатков</span>
               </div>
@@ -279,9 +279,9 @@ export default async function CollectionPage({
         )}
 
         {col.slug === "black-friday" && (
-          <div className="mt-6 max-w-4xl rounded-3xl border border-ink/10 bg-gradient-to-br from-ink to-ink/95 p-5 sm:p-7 text-white shadow-xs">
+          <div className="mt-6 max-w-4xl rounded-xl bg-ink p-5 sm:p-7 text-white">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-red px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-white shadow-2xs">
+              <span className="text-xs font-bold text-yellow">
                 <span>{bfStatus.badgeText}</span>
               </span>
               <span className="text-xs font-semibold text-white/70">
@@ -289,33 +289,33 @@ export default async function CollectionPage({
               </span>
             </div>
             <h2 className="mt-3 font-display text-lg sm:text-xl font-extrabold text-white">
-              {bfStatus.headline} — скидки до -90%
+              {bfStatus.headline} — скидки до −90%
             </h2>
             <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-white/80">
               Главный период распродаж года. Промокоды маркетплейсов, магазинов техники, моды и парфюмерии обновляются по мере запуска предраспродаж. Добавляйте товары в избранное заранее.
             </p>
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <div className="rounded-xl border border-white/15 bg-white/10 p-3">
-                <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider block">С 20 ноября</span>
-                <span className="mt-1 font-bold text-xs sm:text-sm text-white block">Предраспродажа</span>
-                <span className="mt-1 text-[11px] text-white/70 block">Ранний доступ к закрытым акциям</span>
+              <div className="border-t border-white/20 pt-3">
+                <span className="text-xs font-bold tabular-nums text-white/60 block">С 20 ноября</span>
+                <span className="mt-1 font-bold text-xs sm:text-sm text-white block">Предпродажа</span>
+                <span className="mt-1 text-[11px] text-white/70 block">Магазины открывают первые скидки</span>
               </div>
-              <div className="rounded-xl border border-red/60 bg-red/20 p-3">
-                <span className="text-[11px] font-bold text-red-300 uppercase tracking-wider block">26–27 ноября</span>
-                <span className="mt-1 font-bold text-xs sm:text-sm text-white block">Чёрная Пятница (Пик)</span>
-                <span className="mt-1 text-[11px] text-white/70 block">Максимальный дисконт года</span>
+              <div className="border-t-2 border-red pt-3">
+                <span className="text-xs font-bold tabular-nums text-red block">27 ноября</span>
+                <span className="mt-1 font-bold text-xs sm:text-sm text-white block">Чёрная Пятница</span>
+                <span className="mt-1 text-[11px] text-white/70 block">Основные скидки</span>
               </div>
-              <div className="rounded-xl border border-white/15 bg-white/10 p-3">
-                <span className="text-[11px] font-bold text-white/60 uppercase tracking-wider block">30 ноября</span>
+              <div className="border-t border-white/20 pt-3">
+                <span className="text-xs font-bold tabular-nums text-white/60 block">30 ноября</span>
                 <span className="mt-1 font-bold text-xs sm:text-sm text-white block">Киберпонедельник</span>
-                <span className="mt-1 text-[11px] text-white/70 block">Финальные скидки на гаджеты</span>
+                <span className="mt-1 text-[11px] text-white/70 block">Последний день распродажи</span>
               </div>
             </div>
           </div>
         )}
 
         {list.length === 0 && (
-          <Link href="/catalog" className="mt-5 inline-flex rounded-xl bg-red px-4 py-3 text-sm font-bold text-white">
+          <Link href="/catalog" className="mt-5 inline-flex rounded-lg bg-red px-4 py-3 text-sm font-bold text-white hover:bg-red-dark">
             Посмотреть все предложения →
           </Link>
         )}
@@ -341,7 +341,7 @@ export default async function CollectionPage({
 
         
         {col.buyerTips && (
-          <section aria-label="Памятка покупателю" className="mt-12 max-w-3xl rounded-2xl border border-line bg-white p-5 sm:p-7">
+          <section aria-label="Памятка покупателю" className="mt-12 max-w-3xl border-t border-line pt-6">
             <h2 className="font-display text-xl font-extrabold text-ink">Что проверить перед покупкой</h2>
             <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-relaxed text-ink/75">
               {col.buyerTips.map((tip, index) => <li key={index}>{tip}</li>)}
@@ -349,14 +349,14 @@ export default async function CollectionPage({
           </section>
         )}
         {col.relatedArticles && col.relatedArticles.length > 0 && (
-          <section aria-label="Полезные статьи и гиды" className="mt-12 max-w-3xl rounded-2xl border border-line bg-white p-5 sm:p-7">
+          <section aria-label="Полезные статьи и гиды" className="mt-12 max-w-3xl border-t border-line pt-6">
             <h2 className="font-display text-xl font-extrabold text-ink">Полезные статьи и гиды по теме</h2>
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8">
               {col.relatedArticles.map((art) => (
                 <Link
                   key={art.href}
                   href={art.href}
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-line/70 hover:border-mint hover:bg-mint/5 transition-colors group"
+                  className="flex items-center justify-between border-b border-line py-3.5 transition-colors group hover:text-red"
                 >
                   <span className="text-sm font-semibold text-ink group-hover:text-ink">{art.text}</span>
                   <span className="text-ink/40 group-hover:text-ink text-sm">→</span>
@@ -382,9 +382,9 @@ export default async function CollectionPage({
               ? `Частые вопросы: ${col.name}`
               : `Частые вопросы про купоны ${col.name.toLowerCase()}`}
           </h2>
-          <div className="mt-5 space-y-3">
+          <div className="mt-4 border-t border-line">
             {faqList.map((item) => (
-              <details key={item.q} className="group rounded-2xl border border-line bg-white px-5 py-4">
+              <details key={item.q} className="group border-b border-line py-4">
                 <summary className="cursor-pointer list-none font-bold text-ink">
                   {item.q}
                   <span className="float-right text-red group-open:hidden">+</span>

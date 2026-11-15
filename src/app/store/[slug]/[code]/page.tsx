@@ -208,7 +208,7 @@ export default async function CouponPage({
       <div className="mt-8">
         <Link
           href={storeUrl}
-          className="inline-block rounded-full bg-gradient-to-r from-red to-red-dark px-5 py-2.5 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
+          className="inline-block rounded-lg bg-red hover:bg-red-dark px-5 py-2.5 text-sm font-bold text-white transition-all"
         >
           Все промокоды {store.name} →
         </Link>

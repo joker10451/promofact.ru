@@ -16,7 +16,7 @@ export default function HotDeals({ coupons }: { coupons: CatalogCoupon[] }) {
   if (hotCoupons.length === 0) return null;
 
   return (
-    <section id="hot" className="scroll-mt-20 py-10 sm:py-14 border-b border-line bg-gradient-to-b from-white to-paper/40">
+    <section id="hot" className="scroll-mt-20 py-10 sm:py-14 border-b border-line bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2.5">
