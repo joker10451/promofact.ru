@@ -25,7 +25,7 @@ export default function SeasonalSaleBanner({
           </h2>
           <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-ink/70 sm:text-sm">
             {bfStatus.stage === "warmup"
-              ? "Чёрная Пятница стартует 26 ноября. Положите товары в корзину заранее и применяйте промокоды, пока не кончились лимиты."
+              ? "Чёрная Пятница стартует 27 ноября. Положите товары в корзину заранее и применяйте промокоды, пока не кончились лимиты."
               : bfStatus.stage === "active"
                 ? "Чёрная Пятница идёт до 30 ноября. Применяйте промокоды, пока не кончились лимиты."
                 : "Промокоды прошедших распродаж собраны в подборках."}
@@ -94,7 +94,7 @@ export default function SeasonalSaleBanner({
                 {bfStatus.badgeText}
               </span>
               <span className="text-xs font-semibold text-ink/65">
-                {blackFridayCount > 0 ? `${blackFridayCount} предложений` : "Старт 26 ноября"}
+                {blackFridayCount > 0 ? `${blackFridayCount} предложений` : "Старт 27 ноября"}
               </span>
             </div>
 
