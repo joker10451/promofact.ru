@@ -25,3 +25,14 @@ export function plural(n: number, one: string, few: string, many: string): strin
   if (last >= 2 && last <= 4) return few;
   return many;
 }
+
+/**
+ * Неразрывные пробелы в суммах: «1 500 ₽», «от 700 ₽», «−55 %» не рвутся на телефоне.
+ * Текст не меняется, только пробелы внутри чисел и перед/после них.
+ */
+export function nbspMoney(text: string): string {
+  return text
+    .replace(/(\d)[ \u00a0\u202f](?=\d{3}(?!\d))/g, "$1\u00a0")
+    .replace(/(\d)[ \u202f](?=[₽%$€]|руб)/g, "$1\u00a0")
+    .replace(/(^|[\s(])(от|до|за|на) (?=\d)/gi, "$1$2\u00a0");
+}

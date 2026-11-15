@@ -94,7 +94,7 @@ export default function CollectionFilterContainer({ items }: CollectionFilterCon
             onClick={() => setActiveTab("top")}
             className={tabBtnCls(activeTab === "top")}
           >
-            <span>🔥 Топ-выгода</span>
+            <span>Хиты</span>
             <span className="opacity-70 text-[11px]">({counts.top})</span>
           </button>
         )}
@@ -104,7 +104,7 @@ export default function CollectionFilterContainer({ items }: CollectionFilterCon
             onClick={() => setActiveTab("first")}
             className={tabBtnCls(activeTab === "first")}
           >
-            <span>👤 Первый заказ</span>
+            <span>Первый заказ</span>
             <span className="opacity-70 text-[11px]">({counts.first})</span>
           </button>
         )}
@@ -114,7 +114,7 @@ export default function CollectionFilterContainer({ items }: CollectionFilterCon
             onClick={() => setActiveTab("repeat")}
             className={tabBtnCls(activeTab === "repeat")}
           >
-            <span>🔁 Повторные заказы</span>
+            <span>Повторные заказы</span>
             <span className="opacity-70 text-[11px]">({counts.repeat})</span>
           </button>
         )}

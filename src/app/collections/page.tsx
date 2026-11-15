@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Icon from "@/components/Icon";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
@@ -108,21 +109,18 @@ export default async function CollectionsIndexPage() {
                 href="/akcii/den-shopinga-11-11"
                 className="inline-flex items-center gap-1.5 rounded-full bg-red/10 border border-red/25 px-3 py-1.5 text-xs font-bold text-red hover:bg-red/15 transition-all"
               >
-                <span>🔥</span>
                 <span>День шопинга 11.11</span>
               </Link>
               <Link
                 href="/akcii/chernaya-pyatnica-2026"
                 className="inline-flex items-center gap-1.5 rounded-full bg-ink/10 border border-ink/20 px-3 py-1.5 text-xs font-bold text-ink hover:bg-ink/15 transition-all"
               >
-                <span>⚡</span>
                 <span>Чёрная Пятница 2026</span>
               </Link>
               <Link
                 href="/akcii/novogodnie-skidki-2027"
                 className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/30 px-3 py-1.5 text-xs font-bold text-mint-dark hover:bg-mint/25 transition-all"
               >
-                <span>🎄</span>
                 <span>Новогодние скидки 2027</span>
               </Link>
             </div>
@@ -139,8 +137,8 @@ export default async function CollectionsIndexPage() {
               >
                 <div>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-sand text-2xl transition-transform group-hover:scale-110">
-                      {col.emoji}
+                    <span className="grid h-11 w-11 place-items-center rounded-lg border border-line text-ink">
+                      <Icon name={col.slug} size={22} />
                     </span>
                     <span className="rounded-full bg-sand px-3 py-1 text-xs font-bold text-ink/75">
                       {count} {plural(count, "предложение", "предложения", "предложений")}

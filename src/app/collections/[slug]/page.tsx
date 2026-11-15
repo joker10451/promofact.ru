@@ -246,7 +246,6 @@ export default async function CollectionPage({
           <div className="mt-6 max-w-4xl rounded-3xl border border-yellow/30 bg-gradient-to-br from-amber-50 via-yellow/10 to-white p-5 sm:p-7 shadow-xs">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-ink shadow-2xs">
-                <span>🔥</span>
                 <span>{shoppingStatus.badgeText}</span>
               </span>
               <span className="text-xs font-semibold text-ink/70">
@@ -283,7 +282,6 @@ export default async function CollectionPage({
           <div className="mt-6 max-w-4xl rounded-3xl border border-ink/10 bg-gradient-to-br from-ink to-ink/95 p-5 sm:p-7 text-white shadow-xs">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-red px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-white shadow-2xs">
-                <span>🖤</span>
                 <span>{bfStatus.badgeText}</span>
               </span>
               <span className="text-xs font-semibold text-white/70">

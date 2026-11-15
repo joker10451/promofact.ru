@@ -172,7 +172,7 @@ export const PERFLUENCE_OCT18_BATCH_OFFERS: Coupon[] = [
     promocode: {
       id: 8281807,
       code: "ZMB46487",
-      bonusName: "🎁 Вкусный подарок при заказе от 1 490 ₽ в FARFOR",
+      bonusName: "Вкусный подарок при заказе от 1 490 ₽ в FARFOR",
       terms: "Подарок к заказу (ролл или пицца) при сумме от 1 490 ₽ по промокоду ZMB46487. Действует до 31 октября 2026 года 23:59.",
       expires: "2026-10-31T23:59:59+03:00",
       isHit: false,
@@ -280,7 +280,7 @@ export const PERFLUENCE_OCT18_BATCH_OFFERS: Coupon[] = [
     promocode: {
       id: 8281811,
       code: "FRESH2340",
-      bonusName: "🎁 Ролл «Фреш» в подарок от 4 299 ₽",
+      bonusName: "Ролл «Фреш» в подарок от 4 299 ₽",
       terms: "Ролл «Фреш» в подарок при сумме заказа от 4 299 ₽ по промокоду FRESH2340. Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: true,
@@ -306,7 +306,7 @@ export const PERFLUENCE_OCT18_BATCH_OFFERS: Coupon[] = [
     promocode: {
       id: 8281812,
       code: "ЛАЙМ291",
-      bonusName: "🎁 Ролл «Лайм» в подарок от 4 299 ₽",
+      bonusName: "Ролл «Лайм» в подарок от 4 299 ₽",
       terms: "Фирменный ролл «Лайм» в подарок при заказе от 4 299 ₽ по промокоду ЛАЙМ291. Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: false,
@@ -332,7 +332,7 @@ export const PERFLUENCE_OCT18_BATCH_OFFERS: Coupon[] = [
     promocode: {
       id: 8281813,
       code: "УГОРЬ549",
-      bonusName: "🎁 Ролл с угрём в подарок от 3 999 ₽",
+      bonusName: "Ролл с угрём в подарок от 3 999 ₽",
       terms: "Подарочный ролл с угрём при заказе от 3 999 ₽ по промокоду УГОРЬ549. Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: false,
@@ -358,7 +358,7 @@ export const PERFLUENCE_OCT18_BATCH_OFFERS: Coupon[] = [
     promocode: {
       id: 8281814,
       code: "ТЕМПУРА291",
-      bonusName: "🎁 Горячий ролл «Темпура» в подарок от 2 999 ₽",
+      bonusName: "Горячий ролл «Темпура» в подарок от 2 999 ₽",
       terms: "Горячий ролл «Темпура» в подарок при первом заказе от 2 999 ₽ по промокоду ТЕМПУРА291. Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: false,
@@ -570,7 +570,7 @@ export const PERFLUENCE_OCT18_BATCH_OFFERS: Coupon[] = [
     promocode: {
       id: 8281822,
       code: "POQRR",
-      bonusName: "🎁 Пицца в подарок при заказе в Додо Пицце",
+      bonusName: "Пицца в подарок при заказе в Додо Пицце",
       terms: "Пицца в подарок к вашему заказу по промокоду POQRR. Действует до 31 октября 2026 года 23:59.",
       expires: "2026-10-31T23:59:59+03:00",
       isHit: false,

@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { nbspMoney } from "../src/lib/format.ts";
+const N = "\u00a0";
+assert.equal(nbspMoney("−1 500 ₽"), `−1${N}500${N}₽`);
+assert.equal(nbspMoney("на первый заказ от 700 ₽"), `на первый заказ от${N}700${N}₽`);
+assert.equal(nbspMoney("до 1 000 000 ₽"), `до${N}1${N}000${N}000${N}₽`);
+assert.equal(nbspMoney("−55%"), "−55%");
+assert.equal(nbspMoney("Скидка 30 % на 2 заказа"), `Скидка 30${N}% на${N}2 заказа`);
+assert.equal(nbspMoney("в 2026 году"), "в 2026 году");
+console.log("nbsp-money ok");
