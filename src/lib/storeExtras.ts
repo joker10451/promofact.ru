@@ -180,7 +180,7 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
   },
   winlab: {
     requiredActiveCodes: ["10PFNS6570", "5PFSEP5144", "WCPFSEP7289"],
-    customTitle: () => "Промокоды ВинЛаб: 10% первый, 5% повторный заказ",
+    customTitle: (monthRu) => `Промокоды ВинЛаб на ${monthRu}: 10% первый, 5% повторный`,
     customDescription: () =>
       "Актуальные промокоды ВинЛаб: скидка 10% на первый заказ (10PFNS6570), 5% на повторный и 10% на WinClub. Онлайн-заказ и самовывоз.",
     faq: [
@@ -208,7 +208,7 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
   },
   "t-puteshestviya-oteli": {
     requiredActiveCodes: ["YE"],
-    customTitle: () => "Промокод Т-Путешествия: 15% на первое бронирование",
+    customTitle: (monthRu) => `Промокод Т-Путешествия на ${monthRu}: 15% на первую бронь`,
     customDescription: () =>
       "Промокод Т-Путешествия: скидка 15% на отели для новых пользователей (код YE, макс. 3 000 ₽). Бронирование гостиниц онлайн.",
     faq: [
@@ -244,7 +244,7 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
   },
   "yandex-plus": {
     requiredActiveCodes: ["FYBSF2X94G"],
-    customTitle: () => "Промокод Яндекс Плюс FYBSF2X94G — 45 дней бесплатно",
+    customTitle: (monthRu) => `Промокод Яндекс Плюс на ${monthRu}: 45 дней бесплатно`,
     customDescription: () =>
       "Яндекс Плюс: 45 дней бесплатно новым пользователям или 30 дней за 1 ₽ без активной подписки по коду FYBSF2X94G до 31 декабря 2026 года. Условия и продление проверяйте.",
     faq: [
@@ -260,7 +260,7 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
   },
   ostrovok: {
     requiredActiveCodes: ["PF4ALL80"],
-    customTitle: () => "Промокод Островок PF4ALL80 — скидка 4% на бронирование",
+    customTitle: (monthRu) => `Промокод Островок на ${monthRu}: PF4ALL80, скидка 4%`,
     customDescription: () =>
       "Промокод PF4ALL80: скидка 4% на первое или одно повторное бронирование на Островке до 30 ноября 2026 года. Условия онлайн-оплаты уточняйте при бронировании.",
     faq: [
@@ -276,7 +276,7 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
   },
   "m-kosmetik": {
     requiredActiveCodes: ["PK4GMWJUK", "PF21K0T5LF"],
-    customTitle: () => "Промокоды М.Косметик: до 41% первый, 21% повторный",
+    customTitle: (monthRu) => `Промокоды М.Косметик на ${monthRu}: до 41% на первый заказ`,
     customDescription: () =>
       "Промокоды М.Косметик: скидки до 41% на первый заказ и 21% на повторный в приложении Магнит Доставка.",
     faq: [
@@ -292,7 +292,7 @@ const STORE_EXTRAS: Record<string, StoreExtra> = {
   },
   "yandex-eda-gipermarkety": {
     requiredActiveCodes: ["GIP5xlzh"],
-    customTitle: () => "Промокод Яндекс Еда Гипермаркеты: скидка 550 ₽",
+    customTitle: (monthRu) => `Промокод Яндекс Еда Гипермаркеты на ${monthRu}: 550 ₽`,
     customDescription: () =>
       "Промокод Яндекс Еда Гипермаркеты: скидка 550 ₽ на доставку из гипермаркетов (код GIP5xlzh). Заказ продуктов через Яндекс Еду онлайн.",
     faq: [

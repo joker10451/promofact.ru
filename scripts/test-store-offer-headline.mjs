@@ -25,14 +25,14 @@ assert.equal(formatStoreOfferTitle({name:"Sportmaster",month:"октябрь 202
 assert.equal(formatStoreOfferTitle({name:"Tasty Coffee",month:"октябрь 2026",codes:1,codeFree:0,searchBrandPromo:true}),"Промокод Tasty Coffee на октябрь 2026: 1 промокод");
 assert.equal(formatStoreOfferTitle({name:"Tasty Coffee",month:"октябрь 2026",codes:0,codeFree:0,searchBrandPromo:true}),"Скидки и акции Tasty Coffee на октябрь 2026");
 assert.equal(formatPriorityStoreTitle({slug:"tasty-coffee",month:"октябрь 2026",codes:1,codeFree:0}),"Промокоды Tasty Coffee: 1 промокод — октябрь 2026");
-assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:1,codeFree:2}),"Промокоды Randewoo: 1 промокод и 2 акции");
-assert.equal(formatPriorityStoreTitle({slug:"yandeks-puteshestviya",month:"октябрь 2026",codes:1,codeFree:0}),"Промокоды Яндекс Путешествия: 1 промокод");
-assert.equal(formatPriorityStoreTitle({slug:"pyaterochka",month:"октябрь 2026",codes:2,codeFree:0}),"Промокоды Пятёрочки Доставка: 2 промокода");
-assert.equal(formatPriorityStoreTitle({slug:"pyaterochka",month:"октябрь 2026",codes:0,codeFree:1}),"Акции Пятёрочки Доставка: 1 акция");
-assert.equal(formatPriorityStoreTitle({slug:"yandex-eda",month:"октябрь 2026",codes:2,codeFree:1}),"Промокоды Яндекс Еда: 2 промокода и 1 акция");
-assert.equal(formatPriorityStoreTitle({slug:"yandex-eda",month:"октябрь 2026",codes:0,codeFree:2}),"Акции Яндекс Еда: 2 акции");
+assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:1,codeFree:2}),"Промокоды Randewoo на октябрь 2026: 1 промокод и 2 акции");
+assert.equal(formatPriorityStoreTitle({slug:"yandeks-puteshestviya",month:"октябрь 2026",codes:1,codeFree:0}),"Промокоды Яндекс Путешествия на октябрь 2026: 1 промокод");
+assert.equal(formatPriorityStoreTitle({slug:"pyaterochka",month:"октябрь 2026",codes:2,codeFree:0}),"Промокоды Пятёрочки Доставка на октябрь 2026: 2 промокода");
+assert.equal(formatPriorityStoreTitle({slug:"pyaterochka",month:"октябрь 2026",codes:0,codeFree:1}),"Акции Пятёрочки Доставка на октябрь 2026: 1 акция");
+assert.equal(formatPriorityStoreTitle({slug:"yandex-eda",month:"октябрь 2026",codes:2,codeFree:1}),"Промокоды Яндекс Еда на октябрь 2026: 2 промокода и 1 акция");
+assert.equal(formatPriorityStoreTitle({slug:"yandex-eda",month:"октябрь 2026",codes:0,codeFree:2}),"Акции Яндекс Еда на октябрь 2026: 2 акции");
 assert.equal(formatPriorityStoreTitle({slug:"yandex-eda",month:"октябрь 2026",codes:0,codeFree:0}),null);
-assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:0,codeFree:3}),"Акции Randewoo: 3 акции");
+assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:0,codeFree:3}),"Акции Randewoo на октябрь 2026: 3 акции");
 assert.equal(formatPriorityStoreTitle({slug:"randewoo",month:"октябрь 2026",codes:0,codeFree:0}),null);
 assert.equal(formatPriorityStoreTitle({slug:"some-other-store",month:"октябрь 2026",codes:2,codeFree:0}),null);
 const sportmaster = {
