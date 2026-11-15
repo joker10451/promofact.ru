@@ -62,14 +62,14 @@ export function formatPriorityStoreTitle({
   const counts = formatStoreOfferCounts(codes, codeFree);
   switch (slug) {
     case "tasty-coffee": return `${codes > 0 ? "Промокоды" : "Акции"} Tasty Coffee: ${counts} — ${month}`;
-    case "randewoo": return `${codes > 0 ? "Промокоды" : "Акции"} Randewoo: ${counts}`;
-    case "yandeks-puteshestviya": return `${codes > 0 ? "Промокоды" : "Акции"} Яндекс Путешествия: ${counts}`;
+    case "randewoo": return `${codes > 0 ? "Промокоды" : "Акции"} Randewoo на ${month}: ${counts}`;
+    case "yandeks-puteshestviya": return `${codes > 0 ? "Промокоды" : "Акции"} Яндекс Путешествия на ${month}: ${counts}`;
     case "pyaterochka": return codes > 0
-      ? `Промокоды Пятёрочки Доставка: ${counts}`
-      : `Акции Пятёрочки Доставка: ${counts}`;
+      ? `Промокоды Пятёрочки Доставка на ${month}: ${counts}`
+      : `Акции Пятёрочки Доставка на ${month}: ${counts}`;
     case "yandex-eda": return codes > 0
-      ? `Промокоды Яндекс Еда: ${counts}`
-      : `Акции Яндекс Еда: ${counts}`;
+      ? `Промокоды Яндекс Еда на ${month}: ${counts}`
+      : `Акции Яндекс Еда на ${month}: ${counts}`;
     default: return null;
   }
 }
