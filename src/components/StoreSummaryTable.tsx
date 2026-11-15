@@ -100,7 +100,7 @@ export default function StoreSummaryTable({
   return (
     <section
       aria-label={headingText}
-      className="mt-10 overflow-hidden rounded-2xl border border-line bg-white shadow-2xs"
+      className="mt-10 overflow-hidden rounded-xl border border-line bg-white"
     >
       {/* Шапка таблицы */}
       <div className="border-b border-line bg-paper/70 px-4 sm:px-6 py-4">
@@ -221,7 +221,7 @@ export default function StoreSummaryTable({
                       }}
                        target="_blank"
                       rel="nofollow sponsored noopener"
-                      className="inline-flex items-center gap-1 rounded-lg bg-red px-2.5 py-1 text-xs font-bold text-white shadow-2xs hover:bg-red/90 transition-all"
+                      className="inline-flex items-center gap-1 rounded-md bg-red px-2.5 py-1 text-xs font-bold text-white hover:bg-red-dark transition-colors"
                     >
                       <span>В магазин</span>
                       <span>→</span>
