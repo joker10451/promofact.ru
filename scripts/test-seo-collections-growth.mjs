@@ -53,4 +53,11 @@ assert.match(page, /href="\/catalog"/);
 assert.doesNotMatch(page, /MONTH_YEAR|Обновляем ежедневно|Скидка применится сразу|availability: "https:\/\/schema.org\/InStock"/);
 assert.equal((page.match(/<JsonLd data=\{listing\}/g) || []).length, 0,
   "Avoid duplicated JSON-LD ItemList in the page");
+// Partner-confirmed Black Friday codes join the collection even without the words in the offer text.
+const bf = COLLECTIONS.find(c => c.slug === "black-friday");
+const mk = (slug, code, bonusName) => ({ store: { slug, name: slug }, promocode: { code, bonusName, terms: null } });
+assert.equal(bf.filter(mk("letual", "черный", "Скидка 60% от 7 000 ₽")), true);
+assert.equal(bf.filter(mk("letual", "ПЯТНИЦА", "Скидка 20% от 4 000 ₽")), false);
+assert.equal(bf.filter(mk("otello", "ЧЕРНЫЙ", "Скидка 5%")), false);
+assert.equal(bf.filter(mk("any", "", "Чёрная пятница: −30%")), true);
 console.log("SEO collection growth: 5 buyer guides, dynamic ISR, coherent robots/sitemap and placement rules PASS");
