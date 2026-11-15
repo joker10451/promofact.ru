@@ -52,7 +52,7 @@ export default function MobileCatalogMenu({
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-label="Открыть каталог категорий"
-        className="flex items-center gap-1.5 rounded-full border border-line bg-paper px-3 py-2 text-xs font-bold text-ink/80 transition-colors hover:text-ink"
+        className="flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-2 text-xs font-bold text-ink/80 transition-colors hover:text-ink"
       >
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden fill="currentColor">
           <rect x="1" y="2" width="6" height="6" rx="1.5" />
@@ -181,7 +181,7 @@ export default function MobileCatalogMenu({
               <Link
                 href="/promokody"
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-center rounded-full bg-gradient-to-r from-red to-red-dark px-4 py-2.5 text-sm font-bold text-white"
+                className="flex items-center justify-center rounded-lg bg-red hover:bg-red-dark px-4 py-2.5 text-sm font-bold text-white"
               >
                 Все магазины →
               </Link>

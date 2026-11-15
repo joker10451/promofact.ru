@@ -27,9 +27,9 @@ export default function SavingsCalculator() {
   };
 
   return (
-    <section aria-label="Калькулятор экономии" className="rounded-[28px] border border-line bg-gradient-to-br from-white via-white to-yellow/15 p-5 shadow-[0_16px_48px_-32px_rgba(11,16,43,0.3)] sm:p-8">
+    <section aria-label="Калькулятор экономии" className="rounded-xl border border-line bg-white p-5 sm:p-8">
       <div className="mb-6 flex items-start gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-yellow/35 text-ink">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-line text-ink">
           <Icon name="coins" size={23} />
         </span>
         <div>

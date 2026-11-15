@@ -107,19 +107,19 @@ export default async function CollectionsIndexPage() {
             <div className="mt-5 flex flex-wrap gap-2.5">
               <Link
                 href="/akcii/den-shopinga-11-11"
-                className="inline-flex items-center gap-1.5 rounded-full bg-red/10 border border-red/25 px-3 py-1.5 text-xs font-bold text-red hover:bg-red/15 transition-all"
+                className="inline-flex items-center rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-bold text-ink transition-colors hover:border-ink/40"
               >
                 <span>День шопинга 11.11</span>
               </Link>
               <Link
                 href="/akcii/chernaya-pyatnica-2026"
-                className="inline-flex items-center gap-1.5 rounded-full bg-ink/10 border border-ink/20 px-3 py-1.5 text-xs font-bold text-ink hover:bg-ink/15 transition-all"
+                className="inline-flex items-center rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-bold text-ink transition-colors hover:border-ink/40"
               >
                 <span>Чёрная Пятница 2026</span>
               </Link>
               <Link
                 href="/akcii/novogodnie-skidki-2027"
-                className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 border border-mint/30 px-3 py-1.5 text-xs font-bold text-mint-dark hover:bg-mint/25 transition-all"
+                className="inline-flex items-center rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-bold text-ink transition-colors hover:border-ink/40"
               >
                 <span>Новогодние скидки 2027</span>
               </Link>
@@ -128,19 +128,19 @@ export default async function CollectionsIndexPage() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 pl-px pt-px sm:grid-cols-2 lg:grid-cols-3">
             {items.map(({ col, count, storeNames }) => (
               <Link
                 key={col.slug}
                 href={`/collections/${col.slug}`}
-                className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-6 shadow-xs transition-all hover:-translate-y-1 hover:border-red/30 hover:shadow-md"
+                className="group relative -ml-px -mt-px flex flex-col justify-between border border-line bg-white p-6 transition-colors hover:bg-paper"
               >
                 <div>
                   <div className="flex items-center justify-between gap-3">
                     <span className="grid h-11 w-11 place-items-center rounded-lg border border-line text-ink">
                       <Icon name={col.slug} size={22} />
                     </span>
-                    <span className="rounded-full bg-sand px-3 py-1 text-xs font-bold text-ink/75">
+                    <span className="text-xs font-bold tabular-nums text-ink/60">
                       {count} {plural(count, "предложение", "предложения", "предложений")}
                     </span>
                   </div>
@@ -168,7 +168,7 @@ export default async function CollectionsIndexPage() {
             ))}
           </div>
 
-          <section aria-label="Как формируются подборки" className="mt-14 rounded-2xl border border-line bg-white p-6 sm:p-8">
+          <section aria-label="Как формируются подборки" className="mt-14 border-t border-line pt-8">
             <h2 className="font-display text-xl font-extrabold text-ink">
               Как мы составляем подборки
             </h2>

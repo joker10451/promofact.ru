@@ -250,7 +250,7 @@ export default function CouponGrid({
   const quickChipCls = (active: boolean) =>
     `rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
       active
-        ? "bg-gradient-to-r from-red to-red-dark text-white shadow-offset-red"
+        ? "bg-red text-white"
         : "bg-white border border-line text-ink/80 hover:border-ink/40 shadow-2xs"
     }`;
 
@@ -473,7 +473,7 @@ export default function CouponGrid({
                   setSortBy("hits");
                   setSelectedRegion("all");
                 }}
-                className="mt-5 rounded-full bg-yellow text-ink px-5 py-2.5 text-sm font-bold shadow-offset hover:translate-y-[2px] hover:shadow-none transition-all"
+                className="mt-5 rounded-full bg-yellow text-ink px-5 py-2.5 text-sm font-bold transition-all"
               >
                 Сбросить фильтры
               </button>
@@ -543,7 +543,7 @@ export default function CouponGrid({
                   <button
                     type="button"
                     onClick={() => setVisibleLimit((prev) => prev + 12)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-ink px-6 py-3.5 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-ink px-6 py-3.5 text-xs sm:text-sm font-bold text-white transition-all cursor-pointer"
                   >
                     <span>Показать ещё 12 предложений</span>
                     <span className="text-xs text-white/60 font-normal">

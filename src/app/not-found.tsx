@@ -20,7 +20,7 @@ export default function NotFound() {
     <>
       <Header />
       <main className="min-h-screen">
-        <section className="border-b border-line bg-gradient-to-b from-white to-paper px-4 py-12 sm:px-6 sm:py-16">
+        <section className="border-b border-line bg-white px-4 py-12 sm:px-6 sm:py-16">
           <div className="mx-auto max-w-2xl text-center">
             <div className="font-display text-6xl font-black text-red sm:text-7xl">404</div>
             <h1 className="mt-4 font-display text-2xl font-extrabold text-ink sm:text-3xl">
@@ -33,7 +33,7 @@ export default function NotFound() {
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               <Link
                 href="/#catalog"
-                className="rounded-xl bg-red px-6 py-3.5 text-sm font-bold text-white shadow-offset transition-transform hover:-translate-y-0.5"
+                className="rounded-xl bg-red px-6 py-3.5 text-sm font-bold text-white transition-transform"
               >
                 Смотреть все промокоды →
               </Link>

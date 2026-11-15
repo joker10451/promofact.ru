@@ -299,7 +299,7 @@ export default function GlobalSearchModal() {
                 <Link
                   href="/collections/den-shopinga-11-11"
                   onClick={closeSearch}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-red px-3 py-1 text-xs font-bold text-white shadow-2xs hover:opacity-95 transition-all"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1 text-xs font-bold text-ink hover:border-ink/40 transition-colors"
                 >
                   <span>11.11 День шопинга</span>
                 </Link>
@@ -344,7 +344,7 @@ export default function GlobalSearchModal() {
         <div className="overflow-y-auto p-3 space-y-4 flex-1">
           {/* Умная подсказка сезонных распродаж */}
           {Boolean(query && /11|шопинг|черн|пятниц|год|подар|black|friday/i.test(query)) && (
-            <div className="rounded-2xl bg-gradient-to-r from-red/10 via-yellow/10 to-red/10 border border-red/25 p-3">
+            <div className="rounded-lg border border-line p-3">
               <div className="text-xs font-bold text-red mb-1">Сезонная распродажа</div>
               {/11|шопинг/i.test(query) ? (
                 <Link

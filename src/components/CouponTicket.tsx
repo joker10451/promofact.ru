@@ -829,7 +829,7 @@ export default function CouponTicket({
                     setTimeout(() => setShowDetailsModal(false), 150);
                     copyAndOpen(e, promocode.code);
                   }}
-                  className="w-full rounded-2xl bg-gradient-to-r from-red to-red-dark py-3.5 px-4 text-center text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer block"
+                  className="w-full rounded-lg bg-red hover:bg-red-dark py-3.5 px-4 text-center text-sm font-bold text-white transition-all cursor-pointer block"
                 >
                   {promocode.code
                     ? promocode.isBarcode

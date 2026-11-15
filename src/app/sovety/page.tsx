@@ -1,5 +1,5 @@
 import ArticleCover from "@/components/ArticleCover";
-import Icon from "@/components/Icon";
+import { plural } from "@/lib/format";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getArticles } from "@/lib/articles";
@@ -55,33 +55,25 @@ export default function SovetyPage() {
 
           <div className="mt-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-line">
             <div>
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow/40 px-3 py-1 text-[11px] font-bold text-ink mb-2">
-                <Icon name="clipboard" size={17} />
-                <span>База знаний ПромоФакта</span>
-              </div>
               <h1 className="font-display text-3xl sm:text-4xl font-black leading-tight text-ink">
                 Советы по экономии и шопингу
               </h1>
               <p className="mt-2 max-w-2xl text-sm sm:text-base text-ink/65 font-medium">
-                {getArticles().length} практических инструкций: как выжимать максимум выгоды из промокодов, кэшбэка и акций любимых брендов.
+                {getArticles().length} {plural(getArticles().length, "инструкция", "инструкции", "инструкций")}: как применять промокоды, где искать скидки и почему код может не сработать.
               </p>
             </div>
           </div>
 
           {/* Сетка статей */}
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 pl-px pt-px sm:grid-cols-2 lg:grid-cols-3">
             {articles.map((a) => (
               <Link
                 key={a.slug}
                 href={`/sovety/${a.slug}`}
-                className="group flex flex-col justify-between rounded-2xl border border-line bg-white p-6 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-ink/25 hover:shadow-md"
+                className="group -ml-px -mt-px flex flex-col justify-between border border-line bg-white p-6 transition-colors hover:bg-paper"
               >
                 <div>
-                  <ArticleCover slug={a.slug} title={a.title} related={a.related} className="mb-4 h-24 w-full" />
-                  <div className="flex items-center justify-between text-[11px] font-bold text-ink/40 mb-3">
-                    <span className="uppercase tracking-wider">Инструкция</span>
-                    <span>3–4 мин</span>
-                  </div>
+                  <ArticleCover slug={a.slug} title={a.title} related={a.related} className="mb-5 h-20 w-full" />
                   <h2 className="font-display text-base sm:text-lg font-bold leading-snug text-ink group-hover:text-red transition-colors">
                     {a.title}
                   </h2>
@@ -90,7 +82,7 @@ export default function SovetyPage() {
                   </p>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-line/50 flex items-center justify-between">
+                <div className="mt-6 flex items-center justify-between">
                   <span className="text-xs font-bold text-red group-hover:underline">
                     Читать статью →
                   </span>

@@ -138,7 +138,7 @@ export default function PwaInstallBanner() {
             <button
               type="button"
               onClick={handleInstallClick}
-              className="flex-1 rounded-xl bg-gradient-to-r from-red to-red-dark py-2 text-center text-xs font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
+              className="flex-1 rounded-lg bg-red hover:bg-red-dark py-2 text-center text-xs font-bold text-white transition-all"
             >
               <Icon name="elektronika-i-tehnika" size={14} className="inline" /> Добавить на экран
             </button>
