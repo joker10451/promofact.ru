@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/components/Icon";
+import { plural } from "@/lib/format";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -126,19 +127,15 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-paper via-white to-paper pt-3.5 pb-3 sm:pt-12 sm:pb-12 border-b border-line">
+    <section className="relative bg-white pt-3.5 pb-3 sm:pt-12 sm:pb-12 border-b border-line">
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 relative z-10">
         {/* Сезонная плашка: текущая распродажа или ничего */}
         {seasonal && (
         <div className="flex justify-center mb-2 sm:mb-3.5">
           <Link
             href={seasonal.href}
-            className="group inline-flex items-center gap-2 rounded-full bg-red/10 hover:bg-red/15 border border-red/25 px-3.5 py-1 text-xs font-extrabold text-red transition-all shadow-xs hover:scale-[1.02]"
+            className="group inline-flex items-center gap-2 rounded-md border border-red/30 px-3 py-1 text-xs font-bold text-red transition-colors hover:border-red"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red"></span>
-            </span>
             <span>{seasonal.heroText}</span>
             <span className="group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
@@ -172,11 +169,11 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
                   setSelectedIndex(0);
                 }}
                 placeholder="Магазин или промокод"
-                className="h-12 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-ink/15 bg-white pl-11 sm:pl-14 pr-22 sm:pr-32 text-sm sm:text-base font-medium text-ink shadow-[0_8px_30px_rgb(0,0,0,0.06)] outline-none transition-all placeholder:text-ink/40 hover:border-ink/30 focus:border-red focus:shadow-[0_8px_30px_rgba(255,51,85,0.12)]"
+                className="h-12 sm:h-16 w-full rounded-xl border-2 border-ink/15 bg-white pl-11 sm:pl-14 pr-22 sm:pr-32 text-sm sm:text-base font-medium text-ink outline-none transition-colors placeholder:text-ink/40 hover:border-ink/30 focus:border-ink"
               />
               <button
                 type="submit"
-                className="absolute right-1.5 sm:right-2.5 top-1.5 sm:top-2.5 bottom-1.5 sm:bottom-2.5 flex items-center justify-center gap-1 rounded-lg sm:rounded-xl bg-gradient-to-r from-red to-red-dark px-3 sm:px-5 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:brightness-105 active:scale-[0.98] transition-all cursor-pointer"
+                className="absolute right-1.5 sm:right-2.5 top-1.5 sm:top-2.5 bottom-1.5 sm:bottom-2.5 flex items-center justify-center gap-1 rounded-lg bg-red px-3 sm:px-5 text-xs sm:text-sm font-bold text-white hover:bg-red-dark transition-colors cursor-pointer"
               >
                 <span>Найти</span>
                 <span>→</span>
@@ -294,7 +291,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
         <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 border-t border-line/60 pt-2 text-[11px] sm:text-xs font-semibold text-ink/70 sm:mt-7 sm:pt-4">
           <span className="inline-flex items-center gap-1.5">
             <Icon name="tag" size={14} className="text-red" />
-            {couponCount} предложений по последнему обновлению
+            <span className="tabular-nums">{couponCount}</span> {plural(couponCount, "предложение", "предложения", "предложений")} в каталоге
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Icon name="check" size={14} className="text-mint-dark" />

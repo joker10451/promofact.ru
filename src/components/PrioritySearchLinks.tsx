@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { plural } from "@/lib/format";
 import type { StoreInfo } from "@/lib/perfluence";
 
 /**
@@ -43,7 +44,7 @@ export default function PrioritySearchLinks({ stores }: { stores: StoreInfo[] })
           >
             <span className="text-sm font-extrabold leading-snug text-ink">{item.label}</span>
             <span className="mt-1 text-xs leading-snug text-ink/65">{item.description}</span>
-            <span className="mt-2 text-[11px] font-semibold text-red">{item.count} действующих предложений →</span>
+            <span className="mt-2 text-[11px] font-semibold text-red">{item.count} {plural(item.count, "действующее предложение", "действующих предложения", "действующих предложений")} →</span>
           </Link>
         ))}
       </div>

@@ -126,7 +126,7 @@ export default async function Header() {
 
           <Link
             href="/catalog#catalog"
-            className="hidden sm:flex items-center gap-1.5 rounded-full bg-gradient-to-r from-red to-red-dark px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
+            className="hidden sm:flex items-center gap-1.5 rounded-lg bg-red px-4 py-2 text-xs sm:text-sm font-bold text-white hover:bg-red-dark transition-colors"
           >
             <span>Все купоны →</span>
           </Link>
