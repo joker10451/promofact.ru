@@ -77,7 +77,7 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
             : undefined,
         }}
       >
-        <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-offset transition-all">
+        <div className="overflow-hidden rounded-xl border border-line bg-white">
           <a
             href={banner.link}
             target="_blank"
@@ -132,7 +132,7 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
         href={banner.link}
         target="_blank"
         rel="sponsored nofollow noopener"
-        className={`group grid overflow-hidden rounded-3xl bg-ink text-white shadow-offset transition-transform hover:-translate-y-0.5 ${grid}`}
+        className={`group grid overflow-hidden rounded-xl bg-ink text-white ${grid}`}
       >
         {hasImage && (
           <Image
@@ -149,7 +149,7 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
           />
         )}
         <div className="flex flex-col justify-center gap-4 p-6 sm:p-8">
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-mint/15 px-3 py-1 text-xs font-bold text-mint">
+          <span className="inline-flex w-fit items-center gap-1.5 text-xs font-bold text-mint">
             <Icon name="gift" size={14} /> {banner.label ?? "Акция"}
           </span>
           <h2
@@ -160,19 +160,19 @@ function PromoBannerBody({ banner }: { banner: PromoBannerData }) {
             {banner.title}
           </h2>
           <p className="max-w-2xl text-sm text-white/70 sm:text-base">{banner.subtitle}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-gradient-to-r from-mint to-[#1fa3e0] px-5 py-2.5 font-display text-lg font-extrabold">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="font-display text-2xl font-extrabold tabular-nums text-yellow sm:text-3xl">
               {banner.badge}
             </span>
             <span className="text-xs text-white/60">{banner.note}</span>
           </div>
           {banner.code && (
-            <div className="flex w-fit items-center gap-3 rounded-xl border-2 border-dashed border-white/30 px-4 py-2.5">
+            <div className="flex w-fit items-center gap-3 rounded-lg border border-dashed border-white/30 px-4 py-2.5">
               <span className="text-xs text-white/60">Кодовое слово</span>
               <span className="font-mono text-lg font-bold tracking-wider text-white">{banner.code}</span>
             </div>
           )}
-          <span className="inline-flex w-fit items-center gap-2 rounded-xl bg-yellow px-5 py-3 text-sm font-bold text-ink transition-colors group-hover:bg-yellow-dark">
+          <span className="inline-flex w-fit items-center gap-2 rounded-lg bg-yellow px-5 py-3 text-sm font-bold text-ink transition-colors group-hover:bg-yellow-dark">
             {banner.cta} →
           </span>
         </div>
