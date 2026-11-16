@@ -54,80 +54,88 @@ export default function StoreIntentTabs({
       </button>
 
       {/* 2. На первый заказ */}
-      <button
-        type="button"
-        aria-pressed={activeTab === "first-order"}
-        onClick={() => onTabChange("first-order")}
-        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
-          activeTab === "first-order"
-            ? "bg-red text-white font-extrabold shadow-xs"
-            : "border border-line bg-white text-ink/70 hover:border-red hover:text-red"
-        }`}
-      >
-        <Icon name="gift" size={14} />
-        <span>Только первый заказ</span>
-        <span
-          className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
-            activeTab === "first-order" ? "bg-white/20 text-white" : "bg-paper text-ink/60"
+      {firstCount > 0 && (
+        <button
+          type="button"
+          aria-pressed={activeTab === "first-order"}
+          onClick={() => onTabChange("first-order")}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+            activeTab === "first-order"
+              ? "bg-red text-white font-extrabold shadow-xs"
+              : "border border-line bg-white text-ink/70 hover:border-red hover:text-red"
           }`}
         >
-          {firstCount}
-        </span>
-      </button>
+          <Icon name="gift" size={14} />
+          <span>Только первый заказ</span>
+          <span
+            className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
+              activeTab === "first-order" ? "bg-white/20 text-white" : "bg-paper text-ink/60"
+            }`}
+          >
+            {firstCount}
+          </span>
+        </button>
+      )}
 
       {/* Для всех: предложения без ограничений на тип заказа */}
-      <button
-        type="button"
-        aria-pressed={activeTab === "universal"}
-        onClick={() => onTabChange("universal")}
-        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
-          activeTab === "universal"
-            ? "bg-ink text-white font-extrabold shadow-xs"
-            : "border border-line bg-white text-ink/70 hover:border-ink hover:text-ink"
-        }`}
-      >
-        <Icon name="check" size={14} />
-        <span>Для всех</span>
-        <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${activeTab === "universal" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>{universalCount}</span>
-      </button>
-
-      {/* Неизвестные ограничения не превращаем в "для всех". */}
-      <button
-        type="button"
-        aria-pressed={activeTab === "unknown"}
-        onClick={() => onTabChange("unknown")}
-        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
-          activeTab === "unknown"
-            ? "bg-ink text-white font-extrabold shadow-xs"
-            : "border border-line bg-white text-ink/70 hover:border-ink hover:text-ink"
-        }`}
-      >
-        <Icon name="bulb" size={14} />
-        <span>Условия уточняются</span>
-        <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${activeTab === "unknown" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>{unknownCount}</span>
-      </button>
-
-      {/* 3. Повторные заказы */}
-      <button
-        type="button"
-        aria-pressed={activeTab === "repeat-order"}
-        onClick={() => onTabChange("repeat-order")}
-        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
-          activeTab === "repeat-order"
-            ? "bg-mint-dark text-white font-extrabold shadow-xs"
-            : "border border-line bg-white text-ink/70 hover:border-mint-dark hover:text-mint-dark"
-        }`}
-      >
-        <Icon name="repeat" size={14} />
-        <span>Повторные заказы</span>
-        <span
-          className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
-            activeTab === "repeat-order" ? "bg-white/20 text-white" : "bg-paper text-ink/60"
+      {universalCount > 0 && (
+        <button
+          type="button"
+          aria-pressed={activeTab === "universal"}
+          onClick={() => onTabChange("universal")}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+            activeTab === "universal"
+              ? "bg-ink text-white font-extrabold shadow-xs"
+              : "border border-line bg-white text-ink/70 hover:border-ink hover:text-ink"
           }`}
         >
-          {repeatCount}
-        </span>
-      </button>
+          <Icon name="check" size={14} />
+          <span>Для всех</span>
+          <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${activeTab === "universal" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>{universalCount}</span>
+        </button>
+      )}
+
+      {/* Неизвестные ограничения не превращаем в "для всех". */}
+      {unknownCount > 0 && (
+        <button
+          type="button"
+          aria-pressed={activeTab === "unknown"}
+          onClick={() => onTabChange("unknown")}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+            activeTab === "unknown"
+              ? "bg-ink text-white font-extrabold shadow-xs"
+              : "border border-line bg-white text-ink/70 hover:border-ink hover:text-ink"
+          }`}
+        >
+          <Icon name="bulb" size={14} />
+          <span>Условия уточняются</span>
+          <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${activeTab === "unknown" ? "bg-white/20 text-white" : "bg-paper text-ink/60"}`}>{unknownCount}</span>
+        </button>
+      )}
+
+      {/* 3. Повторные заказы */}
+      {repeatCount > 0 && (
+        <button
+          type="button"
+          aria-pressed={activeTab === "repeat-order"}
+          onClick={() => onTabChange("repeat-order")}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+            activeTab === "repeat-order"
+              ? "bg-mint-dark text-white font-extrabold shadow-xs"
+              : "border border-line bg-white text-ink/70 hover:border-mint-dark hover:text-mint-dark"
+          }`}
+        >
+          <Icon name="repeat" size={14} />
+          <span>Повторные заказы</span>
+          <span
+            className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
+              activeTab === "repeat-order" ? "bg-white/20 text-white" : "bg-paper text-ink/60"
+            }`}
+          >
+            {repeatCount}
+          </span>
+        </button>
+      )}
     </nav>
   );
 }

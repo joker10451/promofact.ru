@@ -556,6 +556,10 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // historical ERID. Deny unknown/historical codes until reviewed.
     if (c.store.slug === "yandeks-afisha") {
       const code = c.promocode.code.trim().toUpperCase();
+      const isNov16 = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
+        c.affiliate.link === "https://yandafisha.prfl.me/sites/uinp1u?erid=2RanynehxYL" &&
+        c.affiliate.ordMarker === "2RanynehxYL" &&
+        c.affiliate.ordText.includes("9705121040");
       const isNov06 = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
         c.affiliate.link === "https://yandafisha.prfl.me/sites/p3q5ez?erid=2RanynfupB6" &&
         c.affiliate.ordMarker === "2RanynfupB6" &&
@@ -564,14 +568,19 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.link === "https://yandafisha.prfl.me/sites/xocz1q?erid=2RanynJD4PD" &&
         c.affiliate.ordMarker === "2RanynJD4PD" &&
         c.affiliate.ordText.includes("erid: 2RanynJD4PD");
-      return isNov06 || isOct;
+      return isNov16 || isNov06 || isOct;
     }
     if (c.store.slug === "tanukifamily") {
       const code = c.promocode.code.trim().toUpperCase();
-      return ["20SA1244", "15SA1244", "ZB1177", "SA1244"].includes(code) &&
+      const isNov16 = ["20SA1244", "15SA1244", "KT1366"].includes(code) &&
+        c.affiliate.link === "https://tanukifamily.prfl.me/sites/lz9t15?erid=2RanykQFPDv" &&
+        c.affiliate.ordMarker === "2RanykQFPDv" &&
+        c.affiliate.ordText.includes("erid: 2RanykQFPDv");
+      const isOct = ["20SA1244", "15SA1244", "ZB1177", "SA1244"].includes(code) &&
         c.affiliate.link === "https://tanukifamily.prfl.me/sites/jyhh6e?erid=2RanyoGYb6K" &&
         c.affiliate.ordMarker === "2RanyoGYb6K" &&
         c.affiliate.ordText.includes("erid: 2RanyoGYb6K");
+      return isNov16 || isOct;
     }
     // Perfluence's old widget contains conflicting codes, expiry dates, URL
     // and ERID. Only explicitly approved project website placement survives.

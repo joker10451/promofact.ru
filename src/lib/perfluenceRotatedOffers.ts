@@ -67,6 +67,16 @@ const tanukiAd: Coupon["affiliate"] = {
   ordMarker: TANUKI_OCT16_ERID,
   ordText: 'Реклама. ООО "Корсика", ИНН 7730290633. erid: 2RanyoGYb6K',
 };
+// Renewed Perfluence repeat placement for PromoFact website, 16 November 2026.
+// Post 17453877 with updated codes KT1366, 20SA1244, 15SA1244 and ERID 2RanykQFPDv.
+export const TANUKI_NOV16_LINK = "https://tanukifamily.prfl.me/sites/lz9t15?erid=2RanykQFPDv";
+export const TANUKI_NOV16_ERID = "2RanykQFPDv";
+const tanukiNov16Ad: Coupon["affiliate"] = {
+  link: TANUKI_NOV16_LINK,
+  landingLink: TANUKI_NOV16_LINK,
+  ordMarker: TANUKI_NOV16_ERID,
+  ordText: 'Реклама. ООО "Корсика", ИНН 7730290633. erid: 2RanykQFPDv',
+};
 const TANUKI_SUPPORTED_CITIES = "Москва, Краснодар, Самара, Казань, Уфа, Воронеж, Екатеринбург и Нижний Новгород";
 
 // Updated, account-approved Perfluence website placement for promofact.ru,
@@ -198,6 +208,27 @@ export const TANUKI_OCT16_OFFERS: Coupon[] = [
  * the confirmed code + benefit + cutoff. Do not infer basket-wide eligibility,
  * minimum spend, maximum savings or first-order restrictions from the old feed.
  */
+
+/**
+ * Perfluence renewed repeat placement for promofact.ru, 16 November 2026.
+ * Post 17453877 with fresh promo codes 20SA1244, 15SA1244, KT1366.
+ */
+export const TANUKI_NOV16_OFFERS: Coupon[] = [
+  offer(82602011, tanuki, tanukiNov16Ad, "20SA1244",
+    "Скидка 20% от 1 190 ₽ на первый заказ в Тануки",
+    "2026-11-26T23:59:59+03:00", "Первый заказ · 8 городов",
+    `Скидка 20% от 1 190 ₽ на первый заказ в Тануки по промокоду 20SA1244. Города действия: ${TANUKI_SUPPORTED_CITIES}. Проверьте применимость заказа, ограничения и итоговую цену до оплаты. Действует до 26 ноября 2026 года, 23:59 по Москве.`,
+    true),
+  offer(82602012, tanuki, tanukiNov16Ad, "15SA1244",
+    "Скидка 15% от 1 490 ₽ на все повторные заказы в Тануки",
+    "2026-11-26T23:59:59+03:00", "Повторный заказ",
+    "Скидка 15% от 1 490 ₽ на все повторные заказы в Тануки по промокоду 15SA1244. Применимость, ограничения и итоговую сумму уточняйте при оформлении. Действует до 26 ноября 2026 года, 23:59 по Москве."),
+  offer(82602013, tanuki, tanukiNov16Ad, "KT1366",
+    "Ролл «Теплый краб» в подарок при каждом заказе от 1 490 ₽ в Тануки",
+    "2026-11-29T23:59:59+03:00", "Заказ от 1 490 ₽",
+    "По промокоду KT1366 — ролл «Теплый краб» в подарок при каждом заказе в Тануки от 1 490 ₽. Наличие подарка и другие ограничения проверяйте в корзине. Действует до 29 ноября 2026 года, 23:59 по Москве."),
+];
+
 export const PEREKRESTOK_OCT16_OFFERS: Coupon[] = [
   offer(82604304, perekrestok, perekrestokAd, "178PQJL7A",
     "Скидка 750 ₽ по промокоду в Перекрёсток Доставка",
