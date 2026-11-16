@@ -40,9 +40,9 @@ const START_NOV03_AFFILIATE: Coupon["affiliate"] = {
 };
 
 // --- 3. ПЕРЕКРЁСТОК ДОСТАВКА ---
-export const PEREKRESTOK_NOV03_LINK = "https://perekrestok.prfl.me/sites/fciupl?erid=2RanynvigKW";
-export const PEREKRESTOK_NOV03_ERID = "2RanynvigKW";
-export const PEREKRESTOK_NOV03_LEGAL = 'Реклама. ООО "ИКС 5 ДИДЖИТАЛ", ИНН 9722010808 erid: 2RanynvigKW';
+export const PEREKRESTOK_NOV03_LINK = "https://perekrestok.prfl.me/sites/lpzdjy?erid=2Ranyk7xXZv";
+export const PEREKRESTOK_NOV03_ERID = "2Ranyk7xXZv";
+export const PEREKRESTOK_NOV03_LEGAL = 'Реклама. ООО "ИКС 5 ДИДЖИТАЛ", ИНН 9722010808 erid: 2Ranyk7xXZv';
 
 export const PEREKRESTOK_NOV03_TG_LINK = "https://perekrestok.prfl.me/smart_zakupka/hd4r4n?erid=2RanynuEh3A";
 export const PEREKRESTOK_NOV03_TG_ERID = "2RanynuEh3A";
@@ -254,6 +254,31 @@ export const PERFLUENCE_NOV03_OFFERS: Coupon[] = [
   },
 
   // ================= ПЕРЕКРЁСТОК ДОСТАВКА =================
+  {
+    id: 432800,
+    promocode: {
+      id: 432800,
+      code: "2059N8EV7",
+      bonusName: "Скидка 500 ₽ от 1 200 ₽ на первый заказ в Перекрёстке",
+      terms: "Горячая флеш-акция в «Перекрёсток Доставка»! Промокод 2059N8EV7 даёт скидку 500 ₽ на первый заказ продуктов от 1 200 ₽ в приложении Перекрёсток Доставка. Действует до 19 ноября 2026 года 23:59 МСК.",
+      expires: "2026-11-19T23:59:59+03:00",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Первый заказ",
+      minimumOrder: { value: 1200, currency: "RUB" },
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["perekrestok-dostavka"],
+      activeBloggers: STABLE_STORES["perekrestok-dostavka"]?.activeBloggers ?? 2840,
+    },
+    affiliate: PEREKRESTOK_NOV03_AFFILIATE,
+    extraLinks: [],
+  },
   {
     id: 432801,
     promocode: {
