@@ -39,9 +39,11 @@ function decodeHtml(html: string): string {
 }
 
 export function getPerfluenceCookieString(): string {
-  if (process.env.PERFLUENCE_SESSION_B64) {
+  // _DEPLOYED пишет деплой на VPS из GitHub Secrets; он свежее значения в /etc/promofact.env.
+  const sessionB64 = process.env.PERFLUENCE_SESSION_B64_DEPLOYED || process.env.PERFLUENCE_SESSION_B64;
+  if (sessionB64) {
     try {
-      const decoded = Buffer.from(process.env.PERFLUENCE_SESSION_B64, "base64").toString("utf8");
+      const decoded = Buffer.from(sessionB64, "base64").toString("utf8");
       const session = JSON.parse(decoded);
       return session.cookies
         .filter((c: { domain: string }) => c.domain.includes("perfluence"))
