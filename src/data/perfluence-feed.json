@@ -22,7 +22,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 12
+        "rsp": 14
       },
       "groups": [
         {
@@ -80,7 +80,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 87
+        "rsp": 94
       },
       "groups": [
         {
@@ -150,7 +150,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 27
+        "rsp": 37
       },
       "groups": [
         {
@@ -198,52 +198,6 @@
           "widget_subscribers_codes_count": 0,
           "widget_subscriber_codes": [],
           "ord_marker": "2RanykQGPk8"
-        },
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18833326,
-              "title": "Заказать новогодние товары бренда Cozy Home на WB",
-              "link": "https://cozyhome.prfl.me/smart_zakupka/v5a2zp?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 3641,
-              "code": "DIS3ZMP7",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 25% на новогодние товары Cozy Home на каждый заказ на WB",
-              "date": "17.11.2026 23:59",
-              "group": "17526",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17526,
-              "is_universal": true,
-              "name": "Скидка 25% на новогодние товары Cozy Home на каждый заказ на WB",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17459004,
-              "ord_marker": "2RanykQGPk8",
-              "ord_custom_text": "Реклама. Рекламодатель ООО \"ТК КОУЗИ ХОУМ\", ИНН 7743238687",
-              "discount": 25,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17459004&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "17.11.2026 23:59"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": [],
-          "ord_marker": "2RanykQGPk8"
         }
       ]
     },
@@ -284,7 +238,7 @@
           "Калуга"
         ],
         "pf": 1,
-        "rsp": 441
+        "rsp": 438
       },
       "groups": [
         {
@@ -362,7 +316,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 421
+        "rsp": 423
       },
       "groups": [
         {
@@ -550,7 +504,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 100
+        "rsp": 328
       },
       "groups": [
         {
@@ -648,7 +602,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 369
+        "rsp": 138
       },
       "groups": [
         {
@@ -797,7 +751,7 @@
           "Анапа"
         ],
         "pf": 1,
-        "rsp": 440
+        "rsp": 443
       },
       "groups": [
         {
@@ -857,7 +811,7 @@
         "category_id": 269,
         "category_name": "Косметика и парфюмерия",
         "activeBloggers": 2795,
-        "product_info": "<p>Librederm — международный бренд косметических и дерматологических средств. Лидер в увлажнении кожи лица. №1 в очищении и антивозрастном ух��де. Эффективность средств доказана клинически, а сами средства рекомендованы дерматологами и косметологами.</p>",
+        "product_info": "<p>Librederm — международный бренд косметических и дерматологических средств. Лидер в увлажнении кожи лица. №1 в очищении и антивозрастном уходе. Эффективность средств доказана клинически, а сами средства рекомендованы дерматологами и косметологами.</p>",
         "subscribers_condition": "",
         "site": "https://librederm.ru",
         "info": "",
@@ -870,7 +824,7 @@
         "subscriber_guide": "",
         "regions": [],
         "pf": 1,
-        "rsp": 382
+        "rsp": 343
       },
       "groups": [
         {
@@ -946,7 +900,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 40
+        "rsp": 31
       },
       "groups": [
         {
@@ -1020,7 +974,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 59
+        "rsp": 50
       },
       "groups": [
         {
@@ -1234,14 +1188,14 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 419
+        "rsp": 427
       },
       "groups": [
         {
           "links_for_subscribers": [
             {
               "id": 18778335,
-              "title": "Оформить бесплатный период на 45 дней доступа к сервисам RUTUBE + PREMIER",
+              "title": "Оформить бесплатный период на 45 дней доступа к сервисам RUTUBE + PREMIER или оформить подписку за 99 ₽",
               "link": "https://premier.prfl.me/sites/chp8bj?source=js-widget&source_id=8842",
               "landing_terms": ""
             }
@@ -1253,7 +1207,7 @@
               "code": "9t9tx6zt",
               "is_barcode": false,
               "image": "",
-              "comment": "45 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки, далее 399 ₽",
+              "comment": "45 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
               "date": "30.11.2026",
               "group": "",
               "is_hit": false,
@@ -1263,7 +1217,7 @@
               "hit_color": null,
               "bonus_id": 15508,
               "is_universal": false,
-              "name": "45 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки, далее 399 ₽",
+              "name": "45 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
               "promo_terms": "",
               "region_promo": [
                 "RU"
@@ -1285,7 +1239,7 @@
           "links_for_subscribers": [
             {
               "id": 18754243,
-              "title": "Оформить бесплатный период на 50 дней доступа к сервисам RUTUBE + PREMIER",
+              "title": "Оформить бесплатный период на 50 дней доступа к сервисам RUTUBE + PREMIER или оформить подписку за 99 ₽",
               "link": "https://premier.prfl.me/smart_zakupka/5tl65x?source=js-widget&source_id=8842",
               "landing_terms": ""
             }
@@ -1297,7 +1251,7 @@
               "code": "whkv64tj",
               "is_barcode": false,
               "image": "",
-              "comment": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки, далее 399 ₽",
+              "comment": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
               "date": "30.11.2026",
               "group": "",
               "is_hit": false,
@@ -1307,7 +1261,7 @@
               "hit_color": null,
               "bonus_id": 15507,
               "is_universal": false,
-              "name": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки, далее 399 ₽",
+              "name": "50 дней доступа к сервисам RUTUBE + PREMIER за 1 ₽ для пользователей без активной подписки более 90 дней или подписка на один месяц за 99 ₽ для неактивных пользователей менее 90 дней, далее 399 ₽",
               "promo_terms": "",
               "region_promo": [
                 "RU"
@@ -1357,12 +1311,12 @@
           "Азербайджан",
           "Узбекистан",
           "Беларусь",
-          "Киргизия",
           "Казахстан",
+          "Киргизия",
           "Россия"
         ],
         "pf": 1,
-        "rsp": 392
+        "rsp": 403
       },
       "groups": [
         {
@@ -1540,7 +1494,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 71
+        "rsp": 59
       },
       "groups": [
         {
@@ -1603,7 +1557,7 @@
         "product_info": "<p>Кинопоиск — онлайн-кинотеатр с доступом к тысячам фильмов, сериалов, мультфильмов и шоу. В сервисе представлены оригинальные проекты: \"Красная поляна\", \"Беспринципные в Питере\", \"Триггер\", \"Проект Анна Николаевна\", \"Мажор\".</p>",
         "subscribers_condition": "",
         "site": "https://www.kinopoisk.ru/",
-        "info": "<p>Яндекс Плюс — единая мультиподписка на сервисы Яндекса, включая Кинопоиск и Яндекс Музыку. Мультиподписка позволяет копить и тратить баллы Плюса. Баллами можно оплатить как часть, так и полную стоимость товаров, услуг и билетов в сервисах Яндекса: Яндекс Go (такси и самокаты), Драйв, Яндекс Афиша, Кинопоиск, Яндекс Маркет, Заправки, Еда, Лавка, Путешествия.</p>",
+        "info": "<p>Яндекс Плюс — единая мультиподписка на сервисы Яндекса, включая Кинопоиск и Яндекс Музыку. Мультиподписка позволяет копить и тратить баллы Плюса. Баллами можно оплатить как часть, так и полную стоимость товаров, услуг и билетов в сервисах Яндекса: Яндекс Go (такси и самок��ты), Драйв, Яндекс Афиша, Кинопоиск, Яндекс Маркет, Заправки, Еда, Лавка, Путешествия.</p>",
         "advantages": [
           "Тысячи фильмов и сериалов без рекламы, детский режим и возможность просмотра офлайн, а также просмотра с нескольких аккаунтов;",
           "подключив Кинопоиск, пользователь получает бесплатный доступ к Яндекс Музыке, Яндекс Плюсу, Яндекс Книгам;",
@@ -1617,7 +1571,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 77
+        "rsp": 67
       },
       "groups": [
         {
@@ -1689,7 +1643,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 26
+        "rsp": 27
       },
       "groups": [
         {
@@ -1730,79 +1684,6 @@
               "discount": null,
               "btn_text": null,
               "show": "https://pawss-api.perfluence.net/source-view?post_id=17310351&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": [],
-          "ord_marker": "2RanykMJRBS"
-        },
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18833324,
-              "title": "Забронировать отель из подборки в ноябре со скидкой",
-              "link": "https://yatravel.prfl.me/smart_zakupka/ui31lf?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 1135,
-              "code": "SKIDON20",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 20% (до 100 000 ₽) для первых 100 пользователей при бронировании отелей на сайте или в приложении, действует на период бронирования до 30.11 включительно",
-              "date": "17.11.2026 23:59",
-              "group": "17528",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17528,
-              "is_universal": true,
-              "name": "Скидка 20% (до 100 000 ₽) для первых 100 пользователей при бронировании отелей на сайте или в приложении, действует на период бронирования до 30.11 включительно",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": null,
-              "post_id": 17459002,
-              "ord_marker": "2RanykMJRBS",
-              "ord_custom_text": "Реклама. ООО \"ЯНДЕКС.ВЕРТИКАЛИ\", ИНН 7704340327.",
-              "discount": 20,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17459002&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "17.11.2026 23:59"
-            },
-            {
-              "project_id": 1135,
-              "code": "PF-SKIDONIO-I75DBF",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 10% (до 100 000 ₽) для всех при бронировании отелей на сайте или в приложении, действует на период бронирования до 30.11 включительно\t",
-              "date": "17.11.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17529,
-              "is_universal": false,
-              "name": "Скидка 10% (до 100 000 ₽) для всех при бронировании отелей на сайте или в приложении, действует на период бронирования до 30.11 включительно\t",
-              "promo_terms": "",
-              "region_promo": [],
-              "repeat_order": null,
-              "post_id": 17459002,
-              "ord_marker": "2RanykMJRBS",
-              "ord_custom_text": "Реклама. ООО \"ЯНДЕКС.ВЕРТИКАЛИ\", ИНН 7704340327.",
-              "discount": 10,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17459002&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "17.11.2026 23:59"
             }
           ],
           "has_widget_subscribers_promo": false,
@@ -1883,7 +1764,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 406
+        "rsp": 408
       },
       "groups": [
         {
@@ -1956,290 +1837,6 @@
     },
     {
       "project": {
-        "id": 266,
-        "logo": "https://s3sc.perfluence.net/logos/17035875252963.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/f/c/b/fcbc906b-a60a-4a82-b01e-90d12da135bf.webp",
-        "name": "ЛЭТУАЛЬ",
-        "type": "cpa",
-        "img": "https://s3sc.perfluence.net/img_widget/1/7/4/1744dafc-3f09-4712-9d06-9937b3663777.webp",
-        "category_id": 269,
-        "category_name": "Косметика и парфюмерия",
-        "activeBloggers": 19338,
-        "product_info": "<p>ЛЭТУАЛЬ — лидер парфюмерно-косметической индустрии в России, насчитывает около 1000 розничных магазинов. Помимо парфюмерии и косметики там можно приобрети: технику Kitfort и SAKURA, одежду для дома и спорта, товары для уборки от SYNERGETIC, канцелярию от любимого детского бренда MORIKI DORIKI, и даже товары для взрослых для ярких свиданий.</p>",
-        "subscribers_condition": "",
-        "site": "https://www.letu.ru/",
-        "info": "",
-        "advantages": [
-          "Гибкая система лояльности: начисление бонусов в личный кабинет в зависимости от суммы покупок.",
-          "Раздел с акциями — все актуальные скидки, акции и бонусы собраны в одном месте. ",
-          "Большое количество выгодных промокодов на любой бюджет. ",
-          "Большой ассортимент корейский брендов по выгодным ценам: A'PIEU,  CELIMAX, ARENCIA, TOCOBO  и другие.",
-          "На сайте и в приложении есть специальные подборки товаров, которые отлично подойдут к праздникам."
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 79
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18833433,
-              "title": "Оформить заказ в ЛЭТУАЛЬ",
-              "link": "https://letu.prfl.me/sites/r3nt3f?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 266,
-              "code": "НАБЕРИ",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 6 000 ₽ от 10 000 ₽, 10 000 ₽ от 15 000 ₽, 20 000 ₽ от 30 000 ₽ и 35 000 ₽ от 50 000 ₽ на первый и все повторные заказы по промокоду НАБЕРИ",
-              "date": "30.11.2026",
-              "group": "16079",
-              "is_hit": true,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 16079,
-              "is_universal": true,
-              "name": "Скидка 6 000 ₽ от 10 000 ₽, 10 000 ₽ от 15 000 ₽, 20 000 ₽ от 30 000 ₽ и 35 000 ₽ от 50 000 ₽ на первый и все повторные заказы по промокоду НАБЕРИ",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17459094,
-              "ord_marker": "2Ranym6JPqN",
-              "ord_custom_text": "Реклама. Рекламодатель ООО «Алькор и Ко», ИНН 7729265128",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17459094&widget_id=8842&user_id=861964&source=js-widget"
-            },
-            {
-              "project_id": 266,
-              "code": "ПЯТНИЦА",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 20% от 4 000 ₽, 30% от 7 000 ₽ и 40% от 12 000 ₽ на первый и все повторные заказы по промокоду ПЯТНИЦА",
-              "date": "30.11.2026",
-              "group": "17419",
-              "is_hit": true,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17419,
-              "is_universal": true,
-              "name": "Скидка 20% от 4 000 ₽, 30% от 7 000 ₽ и 40% от 12 000 ₽ на первый и все повторные заказы по промокоду ПЯТНИЦА",
-              "promo_terms": "",
-              "region_promo": [],
-              "repeat_order": true,
-              "post_id": 17459094,
-              "ord_marker": "2Ranym6JPqN",
-              "ord_custom_text": "Реклама. Рекламодатель ООО «Алькор и Ко», ИНН 7729265128",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17459094&widget_id=8842&user_id=861964&source=js-widget"
-            },
-            {
-              "project_id": 266,
-              "code": "МОМЕНТ",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 3 000 ₽ от 7 000 ₽ на первый и все повторные заказы по промокоду МОМЕНТ",
-              "date": "30.11.2026",
-              "group": "16552",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 16552,
-              "is_universal": true,
-              "name": "Скидка 3 000 ₽ от 7 000 ₽ на первый и все повторные заказы по промокоду МОМЕНТ",
-              "promo_terms": "<p><del></del></p>",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17459094,
-              "ord_marker": "2Ranym6JPqN",
-              "ord_custom_text": "Реклама. Рекламодатель ООО «Алькор и Ко», ИНН 7729265128",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17459094&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
-        "id": 602,
-        "logo": "https://s3sc.perfluence.net/logos/17035947384036.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/6/6/d/66d14ba3-58ea-48dc-bf80-2e9d4510e108.png",
-        "name": "TanukiFamily",
-        "type": "cpa",
-        "img": null,
-        "category_id": 303,
-        "category_name": "Доставка из ресторанов",
-        "activeBloggers": 8572,
-        "product_info": "<p>Тануки – сеть ресторанов японской кухни. Не просто ресторан, а самобытная культура Японии на территории России, которой можно насладиться у себя дома. Это одна из самых быстрорастущих ресторанных сетей, которая насчитывает 74 заведения.</p>",
-        "subscribers_condition": "",
-        "site": "https://tanukifamily.ru",
-        "info": "",
-        "advantages": [
-          "быстрая доставка от 29 минут в удобное время или самовывоз;",
-          "более 60 видов роллов и суши, дим-самы, сашими, невероятно вкусные лимонады и смузи, десерты;",
-          "оплата любым удобным способом - наличными, картой онлайн, картой курьеру;",
-          "есть детское и вегетарианское меню, ланчи, сезонное меню;",
-          "каждое блюдо содержит подробное описание, в котором указаны все используемые ингредиенты, а также КБЖУ для тех, кто хочет есть любимые блюда без вреда для фигуры."
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Воронеж",
-          "Уфа",
-          "Самара",
-          "Нижний Новгород",
-          "Москва",
-          "Краснодар",
-          "Казань",
-          "Екатеринбург"
-        ],
-        "pf": 1,
-        "rsp": 88
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18827343,
-              "title": "Скидка или ролл в подарок в Тануки",
-              "link": "https://tanukifamily.prfl.me/sites/lz9t15?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 602,
-              "code": "KT1366",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Ролл Теплый краб в подарок при каждом заказе от 1490 ₽",
-              "date": "29.11.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 14764,
-              "is_universal": false,
-              "name": "Ролл Теплый краб в подарок при каждом заказе от 1490 ₽",
-              "promo_terms": "",
-              "region_promo": [
-                "Москва",
-                "Краснодар",
-                "Самара",
-                "Казань",
-                "Уфа",
-                "Воронеж",
-                "Екатеринбург",
-                "Нижний Новгород"
-              ],
-              "repeat_order": true,
-              "post_id": 17453877,
-              "ord_marker": "2RanykQFPDv",
-              "ord_custom_text": "Реклама. ООО \"Корсика\", ИНН 7730290633.",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453877&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "29.11.2026 23:59"
-            },
-            {
-              "project_id": 602,
-              "code": "20SA1244",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 20% от 1090 ₽ на первый заказ в Тануки",
-              "date": "26.11.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 14343,
-              "is_universal": false,
-              "name": "Скидка 20% от 1090 ₽ на первый заказ в Тануки",
-              "promo_terms": "",
-              "region_promo": [
-                "Москва",
-                "Краснодар",
-                "Самара",
-                "Казань",
-                "Уфа",
-                "Воронеж",
-                "Екатеринбург",
-                "Нижний Новгород"
-              ],
-              "repeat_order": false,
-              "post_id": 17453877,
-              "ord_marker": "2RanykQFPDv",
-              "ord_custom_text": "Реклама. ООО \"Корсика\", ИНН 7730290633.",
-              "discount": 20,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453877&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "26.11.2026 23:59"
-            },
-            {
-              "project_id": 602,
-              "code": "15SA1244",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 15% от 1490 ₽ на все повторные заказы в Тануки",
-              "date": "26.11.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 14344,
-              "is_universal": false,
-              "name": "Скидка 15% от 1490 ₽ на все повторные заказы в Тануки",
-              "promo_terms": "",
-              "region_promo": [],
-              "repeat_order": true,
-              "post_id": 17453877,
-              "ord_marker": "2RanykQFPDv",
-              "ord_custom_text": "Реклама. ООО \"Корсика\", ИНН 7730290633.",
-              "discount": 15,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453877&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "26.11.2026 23:59"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 1341,
         "logo": "https://s3sc.perfluence.net/logos/3/c/8/3c81cd39-b0c6-4b40-98fd-35b70dbdc178.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/0/0/0/000be91d-c539-42d3-8ddd-c8b20b47971f.png",
@@ -2266,7 +1863,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 81
+        "rsp": 79
       },
       "groups": [
         {
@@ -2435,6 +2032,258 @@
     },
     {
       "project": {
+        "id": 602,
+        "logo": "https://s3sc.perfluence.net/logos/17035947384036.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/6/6/d/66d14ba3-58ea-48dc-bf80-2e9d4510e108.png",
+        "name": "TanukiFamily",
+        "type": "cpa",
+        "img": null,
+        "category_id": 303,
+        "category_name": "Доставка из ресторанов",
+        "activeBloggers": 8572,
+        "product_info": "<p>Тануки – сеть ресторанов японской кухни. Не просто ресторан, а самобытная культура Японии на территории России, которой можно насладиться у себя дома. Это одна из самых быстрорастущих ресторанных сетей, которая насчитывает 74 заведения.</p>",
+        "subscribers_condition": "",
+        "site": "https://tanukifamily.ru",
+        "info": "",
+        "advantages": [
+          "быстрая доставка от 29 минут в удобное время или самовывоз;",
+          "более 60 видов роллов и суши, дим-самы, сашими, невероятно вкусные лимонады и смузи, десерты;",
+          "оплата любым удобным способом - наличными, картой онлайн, картой курьеру;",
+          "есть детское и вегетарианское меню, ланчи, сезонное меню;",
+          "каждое блюдо содержит подробное описание, в котором указаны все используемые ингредиенты, а также КБЖУ для тех, кто хочет есть любимые блюда без вреда для фигуры."
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Воронеж",
+          "Уфа",
+          "Самара",
+          "Нижний Новгород",
+          "Москва",
+          "Краснодар",
+          "Казань",
+          "Екатеринбург"
+        ],
+        "pf": 1,
+        "rsp": 132
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18827343,
+              "title": "Скидка или ролл в подарок в Тануки",
+              "link": "https://tanukifamily.prfl.me/sites/lz9t15?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 602,
+              "code": "KT1366",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Ролл Теплый краб в подарок при каждом заказе от 1490 ₽",
+              "date": "29.11.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 14764,
+              "is_universal": false,
+              "name": "Ролл Теплый краб в подарок при каждом заказе от 1490 ₽",
+              "promo_terms": "",
+              "region_promo": [
+                "Москва",
+                "Краснодар",
+                "Самара",
+                "Казань",
+                "Уфа",
+                "Воронеж",
+                "Екатеринбург",
+                "Нижний Новгород"
+              ],
+              "repeat_order": true,
+              "post_id": 17453877,
+              "ord_marker": "2RanykQFPDv",
+              "ord_custom_text": "Реклама. ООО \"Корсика\", ИНН 7730290633.",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453877&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "29.11.2026 23:59"
+            },
+            {
+              "project_id": 602,
+              "code": "20SA1244",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 20% от 1090 ₽ на первый заказ в Тануки",
+              "date": "26.11.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 14343,
+              "is_universal": false,
+              "name": "Скидка 20% от 1090 ₽ на первый заказ в Тануки",
+              "promo_terms": "",
+              "region_promo": [
+                "Москва",
+                "Краснодар",
+                "Самара",
+                "Казань",
+                "Уфа",
+                "Воронеж",
+                "Екатеринбург",
+                "Нижний Новгород"
+              ],
+              "repeat_order": false,
+              "post_id": 17453877,
+              "ord_marker": "2RanykQFPDv",
+              "ord_custom_text": "Реклама. ООО \"Корсика\", ИНН 7730290633.",
+              "discount": 20,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453877&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "26.11.2026 23:59"
+            },
+            {
+              "project_id": 602,
+              "code": "15SA1244",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 15% от 1490 ₽ на все повторные заказы в Тануки",
+              "date": "26.11.2026 23:59",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 14344,
+              "is_universal": false,
+              "name": "Скидка 15% от 1490 ₽ на все повторные заказы в Тануки",
+              "promo_terms": "",
+              "region_promo": [],
+              "repeat_order": true,
+              "post_id": 17453877,
+              "ord_marker": "2RanykQFPDv",
+              "ord_custom_text": "Реклама. ООО \"Корсика\", ИНН 7730290633.",
+              "discount": 15,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453877&widget_id=8842&user_id=861964&source=js-widget",
+              "expires": "26.11.2026 23:59"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
+        "id": 3716,
+        "logo": "https://s3sc.perfluence.net/logos/e/4/4/e44852b7-acbe-40ad-83cd-1f440ccfa1b4.jpg",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/b/f/3bf9bbab-bc32-45dd-ae9c-414774d1855b.png",
+        "name": "СберДевайсы",
+        "type": "cpa",
+        "img": null,
+        "category_id": 298,
+        "category_name": "Всё для дома",
+        "activeBloggers": 1059,
+        "product_info": "<p>СберДевайсы - больше, чем просто гаджеты. Это экосистема умных устройств и сервисов, которая делает жизнь проще, комфортнее и ярче: умные колонки и телевизоры, медиацентры, товары для умного дома.</p>",
+        "subscribers_condition": "",
+        "site": "https://sberdevices.ru/",
+        "info": "",
+        "advantages": [],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 97
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18778356,
+              "title": "Заказать СберДевайсы на сайте",
+              "link": "https://sberdevaysy1.prfl.me/sites/dso5vb?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 3716,
+              "code": "Sberdv71",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 5% на все категории на каждый заказ",
+              "date": "30.11.2026",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17222,
+              "is_universal": false,
+              "name": "Скидка 5% на все категории на каждый заказ",
+              "promo_terms": "<p>Распространяется на все, кроме умного кольца и ЭУИ</p>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17409502,
+              "ord_marker": "2Ranykxaymv",
+              "ord_custom_text": "Реклама. Рекламодатель - ООО “САЛЮТДЕВАЙСЫ”. ИНН: 7730253720",
+              "discount": 5,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409502&widget_id=8842&user_id=861964&source=js-widget"
+            },
+            {
+              "project_id": 3716,
+              "code": "Sberdv171",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 6% на покупку ТВ на каждый заказ",
+              "date": "30.11.2026",
+              "group": "",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17223,
+              "is_universal": false,
+              "name": "Скидка 6% на покупку ТВ на каждый заказ",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17409502,
+              "ord_marker": "2Ranykxaymv",
+              "ord_custom_text": "Реклама. Рекламодатель - ООО “САЛЮТДЕВАЙСЫ”. ИНН: 7730253720",
+              "discount": 6,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409502&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
         "id": 2233,
         "logo": "https://s3sc.perfluence.net/logos/17035055247727.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/9/c/b/9cb3aab1-c852-4599-8a04-a72946582f39.png",
@@ -2460,7 +2309,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 362
+        "rsp": 388
       },
       "groups": [
         {
@@ -2537,7 +2386,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 425
+        "rsp": 424
       },
       "groups": [
         {
@@ -2629,7 +2478,7 @@
           "Челябинск"
         ],
         "pf": 1,
-        "rsp": 403
+        "rsp": 414
       },
       "groups": [
         {
@@ -2758,7 +2607,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 134
+        "rsp": 145
       },
       "groups": [
         {
@@ -2836,6 +2685,82 @@
     },
     {
       "project": {
+        "id": 2657,
+        "logo": "https://s3sc.perfluence.net/logos/17117241389268.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/3/c/33cccb38-9a0a-4371-85b6-75532b3d8700.png",
+        "name": "Подружка",
+        "type": "cpa",
+        "img": null,
+        "category_id": 269,
+        "category_name": "Косметика и парфюмерия",
+        "activeBloggers": 6455,
+        "product_info": "",
+        "subscribers_condition": "<p>Для покупок в магазинах покажите штрих-код на кассе. Советуем сделать скриншот экрана.</p>",
+        "site": "https://www.podrygka.ru",
+        "info": "",
+        "advantages": [
+          "разнообразие скидок и акций, в том числе ежедневная дополнительная скидка 5% с 9.00 до 12.00, товары в подарок при заказах определенных брендов, акция 1+1=3;",
+          "всегда бесплатная доставка в магазины Подружка, а также при заказе от 990р для курьерской доставки и доставки в постаматы в магазинах Пятерочка и пункты выдачи СДЭК по всей стране;",
+          "большое количество магазинов в шаговой доступности, простая и понятная программа лояльности;",
+          "большой выбор декоративной и уходовой косметики, средств для ухода за волосами, аксессуаров, товаров для детей;",
+          "широкий ассортимент азиатской и корейской косметики по выгодным ценам."
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 98
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18778328,
+              "title": "Оформить заказ со скидкой 30% онлайн или в розничном магазине",
+              "link": "https://podrygka.prfl.me/sites/45v1a1?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 2657,
+              "code": "2921060875255",
+              "is_barcode": true,
+              "image": "https://barcode.tec-it.com/barcode.ashx?data=2921060875255&code=EAN13",
+              "comment": "Скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах",
+              "date": "30.11.2026",
+              "group": "11058",
+              "is_hit": true,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 11058,
+              "is_universal": false,
+              "name": "Скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17409474,
+              "ord_marker": "2RanykGZKAc",
+              "ord_custom_text": "Реклама. ООО «Табер Трейд», ИНН 7709505477, ОГРН 1037739861851. Адрес места нахождения (Юридический адрес): 115280, г.Москва, ул.Ленинская Слобода, д.19, комн. 21В",
+              "discount": 30,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409474&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
         "id": 3690,
         "logo": "https://s3sc.perfluence.net/logos/7/c/5/7c53bcdd-3e8d-4578-8791-428c06155093.png",
         "logo_widget": "",
@@ -2855,7 +2780,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 428
+        "rsp": 436
       },
       "groups": [
         {
@@ -2906,104 +2831,6 @@
     },
     {
       "project": {
-        "id": 3716,
-        "logo": "https://s3sc.perfluence.net/logos/e/4/4/e44852b7-acbe-40ad-83cd-1f440ccfa1b4.jpg",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/b/f/3bf9bbab-bc32-45dd-ae9c-414774d1855b.png",
-        "name": "СберДевайсы",
-        "type": "cpa",
-        "img": null,
-        "category_id": 298,
-        "category_name": "Всё для дома",
-        "activeBloggers": 1059,
-        "product_info": "<p>СберДевайсы - больше, чем просто гаджеты. Это экосистема умных устройств и сервисов, которая делает жизнь проще, комфортнее и ярче: умные колонки и телевизоры, медиацентры, товары для умного дома.</p>",
-        "subscribers_condition": "",
-        "site": "https://sberdevices.ru/",
-        "info": "",
-        "advantages": [],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 152
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18778356,
-              "title": "Заказать СберДевайсы на сайте",
-              "link": "https://sberdevaysy1.prfl.me/sites/dso5vb?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 3716,
-              "code": "Sberdv71",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 5% на все категории на каждый заказ",
-              "date": "30.11.2026",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17222,
-              "is_universal": false,
-              "name": "Скидка 5% на все категории на каждый заказ",
-              "promo_terms": "<p>Распространяется на все, кроме умного кольца и ЭУИ</p>",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17409502,
-              "ord_marker": "2Ranykxaymv",
-              "ord_custom_text": "Реклама. Рекламодатель - ООО “САЛЮТДЕВАЙСЫ”. ИНН: 7730253720",
-              "discount": 5,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409502&widget_id=8842&user_id=861964&source=js-widget"
-            },
-            {
-              "project_id": 3716,
-              "code": "Sberdv171",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 6% на покупку ТВ на каждый заказ",
-              "date": "30.11.2026",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17223,
-              "is_universal": false,
-              "name": "Скидка 6% на покупку ТВ на каждый заказ",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17409502,
-              "ord_marker": "2Ranykxaymv",
-              "ord_custom_text": "Реклама. Рекламодатель - ООО “САЛЮТДЕВАЙСЫ”. ИНН: 7730253720",
-              "discount": 6,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409502&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 3750,
         "logo": "https://s3sc.perfluence.net/logos/3/9/7/3975538b-66b4-45ff-ab19-07dd5c2364f2.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/1/3/313da5a4-346f-4b46-a511-57e9d1570665.png",
@@ -3029,7 +2856,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 375
+        "rsp": 393
       },
       "groups": [
         {
@@ -3078,78 +2905,6 @@
     },
     {
       "project": {
-        "id": 4526,
-        "logo": "https://s3sc.perfluence.net/logos/7/0/a/70a93ae0-8ee5-44f7-9afe-ab8642634a42.png",
-        "logo_widget": "",
-        "name": "Арнест ЮниРусь на Ozon",
-        "type": "cpa",
-        "img": null,
-        "category_id": 293,
-        "category_name": "Маркетплейсы",
-        "activeBloggers": 1883,
-        "product_info": "",
-        "subscribers_condition": "",
-        "site": "https://www.unirusgroup.ru",
-        "info": "<p>Арнест ЮниРусь — один из крупнейших российских производителей товаров повседневного спроса. В ассортименте: косметика, средства для дома, продукты питания и БАДы.</p>",
-        "advantages": [
-          ""
-        ],
-        "subscriber_guide": "<p>Арнест ЮниРусь — один из крупнейших российских производителей товаров повседневного спроса. В ассортименте: косметика, средства для дома, продукты питания и БАДы.</p>",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 155
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18778350,
-              "title": "Купить продукцию Чистая линия на Ozon",
-              "link": "https://pureline.prfl.me/sites/efkxh3?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 4526,
-              "code": "15PL",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 15% на товары Чистая линия на первый и все повторные заказы на Ozon",
-              "date": "30.11.2026",
-              "group": "16603",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 16603,
-              "is_universal": true,
-              "name": "Скидка 15% на товары Чистая линия на первый и все повторные заказы на Ozon",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17409496,
-              "ord_marker": "2Ranykoh45r",
-              "ord_custom_text": "Реклама. ООО \"АРНЕСТ ЮНИРУСЬ\", ИНН 7705183476",
-              "discount": 15,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409496&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 2582,
         "logo": "https://s3sc.perfluence.net/logos/a/8/e/a8e92681-c02f-40f5-aa26-695967710217.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/7/c/d7ccda73-b2f4-441d-aeb9-15683b1079b1.svg",
@@ -3173,7 +2928,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 340
+        "rsp": 361
       },
       "groups": [
         {
@@ -3252,6 +3007,78 @@
     },
     {
       "project": {
+        "id": 4526,
+        "logo": "https://s3sc.perfluence.net/logos/7/0/a/70a93ae0-8ee5-44f7-9afe-ab8642634a42.png",
+        "logo_widget": "",
+        "name": "Арнест ЮниРусь на Ozon",
+        "type": "cpa",
+        "img": null,
+        "category_id": 293,
+        "category_name": "Маркетплейсы",
+        "activeBloggers": 1883,
+        "product_info": "",
+        "subscribers_condition": "",
+        "site": "https://www.unirusgroup.ru",
+        "info": "<p>Арнест ЮниРусь — один из крупнейших российских производителей товаров повседневного спроса. В ассортименте: косметика, средства для дома, продукты питания и БАДы.</p>",
+        "advantages": [
+          ""
+        ],
+        "subscriber_guide": "<p>Арнест ЮниРусь — один из крупнейших российских производителей товаров повседневного спроса. В ассортименте: косметика, средства для дома, продукты питания и БАДы.</p>",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 363
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18778350,
+              "title": "Ку��ить продукцию Чистая линия на Ozon",
+              "link": "https://pureline.prfl.me/sites/efkxh3?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 4526,
+              "code": "15PL",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 15% на товары Чистая линия на первый и все повторные заказы на Ozon",
+              "date": "30.11.2026",
+              "group": "16603",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 16603,
+              "is_universal": true,
+              "name": "Скидка 15% на товары Чистая линия на первый и все повторные заказы на Ozon",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17409496,
+              "ord_marker": "2Ranykoh45r",
+              "ord_custom_text": "Реклама. ООО \"АРНЕСТ ЮНИРУСЬ\", ИНН 7705183476",
+              "discount": 15,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409496&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
         "id": 4579,
         "logo": "https://s3sc.perfluence.net/logos/c/0/b/c0bcdeaf-3b5a-4ef7-b3dd-06dd9ac6b36a.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/0/d/e/0deb9f9e-f1f1-4131-8121-e2e70e982852.webp",
@@ -3271,7 +3098,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 391
+        "rsp": 406
       },
       "groups": [
         {
@@ -3379,7 +3206,7 @@
           "Адлер"
         ],
         "pf": 1,
-        "rsp": 442
+        "rsp": 444
       },
       "groups": [
         {
@@ -3530,146 +3357,6 @@
     },
     {
       "project": {
-        "id": 2657,
-        "logo": "https://s3sc.perfluence.net/logos/17117241389268.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/3/3/c/33cccb38-9a0a-4371-85b6-75532b3d8700.png",
-        "name": "Подружка",
-        "type": "cpa",
-        "img": null,
-        "category_id": 269,
-        "category_name": "Косметика и парфюмерия",
-        "activeBloggers": 6455,
-        "product_info": "",
-        "subscribers_condition": "<p>Для покупок в магазинах покажите штрих-код на кассе. Советуем сделать скриншот экрана.</p>",
-        "site": "https://www.podrygka.ru",
-        "info": "",
-        "advantages": [
-          "разнообразие скидок и акций, в том числе ежедневная дополнительная скидка 5% с 9.00 до 12.00, товары в подарок при заказах определенных брендов, акция 1+1=3;",
-          "всегда бесплатная доставка в магазины Подружка, а также при заказе от 990р для курьерской доставки и доставки в постаматы в магазинах Пятерочка и пункты выдачи СДЭК по всей стране;",
-          "большое количество магазинов в шаговой доступности, простая и понятная программа лояльности;",
-          "большой выбор декоративной и уходовой косметики, средств для ухода за волосами, аксессуаров, товаров для детей;",
-          "широкий ассортимент азиатской и корейской косметики по выгодным ценам."
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 363
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18778328,
-              "title": "Оформить заказ со скидкой 30% онлайн или в розничном магазине",
-              "link": "https://podrygka.prfl.me/sites/45v1a1?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 2657,
-              "code": "2921060875255",
-              "is_barcode": true,
-              "image": "https://barcode.tec-it.com/barcode.ashx?data=2921060875255&code=EAN13",
-              "comment": "Скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах",
-              "date": "30.11.2026",
-              "group": "11058",
-              "is_hit": true,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 11058,
-              "is_universal": false,
-              "name": "Скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17409474,
-              "ord_marker": "2RanykGZKAc",
-              "ord_custom_text": "Реклама. ООО «Табер Трейд», ИНН 7709505477, ОГРН 1037739861851. Адрес места нахождения (Юридический адрес): 115280, г.Москва, ул.Ленинская Слобода, д.19, комн. 21В",
-              "discount": 30,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409474&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
-        "id": 3752,
-        "logo": "https://s3sc.perfluence.net/logos/7/c/1/7c1fa445-14f6-4ab7-8624-d38ab04e2d20.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/1/8/9/1898c74b-d252-49c4-9739-0d00c4a7bead.webp",
-        "name": "Дебетовая СберКарта",
-        "type": "cpa",
-        "img": null,
-        "category_id": 257,
-        "category_name": "Банковские карты",
-        "activeBloggers": 1366,
-        "product_info": "<p>СберКарта — это самая выгодная дебетовая карта с подпиской СберПрайм+ по версии Frank RG. Она всегда бесплатная, у нее нет комиссии за оплату ЖКХ в Сбербанк Онлайн и за переводы клиентам Сбера.</p>",
-        "subscribers_condition": "",
-        "site": "https://www.sberbank.com/ru",
-        "info": "<p>Сбербанк — крупнейший банк в России и один из ведущих финансовых институтов в мире. Он предоставляет широкий спектр банковских услуг для частных лиц и корпоративных клиентов.</p>",
-        "advantages": [
-          " До 10% бонусами СберСпасибо в 5 любимых категориях кешбэка с подпиской, а без подписки — 3;",
-          "кешбэк до 50% на покупки, путешествия и отдых в разделе «Для жизни» в СберБанк Онлайн;",
-          "безлимитные переводы без комиссии клиентам Сбера;",
-          "0% комиссия при оплате ЖКХ в Сбербанк Онлайн;",
-          "оплата до 99% бонусами Спасибо на покупки у партнёров."
-        ],
-        "subscriber_guide": "<p>Сбербанк — крупнейший банк в России и один из ведущих финансовых институтов в мире. Он предоставляет широкий спектр банковских услуг для частных лиц и корпоративных клиентов.</p>",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 371
-      },
-      "groups": [
-        {
-          "landing": {
-            "id": 12353,
-            "project_id": 3752,
-            "name": "Оформить дебетовую СберКарту с бесплатными переводами и платежами",
-            "btn_text": "",
-            "link": "https://partners.sbermarketing.ru/s/Ka5UGNucUK",
-            "logo": "",
-            "post_id": 17346035,
-            "is_hiting": false,
-            "is_captcha_enabled": false,
-            "is_oauth_enabled": false,
-            "hit_custom_text": "",
-            "hit_bg_color": null,
-            "hit_color": null,
-            "ord_marker": "2RanykaY4Us",
-            "ord_custom_text": "Реклама. Рекламодатель: ПАО Сбербанк. ИНН: 7707083893\r\nГен. лицензия Банка России на осуществление банковских операций Nº 1481 от 11.08.2015 г.",
-            "show": "https://pawss-api.perfluence.net/source-view?post_id=17346035&widget_id=8842&user_id=861964&source=js-widget"
-          },
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "links_for_subscribers": [
-            {
-              "id": 18708082,
-              "title": "Ссылка для подписчиков",
-              "link": "https://sberbank1.prfl.me/sites/7nue8j?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "promocodes": [],
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 305,
         "logo": "https://s3sc.perfluence.net/logos/17035034035169.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/6/8/5/68500260-9cc7-457d-8285-e48cc40e34ea.png",
@@ -3694,7 +3381,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 377
+        "rsp": 368
       },
       "groups": [
         {
@@ -3775,6 +3462,200 @@
     },
     {
       "project": {
+        "id": 266,
+        "logo": "https://s3sc.perfluence.net/logos/17035875252963.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/f/c/b/fcbc906b-a60a-4a82-b01e-90d12da135bf.webp",
+        "name": "ЛЭТУАЛЬ",
+        "type": "cpa",
+        "img": "https://s3sc.perfluence.net/img_widget/1/7/4/1744dafc-3f09-4712-9d06-9937b3663777.webp",
+        "category_id": 269,
+        "category_name": "Косметика и парфюмерия",
+        "activeBloggers": 19338,
+        "product_info": "<p>ЛЭТУАЛЬ — лидер парфюмерно-косметической индустрии в России, насчитывает около 1000 розничных магазинов. Помимо парфюмерии и косметики там можно приобрети: технику Kitfort и SAKURA, одежду для дома и спорта, товары для уборки от SYNERGETIC, канцелярию от любимого детского бренда MORIKI DORIKI, и даже товары для взрослых для ярких свиданий.</p>",
+        "subscribers_condition": "",
+        "site": "https://www.letu.ru/",
+        "info": "",
+        "advantages": [
+          "Гибкая система лояльности: начисление бонусов в личный кабинет в зависимости от суммы покупок.",
+          "Раздел с акциями — все актуальные скидки, акции и бонусы собраны в одном месте. ",
+          "Большое количество выгодных промокодов на любой бюджет. ",
+          "Большой ассортимент корейский брендов по выгодным ценам: A'PIEU,  CELIMAX, ARENCIA, TOCOBO  и другие.",
+          "На сайте и в приложении есть специальные подборки товаров, которые отлично подойдут к праздникам."
+        ],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 373
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18833433,
+              "title": "Оформить заказ в ЛЭТУАЛЬ",
+              "link": "https://letu.prfl.me/sites/r3nt3f?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 266,
+              "code": "НАБЕРИ",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 6 000 ₽ от 10 000 ₽, 10 000 ₽ от 15 000 ₽, 20 000 ₽ от 30 000 ₽ и 35 000 ₽ от 50 000 ₽ на первый и все повторные заказы по промокоду НАБЕРИ",
+              "date": "30.11.2026",
+              "group": "16079",
+              "is_hit": true,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 16079,
+              "is_universal": true,
+              "name": "Скидка 6 000 ₽ от 10 000 ₽, 10 000 ₽ от 15 000 ₽, 20 000 ₽ от 30 000 ₽ и 35 000 ₽ от 50 000 ₽ на первый и все повторные заказы по промокоду НАБЕРИ",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17459094,
+              "ord_marker": "2Ranym6JPqN",
+              "ord_custom_text": "Реклама. Рекламодатель ООО «Алькор и Ко», ИНН 7729265128",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17459094&widget_id=8842&user_id=861964&source=js-widget"
+            },
+            {
+              "project_id": 266,
+              "code": "ПЯТНИЦА",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 20% от 4 000 ₽, 30% от 7 000 ₽ и 40% от 12 000 ₽ на первый и все повторные заказы по промокоду ПЯТНИЦА",
+              "date": "30.11.2026",
+              "group": "17419",
+              "is_hit": true,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17419,
+              "is_universal": true,
+              "name": "Скидка 20% от 4 000 ₽, 30% от 7 000 ₽ и 40% от 12 000 ₽ на первый и все повторные заказы по промокоду ПЯТНИЦА",
+              "promo_terms": "",
+              "region_promo": [],
+              "repeat_order": true,
+              "post_id": 17459094,
+              "ord_marker": "2Ranym6JPqN",
+              "ord_custom_text": "Реклама. Рекламодатель ООО «Алькор и Ко», ИНН 7729265128",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17459094&widget_id=8842&user_id=861964&source=js-widget"
+            },
+            {
+              "project_id": 266,
+              "code": "МОМЕНТ",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидка 3 000 ₽ от 7 000 ₽ на первый и все повторные заказы по промокоду МОМЕНТ",
+              "date": "30.11.2026",
+              "group": "16552",
+              "is_hit": false,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 16552,
+              "is_universal": true,
+              "name": "Скидка 3 000 ₽ от 7 000 ₽ на первый и все повторные заказы по промокоду МОМЕНТ",
+              "promo_terms": "<p><del></del></p>",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17459094,
+              "ord_marker": "2Ranym6JPqN",
+              "ord_custom_text": "Реклама. Рекламодатель ООО «Алькор и Ко», ИНН 7729265128",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17459094&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
+        "id": 3752,
+        "logo": "https://s3sc.perfluence.net/logos/7/c/1/7c1fa445-14f6-4ab7-8624-d38ab04e2d20.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/1/8/9/1898c74b-d252-49c4-9739-0d00c4a7bead.webp",
+        "name": "Дебетовая СберКарта",
+        "type": "cpa",
+        "img": null,
+        "category_id": 257,
+        "category_name": "Банковские карты",
+        "activeBloggers": 1366,
+        "product_info": "<p>СберКарта — это самая выгодная дебетовая карта с подпиской СберПрайм+ по версии Frank RG. Она всегда бесплатная, у нее нет комиссии за оплату ЖКХ в Сбербанк Онлайн и за переводы клиентам Сбера.</p>",
+        "subscribers_condition": "",
+        "site": "https://www.sberbank.com/ru",
+        "info": "<p>Сбербанк — крупнейший банк в России и один из ведущих финансовых институтов в мире. Он предоставляет широкий спектр банковских услуг для частных лиц и корпоративных клиентов.</p>",
+        "advantages": [
+          " До 10% бонусами СберСпасибо в 5 любимых категориях кешбэка с подпиской, а без подписки — 3;",
+          "кешбэк до 50% на покупки, путешествия и отдых в разделе «Для жизни» в СберБанк Онлайн;",
+          "безлимитные переводы без комиссии клиентам Сбера;",
+          "0% комиссия при оплате ЖКХ в Сбербанк Онлайн;",
+          "оплата до 99% бонусами Спасибо на покупки у партнёров."
+        ],
+        "subscriber_guide": "<p>Сбербанк — крупнейший банк в России и один из ведущих финансовых институтов в мире. Он предоставляет широкий спектр банковских услуг для частных лиц и корпоративных клиентов.</p>",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 390
+      },
+      "groups": [
+        {
+          "landing": {
+            "id": 12353,
+            "project_id": 3752,
+            "name": "Оформить дебетовую СберКарту с бесплатными переводами и платежами",
+            "btn_text": "",
+            "link": "https://partners.sbermarketing.ru/s/Ka5UGNucUK",
+            "logo": "",
+            "post_id": 17346035,
+            "is_hiting": false,
+            "is_captcha_enabled": false,
+            "is_oauth_enabled": false,
+            "hit_custom_text": "",
+            "hit_bg_color": null,
+            "hit_color": null,
+            "ord_marker": "2RanykaY4Us",
+            "ord_custom_text": "Реклама. Рекламодатель: ПАО Сбербанк. ИНН: 7707083893\r\nГен. лицензия Банка России на осуществление банковских операций Nº 1481 от 11.08.2015 г.",
+            "show": "https://pawss-api.perfluence.net/source-view?post_id=17346035&widget_id=8842&user_id=861964&source=js-widget"
+          },
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "links_for_subscribers": [
+            {
+              "id": 18708082,
+              "title": "Ссылка для подписчиков",
+              "link": "https://sberbank1.prfl.me/sites/7nue8j?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "promocodes": [],
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
         "id": 1100,
         "logo": "https://s3sc.perfluence.net/logos/16772229726174.jpg",
         "logo_widget": "",
@@ -3794,7 +3675,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 433
+        "rsp": 425
       },
       "groups": [
         {
@@ -3948,7 +3829,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 426
+        "rsp": 422
       },
       "groups": [
         {
@@ -4025,7 +3906,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 389
+        "rsp": 392
       },
       "groups": [
         {
@@ -4107,76 +3988,6 @@
     },
     {
       "project": {
-        "id": 3611,
-        "logo": "https://s3sc.perfluence.net/logos/e/b/5/eb5ac0ac-7fa7-40c8-a947-fcafc8ffb3d2.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/0/9/d092f096-b21a-4abf-aeb5-e5ba61d1ab0d.png",
-        "name": "Мегамаркет СРА",
-        "type": "cpa",
-        "img": "https://s3sc.perfluence.net/img_widget/6/f/4/6f4565c3-bf73-4012-a456-855da05ff02f.webp",
-        "category_id": 293,
-        "category_name": "Маркетплейсы",
-        "activeBloggers": 3460,
-        "product_info": "<p>Мегамаркет — один из крупнейших в России маркетплейсов с миллионами товаров. Здесь можно купить все: от ручки до посудомойки. Можно заказать экспресс-доставку, есть доставка по клику. До 99% вы сможете оплатить бонусами Спасибо, а еще оформить покупку в рассрочку.</p>",
-        "subscribers_condition": "",
-        "site": "https://megamarket.ru/",
-        "info": "",
-        "advantages": [],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 400
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18778358,
-              "title": "Заказать товары со скидкой по промокоду 15PRFL (до 30.11)",
-              "link": "https://megamarket1.prfl.me/sites/442z68?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 3611,
-              "code": "15PRFL",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидки \r\n7 500 ₽ от 50 000 ₽;\r\n10 500 ₽ от 70 000 ₽;\r\n15 000 ₽ от 100 000 ₽;\r\n22 500 ₽ от 150 000 ₽;\r\n30 000 ₽ от 200 000 ₽\r\n на товары на один любой заказ по промокоду",
-              "date": "30.11.2026",
-              "group": "17224",
-              "is_hit": true,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 17224,
-              "is_universal": true,
-              "name": "Скидки \r\n7 500 ₽ от 50 000 ₽;\r\n10 500 ₽ от 70 000 ₽;\r\n15 000 ₽ от 100 000 ₽;\r\n22 500 ₽ от 150 000 ₽;\r\n30 000 ₽ от 200 000 ₽\r\n на товары на один любой заказ по промокоду",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17409504,
-              "ord_marker": "2Ranym1YxLc",
-              "ord_custom_text": "Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409504&widget_id=8842&user_id=861964&source=js-widget"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
         "id": 1977,
         "logo": "https://s3sc.perfluence.net/logos/17035052263751.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/2/c/6/2c6d807b-8711-478b-a0d9-88122f6512ef.png",
@@ -4195,14 +4006,14 @@
           "доставка по Санкт-Петербургу, Ленинградской области занимает в среднем 45 минут, а в некоторые районы привозят заказы даже за 30 минут",
           "действует акция \"вкусно или бесплатно\". Если заказ не понравится, можно вернуть сумму за заказ",
           "выгодная Праздничная подписка: постоянная скидка 10% на все меню, суммируется с акциями и промокодами + 6 подарочных блюд на выбор к каждому заказу",
-          "переносные сумки для доставки обновляются каждые 3 месяца. При этом холодные и горячие блюда хранятся в них отдельно для сохранения температуры"
+          "переносные сумки для доставки обновляются каждые 3 месяца. При этом холодные и горячие блюда хранятся в них отдельно для сохранения температ��ры"
         ],
         "subscriber_guide": "",
         "regions": [
           "Санкт-Петербург"
         ],
         "pf": 0,
-        "rsp": 424
+        "rsp": 400
       },
       "groups": [
         {
@@ -4365,6 +4176,76 @@
     },
     {
       "project": {
+        "id": 3611,
+        "logo": "https://s3sc.perfluence.net/logos/e/b/5/eb5ac0ac-7fa7-40c8-a947-fcafc8ffb3d2.png",
+        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/d/0/9/d092f096-b21a-4abf-aeb5-e5ba61d1ab0d.png",
+        "name": "Мегамаркет СРА",
+        "type": "cpa",
+        "img": "https://s3sc.perfluence.net/img_widget/6/f/4/6f4565c3-bf73-4012-a456-855da05ff02f.webp",
+        "category_id": 293,
+        "category_name": "Маркетплейсы",
+        "activeBloggers": 3460,
+        "product_info": "<p>Мегамаркет — один из крупнейших в России маркетплейсов с миллионами товаров. Здесь можно купить все: от ручки до посудомойки. Можно заказать экспресс-доставку, есть доставка по клику. До 99% вы сможете оплатить бонусами Спасибо, а еще оформить покупку в рассрочку.</p>",
+        "subscribers_condition": "",
+        "site": "https://megamarket.ru/",
+        "info": "",
+        "advantages": [],
+        "subscriber_guide": "",
+        "regions": [
+          "Россия"
+        ],
+        "pf": 0,
+        "rsp": 420
+      },
+      "groups": [
+        {
+          "links_for_subscribers": [
+            {
+              "id": 18778358,
+              "title": "Заказать товары со скидкой по промокоду 15PRFL (до 30.11)",
+              "link": "https://megamarket1.prfl.me/sites/442z68?source=js-widget&source_id=8842",
+              "landing_terms": ""
+            }
+          ],
+          "landing": [],
+          "promocodes": [
+            {
+              "project_id": 3611,
+              "code": "15PRFL",
+              "is_barcode": false,
+              "image": "",
+              "comment": "Скидки \r\n7 500 ₽ от 50 000 ₽;\r\n10 500 ₽ от 70 000 ₽;\r\n15 000 ₽ от 100 000 ₽;\r\n22 500 ₽ от 150 000 ₽;\r\n30 000 ₽ от 200 000 ₽\r\n на товары на один любой заказ по промокоду",
+              "date": "30.11.2026",
+              "group": "17224",
+              "is_hit": true,
+              "is_hiting": false,
+              "hit_custom_text": "",
+              "hit_bg_color": null,
+              "hit_color": null,
+              "bonus_id": 17224,
+              "is_universal": true,
+              "name": "Скидки \r\n7 500 ₽ от 50 000 ₽;\r\n10 500 ₽ от 70 000 ₽;\r\n15 000 ₽ от 100 000 ₽;\r\n22 500 ₽ от 150 000 ₽;\r\n30 000 ₽ от 200 000 ₽\r\n на товары на один любой заказ по промокоду",
+              "promo_terms": "",
+              "region_promo": [
+                "RU"
+              ],
+              "repeat_order": true,
+              "post_id": 17409504,
+              "ord_marker": "2Ranym1YxLc",
+              "ord_custom_text": "Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180",
+              "discount": null,
+              "btn_text": null,
+              "show": "https://pawss-api.perfluence.net/source-view?post_id=17409504&widget_id=8842&user_id=861964&source=js-widget"
+            }
+          ],
+          "has_widget_subscribers_promo": false,
+          "widget_subscribers_codes_count": 0,
+          "widget_subscriber_codes": []
+        }
+      ]
+    },
+    {
+      "project": {
         "id": 2332,
         "logo": "https://s3sc.perfluence.net/logos/16897557412103.png",
         "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/0/b/1/0b1c5095-840c-4497-8ab2-453afda4a88b.png",
@@ -4388,7 +4269,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 92
+        "rsp": 129
       },
       "groups": [
         {
@@ -4463,7 +4344,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 431
+        "rsp": 421
       },
       "groups": [
         {
@@ -4526,7 +4407,7 @@
         "subscriber_guide": "<p>СберЗдоровье — компания №1 в сфере цифровой медицины, которая предоставляет услуги по поиску и подбору врачей, онлайн-консультациям с врачами, дистанционному мониторингу.</p>",
         "regions": [],
         "pf": 0,
-        "rsp": 435
+        "rsp": 432
       },
       "groups": [
         {
@@ -4690,7 +4571,7 @@
           "Россия"
         ],
         "pf": 1,
-        "rsp": 429
+        "rsp": 412
       },
       "groups": [
         {
@@ -4766,7 +4647,7 @@
           "Россия"
         ],
         "pf": 0,
-        "rsp": 436
+        "rsp": 437
       },
       "groups": [
         {
@@ -4924,170 +4805,6 @@
               "btn_text": null,
               "show": "https://pawss-api.perfluence.net/source-view?post_id=17454037&widget_id=8842&user_id=861964&source=js-widget",
               "expires": "30.11.2026 23:59"
-            }
-          ],
-          "has_widget_subscribers_promo": false,
-          "widget_subscribers_codes_count": 0,
-          "widget_subscriber_codes": []
-        }
-      ]
-    },
-    {
-      "project": {
-        "id": 1965,
-        "logo": "https://s3sc.perfluence.net/logos/16748253656362.png",
-        "logo_widget": "https://s3sc.perfluence.net/project_logo_widget/e/b/1/eb154166-c573-4c85-ac29-a37eea7d417d.png",
-        "name": "Яндекс Афиша",
-        "type": "cpa",
-        "img": "https://s3sc.perfluence.net/img_widget/4/a/c/4acd75ca-b9a6-4820-958a-b166b0009755.png",
-        "category_id": 253,
-        "category_name": "Кино и театр",
-        "activeBloggers": 4871,
-        "product_info": "<p> Яндекс Афиша - площадка для поиска билетов на развлекательные мероприятия: выставки, концерты исполнителей всех жанров, театры, мюзиклы, шоу и даже катки. </p>",
-        "subscribers_condition": "",
-        "site": "https://afisha.yandex.ru/",
-        "info": "",
-        "advantages": [
-          "Самая точная база расписаний",
-          "Возможность пользователей оставлять оценки и отзывы, а также отмечать мероприятия, которые они собираются посетить",
-          "Входит в экосистему Яндекса: доступ к пресейлам и специальным скидкам, накопление баллов Плюса, которые можно также тратить на билеты",
-          "Удобная оплата билетов: картой или со сплитом (стоимость билета делится на 4 части)",
-          "Подборки мероприятий"
-        ],
-        "subscriber_guide": "",
-        "regions": [
-          "Россия"
-        ],
-        "pf": 0,
-        "rsp": 444
-      },
-      "groups": [
-        {
-          "links_for_subscribers": [
-            {
-              "id": 18827307,
-              "title": "Получить скидку на первую и повторную  покупку билетов в приложении",
-              "link": "https://yandafisha.prfl.me/sites/uinp1u?source=js-widget&source_id=8842",
-              "landing_terms": ""
-            }
-          ],
-          "landing": [],
-          "promocodes": [
-            {
-              "project_id": 1965,
-              "code": "XE330781",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 400 ₽ на первую покупку билетов от 3000 ₽ в приложении",
-              "date": "17.11.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 4589,
-              "is_universal": false,
-              "name": "Скидка 400 ₽ на первую покупку билетов от 3000 ₽ в приложении",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17453843,
-              "ord_marker": "2RanynehxYL",
-              "ord_custom_text": "Реклама. ООО \"ЯНДЕКС МУЗЫКА\", ИНН 9705121040.",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453843&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "17.11.2026 23:59"
-            },
-            {
-              "project_id": 1965,
-              "code": "MM009981",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 300 ₽ на первую покупку билетов от 2 000 ₽ в приложении",
-              "date": "17.11.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 4332,
-              "is_universal": false,
-              "name": "Скидка 300 ₽ на первую покупку билетов от 2 000 ₽ в приложении",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17453843,
-              "ord_marker": "2RanynehxYL",
-              "ord_custom_text": "Реклама. ООО \"ЯНДЕКС МУЗЫКА\", ИНН 9705121040.",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453843&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "17.11.2026 23:59"
-            },
-            {
-              "project_id": 1965,
-              "code": "OZ934995",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 10% (не более 750 ₽) на первую и все повторные покупки от 3 000 ₽ в приложении",
-              "date": "17.11.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 14729,
-              "is_universal": false,
-              "name": "Скидка 10% (не более 750 ₽) на первую и все повторные покупки от 3 000 ₽ в приложении",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17453843,
-              "ord_marker": "2RanynehxYL",
-              "ord_custom_text": "Реклама. ООО \"ЯНДЕКС МУЗЫКА\", ИНН 9705121040.",
-              "discount": 10,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453843&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "17.11.2026 23:59"
-            },
-            {
-              "project_id": 1965,
-              "code": "ZT979715",
-              "is_barcode": false,
-              "image": "",
-              "comment": "Скидка 750 ₽ от 5 000 ₽ для новых пользователей в приложении",
-              "date": "17.11.2026 23:59",
-              "group": "",
-              "is_hit": false,
-              "is_hiting": false,
-              "hit_custom_text": "",
-              "hit_bg_color": null,
-              "hit_color": null,
-              "bonus_id": 14728,
-              "is_universal": false,
-              "name": "Скидка 750 ₽ от 5 000 ₽ для новых пользователей в приложении",
-              "promo_terms": "",
-              "region_promo": [
-                "RU"
-              ],
-              "repeat_order": true,
-              "post_id": 17453843,
-              "ord_marker": "2RanynehxYL",
-              "ord_custom_text": "Реклама. ООО \"ЯНДЕКС МУЗЫКА\", ИНН 9705121040.",
-              "discount": null,
-              "btn_text": null,
-              "show": "https://pawss-api.perfluence.net/source-view?post_id=17453843&widget_id=8842&user_id=861964&source=js-widget",
-              "expires": "17.11.2026 23:59"
             }
           ],
           "has_widget_subscribers_promo": false,
