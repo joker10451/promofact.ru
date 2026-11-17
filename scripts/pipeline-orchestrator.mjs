@@ -833,5 +833,6 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
 if (process.argv[1]?.endsWith("pipeline-orchestrator.mjs")) {
   const dryRun = process.argv.includes("--dry-run");
   const noTake = process.argv.includes("--no-take");
-  runPipeline({ dryRun, takeOffers: !noTake }).catch(console.error);
+  // Тестовый прогон не должен ничего менять в кабинете: не берём офферы и не активируем флеш-акции.
+  runPipeline({ dryRun, takeOffers: !noTake && !dryRun }).catch(console.error);
 }
