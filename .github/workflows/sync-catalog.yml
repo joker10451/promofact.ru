@@ -18,6 +18,7 @@ jobs:
     permissions:
       contents: write
       issues: write
+      actions: write
 
     steps:
       - name: Checkout repository
@@ -121,6 +122,14 @@ jobs:
           git add src/data/perfluence-feed.json src/data/sync-meta.json src/data/earnings-rank.json
           git commit -m "chore(catalog): регулярное автообновление каталога партнерских предложений"
           git push origin main
+
+      # Пуш от github-actions[bot] (GITHUB_TOKEN) не запускает workflow по push, поэтому
+      # «Deploy to VPS» сам не стартует и новый фид не доезжал до сайта. Запускаем деплой явно.
+      - name: Deploy the new feed to the VPS
+        if: success() && (steps.check_changes.outputs.has_changes == 'true' || steps.earnings.outputs.changed == 'true')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-vps.yml --ref main
 
       # One persistent issue instead of silent failures; closed on next success.
       - name: Report feed sync status
