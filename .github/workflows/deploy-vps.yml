@@ -36,10 +36,14 @@ jobs:
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           TELEGRAM_POSTING_SECRET: ${{ secrets.TELEGRAM_POSTING_SECRET }}
+          PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}
         run: |
           [ -n "$TELEGRAM_POSTING_SECRET" ] || { echo "TELEGRAM_POSTING_SECRET not set, skipping"; exit 0; }
-          printf 'TELEGRAM_POSTING_SECRET_DEPLOYED=%s\n' "$(printf '%s' "$TELEGRAM_POSTING_SECRET" | tr -d '\r\n')" \
-            | ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes app@"$VPS_HOST" \
+          {
+            printf 'TELEGRAM_POSTING_SECRET_DEPLOYED=%s\n' "$(printf '%s' "$TELEGRAM_POSTING_SECRET" | tr -d '\r\n')"
+            # Сессия кабинета Perfluence для радара уведомлений (/api/perfluence-live/check).
+            [ -z "$PERFLUENCE_SESSION_B64" ] || printf 'PERFLUENCE_SESSION_B64_DEPLOYED=%s\n' "$(printf '%s' "$PERFLUENCE_SESSION_B64" | tr -d '\r\n')"
+          } | ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes app@"$VPS_HOST" \
                 'umask 077; cat > /srv/promofact/.env.production.local'
 
       - name: Build and restart on the server
