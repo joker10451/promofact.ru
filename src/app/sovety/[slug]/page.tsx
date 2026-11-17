@@ -14,7 +14,8 @@ import NewsletterBox from "@/components/NewsletterBox";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import YandexAdBlock from "@/components/YandexAdBlock";
 import { getArticles, getArticle } from "@/lib/articles";
-import { getCoupons, getUsesStats } from "@/lib/perfluence";
+import { getAllStores, getCoupons, getUsesStats } from "@/lib/perfluence";
+import { isPausedPublisherStore } from "@/lib/publisherPauses";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
 export const revalidate = false;
@@ -83,7 +84,15 @@ export default async function ArticlePage({
   const article = getArticle(slug);
   if (!article) notFound();
 
-  const [allCoupons, uses] = await Promise.all([getCoupons(), getUsesStats()]);
+  const [allCoupons, uses, stores] = await Promise.all([getCoupons(), getUsesStats(), getAllStores()]);
+
+  // Магазин может уйти из фида партнёра. Ссылка на его /store/ без страницы — битая
+  // и останавливает SEO-аудит в автосинхронизации каталога, поэтому её не выводим.
+  const storeSlugs = new Set(stores.map((s) => s.slug));
+  const related = article.related.filter((r) => {
+    const store = r.href.match(/^\/store\/([^/?#]+)/)?.[1];
+    return !store || (storeSlugs.has(store) && !isPausedPublisherStore(store));
+  });
 
   // Подбираем 2-3 релевантных промокода по теме статьи
   const relevantCoupons = (() => {
@@ -347,14 +356,14 @@ export default async function ArticlePage({
             </div>
 
             {/* Внутренние ссылки на промокоды */}
-            {article.related.length > 0 && (
+            {related.length > 0 && (
               <div className="mt-8 border-y border-line py-5">
                 <div className="font-display text-sm font-bold text-ink mb-3 flex items-center gap-2">
                   <Icon name="tag" size={14} />
                   <span>Смотрите также скидки по магазинам:</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {article.related.map((r) => (
+                  {related.map((r) => (
                     <Link
                       key={r.href}
                       href={r.href}

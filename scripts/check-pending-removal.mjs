@@ -18,7 +18,7 @@ export function toMarkdown(rows) {
 
 function readRows(page) {
   return page.$$eval("tr", (trs) => trs.map((tr) => {
-    const m = tr.innerText.replace(/s+/g, " ").trim().match(/^(d{6,}) (d{1,2} [а-я]+ d{4}) (S+)/);
+    const m = tr.innerText.replace(/\s+/g, " ").trim().match(/^(\d{6,}) (\d{1,2} [а-я]+ \d{4}) (\S+)/);
     const links = [...tr.querySelectorAll("a")].map((a) => a.href).filter((h) => /^https?:/.test(h));
     return m ? { id: m[1], date: m[2], account: m[3], url: links[links.length - 1] } : null;
   }).filter(Boolean));
@@ -29,12 +29,13 @@ async function main() {
   const browser = await chromium.launch({ headless: true });
   const page = await (await browser.newContext({ storageState: SESSION_FILE })).newPage();
   const rows = [];
+  let expected = NaN;
   for (let p = 1; p <= 15; p++) {
     await page.goto("https://dash.perfluence.net/posts/list/pending_removal?page=" + p, { waitUntil: "domcontentloaded" });
     if (p === 1 && /login|auth/i.test(page.url())) { console.warn("⚠️ Сессия Perfluence истекла"); await browser.close(); return; }
     if (p === 1) {
       const text = await page.evaluate(() => document.body.innerText);
-      expected = Number((text.match(/Необходимо удалитьs*(d+)/) || [])[1] ?? NaN);
+      expected = Number((text.match(/Необходимо удалить\s*(\d+)/) || [])[1] ?? NaN);
       console.log(`page: ${await page.title()} · tr=${await page.locator("tr").count()} · label=${expected}`);
     }
     const fresh = (await readRows(page)).filter((r) => !rows.some((x) => x.id === r.id));
