@@ -13,6 +13,8 @@ async function handlePost(req: NextRequest) {
   // (STATS_PASSWORD) больше не принимается: это разные зоны доступа.
   const isAuthorized = isBearerAuthorized(req.headers.get("authorization"), [
     process.env.TELEGRAM_POSTING_SECRET,
+    // Тот же секрет из GitHub, который деплой кладёт в .env.production.local (systemd его не перекрывает).
+    process.env.TELEGRAM_POSTING_SECRET_DEPLOYED,
     process.env.CRON_SECRET,
   ]);
 
