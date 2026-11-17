@@ -136,13 +136,14 @@ export default function RootLayout({
           name="yandex-distribution-verification"
           content="8d1qy6ygiotilnuj"
         />
-        {/* Yandex Distribution verification token */}
-        <div style={{ display: "none" }} aria-hidden="true">8d1qy6ygiotilnuj</div>
         {/* Очередь колбэков РСЯ объявляем сразу — это просто массив.
             Сам context.js грузит <YandexAds /> и только после согласия. */}
         <script dangerouslySetInnerHTML={{ __html: "window.yaContextCb=window.yaContextCb||[]" }} />
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans pb-14 md:pb-0">
+        {/* Yandex Distribution verification token. Only valid in <body>: a <div> in <head>
+            is moved by the parser and breaks hydration of the whole page. */}
+        <div style={{ display: "none" }} aria-hidden="true">8d1qy6ygiotilnuj</div>
         <Script
           src="https://telegram.org/js/telegram-web-app.js"
           strategy="lazyOnload"
