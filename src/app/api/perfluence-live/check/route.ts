@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
 async function handleCheck(req: NextRequest) {
   const isAuthorized = isBearerAuthorized(req.headers.get("authorization"), [
     process.env.TELEGRAM_POSTING_SECRET,
+    // Тот же секрет из GitHub, который деплой кладёт в .env.production.local (systemd его не перекрывает).
+    process.env.TELEGRAM_POSTING_SECRET_DEPLOYED,
     process.env.CRON_SECRET,
   ]);
 

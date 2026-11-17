@@ -29,14 +29,16 @@ jobs:
 
       # Секрет, которым GitHub-задачи (радар Perfluence, проверка купонов, постинг) стучатся в API сайта.
       # На Vercel он был в настройках проекта; на VPS его не было, и эти задачи получали 401.
-      # Next.js читает .env.production.local при сборке и запуске; переменные из systemd имеют приоритет.
+      # Next.js читает .env.production.local при сборке и запуске, но переменные из systemd
+      # (/etc/promofact.env) имеют приоритет, а там старое значение. Поэтому отдельное имя,
+      # которое API принимает наравне с TELEGRAM_POSTING_SECRET.
       - name: Sync API secret to the server
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           TELEGRAM_POSTING_SECRET: ${{ secrets.TELEGRAM_POSTING_SECRET }}
         run: |
           [ -n "$TELEGRAM_POSTING_SECRET" ] || { echo "TELEGRAM_POSTING_SECRET not set, skipping"; exit 0; }
-          printf 'TELEGRAM_POSTING_SECRET=%s\n' "$(printf '%s' "$TELEGRAM_POSTING_SECRET" | tr -d '\r\n')" \
+          printf 'TELEGRAM_POSTING_SECRET_DEPLOYED=%s\n' "$(printf '%s' "$TELEGRAM_POSTING_SECRET" | tr -d '\r\n')" \
             | ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes app@"$VPS_HOST" \
                 'umask 077; cat > /srv/promofact/.env.production.local'
 
