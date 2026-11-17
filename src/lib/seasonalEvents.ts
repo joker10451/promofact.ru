@@ -15,8 +15,8 @@ export interface SeasonalEventStatus {
 const SHOPPING_DAY_TARGET = new Date("2026-11-11T00:00:00+03:00");
 const SHOPPING_DAY_END = new Date("2026-11-14T23:59:59+03:00");
 
-// Чёрная Пятница 2026 (последний четверг/пятница ноября)
-const BLACK_FRIDAY_TARGET = new Date("2026-11-26T00:00:00+03:00");
+// Чёрная Пятница 2026 — пятница 27 ноября
+const BLACK_FRIDAY_TARGET = new Date("2026-11-27T00:00:00+03:00");
 const BLACK_FRIDAY_END = new Date("2026-11-30T23:59:59+03:00"); // Включая Киберпонедельник
 
 function pluralDays(n: number): string {
@@ -97,7 +97,7 @@ export function getCurrentSeasonalPromo(now = new Date()): SeasonalPromo | null 
       navLabel: "Чёрная Пятница",
       heroText: bf.stage === "active"
         ? "Чёрная Пятница идёт до 30 ноября: промокоды на технику, одежду и доставку"
-        : "Чёрная Пятница 26–30 ноября: собираем промокоды заранее",
+        : "Чёрная Пятница 27–30 ноября: собираем промокоды заранее",
     };
   }
   return null;
@@ -117,7 +117,7 @@ export function getBlackFridayStatus(now = new Date()): SeasonalEventStatus {
       badgeText: "Чёрная Пятница в разгаре",
       stage: "active",
       headline: "Максимальные скидки года активны",
-      formattedTargetDate: "26–30 ноября 2026",
+      formattedTargetDate: "27–30 ноября 2026",
     };
   }
 
@@ -127,7 +127,7 @@ export function getBlackFridayStatus(now = new Date()): SeasonalEventStatus {
       badgeText: "Распродажа завершена",
       stage: "ended",
       headline: "Итоги Чёрной Пятницы 2026",
-      formattedTargetDate: "26–30 ноября 2026",
+      formattedTargetDate: "27–30 ноября 2026",
     };
   }
 
@@ -139,6 +139,6 @@ export function getBlackFridayStatus(now = new Date()): SeasonalEventStatus {
     badgeText: daysLeft <= 7 ? `До старта ${daysLeft} ${pluralDays(daysLeft)}` : `Старт через ${daysLeft} ${pluralDays(daysLeft)}`,
     stage: "warmup",
     headline: "Подготовка к главной распродаже года",
-    formattedTargetDate: "26 ноября 2026",
+    formattedTargetDate: "27 ноября 2026",
   };
 }

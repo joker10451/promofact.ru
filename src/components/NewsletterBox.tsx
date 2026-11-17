@@ -61,8 +61,7 @@ export default function NewsletterBox({ source = "home" }: NewsletterBoxProps) {
 
         <div className="flex flex-col gap-3">
           {status === "success" ? (
-            <div className="rounded-2xl border border-mint/40 bg-mint/10 p-5 text-center">
-              <span className="text-2xl">🎉</span>
+            <div className="rounded-lg border border-mint/40 p-5 text-center">
               <p className="mt-1 font-display text-sm sm:text-base font-extrabold text-ink">
                 Вы успешно подписались!
               </p>
@@ -79,12 +78,12 @@ export default function NewsletterBox({ source = "home" }: NewsletterBoxProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Ваш адрес эл. почты"
                 aria-label="Email для подписки"
-                className="h-12 flex-1 rounded-xl sm:rounded-2xl border border-line bg-white px-4 text-xs sm:text-sm text-ink outline-none transition-all placeholder:text-ink/40 focus:border-red focus:ring-2 focus:ring-red/20 shadow-xs"
+                className="h-12 flex-1 rounded-lg border border-line bg-white px-4 text-xs sm:text-sm text-ink outline-none transition-all placeholder:text-ink/40 focus:border-red focus:ring-2 focus:ring-red/20 shadow-xs"
               />
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="h-12 px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-red to-red-dark text-xs sm:text-sm font-extrabold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap"
+                className="h-12 px-6 rounded-lg bg-red text-xs sm:text-sm font-extrabold text-white hover:bg-red-dark active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap"
               >
                 {status === "loading" ? "Подписка..." : "Подписаться →"}
               </button>

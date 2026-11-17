@@ -3,6 +3,14 @@ import { withoutForbiddenTanukiCoPromotion, withoutForbiddenFloristBeautyCoPromo
 
 export const MIN_INDEXABLE_COLLECTION_OFFERS = 3;
 
+/**
+ * Коды, которые партнёр прямо назвал акцией Чёрной Пятницы, хотя в тексте
+ * оффера этих слов нет. Ключ — `<slug магазина>:<КОД>`; к каждому — источник.
+ */
+export const CONFIRMED_BLACK_FRIDAY_CODES: ReadonlySet<string> = new Set([
+  "letual:ЧЕРНЫЙ", // Perfluence, новость 116629 от 12.11.2026: «Черная пятница в ЛЭТУАЛЬ», −60% от 7 000 ₽
+]);
+
 export function getCollectionCoupons(collection: Collection, coupons: Coupon[]): Coupon[] {
   return withoutForbiddenSberAnalizyCreditCardCoPromotion(
     withoutForbiddenGroceryCoPromotion(
@@ -185,8 +193,9 @@ export const COLLECTIONS: Collection[] = [
       { text: "Кэшбэк банков 2026: как вернуть до 10% с покупок", href: "/sovety/cashbek-bankov-2026" },
     ],
     // An ordinary discount is not a confirmed Black Friday promotion.
-    filter: (c) => /(?:ч[её]рн\S*\s+пятниц\S*|black[\s-]*friday|blackfriday)/iu
-      .test([c.promocode.bonusName, c.promocode.terms].filter(Boolean).join(" ")),
+    filter: (c) => CONFIRMED_BLACK_FRIDAY_CODES.has(`${c.store.slug}:${c.promocode.code.toUpperCase()}`) ||
+      /(?:ч[её]рн\S*\s+пятниц\S*|black[\s-]*friday|blackfriday)/iu
+        .test([c.promocode.bonusName, c.promocode.terms].filter(Boolean).join(" ")),
   },
   {
     slug: "den-shopinga-11-11",

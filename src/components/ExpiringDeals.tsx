@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/components/Icon";
+import { nbspMoney } from "@/lib/format";
 import { useState } from "react";
 import StoreLogo from "@/components/StoreLogo";
 import { ymReachGoal } from "@/components/YandexMetrika";
@@ -70,9 +71,9 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
   if (visibleCoupons.length === 0) return null;
 
   return (
-    <section id="expiring" aria-label="Скоро заканчиваются" className="scroll-mt-24 relative overflow-hidden rounded-3xl border-2 border-red/20 bg-gradient-to-br from-red-50/50 via-white to-amber-50/40 p-6 sm:p-8 shadow-[0_8px_30px_rgba(255,51,85,0.06)]">
+    <section id="expiring" aria-label="Скоро заканчиваются" className="scroll-mt-24 border-t border-line pt-6 sm:pt-8">
       <div>
-        <h2 className="font-display text-2xl font-black tracking-tight text-ink sm:text-3xl">
+        <h2 className="font-display text-xl font-extrabold text-ink sm:text-2xl">
           Скоро заканчиваются
         </h2>
         <p className="mt-1 text-sm font-medium text-ink/60">
@@ -80,14 +81,14 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
         </p>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-1 pl-px pt-px sm:grid-cols-2 lg:grid-cols-4">
         {visibleCoupons.map((coupon) => {
           const isCopied = copiedCode === coupon.promocode.code;
           const expiry = expiryLabel(coupon.promocode.expires);
           return (
             <div
               key={`${coupon.store.slug}-${coupon.promocode.code}`}
-              className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-4 transition-all hover:-translate-y-1 hover:border-red/40 hover:shadow-lg"
+              className="group relative -ml-px -mt-px flex flex-col justify-between border border-line bg-white p-4"
             >
               <div>
                 <div className="flex items-center gap-2 min-w-0">
@@ -102,13 +103,13 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                 </div>
 
                 <div className="mt-3 font-display text-sm font-black leading-snug text-ink line-clamp-2">
-                  {coupon.promocode.bonusName}
+                  {nbspMoney(coupon.promocode.bonusName ?? "")}
                 </div>
 
                 {expiry && (
                   <div
-                    className={`mt-2 inline-flex rounded-md px-1.5 py-0.5 text-[11px] font-bold ${
-                      expiry.urgent ? "bg-red/10 text-red" : "bg-ink/5 text-ink/60"
+                    className={`mt-2 inline-flex text-[11px] font-bold tabular-nums ${
+                      expiry.urgent ? "text-red" : "text-ink/60"
                     }`}
                   >
                     {expiry.text}
@@ -117,13 +118,13 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
               </div>
 
               <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between rounded-xl border border-dashed border-ink/20 bg-paper p-1.5">
+                <div className="flex items-center justify-between rounded-lg border border-dashed border-ink/30 bg-paper p-1.5">
                   <code className="truncate px-2 font-mono text-xs font-bold text-ink">{coupon.promocode.code}</code>
                   <button
                     type="button"
                     onClick={() => copy(coupon)}
-                    className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all ${
-                      isCopied ? "bg-mint text-white" : "bg-yellow text-ink hover:bg-yellow/80"
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-bold transition-colors ${
+                      isCopied ? "bg-mint-dark text-white" : "border border-line bg-white text-ink hover:border-ink/40"
                     }`}
                   aria-label={isCopied ? "Промокод скопирован" : `Скопировать промокод ${coupon.store.name}`}
                   >
@@ -145,7 +146,7 @@ export default function ExpiringDeals({ coupons }: ExpiringDealsProps) {
                      ymReachGoal("affiliate_click", homeCouponAnalyticsContext(coupon, "expiring_deals"));
                      ymReachGoal("click_expiring_store", { store: coupon.store.name });
                    }}
-                  className="block w-full rounded-xl bg-ink py-2 text-center text-xs font-bold text-white transition-all hover:bg-red"
+                  className="block w-full rounded-lg bg-ink py-2 text-center text-xs font-bold text-white transition-colors hover:bg-red"
                 >
                   В магазин →
                 </a>

@@ -12,7 +12,6 @@ export default async function Footer() {
 
   return (
     <footer className="relative mt-10 bg-ink text-white">
-      <div className="h-1.5 w-full bg-gradient-to-r from-yellow via-red to-mint" />
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-2 font-display text-xl font-extrabold">
@@ -34,7 +33,7 @@ export default async function Footer() {
             href="https://t.me/smart_zakupka"
             target="_blank"
             rel="noopener nofollow"
-            className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red to-red-dark px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(255,51,85,0.7)] transition-all hover:translate-y-[2px]"
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-red px-5 py-2.5 text-sm font-extrabold text-white transition-colors hover:bg-red-dark"
           >
             Подписаться на Telegram →
           </a>

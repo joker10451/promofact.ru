@@ -1,4 +1,4 @@
-import { MAGNIT_ROTATED_OFFERS, M_KOSMETIK_ROTATED_OFFERS, CITYDRIVE_APPROVED_OFFERS, YANDEX_TRAVEL_ROTATED_OFFERS, TANUKI_OCT16_OFFERS, PEREKRESTOK_OCT16_OFFERS, GOLDAPPLE_ROTATED_OFFERS } from "@/lib/perfluenceRotatedOffers";
+import { MAGNIT_ROTATED_OFFERS, M_KOSMETIK_ROTATED_OFFERS, CITYDRIVE_APPROVED_OFFERS, YANDEX_TRAVEL_ROTATED_OFFERS, TANUKI_OCT16_OFFERS, TANUKI_NOV16_OFFERS, PEREKRESTOK_OCT16_OFFERS, GOLDAPPLE_ROTATED_OFFERS } from "@/lib/perfluenceRotatedOffers";
 import type { Coupon } from "@/lib/types";
 import { PYATEROCHKA_NOV07_OFFERS } from "@/lib/perfluencePyaterochkaOffers";
 import { PERFLUENCE_NOV06_OFFERS } from "@/lib/perfluenceNov06Offers";
@@ -281,8 +281,8 @@ export const CUSTOM_COUPONS: Coupon[] = [
       id: 1734561501,
       code: "GZP8FU6",
       bonusName: "Скидка 35% от 1 000 ₽ на первый заказ",
-      terms: "Промокод GZP8FU6: скидка 35% от 1 000 ₽ на первый заказ в Самокате (максимальная скидка 500 ₽). Промокод суммируется со скидками на товары внутри сервиса. При скидке более 35% на товары применяется наиболее выгодная цена. Действует до 31 октября 2026 года 23:59.",
-      expires: "2026-10-31",
+      terms: "Промокод GZP8FU6: скидка 35% от 1 000 ₽ на первый заказ в Самокате (максимальная скидка 500 ₽). Промокод суммируется со скидками на товары внутри сервиса. При скидке более 35% на товары применяется наиболее выгодная цена. Действует до 30 ноября 2026 года 23:59 МСК.",
+      expires: "2026-11-30T23:59:59+03:00",
       isHit: true,
       isUniversal: true,
       isFirstOrderOnly: true,
@@ -303,8 +303,8 @@ export const CUSTOM_COUPONS: Coupon[] = [
       id: 1734561502,
       code: "GQCWSD2",
       bonusName: "Скидка 500 ₽ от 2 000 ₽ на первый заказ",
-      terms: "Промокод GQCWSD2: скидка 500 ₽ от 2 000 ₽ на первый заказ в сервисе Самокат. Промокод суммируется со скидками на товары внутри каталога. Действует до 31 октября 2026 года 23:59.",
-      expires: "2026-10-31",
+      terms: "Промокод GQCWSD2: скидка 500 ₽ от 2 000 ₽ на первый заказ в сервисе Самокат. Промокод суммируется со скидками на товары внутри каталога. Действует до 30 ноября 2026 года 23:59 МСК.",
+      expires: "2026-11-30T23:59:59+03:00",
       isHit: true,
       isUniversal: true,
       isFirstOrderOnly: true,
@@ -372,6 +372,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
   ...M_KOSMETIK_ROTATED_OFFERS,
   ...CITYDRIVE_APPROVED_OFFERS,
   ...YANDEX_TRAVEL_ROTATED_OFFERS,
+  ...TANUKI_NOV16_OFFERS,
   ...TANUKI_OCT16_OFFERS,
   ...PEREKRESTOK_OCT16_OFFERS,
   ...GOLDAPPLE_ROTATED_OFFERS,

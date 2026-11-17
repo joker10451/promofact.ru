@@ -174,7 +174,7 @@ let passed = 0;
     customerType: "all_customers",
   });
   assert.strictEqual(res.type, "free_shipping", "Test 9 failed: type");
-  assert.strictEqual(res.discount.formatted, "🚚 Бесплатная доставка", "Test 9 failed: formatted");
+  assert.strictEqual(res.discount.formatted, "Бесплатная доставка", "Test 9 failed: formatted");
   console.log("✓ Test 9: Бесплатная доставка распознана как free_shipping (PASS)");
   passed++;
 }

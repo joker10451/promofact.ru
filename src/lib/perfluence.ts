@@ -556,6 +556,10 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // historical ERID. Deny unknown/historical codes until reviewed.
     if (c.store.slug === "yandeks-afisha") {
       const code = c.promocode.code.trim().toUpperCase();
+      const isNov16 = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
+        c.affiliate.link === "https://yandafisha.prfl.me/sites/uinp1u?erid=2RanynehxYL" &&
+        c.affiliate.ordMarker === "2RanynehxYL" &&
+        c.affiliate.ordText.includes("9705121040");
       const isNov06 = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
         c.affiliate.link === "https://yandafisha.prfl.me/sites/p3q5ez?erid=2RanynfupB6" &&
         c.affiliate.ordMarker === "2RanynfupB6" &&
@@ -564,19 +568,28 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.link === "https://yandafisha.prfl.me/sites/xocz1q?erid=2RanynJD4PD" &&
         c.affiliate.ordMarker === "2RanynJD4PD" &&
         c.affiliate.ordText.includes("erid: 2RanynJD4PD");
-      return isNov06 || isOct;
+      return isNov16 || isNov06 || isOct;
     }
     if (c.store.slug === "tanukifamily") {
       const code = c.promocode.code.trim().toUpperCase();
-      return ["20SA1244", "15SA1244", "ZB1177", "SA1244"].includes(code) &&
+      const isNov16 = ["20SA1244", "15SA1244", "KT1366"].includes(code) &&
+        c.affiliate.link === "https://tanukifamily.prfl.me/sites/lz9t15?erid=2RanykQFPDv" &&
+        c.affiliate.ordMarker === "2RanykQFPDv" &&
+        c.affiliate.ordText.includes("erid: 2RanykQFPDv");
+      const isOct = ["20SA1244", "15SA1244", "ZB1177", "SA1244"].includes(code) &&
         c.affiliate.link === "https://tanukifamily.prfl.me/sites/jyhh6e?erid=2RanyoGYb6K" &&
         c.affiliate.ordMarker === "2RanyoGYb6K" &&
         c.affiliate.ordText.includes("erid: 2RanyoGYb6K");
+      return isNov16 || isOct;
     }
     // Perfluence's old widget contains conflicting codes, expiry dates, URL
     // and ERID. Only explicitly approved project website placement survives.
     if (c.store.slug === "perekrestok-dostavka") {
       const code = c.promocode.code.trim().toUpperCase();
+      const isNov16 = ["2059N8EV7", "1975VWVT7", "198N7PARH", "195GYDL34", "196DULY6U"].includes(code) &&
+        c.affiliate.link === "https://perekrestok.prfl.me/sites/lpzdjy?erid=2Ranyk7xXZv" &&
+        c.affiliate.ordMarker === "2Ranyk7xXZv" &&
+        c.affiliate.ordText.includes("erid: 2Ranyk7xXZv");
       const isNov06 = ["199EMTVUS"].includes(code) &&
         c.affiliate.link === "https://perekrestok.prfl.me/sites/2gduvk?erid=2RanynLdyWc" &&
         c.affiliate.ordMarker === "2RanynLdyWc" &&
@@ -589,7 +602,7 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.link === "https://perekrestok.prfl.me/sites/me2ds4?erid=2RanykFbMxo" &&
         c.affiliate.ordMarker === "2RanykFbMxo" &&
         c.affiliate.ordText.includes("erid: 2RanykFbMxo");
-      return isNov06 || isNov03 || isOct;
+      return isNov16 || isNov06 || isNov03 || isOct;
     }
     // Alcohol advertiser: a missing ERID is NOT an integration error and
     // cannot be "fixed" by inventing a marker. Russia's advertising law,

@@ -245,7 +245,7 @@ export default async function ActionPage({
           <div className="mt-8 flex justify-center">
             <Link
               href="/sovety"
-              className="inline-block rounded-full bg-gradient-to-r from-red to-red-dark px-6 py-3 text-sm font-bold text-white shadow-offset-red transition-all hover:translate-y-[2px] hover:shadow-none"
+              className="inline-block rounded-lg bg-red hover:bg-red-dark px-6 py-3 text-sm font-bold text-white transition-all"
             >
               Все советы по экономии и гиды →
             </Link>

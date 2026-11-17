@@ -40,9 +40,9 @@ const START_NOV03_AFFILIATE: Coupon["affiliate"] = {
 };
 
 // --- 3. ПЕРЕКРЁСТОК ДОСТАВКА ---
-export const PEREKRESTOK_NOV03_LINK = "https://perekrestok.prfl.me/sites/fciupl?erid=2RanynvigKW";
-export const PEREKRESTOK_NOV03_ERID = "2RanynvigKW";
-export const PEREKRESTOK_NOV03_LEGAL = 'Реклама. ООО "ИКС 5 ДИДЖИТАЛ", ИНН 9722010808 erid: 2RanynvigKW';
+export const PEREKRESTOK_NOV03_LINK = "https://perekrestok.prfl.me/sites/lpzdjy?erid=2Ranyk7xXZv";
+export const PEREKRESTOK_NOV03_ERID = "2Ranyk7xXZv";
+export const PEREKRESTOK_NOV03_LEGAL = 'Реклама. ООО "ИКС 5 ДИДЖИТАЛ", ИНН 9722010808 erid: 2Ranyk7xXZv';
 
 export const PEREKRESTOK_NOV03_TG_LINK = "https://perekrestok.prfl.me/smart_zakupka/hd4r4n?erid=2RanynuEh3A";
 export const PEREKRESTOK_NOV03_TG_ERID = "2RanynuEh3A";
@@ -181,7 +181,7 @@ export const PERFLUENCE_NOV03_OFFERS: Coupon[] = [
     promocode: {
       id: 233314,
       code: "RHK52523",
-      bonusName: "🎁 Ролл «Такуаб» в подарок при каждом заказе от 1 290 ₽",
+      bonusName: "Ролл «Такуаб» в подарок при каждом заказе от 1 290 ₽",
       terms: "Промокод RHK52523: вкусный ролл «Такуаб» в подарок при каждом повторном заказе от 1 290 ₽ в FARFOR. Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: false,
@@ -206,7 +206,7 @@ export const PERFLUENCE_NOV03_OFFERS: Coupon[] = [
     promocode: {
       id: 233315,
       code: "XVF29646",
-      bonusName: "🎁 Пицца «Ветчина и грибы» в подарок от 1 290 ₽",
+      bonusName: "Пицца «Ветчина и грибы» в подарок от 1 290 ₽",
       terms: "Промокод XVF29646: пицца «Ветчина и грибы» в подарок при каждом повторном заказе от 1 290 ₽ в FARFOR. Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: false,
@@ -233,7 +233,7 @@ export const PERFLUENCE_NOV03_OFFERS: Coupon[] = [
     promocode: {
       id: 162301,
       code: "pf22sc65m8q6",
-      bonusName: "🔥 14 дней бесплатного доступа для ВСЕХ пользователей в онлайн-кинотеатре START",
+      bonusName: "14 дней бесплатного доступа для ВСЕХ пользователей в онлайн-кинотеатре START",
       terms: "Эксклюзивная флеш-акция 3 и 4 ноября: 14 дней бесплатного доступа к видеосервису START по промокоду pf22sc65m8q6. Доступно для ВСЕХ пользователей (как новых, так и ранее зарегистрированных). Далее подписка продлевается за 499 ₽/мес., отменить можно в любой момент. Акция действует строго до 4 ноября 2026 года 23:59 МСК.",
       expires: "2026-11-04T23:59:59+03:00",
       isHit: true,
@@ -254,6 +254,31 @@ export const PERFLUENCE_NOV03_OFFERS: Coupon[] = [
   },
 
   // ================= ПЕРЕКРЁСТОК ДОСТАВКА =================
+  {
+    id: 432800,
+    promocode: {
+      id: 432800,
+      code: "2059N8EV7",
+      bonusName: "Скидка 500 ₽ от 1 200 ₽ на первый заказ в Перекрёстке",
+      terms: "Горячая флеш-акция в «Перекрёсток Доставка»! Промокод 2059N8EV7 даёт скидку 500 ₽ на первый заказ продуктов от 1 200 ₽ в приложении Перекрёсток Доставка. Действует до 19 ноября 2026 года 23:59 МСК.",
+      expires: "2026-11-19T23:59:59+03:00",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Первый заказ",
+      minimumOrder: { value: 1200, currency: "RUB" },
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["perekrestok-dostavka"],
+      activeBloggers: STABLE_STORES["perekrestok-dostavka"]?.activeBloggers ?? 2840,
+    },
+    affiliate: PEREKRESTOK_NOV03_AFFILIATE,
+    extraLinks: [],
+  },
   {
     id: 432801,
     promocode: {
@@ -412,7 +437,7 @@ export const PERFLUENCE_NOV03_OFFERS: Coupon[] = [
     promocode: {
       id: 197702,
       code: "FRESH2340",
-      bonusName: "🎁 Фреш ролл с креветкой и авокадо в подарок от 4 299 ₽",
+      bonusName: "Фреш ролл с креветкой и авокадо в подарок от 4 299 ₽",
       terms: "Промокод FRESH2340: нежнейший фреш ролл с креветкой и авокадо в подарок при каждом заказе от 4 299 ₽ в «Важная Рыба». Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: false,
@@ -437,7 +462,7 @@ export const PERFLUENCE_NOV03_OFFERS: Coupon[] = [
     promocode: {
       id: 197703,
       code: "ЛАЙМ291",
-      bonusName: "🎁 Фреш ролл с креветкой и лаймом в подарок от 4 299 ₽",
+      bonusName: "Фреш ролл с креветкой и лаймом в подарок от 4 299 ₽",
       terms: "Промокод ЛАЙМ291: фирменный фреш ролл с креветкой и лаймом в подарок при каждом заказе от 4 299 ₽ в «Важная Рыба». Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: false,
@@ -462,7 +487,7 @@ export const PERFLUENCE_NOV03_OFFERS: Coupon[] = [
     promocode: {
       id: 197704,
       code: "УГОРЬ549",
-      bonusName: "🎁 Запеченный ролл «Угорь» в подарок от 3 999 ₽",
+      bonusName: "Запеченный ролл «Угорь» в подарок от 3 999 ₽",
       terms: "Промокод УГОРЬ549: аппетитный запеченный ролл «Угорь» в подарок при заказе от 3 999 ₽ в «Важная Рыба». Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: false,
@@ -487,7 +512,7 @@ export const PERFLUENCE_NOV03_OFFERS: Coupon[] = [
     promocode: {
       id: 197705,
       code: "ТЕМПУРА291",
-      bonusName: "🎁 Ролл с креветкой темпура и соусом манго в подарок от 2 999 ₽",
+      bonusName: "Ролл с креветкой темпура и соусом манго в подарок от 2 999 ₽",
       terms: "Промокод ТЕМПУРА291: хрустящий ролл с креветкой темпура и манго в подарок при первом заказе от 2 999 ₽ в «Важная Рыба». Действует до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: true,

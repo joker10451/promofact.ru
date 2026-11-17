@@ -498,7 +498,7 @@ export default async function StorePage({
 
         <div className="mt-3 sm:mt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-            <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-1 shadow-2xs">
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-xl border border-line bg-white p-1">
               <StoreLogo
                 slug={store.slug}
                 name={store.name}
@@ -579,7 +579,7 @@ export default async function StorePage({
         {/* 1. ГЛАВНЫЙ БЛОК: АКТИВНЫЕ КУПОНЫ И ПРОМОКОДЫ (СРАЗУ НА 1-М ЭКРАНЕ) */}
         <div id="offers" className="mt-6 scroll-mt-24">
           {store.coupons.length === 0 ? (
-            <div className="rounded-3xl border border-line bg-white p-6 sm:p-10 text-center shadow-xs">
+            <div className="rounded-xl border border-line bg-white p-6 sm:p-10 text-center">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-paper border border-line mb-3 text-ink/40">
                 <Icon name="tag" size={24} />
               </div>
@@ -597,7 +597,7 @@ export default async function StorePage({
                     href={store.site}
                     target="_blank"
                     rel="noopener nofollow"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red to-red-dark px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-offset-red hover:translate-y-[1px] hover:shadow-none transition-all"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-red px-6 py-3 text-xs sm:text-sm font-bold text-white hover:bg-red-dark hover:shadow-none transition-all"
                   >
                     <span>Перейти на официальный сайт {store.name} →</span>
                   </a>
@@ -631,10 +631,10 @@ export default async function StorePage({
         ))}
 
         {/* Telegram-канал с промокодами магазина */}
-        <div className="mt-8 rounded-3xl border border-[#0088cc]/20 bg-gradient-to-br from-[#0088cc]/10 via-white to-paper p-5 sm:p-6 shadow-xs">
+        <div className="mt-8 border-y border-line py-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-3.5">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#0088cc] text-white shadow-[0_4px_12px_-2px_rgba(0,136,204,0.4)]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line text-[#0077b3]">
                 <Icon name="send" size={20} />
               </div>
               <div>
@@ -650,7 +650,7 @@ export default async function StorePage({
               href="https://t.me/smart_zakupka"
               target="_blank"
               rel="noopener nofollow"
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-[#0088cc] hover:bg-[#0077b5] px-6 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-[0_4px_14px_-3px_rgba(0,136,204,0.5)] transition-all hover:translate-y-[1px] shrink-0"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[#0077b3] hover:bg-[#00649a] px-6 py-2.5 text-xs sm:text-sm font-extrabold text-white transition-colors shrink-0"
             >
               Подписаться на канал →
             </a>
@@ -660,12 +660,12 @@ export default async function StorePage({
         {/* Быстрая сводка: только то, что подтверждено данными */}
         <p className="mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm text-ink/70">
           <span>
-            Предложений сегодня: <b className="font-display font-extrabold text-ink">{store.coupons.length}</b>
+            Предложений сегодня: <b className="font-display font-extrabold tabular-nums text-ink">{store.coupons.length}</b>
           </span>
           {(avitoByLink || maxDisc || hasGift) && (
             <span>
               {avitoByLink ? "Выгода" : maxDisc ? "Макс. скидка" : "Бонус"}:{" "}
-              <b className="font-display font-extrabold text-red">
+              <b className="font-display font-extrabold tabular-nums text-red">
                 {avitoByLink ? "1 000 ₽ / 5%" : maxDisc ? maxDisc : "подарок к заказу"}
               </b>
             </span>
@@ -683,14 +683,14 @@ export default async function StorePage({
           />
         )}
 
-        <section className="mt-10 max-w-3xl rounded-2xl border border-mint/30 bg-mint/10 p-5">
+        <section className="mt-10 max-w-3xl border-y border-line py-4">
           <Link
             href={`/category/${canonicalCategorySlug(store.categorySlug)}`}
             className="flex items-center justify-between gap-3 group"
           >
             <div>
               <div className="font-display font-extrabold group-hover:text-red transition-colors">
-                <Icon name="tag" size={14} className="inline" /> Все промокоды в категории «{store.category}»
+                Все промокоды в категории «{store.category}»
               </div>
               <p className="mt-1 text-sm text-ink/55">
                 Смотреть скидки других магазинов в этой же категории
@@ -716,7 +716,7 @@ export default async function StorePage({
         />
 
         {buyerGuide && (
-          <section aria-labelledby="store-buyer-guide" className="mt-10 max-w-3xl rounded-2xl border border-line bg-white p-5 sm:p-7">
+          <section aria-labelledby="store-buyer-guide" className="mt-10 max-w-3xl border-t border-line pt-6">
             <h2 id="store-buyer-guide" className="font-display text-xl font-extrabold text-ink">
               {buyerGuide.heading}
             </h2>
@@ -791,11 +791,11 @@ export default async function StorePage({
           <h2 className="font-display text-xl font-extrabold">
             Частые вопросы про промокоды {store.name}
           </h2>
-          <div className="mt-5 space-y-3">
+          <div className="mt-4 divide-y divide-line border-y border-line">
             {faqItems.map((item) => (
               <details
                 key={item.q}
-                className="group rounded-2xl border border-line bg-white px-5 py-4"
+                className="group py-4"
               >
                 <summary className="cursor-pointer list-none font-bold text-ink">
                   {item.q}
@@ -824,17 +824,16 @@ export default async function StorePage({
           if (storeArticles.length === 0) return null;
 
           return (
-            <section className="mt-10 max-w-3xl rounded-3xl border border-line bg-white p-6 shadow-xs">
+            <section className="mt-10 max-w-3xl border-t border-line pt-6">
               <h3 className="font-display text-base font-extrabold text-ink mb-3 flex items-center gap-2">
-                <Icon name="clipboard" size={16} />
                 <span>Полезные гиды и советы по покупкам в {store.name}</span>
               </h3>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid sm:grid-cols-2 sm:gap-x-8">
                 {storeArticles.map((a) => (
                   <Link
                     key={a.slug}
                     href={`/sovety/${a.slug}`}
-                    className="group rounded-2xl border border-line/60 bg-paper/40 p-3.5 hover:bg-white hover:border-ink/20 transition-all shadow-2xs"
+                    className="group border-b border-line py-3"
                   >
                     <div className="font-display text-xs font-bold text-ink group-hover:text-red transition-colors line-clamp-2">
                       {a.title}

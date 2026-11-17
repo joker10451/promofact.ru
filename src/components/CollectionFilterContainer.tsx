@@ -63,16 +63,16 @@ export default function CollectionFilterContainer({ items }: CollectionFilterCon
   }, [items, activeTab, selectedStore]);
 
   const tabBtnCls = (active: boolean) =>
-    `rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+    `rounded-lg border px-3.5 py-1.5 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
       active
-        ? "bg-red text-white shadow-2xs"
-        : "bg-paper border border-line text-ink/75 hover:border-red hover:text-red"
+        ? "border-ink bg-ink text-white"
+        : "border-line bg-white text-ink/75 hover:border-ink/40 hover:text-ink"
     }`;
 
   const storePillCls = (active: boolean) =>
-    `rounded-xl px-2.5 py-1 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
+    `rounded-lg border px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
       active
-        ? "bg-ink text-white shadow-2xs"
+        ? "border-ink bg-ink text-white"
         : "bg-white border border-line text-ink/75 hover:border-ink/40"
     }`;
 
@@ -94,7 +94,7 @@ export default function CollectionFilterContainer({ items }: CollectionFilterCon
             onClick={() => setActiveTab("top")}
             className={tabBtnCls(activeTab === "top")}
           >
-            <span>🔥 Топ-выгода</span>
+            <span>Хиты</span>
             <span className="opacity-70 text-[11px]">({counts.top})</span>
           </button>
         )}
@@ -104,7 +104,7 @@ export default function CollectionFilterContainer({ items }: CollectionFilterCon
             onClick={() => setActiveTab("first")}
             className={tabBtnCls(activeTab === "first")}
           >
-            <span>👤 Первый заказ</span>
+            <span>Первый заказ</span>
             <span className="opacity-70 text-[11px]">({counts.first})</span>
           </button>
         )}
@@ -114,7 +114,7 @@ export default function CollectionFilterContainer({ items }: CollectionFilterCon
             onClick={() => setActiveTab("repeat")}
             className={tabBtnCls(activeTab === "repeat")}
           >
-            <span>🔁 Повторные заказы</span>
+            <span>Повторные заказы</span>
             <span className="opacity-70 text-[11px]">({counts.repeat})</span>
           </button>
         )}
@@ -158,7 +158,7 @@ export default function CollectionFilterContainer({ items }: CollectionFilterCon
           {filteredItems.map((item) => item.element)}
         </div>
       ) : (
-        <div className="rounded-2xl border border-line bg-paper/50 p-8 text-center my-6">
+        <div className="rounded-xl border border-line bg-white p-8 text-center my-6">
           <p className="font-display text-sm font-bold text-ink">
             По выбранным фильтрам предложений не найдено
           </p>
@@ -171,7 +171,7 @@ export default function CollectionFilterContainer({ items }: CollectionFilterCon
               setActiveTab("all");
               setSelectedStore("all");
             }}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-xs font-bold text-white hover:bg-ink/80 transition-all cursor-pointer"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-xs font-bold text-white hover:bg-ink-soft transition-colors cursor-pointer"
           >
             Сбросить фильтры
           </button>

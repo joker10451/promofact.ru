@@ -42,27 +42,27 @@ export default async function CategoryPreview() {
         </div>
         <Link
           href="/category"
-          className="inline-flex w-fit shrink-0 items-center gap-1 rounded-xl border border-ink/20 px-4 py-2.5 text-xs font-bold text-ink transition-colors hover:border-red hover:text-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red"
+          className="inline-flex w-fit shrink-0 items-center gap-1 rounded-lg border border-ink/20 px-4 py-2.5 text-xs font-bold text-ink transition-colors hover:border-red hover:text-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red"
         >
           Все категории <span aria-hidden="true">→</span>
         </Link>
       </div>
 
       <p className="mb-2 text-[11px] font-medium text-ink/55 sm:hidden">Листайте категории →</p>
-      <div className="grid grid-flow-col auto-cols-[minmax(158px,66%)] gap-2.5 overflow-x-auto overscroll-x-contain pb-3 snap-x snap-mandatory no-scrollbar sm:grid-flow-row sm:grid-cols-3 sm:overflow-visible sm:pb-0 lg:grid-cols-6">
+      <div className="grid grid-flow-col auto-cols-[minmax(158px,66%)] pl-px pt-px overflow-x-auto overscroll-x-contain pb-3 snap-x snap-mandatory no-scrollbar sm:grid-flow-row sm:grid-cols-3 sm:overflow-visible sm:pb-0 lg:grid-cols-6">
         {featured.map((category) => (
           <Link
             key={category.slug}
             href={`/category/${category.slug}`}
-            className="group flex min-h-36 min-w-0 snap-start flex-col items-start rounded-2xl border border-line bg-white p-3.5 transition-all hover:-translate-y-0.5 hover:border-red/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red sm:p-4"
+            className="group -ml-px -mt-px flex min-h-32 min-w-0 snap-start flex-col items-start border border-line bg-white p-3.5 transition-colors hover:bg-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red sm:p-4"
           >
-            <span className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-ink text-yellow transition-colors group-hover:bg-red group-hover:text-white">
-              <Icon name={category.slug} size={26} />
+            <span className="mb-3 inline-flex text-ink/70 transition-colors group-hover:text-red">
+              <Icon name={category.slug} size={28} />
             </span>
             <span className="mt-auto text-xs font-extrabold leading-snug text-ink sm:text-sm">
               {category.label}
             </span>
-            <span className="mt-1 text-[11px] font-medium text-ink/60">
+            <span className="mt-1 text-[11px] font-medium tabular-nums text-ink/60">
               {category.count} {plural(category.count, "предложение", "предложения", "предложений")}
             </span>
           </Link>

@@ -1,7 +1,7 @@
-import Icon from "@/components/Icon";
 import Link from "next/link";
 import { getStores } from "@/lib/perfluence";
 import StoreLogo from "@/components/StoreLogo";
+import { plural } from "@/lib/format";
 import { withoutLegacyTwins } from "@/lib/storeDisplayName";
 
 const POPULAR_SLUGS = [
@@ -54,7 +54,6 @@ export default async function PopularStores() {
       <div>
         <div className="mb-2.5 sm:mb-6 flex flex-wrap items-end justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Icon name="store" size={19} className="text-ink/50" />
             <div>
               <h2 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold text-ink">
                 Популярные магазины
@@ -73,14 +72,14 @@ export default async function PopularStores() {
         </div>
 
         {/* Сетка популярных брендов в стиле Pikabu (круглые иконки, бейджи акций) */}
-        <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-3 md:grid-cols-6">
+        <div className="grid grid-cols-3 pl-px pt-px sm:grid-cols-4 md:grid-cols-6">
           {top.slice(0, 12).map((s, index) => (
             <Link
               key={s.slug}
               href={`/store/${s.slug}`}
-              className={`${index >= 6 ? "hidden sm:flex" : "flex"} group min-w-0 flex-col items-center justify-center rounded-2xl border border-line bg-paper/35 px-2 py-3 sm:py-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-red/40 hover:bg-white hover:shadow-[0_12px_28px_-16px_rgba(11,16,43,0.3)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red`}
+              className={`${index >= 6 ? "hidden sm:flex" : "flex"} group -ml-px -mt-px min-w-0 flex-col items-center justify-center border border-line bg-white px-2 py-3 sm:py-5 text-center transition-colors hover:bg-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red`}
             >
-              <div className="flex h-16 w-16 sm:h-[72px] sm:w-[72px] shrink-0 items-center justify-center rounded-xl bg-white p-1.5 border border-line group-hover:border-red/35 transition-colors">
+              <div className="flex h-16 w-16 sm:h-[72px] sm:w-[72px] shrink-0 items-center justify-center rounded-lg bg-white p-1.5">
                 <StoreLogo
                   slug={s.slug}
                   name={s.name}
@@ -94,8 +93,8 @@ export default async function PopularStores() {
               <span className="mt-2.5 line-clamp-2 min-h-[2.4em] w-full break-words text-xs font-extrabold leading-tight sm:text-[13px] text-ink group-hover:text-red transition-colors">
                 {s.name}
               </span>
-              <span className="mt-1 inline-block rounded-full bg-mint/10 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-mint-dark">
-                {s.coupons.length} {s.coupons.length === 1 ? "акция" : s.coupons.length < 5 ? "акции" : "акций"}
+              <span className="mt-0.5 inline-block text-[11px] font-medium tabular-nums text-ink/55">
+                {s.coupons.length} {plural(s.coupons.length, "акция", "акции", "акций")}
               </span>
             </Link>
           ))}

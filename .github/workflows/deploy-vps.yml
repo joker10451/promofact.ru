@@ -27,6 +27,19 @@ jobs:
           chmod 600 ~/.ssh/id_deploy
           printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
+      # Секрет, которым GitHub-задачи (радар Perfluence, проверка купонов, постинг) стучатся в API сайта.
+      # На Vercel он был в настройках проекта; на VPS его не было, и эти задачи получали 401.
+      # Next.js читает .env.production.local при сборке и запуске; переменные из systemd имеют приоритет.
+      - name: Sync API secret to the server
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          TELEGRAM_POSTING_SECRET: ${{ secrets.TELEGRAM_POSTING_SECRET }}
+        run: |
+          [ -n "$TELEGRAM_POSTING_SECRET" ] || { echo "TELEGRAM_POSTING_SECRET not set, skipping"; exit 0; }
+          printf 'TELEGRAM_POSTING_SECRET=%s\n' "$(printf '%s' "$TELEGRAM_POSTING_SECRET" | tr -d '\r\n')" \
+            | ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes app@"$VPS_HOST" \
+                'umask 077; cat > /srv/promofact/.env.production.local'
+
       - name: Build and restart on the server
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}

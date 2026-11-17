@@ -86,9 +86,9 @@ const PEREKRESTOK_NOV06_AFFILIATE: Coupon["affiliate"] = {
 };
 
 // --- 7. ЯНДЕКС АФИША ---
-export const YANDEX_AFISHA_NOV06_SITE_LINK = "https://yandafisha.prfl.me/sites/p3q5ez?erid=2RanynfupB6";
-export const YANDEX_AFISHA_NOV06_SITE_ERID = "2RanynfupB6";
-export const YANDEX_AFISHA_NOV06_SITE_LEGAL = 'Реклама. ООО "ЯНДЕКС МУЗЫКА", ИНН 9705121040 erid: 2RanynfupB6';
+export const YANDEX_AFISHA_NOV06_SITE_LINK = "https://yandafisha.prfl.me/sites/uinp1u?erid=2RanynehxYL";
+export const YANDEX_AFISHA_NOV06_SITE_ERID = "2RanynehxYL";
+export const YANDEX_AFISHA_NOV06_SITE_LEGAL = 'Реклама. ООО "ЯНДЕКС МУЗЫКА", ИНН 9705121040 erid: 2RanynehxYL';
 
 const YANDEX_AFISHA_NOV06_AFFILIATE: Coupon["affiliate"] = {
   link: YANDEX_AFISHA_NOV06_SITE_LINK,
@@ -439,9 +439,9 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
       terms: "Промокод OZ934995 даёт скидку 10% на повторные заказы билетов на любые мероприятия в сервисе Яндекс Афиша. Действует до 5 марта 2027 года 23:59.",
       expires: "2027-03-05T23:59:59+03:00",
       isHit: true,
-      isUniversal: true,
+      isUniversal: false,
       isFirstOrderOnly: false,
-      customerTypeLabel: "Для всех заказов",
+      customerTypeLabel: "Повторные заказы",
       region: "RU",
       isBarcode: false,
       barcodeImage: null,

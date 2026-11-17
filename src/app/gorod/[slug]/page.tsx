@@ -151,7 +151,7 @@ export default async function CityPage({
 
       <main className="min-h-screen bg-paper pb-20">
         {/* Хлебные крошки и Hero */}
-        <div className="border-b border-line bg-gradient-to-b from-white to-paper px-4 py-8 sm:px-6 sm:py-12">
+        <div className="border-b border-line bg-white px-4 py-8 sm:px-6 sm:py-12">
           <div className="mx-auto max-w-7xl">
             <Breadcrumbs
               items={[
@@ -234,7 +234,7 @@ export default async function CityPage({
             <div className="mt-8 flex justify-center">
               <Link
                 href="/promokody"
-                className="inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-3.5 text-sm font-bold text-white shadow-offset transition-transform hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-3.5 text-sm font-bold text-white transition-transform"
               >
                 Все {cityCoupons.length} акций в каталоге →
               </Link>

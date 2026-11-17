@@ -22,9 +22,9 @@ for (const c of afishaCoupons) {
   const code = c.promocode.code;
   const exp = expectedCodes[code];
   assert.ok(exp, `Unexpected code: ${code}`);
-  assert.equal(c.affiliate.link, "https://yandafisha.prfl.me/sites/p3q5ez?erid=2RanynfupB6");
-  assert.equal(c.affiliate.ordMarker, "2RanynfupB6");
-  assert.ok(c.affiliate.ordText.includes("2RanynfupB6"));
+  assert.equal(c.affiliate.link, "https://yandafisha.prfl.me/sites/uinp1u?erid=2RanynehxYL");
+  assert.equal(c.affiliate.ordMarker, "2RanynehxYL");
+  assert.ok(c.affiliate.ordText.includes("2RanynehxYL"));
   assert.ok(c.affiliate.ordText.includes("9705121040"));
   assert.equal(c.promocode.expires, "2027-03-05T23:59:59+03:00");
   assert.equal(c.promocode.isFirstOrderOnly, exp.first);
