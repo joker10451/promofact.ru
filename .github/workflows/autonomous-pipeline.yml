@@ -34,6 +34,10 @@ jobs:
       - name: 📦 Установка зависимостей
         run: npm ci
 
+      # Браузер для баннера к посту (scripts/banner-generator.mjs). Без него пост уходит текстом.
+      - name: 🖼 Установка браузера для баннеров
+        run: npx playwright install --with-deps chromium
+
       - name: 🚀 Запуск полного автономного конвейера
         env:
           PERFLUENCE_WIDGET_URL: ${{ secrets.PERFLUENCE_WIDGET_URL }}
