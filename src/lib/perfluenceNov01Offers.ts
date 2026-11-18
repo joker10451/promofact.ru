@@ -8,13 +8,13 @@ import { STABLE_STORES } from "@/lib/stableStores";
  */
 
 // 1. Магнит Доставка (Project 2582)
-const MAGNIT_NOV_LINK = "https://mgntgm.prfl.me/sites/76bbj5?erid=2RanynM1J8j";
-const MAGNIT_NOV_ERID = "2RanynM1J8j";
+const MAGNIT_NOV_LINK = "https://mgntgm.prfl.me/sites/q0vtt9?erid=2Ranymbp5zL";
+const MAGNIT_NOV_ERID = "2Ranymbp5zL";
 const MAGNIT_NOV_AFFILIATE: Coupon["affiliate"] = {
   link: MAGNIT_NOV_LINK,
   landingLink: MAGNIT_NOV_LINK,
   ordMarker: MAGNIT_NOV_ERID,
-  ordText: 'Реклама. АО "Тандер", ИНН 2310031475. erid: 2RanynM1J8j',
+  ordText: 'Реклама. АО "Тандер", ИНН 2310031475. erid: 2Ranymbp5zL',
 };
 
 // 2. М.Косметик (Project 2548)
@@ -108,15 +108,15 @@ export const PERFLUENCE_NOV01_OFFERS: Coupon[] = [
     id: 258202,
     promocode: {
       id: 258202,
-      code: "Дождь",
-      bonusName: "Скидка 31% на каждый заказ от 1 700 / 2 500 ₽ в Магнит Доставка",
-      terms: "Промокод Дождь: скидка 31% на каждый заказ от 1 700 ₽ в разделе «Экспресс» или от 2 500 ₽ в разделе «Гипермаркет» из специальной подборки «Магнит». Действует до 3 ноября 2026 года 23:59.",
-      expires: "2026-11-03T23:59:59+03:00",
+      code: "SGPF1VUSP76",
+      bonusName: "Скидка 26% на один любой заказ от 2 000 ₽ в разделе «Гипермаркет» при самовывозе",
+      terms: "Промокод SGPF1VUSP76: скидка 26% (не более 2 000 ₽) на один любой заказ от 2 000 ₽ в разделе «Гипермаркет» при самовывозе в приложении «Магнит Доставка». Действует до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
       isHit: true,
       isUniversal: true,
       isFirstOrderOnly: false,
-      customerTypeLabel: "На каждый заказ",
-      minimumOrder: { value: 1700, currency: "RUB" },
+      customerTypeLabel: "Один любой заказ (самовывоз)",
+      minimumOrder: { value: 2000, currency: "RUB" },
       region: "RU",
       isBarcode: false,
       barcodeImage: null,

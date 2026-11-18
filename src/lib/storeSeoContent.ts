@@ -278,6 +278,7 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
     const codes = new Set(input.coupons.map(c => c.code.trim().toLocaleUpperCase("ru-RU")));
     const details: string[] = [];
     if (codes.has("25GFC1TL4")) details.push("Код 25GFC1TL4 даёт 31% только новому пользователю на первый заказ от 2 000 ₽ в «Гипермаркете» до 30 ноября, 23:59 МСК.");
+    if (codes.has("SGPF1VUSP76")) details.push("Код SGPF1VUSP76 даёт 26% на один любой заказ от 2 000 ₽ в «Гипермаркете» при самовывозе до 30 ноября, 23:59 МСК.");
     if (codes.has("SGPFB7JJGY")) details.push("Код SGPFB7JJGY даёт 26% на один любой заказ от 2 000 ₽ в «Гипермаркете» при самовывозе до 31 октября, 23:59 МСК.");
     if (codes.has("НОЯБРЬ") || codes.has("ДОЖДЬ")) details.push("Общий промокод «НОЯБРЬ» даёт скидку 31% на любой заказ от 1 700 ₽ товаров из подборки «Магнит» с суммированием со скидками до 30 ноября, 23:59 МСК.");
     return [
