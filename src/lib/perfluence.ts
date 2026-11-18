@@ -560,19 +560,7 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.link === "https://yaafisha.prfl.me/sites/urcykp?erid=2RanynSbxDJ" &&
         c.affiliate.ordMarker === "2RanynSbxDJ" &&
         c.affiliate.ordText.includes("7736207543");
-      const isNov16 = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
-        c.affiliate.link === "https://yandafisha.prfl.me/sites/uinp1u?erid=2RanynehxYL" &&
-        c.affiliate.ordMarker === "2RanynehxYL" &&
-        c.affiliate.ordText.includes("9705121040");
-      const isNov06 = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
-        c.affiliate.link === "https://yandafisha.prfl.me/sites/p3q5ez?erid=2RanynfupB6" &&
-        c.affiliate.ordMarker === "2RanynfupB6" &&
-        c.affiliate.ordText.includes("9705121040");
-      const isOct = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
-        c.affiliate.link === "https://yandafisha.prfl.me/sites/xocz1q?erid=2RanynJD4PD" &&
-        c.affiliate.ordMarker === "2RanynJD4PD" &&
-        c.affiliate.ordText.includes("erid: 2RanynJD4PD");
-      return isNov18 || isNov16 || isNov06 || isOct;
+      return isNov18;
     }
     if (c.store.slug === "tanukifamily") {
       const code = c.promocode.code.trim().toUpperCase();
