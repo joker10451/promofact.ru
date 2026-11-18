@@ -12,21 +12,21 @@ const afishaCoupons = PERFLUENCE_NOV06_OFFERS.filter(c => c.store.slug === "yand
 assert.equal(afishaCoupons.length, 4, "Must have 4 Nov06 Afisha coupons");
 
 const expectedCodes = {
-  "ZT979715": { discount: "750 ₽", min: "5 000 ₽", first: true },
-  "MM009981": { discount: "300 ₽", min: "2 000 ₽", first: true },
-  "XE330781": { discount: "400 ₽", min: "3 000 ₽", first: true },
-  "OZ934995": { discount: "10%", min: null, first: false }
+  "KYWB8048": { discount: "750 ₽", min: "5 000 ₽", first: true },
+  "GPSJ9957": { discount: "300 ₽", min: "2 000 ₽", first: true },
+  "BWWE9549": { discount: "400 ₽", min: "3 000 ₽", first: true },
+  "GSPC5034": { discount: "10%", min: null, first: false }
 };
 
 for (const c of afishaCoupons) {
   const code = c.promocode.code;
   const exp = expectedCodes[code];
   assert.ok(exp, `Unexpected code: ${code}`);
-  assert.equal(c.affiliate.link, "https://yandafisha.prfl.me/sites/uinp1u?erid=2RanynehxYL");
-  assert.equal(c.affiliate.ordMarker, "2RanynehxYL");
-  assert.ok(c.affiliate.ordText.includes("2RanynehxYL"));
-  assert.ok(c.affiliate.ordText.includes("9705121040"));
-  assert.equal(c.promocode.expires, "2027-03-05T23:59:59+03:00");
+  assert.equal(c.affiliate.link, "https://yaafisha.prfl.me/sites/urcykp?erid=2RanynSbxDJ");
+  assert.equal(c.affiliate.ordMarker, "2RanynSbxDJ");
+  assert.ok(c.affiliate.ordText.includes("2RanynSbxDJ"));
+  assert.ok(c.affiliate.ordText.includes("7736207543"));
+  assert.equal(c.promocode.expires, "2026-12-31T23:59:59+03:00");
   assert.equal(c.promocode.isFirstOrderOnly, exp.first);
   assert.ok(c.promocode.bonusName.includes(exp.discount));
   assert.ok(isApprovedPublicCouponPlacement(c), `Must be approved: ${code}`);

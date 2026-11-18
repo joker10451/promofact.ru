@@ -281,6 +281,50 @@ export const YANDEX_TRAVEL_ROTATED_OFFERS: Coupon[] = [
     "Промокод PF-PREMIUMPRO-B66N2: скидка 2 500 ₽ при бронировании отеля из подборки. Действует до 16 октября 2026 года, 10:59 по московскому времени. Подходящие отели, минимальную сумму и прочие ограничения уточняйте при бронировании."),
 ];
 
+export const YANDEX_TRAVEL_NOV18_LANDING1_LINK = "https://yandextravel.prfl.me/sites/ezrjip?erid=2RanynDFjCG";
+export const YANDEX_TRAVEL_NOV18_LANDING1_ERID = "2RanynDFjCG";
+export const YANDEX_TRAVEL_NOV18_LANDING1_LEGAL = 'Реклама. ООО "ЯНДЕКС.ВЕРТИКАЛИ", ИНН 7704340327. erid: 2RanynDFjCG';
+
+export const YANDEX_TRAVEL_NOV18_LANDING2_LINK = "https://travelyandex.prfl.me/sites/e0ty6u?erid=2Ranyn4MoWC";
+export const YANDEX_TRAVEL_NOV18_LANDING2_ERID = "2Ranyn4MoWC";
+export const YANDEX_TRAVEL_NOV18_LANDING2_LEGAL = 'Реклама. ООО "ЯНДЕКС.ВЕРТИКАЛИ", ИНН 7704340327. erid: 2Ranyn4MoWC';
+
+const yandexTravelNov18Landing1Ad: Coupon["affiliate"] = {
+  link: YANDEX_TRAVEL_NOV18_LANDING1_LINK,
+  landingLink: YANDEX_TRAVEL_NOV18_LANDING1_LINK,
+  ordMarker: YANDEX_TRAVEL_NOV18_LANDING1_ERID,
+  ordText: YANDEX_TRAVEL_NOV18_LANDING1_LEGAL,
+};
+
+const yandexTravelNov18Landing2Ad: Coupon["affiliate"] = {
+  link: YANDEX_TRAVEL_NOV18_LANDING2_LINK,
+  landingLink: YANDEX_TRAVEL_NOV18_LANDING2_LINK,
+  ordMarker: YANDEX_TRAVEL_NOV18_LANDING2_ERID,
+  ordText: YANDEX_TRAVEL_NOV18_LANDING2_LEGAL,
+};
+
+/**
+ * Perfluence updated placements for promofact.ru on 18 November 2026.
+ * Project 1135: Hotel selection & general website bookings.
+ */
+export const YANDEX_TRAVEL_NOV18_OFFERS: Coupon[] = [
+  offer(82511361, yandexTravel, yandexTravelNov18Landing1Ad, "PF-PREMIUMPRO2O27-DIUH3",
+    "Скидка 2 500 ₽ от 25 000 ₽ на отели из подборки",
+    "2026-11-30T23:59:59+03:00",
+    "Отели из подборки · от 25 000 ₽",
+    "Скидка 2 500 ₽ от 25 000 ₽ на одно бронирование из подборки для всех пользователей в приложении и на сайте по промокоду PF-PREMIUMPRO2O27-DIUH3. Действует на проживание с 1.01.2027. Действует до 30 ноября 2026 года, 23:59 по Москве."),
+  offer(82511362, yandexTravel, yandexTravelNov18Landing2Ad, "PF-ALL2O27-CP3PS",
+    "Скидка 1 000 ₽ от 10 000 ₽ на бронирование отелей",
+    "2026-11-30T23:59:59+03:00",
+    "Бронирование отелей · от 10 000 ₽",
+    "Скидка 1 000 ₽ от 10 000 ₽ на одно бронирование для всех пользователей в приложении и на сайте по промокоду PF-ALL2O27-CP3PS. Действует на проживание с 1.01.2027. Действует до 30 ноября 2026 года, 23:59 по Москве."),
+  offer(82511363, yandexTravel, yandexTravelNov18Landing2Ad, "SHARJAH26",
+    "Скидка 25% (не более 3 000 ₽) на отели в эмирате Шарджа",
+    "2026-12-31T23:59:59+03:00",
+    "Отели в эмирате Шарджа",
+    "Скидка 25% (не более 3 000 ₽) на бронирование отелей и иного жилья в эмирате Шарджа для всех пользователей в приложении и на сайте по промокоду SHARJAH26. Действует до 31 декабря 2026 года, 23:59 по Москве."),
+];
+
 /**
  * WinLab promofact.ru placement, renewed 16 October 2026. Publisher approved.
  * The link is https://winelab.prfl.me/sites/gittf8, but the new campaign

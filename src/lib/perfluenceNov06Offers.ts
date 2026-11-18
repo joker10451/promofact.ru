@@ -86,9 +86,9 @@ const PEREKRESTOK_NOV06_AFFILIATE: Coupon["affiliate"] = {
 };
 
 // --- 7. ЯНДЕКС АФИША ---
-export const YANDEX_AFISHA_NOV06_SITE_LINK = "https://yandafisha.prfl.me/sites/uinp1u?erid=2RanynehxYL";
-export const YANDEX_AFISHA_NOV06_SITE_ERID = "2RanynehxYL";
-export const YANDEX_AFISHA_NOV06_SITE_LEGAL = 'Реклама. ООО "ЯНДЕКС МУЗЫКА", ИНН 9705121040 erid: 2RanynehxYL';
+export const YANDEX_AFISHA_NOV06_SITE_LINK = "https://yaafisha.prfl.me/sites/urcykp?erid=2RanynSbxDJ";
+export const YANDEX_AFISHA_NOV06_SITE_ERID = "2RanynSbxDJ";
+export const YANDEX_AFISHA_NOV06_SITE_LEGAL = 'Реклама. ООО «ЯНДЕКС», ИНН 7736207543 erid: 2RanynSbxDJ';
 
 const YANDEX_AFISHA_NOV06_AFFILIATE: Coupon["affiliate"] = {
   link: YANDEX_AFISHA_NOV06_SITE_LINK,
@@ -359,10 +359,10 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
     id: 196501,
     promocode: {
       id: 196501,
-      code: "ZT979715",
-      bonusName: "Скидка 750 ₽ на первый заказ билетов от 5 000 ₽ в Яндекс Афише",
-      terms: "Промокод ZT979715 даёт скидку 750 ₽ на покупку билетов на концерты, спектакли, выставки и шоу от 5 000 ₽ на Яндекс Афише. Действует до 5 марта 2027 года 23:59.",
-      expires: "2027-03-05T23:59:59+03:00",
+      code: "KYWB8048",
+      bonusName: "Скидка 750 ₽ на первую покупку билетов от 5 000 ₽ в Яндекс Афише",
+      terms: "Промокод KYWB8048 даёт скидку 750 ₽ на первую покупку билетов на концерты, спектакли, выставки и шоу от 5 000 ₽ в приложении Яндекс Афиша. Действует до 31 декабря 2026 года 23:59.",
+      expires: "2026-12-31T23:59:59+03:00",
       isHit: true,
       isUniversal: false,
       isFirstOrderOnly: true,
@@ -384,10 +384,10 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
     id: 196502,
     promocode: {
       id: 196502,
-      code: "XE330781",
-      bonusName: "Скидка 400 ₽ на первый заказ от 3 000 ₽ в Яндекс Афише",
-      terms: "Промокод XE330781 даёт скидку 400 ₽ при первом заказе билетов от 3 000 ₽ на сайте и в приложении Яндекс Афиша. Действует до 5 марта 2027 года 23:59.",
-      expires: "2027-03-05T23:59:59+03:00",
+      code: "BWWE9549",
+      bonusName: "Скидка 400 ₽ на первую покупку билетов от 3 000 ₽ в Яндекс Афише",
+      terms: "Промокод BWWE9549 даёт скидку 400 ₽ при первой покупке билетов от 3 000 ₽ в мобильном приложении Яндекс Афиша. Действует до 31 декабря 2026 года 23:59.",
+      expires: "2026-12-31T23:59:59+03:00",
       isHit: false,
       isUniversal: false,
       isFirstOrderOnly: true,
@@ -409,10 +409,10 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
     id: 196504,
     promocode: {
       id: 196504,
-      code: "MM009981",
+      code: "GPSJ9957",
       bonusName: "Скидка 300 ₽ на первую покупку билетов от 2 000 ₽ в Яндекс Афише",
-      terms: "Промокод MM009981 даёт скидку 300 ₽ при первом заказе билетов от 2 000 ₽ на сайте и в мобильном приложении Яндекс Афиша. Действует до 5 марта 2027 года 23:59.",
-      expires: "2027-03-05T23:59:59+03:00",
+      terms: "Промокод GPSJ9957 даёт скидку 300 ₽ при первой покупке билетов от 2 000 ₽ в мобильном приложении Яндекс Афиша. Действует до 31 декабря 2026 года 23:59.",
+      expires: "2026-12-31T23:59:59+03:00",
       isHit: false,
       isUniversal: false,
       isFirstOrderOnly: true,
@@ -434,14 +434,15 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
     id: 196503,
     promocode: {
       id: 196503,
-      code: "OZ934995",
-      bonusName: "Скидка 10% на повторные заказы в Яндекс Афише",
-      terms: "Промокод OZ934995 даёт скидку 10% на повторные заказы билетов на любые мероприятия в сервисе Яндекс Афиша. Действует до 5 марта 2027 года 23:59.",
-      expires: "2027-03-05T23:59:59+03:00",
+      code: "GSPC5034",
+      bonusName: "Скидка 10% (не более 750 ₽) на покупку билетов от 3 000 ₽ в Яндекс Афише",
+      terms: "Промокод GSPC5034 даёт скидку 10% (не более 750 ₽) на первую и все повторные покупки билетов от 3 000 ₽ в мобильном приложении Яндекс Афиша. Действует до 31 декабря 2026 года 23:59.",
+      expires: "2026-12-31T23:59:59+03:00",
       isHit: true,
       isUniversal: false,
       isFirstOrderOnly: false,
-      customerTypeLabel: "Повторные заказы",
+      customerTypeLabel: "Первый и повторный заказ",
+      minimumOrder: { value: 3000, currency: "RUB" },
       region: "RU",
       isBarcode: false,
       barcodeImage: null,

@@ -556,6 +556,10 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // historical ERID. Deny unknown/historical codes until reviewed.
     if (c.store.slug === "yandeks-afisha") {
       const code = c.promocode.code.trim().toUpperCase();
+      const isNov18 = ["KYWB8048", "GPSJ9957", "BWWE9549", "GSPC5034"].includes(code) &&
+        c.affiliate.link === "https://yaafisha.prfl.me/sites/urcykp?erid=2RanynSbxDJ" &&
+        c.affiliate.ordMarker === "2RanynSbxDJ" &&
+        c.affiliate.ordText.includes("7736207543");
       const isNov16 = ["ZT979715", "MM009981", "XE330781", "OZ934995"].includes(code) &&
         c.affiliate.link === "https://yandafisha.prfl.me/sites/uinp1u?erid=2RanynehxYL" &&
         c.affiliate.ordMarker === "2RanynehxYL" &&
@@ -568,7 +572,7 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.link === "https://yandafisha.prfl.me/sites/xocz1q?erid=2RanynJD4PD" &&
         c.affiliate.ordMarker === "2RanynJD4PD" &&
         c.affiliate.ordText.includes("erid: 2RanynJD4PD");
-      return isNov16 || isNov06 || isOct;
+      return isNov18 || isNov16 || isNov06 || isOct;
     }
     if (c.store.slug === "tanukifamily") {
       const code = c.promocode.code.trim().toUpperCase();
@@ -631,12 +635,30 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
           c.affiliate.ordMarker === new URL(link).searchParams.get("erid") &&
           c.affiliate.ordText.includes(c.affiliate.ordMarker);
       }
+      if (code === "PF-PREMIUMPRO2O27-DIUH3") {
+        return c.affiliate.link === "https://yandextravel.prfl.me/sites/ezrjip?erid=2RanynDFjCG" &&
+          c.affiliate.ordMarker === "2RanynDFjCG" &&
+          c.affiliate.ordText.includes("erid: 2RanynDFjCG");
+      }
+      if (code === "PF-ALL2O27-CP3PS") {
+        return c.affiliate.link === "https://travelyandex.prfl.me/sites/e0ty6u?erid=2Ranyn4MoWC" &&
+          c.affiliate.ordMarker === "2Ranyn4MoWC" &&
+          c.affiliate.ordText.includes("erid: 2Ranyn4MoWC");
+      }
+      if (code === "SHARJAH26") {
+        const isNov18 = c.affiliate.link === "https://travelyandex.prfl.me/sites/e0ty6u?erid=2Ranyn4MoWC" &&
+          c.affiliate.ordMarker === "2Ranyn4MoWC" &&
+          c.affiliate.ordText.includes("erid: 2Ranyn4MoWC");
+        const isOct = c.affiliate.link === "https://travelyandex.prfl.me/sites/k9msuz?erid=2RanykJ47QF" &&
+          c.affiliate.ordMarker === "2RanykJ47QF";
+        return isNov18 || isOct;
+      }
       if (code === "PF-PREMIUMPRO-B66N2") {
         return c.affiliate.link === "https://yandextravel.prfl.me/sites/t21yi1?erid=2RanynSc5X1" &&
           c.affiliate.ordMarker === "2RanynSc5X1" &&
           c.affiliate.ordText.includes("erid: 2RanynSc5X1");
       }
-      return ["PF-ALLIOOO-EGGTH", "BOLSHE", "SHARJAH26"].includes(code);
+      return ["PF-ALLIOOO-EGGTH", "BOLSHE"].includes(code);
     }
     // Ivi rotated the 35-day code and approved placement on 15 Oct 2026.
     // Never show legacy FILM35 or an outdated tracking/ERID URL alongside the current offer.
