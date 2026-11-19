@@ -193,6 +193,18 @@ export const MEGAMARKET_ZOO_AFFILIATE: Coupon["affiliate"] = {
   ordText: 'Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180 erid: 2RanymGMVzU',
 };
 
+// --- 12. CARELY (Project 4575, Post 17468407) ---
+export const CARELY_NOV06_SITE_LINK = "https://carely.prfl.me/sites/o0kke1?erid=2RanynLdenp";
+export const CARELY_NOV06_SITE_ERID = "2RanynLdenp";
+export const CARELY_NOV06_SITE_LEGAL = 'Реклама. ООО "КЕАРЛИ ГРУПП", ИНН 9715397054. erid: 2RanynLdenp';
+
+const CARELY_NOV06_AFFILIATE: Coupon["affiliate"] = {
+  link: CARELY_NOV06_SITE_LINK,
+  landingLink: CARELY_NOV06_SITE_LINK,
+  ordMarker: CARELY_NOV06_SITE_ERID,
+  ordText: CARELY_NOV06_SITE_LEGAL,
+};
+
 export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
   // ================= ЯНДЕКС ЦВЕТЫ =================
   {
@@ -828,6 +840,32 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
       ordMarker: "2Ranym1YxLc",
       ordText: MEGAMARKET_NOV06_SITE_LEGAL,
     },
+    extraLinks: [],
+  },
+
+  // ================= CARELY =================
+  {
+    id: 457501,
+    promocode: {
+      id: 457501,
+      code: "B7116D600FC4",
+      bonusName: "Скидка 20% на первый и все повторные заказы Carely",
+      terms: "Промокод B7116D600FC4: скидка 20% на первый и все повторные заказы уходовой косметики брендов ART&FACT, Verifique, Structura в официальном магазине Carely Group на Ozon. Действует до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Первый и повторные заказы",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["carely"],
+      activeBloggers: STABLE_STORES["carely"]?.activeBloggers ?? 708,
+    },
+    affiliate: CARELY_NOV06_AFFILIATE,
     extraLinks: [],
   },
 ];
