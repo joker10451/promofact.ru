@@ -42,9 +42,9 @@ const FMART_NOV04_AFFILIATE: Coupon["affiliate"] = {
 };
 
 // --- 3. ПОДРУЖКА ---
-export const PODRUZHKA_NOV04_LINK = "https://podrygka.prfl.me/sites/hqh59i?erid=2RanymmxYrx";
-export const PODRUZHKA_NOV04_ERID = "2RanymmxYrx";
-export const PODRUZHKA_NOV04_LEGAL = 'Реклама. ООО «Табер Трейд», ИНН 7709505477, ОГРН 1037739861851. Адрес места нахождения (Юридический адрес): 115280, г.Москва, ул.Ленинская Слобода, д.19, комн. 21В erid: 2RanymmxYrx';
+export const PODRUZHKA_NOV04_LINK = "https://podrygka.prfl.me/sites/6ffmdr?erid=2RanynYVtXW";
+export const PODRUZHKA_NOV04_ERID = "2RanynYVtXW";
+export const PODRUZHKA_NOV04_LEGAL = 'Реклама. ООО «Табер Трейд», ИНН 7709505477, ОГРН 1037739861851. Адрес места нахождения (Юридический адрес): 115280, г.Москва, ул.Ленинская Слобода, д.19, комн. 21В erid: 2RanynYVtXW';
 
 const PODRUZHKA_NOV04_AFFILIATE: Coupon["affiliate"] = {
   link: PODRUZHKA_NOV04_LINK,
@@ -200,16 +200,16 @@ export const PERFLUENCE_NOV04_OFFERS: Coupon[] = [
     promocode: {
       id: 265701,
       code: "2921060875255",
-      bonusName: "Скидка 30% на всё + кэшбэк 40% от Т-Банка",
-      terms: "Штрихкод / промокод 2921060875255: скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах «Подружка» без минимальной суммы заказа до 30 ноября 2026 года. Только 4 ноября суммируется с кэшбэком 40% от Т-Банка при покупке от 1 200 ₽!",
+      bonusName: "Скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах",
+      terms: "Штрихкод / промокод 2921060875255: скидка 30% на первый и все повторные заказы онлайн и в розничных магазинах «Подружка» до 30 ноября 2026 года 23:59.",
       expires: "2026-11-30T23:59:59+03:00",
       isHit: true,
       isUniversal: true,
       isFirstOrderOnly: false,
-      customerTypeLabel: "Для всех пользователей",
+      customerTypeLabel: "Для всех покупателей",
       region: "RU",
       isBarcode: true,
-      barcodeImage: null,
+      barcodeImage: "https://barcode.tec-it.com/barcode.ashx?data=2921060875255&code=EAN13",
       group: "perfluence",
     },
     store: {
