@@ -145,6 +145,54 @@ const MEGAMARKET_NOV06_AFFILIATE: Coupon["affiliate"] = {
   ordText: MEGAMARKET_NOV06_SITE_LEGAL,
 };
 
+// 11.1 Матрасы Askona 140х200 (Post 17468328)
+export const MEGAMARKET_ASKONA_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://megamarket1.prfl.me/sites/ks985f?erid=2Ranym5yb24",
+  landingLink: "https://megamarket1.prfl.me/sites/ks985f?erid=2Ranym5yb24",
+  ordMarker: "2Ranym5yb24",
+  ordText: 'Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180 erid: 2Ranym5yb24',
+};
+
+// 11.2 BeFit с кешбэком до 30% (Post 17468329)
+export const MEGAMARKET_BEFIT_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://megamarket1.prfl.me/sites/inqtfb?erid=2Ranym8wZak",
+  landingLink: "https://megamarket1.prfl.me/sites/inqtfb?erid=2Ranym8wZak",
+  ordMarker: "2Ranym8wZak",
+  ordText: 'Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180 erid: 2Ranym8wZak',
+};
+
+// 11.3 Товары со скидкой 30% - pfnv1134218 (Post 17468330)
+export const MEGAMARKET_DISCOUNT30_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://megamarket1.prfl.me/sites/4zbr2a?erid=2RanymARYs6",
+  landingLink: "https://megamarket1.prfl.me/sites/4zbr2a?erid=2RanymARYs6",
+  ordMarker: "2RanymARYs6",
+  ordText: 'Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180 erid: 2RanymARYs6',
+};
+
+// 11.4 Randewoo 20% - RNDW20 (Post 17468331)
+export const MEGAMARKET_RANDEWOO_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://megamarket1.prfl.me/sites/nh657b?erid=2RanymBuY9S",
+  landingLink: "https://megamarket1.prfl.me/sites/nh657b?erid=2RanymBuY9S",
+  ordMarker: "2RanymBuY9S",
+  ordText: 'Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180 erid: 2RanymBuY9S',
+};
+
+// 11.5 Автомобильные шины 20% (Post 17468333)
+export const MEGAMARKET_TIRES_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://megamarket1.prfl.me/sites/7f31mr?erid=2RanymEsWi8",
+  landingLink: "https://megamarket1.prfl.me/sites/7f31mr?erid=2RanymEsWi8",
+  ordMarker: "2RanymEsWi8",
+  ordText: 'Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180 erid: 2RanymEsWi8',
+};
+
+// 11.6 Зоотовары 20% - ZOO20 (Post 17468334)
+export const MEGAMARKET_ZOO_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://megamarket1.prfl.me/sites/r8ovx5?erid=2RanymGMVzU",
+  landingLink: "https://megamarket1.prfl.me/sites/r8ovx5?erid=2RanymGMVzU",
+  ordMarker: "2RanymGMVzU",
+  ordText: 'Реклама. ООО «МАРКЕТПЛЕЙС», г. Москва, ОГРН: 1167746803180 erid: 2RanymGMVzU',
+};
+
 export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
   // ================= ЯНДЕКС ЦВЕТЫ =================
   {
@@ -607,6 +655,179 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
       activeBloggers: STABLE_STORES["megamarket"]?.activeBloggers ?? 12500,
     },
     affiliate: MEGAMARKET_NOV06_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 361102,
+    promocode: {
+      id: 361102,
+      code: "pfnv1134218",
+      bonusName: "Скидка 30% на один любой заказ на Мегамаркете",
+      terms: "Промокод pfnv1134218: скидка 30%, но не более 10 000 ₽ на один любой заказ на маркетплейсе «Мегамаркет». Действует до 22 ноября 2026 года 23:59.",
+      expires: "2026-11-22T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "На один любой заказ",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["megamarket"],
+      activeBloggers: STABLE_STORES["megamarket"]?.activeBloggers ?? 12500,
+    },
+    affiliate: MEGAMARKET_DISCOUNT30_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 361103,
+    promocode: {
+      id: 361103,
+      code: "RNDW20",
+      bonusName: "Скидка 20% на товары магазина Randewoo на Мегамаркете",
+      terms: "Промокод RNDW20: скидка 20% на товары магазина Randewoo, но не более 4 000 ₽ на один любой заказ на маркетплейсе «Мегамаркет». Действует до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "На товары Randewoo",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["megamarket"],
+      activeBloggers: STABLE_STORES["megamarket"]?.activeBloggers ?? 12500,
+    },
+    affiliate: MEGAMARKET_RANDEWOO_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 361104,
+    promocode: {
+      id: 361104,
+      code: "ZOO20",
+      bonusName: "Скидка 20% на зоотовары на Мегамаркете",
+      terms: "Промокод ZOO20: скидка 20% на зоотовары на один любой заказ на маркетплейсе «Мегамаркет». Действует до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "На зоотовары",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["megamarket"],
+      activeBloggers: STABLE_STORES["megamarket"]?.activeBloggers ?? 12500,
+    },
+    affiliate: MEGAMARKET_ZOO_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 361105,
+    promocode: {
+      id: 361105,
+      code: "",
+      bonusName: "Анатомические матрасы Askona 140х200 по специальной цене",
+      terms: "Заказ анатомических матрасов Askona 140х200 по специальным выгодным ценам на маркетплейсе «Мегамаркет». Скидка применяется автоматически при переходе по ссылке. Действует до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Для всех покупателей",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["megamarket"],
+      activeBloggers: STABLE_STORES["megamarket"]?.activeBloggers ?? 12500,
+    },
+    affiliate: MEGAMARKET_ASKONA_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 361106,
+    promocode: {
+      id: 361106,
+      code: "",
+      bonusName: "Кешбэк бонусами до 30% на правильное питание BeFit",
+      terms: "Заказ рационов здорового и сбалансированного питания BeFit с кешбэком бонусами Спасибо до 30% на «Мегамаркете». Акция действует до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Для всех покупателей",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["megamarket"],
+      activeBloggers: STABLE_STORES["megamarket"]?.activeBloggers ?? 12500,
+    },
+    affiliate: MEGAMARKET_BEFIT_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 361107,
+    promocode: {
+      id: 361107,
+      code: "",
+      bonusName: "Скидка 20% на автомобильные шины на Мегамаркете",
+      terms: "Сезонная скидка 20% на автомобильные шины ведущих производителей на «Мегамаркете». Скидка действует по ссылке каталога до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Для всех покупателей",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["megamarket"],
+      activeBloggers: STABLE_STORES["megamarket"]?.activeBloggers ?? 12500,
+    },
+    affiliate: MEGAMARKET_TIRES_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 361108,
+    promocode: {
+      id: 361108,
+      code: "PRF1",
+      bonusName: "Скидка 15% на покупки на Мегамаркете",
+      terms: "Промокод PRF1: скидка 15% на широкий ассортимент товаров на маркетплейсе «Мегамаркет». Действует до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Для всех покупателей",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["megamarket"],
+      activeBloggers: STABLE_STORES["megamarket"]?.activeBloggers ?? 12500,
+    },
+    affiliate: {
+      link: "https://megamarket1.prfl.me/sites/442z68?erid=2Ranym1YxLc",
+      landingLink: "https://megamarket1.prfl.me/sites/442z68?erid=2Ranym1YxLc",
+      ordMarker: "2Ranym1YxLc",
+      ordText: MEGAMARKET_NOV06_SITE_LEGAL,
+    },
     extraLinks: [],
   },
 ];
