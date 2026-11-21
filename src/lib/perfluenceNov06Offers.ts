@@ -205,6 +205,23 @@ const CARELY_NOV06_AFFILIATE: Coupon["affiliate"] = {
   ordText: CARELY_NOV06_SITE_LEGAL,
 };
 
+// --- 13. ОТЕЛЛО (Project 2288) ---
+// 13.1 Забронировать отель с сертификатом (Post 17478213)
+export const OTELLO_CERT_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://otello1.prfl.me/sites/lvyen0?erid=2Ranynbu4HS",
+  landingLink: "https://otello1.prfl.me/sites/lvyen0?erid=2Ranynbu4HS",
+  ordMarker: "2Ranynbu4HS",
+  ordText: 'Реклама. ООО "Дубльгис", ИНН 5405276278. erid: 2Ranynbu4HS',
+};
+
+// 13.2 Забронировать отели с выгодой до 44% (Post 17478214)
+export const OTELLO_NOV_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://otello1.prfl.me/sites/h474rf?erid=2RanyndP3Zn",
+  landingLink: "https://otello1.prfl.me/sites/h474rf?erid=2RanyndP3Zn",
+  ordMarker: "2RanyndP3Zn",
+  ordText: 'Реклама. ООО "Дубльгис", ИНН 5405276278. erid: 2RanyndP3Zn',
+};
+
 export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
   // ================= ЯНДЕКС ЦВЕТЫ =================
   {
@@ -866,6 +883,80 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
       activeBloggers: STABLE_STORES["carely"]?.activeBloggers ?? 708,
     },
     affiliate: CARELY_NOV06_AFFILIATE,
+    extraLinks: [],
+  },
+
+  // ================= ОТЕЛЛО =================
+  {
+    id: 228801,
+    promocode: {
+      id: 228801,
+      code: "NVPF-XE5",
+      bonusName: "Скидка 15% на первое бронирование отеля в Отелло",
+      terms: "Промокод NVPF-XE5: скидка 15% (но не более 2 500 ₽) на первое бронирование отеля или апартаментов в сервисе «Отелло». Действует до 27 ноября 2026 года 23:59.",
+      expires: "2026-11-27T23:59:59+03:00",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Первое бронирование",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["otello"],
+      activeBloggers: STABLE_STORES["otello"]?.activeBloggers ?? 6813,
+    },
+    affiliate: OTELLO_NOV_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 228802,
+    promocode: {
+      id: 228802,
+      code: "WAVE-QBAY",
+      bonusName: "Скидка 7% на повторное бронирование в Отелло",
+      terms: "Промокод WAVE-QBAY: скидка 7% (но не более 4 000 ₽) на одно повторное бронирование отеля или апартаментов в сервисе «Отелло». Действует до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Повторное бронирование",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["otello"],
+      activeBloggers: STABLE_STORES["otello"]?.activeBloggers ?? 6813,
+    },
+    affiliate: OTELLO_NOV_AFFILIATE,
+    extraLinks: [],
+  },
+  {
+    id: 228803,
+    promocode: {
+      id: 228803,
+      code: "",
+      bonusName: "Забронировать отель с сертификатом в Отелло",
+      terms: "Бронирование отелей, гостиниц и апартаментов с подарочным сертификатом в сервисе «Отелло». Промокод не требуется, переходите по ссылке для участия в акции до 30 ноября 2026 года 23:59.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: false,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Для всех пользователей",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["otello"],
+      activeBloggers: STABLE_STORES["otello"]?.activeBloggers ?? 6813,
+    },
+    affiliate: OTELLO_CERT_AFFILIATE,
     extraLinks: [],
   },
 ];
