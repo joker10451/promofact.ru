@@ -18,7 +18,7 @@ jobs:
         id: probe
         run: |
           fail=""
-          for path in / /store/premier /promokody/segodnya /sitemap.xml; do
+          for path in / /catalog /store/premier /store/plati-po-miru /promokody/segodnya /sitemap.xml; do
             ok=0
             for try in 1 2 3; do
               code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "https://promofact.ru$path?uptime=$RANDOM" || echo 000)
