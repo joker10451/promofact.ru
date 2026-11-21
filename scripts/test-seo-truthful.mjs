@@ -58,6 +58,20 @@ assert.ok(article.includes("logo: {"));
 assert.ok(article.includes("url: `${SITE_URL}/icon.png`"));
 assert.ok(!article.includes("article.published ?? new Date().toISOString()"));
 
+// Conversational help must not advertise historical fixed codes or paused placements.
+const helper = fs.readFileSync("src/components/ChatHelper.tsx", "utf8");
+const howToApply = fs.readFileSync("src/components/HowToApply.tsx", "utf8");
+const couponDetail = fs.readFileSync("src/app/store/[slug]/[code]/page.tsx", "utf8");
+const geoCategory = fs.readFileSync("src/app/gorod/[slug]/[category]/page.tsx", "utf8");
+for (const oldCode of ["20AV1474", "15AV1474", "PFQ8W3XMT", "JAR2-YR4A", "HOCHU-D8AP", "a5w5yh74pr5", "pf5m0tdcgqx"]) {
+  assert.ok(!helper.includes(oldCode), "Chat helper must use live store pages, not stale coupon " + oldCode);
+}
+for (const [label, source] of [["chat helper", helper], ["application instructions", howToApply], ["coupon detail", couponDetail], ["geo FAQ", geoCategory], ["store page", store]]) {
+  assert.ok(!source.includes("Скидка применится сразу"), label + ": merchant discount cannot be guaranteed");
+}
+assert.ok(helper.includes("Проверьте её до оплаты"), "Chat helper must explain checking final price");
+assert.ok(howToApply.includes("итоговой сумме до оплаты"), "HowToApply must explain checking the final price");
+
 const seoArticles = fs.readFileSync("src/lib/seoArticles.ts", "utf8");
 for (const unverified of ["Проверен и работает", "Скидка применится сразу", "Обновлено сегодня", "Все предложения актуальны"]) {
   assert.ok(!seoArticles.includes(unverified), "SEO copy must not claim a merchant-verified coupon redemption: " + unverified);
