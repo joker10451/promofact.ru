@@ -58,6 +58,13 @@ assert.ok(article.includes("logo: {"));
 assert.ok(article.includes("url: `${SITE_URL}/icon.png`"));
 assert.ok(!article.includes("article.published ?? new Date().toISOString()"));
 
+const seoArticles = fs.readFileSync("src/lib/seoArticles.ts", "utf8");
+for (const unverified of ["Проверен и работает", "Скидка применится сразу", "Обновлено сегодня", "Все предложения актуальны"]) {
+  assert.ok(!seoArticles.includes(unverified), "SEO copy must not claim a merchant-verified coupon redemption: " + unverified);
+}
+assert.ok(!article.includes("Проверено сегодня"), "Article offer cards must not claim unverified same-day testing");
+assert.ok(article.includes("Условия — у партнёра"), "Offer cards should direct visitors to partner conditions");
+
 const faqContent = fs.readFileSync("src/lib/faqContent.ts", "utf8");
 const howItWorks = fs.readFileSync("src/components/HowItWorks.tsx", "utf8");
 const seoHelp = fs.readFileSync("src/components/SeoArticle.tsx", "utf8");
