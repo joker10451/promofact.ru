@@ -51,6 +51,9 @@ assert(store.includes('slug === "fmart"')&&store.includes("а не отдель�
 assert(e2e.includes("SCENARIO 13: FMART"));
 assert(e2e.includes('page.locator(\'article[id^="coupon-"] button[aria-label^="Скопировать промокод "]\')'));
 assert(e2e.includes("FMART must show its advertising marking"));
+const popular = fs.readFileSync("src/components/PopularStores.tsx", "utf8");
+assert.ok(popular.includes("isPausedPublisherStore(store.slug)"), "Popular stores must exclude paused advertisers");
+assert.ok(popular.includes("store.coupons.length > 0"), "Popular stores must not promote empty shops");
 const pause=fs.readFileSync("src/lib/publisherPauses.ts","utf8");
 // dodo-pizza was taken off the pause list by the owner on 9 Nov 2026 (2d75916).
 for (const slug of ["delimobil", "winlab"]) {
