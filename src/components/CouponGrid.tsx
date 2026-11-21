@@ -61,9 +61,23 @@ export default function CouponGrid({
   // Keep /catalog statically prerendered and indexable; URL search is restored
   // after hydration without making the whole route dynamically rendered.
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("q");
-    if (q) queueMicrotask(() => setQuery(q.trim().slice(0, 100)));
+    const restoreQuery = () => {
+      const q = new URLSearchParams(window.location.search).get("q") || "";
+      setQuery(q.trim().slice(0, 100));
+    };
+    queueMicrotask(restoreQuery);
+    window.addEventListener("popstate", restoreQuery);
+    return () => window.removeEventListener("popstate", restoreQuery);
   }, []);
+
+  const changeQuery = (next: string) => {
+    const value = next.slice(0, 100);
+    setQuery(value);
+    const url = new URL(window.location.href);
+    if (value.trim()) url.searchParams.set("q", value.trim());
+    else url.searchParams.delete("q");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  };
   const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>({});
   const [visibleLimit, setVisibleLimit] = useState(12);
 
@@ -363,11 +377,11 @@ export default function CouponGrid({
       <form onSubmit={(e) => e.preventDefault()} role="search" className="mb-5">
         <label htmlFor="catalog-search" className="mb-2 block text-sm font-bold text-ink">Найти в каталоге</label>
         <div className="flex gap-2">
-          <input id="catalog-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)}
+          <input id="catalog-search" type="search" value={query} onChange={(e) => changeQuery(e.target.value)}
             placeholder="Название магазина, промокод или товар"
             className="min-h-12 min-w-0 flex-1 rounded-xl border border-line bg-white px-4 text-base text-ink outline-none focus:border-red focus:ring-2 focus:ring-red/20" />
           {isFiltered && <button type="button" onClick={() => {
-            setQuery(""); setFilter("all"); setQuickFilter("all"); setSortBy("hits"); handleCityChange("all");
+            changeQuery(""); setFilter("all"); setQuickFilter("all"); setSortBy("hits"); handleCityChange("all");
           }} className="rounded-xl border border-line bg-white px-3 text-xs font-bold text-ink hover:border-red">Сбросить всё</button>}
         </div>
       </form>
@@ -459,7 +473,7 @@ export default function CouponGrid({
               </div>
               <button
                 type="button"
-                onClick={() => setQuery("")}
+                onClick={() => changeQuery("")}
                 className="rounded-lg bg-ink px-2.5 py-1 text-[11px] text-white hover:bg-ink/80 transition-colors"
               >
                 Сбросить <Icon name="close" size={11} />
@@ -480,7 +494,7 @@ export default function CouponGrid({
               <button
                 type="button"
                 onClick={() => {
-                  setQuery("");
+                  changeQuery("");
                   setFilter("all");
                   setQuickFilter("all");
                   setSortBy("hits");

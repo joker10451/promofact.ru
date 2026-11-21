@@ -89,6 +89,11 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
   const hasResults = allItems.length > 0;
 
   useEffect(() => {
+    if (!isOpen || selectedIndex < 0) return;
+    document.getElementById(`hero-search-result-${selectedIndex}`)?.scrollIntoView({ block: "nearest" });
+  }, [isOpen, selectedIndex]);
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);

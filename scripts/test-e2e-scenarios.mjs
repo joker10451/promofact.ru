@@ -1437,9 +1437,11 @@ async function run() {
         await page.locator('article[id^="coupon-"]').first().waitFor();
         assert((await page.locator('article[id^="coupon-"]').allTextContents()).every((text) => text.includes("SUNLIGHT")), "Catalog recognizes wrong keyboard layout");
         await page.getByLabel("Найти в каталоге", { exact: true }).fill("неизвестныймагазин123456789012345678901234567890");
+        assert.equal(new URL(page.url()).searchParams.get("q"), "неизвестныймагазин123456789012345678901234567890");
         await page.getByText("Ничего не нашлось", { exact: true }).waitFor();
         assert(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), "Long queries must not widen the page");
         await page.getByRole("button", { name: "Сбросить всё", exact: true }).click();
+        assert.equal(new URL(page.url()).searchParams.has("q"), false);
         await page.locator('article[id^="coupon-"]').first().waitFor();
 
         await page.route("**/api/search*", (route) => route.fulfill({ status: 503, contentType: "application/json", body: "{}" }));
