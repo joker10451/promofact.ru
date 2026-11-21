@@ -12,7 +12,7 @@ export default function HeaderSearchTrigger() {
       type="button"
       onClick={handleClick}
       aria-label="Поиск по магазинам и купонам"
-      className="flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-medium text-ink/60 hover:border-ink/30 hover:text-ink transition-colors cursor-pointer h-9 min-w-[36px] justify-center"
+      className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-medium text-ink/60 hover:border-ink/30 hover:text-ink transition-colors cursor-pointer"
     >
       <Icon name="search" size={15} className="text-ink/50" />
       <span className="hidden md:inline text-xs">Поиск...</span>

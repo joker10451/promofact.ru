@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "test:shopping-ux": "node --loader ./scripts/ts-loader.mjs scripts/test-shopping-ux.mjs && node --loader ./scripts/ts-loader.mjs scripts/test-returning-customer-offers.mjs",
     "test:trust": "node --loader ./scripts/ts-loader.mjs scripts/test-trust-boundaries.mjs",
     "test:geo-indexing": "node --loader ./scripts/ts-loader.mjs scripts/test-geo-indexing.mjs",
     "dev": "next dev",

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import StoreLogo from "@/components/StoreLogo";
+import CouponImpression from "@/components/CouponImpression";
 import { formatExpires, nbspMoney } from "@/lib/format";
 import { isCouponActive } from "@/lib/couponExpiry";
 import { ymReachGoal } from "@/components/YandexMetrika";
@@ -332,6 +333,7 @@ export default function CouponTicket({
       id={`coupon-${coupon.id}`}
       className="group relative flex min-w-0 self-start flex-col rounded-xl border border-line bg-white p-4 transition-colors duration-200 hover:border-ink/30 scroll-mt-24 sm:p-5"
     >
+      <CouponImpression couponId={coupon.id} store={store.slug} placement={placement} pageType={getPageTypeFromPlacement(placement)} />
       {/* 1. Верхняя строка: Логотип + Название + Бейджи */}
       <div>
         <div className="space-y-3">
@@ -371,6 +373,12 @@ export default function CouponTicket({
           )}
           {/* Длинные условия переносятся на свою строку вместо сдавливания бренда. */}
           <div className="flex min-w-0 flex-wrap items-start gap-1.5">
+            {promocode.region?.trim() && !isNationwideRegion(promocode.region) && (
+              <span className="inline-flex max-w-full items-start gap-1 rounded-md border border-line px-2 py-0.5 text-[11px] font-semibold text-ink/75">
+                <Icon name="pin" size={12} className="mt-0.5 shrink-0" />
+                <span className="break-words">{promocode.region.trim()}</span>
+              </span>
+            )}
             {promocode.isHit && (
               <span className="inline-flex max-w-full items-center gap-1 py-0.5 text-[11px] font-bold uppercase tracking-wide text-red">
                 <Icon name="flame" size={11} /> Хит
@@ -546,7 +554,7 @@ export default function CouponTicket({
                   className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-lg bg-mint-dark hover:bg-ink text-white text-xs sm:text-sm font-bold transition-colors cursor-pointer px-4"
                 >
                   <CheckIcon className="h-4 w-4" />
-                  <span className="truncate">
+                  <span className="py-2 text-center leading-snug">
                     {promocode.isBarcode
                       ? `Штрихкод скопирован! Перейти в ${store.name} →`
                       : `Код скопирован! Перейти в ${store.name} →`}
@@ -596,6 +604,8 @@ export default function CouponTicket({
                 </span>
               </a>
             )}
+
+            {copied && !promocode.isBarcode && <p role="status" className="text-center text-xs font-medium text-emerald-800">Код скопирован. Перейдите в магазин и вставьте его при оформлении.</p>}
 
             {/* Прямой переход по ссылке */}
             <a
@@ -850,7 +860,7 @@ export default function CouponTicket({
         createPortal(
           <div
             role="status"
-            className="fixed bottom-5 left-4 right-4 z-[9999] mx-auto max-w-md rounded-2xl border-2 border-yellow bg-ink p-4 text-white shadow-xl sm:left-auto sm:right-6 sm:bottom-6 sm:w-[380px]"
+            className="fixed bottom-20 left-4 right-4 z-[9999] mx-auto max-w-md rounded-2xl border-2 border-yellow bg-ink p-4 text-white shadow-xl sm:left-auto sm:right-6 sm:bottom-6 sm:w-[380px]"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2.5">
@@ -888,23 +898,13 @@ export default function CouponTicket({
                 : `Вставьте промокод в поле купона при оплате в ${store.name}.`}
             </div>
             <a
-              href={CHANNELS.telegram}
+              href={outgoingUrl}
               target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                ymReachGoal("tg_subscribe_click", { source: "copy_toast", store: store.name });
-                setToast(false);
-              }}
-              className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-xs transition-colors hover:bg-white/15"
+              rel="noopener sponsored nofollow"
+              onClick={handleDirectCtaClick}
+              className="mt-3 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 text-sm font-bold text-ink transition-colors hover:bg-paper"
             >
-              <span className="flex items-center gap-2">
-                <Icon name="send" size={14} />
-                <span>
-                  <span className="block font-bold text-white">Новые коды {store.name} — в Telegram</span>
-                  <span className="block text-white/60">Подборки промокодов и скидок</span>
-                </span>
-              </span>
-              <span className="shrink-0 rounded-lg bg-yellow px-2.5 py-1 font-bold text-ink">Подписаться</span>
+              <span>Перейти в {store.name} →</span>
             </a>
           </div>,
           document.body

@@ -36,6 +36,9 @@ jobs:
       - name: Article covers
         run: npm run test:article-cover
 
+      - name: Shopping search and audience eligibility
+        run: npm run test:shopping-ux
+
       - name: Security, posting reliability and geo indexing
         run: |
           npm run test:trust

@@ -52,7 +52,7 @@ export default function MobileCatalogMenu({
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-label="Открыть каталог категорий"
-        className="flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-2 text-xs font-bold text-ink/80 transition-colors hover:text-ink"
+        className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-3 py-2 text-xs font-bold text-ink/80 transition-colors hover:text-ink"
       >
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden fill="currentColor">
           <rect x="1" y="2" width="6" height="6" rx="1.5" />
@@ -60,7 +60,7 @@ export default function MobileCatalogMenu({
           <rect x="1" y="10" width="6" height="4" rx="1.5" />
           <rect x="9" y="10" width="6" height="4" rx="1.5" />
         </svg>
-        <span>Каталог</span>
+        <span className="hidden sm:inline">Каталог</span>
       </button>
 
       {open ? (
