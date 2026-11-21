@@ -2,7 +2,6 @@ import assert from "node:assert";
 import fs from "node:fs";
 import crypto from "node:crypto";
 import { getActivePromoBanners } from "../src/lib/promoBanners.ts";
-import { getCoupons, getAllStores } from "../src/lib/perfluence.ts";
 
 console.log("=== Тестирование оффера и макета Плати по миру (Премиальная пластиковая карта) ===");
 
@@ -22,7 +21,7 @@ assert.strictEqual(publicHash, EXPECTED_IMAGE_SHA256, "Изображение в
 console.log("✓ Подтверждено: байты изображения строго идентичны эталонному макету (SHA256 проверен портативно)");
 
 // 2. Проверка баннера
-const banners = getActivePromoBanners({ storeSlug: "plati-po-miru" });
+const banners = getActivePromoBanners({ storeSlug: "plati-po-miru", now: Date.parse("2026-10-15T12:00:00+03:00") });
 assert(banners.length > 0, "Должен быть активный баннер для plati-po-miru");
 const banner = banners.find((b) => b.id === "plati-po-miru-premium-2026");
 assert(banner, "Баннер plati-po-miru-premium-2026 должен существовать");
@@ -32,17 +31,15 @@ assert.strictEqual(banner.code, "PFPLPCGN", "Код баннера должен 
 assert(banner.exactCopy && banner.exactCopy.includes("PFPLPCGN"), "exactCopy должен содержать промокод PFPLPCGN");
 assert(banner.exactCopy.includes("9703231520"), "exactCopy должен содержать ИНН 9703231520");
 assert(banner.ordText && banner.ordText.includes("2RanynysXpw"), "ordText должен содержать erid 2RanynysXpw");
-console.log("✓ Подтверждено: баннер активен, creativeOnly=true, exactCopy и маркировка ОРД корректны");
+console.log("✓ Подтверждено: октябрьский баннер имел корректный макет, код и маркировку ОРД");
 
-// 3. Проверка магазина и купона в каталоге
-const stores = await getAllStores();
-const store = stores.find((s) => s.slug === "plati-po-miru");
-assert(store, "Магазин plati-po-miru должен присутствовать в каталоге");
+// 3. Кампания завершилась 31 октября: старый баннер не должен показываться в ноябре.
+const afterExpiry = getActivePromoBanners({
+  storeSlug: "plati-po-miru",
+  now: Date.parse("2026-11-21T12:00:00+03:00"),
+});
+assert(!afterExpiry.some((b) => b.id === "plati-po-miru-premium-2026"),
+  "Истёкший баннер не должен показываться после 31 октября");
+console.log("✓ Подтверждено: истёкшая реклама не отображается после окончания кампании");
 
-const coupons = await getCoupons();
-const coupon = coupons.find((c) => c.store.slug === "plati-po-miru" && c.promocode.code === "PFPLPCGN");
-assert(coupon, "Купон PFPLPCGN должен присутствовать в купонах plati-po-miru");
-assert.strictEqual(coupon.affiliate?.ordMarker, "2RanynysXpw", "Маркер ОРД купона должен быть 2RanynysXpw");
-console.log("✓ Подтверждено: магазин и купон PFPLPCGN доступны в каталоге и привязаны к офферу");
-
-console.log("🎉 Все проверки оффера Плати по миру успешно пройдены!");
+console.log("🎉 Архивная акция Плати по миру: даты и рекламный макет проверены!");
