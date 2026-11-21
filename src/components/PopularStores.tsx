@@ -3,6 +3,7 @@ import { getStores } from "@/lib/perfluence";
 import StoreLogo from "@/components/StoreLogo";
 import { plural } from "@/lib/format";
 import { withoutLegacyTwins } from "@/lib/storeDisplayName";
+import { isPausedPublisherStore } from "@/lib/publisherPauses";
 
 const POPULAR_SLUGS = [
   "sunlight-ru",
@@ -24,7 +25,9 @@ const POPULAR_SLUGS = [
 export default async function PopularStores() {
   let stores: Awaited<ReturnType<typeof getStores>> = [];
   try {
-    stores = withoutLegacyTwins(await getStores());
+    stores = withoutLegacyTwins(await getStores()).filter(
+      (store) => !isPausedPublisherStore(store.slug) && store.coupons.length > 0,
+    );
   } catch {
     stores = [];
   }

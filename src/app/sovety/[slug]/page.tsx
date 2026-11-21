@@ -237,7 +237,7 @@ export default async function ArticlePage({
                           <span>Горячий промокод к статье</span>
                         </div>
                         <span className="text-[11px] font-bold text-mint-dark">
-                          Проверено сегодня
+                          Условия — у партнёра
                         </span>
                       </div>
                       <CouponTicket
