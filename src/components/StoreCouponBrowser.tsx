@@ -5,7 +5,7 @@ import StoreIntentTabs, { type IntentFilter } from "@/components/StoreIntentTabs
 import CouponTicket from "@/components/CouponTicket";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
 import { isCouponActive, expiryTimestamp } from "@/lib/couponExpiry";
-import { getCouponAudience } from "@/lib/storeCouponAudience";
+import { getCouponAudience, isReturningCustomerOffer } from "@/lib/storeCouponAudience";
 import { getStoreHeadlineOfferCounts, formatStoreOfferCounts } from "@/lib/storeOfferHeadline";
 
 interface StoreCouponBrowserProps {
@@ -30,6 +30,24 @@ export default function StoreCouponBrowser({
     setActiveFilter(next);
     setVisibleLimit(9);
   };
+
+  // Search may link directly to an offer beyond the first nine cards.
+  useEffect(() => {
+    const revealLinkedCoupon = () => {
+      const index = coupons.findIndex((coupon) => `#coupon-${coupon.id}` === window.location.hash);
+      if (index < 0) return;
+      setActiveFilter("all");
+      setVisibleLimit((limit) => Math.max(limit, index + 1));
+    };
+    revealLinkedCoupon();
+    window.addEventListener("hashchange", revealLinkedCoupon);
+    return () => window.removeEventListener("hashchange", revealLinkedCoupon);
+  }, [coupons]);
+
+  useEffect(() => {
+    if (!window.location.hash.startsWith("#coupon-")) return;
+    document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ block: "start" });
+  }, [visibleLimit, activeFilter]);
 
   // null во время SSR и initial client render во избежание hydration mismatch.
   // Заполняется текущим временем сразу после монтирования.
@@ -88,7 +106,7 @@ export default function StoreCouponBrowser({
     [activeCoupons],
   );
   const repeatOrderCoupons = useMemo(
-    () => activeCoupons.filter((c) => getCouponAudience(c.promocode) === "repeat-order"),
+    () => activeCoupons.filter((c) => isReturningCustomerOffer(c.promocode)),
     [activeCoupons],
   );
 
@@ -132,6 +150,13 @@ export default function StoreCouponBrowser({
           unknownCount={unknownCoupons.length}
           onTabChange={handleFilterChange}
         />
+      )}
+
+      {!hasRetailBarcodeOffer && activeFilter === "repeat-order" && (
+        <p className="mb-4 text-sm leading-relaxed text-ink/70">
+          Здесь акции для повторных заказов и предложения для всех покупателей.
+          Перед покупкой проверьте минимальную сумму, регион и другие условия в карточке.
+        </p>
       )}
 
       <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">

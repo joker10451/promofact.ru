@@ -63,12 +63,12 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-line shadow-xs">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6">
         {/* Логотип */}
-        <div className="flex items-center gap-3 lg:gap-8">
+        <div className="flex min-w-0 items-center gap-2 lg:gap-8">
           <Link
             href="/"
-            className="group flex items-center gap-2.5 font-display text-lg font-extrabold tracking-tight sm:text-xl shrink-0 text-ink"
+            className="group flex items-center gap-2 font-display text-base font-extrabold tracking-tight sm:gap-2.5 sm:text-xl shrink-0 text-ink"
           >
             <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-red via-red-dark to-yellow shadow-[0_4px_12px_-2px_rgba(255,51,85,0.4)] transition-transform group-hover:scale-105">
               <Image
@@ -89,7 +89,7 @@ export default async function Header() {
           <MegaMenu groups={groups} />
           <MobileCatalogMenu groups={groups} seasonal={seasonal} />
 
-          <nav className="hidden lg:flex items-center gap-4 xl:gap-5 text-sm font-bold text-ink/70">
+          <nav className="hidden xl:flex items-center gap-4 xl:gap-5 text-sm font-bold text-ink/70">
             {nav.map((item) => (
               <Link
                 key={item.href}
@@ -115,7 +115,7 @@ export default async function Header() {
             href="https://t.me/smart_zakupka"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-[#0077b3] hover:border-ink/30 transition-colors shrink-0"
+            className="hidden 2xl:flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-[#0077b3] hover:border-ink/30 transition-colors shrink-0"
             title="Telegram-канал Смарт Закупка: новые промокоды"
           >
             <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">

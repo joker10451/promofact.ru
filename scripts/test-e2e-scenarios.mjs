@@ -95,7 +95,7 @@ async function run() {
     fs.mkdirSync(afterScreenshotsDir, { recursive: true });
 
     let passedTests = 0;
-    const totalTests = 16;
+    const totalTests = 17;
 
     // --- СЦЕНАРИЙ 1: Найти магазин через поиск (раскладка, транслит) ---
     console.log("\n[Тест 1] Сценарий: Найти магазин через поиск (опечатка раскладки, транслит, клавиатура)");
@@ -1001,21 +1001,21 @@ async function run() {
       const firstCountText = await firstOrderBtn.locator("span:last-child").innerText();
       const firstCount = parseInt(firstCountText.trim(), 10);
 
-      const repeatOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Повторные заказы")');
+      const repeatOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Уже покупал")');
       const repeatCountText = await repeatOrderBtn.locator("span:last-child").innerText();
       const repeatCount = parseInt(repeatCountText.trim(), 10);
        const universalBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Для всех")');
-       const universalCount = parseInt((await universalBtn.locator("span:last-child").innerText()).trim(), 10);
+       const universalCount = await universalBtn.count() ? parseInt((await universalBtn.locator("span:last-child").innerText()).trim(), 10) : 0;
        const unknownBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Условия уточняются")');
-       const unknownCount = parseInt((await unknownBtn.locator("span:last-child").innerText()).trim(), 10);
+       const unknownCount = await unknownBtn.count() ? parseInt((await unknownBtn.locator("span:last-child").innerText()).trim(), 10) : 0;
 
       if (isNaN(allCount) || isNaN(firstCount) || isNaN(repeatCount) || isNaN(universalCount) || isNaN(unknownCount)) {
         throw new Error(`Не удалось распарсить бейджи счётчиков: all=${allCountText}, first=${firstCountText}, repeat=${repeatCountText}`);
       }
 
-      // Все предложения разбиты на взаимоисключающие группы, включая неизвестную аудиторию.
-      if (allCount !== firstCount + repeatCount + universalCount + unknownCount) {
-        throw new Error(`Счётчики не сходятся: all=${allCount}, first=${firstCount}, repeat=${repeatCount}, universal=${universalCount}, unknown=${unknownCount}`);
+      // Returning eligibility includes universal offers, but not unknown audiences.
+      if (allCount !== firstCount + repeatCount + unknownCount || repeatCount < universalCount) {
+        throw new Error(`Eligibility counts must include universal offers for returning customers: all=${allCount}, first=${firstCount}, returning=${repeatCount}, universal=${universalCount}`);
       }
 
       // Карточки купонов в сетке (article с id^="coupon-")
@@ -1085,10 +1085,12 @@ async function run() {
         console.log(`  ✓ Фильтр 'Повторные заказы': отображается ${repeatCardsCount} карточек (ожидалось ${repeatCount})`);
       }
 
-      // 3b. Универсальные предложения не относятся к повторным заказам.
-      await universalBtn.click();
-      await page.waitForTimeout(300);
-      if (await cards.count() !== universalCount) {
+      // 3b. The universal subset remains available independently of customer history.
+      if (universalCount > 0) {
+        await universalBtn.click();
+        await page.waitForTimeout(300);
+      }
+      if (universalCount > 0 && await cards.count() !== universalCount) {
         throw new Error(`Ожидалось ${universalCount} универсальных купонов, получено ${await cards.count()}`);
       }
 
@@ -1412,6 +1414,54 @@ async function run() {
         .waitFor({ state: "attached", timeout: 10000 })
         .catch(() => assert.fail("Footer must link to the daily page"));
       await context.close();
+      passedTests++;
+    }
+
+    console.log("\n[Test 17] Mobile discovery: keyboard, catalog aliases, failed search recovery and copy CTA");
+    {
+      const context = await browser.newContext({ viewport: { width: 320, height: 740 } });
+      try {
+        const page = await context.newPage();
+        await page.goto(BASE_URL + "/", { waitUntil: "domcontentloaded" });
+        await page.getByRole("button", { name: "Отклонить", exact: true }).click().catch(() => {});
+        const trigger = page.getByRole("button", { name: "Поиск по магазинам и купонам", exact: true });
+        const bounds = await trigger.boundingBox();
+        assert(bounds && bounds.x >= 0 && bounds.x + bounds.width <= 320, "Search button must fit a 320px viewport");
+        const heroSearch = page.getByRole("combobox", { name: "Найти магазин или промокод" });
+        await heroSearch.fill("санлайт");
+        await heroSearch.press("ArrowDown");
+        await heroSearch.press("Enter");
+        await page.waitForURL("**/store/sunlight-ru");
+
+        await page.goto(BASE_URL + "/catalog?q=cfykfqn#catalog", { waitUntil: "domcontentloaded" });
+        await page.locator('article[id^="coupon-"]').first().waitFor();
+        assert((await page.locator('article[id^="coupon-"]').allTextContents()).every((text) => text.includes("SUNLIGHT")), "Catalog recognizes wrong keyboard layout");
+        await page.getByLabel("Найти в каталоге", { exact: true }).fill("неизвестныймагазин123456789012345678901234567890");
+        assert.equal(new URL(page.url()).searchParams.get("q"), "неизвестныймагазин123456789012345678901234567890");
+        await page.getByText("Ничего не нашлось", { exact: true }).waitFor();
+        assert(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), "Long queries must not widen the page");
+        await page.getByRole("button", { name: "Сбросить всё", exact: true }).click();
+        assert.equal(new URL(page.url()).searchParams.has("q"), false);
+        await page.locator('article[id^="coupon-"]').first().waitFor();
+
+        await page.route("**/api/search*", (route) => route.fulfill({ status: 503, contentType: "application/json", body: "{}" }));
+        await trigger.click();
+        await page.getByText("Не удалось загрузить поиск", { exact: true }).waitFor();
+        assert.equal(await page.getByText("Ничего не найдено", { exact: true }).count(), 0, "Network errors are not empty search results");
+        await page.unroute("**/api/search*");
+        await page.getByRole("button", { name: "Повторить", exact: true }).click();
+        const input = page.getByLabel("Поиск магазина или промокода", { exact: true });
+        await input.fill("FARFORTEST1");
+        await page.locator('a[href="/store/farfor#coupon-99233301"]').waitFor();
+        await input.press("Shift+Tab");
+        assert(await page.evaluate(() => document.activeElement?.getAttribute("href") === "/store/farfor#coupon-99233301"), "Search focus must stay inside the dialog");
+        await input.press("Enter");
+        await page.waitForURL("**/store/farfor#coupon-99233301");
+        const card = page.locator("#coupon-99233301");
+        await card.waitFor();
+        const destination = await card.locator('a[rel*="sponsored"]').first().getAttribute("href");
+        assert(destination.includes("/sites/test-e2e") && destination.includes("erid="), "Approved affiliate destination must survive UX changes");
+      } finally { await context.close(); }
       passedTests++;
     }
 

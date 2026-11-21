@@ -2,7 +2,7 @@ import type { Promocode } from "@/lib/types";
 
 /**
  * A coupon usable by everyone is not an offer exclusively for repeat customers.
- * Keep the three buckets mutually exclusive for UI counts and filters.
+ * Keep audience buckets mutually exclusive; eligibility filters may combine them.
  */
 export type CouponAudience = "first-order" | "repeat-order" | "universal" | "unknown";
 
@@ -19,4 +19,12 @@ export function getCouponAudience(
   // Missing eligibility is not proof the coupon is valid for everyone.
   if (/для всех|всем пользователям|любым покупателям|без ограничений на тип заказа/u.test(label)) return "universal";
   return "unknown";
+}
+
+/** Eligibility is broader than the exclusive audience buckets used in counts. */
+export function isReturningCustomerOffer(
+  promo: Pick<Promocode, "isFirstOrderOnly" | "customerTypeLabel">,
+): boolean {
+  const audience = getCouponAudience(promo);
+  return audience === "repeat-order" || audience === "universal";
 }

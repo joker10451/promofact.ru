@@ -51,20 +51,20 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
 
   const [q, setQ] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const query = q.trim();
   const normQ = normalizeSearchTerm(query);
   const convertedQ = normalizeSearchTerm(convertKeyboardLayout(query));
 
-  const matchedStores = query
+  const matchedStores = normQ
     ? stores
         .filter((s) => matchStoreSearch(s, query))
         .slice(0, 5)
     : [];
 
-  const matchedCoupons = query
+  const matchedCoupons = normQ
     ? coupons
         .filter((c) => {
           const code = normalizeSearchTerm(c.code);
@@ -87,6 +87,11 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
   ];
 
   const hasResults = allItems.length > 0;
+
+  useEffect(() => {
+    if (!isOpen || selectedIndex < 0) return;
+    document.getElementById(`hero-search-result-${selectedIndex}`)?.scrollIntoView({ block: "nearest" });
+  }, [isOpen, selectedIndex]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -115,9 +120,20 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
       setSelectedIndex((prev) => (allItems.length > 0 ? (prev + 1) % allItems.length : 0));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex((prev) => (allItems.length > 0 ? (prev - 1 + allItems.length) % allItems.length : 0));
+      setSelectedIndex((prev) => (allItems.length > 0 ? (prev <= 0 ? allItems.length - 1 : prev - 1) : -1));
     } else if (e.key === "Escape") {
       setIsOpen(false);
+    } else if (e.key === "Enter" && !e.nativeEvent.isComposing && selectedIndex >= 0 && allItems[selectedIndex]) {
+      e.preventDefault();
+      const item = allItems[selectedIndex];
+      setIsOpen(false);
+      if (item.type === "store") {
+        ymReachGoal("search_store_click", { store: item.data.slug });
+        router.push(`/store/${item.data.slug}`);
+      } else if (item.data.storeSlug) {
+        ymReachGoal("search_coupon_click", { store: item.data.storeSlug });
+        router.push(`/store/${item.data.storeSlug}#coupon-${item.data.id}`);
+      } else submitSearch(item.data.store);
     }
   };
 
@@ -166,9 +182,15 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
                 onChange={(e) => {
                   setQ(e.target.value);
                   setIsOpen(true);
-                  setSelectedIndex(0);
+                  setSelectedIndex(-1);
                 }}
                 placeholder="Магазин или промокод"
+                aria-label="Найти магазин или промокод"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={Boolean(isOpen && query)}
+                aria-controls="hero-search-results"
+                aria-activedescendant={isOpen && selectedIndex >= 0 && allItems[selectedIndex] ? `hero-search-result-${selectedIndex}` : undefined}
                 className="h-12 sm:h-16 w-full rounded-xl border-2 border-ink/15 bg-white pl-11 sm:pl-14 pr-22 sm:pr-32 text-sm sm:text-base font-medium text-ink outline-none transition-colors placeholder:text-ink/40 hover:border-ink/30 focus:border-ink"
               />
               <button
@@ -183,7 +205,7 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
 
           {/* Подсказки автодополнения */}
           {isOpen && query && (
-            <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-line bg-white p-3 text-left shadow-xl">
+            <div id="hero-search-results" role="listbox" aria-label="Результаты поиска" className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[55dvh] overflow-y-auto rounded-2xl border border-line bg-white p-3 text-left shadow-xl">
               {!hasResults ? (
                 <div className="py-4 px-2 text-center">
                   <p className="text-xs sm:text-sm font-medium text-ink/60">
@@ -205,6 +227,9 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
                         return (
                           <Link
                             key={s.id}
+                            id={`hero-search-result-${idx}`}
+                            role="option"
+                            aria-selected={isSelected}
                             href={`/store/${s.slug}`}
                             onClick={() => {
                               setIsOpen(false);
@@ -249,9 +274,13 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
                         const realIdx = matchedStores.length + idx;
                         const isSelected = selectedIndex === realIdx;
                         return (
-                          <div
+                          <Link
                             key={c.id}
-                            onClick={() => submitSearch(c.store)}
+                            id={`hero-search-result-${realIdx}`}
+                            role="option"
+                            aria-selected={isSelected}
+                            href={c.storeSlug ? `/store/${c.storeSlug}#coupon-${c.id}` : `/catalog?q=${encodeURIComponent(c.store)}#catalog`}
+                            onClick={() => { setIsOpen(false); ymReachGoal("search_coupon_click", { store: c.storeSlug }); }}
                             className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-ink transition-colors ${
                               isSelected ? "bg-red/10 border border-red/30" : "hover:bg-paper"
                             }`}
@@ -260,8 +289,8 @@ export default function Hero({ search, couponCount = 0, proofTotal = 0, seasonal
                               <span className="font-bold text-ink">{c.store}: </span>
                               <span className="text-ink/80 truncate">{c.bonus || c.code}</span>
                             </div>
-                            <span className="shrink-0 font-mono text-xs font-bold text-red">{c.code}</span>
-                          </div>
+                            <span className="max-w-[40%] break-all font-mono text-xs font-bold text-red">{c.code}</span>
+                          </Link>
                         );
                       })}
                     </div>

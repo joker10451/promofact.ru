@@ -43,10 +43,13 @@ export default function GlobalSearchModal() {
   const [stores, setStores] = useState<SearchStore[]>([]);
   const [coupons, setCoupons] = useState<SearchCoupon[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedElement = useRef<HTMLElement | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -57,10 +60,22 @@ export default function GlobalSearchModal() {
     latestQueryRef.current = query.trim();
   }, [query]);
 
+  const updateQuery = (value: string) => {
+    if (value === query) return;
+    latestQueryRef.current = value.trim();
+    abortControllerRef.current?.abort();
+    setQuery(value);
+    setLoading(true);
+    setSearchError(false);
+    setSelectedIndex(0);
+  };
+
   const openSearch = useCallback(() => {
     if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
       previouslyFocusedElement.current = document.activeElement;
     }
+    setLoading(true);
+    setSearchError(false);
     setIsOpen(true);
     ymReachGoal("search_modal_open");
   }, []);
@@ -76,9 +91,11 @@ export default function GlobalSearchModal() {
       debounceTimer.current = null;
     }
     setIsOpen(false);
+    latestQueryRef.current = "";
     setQuery("");
     setSelectedIndex(0);
     setLoading(false);
+    setSearchError(false);
 
     // Возвращаем фокус на элемент, вызвавший поиск
     setTimeout(() => {
@@ -118,12 +135,25 @@ export default function GlobalSearchModal() {
 
   // Фокус на инпут при открытии и блокировка скролла
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      setTimeout(() => inputRef.current?.focus(), 50);
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const timer = setTimeout(() => inputRef.current?.focus(), 50);
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled])');
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", trapFocus);
+    return () => {
+      clearTimeout(timer);
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", trapFocus);
+    };
   }, [isOpen]);
 
   // Выполнение поиска с защитой от race conditions через AbortController
@@ -149,20 +179,24 @@ export default function GlobalSearchModal() {
       queueMicrotask(() => setLoading(true));
 
       fetch("/api/search", { signal: controller.signal })
-        .then((res) => res.json())
+        .then((res) => { if (!res.ok) throw new Error("Search unavailable"); return res.json(); })
         .then((data) => {
           // Явная проверка актуальности: если пользователь уже начал ввод, не перезаписываем
-          if (latestQueryRef.current !== "") return;
+          if (controller.signal.aborted || latestQueryRef.current !== "") return;
           setStores(data.stores || []);
           setCoupons([]);
+          setSearchError(false);
           setLoading(false);
         })
         .catch((err) => {
-          if (err.name !== "AbortError" && latestQueryRef.current === "") {
+          if (!controller.signal.aborted && err.name !== "AbortError" && latestQueryRef.current === "") {
+            setSearchError(true);
+            setStores([]);
+            setCoupons([]);
             setLoading(false);
           }
         });
-      return;
+      return () => controller.abort();
     }
 
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -174,14 +208,15 @@ export default function GlobalSearchModal() {
 
       const q = query.trim();
       fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
-        .then((res) => res.json())
+        .then((res) => { if (!res.ok) throw new Error("Search unavailable"); return res.json(); })
         .then((data) => {
           // Явная проверка актуальности запроса после fetch/JSON parsing
-          if (latestQueryRef.current !== q) return;
+          if (controller.signal.aborted || latestQueryRef.current !== q) return;
           const foundStores = data.stores || [];
           const foundCoupons = data.coupons || [];
           setStores(foundStores);
           setCoupons(foundCoupons);
+          setSearchError(false);
           setLoading(false);
           setSelectedIndex(0);
           // Безопасная аналитика: передаем только факт наличия результатов, без сырого query
@@ -193,7 +228,10 @@ export default function GlobalSearchModal() {
           });
         })
         .catch((err) => {
-          if (err.name !== "AbortError" && latestQueryRef.current === q) {
+          if (!controller.signal.aborted && err.name !== "AbortError" && latestQueryRef.current === q) {
+            setSearchError(true);
+            setStores([]);
+            setCoupons([]);
             setLoading(false);
           }
         });
@@ -201,10 +239,11 @@ export default function GlobalSearchModal() {
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      abortControllerRef.current?.abort();
     };
-  }, [query, isOpen]);
+  }, [query, isOpen, retryCount]);
 
-  const allResults = [
+  const allResults = loading || searchError ? [] : [
     ...stores.map((s) => ({ type: "store" as const, data: s })),
     ...coupons.map((c) => ({ type: "coupon" as const, data: c })),
   ];
@@ -218,12 +257,13 @@ export default function GlobalSearchModal() {
       router.push(`/store/${item.data.slug}`);
     } else {
       ymReachGoal("search_coupon_click", { store: item.data.storeSlug });
-      router.push(`/store/${item.data.storeSlug}`);
+      router.push(`/store/${item.data.storeSlug}#coupon-${item.data.id}`);
     }
     closeSearch();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.nativeEvent.isComposing) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((prev) => (allResults.length > 0 ? (prev + 1) % allResults.length : 0));
@@ -249,6 +289,7 @@ export default function GlobalSearchModal() {
       onClick={closeSearch}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-2xl rounded-3xl bg-white shadow-2xl border border-line overflow-hidden flex flex-col max-h-[88vh] mt-4 sm:mt-12"
         onClick={(e) => e.stopPropagation()}
       >
@@ -261,16 +302,17 @@ export default function GlobalSearchModal() {
             ref={inputRef}
             type="search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => updateQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Магазин, бренд или промокод (например, SUNLIGHT, Самокат)..."
-            className="w-full bg-transparent text-sm sm:text-base font-medium text-ink placeholder:text-ink/40 outline-none"
+            aria-label="Поиск магазина или промокода"
+            className="min-w-0 w-full bg-transparent text-base font-medium text-ink placeholder:text-ink/40 outline-none"
           />
           {query ? (
             <button
               type="button"
               onClick={() => {
-                setQuery("");
+                updateQuery("");
                 inputRef.current?.focus();
               }}
               className="p-1.5 text-ink/40 hover:text-ink transition-colors mr-1 cursor-pointer"
@@ -282,6 +324,7 @@ export default function GlobalSearchModal() {
           <button
             type="button"
             onClick={closeSearch}
+            aria-label="Закрыть поиск"
             className="rounded-xl bg-paper border border-line px-2.5 py-1 text-xs font-bold text-ink/60 hover:text-ink hover:border-ink/40 transition-all cursor-pointer shrink-0 ml-1"
           >
             ESC
@@ -329,7 +372,7 @@ export default function GlobalSearchModal() {
                   <button
                     key={tag}
                     type="button"
-                    onClick={() => setQuery(tag)}
+                    onClick={() => updateQuery(tag)}
                     className="rounded-full bg-paper border border-line px-3 py-1 text-xs font-bold text-ink/75 hover:border-red hover:text-red transition-all cursor-pointer"
                   >
                     {tag}
@@ -376,13 +419,21 @@ export default function GlobalSearchModal() {
               )}
             </div>
           )}
+          {searchError && <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center text-sm text-ink">
+            <p className="font-bold">Не удалось загрузить поиск</p>
+            <p className="mt-1">Попробуйте ещё раз или откройте каталог.</p>
+            <div className="mt-3 flex justify-center gap-3">
+              <button type="button" onClick={() => { setSearchError(false); setLoading(true); setRetryCount((n) => n + 1); }} className="rounded-xl bg-ink px-4 py-2 font-bold text-white">Повторить</button>
+              <Link href="/catalog" onClick={closeSearch} className="rounded-xl border border-line bg-white px-4 py-2 font-bold">Каталог</Link>
+            </div>
+          </div>}
           {loading && (
             <div className="py-8 text-center text-xs font-bold text-ink/40">
               Поиск...
             </div>
           )}
 
-          {!loading && query && allResults.length === 0 && (
+          {!loading && !searchError && query && allResults.length === 0 && (
             <div className="py-10 px-4 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-paper border border-line text-ink/40 mb-3">
                 <Icon name="search" size={24} />
@@ -395,7 +446,7 @@ export default function GlobalSearchModal() {
           )}
 
           {/* Секция магазинов */}
-          {stores.length > 0 && (
+          {!loading && !searchError && stores.length > 0 && (
             <div>
               <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink/40">
                 {query ? "Магазины" : "Часто ищут"}
@@ -448,7 +499,7 @@ export default function GlobalSearchModal() {
           )}
 
           {/* Секция промокодов */}
-          {coupons.length > 0 && (
+          {!loading && !searchError && coupons.length > 0 && (
             <div>
               <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink/40">
                 Предложения и промокоды
@@ -460,7 +511,7 @@ export default function GlobalSearchModal() {
                   return (
                     <Link
                       key={c.id}
-                      href={`/store/${c.storeSlug}`}
+                      href={`/store/${c.storeSlug}#coupon-${c.id}`}
                       onClick={() => {
                         ymReachGoal("search_coupon_click", { store: c.storeSlug });
                         closeSearch();
@@ -477,7 +528,7 @@ export default function GlobalSearchModal() {
                           {c.bonusName}
                         </div>
                       </div>
-                      <span className="shrink-0 rounded-xl bg-paper border border-dashed border-ink/20 px-2.5 py-1 font-mono text-xs font-bold text-red">
+                      <span className="max-w-[40%] break-all rounded-xl bg-paper border border-dashed border-ink/20 px-2.5 py-1 font-mono text-xs font-bold text-red">
                         {c.code}
                       </span>
                     </Link>

@@ -4,7 +4,7 @@ import Script from "next/script";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { getConsent, onConsentChange } from "@/lib/cookieConsent";
-import { sanitizeAnalyticsPath, AUTOMATED_UA_PATTERN } from "@/lib/analyticsSafety";
+import { sanitizeAnalyticsPath, AUTOMATED_UA_PATTERN, isAutomatedClient } from "@/lib/analyticsSafety";
 
 const YM_ID = Number(process.env.NEXT_PUBLIC_YM_ID ?? "111247117");
 
@@ -66,10 +66,11 @@ export default function YandexMetrika() {
 }
 
 /** Хелпер для вызова целей Метрики из любого клиентского кода. */
-export function ymReachGoal(goal: string, params?: Record<string, unknown>) {
+export function ymReachGoal(goal: string, params?: Record<string, unknown>): boolean {
   // The counter may stay on window after the visitor declines cookies.
   // Never send goals after an explicit opt-out.
-  if (typeof window === "undefined" || getConsent() === "declined") return;
+  if (typeof window === "undefined" || !YM_ID || getConsent() === "declined" ||
+      isAutomatedClient(navigator.userAgent, navigator.webdriver)) return false;
   const w = window as unknown as {
     ym?: (id: number, method: string, goal: string, params?: Record<string, unknown>) => void;
   };
@@ -87,5 +88,7 @@ export function ymReachGoal(goal: string, params?: Record<string, unknown>) {
       }
     }
     w.ym(YM_ID, "reachGoal", goal, safeParams);
+    return true;
   }
+  return false;
 }
