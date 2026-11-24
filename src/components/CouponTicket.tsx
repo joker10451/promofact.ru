@@ -155,6 +155,7 @@ export default function CouponTicket({
   };
 
   const [copied, setCopied] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const [toastType, setToastType] = useState<"copied" | "opened">("copied");
   const [toast, setToast] = useState(false);
@@ -220,6 +221,7 @@ export default function CouponTicket({
 
     if (success) {
       setCopied(true);
+      setRevealed(true);
       setCopyError(false);
       setToastType(toastMode);
       setToast(true);
@@ -310,6 +312,7 @@ export default function CouponTicket({
       setExpiredAttempt(true);
       return;
     }
+    setRevealed(true);
     prepareNativeAffiliateLink(e.currentTarget);
     ymReachGoal("copy_and_open", getAnalyticsContext());
     handleAffiliateClick();
@@ -517,26 +520,46 @@ export default function CouponTicket({
                   </span>
                 </div>
               </div>
-            ) : (
+            ) : revealed || copied ? (
               <button
                 type="button"
                 onClick={() => copyCode(promocode.code)}
-                className="flex w-full min-w-0 items-center gap-2.5 rounded-lg border border-dashed border-ink/30 bg-paper px-3 py-3 text-left transition-colors hover:border-ink/60"
-                title="Нажмите, чтобы скопировать промокод"
+                className="flex w-full min-w-0 items-center gap-2.5 rounded-lg border border-dashed border-mint bg-mint/5 px-3 py-3 text-left transition-colors hover:border-mint-dark"
+                title="Нажмите, чтобы скопировать промокод ещё раз"
                 aria-label={`Скопировать промокод ${promocode.code}`}
               >
                 <Icon name="copy" size={16} className={copied ? "shrink-0 text-mint-dark" : "shrink-0 text-ink/60"} />
-                <span className="min-w-0 flex-1 break-all font-mono text-xs font-bold tracking-normal text-ink sm:text-sm">
+                <span className="min-w-0 flex-1 break-all font-mono text-xs font-black tracking-normal text-ink sm:text-sm">
                   {promocode.code}
                 </span>
-                <span className={`shrink-0 text-[11px] font-semibold ${copied ? "text-mint-dark" : "text-ink/70"}`}>
-                  {copied ? "Скопировано" : "Копировать"}
+                <span className={`shrink-0 text-[11px] font-semibold ${copied ? "text-mint-dark font-bold" : "text-ink/70"}`}>
+                  {copied ? "Скопировано!" : "Копировать"}
                 </span>
               </button>
+            ) : (
+              <a
+                href={outgoingUrl}
+                target="_blank"
+                rel="noopener sponsored nofollow"
+                onClick={(e) => copyAndOpen(e, promocode.code)}
+                className="group flex w-full min-w-0 items-center justify-between gap-2.5 rounded-lg border border-dashed border-red/40 bg-red/[0.03] px-3 py-2.5 text-left transition-all hover:border-red hover:bg-red/[0.08] cursor-pointer"
+                title="Нажмите, чтобы показать промокод и перейти в магазин"
+                aria-label="Показать промокод и перейти в магазин"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Icon name="copy" size={16} className="shrink-0 text-red/80 group-hover:text-red transition-colors" />
+                  <span className="min-w-0 flex-1 font-mono text-xs font-black tracking-widest text-ink/75 group-hover:text-ink sm:text-sm">
+                    {promocode.code.length > 5 ? `${promocode.code.slice(0, 2)}••••${promocode.code.slice(-2)}` : "••••••••"}
+                  </span>
+                </div>
+                <span className="shrink-0 text-[11px] font-bold text-red group-hover:underline">
+                  Показать код →
+                </span>
+              </a>
             )}
 
             {/* Основная кнопка действия */}
-            {copied ? (
+            {copied || revealed ? (
               <>
                 <a
                   href={outgoingUrl}
@@ -587,12 +610,12 @@ export default function CouponTicket({
                 target="_blank"
                 rel="noopener sponsored nofollow"
                 onClick={(e) => copyAndOpen(e, promocode.code)}
-                className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-lg bg-red hover:bg-red-dark text-white text-xs sm:text-sm font-bold transition-colors cursor-pointer px-4"
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-lg bg-red hover:bg-red-dark text-white text-xs sm:text-sm font-extrabold transition-all cursor-pointer px-4 shadow-xs hover:shadow-md"
               >
                 <Icon name="copy" size={16} />
                 <span className="truncate">
                   {/* Без стрелки: в сетке из трёх колонок текст обрезался до «перейт…». */}
-                  {promocode.isBarcode ? "Скопировать штрихкод и перейти" : "Скопировать и перейти"}
+                  {promocode.isBarcode ? "Скопировать штрихкод и перейти" : "Показать промокод"}
                 </span>
               </a>
             )}

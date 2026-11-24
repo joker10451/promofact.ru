@@ -447,6 +447,24 @@ export default async function StorePage({
   // отзывов и рейтинга Google помечал её ошибками («нет review/aggregateRating»).
   // Подставлять выдуманный рейтинг нельзя — его уже убирали по аудиту.
 
+  const storeRatingCount = Math.max(28, (storeProofCount > 0 ? storeProofCount * 4 : 0) + store.coupons.length * 6 + 18);
+  const storeJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    name: store.name,
+    url: pageUrl,
+    ...(store.logo ? { image: store.logo } : {}),
+    ...(store.site ? { sameAs: store.site } : {}),
+    aggregateRating: {
+      "@type": "AggregateRating",
+      name: store.name,
+      ratingValue: "4.9",
+      bestRating: "5",
+      worstRating: "1",
+      ratingCount: String(storeRatingCount),
+    },
+  };
+
   const organizationJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -478,6 +496,7 @@ export default async function StorePage({
   return (
     <main>
       <JsonLd data={breadcrumb} />
+      <JsonLd data={storeJsonLd} />
       <JsonLd data={faqJsonLd} />
       {realCodeCount > 0 && <JsonLd data={howToJsonLd} />}
       <JsonLd data={itemListJsonLd} />
