@@ -62,10 +62,12 @@ function getDiscountStyles(type: string): string {
 export type CouponTicketPlacement =
   | "home_catalog"
   | "home_hot_deals"
+  | "home_finance"
   | "store_coupon"
   | "article_coupon"
   | "category_coupon"
   | "collection_coupon"
+  | "collection_finance_table"
   | "geo_city_coupon"
   | "geo_category_coupon"
   | "today_coupon"
@@ -76,6 +78,7 @@ function getPageTypeFromPlacement(placement: CouponTicketPlacement): string {
   switch (placement) {
     case "home_catalog":
     case "home_hot_deals":
+    case "home_finance":
       return "home";
     case "store_coupon":
       return "store";
@@ -84,6 +87,7 @@ function getPageTypeFromPlacement(placement: CouponTicketPlacement): string {
     case "category_coupon":
       return "category";
     case "collection_coupon":
+    case "collection_finance_table":
       return "collection";
     case "geo_city_coupon":
     case "geo_category_coupon":
@@ -131,6 +135,7 @@ export default function CouponTicket({
     store.name,
     promocode.isFirstOrderOnly
   );
+  const isFinanceOffer = promocode.group === "pampadu";
 
   const activeClickIdRef = useRef<string | undefined>(undefined);
 
@@ -145,7 +150,7 @@ export default function CouponTicket({
       placement,
       page_path: pagePath,
       page_type: getPageTypeFromPlacement(placement),
-      offer_type: offer.isNoCode ? "deal" : "promo",
+      offer_type: isFinanceOffer ? "finance_card" : offer.isNoCode ? "deal" : "promo",
       source_component: "coupon_ticket",
     };
     if (activeClickIdRef.current) {
@@ -468,9 +473,34 @@ export default function CouponTicket({
         </p>
       )}
 
-      {/* 4. Нижний блок: Код + Кнопка One-Click */}
+      {/* 4. Нижний блок: 1-Click финансы или Код + Кнопка One-Click */}
       <div className="mt-4 border-t border-line/60 pt-4">
-        {!offer.isNoCode && promocode.code ? (
+        {isFinanceOffer ? (
+          <div className="space-y-3">
+            {promocode.highlights && promocode.highlights.length > 0 && (
+              <ul className="space-y-1.5 text-xs text-ink/80">
+                {promocode.highlights.slice(0, 3).map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <Icon name="check" size={14} className="mt-0.5 shrink-0 text-mint-dark" />
+                    <span className="leading-snug">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <a
+              href={outgoingUrl}
+              target="_blank"
+              rel="noopener sponsored nofollow"
+              onClick={handleDirectCtaClick}
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-lg bg-red hover:bg-red-dark text-white text-xs sm:text-sm font-extrabold transition-all cursor-pointer px-4 shadow-xs hover:shadow-md"
+            >
+              <span className="truncate">Оформить карту {store.name} →</span>
+            </a>
+            <div className="text-center text-[11px] font-medium text-ink/55">
+              Без ввода промокода · переход на официальную страницу банка
+            </div>
+          </div>
+        ) : !offer.isNoCode && promocode.code ? (
           <div className="space-y-2.5">
             {/* Сообщение об ошибке буфера и ручное выделение кода */}
             {copyError && (
@@ -650,7 +680,8 @@ export default function CouponTicket({
           </div>
         )}
 
-        {/* Интерактивный фидбек: Код сработал? */}
+        {/* Интерактивный фидбек: Код сработал? (не показываем для банковских карт без кода) */}
+        {!isFinanceOffer && (
         <div className="mt-3 flex items-center justify-between border-t border-line/60 pt-2.5 text-[11px] text-ink/70">
           <span className="font-medium">Код сработал?</span>
           <div className="flex items-center gap-1.5">
@@ -682,6 +713,7 @@ export default function CouponTicket({
             </button>
           </div>
         </div>
+        )}
 
         {/* 5. Мета-данные и реклама */}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-1 text-[11px] font-medium leading-relaxed text-ink/65">

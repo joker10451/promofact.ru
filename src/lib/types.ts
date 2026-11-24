@@ -13,6 +13,9 @@ export interface Promocode {
   isBarcode: boolean;
   barcodeImage: string | null;
   group: string | null;
+  /** Преимущества банковских/финансовых продуктов без промокода (Pampadu). */
+  highlights?: string[];
+  productType?: "credit" | "debit" | "installment";
 }
 
 export interface Store {

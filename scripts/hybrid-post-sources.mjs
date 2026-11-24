@@ -34,6 +34,21 @@ const PAUSED_ARTICLE_SLUGS = new Set([
 const PAUSED_STORE_PREFIXES = ["delimobil", "winlab"];
 
 /**
+ * Добавляет UTM-метки к собственным страницам `promofact.ru` для аналитики переходов.
+ * Партнёрские ссылки (prfl.me, trk.ppdu.ru и др.) никогда не модифицируются.
+ */
+export function withUtm(url, source = "telegram", medium = "social", campaign = "") {
+  if (!url || !String(url).startsWith(SITE_URL)) return url;
+  const u = new URL(url);
+  if (!u.searchParams.has("utm_source")) u.searchParams.set("utm_source", source);
+  if (!u.searchParams.has("utm_medium")) u.searchParams.set("utm_medium", medium);
+  if (campaign && !u.searchParams.has("utm_campaign")) {
+    u.searchParams.set("utm_campaign", String(campaign).slice(0, 64));
+  }
+  return u.toString();
+}
+
+/**
  * Экранирование HTML-спецсимволов для Telegram HTML parse_mode.
  */
 export function escapeHtml(str) {
@@ -220,7 +235,7 @@ export function buildPampaduCandidates(history, nowMs = Date.now(), { force = fa
       ``,
       `📌 Совет: на покупках перед Новым годом беспроцентный период 120 дней или Сплит 0% позволяют сохранить скидку по промокоду и не замораживать всю сумму сразу.`,
       ``,
-      `👉 <a href="${SITE_URL}/collections/finansy-i-karty">Сравнить условия всех карт на ПромоФакте →</a>`,
+      `👉 <a href="${withUtm(`${SITE_URL}/collections/finansy-i-karty`, "telegram", "social", "credit-cards")}">Сравнить условия всех карт на ПромоФакте →</a>`,
       ``,
       `⚖️ <i>${escapeHtml(eridFooter)}</i>`,
     ].join("\n");
@@ -232,7 +247,7 @@ export function buildPampaduCandidates(history, nowMs = Date.now(), { force = fa
           url: o.link,
         },
       ]),
-      [{ text: "💼 Все карты и кэшбэк →", url: `${SITE_URL}/collections/finansy-i-karty` }],
+      [{ text: "💼 Все карты и кэшбэк →", url: withUtm(`${SITE_URL}/collections/finansy-i-karty`, "telegram", "social", "credit-cards") }],
     ];
 
     candidates.push({
@@ -271,6 +286,7 @@ export function buildPampaduCandidates(history, nowMs = Date.now(), { force = fa
       .slice(0, 3)
       .map((item) => `• ${escapeHtml(item)}`);
     const siteStoreUrl = `${SITE_URL}/store/${o.storeSlug}`;
+    const tgSiteStoreUrl = withUtm(siteStoreUrl, "telegram", "social", o.storeSlug);
 
     const text = [
       `💳 <b>${escapeHtml(o.bonusName)}</b>`,
@@ -279,7 +295,7 @@ export function buildPampaduCandidates(history, nowMs = Date.now(), { force = fa
       bullets.length ? `\n${bullets.join("\n")}` : null,
       ``,
       `👉 <a href="${o.link}">Оформить карту ${escapeHtml(bankName)} на официальной странице →</a>`,
-      `🌐 <a href="${siteStoreUrl}">Все предложения ${escapeHtml(bankName)} на ПромоФакте</a>`,
+      `🌐 <a href="${tgSiteStoreUrl}">Все предложения ${escapeHtml(bankName)} на ПромоФакте</a>`,
       ``,
       `⚖️ <i>${escapeHtml(o.ordText)}</i>`,
     ]
@@ -296,12 +312,12 @@ export function buildPampaduCandidates(history, nowMs = Date.now(), { force = fa
       affUrl: o.link,
       ordMarker: o.ordMarker,
       ordText: o.ordText,
-      vkUrl: siteStoreUrl,
+      vkUrl: withUtm(siteStoreUrl, "vk", "social", o.storeSlug),
       vkTitle: o.bonusName,
       text,
       buttons: [
         [{ text: `💳 Оформить ${bankName}`, url: o.link }],
-        [{ text: `📋 Подробнее о карте на сайте`, url: siteStoreUrl }],
+        [{ text: `📋 Подробнее о карте на сайте`, url: tgSiteStoreUrl }],
       ],
       score: Math.round((o.cpaRub || 1000) / 100) + Math.min(30, Math.round(ageDays)),
     });
@@ -425,25 +441,27 @@ export function buildArticleCandidates(history, nowMs = Date.now()) {
       a.ctaButton?.href && a.ctaButton.href.startsWith("/")
         ? `${SITE_URL}${a.ctaButton.href}`
         : url;
+    const tgArticleUrl = withUtm(url, "telegram", "social", a.slug);
+    const tgCtaHref = withUtm(ctaHref, "telegram", "social", a.slug);
 
     const text = [
       `📰 <b>${escapeHtml(a.title)}</b>`,
       ``,
       a.description ? escapeHtml(a.description) : null,
       ``,
-      `👉 <a href="${url}">Читать полный разбор и таблицу выгоды на ПромоФакте →</a>`,
+      `👉 <a href="${tgArticleUrl}">Читать полный разбор и таблицу выгоды на ПромоФакте →</a>`,
       ctaHref !== url
-        ? `🛍 <a href="${ctaHref}">Открыть актуальные промокоды по теме</a>`
+        ? `🛍 <a href="${tgCtaHref}">Открыть актуальные промокоды по теме</a>`
         : null,
     ]
       .filter((line) => line !== null)
       .join("\n");
 
     const buttons = [
-      [{ text: "📖 Читать разбор →", url }],
+      [{ text: "📖 Читать разбор →", url: tgArticleUrl }],
       ctaHref !== url
-        ? [{ text: a.ctaButton?.text || "🛍 Промокоды по теме", url: ctaHref }]
-        : [{ text: "🔍 Все магазины и скидки", url: `${SITE_URL}/catalog` }],
+        ? [{ text: a.ctaButton?.text || "🛍 Промокоды по теме", url: tgCtaHref }]
+        : [{ text: "🔍 Все магазины и скидки", url: withUtm(`${SITE_URL}/catalog`, "telegram", "social", a.slug) }],
     ];
 
     candidates.push({
@@ -476,6 +494,7 @@ export function buildArticleCandidates(history, nowMs = Date.now()) {
   const bfAge = lastBf ? daysSince(lastBf.date, nowMs) : 999;
   if (bfAge >= 5) {
     const bfUrl = `${SITE_URL}/collections/black-friday`;
+    const tgBfUrl = withUtm(bfUrl, "telegram", "social", "black-friday");
     candidates.push({
       kind: "article",
       postMode: "message",
@@ -497,11 +516,11 @@ export function buildArticleCandidates(history, nowMs = Date.now()) {
         `• Суммирование промокодов с банковским кэшбэком и рассрочкой 0%`,
         `• Никаких устаревших купонов — только актуальная витрина`,
         ``,
-        `👉 <a href="${bfUrl}">Открыть хаб Чёрной Пятницы на ПромоФакте →</a>`,
+        `👉 <a href="${tgBfUrl}">Открыть хаб Чёрной Пятницы на ПромоФакте →</a>`,
       ].join("\n"),
       buttons: [
-        [{ text: "🔥 Открыть все скидки распродажи →", url: bfUrl }],
-        [{ text: "💳 Карты и кэшбэк 0%", url: `${SITE_URL}/collections/finansy-i-karty` }],
+        [{ text: "🔥 Открыть все скидки распродажи →", url: tgBfUrl }],
+        [{ text: "💳 Карты и кэшбэк 0%", url: withUtm(`${SITE_URL}/collections/finansy-i-karty`, "telegram", "social", "black-friday") }],
       ],
       enableLinkPreview: true,
       score: 95,

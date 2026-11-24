@@ -187,6 +187,11 @@ const PAMPADU_COUPONS: Coupon[] = pampaduOffersData.offers.map((offer) => {
       isBarcode: false,
       barcodeImage: null,
       group: "pampadu",
+      highlights: Array.isArray(offer.highlights) ? offer.highlights : undefined,
+      productType:
+        offer.productType === "credit" || offer.productType === "debit" || offer.productType === "installment"
+          ? offer.productType
+          : undefined,
     },
     store: {
       ...baseStore,

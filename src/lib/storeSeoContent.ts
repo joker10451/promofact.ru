@@ -22,7 +22,7 @@ export interface StoreArticleInput {
   about?: string | null;
   conditions?: string | null;
   /** Активные купоны: только коды/названия. */
-  coupons: { code: string; bonusName: string | null; isBarcode?: boolean }[];
+  coupons: { code: string; bonusName: string | null; isBarcode?: boolean; group?: string | null }[];
   couponCount: number;
   maxDiscount: string | null;
   hasGiftOffer?: boolean;
@@ -159,8 +159,16 @@ function pickAngle(categorySlug: string, slug: string): string {
 
 /** Число активных купонов и названия кодов в тексте. */
 function codesSentence(input: StoreArticleInput): string {
-  const active = input.coupons.filter((c) => !c.isBarcode && isRealPromoCode(c.code));
+  const financeOffers = input.coupons.filter((c) => c.group === "pampadu");
+  const active = input.coupons.filter((c) => c.group !== "pampadu" && !c.isBarcode && isRealPromoCode(c.code));
   const barcodes = input.coupons.filter((c) => c.isBarcode && isRealPromoCode(c.code));
+  if (active.length === 0 && financeOffers.length > 0) {
+    const summary = financeOffers
+      .slice(0, 3)
+      .map((c) => c.bonusName || "Карта по условиям партнёра")
+      .join("; ");
+    return `У ${input.name} сейчас действует ${financeOffers.length} ${financeOffers.length === 1 ? "предложение" : "предложения"} по оформлению карт без промокода: ${summary}. Подробные условия и ограничения смотрите в карточках ниже.`;
+  }
   if (active.length === 0) {
     if (input.name === "Авито Путешествия") {
       return "Для Авито Путешествий доступны два отдельных предложения по партнёрским ссылкам — на жильё и отель. Общего кода для копирования в карточках нет; возможный персональный код и способ получения скидки уточняйте в Авито перед бронированием.";
@@ -193,7 +201,7 @@ function buildParagraphs(input: StoreArticleInput, slug: string): string[] {
     bloggers: input.activeBloggers,
   };
 
-  const realCodes = input.coupons.filter((c) => !c.isBarcode && isRealPromoCode(c.code)).length;
+  const realCodes = input.coupons.filter((c) => c.group !== "pampadu" && !c.isBarcode && isRealPromoCode(c.code)).length;
   const barcodes = input.coupons.filter((c) => c.isBarcode && isRealPromoCode(c.code)).length;
   const noCodeDeals = input.coupons.length - realCodes - barcodes;
   const offerCounts = formatStoreOfferCounts(realCodes, noCodeDeals, barcodes);
@@ -335,7 +343,7 @@ export function buildStoreArticle(input: StoreArticleInput, slug: string): strin
  */
 export function buildStoreDescription(input: StoreArticleInput): string {
   const n = input.couponCount;
-  const realCodes = input.coupons.filter((c) => !c.isBarcode && isRealPromoCode(c.code)).length;
+  const realCodes = input.coupons.filter((c) => c.group !== "pampadu" && !c.isBarcode && isRealPromoCode(c.code)).length;
   const barcodes = input.coupons.filter((c) => c.isBarcode && isRealPromoCode(c.code)).length;
   const codeFree = input.coupons.length - realCodes - barcodes;
   const countLabel = formatStoreOfferCounts(realCodes, codeFree, barcodes);
@@ -365,7 +373,13 @@ export function buildStoreDescription(input: StoreArticleInput): string {
   const tail = ` Актуально на ${input.monthRu}.`;
   const full = `${head}${input.hasGiftOffer && !input.maxDiscount ? " Подарки к заказу при выполнении условий." : ""}${best ? ` ${best}.` : ""}${tail}`;
   // Code names are what people type ("промокод набери летуаль"); they are already visible on the page.
-  const codeNames = [...new Set(input.coupons.filter((c) => !c.isBarcode && isRealPromoCode(c.code)).map((c) => c.code.trim()))].slice(0, 3);
+  const codeNames = [
+    ...new Set(
+      input.coupons
+        .filter((c) => c.group !== "pampadu" && !c.isBarcode && isRealPromoCode(c.code))
+        .map((c) => c.code.trim()),
+    ),
+  ].slice(0, 3);
   const codesPart = codeNames.length ? ` Коды: ${codeNames.join(", ")}.` : "";
   const core = full.endsWith(tail) ? full.slice(0, full.length - tail.length) : full;
   if (full.length <= 160) return codesPart && core.length + codesPart.length <= 160 ? core + codesPart : full;

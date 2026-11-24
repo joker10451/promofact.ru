@@ -13,15 +13,22 @@ import CouponTicket from "@/components/CouponTicket";
 import NewsletterBox from "@/components/NewsletterBox";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import YandexAdBlock from "@/components/YandexAdBlock";
-import { getArticles, getArticle } from "@/lib/articles";
+import { getArticlesNewestFirst, getArticle } from "@/lib/articles";
 import { getAllStores, getCoupons, getUsesStats } from "@/lib/perfluence";
 import { isPausedPublisherStore } from "@/lib/publisherPauses";
+import {
+  withoutForbiddenTravelCoPromotion,
+  withoutForbiddenTanukiCoPromotion,
+  withoutForbiddenFloristBeautyCoPromotion,
+  withoutForbiddenGroceryCoPromotion,
+  withoutForbiddenSberAnalizyCreditCardCoPromotion,
+} from "@/lib/publisherPlacementRules";
 import { SITE_NAME, SITE_URL, CHANNELS } from "@/lib/site";
 
 export const revalidate = false;
 
 export async function generateStaticParams() {
-  return getArticles().map((a) => ({ slug: a.slug }));
+  return getArticlesNewestFirst().map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({
@@ -94,23 +101,89 @@ export default async function ArticlePage({
     return !store || (storeSlugs.has(store) && !isPausedPublisherStore(store));
   });
 
-  // Подбираем 2-3 релевантных промокода по теме статьи
+  // Подбираем до 3–4 релевантных предложений (учитываем article.related, ctaButton и запреты совместного показа)
+  const safeCoupons = withoutForbiddenSberAnalizyCreditCardCoPromotion(
+    withoutForbiddenGroceryCoPromotion(
+      withoutForbiddenFloristBeautyCoPromotion(
+        withoutForbiddenTanukiCoPromotion(withoutForbiddenTravelCoPromotion(allCoupons)),
+      ),
+    ),
+  );
+
+  const relatedStoreOrder = related
+    .map((r) => r.href.match(/^\/store\/([^/?#]+)/)?.[1])
+    .filter((s): s is string => Boolean(s));
+  const ctaStore = article.ctaButton?.href.match(/^\/store\/([^/?#]+)/)?.[1];
+  if (ctaStore && !relatedStoreOrder.includes(ctaStore)) {
+    relatedStoreOrder.unshift(ctaStore);
+  }
+  const relatedStoreRank = new Map(relatedStoreOrder.map((s, idx) => [s, idx]));
+
+  const textToMatch = `${article.title} ${article.description} ${article.slug}`.toLowerCase();
+  const isFinanceArticle =
+    article.ctaButton?.href === "/collections/finansy-i-karty" ||
+    related.some((r) => r.href === "/collections/finansy-i-karty") ||
+    /карт|кэшбэк|кешбэк|кредит|рассроч|финанс|120-dney/i.test(textToMatch);
+
   const relevantCoupons = (() => {
-    const textToMatch = `${article.title} ${article.description} ${article.slug}`.toLowerCase();
-    const matches = allCoupons.filter((c) => {
-      const storeName = c.store.name.toLowerCase();
-      const catName = c.store.category.toLowerCase();
-      return textToMatch.includes(storeName) || textToMatch.includes(catName);
-    });
+    const isSingleStoreGuide = relatedStoreOrder.length === 1;
+    const targetMax = isFinanceArticle || relatedStoreOrder.length >= 4 ? 4 : 3;
 
-    if (matches.length >= 2) return matches.slice(0, 3);
+    const scored = safeCoupons
+      .map((c) => {
+        let score = 0;
+        const slugRank = relatedStoreRank.get(c.store.slug);
+        if (slugRank !== undefined) score += 200 - slugRank * 5;
+        if (isFinanceArticle && c.promocode.group === "pampadu") score += 120;
+        if (
+          textToMatch.includes(c.store.name.toLowerCase()) ||
+          textToMatch.includes(c.store.category.toLowerCase()) ||
+          textToMatch.includes(c.store.slug.replace(/-/g, " "))
+        ) {
+          score += 50;
+        }
+        if (c.promocode.isHit) score += 5;
+        return { coupon: c, score };
+      })
+      .filter((x) => x.score >= 50)
+      .sort((a, b) => b.score - a.score);
 
-    // Если точных совпадений мало, дополняем хитами
-    const hits = allCoupons.filter((c) => c.promocode.isHit && !matches.some((m) => m.id === c.id));
-    return [...matches, ...hits].slice(0, 3);
+    const picked: typeof safeCoupons = [];
+    const perStoreCount = new Map<string, number>();
+    const storeCap = isSingleStoreGuide ? 3 : 1;
+
+    for (const { coupon } of scored) {
+      if (picked.length >= targetMax) break;
+      const cnt = perStoreCount.get(coupon.store.slug) ?? 0;
+      if (cnt >= storeCap) continue;
+      picked.push(coupon);
+      perStoreCount.set(coupon.store.slug, cnt + 1);
+    }
+
+    if (picked.length >= 2 || isFinanceArticle) {
+      return picked;
+    }
+
+    // Для нефинансовых обзорных статей при малом числе совпадений аккуратно добираем хиты
+    const hits = safeCoupons.filter((c) => c.promocode.isHit && !picked.some((m) => m.id === c.id));
+    for (const c of hits) {
+      if (picked.length >= 3) break;
+      if ((perStoreCount.get(c.store.slug) ?? 0) >= 1) continue;
+      picked.push(c);
+      perStoreCount.set(c.store.slug, 1);
+    }
+    return picked;
   })();
 
-  const moreArticles = getArticles().filter((a) => a.slug !== slug).slice(0, 3);
+  const relatedHrefs = new Set(article.related.map((r) => r.href));
+  const moreArticles = getArticlesNewestFirst()
+    .filter((a) => a.slug !== slug)
+    .sort((a, b) => {
+      const aOverlap = a.related.filter((r) => relatedHrefs.has(r.href)).length;
+      const bOverlap = b.related.filter((r) => relatedHrefs.has(r.href)).length;
+      return bOverlap - aOverlap;
+    })
+    .slice(0, 3);
 
   const url = `${SITE_URL}/sovety/${slug}`;
   const articleJsonLd: Record<string, unknown> = {
@@ -234,7 +307,11 @@ export default async function ArticlePage({
                       <div className="flex items-center justify-between gap-2 mb-3">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-ink">
                           <Icon name="flame" size={15} />
-                          <span>Горячий промокод к статье</span>
+                          <span>
+                            {relevantCoupons[0].promocode.group === "pampadu"
+                              ? "Рекомендованное предложение к статье"
+                              : "Горячий промокод к статье"}
+                          </span>
                         </div>
                         <span className="text-[11px] font-bold text-mint-dark">
                           Проверено сегодня
@@ -307,7 +384,9 @@ export default async function ArticlePage({
                   <div className="flex items-center gap-2">
                     <Icon name="flame" size={16} />
                     <h2 className="font-display text-lg sm:text-xl font-bold text-ink">
-                      Рабочие промокоды по теме статьи
+                      {relevantCoupons.every((c) => c.promocode.group === "pampadu")
+                        ? "Подходящие банковские карты по теме статьи"
+                        : "Рабочие промокоды и акции по теме статьи"}
                     </h2>
                   </div>
                   <span className="text-xs font-bold text-mint-dark">

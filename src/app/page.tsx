@@ -5,6 +5,7 @@ import PrioritySearchLinks from "@/components/PrioritySearchLinks";
 import ExpiringDeals from "@/components/ExpiringDeals";
 import SberCampaignTeasers from "@/components/SberCampaignTeasers";
 import HomeOffersPreview from "@/components/HomeOffersPreview";
+import HomeFinanceShowcase from "@/components/HomeFinanceShowcase";
 import HomeResourcesPreview from "@/components/HomeResourcesPreview";
 import CategoryPreview from "@/components/CategoryPreview";
 import SeasonalSaleBanner from "@/components/SeasonalSaleBanner";
@@ -129,7 +130,12 @@ export default async function Home() {
           </Reveal>
         </div>
 
-        {/* Короткая подборка реальных купонов, полный каталог — на /catalog. */}
+        <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+          <Reveal>
+            <HomeFinanceShowcase />
+          </Reveal>
+        </div>
+
         <div className="mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-12">
           <Reveal>
             <HomeOffersPreview coupons={featuredCoupons} totalCount={coupons.length} />

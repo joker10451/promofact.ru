@@ -5,7 +5,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CouponTicket from "@/components/CouponTicket";
 import CollectionFilterContainer from "@/components/CollectionFilterContainer";
+import FinanceComparisonHub, { type FinanceComparisonCard } from "@/components/FinanceComparisonHub";
 import JsonLd from "@/components/JsonLd";
+import pampaduOffersData from "@/data/pampadu-offers.json";
+import { STABLE_STORES } from "@/lib/stableStores";
+import { isCouponActive } from "@/lib/couponExpiry";
 import { getCoupons, getUsesStats } from "@/lib/perfluence";
 import { getCollections, getCollectionCoupons, MIN_INDEXABLE_COLLECTION_OFFERS } from "@/lib/collections";
 import { getShoppingDayStatus, getBlackFridayStatus } from "@/lib/seasonalEvents";
@@ -62,6 +66,9 @@ export async function generateMetadata({
   } else if (slug === "black-friday") {
     pageTitle = "Чёрная Пятница 2026: промокоды, скидки и купоны на распродажу";
     description = "Промокоды и купоны на Чёрную Пятницу 2026 в России. Максимальные скидки до 90% на маркетплейсах, в магазинах техники, одежды и косметики. Проверяйте условия перед оплатой.";
+  } else if (slug === "finansy-i-karty") {
+    pageTitle = "Банковские карты 2026: кредитные 120 дней без % и дебетовые с кэшбэком";
+    description = "Сравнение выгодных банковских карт с длинным льготным периодом до 120 дней, рассрочкой 0% и повышенным кэшбэком. Оформление онлайн с проверенными условиями.";
   }
 
   const ogTitle = `${pageTitle} — ${SITE_NAME}`;
@@ -135,6 +142,31 @@ export default async function CollectionPage({
   const bfStatus = getBlackFridayStatus();
 
   const list = getCollectionCoupons(col, all);
+  const financeCards: FinanceComparisonCard[] =
+    col.slug === "finansy-i-karty"
+      ? [...pampaduOffersData.offers]
+          .filter((o) => isCouponActive(o.expires))
+          .sort((a, b) => (b.cpaRub ?? 0) - (a.cpaRub ?? 0))
+          .map((o) => {
+            const meta = STABLE_STORES[o.storeSlug];
+            return {
+              id: o.id,
+              storeSlug: o.storeSlug,
+              bankName: meta?.name ?? o.storeSlug,
+              logo: meta?.logo ?? null,
+              site: meta?.site ?? "#",
+              productType:
+                o.productType === "debit" || o.productType === "installment" ? o.productType : "credit",
+              bonusName: o.bonusName,
+              graceDays: o.graceDays || "Условия банка",
+              limitLabel: o.limitLabel || "Уточняйте лимит",
+              cashbackLabel: o.cashbackLabel || "Бонусы банка",
+              serviceFee: o.serviceFee || "От 0 ₽",
+              link: o.link,
+              ordText: o.ordText,
+            };
+          })
+      : [];
   const storeNames = [...new Set(list.map((c) => c.store.name))];
   const paragraphs = seoText(col.name, storeNames, storeNames.length, list.length);
   const pageUrl = `${SITE_URL}/collections/${slug}`;
@@ -235,7 +267,9 @@ export default async function CollectionPage({
         </nav>
 
         <h1 className="mt-6 max-w-3xl font-display text-2xl font-extrabold leading-tight sm:text-3xl">
-          Промокоды и купоны: {col.name}
+          {col.slug === "finansy-i-karty"
+            ? "Банковские карты 2026: рассрочка 0%, 120 дней и кэшбэк"
+            : `Промокоды и купоны: ${col.name}`}
         </h1>
         <p className="mt-3 max-w-2xl text-ink/60">
           {list.length > 0
@@ -314,6 +348,10 @@ export default async function CollectionPage({
           </div>
         )}
 
+        {col.slug === "finansy-i-karty" && financeCards.length > 0 && (
+          <FinanceComparisonHub cards={financeCards} />
+        )}
+
         {list.length === 0 && (
           <Link href="/catalog" className="mt-5 inline-flex rounded-lg bg-red px-4 py-3 text-sm font-bold text-white hover:bg-red-dark">
             Посмотреть все предложения →
@@ -340,9 +378,9 @@ export default async function CollectionPage({
         />
 
         {col.slug === "finansy-i-karty" && (
-          <section aria-label="Интерактивная финансовая витрина" className="mt-12 max-w-4xl border-t border-line pt-6">
+          <section id="all-32-cards" aria-label="Интерактивная финансовая витрина" className="mt-12 max-w-4xl border-t border-line pt-6">
             <h2 className="font-display text-xl font-extrabold text-ink mb-2">
-              Подбор дебетовых и кредитных карт онлайн
+              Расширенный каталог: 32 банковские карты онлайн
             </h2>
             <p className="text-sm text-ink/75 mb-6">
               Сравните актуальные условия по дебетовым картам, бонусам за оформление и выберите подходящую карту в официальном онлайн-каталоге:

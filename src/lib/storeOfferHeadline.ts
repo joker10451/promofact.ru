@@ -1,10 +1,14 @@
 import { isRealPromoCode } from "@/lib/dedupe";
 
 /** Search metadata distinguishes online codes, checkout barcodes and code-free deals. */
-export function getStoreHeadlineOfferCounts(coupons: readonly { promocode: { code: string | null | undefined; isBarcode?: boolean } }[]) {
+export function getStoreHeadlineOfferCounts(
+  coupons: readonly { promocode: { code: string | null | undefined; isBarcode?: boolean; group?: string | null } }[],
+) {
   const offers = coupons.length;
   const barcodes = coupons.filter((coupon) => coupon.promocode.isBarcode && isRealPromoCode(coupon.promocode.code)).length;
-  const codes = coupons.filter((coupon) => !coupon.promocode.isBarcode && isRealPromoCode(coupon.promocode.code)).length;
+  const codes = coupons.filter(
+    (coupon) => coupon.promocode.group !== "pampadu" && !coupon.promocode.isBarcode && isRealPromoCode(coupon.promocode.code),
+  ).length;
   const codeFree = offers - codes - barcodes;
   return { offers, codes, codeFree, barcodes };
 }

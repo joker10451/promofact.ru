@@ -2,7 +2,7 @@ import ArticleCover from "@/components/ArticleCover";
 import { plural } from "@/lib/format";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getArticles } from "@/lib/articles";
+import { getArticles, getArticlesNewestFirst } from "@/lib/articles";
 import { SITE_URL } from "@/lib/site";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export default function SovetyPage() {
-  const articles = [...getArticles()].reverse();
+  const articles = getArticlesNewestFirst();
 
   return (
     <>
@@ -59,8 +59,22 @@ export default function SovetyPage() {
                 Советы по экономии и шопингу
               </h1>
               <p className="mt-2 max-w-2xl text-sm sm:text-base text-ink/65 font-medium">
-                {getArticles().length} {plural(getArticles().length, "инструкция", "инструкции", "инструкций")}: как применять промокоды, где искать скидки и почему код может не сработать.
+                {articles.length} {plural(articles.length, "инструкция", "инструкции", "инструкций")}: как применять промокоды, где искать скидки и почему код может не сработать.
               </p>
+            </div>
+            <div className="flex flex-wrap gap-2 shrink-0">
+              <Link
+                href="/collections/finansy-i-karty"
+                className="inline-flex items-center rounded-lg border border-line bg-white px-3.5 py-2 text-xs font-extrabold text-ink transition-colors hover:border-red hover:text-red"
+              >
+                Карты 120 дней и кэшбэк →
+              </Link>
+              <Link
+                href="/collections/black-friday"
+                className="inline-flex items-center rounded-lg border border-line bg-white px-3.5 py-2 text-xs font-extrabold text-ink transition-colors hover:border-red hover:text-red"
+              >
+                Чёрная Пятница 2026 →
+              </Link>
             </div>
           </div>
 

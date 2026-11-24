@@ -19,6 +19,10 @@ const SHOPPING_DAY_END = new Date("2026-11-14T23:59:59+03:00");
 const BLACK_FRIDAY_TARGET = new Date("2026-11-27T00:00:00+03:00");
 const BLACK_FRIDAY_END = new Date("2026-11-30T23:59:59+03:00"); // Включая Киберпонедельник
 
+// Новогодний марафон 2027 — весь декабрь 2026
+const NEW_YEAR_START = new Date("2026-12-01T00:00:00+03:00");
+const NEW_YEAR_END = new Date("2026-12-31T23:59:59+03:00");
+
 function pluralDays(n: number): string {
   const mod10 = n % 10;
   const mod100 = n % 100;
@@ -100,7 +104,51 @@ export function getCurrentSeasonalPromo(now = new Date()): SeasonalPromo | null 
         : "Чёрная Пятница 27–30 ноября: собираем промокоды заранее",
     };
   }
+  const ny = getNewYearStatus(now);
+  if (ny.stage !== "ended" && now.getTime() >= NEW_YEAR_START.getTime()) {
+    return {
+      href: "/akcii/novogodnie-skidki-2027",
+      navLabel: "Новый год 2027",
+      heroText: "Новогодние скидки 2027: промокоды на подарки, доставку и карты с кэшбэком",
+    };
+  }
   return null;
+}
+
+/**
+ * Рассчитывает статус новогодних распродаж 2027 (декабрь 2026)
+ */
+export function getNewYearStatus(now = new Date()): SeasonalEventStatus {
+  const nowMs = now.getTime();
+  const startMs = NEW_YEAR_START.getTime();
+  const endMs = NEW_YEAR_END.getTime();
+
+  if (nowMs >= startMs && nowMs <= endMs) {
+    return {
+      daysLeft: 0,
+      badgeText: "Декабрьский марафон скидок",
+      stage: "active",
+      headline: "Новогодние распродажи и подарки 2027",
+      formattedTargetDate: "1–31 декабря 2026",
+    };
+  }
+  if (nowMs > endMs) {
+    return {
+      daysLeft: 0,
+      badgeText: "Сезон завершён",
+      stage: "ended",
+      headline: "Новогодние скидки 2027",
+      formattedTargetDate: "декабрь 2026",
+    };
+  }
+  const daysLeft = Math.max(1, Math.ceil((startMs - nowMs) / (1000 * 60 * 60 * 24)));
+  return {
+    daysLeft,
+    badgeText: `До декабря ${daysLeft} ${pluralDays(daysLeft)}`,
+    stage: "warmup",
+    headline: "Подготовка к новогодним покупкам 2027",
+    formattedTargetDate: "1–31 декабря 2026",
+  };
 }
 
 /**

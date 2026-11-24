@@ -2430,6 +2430,30 @@ export function getArticles(now: number = Date.now()): Article[] {
   return combined;
 }
 
+/**
+ * Статьи в хронологическом порядке: свежие (по `published` и автогенерации) сверху.
+ * Используется витриной `/sovety`, лентой Дзена и блоком «Читайте также».
+ */
+export function getArticlesNewestFirst(now: number = Date.now()): Article[] {
+  const staticOrder = new Map(ARTICLES.map((a, idx) => [a.slug, idx]));
+  const genOrder = new Map(GENERATED_ARTICLES.map((a, idx) => [a.slug, 100000 - idx]));
+
+  const pubDateMs = (a: Article) => {
+    if (a.published && /^\d{4}-\d{2}-\d{2}$/.test(a.published)) {
+      return Date.parse(`${a.published}T12:00:00+03:00`);
+    }
+    return 0;
+  };
+
+  return [...getArticles(now)].sort((a, b) => {
+    const diff = pubDateMs(b) - pubDateMs(a);
+    if (diff !== 0) return diff;
+    const scoreA = staticOrder.has(a.slug) ? staticOrder.get(a.slug)! : genOrder.get(a.slug) ?? 0;
+    const scoreB = staticOrder.has(b.slug) ? staticOrder.get(b.slug)! : genOrder.get(b.slug) ?? 0;
+    return scoreB - scoreA;
+  });
+}
+
 export function getArticle(slug: string, now: number = Date.now()): Article | undefined {
   return getArticles(now).find((a) => a.slug === slug);
 }

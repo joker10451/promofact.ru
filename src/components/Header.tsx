@@ -16,6 +16,7 @@ import {
 // Прямые ссылки, которым не место в каталоге категорий.
 const NAV = [
   { href: "/catalog", label: "Купоны", isHot: false },
+  { href: "/collections/finansy-i-karty", label: "Карты и кэшбэк", isHot: false },
   { href: "/promokody", label: "Магазины", isHot: false },
   { href: "/collections", label: "Подборки", isHot: false },
   { href: "/sovety", label: "Советы", isHot: false },

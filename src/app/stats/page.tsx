@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { fetchResults, type Result } from "@/lib/perfluence";
+import pampaduOffersData from "@/data/pampadu-offers.json";
+import telegramHistoryRaw from "@/data/telegram-post-history.json";
+import generatedArticlesRaw from "@/data/generated-articles.json";
+import { STABLE_STORES } from "@/lib/stableStores";
 
 export const dynamic = "force-dynamic";
 
@@ -184,6 +188,62 @@ export default async function StatsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="font-display text-xl font-extrabold">Финансовые офферы Pampadu (siteId {pampaduOffersData.siteId})</h2>
+        <p className="mt-1 text-xs text-ink/55">
+          Активные банковские карты из реестра <code>src/data/pampadu-offers.json</code>. Ставки CPA видны только здесь.
+        </p>
+        <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-white">
+          <table className="w-full min-w-[540px] text-left text-sm">
+            <thead>
+              <tr className="border-b border-line text-[11px] uppercase tracking-widest text-ink/45">
+                <th className="px-5 py-3 font-bold">Банк</th>
+                <th className="px-5 py-3 font-bold">Продукт</th>
+                <th className="px-5 py-3 font-bold">ERID</th>
+                <th className="px-5 py-3 font-bold">CPA ставка</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...pampaduOffersData.offers]
+                .sort((a, b) => (b.cpaRub ?? 0) - (a.cpaRub ?? 0))
+                .map((o) => {
+                  const bankName = STABLE_STORES[o.storeSlug]?.name ?? o.storeSlug;
+                  return (
+                    <tr key={o.id} className="border-b border-line/60 last:border-0">
+                      <td className="px-5 py-3 font-bold">{bankName}</td>
+                      <td className="px-5 py-3 text-xs text-ink/80">{o.bonusName}</td>
+                      <td className="px-5 py-3 font-mono text-xs text-ink/60">{o.ordMarker}</td>
+                      <td className="px-5 py-3 font-bold text-mint whitespace-nowrap">
+                        {formatSourceAmount(o.cpaRub ?? 0)} ₽
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-line bg-white p-6">
+        <h2 className="font-display text-lg font-extrabold">Автономный конвейер и атрибуция</h2>
+        <div className="mt-3 grid gap-4 sm:grid-cols-3 text-sm">
+          <div className="rounded-xl border border-line/70 bg-paper/40 p-4">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/50">Постов в @smart_zakupka</div>
+            <div className="mt-1 font-display text-2xl font-extrabold">{Array.isArray(telegramHistoryRaw) ? telegramHistoryRaw.length : 0}</div>
+          </div>
+          <div className="rounded-xl border border-line/70 bg-paper/40 p-4">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/50">AI-статей в реестре</div>
+            <div className="mt-1 font-display text-2xl font-extrabold">{Array.isArray(generatedArticlesRaw) ? generatedArticlesRaw.length : 0}</div>
+          </div>
+          <div className="rounded-xl border border-line/70 bg-paper/40 p-4">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ink/50">Цели Яндекс.Метрики</div>
+            <div className="mt-1 font-mono text-xs text-ink/75">
+              affiliate_click (home_finance, collection_finance_table, article_coupon) · utm_source=telegram|dzen
+            </div>
+          </div>
         </div>
       </section>
 

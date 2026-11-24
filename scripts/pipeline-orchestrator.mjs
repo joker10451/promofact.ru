@@ -29,6 +29,7 @@ import {
   parseExpiryMs,
   recordTgHistory,
   selectHybridTrack,
+  withUtm,
 } from "./hybrid-post-sources.mjs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -711,9 +712,10 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
       : selected.ordText;
 
     const storePageUrl = `https://promofact.ru/store/${selected.storeSlug}`;
+    const tgStorePageUrl = withUtm(storePageUrl, "telegram", "social", selected.storeSlug);
     const footerLines = [
       `👉 <a href="${selected.affUrl}">Активировать в ${escapeHtml(selected.storeName)} →</a>`,
-      `🌐 <a href="${storePageUrl}">Все промокоды ${escapeHtml(selected.storeName)} на ПромоФакте</a>`,
+      `🌐 <a href="${tgStorePageUrl}">Все промокоды ${escapeHtml(selected.storeName)} на ПромоФакте</a>`,
       ``,
       `⚖️ <i>${escapeHtml(eridLine)}</i>`,
     ];
@@ -721,7 +723,7 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
     const postText = fitCaption(bodyLines.join("\n"), footerLines.join("\n"), 980);
     const buttons = [
       [{ text: `🛍 В магазин ${selected.storeName} →`, url: selected.affUrl }],
-      [{ text: `🌐 Все промокоды ${selected.storeName}`, url: storePageUrl }],
+      [{ text: `🌐 Все промокоды ${selected.storeName}`, url: tgStorePageUrl }],
     ];
 
     const bgTemplateUrl = await fetchProjectTemplateImage(selected.storeId);

@@ -1,4 +1,4 @@
-import { getArticles, type Article } from "@/lib/articles";
+import { getArticlesNewestFirst, type Article } from "@/lib/articles";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL, siteLink } from "@/lib/site";
 
 // Раз в час, а не в 12: рекламные статьи выходят по времени (publishAt),
@@ -52,7 +52,7 @@ function cover(a: Article): { url: string; type: string } {
   return { url: `${SITE_URL}/sovety/${a.slug}/opengraph-image`, type: "image/png" };
 }
 
-function contentHtml(a: Article, url: string): string {
+function contentHtml(a: Article): string {
   const img = cover(a);
   const parts: string[] = [
     `<figure><img src="${escapeXml(img.url)}" alt="${escapeXml(a.title)}"/></figure>`,
@@ -66,17 +66,20 @@ function contentHtml(a: Article, url: string): string {
     for (const item of a.faq) parts.push(`<p><b>${escapeXml(item.q)}</b></p><p>${escapeXml(item.a)}</p>`);
   }
   if (a.ctaButton) {
-    parts.push(`<p><a href="${escapeXml(a.ctaButton.href)}">${escapeXml(a.ctaButton.text)}</a></p>`);
+    const resolvedCta = a.ctaButton.href.startsWith("/")
+      ? siteLink(a.ctaButton.href, "dzen", "article", a.slug)
+      : a.ctaButton.href;
+    parts.push(`<p><a href="${escapeXml(resolvedCta)}">${escapeXml(a.ctaButton.text)}</a></p>`);
     if (a.ctaButton.disclaimer) parts.push(`<p>${escapeXml(a.ctaButton.disclaimer)}</p>`);
   }
   parts.push(
-    `<p>Все действующие промокоды и подробные условия — <a href="${escapeXml(siteLink(`/sovety/${a.slug}`, "dzen", "article"))}">на сайте ${escapeXml(SITE_NAME)}</a>. А свежие скидки и закрытые акции первыми публикуем в Telegram-канале <a href="https://t.me/smart_zakupka">@smart_zakupka</a>.</p>`,
+    `<p>Все действующие промокоды и подробные условия — <a href="${escapeXml(siteLink(`/sovety/${a.slug}`, "dzen", "article", a.slug))}">на сайте ${escapeXml(SITE_NAME)}</a>. А свежие скидки и закрытые акции первыми публикуем в Telegram-канале <a href="https://t.me/smart_zakupka">@smart_zakupka</a>.</p>`,
   );
   return parts.join("\n");
 }
 
 export async function GET() {
-  const items = getArticles().map((a, i) => {
+  const items = getArticlesNewestFirst().map((a, i) => {
     const url = `${SITE_URL}/sovety/${a.slug}`;
     const img = cover(a);
     return `    <item>
@@ -91,7 +94,7 @@ export async function GET() {
       <category>comment-all</category>
       <enclosure url="${escapeXml(img.url)}" type="${img.type}"/>
       <description><![CDATA[${a.description}]]></description>
-      <content:encoded><![CDATA[${contentHtml(a, url)}]]></content:encoded>
+      <content:encoded><![CDATA[${contentHtml(a)}]]></content:encoded>
     </item>`;
   }).join("\n");
 

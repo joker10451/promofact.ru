@@ -12,13 +12,18 @@ export default function SavingsCalculator() {
   const [amount, setAmount] = useState(4500);
   const [discountType, setDiscountType] = useState<"percent" | "fixed">("percent");
   const [discountValue, setDiscountValue] = useState(20);
+  const [cashbackPercent, setCashbackPercent] = useState(5);
 
   const safeAmount = Math.max(0, Math.min(50000, Number.isFinite(amount) ? amount : 0));
   const safeDiscount = Math.max(0, Math.min(discountType === "percent" ? 100 : 50000, Number.isFinite(discountValue) ? discountValue : 0));
+  const safeCashback = Math.max(0, Math.min(30, Number.isFinite(cashbackPercent) ? cashbackPercent : 0));
   const savings = Math.min(safeAmount, discountType === "percent"
     ? Math.round((safeAmount * safeDiscount) / 100)
     : safeDiscount);
   const payable = Math.max(0, safeAmount - savings);
+  const cashbackEstimate = Math.round((payable * safeCashback) / 100);
+  const totalBenefit = savings + cashbackEstimate;
+  const splitQuarter = Math.ceil(payable / 4);
   const money = (value: number) => value.toLocaleString("ru-RU", { maximumFractionDigits: 0 }) + " ₽";
 
   const changeType = (type: "percent" | "fixed") => {
@@ -99,6 +104,23 @@ export default function SavingsCalculator() {
               className="min-h-12 w-full rounded-xl border border-line bg-white px-4 text-lg font-bold text-ink outline-none focus:border-red focus:ring-2 focus:ring-red/15"
             />
           </div>
+
+          <div>
+            <label htmlFor="calculator-cashback-value" className="mb-2 block text-sm font-bold text-ink">
+              Ориентировочный кэшбэк по карте, % (доп. выгода)
+            </label>
+            <input
+              id="calculator-cashback-value"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              max="30"
+              step="1"
+              value={cashbackPercent}
+              onChange={(event) => setCashbackPercent(Math.max(0, Math.min(30, Number(event.target.value) || 0)))}
+              className="min-h-12 w-full rounded-xl border border-line bg-white px-4 text-base font-bold text-ink outline-none focus:border-red focus:ring-2 focus:ring-red/15"
+            />
+          </div>
         </div>
 
         <div className="flex flex-col justify-between rounded-2xl bg-ink p-5 text-white sm:p-6">
@@ -106,23 +128,40 @@ export default function SavingsCalculator() {
             <p className="text-xs font-extrabold uppercase tracking-wider text-white/60">Предварительный расчёт</p>
             <div className="mt-6 grid gap-4">
               <div className="border-b border-white/15 pb-4">
-                <p className="text-sm text-white/65">Возможная экономия</p>
+                <p className="text-sm text-white/65">Возможная экономия по промокоду</p>
                 <output className="mt-1 block font-display text-2xl font-extrabold text-yellow sm:text-3xl">{money(savings)}</output>
               </div>
-              <div>
+              <div className="border-b border-white/15 pb-4">
                 <p className="text-sm text-white/65">После скидки</p>
                 <output className="mt-1 block font-display text-2xl font-extrabold text-white sm:text-3xl">{money(payable)}</output>
               </div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <p className="text-white/60">Оценочный кэшбэк ({safeCashback}%)</p>
+                  <p className="mt-1 font-display text-base font-bold text-mint">{money(cashbackEstimate)}</p>
+                  <p className="mt-0.5 text-[11px] text-white/55">Суммарно: ~{money(totalBenefit)}</p>
+                </div>
+                <div>
+                  <p className="text-white/60">Частями 0% (÷ 4 мес.)</p>
+                  <p className="mt-1 font-display text-base font-bold text-white">{money(splitQuarter)}/мес</p>
+                  <p className="mt-0.5 text-[11px] text-white/55">Зависит от условий банка</p>
+                </div>
+              </div>
             </div>
           </div>
-          <Link href="/promokody" className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-red px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow">
-            Найти реальные промокоды <span className="ml-2" aria-hidden="true">→</span>
-          </Link>
+          <div className="mt-7 grid gap-2.5">
+            <Link href="/promokody" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-red px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow">
+              Найти реальные промокоды <span className="ml-2" aria-hidden="true">→</span>
+            </Link>
+            <Link href="/collections/finansy-i-karty" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/25 px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-white/10">
+              Сравнить карты с кэшбэком и рассрочкой 0% →
+            </Link>
+          </div>
         </div>
       </div>
 
       <p className="mt-5 rounded-xl border border-yellow/40 bg-yellow/15 p-3 text-xs leading-relaxed text-ink/75">
-        Это примерный математический расчёт, а не подтверждённая скидка. Итог зависит от минимальной суммы покупки, ограничений, срока действия и условий конкретного магазина. Проверяйте их в карточке предложения.
+        Это примерный математический расчёт, а не подтверждённая скидка или гарантированное одобрение банка. Итог зависит от минимальной суммы покупки, лимитов, тарифов банка и условий конкретного магазина. Проверяйте их в карточке предложения.
       </p>
     </section>
   );
