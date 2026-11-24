@@ -44,6 +44,9 @@ const SHORT_LINKS: Record<string, string> = {
 };
 
 const nextConfig: NextConfig = {
+  experimental: {
+    agentUpgrade: "security",
+  },
   // Логотипы партнёрских сетей через свой домен — см. src/lib/logoProxy.ts.
   async rewrites() {
     return LOGO_PROXIES.map(({ prefix, origin }) => ({
