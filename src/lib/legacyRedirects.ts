@@ -6,6 +6,7 @@
  */
 export const LEGACY_STORE_REDIRECTS: Record<string, string> = {
   "admitad-25914-yandex": "/store/yandex-practicum",
+  "admitad-23526-start": "/store/start-ru",
   ostin: "/category/marketpleysy",
   hoff: "/category/marketpleysy",
   "m-video": "/category/elektronika-i-tehnika",

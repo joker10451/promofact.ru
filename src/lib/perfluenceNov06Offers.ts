@@ -222,6 +222,14 @@ export const OTELLO_NOV_AFFILIATE: Coupon["affiliate"] = {
   ordText: 'Реклама. ООО "Дубльгис", ИНН 5405276278. erid: 2RanyndP3Zn',
 };
 
+// --- 14. START.RU (Project 1623, Post 17489928) ---
+export const START_NOV_AFFILIATE: Coupon["affiliate"] = {
+  link: "https://start.prfl.me/sites/1dn92i?erid=2RanykjHoA4",
+  landingLink: "https://start.prfl.me/sites/1dn92i?erid=2RanykjHoA4",
+  ordMarker: "2RanykjHoA4",
+  ordText: 'Реклама. ООО "СТАРТ.РУ", ИНН 7728374780. erid: 2RanykjHoA4',
+};
+
 export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
   // ================= ЯНДЕКС ЦВЕТЫ =================
   {
@@ -957,6 +965,32 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
       activeBloggers: STABLE_STORES["otello"]?.activeBloggers ?? 6813,
     },
     affiliate: OTELLO_CERT_AFFILIATE,
+    extraLinks: [],
+  },
+
+  // ================= START.RU =================
+  {
+    id: 162302,
+    promocode: {
+      id: 162302,
+      code: "pf24b5xgj555",
+      bonusName: "25 дней доступа за 0 ₽ для новых пользователей в START",
+      terms: "Промокод pf24b5xgj555 даёт 25 дней бесплатного доступа к эксклюзивным сериалам и премьерам онлайн-кинотеатра START для новых пользователей. Действует до 31 декабря 2026 года 00:59.",
+      expires: "2026-12-31T00:59:00+03:00",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Только новые пользователи",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["start-ru"],
+      activeBloggers: STABLE_STORES["start-ru"]?.activeBloggers ?? 3580,
+    },
+    affiliate: START_NOV_AFFILIATE,
     extraLinks: [],
   },
 ];
