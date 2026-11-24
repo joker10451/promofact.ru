@@ -1162,6 +1162,36 @@ export const CUSTOM_COUPONS: Coupon[] = [
     },
     extraLinks: [],
   },
+  // 24 Ноября: Мегамаркет (Своя пятница — повышенный курс бонусов Спасибо 1 к 1.5)
+  {
+    id: 11732201,
+    promocode: {
+      id: 11732201,
+      code: "",
+      bonusName: "Повышенный курс списания бонусов Спасибо (1 бонус = 1,5 ₽) на Мегамаркете",
+      terms: "Горячая акция «Своя пятница» до 30 ноября 2026: повышенный курс списания бонусов СберСпасибо на Мегамаркете. 1 бонус = 1,5 ₽ скидки (выгода до 2 000 ₽) на выделенный ассортимент товаров по ссылке.",
+      expires: "2026-11-30T23:59:59+03:00",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Все пользователи",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["megamarket"],
+      activeBloggers: STABLE_STORES["megamarket"]?.activeBloggers ?? 12500,
+    },
+    affiliate: {
+      link: "https://megamarket1.prfl.me/sites/ks985f?erid=2Ranym5yb24",
+      landingLink: "https://megamarket1.prfl.me/sites/ks985f?erid=2Ranym5yb24",
+      ordMarker: "2Ranym5yb24",
+      ordText: 'Реклама. ООО «Маркетплейс», ИНН 9701048328. erid: 2Ranym5yb24',
+    },
+    extraLinks: [],
+  },
 ];
 
 /**
