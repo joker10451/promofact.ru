@@ -339,6 +339,26 @@ export default async function CollectionPage({
           }))}
         />
 
+        {col.slug === "finansy-i-karty" && (
+          <section aria-label="Интерактивная финансовая витрина" className="mt-12 max-w-4xl border-t border-line pt-6">
+            <h2 className="font-display text-xl font-extrabold text-ink mb-2">
+              Подбор дебетовых и кредитных карт онлайн
+            </h2>
+            <p className="text-sm text-ink/75 mb-6">
+              Сравните актуальные условия по дебетовым картам, бонусам за оформление и выберите подходящую карту в официальном онлайн-каталоге:
+            </p>
+            <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-sm">
+              <iframe
+                src="https://ppdu.ru/41ef6068-a4eb-4179-a855-6c0270f8acf0"
+                title="Витрина дебетовых карт"
+                className="w-full border-0"
+                style={{ height: "680px" }}
+                loading="lazy"
+              />
+            </div>
+          </section>
+        )}
+
         
         {col.buyerTips && (
           <section aria-label="Памятка покупателю" className="mt-12 max-w-3xl border-t border-line pt-6">

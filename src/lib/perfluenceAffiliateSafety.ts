@@ -14,6 +14,20 @@ export function isPerfluencePartnerLink(link: string): boolean {
   }
 }
 
+function isPampaduUrl(url: URL): boolean {
+  return url.protocol === "https:" &&
+    !url.username && !url.password && !url.port &&
+    (url.hostname === "trk.ppdu.ru" || url.hostname === "ppdu.ru" || url.hostname.endsWith(".ppdu.ru"));
+}
+
+export function isPampaduPartnerLink(link: string): boolean {
+  try {
+    return isPampaduUrl(new URL(link));
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Fail-closed validation ONLY for the automatically imported Perfluence widget.
  * Editorial placements have their own approved-link gates. A merchant's

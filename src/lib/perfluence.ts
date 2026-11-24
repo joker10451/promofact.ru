@@ -9,7 +9,7 @@ import { isCouponActive } from "@/lib/couponExpiry";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
-import { isPerfluencePartnerLink, isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
+import { isPampaduPartnerLink, isPerfluencePartnerLink, isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
 import { isRegulatedAdvertiser, meetsMandatoryDisclaimers } from "@/lib/regulatedAds";
 import { carriesOverduePlacement, isExhaustedCode } from "@/lib/overduePlacements";
 import { isApprovedOct24Repost } from "@/lib/perfluenceRepeatsOct24";
@@ -990,6 +990,7 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     source.coupons = source.coupons.filter((coupon) =>
       coupon.promocode.group !== "admitad" &&
       (isPerfluencePartnerLink(coupon.affiliate.link) ||
+        isPampaduPartnerLink(coupon.affiliate.link) ||
         // Perfluence provided this exact Adjust link for its reviewed Samokat placement.
         (source.source === "custom" && coupon.affiliate.link === SAMOKAT_LINK)) &&
       !carriesOverduePlacement(coupon) &&
