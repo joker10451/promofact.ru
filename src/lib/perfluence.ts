@@ -948,9 +948,9 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // Exact approved publisher URLs outrank cached widget entries for ALL
   // four rotated projects. Never hide our verified SberDevices placement
   // just because a stale widget mentions the same coupon code.
-  const freshCustomCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
+  const { getCustomCoupons, SAMOKAT_LINK } = await import("@/lib/customCoupons");
   const sources: import("@/lib/dedupe").SourceBucket[] = [
-    { source: "custom", coupons: freshCustomCoupons },
+    { source: "custom", coupons: getCustomCoupons() },
     ...baseBuckets.map((b) => ({
       source: b.source,
       coupons: b.source === "perfluence"
@@ -966,7 +966,9 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   for (const source of sources) {
     source.coupons = source.coupons.filter((coupon) =>
       coupon.promocode.group !== "admitad" &&
-      isPerfluencePartnerLink(coupon.affiliate.link) &&
+      (isPerfluencePartnerLink(coupon.affiliate.link) ||
+        // Perfluence provided this exact Adjust link for its reviewed Samokat placement.
+        (source.source === "custom" && coupon.affiliate.link === SAMOKAT_LINK)) &&
       !carriesOverduePlacement(coupon) &&
       !isExhaustedCode(coupon)
     );

@@ -100,7 +100,7 @@ const ROSGOSSTRAKH_AFFILIATE: Coupon["affiliate"] = {
 };
 
 // PERFLUENCE / Samokat Birthday: approved PromoFact site placement (post 17345615, project 305).
-const SAMOKAT_LINK = "https://vml8.adj.st/main?showcaseType=MINIMARKET&adj_t=14mofhu6&adj_campaign=CPA&adj_adgroup=3074542&adj_fallback=https%3A%2F%2Fsamokat.ru%3Futm_source%3Dperfluence%26utm_medium%3Dcpa%26utm_campaign%3D3074542&adj_redirect_macos=https%3A%2F%2Fsamokat.ru%3Futm_source%3Dperfluence%26utm_medium%3Dcpa%26utm_campaign%3D3074542&erid=2RanymVswDd";
+export const SAMOKAT_LINK = "https://vml8.adj.st/main?showcaseType=MINIMARKET&adj_t=14mofhu6&adj_campaign=CPA&adj_adgroup=3074542&adj_fallback=https%3A%2F%2Fsamokat.ru%3Futm_source%3Dperfluence%26utm_medium%3Dcpa%26utm_campaign%3D3074542&adj_redirect_macos=https%3A%2F%2Fsamokat.ru%3Futm_source%3Dperfluence%26utm_medium%3Dcpa%26utm_campaign%3D3074542&erid=2RanymVswDd";
 const SAMOKAT_ERID = "2RanymVswDd";
 const SAMOKAT_STORE: Coupon["store"] = {
   id: 305,
