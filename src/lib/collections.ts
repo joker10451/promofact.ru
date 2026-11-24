@@ -9,8 +9,7 @@ export const MIN_INDEXABLE_COLLECTION_OFFERS = 3;
  */
 export const CONFIRMED_BLACK_FRIDAY_CODES: ReadonlySet<string> = new Set([
   "letual:ЧЕРНЫЙ", // Perfluence, новость 116629 от 12.11.2026: «Черная пятница в ЛЭТУАЛЬ», −60% от 7 000 ₽
-  "letual:ПЯТНИЦА", // ЛЭТУАЛЬ — промокод Чёрной Пятницы
-  "letual:НАБЕРИ",
+  "letual:НАБЕРИ", // ЛЭТУАЛЬ — акция ноября 2026
   "letual:МОМЕНТ",
   "podruzhka:2921060875255", // Подружка — Чёрная Пятница 2026, скидка 25% на косметику
   "cozy-home:N6ZIN4Y4", // Cozy Home — Black Friday на маркетплейсах
@@ -22,10 +21,10 @@ export const CONFIRMED_BLACK_FRIDAY_CODES: ReadonlySet<string> = new Set([
   "megamarket:15PRFL",
   "sberdevaysy:SBERDV71", // СберДевайсы — Black Friday скидка на умные устройства
   "sberdevaysy:SBERDV171",
-  "sunlight:PFN324613", // SUNLIGHT — распродажа ювелирных изделий к Чёрной Пятнице
-  "sunlight:PFNN153513",
-  "sunlight:PFNN556373",
-  "sunlight:PFN843468",
+  "sunlight-ru:PFSN124409", // SUNLIGHT — распродажа ювелирных изделий к Чёрной Пятнице
+  "sunlight-ru:PFSN394722",
+  "sunlight-ru:PFS568042",
+  "sunlight-ru:PFS1587883",
   "yandex-pay:YANDEXSUPERSPLIT", // Яндекс Пэй — Супер Сплит к Чёрной Пятнице
   "t-bank:TBANKPLATINUM", // Т-Банк Платинум — 0% рассрочка на покупки в распродажу
 ]);
@@ -207,9 +206,10 @@ export const COLLECTIONS: Collection[] = [
       },
     ],
     relatedArticles: [
-      { text: "Чёрная пятница 2026: гид по скидкам и промокодам", href: "/sovety/chernaya-pyatnica-2026" },
+      { text: "Где искать максимальные скидки в Чёрную Пятницу 2026", href: "/sovety/chernaya-pyatnica-2026-promokody-gde-skidki" },
+      { text: "Чёрная пятница 2026: когда начнётся и как не переплатить", href: "/sovety/chernaya-pyatnica-2026" },
+      { text: "Кредитные карты от 120 дней без % для покупок в рассрочку", href: "/sovety/luchshie-kreditnye-karty-120-dney-2026" },
       { text: "Лайфхаки шопинга на маркетплейсах: Ozon, WB, Маркет", href: "/sovety/laifhaki-shoppinga-na-marketpleysah" },
-      { text: "Кэшбэк банков 2026: как вернуть до 10% с покупок", href: "/sovety/cashbek-bankov-2026" },
     ],
     // An ordinary discount is not a confirmed Black Friday promotion.
     filter: (c) => CONFIRMED_BLACK_FRIDAY_CODES.has(`${c.store.slug}:${c.promocode.code.toUpperCase()}`) ||
@@ -265,6 +265,11 @@ export const COLLECTIONS: Collection[] = [
     ],
     // Financial products only: don't pull in Netprint, streaming and other
     // subscriptions merely because their copy mentions money or bonuses.
+    relatedArticles: [
+      { text: "Кредитные карты от 120 дней без процентов в 2026 году", href: "/sovety/luchshie-kreditnye-karty-120-dney-2026" },
+      { text: "Кэшбэк банков 2026: как вернуть до 10% с покупок", href: "/sovety/cashbek-bankov-2026" },
+      { text: "Дебетовая СберКарта: обслуживание и кэшбэк", href: "/sovety/debetovaya-sberkarta-obsluzhivanie-keshbek" },
+    ],
     filter: (c) =>
       ["finansy", "banki", "banki-i-finansy"].includes(c.store.categorySlug || "") ||
       /^(?:sberbank|sberkarta|sber-karta|vklad-v-sbere|t-bank|alfa-bank|otp|rosgosstrakh|plati-po-vsemu-miru|yandex-pay|zenit)(?:$|-)/iu

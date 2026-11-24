@@ -52,8 +52,8 @@ const store = stores.find((s) => s.slug === "otp-bank");
 assert(store, "Магазин otp-bank должен присутствовать в каталоге");
 
 const coupons = await getCoupons();
-const coupon = coupons.find((c) => c.store.slug === "otp-bank");
-assert(coupon, "Оффер для otp-bank должен присутствовать в каталоге");
+const coupon = coupons.find((c) => c.store.slug === "otp-bank" && c.affiliate?.ordMarker === "2RanynrNE1y");
+assert(coupon, "Оффер дебетовой карты otp-bank (2RanynrNE1y) должен присутствовать в каталоге");
 assert.strictEqual(coupon.affiliate?.ordMarker, "2RanynrNE1y", "Маркер ОРД купона должен быть 2RanynrNE1y");
 assert(coupon.affiliate?.link.includes("2RanynrNE1y"), "Партнерская ссылка купона должна содержать erid");
 console.log("✓ Подтверждено: магазин и оффер доступны в каталоге и привязаны к партнерской ссылке");
