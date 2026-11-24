@@ -80,7 +80,7 @@ function loadStableStores() {
   if (!fs.existsSync(STABLE_STORES_PATH)) return { stores, bySlug };
   const text = fs.readFileSync(STABLE_STORES_PATH, "utf8");
   const re =
-    /"([a-z0-9-]+)":\s*\{\s*[\s\S]*?id:\s*(\d+),[\s\S]*?slug:\s*"([a-z0-9-]+)",[\s\S]*?name:\s*"([^"]+)",[\s\S]*?category:\s*"([^"]+)",[\s\S]*?categorySlug:\s*"([a-z0-9-]+)"/g;
+    /"([a-z0-9-]+)":\s*\{\s*[\s\S]*?id:\s*(-?\d+),[\s\S]*?slug:\s*"([a-z0-9-]+)",[\s\S]*?name:\s*"([^"]+)",[\s\S]*?category:\s*"([^"]+)",[\s\S]*?categorySlug:\s*"([a-z0-9-]+)"/g;
   for (const m of text.matchAll(re)) {
     const store = {
       id: Number.parseInt(m[2], 10),
@@ -397,7 +397,7 @@ ${brief.angleHint}
 
 ЖЁСТКИЕ ТРЕБОВАНИЯ:
 1. Никаких HTML-тегов в тексте (разрешён только **жирный** шрифт в абзацах \`body\` и заголовки второго уровня начинающиеся строго с \`## \`).
-2. Никакой ложной гарантированности: НИКОГДА не пиши «скидка применится сразу», «гарантировано», «100% сработает», «работает у всех», «промокод бессрочный» и не упоминай Admitad / Адмитад. Всегда честно указывай про пороги и условия проверки в корзине.
+2. Никакой ложной гарантированности и стоп-слов: СТРОГО ЗАПРЕЩЕНЫ любые однокоренные слова с корнем «гарантир» (гарантия, гарантированный, гарантировано, гарантирует, гарантируем — даже с частицей «не»!), а также «скидка применится сразу», «100% сработает», «работает у всех», «точные даты заранее», «промокод бессрочный» и любые упоминания Admitad / Адмитад. Вместо «гарантированный» пиши «подтверждённый», «постоянный» или «при соблюдении условий». Всегда честно указывай про пороги и условия проверки в корзине/банке.
 3. Длина \`body\`: от 11 до 16 насыщенных абзацев (включая 4–5 подзаголовков вида \`## Заголовок раздела\`). Средний объём статьи — 3500–5500 символов полезного текста с примерами расчётов в рублях (₽).
 4. \`slug\`: предложи латинский URL-slug (только строчные буквы a-z, цифры 0-9 и дефис \`-\`, желательно \`${brief.suggestedSlug}\`), НЕ совпадающий ни с одним уже существующим (${[...existingSlugs].slice(0, 20).join(", ")}...).
 5. \`title\`: цепляющий, конкретный заголовок 45–88 символов без эмодзи (удобен и для обложки 1200×630, и для SEO).
@@ -503,11 +503,16 @@ function validateAndNormalizeArticle(raw, {
   }
 
   const fullText = [title, description, ...body].join("\n");
-  if (BANNED_CLAIM_RE.test(fullText)) {
-    return { ok: false, reason: "Обнаружена запрещённая недобросовестная формулировка (test:seo-truthful)" };
+  const bannedMatch = fullText.match(BANNED_CLAIM_RE);
+  if (bannedMatch) {
+    return {
+      ok: false,
+      reason: `Обнаружена запрещённая недобросовестная формулировка (test:seo-truthful: «${bannedMatch[0]}»)`,
+    };
   }
-  if (HTML_TAG_RE.test(fullText)) {
-    return { ok: false, reason: "Обнаружены сырые HTML-теги в теле статьи" };
+  const htmlMatch = fullText.match(HTML_TAG_RE);
+  if (htmlMatch) {
+    return { ok: false, reason: `Обнаружены сырые HTML-теги в теле статьи («${htmlMatch[0]}»)` };
   }
   if (BAD_BRAND_RE.test(fullText)) {
     return { ok: false, reason: "Обнаружено нежелательное упоминание Admitad" };
@@ -565,14 +570,14 @@ function validateAndNormalizeArticle(raw, {
   };
 
   pushRelated(brief.ctaDefault.text.replace(/\s*→$/, ""), brief.ctaDefault.href);
+  for (const ts of brief.targetStores) {
+    if (keptRelated.length >= 4) break;
+    const meta = storesBySlug.get(ts);
+    if (meta) pushRelated(`Предложения ${meta.name}`, `/store/${ts}`);
+  }
   for (const r of Array.isArray(raw.related) ? raw.related : []) {
     if (keptRelated.length >= 6) break;
     pushRelated(r?.text, r?.href);
-  }
-  for (const ts of brief.targetStores) {
-    if (keptRelated.length >= 5) break;
-    const meta = storesBySlug.get(ts);
-    if (meta) pushRelated(`Промокоды ${meta.name}`, `/store/${ts}`);
   }
   if (!keptRelated.some((r) => r.href.startsWith("/collections/"))) {
     pushRelated("Банковские карты и кэшбэк", "/collections/finansy-i-karty");
@@ -690,7 +695,7 @@ async function main() {
 
   console.log(`[generate-article] Выбрана тема (${brief.slot}): ${brief.suggestedSlug}`);
 
-  const prompt = buildGeminiPrompt({
+  const basePrompt = buildGeminiPrompt({
     brief,
     validStoreSlugs,
     validCategorySlugs,
@@ -699,25 +704,40 @@ async function main() {
     mskYmd,
   });
 
-  const { model, parsed } = await callGeminiWithFallback(apiKey, prompt);
-  console.log(`[generate-article] Получен JSON от ${model}`);
+  let article = null;
+  let lastValidationReason = "";
+  const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const prompt = lastValidationReason
+      ? `${basePrompt}\n\nВАЖНОЕ ЗАМЕЧАНИЕ К ПОПЫТКЕ #${attempt - 1}: статья была отклонена валидатором по причине: ${lastValidationReason}\nПерепиши JSON целиком и полностью исключи указанное нарушение (особенно проверь отсутствие любых слов с корнем «гарантир» и любых обещаний вроде «100% сработает» / «бессрочный»).`
+      : basePrompt;
 
-  const validated = validateAndNormalizeArticle(parsed, {
-    brief,
-    mskYmd,
-    forbiddenSlugs,
-    validStoreSlugs,
-    validCategorySlugs,
-    validCollectionSlugs,
-    existingArticleSlugs: existing.slugs,
-    storesBySlug: storesMeta.bySlug,
-  });
+    const { model, parsed } = await callGeminiWithFallback(apiKey, prompt);
+    console.log(`[generate-article] Попытка ${attempt}/${maxAttempts}: получен JSON от ${model}`);
 
-  if (!validated.ok) {
-    throw new Error(`Сгенерированная статья отклонена валидатором: ${validated.reason}`);
+    const validated = validateAndNormalizeArticle(parsed, {
+      brief,
+      mskYmd,
+      forbiddenSlugs,
+      validStoreSlugs,
+      validCategorySlugs,
+      validCollectionSlugs,
+      existingArticleSlugs: existing.slugs,
+      storesBySlug: storesMeta.bySlug,
+    });
+
+    if (validated.ok) {
+      article = validated.article;
+      break;
+    }
+
+    lastValidationReason = validated.reason;
+    console.warn(`[generate-article] Попытка ${attempt}/${maxAttempts} отклонена: ${lastValidationReason}`);
   }
 
-  const article = validated.article;
+  if (!article) {
+    throw new Error(`Сгенерированная статья отклонена валидатором после ${maxAttempts} попыток: ${lastValidationReason}`);
+  }
   console.log(`[generate-article] Валидация ПРОЙДЕНА:`);
   console.log(`  slug: ${article.slug}`);
   console.log(`  title: ${article.title} (${article.title.length} симв.)`);
