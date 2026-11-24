@@ -1,17 +1,17 @@
 {
-  "lastSuccessSync": "2026-11-24T00:44:14.006Z",
-  "lastAttemptAt": "2026-11-24T00:44:14.006Z",
+  "lastSuccessSync": "2026-11-24T10:50:12.966Z",
+  "lastAttemptAt": "2026-11-24T10:50:12.966Z",
   "status": "success",
   "source": "perfluence-api",
   "projectCount": 51,
-  "totalPromos": 89,
-  "activePromos": 89,
+  "totalPromos": 90,
+  "activePromos": 90,
   "expiredPromos": 0,
-  "totalLinkOffers": 16,
-  "activeLinkOffers": 16,
+  "totalLinkOffers": 14,
+  "activeLinkOffers": 14,
   "expiredLinkOffers": 0,
-  "totalOffers": 93,
-  "activeOffers": 93,
+  "totalOffers": 94,
+  "activeOffers": 94,
   "expiredOffers": 0,
-  "updatedAt": "2026-11-24T00:44:14.006Z"
+  "updatedAt": "2026-11-24T10:50:12.966Z"
 }
