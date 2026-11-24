@@ -120,7 +120,7 @@ export default async function ArticlePage({
     description: article.description,
     datePublished: article.published || "2026-10-01",
     dateModified: article.published || "2026-10-23",
-    ...(article.image ? { image: new URL(article.image, SITE_URL).toString() } : {}),
+    ...(article.image ? { image: new URL(article.image, SITE_URL).toString() } : { image: `${SITE_URL}/sovety/${slug}/opengraph-image` }),
     author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
     publisher: {
       "@type": "Organization",

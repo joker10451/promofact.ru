@@ -20,6 +20,7 @@ import { PERFLUENCE_REPEAT_OCT24_OFFERS } from "@/lib/perfluenceRepeatsOct24";
 import { SBER_ANALIZY_OCT29_OFFERS } from "@/lib/perfluenceSberAnalizyOct29";
 import { PERFLUENCE_OCT26_WEBSITE_OFFERS } from "@/lib/perfluenceOct26Website";
 import { isPausedPublisherStore } from "@/lib/publisherPauses";
+import pampaduOffersData from "@/data/pampadu-offers.json";
 
 /**
  * Ручные купоны от рекламодателей и партнёрских сетей.
@@ -165,182 +166,45 @@ const YANDEX_OCT23_APPROVED_OFFERS: Coupon[] = [
     "lmj210", "Скидка 520 ₽ в Яндекс Еде Рестораны", "2026-11-01T23:59:59+03:00"),
 ];
 
+const PAMPADU_COUPONS: Coupon[] = pampaduOffersData.offers.map((offer) => {
+  const baseStore = STABLE_STORES[offer.storeSlug];
+  if (!baseStore) {
+    throw new Error(`Unknown Pampadu storeSlug "${offer.storeSlug}" in src/data/pampadu-offers.json`);
+  }
+  return {
+    id: offer.id,
+    promocode: {
+      id: offer.id,
+      code: offer.code,
+      bonusName: offer.bonusName,
+      terms: offer.terms,
+      expires: offer.expires,
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: offer.customerTypeLabel,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "pampadu",
+    },
+    store: {
+      ...baseStore,
+      activeBloggers: offer.activeBloggers ?? baseStore.activeBloggers ?? 0,
+    },
+    affiliate: {
+      link: offer.link,
+      landingLink: offer.landingLink,
+      ordMarker: offer.ordMarker,
+      ordText: offer.ordText,
+    },
+    extraLinks: [],
+  };
+});
+
 export const CUSTOM_COUPONS: Coupon[] = [
-  // --- PAMPADU FINANCIAL OFFERS ---
-  {
-    id: 99220301,
-    promocode: {
-      id: 99220301,
-      code: "TBANKBLACK",
-      bonusName: "Дебетовая карта T-Bank Black: бесплатное обслуживание навсегда и кэшбэк до 30%",
-      terms: "Бесплатное обслуживание карты Black МИР навсегда без условий. Кэшбэк до 30% в категориях на выбор и у партнеров рублями каждый месяц. Доход на остаток и переводы без комиссии через СБП.",
-      expires: "2026-12-31",
-      isHit: true,
-      isUniversal: true,
-      isFirstOrderOnly: false,
-      customerTypeLabel: "Для всех",
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "pampadu",
-    },
-    store: {
-      ...STABLE_STORES["t-bank"],
-      activeBloggers: 3200,
-    },
-    affiliate: {
-      link: "https://trk.ppdu.ru/click?uid=263585&oid=2203&erid=Kra23xCCG&siteId=30575",
-      landingLink: "https://trk.ppdu.ru/click/gauHyQcm?erid=Kra23xCCG",
-      ordMarker: "Kra23xCCG",
-      ordText: "Реклама. АО «Т-Банк», ОГРН 1027739004037 erid: Kra23xCCG",
-    },
-    extraLinks: [],
-  },
-  {
-    id: 99142801,
-    promocode: {
-      id: 99142801,
-      code: "ALFASMART",
-      bonusName: "Дебетовая Альфа-Карта МИР: суперкэшбэк до 100% и 0 ₽ за обслуживание всегда",
-      terms: "Бесплатное обслуживание навсегда без условий и трат. Кэшбэк до 100% в барабане суперкэшбэка каждый месяц, до 5% в 4 категориях на выбор и до 33% у партнеров. Бесплатные переводы в любые банки.",
-      expires: "2026-12-31",
-      isHit: true,
-      isUniversal: true,
-      isFirstOrderOnly: false,
-      customerTypeLabel: "Для всех",
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "pampadu",
-    },
-    store: {
-      ...STABLE_STORES["alfa-bank"],
-      activeBloggers: 3500,
-    },
-    affiliate: {
-      link: "https://trk.ppdu.ru/click?uid=263585&oid=1428&erid=2SDnje2HATp&siteId=30575",
-      landingLink: "https://trk.ppdu.ru/click/pN5y1lxU?erid=2SDnje2HATp",
-      ordMarker: "2SDnje2HATp",
-      ordText: "Реклама. АО «АЛЬФА-БАНК», ОГРН 1027700067328 erid: 2SDnje2HATp",
-    },
-    extraLinks: [],
-  },
-  {
-    id: 99169201,
-    promocode: {
-      id: 99169201,
-      code: "TBANKPLATINUM",
-      bonusName: "Кредитная карта Т-Банк Платинум: лимит до 1 000 000 ₽ и рассрочка 0% до 12 месяцев",
-      terms: "Кредитный лимит до 1 000 000 ₽ с мгновенным решением за 2 минуты без справок. Беспроцентный период до 55 дней на любые покупки, рассрочка 0% до 12 месяцев у партнеров. Бесплатная доставка карты представителем.",
-      expires: "2026-12-31",
-      isHit: true,
-      isUniversal: true,
-      isFirstOrderOnly: false,
-      customerTypeLabel: "Кредитная карта",
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "pampadu",
-    },
-    store: {
-      ...STABLE_STORES["t-bank"],
-      activeBloggers: 3200,
-    },
-    affiliate: {
-      link: "https://trk.ppdu.ru/click?uid=263585&oid=1692&erid=2SDnjc8oQFe&siteId=30575",
-      landingLink: "https://trk.ppdu.ru/click/wcmqivIW?erid=2SDnjc8oQFe&siteId=30575",
-      ordMarker: "2SDnjc8oQFe",
-      ordText: "Реклама. АО «Т-Банк», ОГРН 1027739004037 erid: 2SDnjc8oQFe",
-    },
-    extraLinks: [],
-  },
-  {
-    id: 99268401,
-    promocode: {
-      id: 99268401,
-      code: "YANDEXSUPERSPLIT",
-      bonusName: "Кредитная карта Яндекс Пэй Супер Сплит: лимит до 295 000 ₽ и кэшбэк до 50%",
-      terms: "Оплата покупок частями без переплат в любых магазинах через Сплит. Лимит до 295 000 ₽, кэшбэк до 50% баллами Яндекс Плюса, бесплатный цифровой выпуск за 1 минуту в приложении и 0 ₽ за обслуживание.",
-      expires: "2026-12-31",
-      isHit: true,
-      isUniversal: true,
-      isFirstOrderOnly: false,
-      customerTypeLabel: "Кредитная карта",
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "pampadu",
-    },
-    store: {
-      ...STABLE_STORES["yandex-pay"],
-      activeBloggers: 2800,
-    },
-    affiliate: {
-      link: "https://trk.ppdu.ru/click?uid=263585&oid=2684&erid=2SDnjeCxpmJ&siteId=30575",
-      landingLink: "https://trk.ppdu.ru/click/z7if0mKq?erid=2SDnjeCxpmJ&siteId=30575",
-      ordMarker: "2SDnjeCxpmJ",
-      ordText: "Реклама. АО «Яндекс Банк», ОГРН 1027739660237 erid: 2SDnjeCxpmJ",
-    },
-    extraLinks: [],
-  },
-  {
-    id: 99206601,
-    promocode: {
-      id: 99206601,
-      code: "OTP120DAYS",
-      bonusName: "Кредитная карта ОТП Банк: 120 дней без % на любые покупки и 0 ₽ обслуживание",
-      terms: "Честный беспроцентный период 120 дней без процентов на любые покупки. Кредитный лимит до 300 000 ₽, бесплатное обслуживание навсегда без скрытых условий и минимальных трат. Оформление онлайн за пару минут.",
-      expires: "2026-12-31",
-      isHit: true,
-      isUniversal: true,
-      isFirstOrderOnly: false,
-      customerTypeLabel: "Кредитная карта",
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "pampadu",
-    },
-    store: {
-      ...STABLE_STORES["otp-bank"],
-      activeBloggers: 1520,
-    },
-    affiliate: {
-      link: "https://trk.ppdu.ru/click?uid=263585&oid=2066&erid=2SDnjee1d3Q&siteId=30575",
-      landingLink: "https://trk.ppdu.ru/click/mfBInxK9?erid=2SDnjee1d3Q&siteId=30575",
-      ordMarker: "2SDnjee1d3Q",
-      ordText: "Реклама. АО «ОТП Банк», ИНН 7708001614 erid: 2SDnjee1d3Q",
-    },
-    extraLinks: [],
-  },
-  {
-    id: 99146801,
-    promocode: {
-      id: 99146801,
-      code: "ZENIT120CARD",
-      bonusName: "Кредитная карта Банк ЗЕНИТ: 120 дней без % и лимит до 2 000 000 ₽",
-      terms: "Кредитный лимит до 2 000 000 ₽, льготный период до 120 дней без процентов на покупки. Кэшбэк рублями, бесплатное снятие наличных в любых банкоматах и бесплатная доставка.",
-      expires: "2026-12-31",
-      isHit: true,
-      isUniversal: true,
-      isFirstOrderOnly: false,
-      customerTypeLabel: "Кредитная карта",
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "pampadu",
-    },
-    store: {
-      ...STABLE_STORES["zenit"],
-      activeBloggers: 1400,
-    },
-    affiliate: {
-      link: "https://trk.ppdu.ru/click?uid=263585&oid=1468&erid=2SDnjdGKRVJ&siteId=30575",
-      landingLink: "https://trk.ppdu.ru/click/Gnetr0bk?erid=2SDnjdGKRVJ&siteId=30575",
-      ordMarker: "2SDnjdGKRVJ",
-      ordText: "Реклама. ПАО Банк ЗЕНИТ, ИНН 7729405872 erid: 2SDnjdGKRVJ",
-    },
-    extraLinks: [],
-  },
+  // --- PAMPADU FINANCIAL OFFERS (src/data/pampadu-offers.json) ---
+  ...PAMPADU_COUPONS,
   // --- GLOBUS (#1123) ---
   {
     id: 1749138701,

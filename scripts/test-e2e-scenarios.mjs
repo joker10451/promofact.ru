@@ -261,63 +261,68 @@ async function run() {
       passedTests++;
     }
 
-    // --- СЦЕНАРИЙ 4: Достоверное копирование промокода (проверка буфера) ---
-    console.log("\n[Тест 4] Сценарий: Достоверное копирование промокода в системный буфер обмена");
+    // --- СЦЕНАРИЙ 4: Click-to-Reveal и достоверное копирование промокода ---
+    console.log("\n[Тест 4] Сценарий: Click-to-Reveal и достоверное копирование промокода в буфер обмена");
     {
       const context = await browser.newContext({
         viewport: { width: 390, height: 844 },
         permissions: ["clipboard-read", "clipboard-write"],
       });
+      await context.route("**/*mc.yandex.ru/**", (route) => route.abort());
+      await context.route("**/*prfl.me/**", (route) =>
+        route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Partner</body></html>" })
+      );
       const page = await context.newPage();
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
-      // Находим первую карточку купона
-      const firstCard = page.locator('article[id^="coupon-"]').first();
-      // Accessible code control replaces the former div with a truncated span.
-      const codeElement = firstCard.locator('button[aria-label^="Скопировать промокод "]').first();
-      const label = await codeElement.getAttribute("aria-label");
+      // Находим детерминированную фикстуру с промокодом (FARFORTEST1)
+      const firstCard = page.locator("#coupon-99233301");
+      await firstCard.waitFor({ state: "visible" });
+
+      // До клика промокод замаскирован и отображается ссылка «Показать промокод и перейти в магазин»
+      const revealControl = firstCard.locator('a[aria-label="Показать промокод и перейти в магазин"]').first();
+      await revealControl.waitFor({ state: "visible" });
+      const revealHref = await revealControl.getAttribute("href");
+      if (!revealHref || revealHref.startsWith("#")) throw new Error("Кнопка показа кода должна вести на партнёрскую ссылку");
+      if ((await revealControl.getAttribute("target")) !== "_blank") throw new Error("Магазин должен открываться в новой вкладке");
+
+      const [popup] = await Promise.all([
+        context.waitForEvent("page", { timeout: 5000 }),
+        revealControl.click(),
+      ]);
+      await popup.close().catch(() => {});
+
+      // После Click-to-Reveal появляется открытый код и кнопка «Скопировать промокод ...»
+      const copyBtn = firstCard.locator('button[aria-label^="Скопировать промокод "]').first();
+      await copyBtn.waitFor({ state: "visible", timeout: 4000 });
+      const label = await copyBtn.getAttribute("aria-label");
       const expectedCode = (label || "").replace(/^Скопировать промокод\s+/, "").trim();
-      if (!expectedCode) throw new Error("Не найден промокод в доступной кнопке");
+      if (!expectedCode) throw new Error("Не найден раскрытый промокод в доступной кнопке");
 
-      const copyBtn = firstCard.locator('button[aria-label^="Скопировать промокод "]').first(); // copy-only control
-      await copyBtn.waitFor({ state: "visible" });
+      const clipboardAfterReveal = await page.evaluate(() => navigator.clipboard.readText());
+      if (clipboardAfterReveal !== expectedCode) {
+        throw new Error(`Буфер после Click-to-Reveal не совпадает: ожидался "${expectedCode}", получен "${clipboardAfterReveal}"`);
+      }
+
+      // Проверяем повторное копирование только кнопкой кода (без нового перехода)
+      await page.evaluate(() => navigator.clipboard.writeText(""));
       await copyBtn.click();
-
-      // Проверяем статус в карточке
-      const copiedBadge = firstCard.getByText("Скопировано", { exact: true });
+      const copiedBadge = firstCard.getByText("Скопировано!", { exact: true });
       await copiedBadge.waitFor({ state: "visible", timeout: 3000 });
 
-      // Считываем реальное содержимое буфера обмена через Clipboard API
       const clipboardContent = await page.evaluate(() => navigator.clipboard.readText());
       if (clipboardContent !== expectedCode) {
         throw new Error(`Буфер обмена не совпадает: ожидался "${expectedCode}", получен "${clipboardContent}"`);
       }
-      console.log(`  ✓ Фактический буфер обмена подтверждён: "${clipboardContent}"`);
+      console.log(`  ✓ Click-to-Reveal и фактический буфер обмена подтверждены: "${clipboardContent}"`);
 
-      // Проверяем, что Toast НЕ утверждает «Магазин открыт»
+      // Проверяем, что Toast НЕ утверждает «Магазин открыт» при обычном копировании
       const toastStatus = page.locator('div[role="status"]');
       const toastText = await toastStatus.innerText();
       if (toastText.includes("Магазин открыт")) {
         throw new Error(`Тост ошибочно утверждает, что магазин открыт, хотя перехода не было: ${toastText}`);
       }
       console.log("  ✓ Уведомление честно сообщает о копировании без ложного утверждения об открытии магазина");
-
-      // Main CTA: one tap copies the code and opens the partner link in a new tab.
-      await page.evaluate(() => navigator.clipboard.writeText(""));
-      const mainCta = firstCard.locator("a:has-text('Скопировать и перейти')");
-      await mainCta.waitFor({ state: "visible" });
-      const ctaHref = await mainCta.getAttribute("href");
-      if (!ctaHref || ctaHref.startsWith("#")) throw new Error("Главная кнопка должна вести на партнёрскую ссылку");
-      if ((await mainCta.getAttribute("target")) !== "_blank") throw new Error("Магазин должен открываться в новой вкладке");
-      const popupPromise = context.waitForEvent("page", { timeout: 5000 });
-      await mainCta.click();
-      const popup = await popupPromise;
-      await popup.close().catch(() => {});
-      const afterCta = await page.evaluate(() => navigator.clipboard.readText());
-      if (afterCta !== expectedCode) {
-        throw new Error(`Главная кнопка не скопировала код: ожидался "${expectedCode}", получен "${afterCta}"`);
-      }
-      console.log("  ✓ «Скопировать и перейти»: код в буфере и открыта вкладка партнёра");
 
       await context.close();
       passedTests++;
@@ -327,6 +332,9 @@ async function run() {
     console.log("\n[Тест 5] Сценарий: Обработка отказа доступа к Clipboard API (Fallback ручного копирования)");
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      await context.route("**/*prfl.me/**", (route) =>
+        route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Partner</body></html>" })
+      );
       const page = await context.newPage();
 
       // Имитируем отказ Clipboard API (браузер заблокировал доступ или ошибка прав)
@@ -348,15 +356,21 @@ async function run() {
 
       await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
 
-      const firstCard = page.locator("article").first();
-      const copyBtn = firstCard.locator('button[aria-label^="Скопировать промокод "]').first();
-      await copyBtn.waitFor({ state: "visible" });
-      
-      // Нажимаем копирование и ожидаем блок ручного ввода (с повтором, если в CI гидратация ещё завершалась)
+      const firstCard = page.locator("#coupon-99233301");
+      await firstCard.waitFor({ state: "visible" });
+      const revealControl = firstCard.locator('a[aria-label="Показать промокод и перейти в магазин"]').first();
+      await revealControl.waitFor({ state: "visible" });
+
+      // Нажимаем показать/скопировать и ожидаем блок ручного ввода (с повтором, если в CI гидратация ещё завершалась)
       const fallbackAlert = firstCard.locator('div[role="alert"]');
       let alertVisible = false;
       for (let attempt = 0; attempt < 3; attempt++) {
-        await copyBtn.click();
+        await revealControl.click().catch(() => {});
+        // После первого клика может появиться кнопка "Повторить копирование" / revealed copyBtn
+        const revealedCopyBtn = firstCard.locator('button[aria-label^="Скопировать промокод "]').first();
+        if (await revealedCopyBtn.isVisible().catch(() => false)) {
+          await revealedCopyBtn.click();
+        }
         try {
           await fallbackAlert.waitFor({ state: "visible", timeout: 2500 });
           alertVisible = true;
@@ -371,7 +385,7 @@ async function run() {
       }
 
       // Убеждаемся, что фиктивный статус "скопировано!" НЕ отобразился
-      const fakeSuccess = await firstCard.getByText("Скопировано", { exact: true }).isVisible();
+      const fakeSuccess = await firstCard.getByText("Скопировано!", { exact: true }).isVisible();
       if (fakeSuccess) {
         throw new Error("Отобразился статус успешного копирования при ошибке Clipboard API!");
       }
@@ -405,7 +419,7 @@ async function run() {
         await helperBtn.waitFor({ state: "visible" });
         const helperBox = await helperBtn.boundingBox();
 
-        const firstCopyBtn = page.locator("a:has-text('Скопировать и перейти')").first(); // main CTA
+        const firstCopyBtn = page.locator("a:has-text('Показать промокод')").first(); // main CTA
         await firstCopyBtn.waitFor({ state: "visible" });
         const copyBox = await firstCopyBtn.boundingBox();
 
@@ -663,8 +677,26 @@ async function run() {
       ];
 
       for (const res of resolutions) {
-        const context = await browser.newContext({ viewport: { width: res.width, height: res.height } });
+        const context = await browser.newContext({
+          viewport: { width: res.width, height: res.height },
+          permissions: ["clipboard-read", "clipboard-write"],
+        });
+        await context.route("**/*prfl.me/**", (route) =>
+          route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Partner</body></html>" })
+        );
         const page = await context.newPage();
+        const revealAllCards = async () => {
+          const reveals = page.locator('article[id^="coupon-"] a[aria-label="Показать промокод и перейти в магазин"]');
+          for (let attempt = 0; attempt < 20; attempt++) {
+            if ((await reveals.count()) === 0) break;
+            const [popup] = await Promise.all([
+              context.waitForEvent("page", { timeout: 3000 }).catch(() => null),
+              reveals.first().click(),
+            ]);
+            if (popup) await popup.close().catch(() => {});
+            await page.waitForTimeout(50);
+          }
+        };
 
         for (const pathUrl of pagesToTest) {
           await page.goto(`${BASE_URL}${pathUrl}`, { waitUntil: "domcontentloaded" });
@@ -705,6 +737,7 @@ async function run() {
             }
           }
           if (pathUrl === "/store/ivi") {
+            await revealAllCards();
             const cards = page.locator('article[id^="coupon-"]');
             assert.equal(await cards.filter({ hasText: "begrnta7swiz" }).count(), 1,
               "Ivi must display exactly one new approved coupon instead of old FILM35");
@@ -741,6 +774,7 @@ async function run() {
             }
           }
           if (pathUrl === "/store/citydrive") {
+            await revealAllCards();
             // The feed renews the other codes' dates and ERIDs, so only the main code is pinned
             // (perfluenceRotatedOffers.ts, to 30 Nov). Any other card shown must carry its marking.
             const mainCard = page.locator('article[id^="coupon-"]').filter({ hasText: "PERFCITY107" }).first();
@@ -756,12 +790,13 @@ async function run() {
             }
           }
           if (pathUrl === "/store/m-kosmetik") {
+            await revealAllCards();
             // Codes rotate independently; never require an offer after its Moscow expiry.
             // Чай expired at the end of 22 October Moscow time, so later runs
             // must not demand it.
             const offers = [
               { code: "Чай", endsAt: "2026-10-22T23:59:59+03:00" },
-              // Renewed in the 1 November placement (perfluenceNov01Offers.ts).
+              // Renewed in the 1 November placement (perfluenceNov01Offers.ts) and 24 Nov (perfluenceNov24Offers.ts).
               { code: "PK4GMWJUK", endsAt: "2026-11-30T23:59:59+03:00" },
               { code: "PF21K0T5LF", endsAt: "2026-10-31T23:59:59+03:00" },
             ];
@@ -776,7 +811,7 @@ async function run() {
             }
             assert.ok(await cards.count() >= active.length,
               "M.Kosmetik must keep its non-expired approved coupons");
-            const publisherDisclosure = page.getByText(/2Ranymz3211|2RanynNVHR5/);
+            const publisherDisclosure = page.getByText(/2Ranymz3211|2RanynNVHR5|2Ranynmu9Ba/);
             assert.ok(await publisherDisclosure.count() >= active.length,
               "Active M.Kosmetik offers must display approved Perfluence ERID");
           }
@@ -993,24 +1028,27 @@ async function run() {
         throw new Error(`Начальный фильтр должен быть 'all' (aria-pressed=true), получено: ${isAllPressed}`);
       }
 
-      // Считываем badge counts из кнопок
+      // Считываем badge counts из кнопок (нулевые группы StoreIntentTabs не рендерит)
       const allCountText = await allBtn.locator("span:last-child").innerText();
       const allCount = parseInt(allCountText.trim(), 10);
 
+      const readTabCount = async (btn) =>
+        (await btn.count()) > 0
+          ? parseInt((await btn.locator("span:last-child").innerText()).trim(), 10)
+          : 0;
+
       const firstOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Только первый заказ")');
-      const firstCountText = await firstOrderBtn.locator("span:last-child").innerText();
-      const firstCount = parseInt(firstCountText.trim(), 10);
+      const firstCount = await readTabCount(firstOrderBtn);
 
       const repeatOrderBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Повторные заказы")');
-      const repeatCountText = await repeatOrderBtn.locator("span:last-child").innerText();
-      const repeatCount = parseInt(repeatCountText.trim(), 10);
-       const universalBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Для всех")');
-       const universalCount = parseInt((await universalBtn.locator("span:last-child").innerText()).trim(), 10);
-       const unknownBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Условия уточняются")');
-       const unknownCount = parseInt((await unknownBtn.locator("span:last-child").innerText()).trim(), 10);
+      const repeatCount = await readTabCount(repeatOrderBtn);
+      const universalBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Для всех")');
+      const universalCount = await readTabCount(universalBtn);
+      const unknownBtn = page.locator('nav[aria-label="Фильтр купонов по типу заказа"] button:has-text("Условия уточняются")');
+      const unknownCount = await readTabCount(unknownBtn);
 
       if (isNaN(allCount) || isNaN(firstCount) || isNaN(repeatCount) || isNaN(universalCount) || isNaN(unknownCount)) {
-        throw new Error(`Не удалось распарсить бейджи счётчиков: all=${allCountText}, first=${firstCountText}, repeat=${repeatCountText}`);
+        throw new Error(`Не удалось распарсить бейджи счётчиков: all=${allCountText}, first=${firstCount}, repeat=${repeatCount}`);
       }
 
       // Все предложения разбиты на взаимоисключающие группы, включая неизвестную аудиторию.
@@ -1024,61 +1062,46 @@ async function run() {
       if (initialCardsCount !== allCount) {
         throw new Error(`Количество карточек (${initialCardsCount}) не совпадает со счётчиком 'Все акции' (${allCount})`);
       }
-      console.log(`  ✓ Начальное состояние: all=${allCount} (first=${firstCount}, repeat=${repeatCount}), карточек в DOM: ${initialCardsCount}`);
+      console.log(`  ✓ Начальное состояние: all=${allCount} (first=${firstCount}, repeat=${repeatCount}, universal=${universalCount}, unknown=${unknownCount}), карточек в DOM: ${initialCardsCount}`);
 
-      // 2. Клик "На первый заказ"
-      await firstOrderBtn.click();
-      await page.waitForTimeout(300);
+      // 2. Клик "На первый заказ" (если кнопка отображена)
+      if (firstCount > 0) {
+        await firstOrderBtn.click();
+        await page.waitForTimeout(300);
 
-      // Проверяем, что pathname не изменился и нет query params
-      const urlAfterFirst = new URL(page.url());
-      if (urlAfterFirst.pathname !== "/store/farfor" || urlAfterFirst.search !== "") {
-        throw new Error(`URL не должен меняться при клике на фильтр: ${page.url()}`);
-      }
+        const urlAfterFirst = new URL(page.url());
+        if (urlAfterFirst.pathname !== "/store/farfor" || urlAfterFirst.search !== "") {
+          throw new Error(`URL не должен меняться при клике на фильтр: ${page.url()}`);
+        }
 
-      const isFirstPressed = await firstOrderBtn.getAttribute("aria-pressed");
-      if (isFirstPressed !== "true") {
-        throw new Error("Кнопка 'На первый заказ' должна иметь aria-pressed=true");
-      }
+        const isFirstPressed = await firstOrderBtn.getAttribute("aria-pressed");
+        if (isFirstPressed !== "true") {
+          throw new Error("Кнопка 'На первый заказ' должна иметь aria-pressed=true");
+        }
 
-      const firstCardsCount = await cards.count();
-      if (firstCount === 0) {
-        // Empty state check
-        const emptyState = page.locator('text="Сейчас предложений этого типа нет."');
-        await emptyState.waitFor({ state: "visible" });
-        const resetBtn = page.locator('button:has-text("Показать все акции")');
-        await resetBtn.waitFor({ state: "visible" });
-        console.log("  ✓ Фильтр 'На первый заказ' (0 купонов): корректный empty-state показан");
-      } else {
+        const firstCardsCount = await cards.count();
         if (firstCardsCount !== firstCount) {
           throw new Error(`Ожидалось ${firstCount} купонов на первый заказ, отображается: ${firstCardsCount}`);
         }
         console.log(`  ✓ Фильтр 'На первый заказ': отображается ${firstCardsCount} карточек (ожидалось ${firstCount})`);
       }
 
-      // 3. Клик "Повторные заказы"
-      await repeatOrderBtn.click();
-      await page.waitForTimeout(300);
+      // 3. Клик "Повторные заказы" (если кнопка отображена)
+      if (repeatCount > 0) {
+        await repeatOrderBtn.click();
+        await page.waitForTimeout(300);
 
-      const urlAfterRepeat = new URL(page.url());
-      if (urlAfterRepeat.pathname !== "/store/farfor" || urlAfterRepeat.search !== "") {
-        throw new Error(`URL не должен меняться при клике на фильтр: ${page.url()}`);
-      }
+        const urlAfterRepeat = new URL(page.url());
+        if (urlAfterRepeat.pathname !== "/store/farfor" || urlAfterRepeat.search !== "") {
+          throw new Error(`URL не должен меняться при клике на фильтр: ${page.url()}`);
+        }
 
-      const isRepeatPressed = await repeatOrderBtn.getAttribute("aria-pressed");
-      if (isRepeatPressed !== "true") {
-        throw new Error("Кнопка 'Повторные заказы' должна иметь aria-pressed=true");
-      }
+        const isRepeatPressed = await repeatOrderBtn.getAttribute("aria-pressed");
+        if (isRepeatPressed !== "true") {
+          throw new Error("Кнопка 'Повторные заказы' должна иметь aria-pressed=true");
+        }
 
-      const repeatCardsCount = await cards.count();
-      if (repeatCount === 0) {
-        // Empty state check
-        const emptyState = page.locator('text="Сейчас предложений этого типа нет."');
-        await emptyState.waitFor({ state: "visible" });
-        const resetBtn = page.locator('button:has-text("Показать все акции")');
-        await resetBtn.waitFor({ state: "visible" });
-        console.log("  ✓ Фильтр 'Повторные заказы' (0 купонов): корректный empty-state показан");
-      } else {
+        const repeatCardsCount = await cards.count();
         if (repeatCardsCount !== repeatCount) {
           throw new Error(`Ожидалось ${repeatCount} купонов на повторный заказ, отображается: ${repeatCardsCount}`);
         }
@@ -1086,17 +1109,21 @@ async function run() {
       }
 
       // 3b. Универсальные предложения не относятся к повторным заказам.
-      await universalBtn.click();
-      await page.waitForTimeout(300);
-      if (await cards.count() !== universalCount) {
-        throw new Error(`Ожидалось ${universalCount} универсальных купонов, получено ${await cards.count()}`);
+      if (universalCount > 0) {
+        await universalBtn.click();
+        await page.waitForTimeout(300);
+        if (await cards.count() !== universalCount) {
+          throw new Error(`Ожидалось ${universalCount} универсальных купонов, получено ${await cards.count()}`);
+        }
       }
 
       // 3c. Неизвестная аудитория показана отдельно, а не как "Для всех".
-      await unknownBtn.click();
-      await page.waitForTimeout(300);
-      if (await cards.count() !== unknownCount) {
-        throw new Error(`Ожидалось ${unknownCount} купонов с неподтверждённой аудиторией, получено ${await cards.count()}`);
+      if (unknownCount > 0) {
+        await unknownBtn.click();
+        await page.waitForTimeout(300);
+        if (await cards.count() !== unknownCount) {
+          throw new Error(`Ожидалось ${unknownCount} купонов с неподтверждённой аудиторией, получено ${await cards.count()}`);
+        }
       }
 
       // 4. Клик "Все акции"
@@ -1221,27 +1248,39 @@ async function run() {
       ];
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
+      let emptyCasesVerified = 0;
       for (const item of cases) {
         const url = `${BASE_URL}/store/${item.slug}`;
         const response = await page.goto(url, { waitUntil: "domcontentloaded" });
         assert.equal(response?.status(), 200, item.slug + ": legacy URL must resolve without a 404");
         const robot = await page.locator('meta[name="robots"]').getAttribute("content");
-        assert.match(robot || "", /noindex/i, item.slug + ": empty stores must not be indexed");
-        const emptyHeading = page.getByRole("heading", { name: /Подтверждённых промокодов.*пока нет/ });
-        await emptyHeading.waitFor({ state: "visible" });
-        assert.equal(await page.locator('a[href="' + item.merchant + '"]').count() > 0, true,
-          item.slug + ": official merchant destination must be present");
-        const emptyCopy = await emptyHeading.locator("xpath=..").innerText();
-        assert.ok(!/скидки действуют|акции каталога действуют|гарантирован/i.test(emptyCopy),
-          "Do not imply an unverified promotion is live");
-        assert.ok(!(await page.locator('article[id^="coupon-"]').count()),
-          item.slug + ": do not fabricate coupons for historic URLs");
+        const offerCount = await page.locator('article[id^="coupon-"]').count();
+        if (offerCount === 0) {
+          emptyCasesVerified++;
+          assert.match(robot || "", /noindex/i, item.slug + ": empty stores must not be indexed");
+          const emptyHeading = page.getByRole("heading", { name: /Подтверждённых промокодов.*пока нет/ });
+          await emptyHeading.waitFor({ state: "visible" });
+          assert.equal(await page.locator('a[href="' + item.merchant + '"]').count() > 0, true,
+            item.slug + ": official merchant destination must be present");
+          const emptyCopy = await emptyHeading.locator("xpath=..").innerText();
+          assert.ok(!/скидки действуют|акции каталога действуют|гарантирован/i.test(emptyCopy),
+            "Do not imply an unverified promotion is live");
+        } else {
+          // Once a historic store receives real approved offers, indexing unlocks automatically.
+          assert.match(robot || "", /^index/i, item.slug + ": store with real active offers may be indexed");
+          const cardArticles = page.locator('article[id^="coupon-"]');
+          for (let i = 0; i < offerCount; i++) {
+            assert.match(await cardArticles.nth(i).innerText(), /erid:\s*\w{8,}/i,
+              `${item.slug}: every active offer must carry advertising marking`);
+          }
+        }
         await page.screenshot({
           path: path.join(afterScreenshotsDir, `ui-seo-1-1-${item.slug}-390.png`),
           fullPage: false,
           animations: "disabled",
         });
       }
+      assert.ok(emptyCasesVerified >= 1, "At least one empty legacy store must be verified noindex");
       await context.close();
       passedTests++;
     }
@@ -1250,21 +1289,34 @@ async function run() {
     console.log("\n[Test 13] FMART: actual store cards, approved ERID and discoverability");
     {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      await context.route("**/*prfl.me/**", (route) =>
+        route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Partner</body></html>" })
+      );
       const page = await context.newPage();
       const response = await page.goto(BASE_URL + "/store/fmart", { waitUntil: "domcontentloaded" });
       assert.equal(response?.status(), 200, "FMART store must resolve independently of Flowwow");
       assert.match(await page.locator("h1").innerText(), /FMART/i);
-      const codes = page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]');
+      const cards = page.locator('article[id^="coupon-"]');
       await page.waitForTimeout(550);
       // FMART's codes, dates and ERIDs are renewed by the feed every few days (flash offers),
-      // so they are not pinned. Invariants: whatever is shown is marked as advertising, once each.
-      const shownCodes = [];
-      for (let i = 0; i < await codes.count(); i++) {
-        shownCodes.push(await codes.nth(i).getAttribute("aria-label"));
+      // so they are not pinned. Invariants: whatever is shown is marked as advertising, distinct IDs.
+      const shownIds = [];
+      for (let i = 0; i < await cards.count(); i++) {
+        shownIds.push(await cards.nth(i).getAttribute("id"));
       }
-      assert.equal(new Set(shownCodes).size, shownCodes.length, "FMART code shown twice");
-      const hasOffers = shownCodes.length > 0;
+      assert.equal(new Set(shownIds).size, shownIds.length, "FMART coupon card shown twice");
+      const hasOffers = shownIds.length > 0;
       if (hasOffers) {
+        const firstReveal = cards.first().locator('a[aria-label="Показать промокод и перейти в магазин"]').first();
+        if (await firstReveal.count()) {
+          const [fmartPopup] = await Promise.all([
+            context.waitForEvent("page", { timeout: 5000 }).catch(() => null),
+            firstReveal.click(),
+          ]);
+          await fmartPopup?.close().catch(() => {});
+          const revealedCopy = page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]');
+          assert((await revealedCopy.count()) > 0, "Revealed FMART coupon must show copy button");
+        }
         assert.match(await page.content(), /erid:\s*\w{8,}/i, "FMART must show its advertising marking");
         await page.screenshot({ path: path.resolve("./audit-screenshots/after/polish-fmart-390.png"), fullPage: true, animations: "disabled" });
         const home = await page.goto(BASE_URL + "/", { waitUntil: "domcontentloaded" });
@@ -1323,12 +1375,12 @@ async function run() {
         assert.equal(response?.status(), 200);
         // The feed renews VkusVill's codes, dates and ERIDs, so they are not pinned.
         // Invariants: every card is marked as advertising and each code appears once.
-        const cardCodes = page.locator('article[id^="coupon-"] button[aria-label^="Скопировать промокод "]');
-        const labels = [];
-        for (let i = 0; i < await cardCodes.count(); i++) labels.push(await cardCodes.nth(i).getAttribute("aria-label"));
-        assert.equal(new Set(labels).size, labels.length, "VkusVill code shown twice");
+        const cardArticles = page.locator('article[id^="coupon-"]');
+        const cardIds = [];
+        for (let i = 0; i < await cardArticles.count(); i++) cardIds.push(await cardArticles.nth(i).getAttribute("id"));
+        assert.equal(new Set(cardIds).size, cardIds.length, "VkusVill card shown twice");
         const html = await page.content();
-        if (labels.length) assert.match(html, /erid:\s*\w{8,}/i, "VkusVill must show its advertising marking");
+        if (cardIds.length) assert.match(html, /erid:\s*\w{8,}/i, "VkusVill must show its advertising marking");
         assert(!html.includes("2RanynjH547"), "Never restore stale Telegram marker");
         assert(!html.includes("vksvl.prfl.me/smart_zakupka"), "Never route website clicks through Telegram");
         await page.screenshot({

@@ -18,6 +18,18 @@ import { getFlashDeals, autoActivateFlashProjects } from "./perfluence-flash-dea
 import { postToVk } from "./vk-crossposter.mjs";
 import { checkNewEarnings } from "./perfluence-earnings-monitor.mjs";
 import { pingIndexNow } from "./indexnow-ping.mjs";
+import { getProxyUrl, requestJson } from "./http-client.mjs";
+import {
+  buildArticleCandidates,
+  buildPampaduCandidates,
+  escapeHtml,
+  fitCaption,
+  loadStableStoreSlugs,
+  loadTgHistory,
+  parseExpiryMs,
+  recordTgHistory,
+  selectHybridTrack,
+} from "./hybrid-post-sources.mjs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HISTORY_FILE = path.join(DATA_DIR, "posted_promos.json");
@@ -55,7 +67,16 @@ const STORE_SLUGS = {
   3641: "cozy-home",
   3807: "librederm",
   1977: "vazhnaya-ryba",
+  2657: "podruzhka",
+  2582: "magnit-dostavka",
+  2333: "farfor",
+  5067: "sberdevaysy",
+  4463: "rosgosstrakh",
+  1965: "yandex-afisha",
+  3750: "yandeks-tsvety",
 };
+
+const STABLE_SLUGS = loadStableStoreSlugs();
 
 const TRANSLIT = {
   а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i",
@@ -65,7 +86,10 @@ const TRANSLIT = {
 };
 
 function storeSlugOf(storeId, storeName) {
+  if (STABLE_SLUGS.byId[storeId]) return STABLE_SLUGS.byId[storeId];
   if (STORE_SLUGS[storeId]) return STORE_SLUGS[storeId];
+  const byName = STABLE_SLUGS.byName[String(storeName || "").toLowerCase().trim()];
+  if (byName) return byName;
   return String(storeName)
     .toLowerCase()
     .split("")
@@ -126,62 +150,62 @@ async function deleteTelegramMessage(messageId) {
   return await res.json();
 }
 
-async function sendTelegramPost(text, buttons = [], imageUrl = null) {
+async function sendTelegramPost(text, buttons = [], imageUrl = null, extra = {}) {
   const replyMarkup = buttons.length > 0 ? { inline_keyboard: buttons } : undefined;
+  const disableWebPagePreview = extra.disableWebPagePreview ?? false;
 
-  // Если есть локальный файл или ссылка на баннер — шлем как фото с подписью
-  if (imageUrl) {
+  // Если есть локальный файл или ссылка на баннер — шлем как фото с подписью (строго <= 980 симв., иначе переходим к sendMessage)
+  if (imageUrl && text.length <= 1024) {
     const photoUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        let photoRes;
-        if (fs.existsSync(imageUrl)) {
+        let photoData;
+        if (fs.existsSync(imageUrl) && !getProxyUrl()) {
           const fileBuffer = fs.readFileSync(imageUrl);
           const formData = new FormData();
           formData.append("chat_id", CHANNEL_ID);
           formData.append("photo", new Blob([fileBuffer], { type: "image/png" }), "banner.png");
-          formData.append("caption", text.slice(0, 1024));
+          formData.append("caption", text);
           formData.append("parse_mode", "HTML");
           if (replyMarkup) formData.append("reply_markup", JSON.stringify(replyMarkup));
 
-          photoRes = await fetch(photoUrl, { method: "POST", body: formData });
-        } else {
-          photoRes = await fetch(photoUrl, {
+          const photoRes = await fetch(photoUrl, { method: "POST", body: formData });
+          photoData = await photoRes.json();
+        } else if (!fs.existsSync(imageUrl)) {
+          const res = await requestJson(photoUrl, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+            body: {
               chat_id: CHANNEL_ID,
               photo: imageUrl,
-              caption: text.slice(0, 1024),
+              caption: text,
               parse_mode: "HTML",
-              reply_markup: replyMarkup
-            })
+              reply_markup: replyMarkup,
+            },
           });
+          photoData = res.json;
         }
-        const photoData = await photoRes.json();
-        if (photoData.ok) return photoData;
-        console.warn(`⚠ sendPhoto попытка ${attempt} не удалась:`, photoData.description);
+        if (photoData?.ok) return photoData;
+        if (photoData) console.warn(`⚠ sendPhoto попытка ${attempt} не удалась:`, photoData.description);
       } catch (photoErr) {
         console.warn(`⚠ sendPhoto попытка ${attempt} ошибка:`, photoErr.message);
-        if (attempt < 2) await new Promise(r => setTimeout(r, 1000));
+        if (attempt < 2) await new Promise((r) => setTimeout(r, 1000));
       }
     }
   }
 
-  // Текстовая отправка (fallback)
+  // Текстовая отправка (полный HTML до 4096 символов)
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-  const res = await fetch(url, {
+  const res = await requestJson(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+    body: {
       chat_id: CHANNEL_ID,
-      text,
+      text: text.slice(0, 4096),
       parse_mode: "HTML",
       reply_markup: replyMarkup,
-      disable_web_page_preview: false
-    })
+      disable_web_page_preview: disableWebPagePreview,
+    },
   });
-  return await res.json();
+  return res.json || { ok: false, description: res.text };
 }
 
 async function fetchChannelSpecificOffer(projectId, targetAccount = "smart_zakupka") {
@@ -300,9 +324,11 @@ async function fetchProjectTemplateImage(projectId) {
   }
 }
 
-export async function runPipeline(options = { dryRun: false, takeOffers: true }) {
+export async function runPipeline(options = { dryRun: false, takeOffers: true, mode: "auto" }) {
+  const mode = options.mode || "auto";
+  const tgHistory = loadTgHistory();
   console.log("==================================================");
-  console.log("   🚀 ПОЛНЫЙ АВТОНОМНЫЙ ЦИКЛ (AUTONOMOUS PIPELINE) ");
+  console.log(`   🚀 АВТОНОМНЫЙ КОНВЕЙЕР (режим: ${mode})   `);
   console.log("==================================================");
 
   // ФАЗА 0: Мониторинг новых заказов, конверсий и заработка
@@ -326,8 +352,8 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
 
   for (const item of historyData.history) {
     if (!item.deleted && item.messageId && item.expires) {
-      const expTime = new Date(`${item.expires}T23:59:59`).getTime();
-      if (now > expTime) {
+      const expTime = parseExpiryMs(item.expires);
+      if (expTime !== null && now > expTime) {
         console.log(` -> Оффер "${item.store}" (${item.code}) истек ${item.expires}. Удаление #${item.messageId}...`);
         if (!options.dryRun) {
           const delRes = await deleteTelegramMessage(item.messageId);
@@ -344,7 +370,8 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   if (cleanedCount > 0) saveHistory(historyData);
 
   // ФАЗА 2: Автоматический поиск и взятие новых офферов в Perfluence
-  if (options.takeOffers && fs.existsSync(SESSION_FILE)) {
+  const wantPerfluence = mode === "auto" || mode === "perfluence";
+  if (wantPerfluence && options.takeOffers && fs.existsSync(SESSION_FILE)) {
     console.log("\n[Фаза 2] Сканирование каталога и авто-взятие новых офферов...");
     try {
       await takeNewOffers({ maxOffers: 2, headless: true });
@@ -352,35 +379,39 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
       console.warn(`[Фаза 2] Авто-взятие пропущено: ${err.message}`);
     }
   } else {
-    console.log("\n[Фаза 2] Сессия браузера в облаке не передана, авто-взятие пропущено. Переходим к отбору из API...");
+    console.log(`\n[Фаза 2] Авто-взятие пропущено (mode=${mode}, takeOffers=${Boolean(options.takeOffers)}).`);
   }
 
-  // ФАЗА 3: Загрузка готовых офферов из виджета
-  console.log("\n[Фаза 3] Анализ активных офферов из Perfluence API...");
+  // ФАЗА 3: Загрузка готовых офферов из виджета Perfluence (если выбран трек Perfluence/auto)
   let items = [];
-  try {
-    if (WIDGET_URL) {
-      const res = await fetch(WIDGET_URL);
-      if (res.ok) {
-        const json = await res.json();
-        items = Array.isArray(json.data) ? json.data : [];
+  if (wantPerfluence) {
+    console.log("\n[Фаза 3] Анализ активных офферов из Perfluence API...");
+    try {
+      if (WIDGET_URL) {
+        const res = await requestJson(WIDGET_URL);
+        if (res.ok && res.json) {
+          items = Array.isArray(res.json.data) ? res.json.data : [];
+        }
       }
+    } catch (e) {
+      console.warn("Ошибка загрузки виджета:", e.message);
     }
-  } catch (e) {
-    console.warn("Ошибка загрузки виджета:", e.message);
-  }
-
-  console.log(` -> Получено проектов из Perfluence: ${items.length}`);
-
-  if (items.length === 0) {
-    console.log("❌ Нет доступных офферов для публикации.");
-    return;
+    console.log(` -> Получено проектов из Perfluence: ${items.length}`);
   }
 
   // Извлекаем промокоды и проекты
   const candidates = [];
-  const recentCodes = new Set(historyData.history.map(h => (h.code || "").trim().toUpperCase()).filter(Boolean));
-  const recentStores = new Set(historyData.history.slice(0, 5).map(h => h.storeSlug).filter(Boolean));
+  const recentCodes = new Set([
+    ...historyData.history.map((h) => (h.code || "").trim().toUpperCase()).filter(Boolean),
+    ...tgHistory
+      .flatMap((h) => (Array.isArray(h.codes) ? h.codes : h.code ? [h.code] : []))
+      .map((c) => String(c || "").trim().toUpperCase())
+      .filter(Boolean),
+  ]);
+  const recentStores = new Set([
+    ...historyData.history.slice(0, 5).map((h) => h.storeSlug).filter(Boolean),
+    ...tgHistory.slice(-5).map((h) => h.store).filter(Boolean),
+  ]);
 
   for (const item of items) {
     const project = item.project || item.shop || item;
@@ -457,56 +488,58 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   ];
 
   // [Фаза 3.1] Мониторинг и авто-активация «Флеш-акций» и повышенных ставок
-  console.log("\n[Фаза 3.1] Мониторинг и авто-активация «Флеш-акций» рекламодателей...");
   let flashDeals = [];
   const flashMap = new Map();
-  try {
-    // 1. Авто-активация проектов с флеш-акциями в 1 клик
-    if (options.takeOffers !== false) {
-      await autoActivateFlashProjects();
-    }
+  if (wantPerfluence) {
+    console.log("\n[Фаза 3.1] Мониторинг и авто-активация «Флеш-акций» рекламодателей...");
+    try {
+      // 1. Авто-активация проектов с флеш-акциями в 1 клик
+      if (options.takeOffers !== false) {
+        await autoActivateFlashProjects();
+      }
 
-    flashDeals = await getFlashDeals();
-    for (const d of flashDeals) {
-      if (d.projectId) flashMap.set(String(d.projectId), d);
-      if (d.projectName) flashMap.set(d.projectName.toLowerCase(), d);
-    }
-    if (flashDeals.length > 0) {
-      console.log(` -> Обнаружено активных спецпредложений/флеш-акций: ${flashDeals.length}`);
-      flashDeals.forEach(f => console.log(`    ⚡ [${f.badge}] #${f.projectId} "${f.projectName}": ${f.title}`));
-    } else {
-      console.log(" -> В новостях нет активных флеш-акций на сегодня.");
-    }
+      flashDeals = await getFlashDeals();
+      for (const d of flashDeals) {
+        if (d.projectId) flashMap.set(String(d.projectId), d);
+        if (d.projectName) flashMap.set(d.projectName.toLowerCase(), d);
+      }
+      if (flashDeals.length > 0) {
+        console.log(` -> Обнаружено активных спецпредложений/флеш-акций: ${flashDeals.length}`);
+        flashDeals.forEach(f => console.log(`    ⚡ [${f.badge}] #${f.projectId} "${f.projectName}": ${f.title}`));
+      } else {
+        console.log(" -> В новостях нет активных флеш-акций на сегодня.");
+      }
 
-    // 2. Добавляем активированные флеш-офферы в пул кандидатов, если их еще не было
-    for (const deal of flashDeals) {
-      if (!deal.projectId) continue;
-      const exists = candidates.some(c => String(c.storeId) === String(deal.projectId) || c.storeName.toLowerCase() === deal.projectName.toLowerCase());
-      if (!exists) {
-        const channelData = await fetchChannelSpecificOffer(deal.projectId, "smart_zakupka");
-        if (channelData && channelData.promos && channelData.promos.length > 0) {
-          for (const p of channelData.promos) {
-            if (!p.code || recentCodes.has(p.code.toUpperCase())) continue;
-            candidates.push({
-              storeId: deal.projectId,
-              storeName: deal.projectName,
-              code: p.code,
-              bonus: p.bonus || deal.title,
-              terms: deal.desc || "",
-              expires: p.expires || null,
-              affUrl: channelData.affUrl,
-              ordMarker: channelData.ordMarker,
-              ordText: channelData.ordText || `Реклама. ${deal.projectName}`,
-              isHit: true,
-              flashDeal: deal
-            });
-            console.log(` -> ⚡ Флеш-оффер "${deal.projectName}" (#${deal.projectId}) добавлен в пул кандидатов с промокодом [${p.code}]!`);
+      // 2. Добавляем активированные флеш-офферы в пул кандидатов, если их еще не было
+      for (const deal of flashDeals) {
+        if (!deal.projectId) continue;
+        const exists = candidates.some(c => String(c.storeId) === String(deal.projectId) || c.storeName.toLowerCase() === deal.projectName.toLowerCase());
+        if (!exists) {
+          const channelData = await fetchChannelSpecificOffer(deal.projectId, "smart_zakupka");
+          if (channelData && channelData.promos && channelData.promos.length > 0) {
+            for (const p of channelData.promos) {
+              if (!p.code || recentCodes.has(p.code.toUpperCase())) continue;
+              candidates.push({
+                storeId: deal.projectId,
+                storeName: deal.projectName,
+                code: p.code,
+                bonus: p.bonus || deal.title,
+                terms: deal.desc || "",
+                expires: p.expires || null,
+                affUrl: channelData.affUrl,
+                ordMarker: channelData.ordMarker,
+                ordText: channelData.ordText || `Реклама. ${deal.projectName}`,
+                isHit: true,
+                flashDeal: deal
+              });
+              console.log(` -> ⚡ Флеш-оффер "${deal.projectName}" (#${deal.projectId}) добавлен в пул кандидатов с промокодом [${p.code}]!`);
+            }
           }
         }
       }
+    } catch (err) {
+      console.warn(" -> Ошибка мониторинга флеш-акций:", err.message);
     }
-  } catch (err) {
-    console.warn(" -> Ошибка мониторинга флеш-акций:", err.message);
   }
 
   const recentStoresList = historyData.history.slice(0, 10).map(h => (h.store || "").toLowerCase());
@@ -581,54 +614,164 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   // окажется с чужим erid. Поэтому идём по кандидатам сверху вниз и берём
   // первого, у кого в кабинете есть публикация для канала.
   let selected = null;
-  for (const candidate of scored.slice(0, 8)) {
-    if (!candidate.storeId) continue;
-    const channelData = await fetchChannelSpecificOffer(candidate.storeId, "smart_zakupka");
-    if (!channelData || !channelData.affUrl || !channelData.ordMarker) {
-      console.log(
-        ` -> «${candidate.storeName}»: для канала нет публикации с ссылкой и erid, пропускаем`,
-      );
-      continue;
+  if (wantPerfluence && scored.length > 0 && fs.existsSync(SESSION_FILE)) {
+    for (const candidate of scored.slice(0, 8)) {
+      if (!candidate.storeId) continue;
+      const channelData = await fetchChannelSpecificOffer(candidate.storeId, "smart_zakupka");
+      if (!channelData || !channelData.affUrl || !channelData.ordMarker) {
+        console.log(
+          ` -> «${candidate.storeName}»: для канала нет публикации с ссылкой и erid, пропускаем`,
+        );
+        continue;
+      }
+
+      candidate.affUrl = channelData.affUrl;
+      candidate.ordMarker = channelData.ordMarker;
+      if (channelData.ordText) candidate.ordText = channelData.ordText;
+
+      // Самый выгодный код канала, которого ещё не было в постах
+      const validPromos = (channelData.promos || [])
+        .filter((p) => p.code && !recentCodes.has(p.code.toUpperCase()))
+        .sort((a, b) => b.discountNum - a.discountNum);
+
+      if (validPromos.length > 0) {
+        candidate.code = validPromos[0].code;
+        candidate.bonus = validPromos[0].bonus;
+        if (validPromos[0].expires) candidate.expires = validPromos[0].expires;
+        candidate.otherPromos = validPromos.slice(1).map((p) => ({
+          code: p.code,
+          bonus: p.bonus,
+          expires: p.expires,
+        }));
+      } else if (!channelData.promos?.some((p) => p.code === candidate.code)) {
+        // Кода из виджета нет среди кодов канала — значит он не наш.
+        console.log(` -> «${candidate.storeName}»: код ${candidate.code} не выдан каналу, пропускаем`);
+        continue;
+      }
+
+      selected = candidate;
+      break;
     }
-
-    candidate.affUrl = channelData.affUrl;
-    candidate.ordMarker = channelData.ordMarker;
-    if (channelData.ordText) candidate.ordText = channelData.ordText;
-
-    // Самый выгодный код канала, которого ещё не было в постах
-    const validPromos = (channelData.promos || [])
-      .filter((p) => p.code && !recentCodes.has(p.code.toUpperCase()))
-      .sort((a, b) => b.discountNum - a.discountNum);
-
-    if (validPromos.length > 0) {
-      candidate.code = validPromos[0].code;
-      candidate.bonus = validPromos[0].bonus;
-      if (validPromos[0].expires) candidate.expires = validPromos[0].expires;
-      candidate.otherPromos = validPromos.slice(1).map((p) => ({
-        code: p.code,
-        bonus: p.bonus,
-        expires: p.expires,
-      }));
-    } else if (!channelData.promos?.some((p) => p.code === candidate.code)) {
-      // Кода из виджета нет среди кодов канала — значит он не наш.
-      console.log(` -> «${candidate.storeName}»: код ${candidate.code} не выдан каналу, пропускаем`);
-      continue;
-    }
-
-    selected = candidate;
-    break;
+  } else if (wantPerfluence && scored.length > 0 && !fs.existsSync(SESSION_FILE)) {
+    console.log(" -> ℹ Локальная Perfluence-сессия отсутствует — проверяем гибридный fallback (Pampadu / /sovety).");
   }
 
-  if (!selected) {
-    console.log(
-      "\n❌ Ни по одному офферу нет публикации для канала @smart_zakupka." +
-        " Зайдите в кабинет Perfluence и нажмите «Получить промокод» для канала," +
-        " либо проверьте, жива ли сессия в data/perfluence_session.json.",
-    );
+  const pampaduCandidates = buildPampaduCandidates(tgHistory, now, { force: mode === "pampadu" });
+  const articleCandidates = buildArticleCandidates(tgHistory, now);
+  const track = selectHybridTrack({
+    mode,
+    hasPerfluenceCandidate: Boolean(selected),
+    hasUrgentFlashDeal: Boolean(selected?.flashDeal),
+    hasPampaduCandidate: pampaduCandidates.length > 0,
+    hasArticleCandidate: articleCandidates.length > 0,
+    history: tgHistory,
+    nowDate: new Date(now),
+  });
 
-    // ВК при этом не остаётся без записей: сообщество без ленты не получает
-    // показов в клипах, а анонс со ссылкой на страницу сайта партнёрской
-    // рекламой не является — маркировка стоит на самой странице.
+  console.log(
+    ` -> [Гибридный выбор] perfluence=${Boolean(selected)}, pampadu=${pampaduCandidates.length}, articles=${articleCandidates.length} => трек "${track || "none"}"`,
+  );
+
+  let activePost = null;
+  if (track === "perfluence" && selected) {
+    console.log(`\n[Фаза 4] Выбран Perfluence-оффер: "${selected.storeName}" (балл: ${selected.score}, код: ${selected.code}, бонус: ${selected.bonus})${selected.flashDeal ? ` [${selected.flashDeal.badge}]` : ""}`);
+
+    const bodyLines = [];
+    if (selected.flashDeal && !selected.flashDeal.isInternalOnly && selected.flashDeal.audienceDesc) {
+      bodyLines.push(`${escapeHtml(selected.flashDeal.badge)}`);
+      bodyLines.push(`📢 <b>${escapeHtml(selected.flashDeal.title)}</b> — <i>${escapeHtml(selected.flashDeal.audienceDesc)}</i>\n`);
+    }
+    bodyLines.push(`${selected.isHit ? "🔥" : "🏷"} <b>${escapeHtml(selected.storeName)} — ${escapeHtml(selected.bonus)}</b>\n`);
+    bodyLines.push(`🎟 Промокод: <code>${escapeHtml(selected.code)}</code>`);
+    bodyLines.push(`<i>(нажмите на код — он скопируется в буфер)</i>\n`);
+
+    const facts = [];
+    facts.push(selected.repeatOrder ? "Первый и повторные заказы" : "Только первый заказ");
+    if (selected.region && selected.region !== "RU") facts.push(`Города: ${selected.region}`);
+    if (selected.expires) facts.push(`Действует до ${formatExpires(selected.expires)}`);
+
+    bodyLines.push("📌 <b>Условия:</b>");
+    facts.forEach((f) => bodyLines.push(`• ${escapeHtml(f)}`));
+
+    const others = (selected.otherPromos || []).slice(0, 3);
+    if (others.length) {
+      bodyLines.push(`\n🎁 <b>Ещё коды ${escapeHtml(selected.storeName)}:</b>`);
+      for (const o of others) {
+        const until = o.expires ? ` (до ${formatExpires(o.expires)})` : "";
+        const what = escapeHtml(cleanText(o.bonus).slice(0, 70));
+        bodyLines.push(`• <code>${escapeHtml(o.code)}</code> — ${what}${until}`);
+      }
+    }
+
+    const details = cleanText(selected.terms) || cleanText(selected.about);
+    if (details) bodyLines.push(`\nℹ️ ${escapeHtml(details.slice(0, 180))}`);
+
+    const eridLine = selected.ordMarker && !selected.ordText.includes(selected.ordMarker)
+      ? `${selected.ordText} erid: ${selected.ordMarker}`
+      : selected.ordText;
+
+    const storePageUrl = `https://promofact.ru/store/${selected.storeSlug}`;
+    const footerLines = [
+      `👉 <a href="${selected.affUrl}">Активировать в ${escapeHtml(selected.storeName)} →</a>`,
+      `🌐 <a href="${storePageUrl}">Все промокоды ${escapeHtml(selected.storeName)} на ПромоФакте</a>`,
+      ``,
+      `⚖️ <i>${escapeHtml(eridLine)}</i>`,
+    ];
+
+    const postText = fitCaption(bodyLines.join("\n"), footerLines.join("\n"), 980);
+    const buttons = [
+      [{ text: `🛍 В магазин ${selected.storeName} →`, url: selected.affUrl }],
+      [{ text: `🌐 Все промокоды ${selected.storeName}`, url: storePageUrl }],
+    ];
+
+    const bgTemplateUrl = await fetchProjectTemplateImage(selected.storeId);
+    let bannerPath = bgTemplateUrl;
+    try {
+      bannerPath = await generatePromoBanner({
+        storeName: selected.storeName,
+        code: selected.code,
+        bonus: selected.bonus,
+        bgImageUrl: bgTemplateUrl,
+        badgeText: selected.flashDeal?.badge || "🔥 ТОП СКИДКА",
+      });
+      console.log(` -> 🎨 Сгенерирован баннер с промокодом [${selected.code}]: ${bannerPath}`);
+    } catch (genErr) {
+      console.warn("⚠ Не удалось сгенерировать баннер, отправляем с исходным макетом:", genErr.message);
+    }
+
+    activePost = {
+      kind: "perfluence",
+      postMode: "photo",
+      storeId: selected.storeId,
+      storeSlug: selected.storeSlug,
+      storeName: selected.storeName,
+      code: selected.code,
+      codes: [selected.code],
+      bonus: selected.bonus,
+      terms: selected.terms,
+      affUrl: selected.affUrl,
+      ordMarker: selected.ordMarker,
+      ordText: selected.ordText,
+      expires: selected.expires,
+      flashDeal: selected.flashDeal,
+      url: storePageUrl,
+      vkUrl: storePageUrl,
+      vkTitle: selected.bonus,
+      text: postText,
+      buttons,
+      bannerPath,
+      enableLinkPreview: false,
+    };
+  } else if (track === "pampadu" && pampaduCandidates.length > 0) {
+    activePost = pampaduCandidates[0];
+    console.log(`\n[Фаза 4] Гибридный трек PAMPADU: "${activePost.storeName}" (коды: ${activePost.codes.join(", ")})`);
+  } else if (track === "article" && articleCandidates.length > 0) {
+    activePost = articleCandidates[0];
+    console.log(`\n[Фаза 4] Гибридный трек ARTICLE: "${activePost.storeName}" (${activePost.url})`);
+  }
+
+  if (!activePost) {
+    console.log("\n❌ Нет подходящего контента для публикации (Perfluence / Pampadu / Статьи исчерпаны или на кулдауне).");
     const announce = scored[0];
     if (announce && !options.dryRun) {
       try {
@@ -644,92 +787,26 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
       } catch (e) {
         console.warn(" -> ⚠ ВК: анонс не опубликован:", e.message);
       }
-    } else if (announce) {
-      console.log(` -> [DRY RUN] ВК получил бы анонс «${announce.storeName}» со ссылкой на сайт`);
     }
     return;
-  }
-
-  console.log(`\n[Фаза 4] Выбран лучший оффер: "${selected.storeName}" (балл: ${selected.score}, код: ${selected.code}, бонус: ${selected.bonus})${selected.flashDeal ? ` [${selected.flashDeal.badge}]` : ""}`);
-
-  // Формируем пост
-  const postLines = [];
-  if (selected.flashDeal && !selected.flashDeal.isInternalOnly && selected.flashDeal.audienceDesc) {
-    postLines.push(`${selected.flashDeal.badge}`);
-    postLines.push(`📢 <b>${selected.flashDeal.title}</b> — <i>${selected.flashDeal.audienceDesc}</i>\n`);
-  }
-  postLines.push(`${selected.isHit ? "🔥" : "🏷"} <b>${selected.storeName} — ${selected.bonus}</b>\n`);
-  postLines.push(`🎟 Промокод: <code>${selected.code}</code>`);
-  postLines.push(`<i>(нажмите на код — он скопируется в буфер)</i>\n`);
-
-  // Блок условий: раньше он был единственным и появлялся, только если
-  // рекламодатель заполнил terms. Теперь собираем строки из полей, которые
-  // виджет отдаёт всегда, — пост перестал быть «кодом в пустоте».
-  const facts = [];
-  facts.push(selected.repeatOrder ? "Первый и повторные заказы" : "Только первый заказ");
-  if (selected.region && selected.region !== "RU") facts.push(`Города: ${selected.region}`);
-  if (selected.expires) facts.push(`Действует до ${formatExpires(selected.expires)}`);
-
-  postLines.push("📌 <b>Условия:</b>");
-  facts.forEach((f) => postLines.push(`• ${f}`));
-
-  // Остальные коды магазина — прямо в посте. Подписчик сам выберет тот, что
-  // подходит под его сумму заказа, вместо того чтобы уходить искать на сайт.
-  const others = (selected.otherPromos || []).slice(0, 3);
-  if (others.length) {
-    postLines.push(`\n🎁 <b>Ещё коды ${selected.storeName}:</b>`);
-    for (const o of others) {
-      const until = o.expires ? ` (до ${formatExpires(o.expires)})` : "";
-      const what = cleanText(o.bonus).slice(0, 80);
-      postLines.push(`• <code>${o.code}</code> — ${what}${until}`);
-    }
-  }
-
-  const details = cleanText(selected.terms) || cleanText(selected.about);
-  if (details) postLines.push(`\nℹ️ ${details.slice(0, 220)}`);
-
-  postLines.push("");
-  if (selected.ordMarker && !selected.ordText.includes(selected.ordMarker)) {
-    postLines.push(`<i>${selected.ordText} erid: ${selected.ordMarker}</i>`);
-  } else {
-    postLines.push(`<i>${selected.ordText}</i>`);
-  }
-
-  const postText = postLines.join("\n");
-  const buttons = [
-    [{ text: `🛍 В магазин ${selected.storeName} →`, url: selected.affUrl }],
-    // Раньше вторая кнопка вела на главную. Ведём на страницу магазина:
-    // там все его коды, условия и маркировка.
-    [{ text: `🌐 Все промокоды ${selected.storeName}`, url: `https://promofact.ru/store/${selected.storeSlug}` }]
-  ];
-
-  // 1. Ищем официальный промо-макет проекта в Perfluence
-  const bgTemplateUrl = await fetchProjectTemplateImage(selected.storeId);
-  
-  // 2. Генерируем брендовый баннер с ВПЕЧАТАННЫМ персональным промокодом!
-  try {
-    selected.bannerPath = await generatePromoBanner({
-      storeName: selected.storeName,
-      code: selected.code,
-      bonus: selected.bonus,
-      bgImageUrl: bgTemplateUrl,
-      badgeText: selected.flashDeal?.badge || "🔥 ТОП СКИДКА"
-    });
-    console.log(` -> 🎨 Сгенерирован баннер с вашим промокодом [${selected.code}]: ${selected.bannerPath}`);
-  } catch (genErr) {
-    console.warn("⚠ Не удалось сгенерировать баннер, отправляем с исходным макетом:", genErr.message);
-    selected.bannerPath = bgTemplateUrl;
   }
 
   if (options.dryRun) {
-    console.log("\n[DRY RUN] Баннер: " + (selected.bannerPath || "нет (текстовый)"));
-    console.log("[DRY RUN] Текст поста:\n" + postText);
+    console.log(`\n[DRY RUN] Трек: ${activePost.kind} (${activePost.postMode}), длина текста: ${activePost.text.length}`);
+    console.log("[DRY RUN] Баннер: " + (activePost.bannerPath || "нет (структурированный HTML-пост)"));
+    console.log("[DRY RUN] Кнопки: " + JSON.stringify(activePost.buttons));
+    console.log("[DRY RUN] Текст поста:\n" + activePost.text);
     return;
   }
 
-  // Публикуем в Telegram (с баннером, где напечатан промокод)
-  console.log(` -> Отправка поста в канал ${CHANNEL_ID}...`);
-  const postRes = await sendTelegramPost(postText, buttons, selected.bannerPath);
+  // Публикуем в Telegram
+  console.log(` -> Отправка поста (${activePost.kind}) в канал ${CHANNEL_ID}...`);
+  const postRes = await sendTelegramPost(
+    activePost.text,
+    activePost.buttons,
+    activePost.bannerPath || null,
+    { disableWebPagePreview: !activePost.enableLinkPreview },
+  );
 
   if (!postRes.ok) {
     console.error("❌ Ошибка отправки в Telegram:", postRes.description);
@@ -741,33 +818,48 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   const postUrl = `https://t.me/${channelClean}/${messageId}`;
   console.log(`\n🎉 ПОСТ УСПЕШНО ОПУБЛИКОВАН! Ссылка: ${postUrl}`);
 
-  // Сохраняем в историю
+  // Сохраняем в оба журнала (основной + единую TG-историю)
+  const primaryCode = activePost.code || activePost.codes?.[0] || activePost.storeSlug;
   historyData.history.unshift({
     id: Date.now(),
-    code: selected.code,
-    store: selected.storeName,
+    sourceType: activePost.kind,
+    code: primaryCode,
+    store: activePost.storeName,
+    storeSlug: activePost.storeSlug,
     messageId,
     postUrl,
-    expires: selected.expires,
-    date: new Date().toISOString()
+    expires: activePost.expires || null,
+    date: new Date().toISOString(),
   });
   saveHistory(historyData);
 
-  // ФАЗА 4.1: Автоматический кросспостинг во ВКонтакте (сообщество vk.com/promofact)
+  recordTgHistory({
+    messageId,
+    store: activePost.storeSlug,
+    storeName: activePost.storeName,
+    date: new Date().toISOString(),
+    channel: CHANNEL_ID,
+    sourceType: activePost.kind,
+    codes: activePost.codes || [primaryCode],
+    url: activePost.url,
+  });
+
+  // ФАЗА 4.1: Автоматический кросспостинг во ВКонтакте (сообщество vk.com/promofact, пропускает без VK_ACCESS_TOKEN)
   try {
     const vkResult = await postToVk({
-      storeName: selected.storeName,
-      storeSlug: selected.storeSlug,
-      code: selected.code,
-      bonus: selected.bonus,
-      terms: selected.terms,
-      affUrl: selected.affUrl,
-      ordMarker: selected.ordMarker,
-      ordText: selected.ordText,
-      bannerPath: selected.bannerPath,
-      flashDeal: selected.flashDeal,
-      // erid выдан под Telegram, поэтому в ВК идёт анонс со ссылкой на сайт.
-      siteMode: true
+      storeName: activePost.storeName,
+      storeSlug: activePost.storeSlug,
+      siteUrl: activePost.vkUrl,
+      code: primaryCode,
+      bonus: activePost.vkTitle || activePost.bonus,
+      terms: activePost.terms || "",
+      affUrl: activePost.affUrl,
+      ordMarker: activePost.ordMarker,
+      ordText: activePost.ordText,
+      bannerPath: activePost.bannerPath || null,
+      flashDeal: activePost.flashDeal,
+      // Сообщество ВК ведёт на сайт со всей маркировкой и кнопками.
+      siteMode: true,
     });
     if (vkResult.ok) {
       console.log(` -> 🌐 Кросспостинг в VK: успешно опубликован (${vkResult.postUrl})`);
@@ -779,31 +871,28 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   // ФАЗА 4.2: Мгновенное SEO-оповещение поисковых систем (IndexNow: Яндекс, Bing)
   console.log("\n[Фаза 4.2] Мгновенное оповещение Яндекс и Bing (IndexNow)...");
   try {
-    const cleanStoreSlug = selected.storeName
-      .toLowerCase()
-      .replace(/[^a-zа-я0-9]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-
-    const pingUrls = [
-      `https://promofact.ru/store/${cleanStoreSlug}`,
-      "https://promofact.ru",
-      "https://promofact.ru/promokody"
-    ];
+    const pingUrls =
+      activePost.kind === "article"
+        ? [activePost.url, "https://promofact.ru/sovety", "https://promofact.ru"]
+        : [
+            `https://promofact.ru/store/${activePost.storeSlug}`,
+            "https://promofact.ru",
+            "https://promofact.ru/promokody",
+          ];
 
     const idxRes = await pingIndexNow(pingUrls);
     if (idxRes.ok) {
-      console.log(` -> ✓ IndexNow: поисковики мгновенно уведомлены о скидках "${selected.storeName}" (${idxRes.sentUrls.length} URL).`);
+      console.log(` -> ✓ IndexNow: отправлено (${idxRes.sentUrls.length} URL).`);
     }
   } catch (idxErr) {
     console.warn(" -> ⚠ Ошибка отправки IndexNow:", idxErr.message);
   }
 
-  // ФАЗА 5: Авто-сдача отчета в Perfluence (если сессия есть)
-  if (fs.existsSync(SESSION_FILE) && selected.storeId) {
-    console.log(`\n[Фаза 5] Авто-сдача отчета в Perfluence для проекта #${selected.storeId}...`);
+  // ФАЗА 5: Авто-сдача отчета в Perfluence (только для трека Perfluence и при наличии сессии)
+  if (activePost.kind === "perfluence" && fs.existsSync(SESSION_FILE) && activePost.storeId) {
+    console.log(`\n[Фаза 5] Авто-сдача отчета в Perfluence для проекта #${activePost.storeId}...`);
     try {
-      await submitReport(selected.storeId, postUrl, { headless: true });
+      await submitReport(activePost.storeId, postUrl, { headless: true });
       console.log("✓ Отчет успешно сдан модераторам!");
     } catch (repErr) {
       console.warn("⚠ Сдача отчета через Playwright:", repErr.message);
@@ -813,14 +902,13 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
   // Уведомление в ЛС админу
   if (ADMIN_CHAT_ID) {
     try {
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      await requestJson(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           chat_id: ADMIN_CHAT_ID,
-          text: `📢 <b>Автоматический пост опубликован!</b>\n\n🏬 Магазин: <b>${selected.storeName}</b>\n🎟 Промокод: <code>${selected.code}</code>\n🔗 Ссылка: ${postUrl}`,
-          parse_mode: "HTML"
-        })
+          text: `📢 <b>Автоматический пост опубликован (${activePost.kind})!</b>\n\n🏷 Тема: <b>${escapeHtml(activePost.storeName)}</b>\n🎟 Код/ключ: <code>${escapeHtml(primaryCode)}</code>\n🔗 Ссылка: ${postUrl}`,
+          parse_mode: "HTML",
+        },
       });
     } catch {}
   }
@@ -833,6 +921,8 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true })
 if (process.argv[1]?.endsWith("pipeline-orchestrator.mjs")) {
   const dryRun = process.argv.includes("--dry-run");
   const noTake = process.argv.includes("--no-take");
+  const modeArg = process.argv.find((a) => a.startsWith("--mode="));
+  const mode = modeArg ? modeArg.slice("--mode=".length).trim() : "auto";
   // Тестовый прогон не должен ничего менять в кабинете: не берём офферы и не активируем флеш-акции.
-  runPipeline({ dryRun, takeOffers: !noTake && !dryRun }).catch(console.error);
+  runPipeline({ dryRun, takeOffers: !noTake && !dryRun, mode }).catch(console.error);
 }

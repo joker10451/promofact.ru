@@ -44,12 +44,12 @@ function pubDate(a: Article, index: number): string {
 }
 
 function cover(a: Article): { url: string; type: string } {
-  // Обложка от 700 px. Своя картинка статьи — если есть, иначе общая OG-картинка сайта (1200×630).
+  // Обложка от 700 px. Своя картинка статьи — если есть, иначе уникальная динамическая OG-картинка статьи (1200×630).
   if (a.image) {
     const url = `${SITE_URL}${a.image}`;
     return { url, type: a.image.endsWith(".png") ? "image/png" : "image/jpeg" };
   }
-  return { url: `${SITE_URL}/opengraph-image`, type: "image/png" };
+  return { url: `${SITE_URL}/sovety/${a.slug}/opengraph-image`, type: "image/png" };
 }
 
 function contentHtml(a: Article, url: string): string {

@@ -1,10 +1,10 @@
 name: Perfluence & Telegram Pipeline — Автономный конвейер
 
 on:
-  # Автопостинг снова включён 17.11.2026 по запросу владельца (был выключен 22.09).
-  # 10:15, 14:15 и 18:15 МСК. Плановый запуск идёт с --no-take: в кабинете Perfluence ничего не создаёт.
+  # 10:15, 14:15 и вечерний прайм-тайм 19:00 МСК. Плановый запуск идёт с --no-take: в кабинете Perfluence ничего не создаёт.
   schedule:
-    - cron: '15 7,11,15 * * *'
+    - cron: '15 7,11 * * *'
+    - cron: '0 16 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -12,6 +12,16 @@ on:
         type: boolean
         required: false
         default: false
+      mode:
+        description: 'Режим контента: auto | perfluence | pampadu | article'
+        type: choice
+        required: false
+        default: 'auto'
+        options:
+          - auto
+          - perfluence
+          - pampadu
+          - article
 
 permissions:
   contents: write
@@ -59,10 +69,11 @@ jobs:
           fi
           
           # Запуск оркестратора
+          MODE="${{ github.event.inputs.mode || 'auto' }}"
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            node scripts/pipeline-orchestrator.mjs --dry-run
+            node scripts/pipeline-orchestrator.mjs --dry-run --mode="$MODE"
           else
-            node scripts/pipeline-orchestrator.mjs --no-take
+            node scripts/pipeline-orchestrator.mjs --no-take --mode="$MODE"
           fi
 
       - name: 💾 Сохранение истории публикаций
@@ -70,5 +81,5 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/posted_promos.json
+          git add data/posted_promos.json src/data/telegram-post-history.json
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore(history): auto-update posted promos history [skip ci]" && git push)

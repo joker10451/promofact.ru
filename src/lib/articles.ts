@@ -1,3 +1,5 @@
+import generatedArticlesRaw from "@/data/generated-articles.json";
+
 export type ArticleLink = { text: string; href: string };
 
 export type Article = {
@@ -2393,6 +2395,10 @@ export const ARTICLES: Article[] = [
 
 ];
 
+const GENERATED_ARTICLES: Article[] = Array.isArray(generatedArticlesRaw)
+  ? (generatedArticlesRaw as Article[])
+  : [];
+
 /** Момент выхода статьи (мс). Без publishAt статья опубликована всегда. */
 function publishMs(a: Article): number {
   if (!a.publishAt) return 0;
@@ -2406,7 +2412,22 @@ function publishMs(a: Article): number {
  * статьи только отсюда, а не из массива напрямую.
  */
 export function getArticles(now: number = Date.now()): Article[] {
-  return ARTICLES.filter((a) => publishMs(a) <= now && a.slug !== "promokody-dodo-pizza");
+  const seen = new Set<string>();
+  const combined: Article[] = [];
+  // Ручные статьи в ARTICLES имеют приоритет при совпадении slug, а свежие автогенерации показываются выше.
+  const staticSlugs = new Set(ARTICLES.map((a) => a.slug));
+  const merged = [
+    ...GENERATED_ARTICLES.filter((a) => a?.slug && !staticSlugs.has(a.slug)),
+    ...ARTICLES,
+  ];
+  for (const a of merged) {
+    if (!a?.slug || a.slug === "promokody-dodo-pizza" || seen.has(a.slug)) continue;
+    seen.add(a.slug);
+    if (publishMs(a) <= now) {
+      combined.push(a);
+    }
+  }
+  return combined;
 }
 
 export function getArticle(slug: string, now: number = Date.now()): Article | undefined {

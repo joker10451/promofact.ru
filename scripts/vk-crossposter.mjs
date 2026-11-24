@@ -114,6 +114,7 @@ async function uploadVkWallPhoto(filePath, token, groupId) {
 export function formatVkPostText({
   storeName,
   storeSlug,
+  siteUrl,
   code,
   bonus,
   terms,
@@ -128,9 +129,11 @@ export function formatVkPostText({
   siteMode = true
 }) {
   const lines = [];
-  const sitePage = storeSlug
-    ? `https://promofact.ru/store/${storeSlug}`
-    : "https://promofact.ru";
+  const sitePage = siteUrl
+    ? siteUrl
+    : storeSlug
+      ? `https://promofact.ru/store/${storeSlug}`
+      : "https://promofact.ru";
 
   if (flashDeal && !flashDeal.isInternalOnly && flashDeal.audienceDesc) {
     lines.push(`⚡ ${flashDeal.badge}: ${flashDeal.title.toUpperCase()}!`);

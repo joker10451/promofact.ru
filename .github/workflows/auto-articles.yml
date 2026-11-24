@@ -1,0 +1,114 @@
+name: Auto SEO & Dzen Articles (Gemini) — Генерация и публикация статей
+
+on:
+  schedule:
+    # Пн (ритейл), Ср (финансы/карты), Пт (сезонные гайды) в 12:00 МСК (09:00 UTC)
+    - cron: '0 9 * * 1,3,5'
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Слот статьи: auto | retail | finance | seasonal'
+        type: choice
+        required: false
+        default: 'auto'
+        options:
+          - auto
+          - retail
+          - finance
+          - seasonal
+      dry_run:
+        description: 'Тестовая генерация без коммита и деплоя'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Клонирование репозитория
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 🟢 Настройка Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: 📦 Установка зависимостей
+        run: npm ci
+
+      - name: ✍️ Генерация статьи через Gemini API
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PERFLUENCE_WIDGET_URL: ${{ secrets.PERFLUENCE_WIDGET_URL }}
+        run: |
+          SLOT="${{ github.event.inputs.slot || 'auto' }}"
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            node scripts/generate-article.mjs --slot="$SLOT" --dry-run
+          else
+            node scripts/generate-article.mjs --slot="$SLOT"
+          fi
+
+      - name: 🔍 Проверка обложек, честного SEO, 410 Gone, перелинковки, линтера и сборки
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          PERFLUENCE_WIDGET_URL: ${{ secrets.PERFLUENCE_WIDGET_URL }}
+          NEXT_PUBLIC_SITE_URL: https://promofact.ru
+        run: |
+          npm run test:article-cover
+          npm run test:seo-truthful
+          npm run test:trust
+          npm run test:gone-articles
+          npm run test:links
+          npm run lint
+          npm run build
+          npm run test:seo
+
+      - name: 💾 Коммит, пуш, деплой на VPS и IndexNow
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INDEXNOW_SECRET: ${{ secrets.INDEXNOW_SECRET }}
+        run: |
+          git config user.name "PromoFact Content Bot"
+          git config user.email "bot@promofact.ru"
+          git add src/data/generated-articles.json
+          if git diff --staged --quiet; then
+            echo "Новых изменений в generated-articles.json нет — выходим."
+            exit 0
+          fi
+
+          SLUG=$(node -e "const a = JSON.parse(require('fs').readFileSync('src/data/generated-articles.json','utf8')); console.log(a[0]?.slug || 'article');")
+          git commit -m "feat(seo): автопубликация статьи /sovety/$SLUG [skip ci-auto]"
+          git push
+
+          # Коммит с GITHUB_TOKEN не запускает workflow по on:push, поэтому триггерим deploy-vps явно
+          STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          gh workflow run deploy-vps.yml --ref main
+          sleep 10
+
+          RUN_ID=""
+          for i in $(seq 1 12); do
+            RUN_ID=$(gh run list --workflow=deploy-vps.yml --branch main --limit 5 --json databaseId,createdAt -q ".[] | select(.createdAt >= \"$STARTED_AT\") | .databaseId" | head -n 1 || true)
+            if [ -n "$RUN_ID" ]; then
+              break
+            fi
+            sleep 5
+          done
+
+          if [ -n "$RUN_ID" ]; then
+            echo "Ожидаем завершение Deploy to VPS (run $RUN_ID)..."
+            gh run watch "$RUN_ID" --exit-status
+          else
+            echo "::warning::Не удалось получить ID запуска deploy-vps.yml, ждём 120s перед IndexNow"
+            sleep 120
+          fi
+
+          node scripts/indexnow-new.mjs HEAD~1 HEAD || echo "::warning::IndexNow вернул предупреждение"

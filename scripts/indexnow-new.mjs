@@ -18,18 +18,32 @@ async function main() {
   }
   const changed = diff.split("\n").filter(Boolean);
   const touchedArticles = changed.includes("src/lib/articles.ts");
+  const touchedGenerated = changed.includes("src/data/generated-articles.json");
   const touchedStores = changed.some(
     (f) => f.startsWith("src/app/store") || f.startsWith("src/app/category")
   );
 
-  // Если менялись статьи/магазины — шлём точечно по slug'ам из diff'а articles.ts
+  // Если менялись статьи/магазины — шлём точечно по slug'ам из diff'а articles.ts и generated-articles.json
   let urls = [];
+  const slugs = new Set();
   if (touchedArticles) {
     const added = execSync(`git diff ${BASE} ${HEAD} -- src/lib/articles.ts`, {
       encoding: "utf8",
     });
-    const slugs = [...added.matchAll(/^\+\s*slug:\s*"([^"]+)"/gm)].map((m) => m[1]);
-    urls = slugs.map((s) => `${SITE}/sovety/${s}`);
+    for (const m of added.matchAll(/^\+\s*slug:\s*"([^"]+)"/gm)) {
+      slugs.add(m[1]);
+    }
+  }
+  if (touchedGenerated) {
+    const addedGen = execSync(`git diff ${BASE} ${HEAD} -- src/data/generated-articles.json`, {
+      encoding: "utf8",
+    });
+    for (const m of addedGen.matchAll(/^\+\s*"slug":\s*"([^"]+)"/gm)) {
+      slugs.add(m[1]);
+    }
+  }
+  if (slugs.size > 0) {
+    urls = [...slugs].map((s) => `${SITE}/sovety/${s}`);
   }
 
   if (!urls.length) {
