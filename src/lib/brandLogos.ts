@@ -109,6 +109,20 @@ export function getLocalBrandLogo(slug: string): string | null {
 
 
 export const BRAND_REGISTRY: Record<string, BrandMeta> = {
+  "t-bank": {
+    logoUrl: "/brands/t-bank-junior.png",
+    emoji: "💳",
+    bgGradient: "from-amber-400 to-yellow-500",
+    textColor: "text-ink",
+    domain: "tbank.ru",
+  },
+  "alfa-bank": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/alfabank.ru?size=120",
+    emoji: "🅰️",
+    bgGradient: "from-red-600 to-rose-700",
+    textColor: "text-white",
+    domain: "alfabank.ru",
+  },
   "globus": {
     logoUrl: "https://s3sc.perfluence.net/logos/17035040417294.png",
     emoji: "🛒",

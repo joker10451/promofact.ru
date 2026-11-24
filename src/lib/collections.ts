@@ -248,7 +248,7 @@ export const COLLECTIONS: Collection[] = [
     // subscriptions merely because their copy mentions money or bonuses.
     filter: (c) =>
       ["finansy", "banki", "banki-i-finansy"].includes(c.store.categorySlug || "") ||
-      /^(?:sberbank|sberkarta|sber-karta|vklad-v-sbere|t-bank|otp|rosgosstrakh|plati-po-vsemu-miru)(?:$|-)/iu
+      /^(?:sberbank|sberkarta|sber-karta|vklad-v-sbere|t-bank|alfa-bank|otp|rosgosstrakh|plati-po-vsemu-miru)(?:$|-)/iu
         .test(c.store.slug || ""),
   },
   {

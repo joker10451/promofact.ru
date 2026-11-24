@@ -166,6 +166,65 @@ const YANDEX_OCT23_APPROVED_OFFERS: Coupon[] = [
 ];
 
 export const CUSTOM_COUPONS: Coupon[] = [
+  // --- PAMPADU FINANCIAL OFFERS ---
+  {
+    id: 99220301,
+    promocode: {
+      id: 99220301,
+      code: "TBANKBLACK",
+      bonusName: "Дебетовая карта T-Bank Black: бесплатное обслуживание навсегда и кэшбэк до 30%",
+      terms: "Бесплатное обслуживание карты Black МИР навсегда без условий. Кэшбэк до 30% в категориях на выбор и у партнеров рублями каждый месяц. Доход на остаток и переводы без комиссии через СБП.",
+      expires: "2026-12-31",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Для всех",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "pampadu",
+    },
+    store: {
+      ...STABLE_STORES["t-bank"],
+      activeBloggers: 3200,
+    },
+    affiliate: {
+      link: "https://trk.ppdu.ru/click?uid=263585&oid=2203&erid=Kra23xCCG&siteId=30575",
+      landingLink: "https://trk.ppdu.ru/click/gauHyQcm?erid=Kra23xCCG",
+      ordMarker: "Kra23xCCG",
+      ordText: "Реклама. АО «Т-Банк», ОГРН 1027739004037 erid: Kra23xCCG",
+    },
+    extraLinks: [],
+  },
+  {
+    id: 99142801,
+    promocode: {
+      id: 99142801,
+      code: "ALFASMART",
+      bonusName: "Дебетовая Альфа-Карта МИР: суперкэшбэк до 100% и 0 ₽ за обслуживание всегда",
+      terms: "Бесплатное обслуживание навсегда без условий и трат. Кэшбэк до 100% в барабане суперкэшбэка каждый месяц, до 5% в 4 категориях на выбор и до 33% у партнеров. Бесплатные переводы в любые банки.",
+      expires: "2026-12-31",
+      isHit: true,
+      isUniversal: true,
+      isFirstOrderOnly: false,
+      customerTypeLabel: "Для всех",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "pampadu",
+    },
+    store: {
+      ...STABLE_STORES["alfa-bank"],
+      activeBloggers: 3500,
+    },
+    affiliate: {
+      link: "https://trk.ppdu.ru/click?uid=263585&oid=1428&erid=2SDnje2HATp&siteId=30575",
+      landingLink: "https://trk.ppdu.ru/click/pN5y1lxU?erid=2SDnje2HATp",
+      ordMarker: "2SDnje2HATp",
+      ordText: "Реклама. АО «АЛЬФА-БАНК», ОГРН 1027700067328 erid: 2SDnje2HATp",
+    },
+    extraLinks: [],
+  },
   // --- GLOBUS (#1123) ---
   {
     id: 1749138701,
