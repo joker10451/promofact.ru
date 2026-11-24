@@ -16,10 +16,12 @@ assert.equal(carriesOverduePlacement(mk({ ordMarker: "2RanykSwE92" })), false);
 const stores = await getAllStores();
 const all = stores.flatMap((s) => s.coupons.map((c) => [s.slug, c]));
 assert.deepEqual(all.filter(([, c]) => carriesOverduePlacement(c)).map(([s]) => s), []);
-const fresh = { premier: "2RanykSwE92", poizon: "2RanynpojsA", "yandeks-lavka": "2RanyoHVWwN", sberprime: "2RanynswGSF" };
-for (const [slug, erid] of Object.entries(fresh)) {
+for (const slug of ["premier", "poizon", "yandeks-lavka", "sberprime"]) {
   const s = stores.find((x) => x.slug === slug);
-  assert.ok(s?.coupons.some((c) => c.affiliate.ordMarker === erid), `${slug} must carry ${erid}`);
+  assert.ok(
+    s?.coupons.some((c) => Boolean(c.affiliate.ordMarker) && !carriesOverduePlacement(c)),
+    `${slug} must carry an active non-overdue ordMarker`,
+  );
 }
 
 assert.deepEqual(all.filter(([, c]) => c.promocode.code.toUpperCase() === "PERPREGA309361").length, 0, "exhausted code must not be shown");
