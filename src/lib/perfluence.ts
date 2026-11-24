@@ -948,9 +948,10 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // Exact approved publisher URLs outrank cached widget entries for ALL
   // four rotated projects. Never hide our verified SberDevices placement
   // just because a stale widget mentions the same coupon code.
-  const { getCustomCoupons, SAMOKAT_LINK } = await import("@/lib/customCoupons");
+  const freshCustomCoupons = (await import("@/lib/customCoupons")).getCustomCoupons();
+  const { SAMOKAT_LINK } = await import("@/lib/customCoupons");
   const sources: import("@/lib/dedupe").SourceBucket[] = [
-    { source: "custom", coupons: getCustomCoupons() },
+    { source: "custom", coupons: freshCustomCoupons },
     ...baseBuckets.map((b) => ({
       source: b.source,
       coupons: b.source === "perfluence"
