@@ -123,6 +123,20 @@ export const BRAND_REGISTRY: Record<string, BrandMeta> = {
     textColor: "text-white",
     domain: "alfabank.ru",
   },
+  "yandex-pay": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/pay.yandex.ru?size=120",
+    emoji: "💳",
+    bgGradient: "from-red-500 to-rose-600",
+    textColor: "text-white",
+    domain: "pay.yandex.ru",
+  },
+  "zenit": {
+    logoUrl: "https://favicon.yandex.net/favicon/v2/www.zenit.ru?size=120",
+    emoji: "🏦",
+    bgGradient: "from-blue-600 to-cyan-700",
+    textColor: "text-white",
+    domain: "zenit.ru",
+  },
   "globus": {
     logoUrl: "https://s3sc.perfluence.net/logos/17035040417294.png",
     emoji: "🛒",
