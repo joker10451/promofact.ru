@@ -96,5 +96,19 @@
       "TBANKBLACK"
     ],
     "url": "https://promofact.ru/collections/finansy-i-karty"
+  },
+  {
+    "messageId": 130,
+    "store": "credit-cards",
+    "storeName": "Кредитные карты (Яндекс Пэй, Т-Банк, ОТП, Зенит)",
+    "date": "2026-11-24T18:42:44.511Z",
+    "channel": "@smart_zakupka",
+    "codes": [
+      "YANDEXSUPERSPLIT",
+      "TBANKPLATINUM",
+      "OTP120DAYS",
+      "ZENIT120CARD"
+    ],
+    "url": "https://promofact.ru/collections/finansy-i-karty"
   }
 ]
