@@ -1,5 +1,6 @@
 import { MAGNIT_ROTATED_OFFERS, M_KOSMETIK_ROTATED_OFFERS, CITYDRIVE_APPROVED_OFFERS, YANDEX_TRAVEL_ROTATED_OFFERS, YANDEX_TRAVEL_NOV18_OFFERS, TANUKI_OCT16_OFFERS, TANUKI_NOV16_OFFERS, PEREKRESTOK_OCT16_OFFERS, GOLDAPPLE_ROTATED_OFFERS } from "@/lib/perfluenceRotatedOffers";
 import type { Coupon } from "@/lib/types";
+import { PERFLUENCE_NOV24_OFFERS } from "@/lib/perfluenceNov24Offers";
 import { PYATEROCHKA_NOV07_OFFERS } from "@/lib/perfluencePyaterochkaOffers";
 import { PERFLUENCE_NOV06_OFFERS } from "@/lib/perfluenceNov06Offers";
 import { PERFLUENCE_NOV05_OFFERS } from "@/lib/perfluenceNov05Offers";
@@ -262,6 +263,7 @@ export const CUSTOM_COUPONS: Coupon[] = [
     affiliate: YANDEX_PRACTICUM_AFFILIATE,
     extraLinks: [],
   },
+  ...PERFLUENCE_NOV24_OFFERS,
   ...PYATEROCHKA_NOV07_OFFERS,
   ...PERFLUENCE_NOV06_OFFERS,
   ...PERFLUENCE_NOV05_OFFERS,
@@ -747,10 +749,10 @@ export const CUSTOM_COUPONS: Coupon[] = [
     id: 81409001,
     promocode: {
       id: 81409001,
-      code: "10PFNS5800",
+      code: "OKTPFN3197",
       bonusName: "Скидка 10% на первый заказ в ВинЛаб",
-      terms: "Скидка 10% на первый заказ на сайте и в мобильном приложении ВинЛаб. Максимальная скидка — 3 000 ₽. Суммируется со скидками, кроме раздела «Ваша цена». Срок действия по 11 ноября 2026 года 10:59 МСК.",
-      expires: "2026-11-11T10:59:59+03:00",
+      terms: "Скидка 10% на первый заказ на сайте и в мобильном приложении ВинЛаб. Максимальная скидка — 3 000 ₽. Суммируется со скидками, кроме раздела «Ваша цена». Срок действия по 25 ноября 2026 года 10:59 МСК.",
+      expires: "2026-11-25T10:59:59+03:00",
       isHit: true,
       isUniversal: false,
       isFirstOrderOnly: true,
@@ -765,8 +767,8 @@ export const CUSTOM_COUPONS: Coupon[] = [
       activeBloggers: STABLE_STORES["winlab"].activeBloggers ?? 0,
     },
     affiliate: {
-      link: "https://winelab.prfl.me/sites/bxv17b",
-      landingLink: "https://winelab.prfl.me/sites/bxv17b",
+      link: "https://winelab.prfl.me/sites/2jtblm",
+      landingLink: "https://winelab.prfl.me/sites/2jtblm",
       ordMarker: "",
       ordText: "Реклама. АО «ВИНЛАБ», ИНН 7727404495. 18+.",
     },
@@ -776,10 +778,10 @@ export const CUSTOM_COUPONS: Coupon[] = [
     id: 81409002,
     promocode: {
       id: 81409002,
-      code: "WCPFOKT6389",
+      code: "10WCNOVPF7567",
       bonusName: "Дополнительная скидка 10% на WinClub в ВинЛаб",
-      terms: "Дополнительная скидка 10% на каждый заказ товаров со значком WinClub на сайте и в мобильном приложении ВинЛаб. Максимальная скидка — 3 000 ₽. Срок действия по 28 октября 2026 года.",
-      expires: "2026-11-11T10:59:59+03:00",
+      terms: "Дополнительная скидка 10% на каждый заказ товаров со значком WinClub на сайте и в мобильном приложении ВинЛаб. Максимальная скидка — 3 000 ₽. Срок действия по 25 ноября 2026 года 10:59 МСК.",
+      expires: "2026-11-25T10:59:59+03:00",
       isHit: false,
       isUniversal: true,
       isFirstOrderOnly: false,
@@ -794,8 +796,8 @@ export const CUSTOM_COUPONS: Coupon[] = [
       activeBloggers: STABLE_STORES["winlab"].activeBloggers ?? 0,
     },
     affiliate: {
-      link: "https://winelab.prfl.me/sites/bxv17b",
-      landingLink: "https://winelab.prfl.me/sites/bxv17b",
+      link: "https://winelab.prfl.me/sites/2jtblm",
+      landingLink: "https://winelab.prfl.me/sites/2jtblm",
       ordMarker: "",
       ordText: "Реклама. АО «ВИНЛАБ», ИНН 7727404495. 18+.",
     },
@@ -805,10 +807,10 @@ export const CUSTOM_COUPONS: Coupon[] = [
     id: 81409003,
     promocode: {
       id: 81409003,
-      code: "5OKTPF6363",
+      code: "5NOVPFP7279",
       bonusName: "Скидка 5% на повторные заказы в ВинЛаб",
-      terms: "Скидка 5% на каждый повторный заказ на сайте и в мобильном приложении ВинЛаб. Максимальная скидка — 3 000 ₽. Суммируется со скидками, кроме раздела «Ваша цена». Срок действия по 11 ноября 2026 года 10:59 МСК.",
-      expires: "2026-11-11T10:59:59+03:00",
+      terms: "Скидка 5% на каждый повторный заказ на сайте и в мобильном приложении ВинЛаб. Максимальная скидка — 3 000 ₽. Суммируется со скидками, кроме раздела «Ваша цена». Срок действия по 25 ноября 2026 года 10:59 МСК.",
+      expires: "2026-11-25T10:59:59+03:00",
       isHit: false,
       isUniversal: false,
       isFirstOrderOnly: false,
@@ -823,8 +825,8 @@ export const CUSTOM_COUPONS: Coupon[] = [
       activeBloggers: STABLE_STORES["winlab"].activeBloggers ?? 0,
     },
     affiliate: {
-      link: "https://winelab.prfl.me/sites/bxv17b",
-      landingLink: "https://winelab.prfl.me/sites/bxv17b",
+      link: "https://winelab.prfl.me/sites/2jtblm",
+      landingLink: "https://winelab.prfl.me/sites/2jtblm",
       ordMarker: "",
       ordText: "Реклама. АО «ВИНЛАБ», ИНН 7727404495. 18+.",
     },
