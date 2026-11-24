@@ -112,7 +112,7 @@ export function isApprovedOct28PublisherPlacement(c: Coupon): boolean {
   // Allow November 3 renewed Rutube placement
   if (c.store.slug === "rutube" && c.affiliate.ordMarker === "2RanykXMAsE") return true;
   // Allow November 6 renewed Ostrovok placement
-  if (c.store.slug === "ostrovok" && c.affiliate.ordMarker === "2RanykdK97S") return true;
+  if (c.store.slug === "ostrovok" && c.affiliate.ordMarker === "2RanykdK97S" || c.affiliate.ordMarker === "2Ranyk9Ckdz") return true;
   if (c.promocode.group === "admitad") return true;
   return PERFLUENCE_OCT28_OFFERS.some((approved) =>
     approved.id === c.id &&

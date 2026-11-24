@@ -497,11 +497,13 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
           c.affiliate.ordText.includes("erid: 2RanyoMvJ99");
       }
       if (flowerCode === "QX7GZZ") {
+        const isNov24 = c.affiliate.link === "https://yaflowers.prfl.me/sites/y861bu?erid=2RanyoD6vyS" &&
+          c.affiliate.ordMarker === "2RanyoD6vyS";
         const isNov02 = c.affiliate.link === "https://yaflowers.prfl.me/sites/ur289i?erid=2RanykWBevG" &&
           c.affiliate.ordMarker === "2RanykWBevG";
         const isOct23 = c.affiliate.link === "https://yaflowers.prfl.me/sites/oluvpa?erid=2RanymRX1bZ" &&
           c.affiliate.ordMarker === "2RanymRX1bZ";
-        return (isNov02 || isOct23) && c.affiliate.ordText.includes("ИНН 9705114405");
+        return (isNov24 || isNov02 || isOct23) && c.affiliate.ordText.includes("ИНН 9705114405");
       }
       if (flowerCode === "MDK403") {
         return c.affiliate.link === "https://yaflowers.prfl.me/sites/koqnjw?erid=2RanykhkmUY" &&
@@ -529,6 +531,13 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // attribute their clicks to the old PromoFact placement and outdated ERID.
     if (c.store.slug === "magnit-dostavka") {
       const magnitCode = c.promocode.code.trim().toUpperCase();
+      // Allow November 24 renewed placement (Post 17490057)
+      if (c.affiliate.ordMarker === "2RanyoLWsPA") {
+        return (magnitCode === "25GFC1TL4" || magnitCode === "SGPF1VUSP76") &&
+          c.affiliate.link === "https://mgntgm.prfl.me/sites/v3d0y2?erid=2RanyoLWsPA" &&
+          c.affiliate.ordText.includes('АО "Тандер"') &&
+          c.affiliate.ordText.includes("erid: 2RanyoLWsPA");
+      }
       // Allow November 18 renewed placement
       if (c.affiliate.ordMarker === "2Ranymbp5zL") {
         return (magnitCode === "25GFC1TL4" || magnitCode === "SGPF1VUSP76") &&
@@ -563,14 +572,22 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // historical ERID. Deny unknown/historical codes until reviewed.
     if (c.store.slug === "yandeks-afisha") {
       const code = c.promocode.code.trim().toUpperCase();
+      const isNov24 = ["KYWB8048", "GPSJ9957", "BWWE9549", "GSPC5034"].includes(code) &&
+        c.affiliate.link === "https://yaafisha.prfl.me/sites/gntmut?erid=2Ranynym3SL" &&
+        c.affiliate.ordMarker === "2Ranynym3SL" &&
+        c.affiliate.ordText.includes("7736207543");
       const isNov18 = ["KYWB8048", "GPSJ9957", "BWWE9549", "GSPC5034"].includes(code) &&
         c.affiliate.link === "https://yaafisha.prfl.me/sites/urcykp?erid=2RanynSbxDJ" &&
         c.affiliate.ordMarker === "2RanynSbxDJ" &&
         c.affiliate.ordText.includes("7736207543");
-      return isNov18;
+      return isNov24 || isNov18;
     }
     if (c.store.slug === "tanukifamily") {
       const code = c.promocode.code.trim().toUpperCase();
+      const isNov24 = ["20SA1244", "15SA1244", "KT1366"].includes(code) &&
+        c.affiliate.link === "https://tanukifamily.prfl.me/sites/38184m?erid=2RanynxH49z" &&
+        c.affiliate.ordMarker === "2RanynxH49z" &&
+        c.affiliate.ordText.includes("erid: 2RanynxH49z");
       const isNov16 = ["20SA1244", "15SA1244", "KT1366"].includes(code) &&
         c.affiliate.link === "https://tanukifamily.prfl.me/sites/lz9t15?erid=2RanykQFPDv" &&
         c.affiliate.ordMarker === "2RanykQFPDv" &&
@@ -579,7 +596,7 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
         c.affiliate.link === "https://tanukifamily.prfl.me/sites/jyhh6e?erid=2RanyoGYb6K" &&
         c.affiliate.ordMarker === "2RanyoGYb6K" &&
         c.affiliate.ordText.includes("erid: 2RanyoGYb6K");
-      return isNov16 || isOct;
+      return isNov24 || isNov16 || isOct;
     }
     // Perfluence's old widget contains conflicting codes, expiry dates, URL
     // and ERID. Only explicitly approved project website placement survives.
@@ -615,6 +632,11 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
     // MTS Music co-promotion is prohibited elsewhere in publisherPlacementRules.
     if (c.store.slug === "yandeks-puteshestviya") {
       const code = c.promocode.code.trim().toUpperCase();
+      if (["OPPAPA20", "PF-OPPAPAIO-BCCG96"].includes(code)) {
+        return c.affiliate.link === "https://yatravel.prfl.me/sites/unfato?erid=2RanynuK5bJ" &&
+          c.affiliate.ordMarker === "2RanynuK5bJ" &&
+          c.affiliate.ordText.includes("erid: 2RanynuK5bJ");
+      }
       // This guard originally covered Perfluence alone but also ran over the
       // fully merged Admitad catalog, hiding legitimately published offers.
       // Explicitly allow only these two currently approved Admitad placements;

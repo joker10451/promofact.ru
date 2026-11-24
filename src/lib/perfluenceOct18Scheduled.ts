@@ -64,6 +64,8 @@ export function isApprovedOct18WebsitePlacement(c: Coupon): boolean {
     return false;
   }
   if (c.store.slug !== "vkusvill-dostavka") return true;
+  // 24 Nov renewed site placement (Post 17490051)
+  if (c.affiliate.ordMarker === "2Ranyo8ey8Q" && c.affiliate.link.startsWith("https://vksvl.prfl.me/sites/wly5gq")) return true;
   // 6 Nov renewed site placement; without this every VkusVill code was hidden.
   if (c.affiliate.link === VKUSVILL_NOV06_SITE_LINK &&
       c.affiliate.landingLink === VKUSVILL_NOV06_SITE_LINK &&
