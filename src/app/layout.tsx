@@ -5,6 +5,7 @@ import "./globals.css";
 import YandexMetrika from "@/components/YandexMetrika";
 import YandexAds from "@/components/YandexAds";
 import ChatHelper from "@/components/ChatHelper";
+import TelegramFloatingPill from "@/components/TelegramFloatingPill";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import TelegramWebAppInit from "@/components/TelegramWebAppInit";
 import CookieBanner from "@/components/CookieBanner";
@@ -153,6 +154,7 @@ export default function RootLayout({
         <YandexMetrika />
         <YandexAds />
         <ChatHelper />
+        <TelegramFloatingPill />
         {children}
         <CookieBanner />
         <PwaInstallBanner />

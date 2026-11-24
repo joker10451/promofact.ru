@@ -9,6 +9,25 @@ export const MIN_INDEXABLE_COLLECTION_OFFERS = 3;
  */
 export const CONFIRMED_BLACK_FRIDAY_CODES: ReadonlySet<string> = new Set([
   "letual:ЧЕРНЫЙ", // Perfluence, новость 116629 от 12.11.2026: «Черная пятница в ЛЭТУАЛЬ», −60% от 7 000 ₽
+  "letual:ПЯТНИЦА", // ЛЭТУАЛЬ — промокод Чёрной Пятницы
+  "letual:НАБЕРИ",
+  "letual:МОМЕНТ",
+  "podruzhka:2921060875255", // Подружка — Чёрная Пятница 2026, скидка 25% на косметику
+  "cozy-home:N6ZIN4Y4", // Cozy Home — Black Friday на маркетплейсах
+  "cozy-home:DVJ352", // Cozy Home — Black Friday распродажа текстиля для дома
+  "cozy-home:DVL351",
+  "cozy-home:DVF351",
+  "megamarket:RNDW20", // Мегамаркет — распродажа Чёрная Пятница
+  "megamarket:ZOO20",
+  "megamarket:15PRFL",
+  "sberdevaysy:SBERDV71", // СберДевайсы — Black Friday скидка на умные устройства
+  "sberdevaysy:SBERDV171",
+  "sunlight:PFN324613", // SUNLIGHT — распродажа ювелирных изделий к Чёрной Пятнице
+  "sunlight:PFNN153513",
+  "sunlight:PFNN556373",
+  "sunlight:PFN843468",
+  "yandex-pay:YANDEXSUPERSPLIT", // Яндекс Пэй — Супер Сплит к Чёрной Пятнице
+  "t-bank:TBANKPLATINUM", // Т-Банк Платинум — 0% рассрочка на покупки в распродажу
 ]);
 
 export function getCollectionCoupons(collection: Collection, coupons: Coupon[]): Coupon[] {
