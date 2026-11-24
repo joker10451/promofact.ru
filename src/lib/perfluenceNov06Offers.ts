@@ -66,13 +66,6 @@ export const VKUSVILL_NOV06_SITE_LINK = "https://vksvl.prfl.me/sites/etfzjw?erid
 export const VKUSVILL_NOV06_SITE_ERID = "2RanynbTrL4";
 export const VKUSVILL_NOV06_SITE_LEGAL = 'Реклама. АО "Вкусвилл", ОГРН 1217700253671. erid: 2RanynbTrL4';
 
-const VKUSVILL_NOV06_AFFILIATE: Coupon["affiliate"] = {
-  link: VKUSVILL_NOV06_SITE_LINK,
-  landingLink: VKUSVILL_NOV06_SITE_LINK,
-  ordMarker: VKUSVILL_NOV06_SITE_ERID,
-  ordText: VKUSVILL_NOV06_SITE_LEGAL,
-};
-
 // --- 6. ПЕРЕКРЁСТОК ДОСТАВКА ---
 export const PEREKRESTOK_NOV06_SITE_LINK = "https://perekrestok.prfl.me/sites/2gduvk?erid=2RanynLdyWc";
 export const PEREKRESTOK_NOV06_SITE_ERID = "2RanynLdyWc";
@@ -336,81 +329,8 @@ export const PERFLUENCE_NOV06_OFFERS: Coupon[] = [
   },
 
   // ================= ВКУСВИЛЛ ДОСТАВКА =================
-  {
-    id: 134102,
-    promocode: {
-      id: 134102,
-      code: "VSTCLCZ",
-      bonusName: "Скидка 600 ₽ на первый заказ от 2 000 ₽ во ВкусВилл",
-      terms: "Свежий ноябрьский промокод VSTCLCZ: скидка 600 ₽ на первый онлайн-заказ натуральных продуктов и готовой еды от 2 000 ₽ с бесплатной доставкой ВкусВилл. Действует до 30 ноября 2026 года.",
-      expires: "2026-11-30T23:59:59+03:00",
-      isHit: true,
-      isUniversal: false,
-      isFirstOrderOnly: true,
-      customerTypeLabel: "Первый заказ",
-      minimumOrder: { value: 2000, currency: "RUB" },
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "perfluence",
-    },
-    store: {
-      ...STABLE_STORES["vkusvill-dostavka"],
-      activeBloggers: STABLE_STORES["vkusvill-dostavka"]?.activeBloggers ?? 6540,
-    },
-    affiliate: VKUSVILL_NOV06_AFFILIATE,
-    extraLinks: [],
-  },
-  {
-    id: 134103,
-    promocode: {
-      id: 134103,
-      code: "35VEM5EY",
-      bonusName: "Скидка 350 ₽ на первый заказ от 1 500 ₽ во ВкусВилл",
-      terms: "Промокод 35VEM5EY даёт скидку 350 ₽ при первом заказе от 1 500 ₽ в доставке ВкусВилл. Действует до 30 ноября 2026 года.",
-      expires: "2026-11-30T23:59:59+03:00",
-      isHit: false,
-      isUniversal: false,
-      isFirstOrderOnly: true,
-      customerTypeLabel: "Первый заказ",
-      minimumOrder: { value: 1500, currency: "RUB" },
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "perfluence",
-    },
-    store: {
-      ...STABLE_STORES["vkusvill-dostavka"],
-      activeBloggers: STABLE_STORES["vkusvill-dostavka"]?.activeBloggers ?? 6540,
-    },
-    affiliate: VKUSVILL_NOV06_AFFILIATE,
-    extraLinks: [],
-  },
-  {
-    id: 134104,
-    promocode: {
-      id: 134104,
-      code: "30V8RX3X",
-      bonusName: "Скидка 300 ₽ на первый заказ от 1 500 ₽ во ВкусВилл",
-      terms: "Промокод 30V8RX3X даёт скидку 300 ₽ на первый заказ от 1 500 ₽ в сервисе быстрой доставки ВкусВилл. Действует до 30 ноября 2026 года.",
-      expires: "2026-11-30T23:59:59+03:00",
-      isHit: false,
-      isUniversal: false,
-      isFirstOrderOnly: true,
-      customerTypeLabel: "Первый заказ",
-      minimumOrder: { value: 1500, currency: "RUB" },
-      region: "RU",
-      isBarcode: false,
-      barcodeImage: null,
-      group: "perfluence",
-    },
-    store: {
-      ...STABLE_STORES["vkusvill-dostavka"],
-      activeBloggers: STABLE_STORES["vkusvill-dostavka"]?.activeBloggers ?? 6540,
-    },
-    affiliate: VKUSVILL_NOV06_AFFILIATE,
-    extraLinks: [],
-  },
+  // Удалены ручные переопределения от 6 ноября: актуальная лесенка (600 / 350 / 300 / 250 / 200 ₽)
+  // с актуальным erid 2Ranyo8ey8Q (sites/wly5gq) поступает напрямую из perfluence-feed.json.
 
   // ================= ПЕРЕКРЁСТОК ДОСТАВКА (ФЛЕШ 650 ₽) =================
   {

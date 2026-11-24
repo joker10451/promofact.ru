@@ -70,4 +70,13 @@ const ticketSrc = fs.readFileSync(path.resolve("src/components/CouponTicket.tsx"
 assert.ok(ticketSrc.includes('promocode.group === "pampadu"'), "CouponTicket must distinguish 1-click Pampadu finance cards");
 assert.ok(ticketSrc.includes("Оформить карту"), "Finance cards must render direct bank application CTA");
 
-console.log("V2-GROWTH: Pampadu 1-click UX, SEO metadata, newest-first sorting, Dec seasonality & UTM PASS");
+// 7. VkusVill custom overrides removed so live feed's distinct ladder (600/350/300/250/200) + erid win cleanly
+const { getAllStores } = await import("../src/lib/perfluence.ts");
+const stores = await getAllStores();
+const vkusvill = stores.find((s) => s.slug === "vkusvill-dostavka");
+assert.ok(vkusvill && vkusvill.coupons.length === 5, "VkusVill must keep 5 active offers from live Perfluence feed");
+const vkusvillAmounts = new Set(vkusvill.coupons.map((c) => c.promocode.bonusName.match(/(\d+)\s*₽/)?.[1]).filter(Boolean));
+assert.deepEqual(vkusvillAmounts, new Set(["600", "350", "300", "250", "200"]), "VkusVill must not regress to duplicate nominal amounts");
+assert.ok(vkusvill.coupons.every((c) => c.affiliate.ordMarker === "2Ranyo8ey8Q"), "VkusVill must carry unified renewed ERID 2Ranyo8ey8Q");
+
+console.log("V2-GROWTH: Pampadu 1-click UX, SEO metadata, newest-first sorting, Dec seasonality, UTM & clean store parity PASS");
