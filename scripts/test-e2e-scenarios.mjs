@@ -1283,73 +1283,33 @@ async function run() {
       passedTests++;
     }
 
-    // --- SCENARIO 14: real rendered Admitad CTA and copy-and-open, no external requests ---
-    console.log("\\n[Test 14] Admitad native navigation: three browser engines, narrow/wide viewports, blocked window.open");
+    // --- SCENARIO 14: unapproved Admitad fixture stays out of public surfaces ---
+    console.log("\n[Test 14] Admitad fixture is excluded from store, catalog and search");
     {
-      const targets = [["chromium", chromium], ["firefox", firefox], ["webkit", webkit]];
-      for (const [engineName, engine] of targets) {
-        const runningBrowser = engineName === "chromium" ? browser : await engine.launch({ headless: true });
-        try {
-          for (const narrow of [false, true]) {
-            const context = await runningBrowser.newContext({
-              viewport: narrow ? { width: 390, height: 844 } : { width: 1366, height: 768 },
-              ...(narrow && engineName !== "firefox" ? { hasTouch: true, isMobile: true } : {}),
-            });
-            try {
-              // No test request reaches the actual affiliate network.
-              await context.route("**/ad.admitad.com/**", (route) => route.fulfill({
-                status: 200, contentType: "text/html", body: "<html>Mock Admitad landing</html>",
-              }));
-              const page = await context.newPage();
-              await page.addInitScript(() => {
-                window.open = () => { throw new Error("SIMULATED_POPUP_BLOCK"); };
-              });
-              await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
-              const card = page.locator("#coupon-99233303");
-              await card.waitFor({ state: "visible", timeout: 10000 });
-              const link = card.locator('a:has-text("Перейти на сайт")');
-              const rendered = new URL(await link.getAttribute("href"));
-              assert.equal(rendered.searchParams.get("erid"), "TestERIDAdmitad2026");
-              assert.equal(rendered.searchParams.get("subid"), "store_coupon");
-              assert.equal(rendered.searchParams.get("subid1"), "promofact:store");
-              assert.equal(rendered.searchParams.get("subid2"), "99233303");
-              assert.equal(rendered.searchParams.get("subid3"), "promofact");
-              assert.equal(await link.getAttribute("target"), "_blank");
-              assert.match(await link.getAttribute("rel"), /noopener.*sponsored.*nofollow/);
-              const [tab] = await Promise.all([
-                context.waitForEvent("page", { timeout: 9000 }), link.click(),
-              ]);
-              await tab.waitForURL("**/ad.admitad.com/**", { timeout: 9000 });
-              const visited = new URL(tab.url());
-              assert.equal(visited.searchParams.get("erid"), "TestERIDAdmitad2026");
-              assert.equal(visited.searchParams.get("subid2"), "99233303");
-              assert.match(visited.searchParams.get("subid4") || "", /^[0-9a-f-]{36}$/i);
-              await tab.close();
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const page = await context.newPage();
+      const forbidden = /99233303|ADMITADE2E|TestERIDAdmitad2026/;
 
-              // The modal copy-and-open button must also navigate natively.
-              await card.locator('button:has-text("Условия акции")').click();
-              const modal = page.locator('div[role="dialog"]').last();
-              await modal.waitFor({ state: "visible" });
-              const copyAndOpen = modal.locator('a:has-text("Скопировать")').first();
-              assert.equal(await copyAndOpen.getAttribute("target"), "_blank");
-              const [copiedTab] = await Promise.all([
-                context.waitForEvent("page", { timeout: 9000 }), copyAndOpen.click(),
-              ]);
-              await copiedTab.waitForURL("**/ad.admitad.com/**", { timeout: 9000 });
-              const copiedUrl = new URL(copiedTab.url());
-              assert.equal(copiedUrl.searchParams.get("erid"), "TestERIDAdmitad2026");
-              assert.equal(copiedUrl.searchParams.get("subid"), "store_coupon");
-              assert.match(copiedUrl.searchParams.get("subid4") || "", /^[0-9a-f-]{36}$/i);
-              await copiedTab.close();
-              console.log("  ✓ " + engineName + (narrow ? " 390px" : " desktop") + ": direct + modal partner navigation");
-            } finally {
-              await context.close();
-            }
-          }
-        } finally {
-          if (engineName !== "chromium") await runningBrowser.close();
-        }
-      }
+      const store = await page.goto(`${BASE_URL}/store/farfor`, { waitUntil: "domcontentloaded" });
+      assert.equal(store?.status(), 200, "FARFOR store should remain available");
+      assert.equal(await page.locator("#coupon-99233303").count(), 0,
+        "Unapproved Admitad fixture must not render on the store page");
+      assert.doesNotMatch(await page.content(), forbidden,
+        "Unapproved Admitad code and ERID must not appear in store HTML");
+
+      const searchResponse = await page.request.get(`${BASE_URL}/api/search?q=ADMITADE2E`);
+      assert.equal(searchResponse.status(), 200, "Coupon search should remain available");
+      const search = await searchResponse.json();
+      assert.equal(search.coupons.some((coupon) => String(coupon.id) === "99233303" || coupon.code === "ADMITADE2E"), false,
+        "Unapproved Admitad fixture must not appear in public coupon search");
+
+      const catalog = await page.goto(`${BASE_URL}/catalog`, { waitUntil: "domcontentloaded" });
+      assert.equal(catalog?.status(), 200, "Public catalog should remain available");
+      assert.doesNotMatch(await page.content(), forbidden,
+        "Unapproved Admitad code and ERID must not appear in catalog HTML");
+      console.log("  ✓ Admitad fixture is absent from store, catalog and search; Perfluence fixture checks remain in scenario 4");
+
+      await context.close();
       passedTests++;
     }
 

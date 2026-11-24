@@ -86,15 +86,21 @@ assert.ok(worker.includes("PUBLISHER_COUPON_ID_CAMPAIGN_CHANGED"),
 assert.ok(runner.includes("assertSnapshotUnchanged") && runner.includes("skipDbWrite: true") &&
   runner.includes("ADMITAD_CATALOG_PUBLISH_APPROVED"),
   "Runner must preview first and require explicit approval");
-assert.match(workflow,/cron: ['"]27 4 \* \* \*['"]/);
-assert.match(workflow,/ADMITAD_PUBLISHER_AUTO_SYNC_ENABLED != 'false'/);
-assert.match(workflow,/github.event_name == 'schedule'/);
-assert.match(workflow,/ADMITAD_PUBLISHER_CATALOG_DRY_RUN:/);
-assert.match(workflow,/ADMITAD_CATALOG_PUBLISH_APPROVED:/);
+assert.doesNotMatch(workflow,/\bschedule:/,
+  "The catalog refresh must not run on a schedule");
+assert.match(workflow,/ADMITAD_PUBLISHER_CATALOG_DRY_RUN:\s*['"]true['"]/,
+  "Catalog workflow must be preview-only");
+assert.match(workflow,/ADMITAD_CATALOG_PUBLISH_APPROVED:\s*['"]false['"]/,
+  "Catalog workflow must never enable publishing");
+assert.doesNotMatch(workflow,/inputs\.publish\b|confirm:/,
+  "Catalog workflow must not expose a publish authorization input");
+assert.match(workflow,/github\.event_name == 'pull_request'[\s\S]*head\.repo\.full_name == github\.repository/,
+  "PR execution must require a trusted same-repository head");
+assert.match(workflow,/github\.event_name == 'workflow_dispatch'/,
+  "Manual workflow dispatch may run the read-only preview");
 assert.ok(!workflow.includes("git push"), "Scheduled DB refresh must not push or deploy");
 const oldBatch = fs.readFileSync(".github/workflows/admitad-batch.yml", "utf8");
 assert.doesNotMatch(oldBatch,/\bschedule:/, "Old narrower cron must remain disabled");
 assert.match(workflow,/concurrency:/);
 assert.match(workflow,/catalog-1-refresh\.mjs/);
-assert.match(workflow,/inputs\.confirm == true/);
-console.log("CATALOG-1: no-write preview, new-program guard, retention, identity and approval PASS");
+console.log("CATALOG-1: preview-only workflow, new-program guard, retention and identity PASS");

@@ -8,18 +8,26 @@ process.env.NODE_ENV = "production";
 process.env.PERFLUENCE_WIDGET_URL = "https://perfluence-unreachable.invalid/widget";
 
 const originalFetch = globalThis.fetch;
+const originalNow = Date.now;
 let calls = 0;
 globalThis.fetch = async () => {
   calls++;
   throw new Error("Production rendering must not request the Perfluence widget");
 };
 try {
-  const { getPerfluenceCoupons, isPerfluenceConfigured } = await import("../src/lib/perfluence.ts");
+  const { getCoupons, getPerfluenceCoupons, isPerfluenceConfigured } = await import("../src/lib/perfluence.ts");
   assert.equal(isPerfluenceConfigured(), true, "The live endpoint is deliberately configured");
   const visible = await getPerfluenceCoupons();
   assert.ok(visible.length > 0, "The checked-in Perfluence feed must retain publishable offers");
+  Date.now = () => Date.parse("2026-11-24T12:00:00+03:00");
+  const catalog = await getCoupons();
+  const codes = catalog.map((coupon) => coupon.promocode.code);
+  assert.ok(codes.includes("GZP8FU6") && codes.includes("GQCWSD2"),
+    "Keep the reviewed Samokat Perfluence offers even though their link uses Adjust");
+  assert.ok(!codes.includes("RND7"), "Exclude the manually added Admitad code from the catalog");
   assert.equal(calls, 0, "No remote request or timeout on Vercel production");
 } finally {
+  Date.now = originalNow;
   globalThis.fetch = originalFetch;
 }
 

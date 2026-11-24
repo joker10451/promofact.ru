@@ -1,3 +1,4 @@
+import { isPerfluencePartnerLink } from "@/lib/perfluenceAffiliateSafety";
 import { isPausedPublisherStore } from "@/lib/publisherPauses";
 
 /**
@@ -460,6 +461,7 @@ export function getActivePromoBanners(opts: { storeSlug?: string; now?: number }
   const now = opts.now ?? Date.now();
   return PROMO_BANNERS.filter(
     (b) =>
+      isPerfluencePartnerLink(b.link) &&
       !PAUSED_PROMO_BANNER_IDS.has(b.id) &&
       !isPausedPublisherStore(b.storeSlug) &&
       now >= bannerStartMs(b) - PREFETCH_MS &&
