@@ -215,6 +215,18 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     site: "https://www.askona.ru/",
     activeBloggers: 0,
   },
+  "globus": {
+    id: 1123,
+    slug: "globus",
+    name: "Глобус",
+    logo: "https://s3sc.perfluence.net/logos/17035040417294.png",
+    category: "Доставка продуктов",
+    categorySlug: "dostavka-produktov",
+    about: "Гипермаркеты «Глобус» — международная сеть продуктовых гипермаркетов с собственным производством (мясной цех, пекарня, кулинария), огромным ассортиментом свежих продуктов и быстрой доставкой онлайн-заказов.",
+    conditions: "Скидки по промокодам применяются при оформлении онлайн-заказа на сайте или в мобильном приложении Глобус.",
+    site: "https://online.globus.ru",
+    activeBloggers: 2150,
+  },
   "polzaru": {
     id: -100030,
     slug: "polzaru",

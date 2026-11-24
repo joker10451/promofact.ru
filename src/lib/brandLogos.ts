@@ -109,6 +109,13 @@ export function getLocalBrandLogo(slug: string): string | null {
 
 
 export const BRAND_REGISTRY: Record<string, BrandMeta> = {
+  "globus": {
+    logoUrl: "https://s3sc.perfluence.net/logos/17035040417294.png",
+    emoji: "🛒",
+    bgGradient: "from-amber-500 to-orange-600",
+    textColor: "text-white",
+    domain: "globus.ru",
+  },
   "rosgosstrakh": {
     logoUrl: "/brands/rosgosstrakh.png",
     emoji: "🛡️",
