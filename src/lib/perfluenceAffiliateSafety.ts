@@ -1,5 +1,19 @@
 import type { Coupon } from "@/lib/types";
 
+function isPerfluenceUrl(url: URL): boolean {
+  return url.protocol === "https:" &&
+    !url.username && !url.password && !url.port &&
+    (url.hostname === "prfl.me" || url.hostname.endsWith(".prfl.me"));
+}
+
+export function isPerfluencePartnerLink(link: string): boolean {
+  try {
+    return isPerfluenceUrl(new URL(link));
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Fail-closed validation ONLY for the automatically imported Perfluence widget.
  * Editorial placements have their own approved-link gates. A merchant's
@@ -22,10 +36,7 @@ export function isPublicPerfluenceWidgetCoupon(
   if (/\berid\b/i.test(disclosure) && declaredInText !== marker) return false;
   try {
     const url = new URL(link);
-    const hostname = url.hostname.toLowerCase();
-    return url.protocol === "https:" &&
-      !url.username && !url.password && !url.port &&
-      (hostname === "prfl.me" || hostname.endsWith(".prfl.me")) &&
+    return isPerfluenceUrl(url) &&
       url.searchParams.getAll("erid").length === 1 &&
       url.searchParams.get("erid") === marker;
   } catch {

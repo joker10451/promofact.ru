@@ -9,7 +9,7 @@ import { isCouponActive } from "@/lib/couponExpiry";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { isApprovedOct16PublisherOffer } from "@/lib/perfluenceOct16Offers";
 import { isApprovedOct18WebsitePlacement } from "@/lib/perfluenceOct18Scheduled";
-import { isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
+import { isPerfluencePartnerLink, isPublicPerfluenceWidgetCoupon } from "@/lib/perfluenceAffiliateSafety";
 import { isRegulatedAdvertiser, meetsMandatoryDisclaimers } from "@/lib/regulatedAds";
 import { carriesOverduePlacement, isExhaustedCode } from "@/lib/overduePlacements";
 import { isApprovedOct24Repost } from "@/lib/perfluenceRepeatsOct24";
@@ -939,32 +939,6 @@ const getCachedBaseSourceBuckets = unstable_cache(
   { revalidate: 3600 },
 );
 
-/**
- * Динамический снимок Admitad (ADMITAD-2.1).
- * Кэшируется с revalidate: 900 (15 минут), что позволяет автоматически подхватывать
- * свежий снимок Supabase без полной пересборки сайта.
- */
-export const getCachedAdmitadCoupons = unstable_cache(
-  async (): Promise<Coupon[]> => {
-    if (process.env.ADMITAD_CATALOG_ENABLED !== "true") return [];
-    try {
-      const { fetchAdmitadCouponsCached } = await import("@/lib/admitadSupabase");
-      return await fetchAdmitadCouponsCached();
-    } catch (e) {
-      console.error("[perfluence] admitad snapshot read error:", e);
-      return [];
-    }
-  },
-  // Publisher eligibility changed: stale persistent data cache must not
-  // keep previously published but now explicitly denied advertiser programs.
-   ["promofact", "admitad-snapshot-coupons-v3-publisher-rights"],
-  { revalidate: 3600 },
-);
-
-/**
- * Полный объединённый стек каталога со строгим приоритетом:
- * custom > supabase > perfluence > admitad.
- */
 export async function getCombinedCoupons(): Promise<Coupon[]> {
   const baseBuckets = await getCachedBaseSourceBuckets();
   const { dedupeCoupons } = await import("@/lib/dedupe");
@@ -985,22 +959,18 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
     })),
   ];
 
-  if (process.env.ADMITAD_CATALOG_ENABLED === "true") {
-    try {
-      const admitadCoupons = await getCachedAdmitadCoupons();
-      if (admitadCoupons.length > 0) {
-        sources.push({ source: "admitad", coupons: admitadCoupons });
-      }
-    } catch (e) {
-      console.error("[perfluence] admitad merge error:", e);
-    }
-  }
-
   // Placements Perfluence asks us to remove (30 days after the post, ORD reporting stops) are
   // dropped here, BEFORE de-duplication: otherwise a stale hand-coded entry would win the
   // de-duplication against the widget's fresh placement of the same offer and then be removed,
   // leaving nothing.
-  for (const s of sources) s.coupons = s.coupons.filter((c) => !carriesOverduePlacement(c) && !isExhaustedCode(c));
+  for (const source of sources) {
+    source.coupons = source.coupons.filter((coupon) =>
+      coupon.promocode.group !== "admitad" &&
+      isPerfluencePartnerLink(coupon.affiliate.link) &&
+      !carriesOverduePlacement(coupon) &&
+      !isExhaustedCode(coupon)
+    );
+  }
 
   const { coupons, stats } = dedupeCoupons(sources);
 
@@ -1014,7 +984,7 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // The publisher's Perfluence widget is the source of truth: a widget offer
   // that already passed isPublicPerfluenceWidgetCoupon (matching ERID in field,
   // prfl.me link and legal text) publishes without a hand-kept code list.
-  // Dated allowlists still govern custom and Admitad offers.
+  // Dated allowlists still govern manually managed Perfluence offers.
   const widgetCoupons = new Set(sources.find((s) => s.source === "perfluence")?.coupons ?? []);
   // Regulated advertisers (medicine, finance, insurance, payments) never take the
   // automatic widget path: a widget offer there goes through the reviewed rules.
