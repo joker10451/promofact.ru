@@ -71,5 +71,18 @@
     "code": "NVPF-XE5, WAVE-QBAY",
     "message_id": 127,
     "date": "2026-11-24T16:00:03.258Z"
+  },
+  {
+    "messageId": 128,
+    "store": "globus",
+    "storeName": "Глобус",
+    "date": "2026-11-24T17:06:33.719Z",
+    "channel": "@smart_zakupka",
+    "codes": [
+      "p29f8zk",
+      "p31fr6l",
+      "p30f8kc"
+    ],
+    "url": "https://globusonline.prfl.me/sites/lqr3zn?erid=2RanykqRqcx"
   }
 ]
