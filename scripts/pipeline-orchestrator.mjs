@@ -424,6 +424,20 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
     console.log(`\n[Фаза 2] Автопилот Perfluence пропущен (mode=${mode}, hasSession=${fs.existsSync(SESSION_FILE)}).`);
   }
 
+  // ФАЗА 2.1: Сразу досдаём отложенные сайт-отчёты со скриншотом через Playwright (даже если ТГ-постинг на кулдауне)
+  if (!options.dryRun && fs.existsSync(SESSION_FILE) && autopilotReport?.needsScreenshotPosts?.length) {
+    console.log(`\n[Фаза 2.1] Сдача ${autopilotReport.needsScreenshotPosts.length} сайт-отчётов со скриншотом...`);
+    for (const pending of autopilotReport.needsScreenshotPosts.slice(0, 10)) {
+      try {
+        await submitReport(pending.postId, pending.postUrl, { headless: true });
+        console.log(` ✓ Сайт-отчёт #${pending.postId} (${pending.postUrl}) сдан со скриншотом!`);
+      } catch (shotErr) {
+        console.warn(` ⚠ Не удалось сдать #${pending.postId}:`, shotErr.message);
+      }
+    }
+    autopilotReport.needsScreenshotPosts = [];
+  }
+
   // ФАЗА 3: Загрузка готовых офферов из виджета Perfluence (если выбран трек Perfluence/auto)
   let items = [];
   if (wantPerfluence) {
