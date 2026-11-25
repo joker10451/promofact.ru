@@ -305,22 +305,32 @@ function pickTopicBrief({ slot, storeOffers, pampaduOffers, existingSlugs, exist
     const financeAngles = [
       {
         slug: "debetovye-karty-s-besplatnym-obsluzhivaniem-i-keshbekom-2026",
+        slugPrefix: "debetovye-karty",
+        keywords: ["бесплатным обслуживанием", "дебетовые карты"],
         topic: "Дебетовые карты с бесплатным обслуживанием навсегда и максимальным кэшбэком для покупок с промокодами в 2026 году",
         focus: "debit",
       },
       {
         slug: "kreditka-ili-rassrochka-kak-oplachivat-krupnye-pokupki-2026",
+        slugPrefix: "kreditka-ili-rassrochka",
+        keywords: ["рассрочк", "сплит"],
         topic: "Льготный период 120 дней против рассрочки 0% (Сплит и Платинум): как правильно покупать по промокодам без переплат",
         focus: "credit",
       },
       {
         slug: "keshbek-bankov-i-promokody-kak-skladyvat-skidki-2026",
+        slugPrefix: "keshbek-bankov-i-promokody",
+        keywords: ["складывать скидки", "сочетать промокоды"],
         topic: "Как легально сочетать промокоды магазинов с банковским кэшбэком и льготным периодом до 120 дней в 2026 году",
         focus: "all",
       },
     ];
-    const picked = financeAngles.find((a) => !existingSlugs.has(a.slug) && !titleJoined.includes(a.slug.slice(0, 12))) || {
-      slug: `finansy-karty-keshbek-${mskYmd.slice(0, 7)}`,
+    const isAngleCovered = (a) =>
+      existingSlugs.has(a.slug) ||
+      [...existingSlugs].some((s) => s.startsWith(a.slugPrefix)) ||
+      a.keywords.some((kw) => titleJoined.includes(kw));
+    const picked = financeAngles.find((a) => !isAngleCovered(a)) || {
+      slug: `finansy-karty-keshbek-${mskYmd.slice(0, 7)}-${mskYmd.slice(8, 10)}`,
       topic: `Банковские карты и кэшбэк-связки под зимние покупки 2026–2027`,
       focus: "all",
     };
@@ -399,7 +409,7 @@ ${brief.angleHint}
 1. Никаких HTML-тегов в тексте (разрешён только **жирный** шрифт в абзацах \`body\` и заголовки второго уровня начинающиеся строго с \`## \`).
 2. Никакой ложной гарантированности и стоп-слов: СТРОГО ЗАПРЕЩЕНЫ любые однокоренные слова с корнем «гарантир» (гарантия, гарантированный, гарантировано, гарантирует, гарантируем — даже с частицей «не»!), а также «скидка применится сразу», «100% сработает», «работает у всех», «точные даты заранее», «промокод бессрочный» и любые упоминания Admitad / Адмитад. Вместо «гарантированный» пиши «подтверждённый», «постоянный» или «при соблюдении условий». Всегда честно указывай про пороги и условия проверки в корзине/банке.
 3. Длина \`body\`: от 11 до 16 насыщенных абзацев (включая 4–5 подзаголовков вида \`## Заголовок раздела\`). Средний объём статьи — 3500–5500 символов полезного текста с примерами расчётов в рублях (₽).
-4. \`slug\`: предложи латинский URL-slug (только строчные буквы a-z, цифры 0-9 и дефис \`-\`, желательно \`${brief.suggestedSlug}\`), НЕ совпадающий ни с одним уже существующим (${[...existingSlugs].slice(0, 20).join(", ")}...).
+4. \`slug\`: используй точный латинский URL-slug \`${brief.suggestedSlug}\` (или близкий уникальный slug из строчных букв a-z, цифр 0-9 и дефиса \`-\`), НЕ совпадающий ни с одним уже существующим (${[...existingSlugs].slice(-20).join(", ")}).
 5. \`title\`: цепляющий, конкретный заголовок 45–88 символов без эмодзи (удобен и для обложки 1200×630, и для SEO).
 6. \`description\`: лаконичный сниппет 115–160 символов.
 7. \`faq\`: 4 честных практических вопроса и ответа (\`q\`, \`a\`).
