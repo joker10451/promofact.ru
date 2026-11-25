@@ -83,6 +83,16 @@ try {
 
   globalThis.fetch = async (url, init) => {
     if (init?.method === "POST") {
+      return new Response("<form><p>Исправьте следующие ошибки: Необходимо заполнить Скрин публикации Проект Мегамаркет</p></form>", { status: 200 });
+    }
+    return new Response('<form><input name="_csrf" value="tok123"><input name="Post[post_link]"></form>', { status: 200 });
+  };
+  const needsShotSummary = await submitPerfluenceReportHttp("s=1", "99999", "https://promofact.ru/store/megamarket");
+  assert.equal(needsShotSummary.ok, false);
+  assert.equal(needsShotSummary.needsScreenshot, true);
+
+  globalThis.fetch = async (url, init) => {
+    if (init?.method === "POST") {
       return new Response("", { status: 302, headers: { location: "/posts" } });
     }
     return new Response('<form><input name="_csrf" value="tok123"><input name="Post[post_link]"></form>', { status: 200 });

@@ -306,13 +306,19 @@ export async function submitPerfluenceReportHttp(
   if (submitRes.status === 302) return { ok: true, needsScreenshot: false };
 
   // Yii2 returns HTTP 200 with validation error blocks when fields (e.g. screenshot) fail validation.
-  const errSummary = submitRes.html.match(/class="error-summary[^"]*"[^>]*>([\s\S]*?)<\/div>/i)?.[1] || "";
-  const invalidFeedbacks = [...submitRes.html.matchAll(/class="[^"]*(?:invalid-feedback|help-block)[^"]*"[^>]*>([\s\S]*?)<\/div>/gi)]
+  const errSummary = submitRes.html.match(/<div[^>]*class="[^"]*error-summary[^"]*"[^>]*>([\s\S]*?)<\/div>/i)?.[1] || "";
+  const invalidFeedbacks = [...submitRes.html.matchAll(/class="[^"]*(?:invalid-feedback|has-error)[^"]*"[^>]*>([\s\S]*?)<\/div>/gi)]
     .map((m) => m[1].replace(/<[^>]+>/g, " ").trim())
     .filter(Boolean);
-  const combinedErr = decodeHtml(`${errSummary} ${invalidFeedbacks.join("; ")}`.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+  const cleanedHtmlText = decodeHtml(submitRes.html.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<[^>]+>/g, " "))
+    .replace(/\s+/g, " ")
+    .trim();
+  const yiiSummary = cleanedHtmlText.match(/Исправьте следующие ошибки:\s*([^]{1,220}?)(?:Проект\s|Соц сеть|$)/i)?.[1]?.trim() || "";
+  const combinedErr = decodeHtml(`${errSummary} ${yiiSummary} ${invalidFeedbacks.join("; ")}`.replace(/<[^>]+>/g, " "))
+    .replace(/\s+/g, " ")
+    .trim();
 
-  const needsScreenshot = /скрин|screen|изображ|файл/i.test(combinedErr);
+  const needsScreenshot = /скрин|screen|изображ/i.test(combinedErr);
   return {
     ok: false,
     needsScreenshot,
@@ -366,7 +372,11 @@ async function verifyLiveStorePage(
   return { ready, html };
 }
 
-async function deleteChannelPost(botToken: string, channelId: string, messageId: string): Promise<{ ok: boolean; permanentSkip: boolean }> {
+async function deleteChannelPost(
+  botToken: string,
+  channelId: string,
+  messageId: string,
+): Promise<{ ok: boolean; permanentSkip: boolean; alreadyMissing: boolean; description?: string }> {
   const res = await fetch(`https://api.telegram.org/bot${botToken}/deleteMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -374,10 +384,11 @@ async function deleteChannelPost(botToken: string, channelId: string, messageId:
     signal: AbortSignal.timeout(10_000),
   });
   const json = (await res.json().catch(() => ({}))) as { ok?: boolean; description?: string };
-  if (json.ok) return { ok: true, permanentSkip: true };
-  const desc = json.description || "";
-  const permanentSkip = /not found|can't be deleted|message to delete/i.test(desc);
-  return { ok: false, permanentSkip };
+  if (json.ok) return { ok: true, permanentSkip: true, alreadyMissing: false };
+  const desc = json.description || `HTTP ${res.status}`;
+  const alreadyMissing = /message to delete not found/i.test(desc);
+  const permanentSkip = alreadyMissing || /can't be deleted/i.test(desc);
+  return { ok: false, permanentSkip, alreadyMissing, description: desc };
 }
 
 async function runPool<T>(items: T[], concurrency: number, worker: (item: T) => Promise<void>): Promise<void> {
@@ -505,6 +516,10 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
         if (del.permanentSkip) attemptedTgDeletes.add(row.tgMessageId);
         if (del.ok) {
           report.deletedTelegramMessageIds.push(row.tgMessageId);
+        } else if (del.description && report.errors.length < 5) {
+          report.errors.push(`TG_DELETE_${row.tgMessageId}: ${del.description}`);
+        }
+        if (del.ok || del.alreadyMissing) {
           if (await enqueuePostRecheck(cookieHeader, row.postId)) {
             report.recheckedPostIds.push(row.postId);
           }
@@ -580,7 +595,8 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
     const title = decodeHtml(accRes.html.match(/<title>([^<]+)<\/title>/i)?.[1] || "");
     const projectName = title.replace(/^Проект\s*["«]?|["»]?$/g, "").trim();
 
-    for (const accountId of [WEBSITE_ACCOUNT_ID, TELEGRAM_ACCOUNT_ID]) {
+    // Activate Telegram first and website second so Perfluence widget favors promofact.ru /sites/... links.
+    for (const accountId of [TELEGRAM_ACCOUNT_ID, WEBSITE_ACCOUNT_ID]) {
       if (!isProjectAllowed(projectId, projectName, accountId)) continue;
       const tile = extractTileSlice(accRes.html, accountId);
       if (!tile) continue;

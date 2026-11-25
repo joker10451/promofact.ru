@@ -14,6 +14,7 @@ import path from "node:path";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 import { submitReport } from "./perfluence-report.mjs";
+import { generatePromoBanner } from "./banner-generator.mjs";
 import { getFlashDeals } from "./perfluence-flash-deals.mjs";
 import { postToVk } from "./vk-crossposter.mjs";
 import { checkNewEarnings } from "./perfluence-earnings-monitor.mjs";
@@ -975,7 +976,7 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
   // Досдаём отложенные отчёты сайта (где нужен скриншот) и недавно вышедшие посты @smart_zakupka
   if (fs.existsSync(SESSION_FILE) && autopilotReport?.needsScreenshotPosts?.length) {
     console.log(`\n[Фаза 5.1] Сдача ${autopilotReport.needsScreenshotPosts.length} сайт-отчётов со скриншотом...`);
-    for (const pending of autopilotReport.needsScreenshotPosts.slice(0, 5)) {
+    for (const pending of autopilotReport.needsScreenshotPosts.slice(0, 10)) {
       try {
         await submitReport(pending.postId, pending.postUrl, { headless: true });
         console.log(` ✓ Сайт-отчёт #${pending.postId} (${pending.postUrl}) сдан со скриншотом!`);
