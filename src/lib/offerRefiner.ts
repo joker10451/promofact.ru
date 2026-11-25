@@ -157,9 +157,11 @@ export function refineOffer(
 
   // 2. Комбинация: Скидка (%) + Подарок (например, Кинопоиск 50% + 60 дней)
   const pctMatch = title.match(/(\d+)\s*%/) || terms.match(/(\d+)\s*%/);
-  const isGiftInText =
-    /подар(?:ок|ки|ка|ков)|ролл|фото|пицца|подвеск|gift|в\s+подарок/i.test(title) ||
-    /подар(?:ок|ки|ка|ков)|ролл|фото|пицца|подвеск|в\s+подарок/i.test(terms);
+  const hasExplicitRubDiscount = /(?:скидка|минус)\s*(?:\d[\d\s]*\s*(?:₽|р\b|руб))/i.test(title);
+  // «подарков» и «ролл(ов)/пицц(ы)» в перечне товаров («цветов и подарков», «пиццы, сетов и роллов») —
+  // не подарок к заказу; учитываем именно формулировки выдачи подарка.
+  const giftPhraseRe = /(?:^|[^а-яё])(?:в\s+подарок|подарок|подарк[аи]|дарим|gift)(?=$|[^а-яё])|50\s*фото|подвеск[аиу]?\s+(?:в\s+подарок|бесплатно)/iu;
+  const isGiftInText = giftPhraseRe.test(title) || giftPhraseRe.test(terms);
 
   if (pctMatch && isGiftInText) {
     const val = parseInt(pctMatch[1], 10);
@@ -207,8 +209,8 @@ export function refineOffer(
     };
   }
 
-  // 3. Подарки к заказу (Gift) — срабатывает если нет процентной скидки
-  if (isGiftInText) {
+  // 3. Подарки к заказу (Gift) — срабатывает только если в заголовке нет явной денежной скидки
+  if (isGiftInText && !hasExplicitRubDiscount) {
     let giftTitle = /подарок\s+на\s+выбор/iu.test(combined) ? "Подарок на выбор" : "Подарок к заказу";
 
     if (/фреш\s*ролл/i.test(title) || /ролл\s+с\s+креветкой/i.test(title) || /ролл\s+с\s+креветкой/i.test(terms)) {

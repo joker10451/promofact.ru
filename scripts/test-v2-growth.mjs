@@ -80,4 +80,26 @@ const vkusvillAmounts = new Set(vkusvill.coupons.map((c) => c.promocode.bonusNam
 assert.deepEqual(vkusvillAmounts, new Set(["600", "350", "300", "250", "200"]), "VkusVill must not regress to duplicate nominal amounts");
 assert.ok(vkusvill.coupons.every((c) => c.affiliate.ordMarker === "2Ranyo8ey8Q"), "VkusVill must carry unified renewed ERID 2Ranyo8ey8Q");
 
+// 8. Offer refiner never misclassifies explicit ruble discounts mentioning "подарков"/"роллов" as gifts
+const { refineOffer } = await import("../src/lib/offerRefiner.ts");
+const yandexFlowers = refineOffer(
+  "Скидка 1 100 ₽ на первый заказ цветов от 3 000 ₽",
+  "Свежий промокод QX7GZZ даёт скидку 1 100 ₽ при заказе букетов, композиций и подарков от 3 000 ₽",
+  "QX7GZZ",
+  "Яндекс Цветы",
+  true,
+);
+assert.equal(yandexFlowers.type, "rub");
+assert.equal(yandexFlowers.discount, "−1 100 ₽");
+
+const farforRub = refineOffer(
+  "Скидка 500 ₽ на любой заказ от 1 890 ₽ в FARFOR",
+  "Промокод YMM14572 даёт скидку 500 ₽ на заказ пиццы, сетов и роллов от 1 890 ₽",
+  "YMM14572",
+  "FARFOR",
+  false,
+);
+assert.equal(farforRub.type, "rub");
+assert.equal(farforRub.discount, "−500 ₽");
+
 console.log("V2-GROWTH: Pampadu 1-click UX, SEO metadata, newest-first sorting, Dec seasonality, UTM & clean store parity PASS");
