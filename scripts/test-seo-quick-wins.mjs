@@ -359,27 +359,29 @@ let passed = 0;
 {
   const { getStoreExtra, hasActiveRequiredCoupons } = await import("@/lib/storeExtras");
 
-  // 1. Проверяем Островок: требуется PF4ALL80
-  const ostrovokExtra = getStoreExtra("ostrovok");
-  assert.ok(ostrovokExtra, "Островок должен иметь storeExtra");
-  assert.deepStrictEqual(ostrovokExtra.requiredActiveCodes, ["PF4ALL80"]);
+  // 1. Проверяем Самокат: требуются GZP8FU6 и GQCWSD2
+  const samokatExtra = getStoreExtra("samokat");
+  assert.ok(samokatExtra, "Самокат должен иметь storeExtra");
+  assert.deepStrictEqual(samokatExtra.requiredActiveCodes, ["GZP8FU6", "GQCWSD2"]);
 
   // Активные купоны -> true
   const activeCoupons = [
-    { promocode: { code: "PF4ALL80", expires: "2026-11-30" } },
+    { promocode: { code: "GZP8FU6", expires: "2026-11-30" } },
+    { promocode: { code: "GQCWSD2", expires: "2026-11-30" } },
   ];
   assert.strictEqual(
-    hasActiveRequiredCoupons(ostrovokExtra, activeCoupons, new Date("2026-10-01").getTime()),
+    hasActiveRequiredCoupons(samokatExtra, activeCoupons, new Date("2026-10-01").getTime()),
     true,
     "При наличии действующих промокодов custom metadata должны быть активны"
   );
 
   // Один купон истек -> false (fallback на нейтральный генератор)
   const expiredCoupons = [
-    { promocode: { code: "PF4ALL80", expires: "2026-09-30" } }, // истек
+    { promocode: { code: "GZP8FU6", expires: "2026-09-30" } },
+    { promocode: { code: "GQCWSD2", expires: "2026-11-30" } },
   ];
   assert.strictEqual(
-    hasActiveRequiredCoupons(ostrovokExtra, expiredCoupons, new Date("2026-10-01").getTime()),
+    hasActiveRequiredCoupons(samokatExtra, expiredCoupons, new Date("2026-10-01").getTime()),
     false,
     "Если промокод истек, custom metadata должны отключиться (fallback)"
   );
@@ -389,56 +391,50 @@ let passed = 0;
     { promocode: { code: "OTHER_CODE", expires: "2026-10-31" } },
   ];
   assert.strictEqual(
-    hasActiveRequiredCoupons(ostrovokExtra, missingCoupons, new Date("2026-10-01").getTime()),
+    hasActiveRequiredCoupons(samokatExtra, missingCoupons, new Date("2026-10-01").getTime()),
     false,
     "Если требуемый код отсутствует, custom metadata должны отключиться (fallback)"
   );
 
-  // 2. Проверяем Т-Путешествия: требуется YE
-  const tpExtra = getStoreExtra("t-puteshestviya-oteli");
-  assert.ok(tpExtra, "Т-Путешествия должны иметь storeExtra");
-  assert.deepStrictEqual(tpExtra.requiredActiveCodes, ["YE"]);
+  // 2. Проверяем Яндекс Плюс: требуется 2DPEP4GFQF
+  const plusExtra = getStoreExtra("yandex-plus");
+  assert.ok(plusExtra, "Яндекс Плюс должен иметь storeExtra");
+  assert.deepStrictEqual(plusExtra.requiredActiveCodes, ["2DPEP4GFQF"]);
   assert.strictEqual(
-    hasActiveRequiredCoupons(tpExtra, [{ promocode: { code: "YE", expires: "2026-10-11" } }], new Date("2026-10-01").getTime()),
+    hasActiveRequiredCoupons(plusExtra, [{ promocode: { code: "2DPEP4GFQF", expires: "2026-12-31" } }], new Date("2026-11-01").getTime()),
     true
   );
   assert.strictEqual(
-    hasActiveRequiredCoupons(tpExtra, [{ promocode: { code: "YE", expires: "2026-10-11" } }], new Date("2026-10-12").getTime()),
+    hasActiveRequiredCoupons(plusExtra, [{ promocode: { code: "2DPEP4GFQF", expires: "2026-12-31" } }], new Date("2027-01-02").getTime()),
     false,
-    "После 11.10.2026 промокод YE истекает и метаданные должны переключиться на fallback"
+    "После 31.12.2026 промокод 2DPEP4GFQF истекает и метаданные должны переключиться на fallback"
   );
 
-  // 3. Проверяем ВинЛаб: требуются 10PFNS6570, 5PFSEP5144 и WCPFSEP7289
-  const winlabExtra = getStoreExtra("winlab");
-  assert.ok(winlabExtra, "ВинЛаб должен иметь storeExtra");
-  assert.deepStrictEqual(winlabExtra.requiredActiveCodes, ["10PFNS6570", "5PFSEP5144", "WCPFSEP7289"]);
-
-  // Проверяем FAQ fallback логику:
-  // При наличии всех кодов -> showCustomFaq true
-  const winlabActiveCoupons = [
-    { promocode: { code: "10PFNS6570", expires: "2026-10-31" } },
-    { promocode: { code: "5PFSEP5144", expires: "2026-10-31" } },
-    { promocode: { code: "WCPFSEP7289", expires: "2026-10-31" } },
+  // 3. Проверяем частичное истечение нескольких requiredActiveCodes
+  const multiExtra = { requiredActiveCodes: ["C1", "C2", "C3"], customTitle: () => "Multi" };
+  const multiActive = [
+    { promocode: { code: "C1", expires: "2026-12-31" } },
+    { promocode: { code: "C2", expires: "2026-12-31" } },
+    { promocode: { code: "C3", expires: "2026-12-31" } },
   ];
   assert.strictEqual(
-    hasActiveRequiredCoupons(winlabExtra, winlabActiveCoupons, new Date("2026-10-01").getTime()),
+    hasActiveRequiredCoupons(multiExtra, multiActive, new Date("2026-11-01").getTime()),
     true,
-    "Все 3 промокода ВинЛаб активны -> FAQ и метаданные включены"
+    "Все 3 промокода активны -> FAQ и метаданные включены"
   );
 
-  // При истечении WCPFSEP7289 -> showCustomFaq false (отключение offer-specific FAQ)
-  const winlabExpiredWinclub = [
-    { promocode: { code: "10PFNS6570", expires: "2026-10-31" } },
-    { promocode: { code: "5PFSEP5144", expires: "2026-10-31" } },
-    { promocode: { code: "WCPFSEP7289", expires: "2026-09-30" } }, // истек
+  const multiExpiredOne = [
+    { promocode: { code: "C1", expires: "2026-12-31" } },
+    { promocode: { code: "C2", expires: "2026-12-31" } },
+    { promocode: { code: "C3", expires: "2026-09-30" } },
   ];
   assert.strictEqual(
-    hasActiveRequiredCoupons(winlabExtra, winlabExpiredWinclub, new Date("2026-10-01").getTime()),
+    hasActiveRequiredCoupons(multiExtra, multiExpiredOne, new Date("2026-11-01").getTime()),
     false,
-    "Если промокод WinClub WCPFSEP7289 истек -> custom FAQ и metadata отключаются"
+    "Если хотя бы один промокод истек -> custom FAQ и metadata отключаются"
   );
 
-  // 4. Проверяем магазины БЕЗ requiredActiveCodes (FARFOR, RUTUBE, СберЗдоровье):
+  // 4. Проверяем магазины БЕЗ requiredActiveCodes (FARFOR, Food Band, СберЗдоровье):
   // Их FAQ не должен скрываться из-за отсутствия customTitle или requiredActiveCodes
   const farforExtra = getStoreExtra("farfor");
   assert.ok(farforExtra && farforExtra.faq && farforExtra.faq.length > 0, "У FARFOR должен быть FAQ");
@@ -463,12 +459,12 @@ let passed = 0;
     "FAQ FARFOR должен сохраняться независимо от наличия кодов"
   );
 
-  const rutubeExtra = getStoreExtra("rutube");
-  assert.ok(rutubeExtra && rutubeExtra.faq && rutubeExtra.faq.length > 0, "У RUTUBE должен быть FAQ");
+  const foodBandExtra = getStoreExtra("food-band");
+  assert.ok(foodBandExtra && foodBandExtra.faq && foodBandExtra.faq.length > 0, "У Food Band должен быть FAQ");
   assert.deepStrictEqual(
-    getFaqForStore(rutubeExtra, [], Date.now()),
-    rutubeExtra.faq,
-    "FAQ RUTUBE должен сохраняться независимо от наличия кодов"
+    getFaqForStore(foodBandExtra, [], Date.now()),
+    foodBandExtra.faq,
+    "FAQ Food Band должен сохраняться независимо от наличия кодов"
   );
 
   const sberzExtra = getStoreExtra("sberzdorovie");

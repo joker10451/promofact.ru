@@ -61,10 +61,8 @@ assert.equal(withoutForbiddenTanukiCoPromotion(TANUKI_OCT16_OFFERS).length,4,
  "Tanuki standalone storefront remains available");
 
 const perfluence=fs.readFileSync("src/lib/perfluence.ts","utf8");
-const custom=fs.readFileSync("src/lib/customCoupons.ts","utf8");
 const home=fs.readFileSync("src/app/page.tsx","utf8");
 const collections=fs.readFileSync("src/app/collections/[slug]/page.tsx","utf8");
-assert(custom.includes("...TANUKI_OCT16_OFFERS"));
 assert(perfluence.includes('if (c.store.slug === "tanukifamily")') &&
   perfluence.includes('c.affiliate.link === "'+TANUKI_OCT16_LINK+'"') &&
   perfluence.includes('c.affiliate.ordMarker === "'+TANUKI_OCT16_ERID+'"') &&

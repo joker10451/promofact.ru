@@ -102,4 +102,92 @@ const farforRub = refineOffer(
 assert.equal(farforRub.type, "rub");
 assert.equal(farforRub.discount, "−500 ₽");
 
+// 9. Banking cards, fixed-price sets, exchange rates, deposit rates & duplicate slug consolidation
+const tbankPlat = refineOffer(
+  "Кредитная карта Т-Банк Платинум: лимит до 1 000 000 ₽ и рассрочка 0% до 12 месяцев",
+  "Беспроцентный период до 55 дней на любые покупки, рассрочка 0% до 12 месяцев.",
+  "TBANKPLATINUM",
+  "Т-Банк",
+  false,
+);
+assert.notEqual(tbankPlat.discount, "−0%");
+assert.equal(tbankPlat.discount, "Рассрочка 0% до 12 мес.");
+
+const otpGrace = refineOffer(
+  "Кредитная карта ОТП Банк: 120 дней без % на любые покупки и 0 ₽ обслуживание",
+  "Честный беспроцентный период 120 дней без процентов на любые покупки.",
+  "OTP120DAYS",
+  "ОТП Банк",
+  false,
+);
+assert.equal(otpGrace.type, "default");
+assert.equal(otpGrace.discount, "120 дней без %");
+
+const alfaCard = refineOffer(
+  "Дебетовая Альфа-Карта МИР: суперкэшбэк до 100% и 0 ₽ за обслуживание всегда",
+  "Выбор любимых категорий с кэшбэком до 100%.",
+  "ALFASMART",
+  "Альфа-Банк",
+  false,
+);
+assert.equal(alfaCard.discount, "Кешбэк до 100%");
+
+const otpCert = refineOffer(
+  "Сертификат на 2000 ₽ в подарок за оформление дебетовой ОТП Карты",
+  "Сертификат отправляется после совершения первой покупки от 100 ₽",
+  "",
+  "ОТП Банк",
+  false,
+);
+assert.equal(otpCert.type, "gift");
+assert.equal(otpCert.discount, "Сертификат 2 000 ₽");
+assert.equal(otpCert.condition, "после первой покупки от 100 ₽");
+
+const farforSet = refineOffer(
+  "Сет «Запеченный» за 599 ₽ для новых клиентов",
+  "При заказе в приложении",
+  "ZDZ99554",
+  "FARFOR",
+  true,
+);
+assert.equal(farforSet.type, "default");
+assert.equal(farforSet.discount, "Сет «Запеченный» за 599 ₽");
+
+const megaRate = refineOffer(
+  "Повышенный курс списания бонусов Спасибо (1 бонус = 1,5 ₽) на Мегамаркете",
+  "Акция на Мегамаркете",
+  "",
+  "Мегамаркет",
+  false,
+);
+assert.equal(megaRate.type, "default");
+assert.equal(megaRate.discount, "1 бонус = 1,5 ₽");
+
+const vkladRate = refineOffer(
+  "Розыгрыш 18,5 млн бонусов Спасибо за вклад в Сбере",
+  "Ставка до 13,5% годовых на срок 3–7 месяцев.",
+  "СПАСИБО",
+  "Вклад в Сбере",
+  false,
+);
+assert.notEqual(vkladRate.discount, "−5%");
+
+const activeSlugs = new Set(stores.filter((s) => s.coupons.length > 0).map((s) => s.slug));
+for (const canonical of ["food-band", "polzaru", "plati-po-miru", "debetovaya-sberkarta", "chistaya-liniya"]) {
+  assert.ok(activeSlugs.has(canonical), `Canonical feed store missing: ${canonical}`);
+}
+for (const dup of ["foodband", "polza", "platipomiru", "sberbank", "arnest-yunirus-na-ozon", "yandex-practicum"]) {
+  assert.ok(!activeSlugs.has(dup), `Duplicate/retired store must not be active: ${dup}`);
+}
+const letualStore = stores.find((s) => s.slug === "letual");
+assert.ok(
+  letualStore?.coupons.some((c) => c.affiliate.ordMarker === "2RanykCAjCg"),
+  "L'Etoile must use fresh Perfluence feed ERID 2RanykCAjCg",
+);
+assert.equal(fs.readFileSync("src/lib/storeExtras.ts", "utf8").includes("kv7qjypp"), false,
+  "Expired kv7qjypp FAQ must stay removed from storeExtras");
+const nextCfgSrc = fs.readFileSync("next.config.ts", "utf8");
+assert.ok(nextCfgSrc.includes("poweredByHeader: false") && nextCfgSrc.includes("Strict-Transport-Security"),
+  "Next config must expose security headers and disable X-Powered-By");
+
 console.log("V2-GROWTH: Pampadu 1-click UX, SEO metadata, newest-first sorting, Dec seasonality, UTM & clean store parity PASS");

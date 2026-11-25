@@ -132,10 +132,12 @@ export function refineOffer(
     };
   }
   // 1. Фиксированные спец-предложения и подписки (Иви, СберПрайм, Яндекс Плюс, Start.ru, Premier)
+  // Банковские карты («120 дней без %») не являются подписками.
   const daysMatch = title.match(/(\d+)\s*(?:дней|дня|день)/i);
   if (
     (daysMatch || /подписк/i.test(title)) &&
     !/(\d+)\s*%/.test(title) &&
+    !/кредитн[а-яё]*\s+карт|дебетов[а-яё]*\s+карт|без\s*%/iu.test(title) &&
     /подписк|доступ|пробн|бесплатн|кинотеатр/i.test(combined)
   ) {
     // Не выводим цену, срок или аудиторию, которых нет в данных рекламодателя.
@@ -155,8 +157,58 @@ export function refineOffer(
     };
   }
 
+  // 1.5. Банковские карты (льготный период, рассрочка 0%, кэшбэк по картам)
+  if (/(?:кредитн|дебетов)[а-яё]*(?:\s+[а-яa-z0-9-]+)?\s+карт/iu.test(title)) {
+    const afterColon = title.includes(":") ? title.split(":").slice(1).join(":").trim() : title;
+    const graceMatch = title.match(/(\d+)\s*дн(?:ей|я|ь)\s+без\s*%/iu);
+    if (graceMatch) {
+      const cond = afterColon
+        .replace(/^(?:честный\s+)?(?:до\s+)?\d+\s*дн(?:ей|я|ь)\s+без\s*%(?:\s+на\s+любые\s+покупки)?/iu, "")
+        .replace(/^(?:\s*и\s+)|(?:\s+и\s*$)/gi, "")
+        .trim();
+      return {
+        type: "default",
+        discount: `${graceMatch[1]} дней без %`,
+        condition: cond || "Льготный период на покупки",
+        fullTerms: terms || title,
+        isNoCode,
+      };
+    }
+    const zeroInstallment = title.match(/рассрочк[а-яё]*\s*0%\s*до\s*(\d+)\s*мес[а-яё]*/iu);
+    if (zeroInstallment) {
+      const cond = afterColon
+        .replace(/рассрочк[а-яё]*\s*0%\s*до\s*\d+\s*мес[а-яё]*/iu, "")
+        .replace(/(?:^\s*и\s+|\s+и\s*$)/gi, "")
+        .trim();
+      return {
+        type: "default",
+        discount: `Рассрочка 0% до ${zeroInstallment[1]} мес.`,
+        condition: cond || "По условиям карты",
+        fullTerms: terms || title,
+        isNoCode,
+      };
+    }
+    const cardCashback = title.match(/к[еэ]шб[еэ]к[а-яё]*\s*(до\s*)?([1-9]\d*)\s*%/iu);
+    if (cardCashback) {
+      const cond = afterColon
+        .replace(/(?:супер)?к[еэ]шб[еэ]к[а-яё]*\s*(?:до\s*)?[1-9]\d*\s*%/iu, "")
+        .replace(/(?:^\s*и\s+|\s+и\s*$)/gi, "")
+        .trim();
+      return {
+        type: "percent",
+        discount: `Кешбэк ${cardCashback[1] ? "до " : ""}${cardCashback[2]}%`,
+        condition: cond || "По условиям карты",
+        fullTerms: terms || title,
+        isNoCode,
+      };
+    }
+  }
+
   // 2. Комбинация: Скидка (%) + Подарок (например, Кинопоиск 50% + 60 дней)
-  const pctMatch = title.match(/(\d+)\s*%/) || terms.match(/(\d+)\s*%/);
+  // Игнорируем 0% (рассрочка 0% — не скидка −0%) и десятичные процентные ставки по вкладам («13,5% годовых»).
+  const stripNonDiscountPct = (s: string) =>
+    s.replace(/\d+[,.]\d+\s*%/g, "").replace(/ставк[а-яё]*\s*(?:до\s*)?\d+\s*%/gi, "");
+  const pctMatch = stripNonDiscountPct(title).match(/([1-9]\d*)\s*%/) || stripNonDiscountPct(terms).match(/([1-9]\d*)\s*%/);
   const hasExplicitRubDiscount = /(?:скидка|минус)\s*(?:\d[\d\s]*\s*(?:₽|р\b|руб))/i.test(title);
   // «подарков» и «ролл(ов)/пицц(ы)» в перечне товаров («цветов и подарков», «пиццы, сетов и роллов») —
   // не подарок к заказу; учитываем именно формулировки выдачи подарка.
@@ -211,9 +263,13 @@ export function refineOffer(
 
   // 3. Подарки к заказу (Gift) — срабатывает только если в заголовке нет явной денежной скидки
   if (isGiftInText && !hasExplicitRubDiscount) {
+    const certMatch = title.match(/сертификат\s+на\s+(\d[\d\s]*)\s*(?:₽|р\b|руб)/iu);
     let giftTitle = /подарок\s+на\s+выбор/iu.test(combined) ? "Подарок на выбор" : "Подарок к заказу";
 
-    if (/фреш\s*ролл/i.test(title) || /ролл\s+с\s+креветкой/i.test(title) || /ролл\s+с\s+креветкой/i.test(terms)) {
+    if (certMatch) {
+      const certAmt = Number(certMatch[1].replace(/\s/g, "")).toLocaleString("ru-RU").replace(/\u00a0/g, " ");
+      giftTitle = `Сертификат ${certAmt} ₽`;
+    } else if (/фреш\s*ролл/i.test(title) || /ролл\s+с\s+креветкой/i.test(title) || /ролл\s+с\s+креветкой/i.test(terms)) {
       giftTitle = "Ролл с креветкой и авокадо в подарок";
     } else if (/ролл/i.test(title) || /ролл/i.test(terms)) {
       giftTitle = "Ролл в подарок";
@@ -227,7 +283,10 @@ export function refineOffer(
       giftTitle = "Пицца в подарок";
     }
 
-    const condition = minOrder
+    const firstPurchaseMin = combined.match(/перв(?:ой|ого)\s+покупк[а-яё]*\s+от\s+(\d[\d\s]*)\s*(?:₽|руб)/iu);
+    const condition = firstPurchaseMin
+      ? `после первой покупки от ${Number(firstPurchaseMin[1].replace(/\s/g, "")).toLocaleString("ru-RU").replace(/\u00a0/g, " ")} ₽`
+      : minOrder
       ? `При заказе от ${minOrder.value.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`
       : isFirstOrder
       ? "на первый заказ"
@@ -242,6 +301,37 @@ export function refineOffer(
         `Добавьте товары в корзину и примените предложение для получения подарка к заказу в ${storeName}.`,
       isNoCode,
     };
+  }
+
+  // 3.1. Фиксированная стоимость набора/товара («Сет ... за 599 ₽», «1 кг роллов за 1290 ₽») — цена, не скидка −599 ₽
+  const setPriceMatch = !/скидк|минус|экономи|выгод|дешевле|к[еэ]шб[еэ]к|кэшбэк|бонус|сертификат|подарок|бесплатн/iu.test(title)
+    ? title.match(/^(.+?)\s+за\s+(\d[\d\s]{2,})\s*(?:₽|р\b|руб(?:лей|ля|\.)?)(.*)$/iu)
+    : null;
+  if (
+    setPriceMatch &&
+    !/(?:дн(?:ей|я|ь)|месяц[а-яё]*)\s*$/iu.test(setPriceMatch[1]) &&
+    !/=\s*\d/.test(title)
+  ) {
+    const priceNum = parseInt(setPriceMatch[2].replace(/\s/g, ""), 10);
+    if (Number.isFinite(priceNum) && priceNum >= 50) {
+      const formattedPrice = priceNum.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽";
+      const itemLabel = cleanTruncate(setPriceMatch[1].trim(), 38);
+      const tailCond = setPriceMatch[3]
+        .replace(/\s+(?:в|на)\s+(?:Food\s*Band|FARFOR|Фарфор|сайте\s+и\s+в\s+приложении)\b.*$/iu, "")
+        .trim();
+      const condText = tailCond
+        ? formatConditionPrefix(cleanConditionText(tailCond)).replace(/^на\s+/i, "")
+        : isFirstOrder
+        ? "на первый заказ"
+        : "спеццена по промокоду";
+      return {
+        type: "default",
+        discount: `${itemLabel} за ${formattedPrice}`,
+        condition: condText,
+        fullTerms: terms || title,
+        isNoCode,
+      };
+    }
   }
 
   // 4. Процентные скидки
@@ -289,12 +379,26 @@ export function refineOffer(
     };
   }
 
-  // 5. Фиксированные скидки в рублях
+  // 4.5. Повышенный курс списания бонусов/баллов («1 бонус = 1,5 ₽») — не скидка −5 ₽
+  const bonusRateMatch = combined.match(/(\d+\s*бонус[а-яё]*\s*=\s*\d+(?:[,.]\d+)?\s*(?:₽|руб))/iu);
+  if (bonusRateMatch || /курс[а-яё]*\s+списан/iu.test(title)) {
+    return {
+      type: "default",
+      discount: bonusRateMatch ? bonusRateMatch[1].replace(/руб\.?/iu, "₽") : cleanTruncate(title, 50),
+      condition: cleanTruncate(terms || title, 90),
+      fullTerms: terms || title,
+      isNoCode,
+    };
+  }
+
+  // 5. Фиксированные скидки в рублях (исключаем десятичные курсы вида 1,5 ₽)
+  const titleNoDec = title.replace(/\d+[,.]\d+\s*(?:₽|р\b|руб\.?|рублей|рубля)/gi, "");
+  const termsNoDec = terms.replace(/\d+[,.]\d+\s*(?:₽|р\b|руб\.?|рублей|рубля)/gi, "");
   const rubMatch =
-    title.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
-    title.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
-    terms.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
-    terms.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i);
+    titleNoDec.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
+    titleNoDec.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
+    termsNoDec.match(/(?:скидка|минус)\s*(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i) ||
+    termsNoDec.match(/(\d+[\s\d]*)\s*(?:₽|р\b|руб\.?|рублей|рубля)/i);
 
   // "за 1 ₽" is a price of a subscription/trial, not a saving of 1 ₽.
   const oneRublePrice = /(?:за|по цене)\s*1\s*(?:₽|руб)/iu.test(combined) &&

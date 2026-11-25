@@ -99,21 +99,6 @@ export const PROMO_BANNERS: PromoBanner[] = [
     endsAt: "2026-10-31",
   },
   {
-    id: "yandex-practicum-hero",
-    storeSlug: "yandex-practicum",
-    storeSlugs: ["yandex-practicum", "yandex-plus", "onlayn-obrazovanie"],
-    label: "Образование в Яндексе",
-    title: "Яндекс Практикум: Освойте IT-профессию с нуля",
-    subtitle: "Бесплатные вводные модули на 20+ часов практики, интерактивный тренажер в браузере, реальные кейсы в портфолио и гарантия содействия в трудоустройстве.",
-    badge: "Попробуйте бесплатно",
-    note: "Официальная лицензия Яндекса. Доступен беспроцентный Сплит от 3 500 ₽/мес и налоговый вычет 13% НДФЛ.",
-    cta: "Начать учиться бесплатно",
-    link: "https://practicum.yandex.ru/?affiliate_clid=15523679&utm_source=distribution&utm_medium=cpa&utm_campaign=15523679",
-    ordText: 'Реклама. АНО ДПО "Образовательные технологии Яндекса", ИНН 7704282033',
-    startsAt: "2026-10-01",
-    endsAt: "2027-12-31",
-  },
-  {
     id: "sber-kids-card-10000-500-2026",
     storeSlug: "sberbank-detskaya-karta",
     label: "Спецпредложение Сбера",
@@ -152,7 +137,7 @@ https://www.sberbank.ru/common/img/uploaded/cards/sberkarta_kids/pravila_akcii_b
 
   {
     id: "sber-ulybatl-185-2026",
-    storeSlug: "sberbank",
+    storeSlug: "debetovaya-sberkarta",
     storeSlugs: ["sberprime", "sberbank-detskaya-karta"],
     label: "Спецпроект Сбера",
     title: "Улыбатл — розыгрыш призов за оплату улыбкой",

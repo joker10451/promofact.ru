@@ -29,7 +29,7 @@ assert.equal(hasActiveRequiredCoupons(dateOnly,[{promocode:{code:"SEOTEST",expir
   Date.parse("2026-11-02T00:00:00+03:00")),false);
 assert.equal(hasActiveRequiredCoupons(dateOnly,[{promocode:{code:"SEOTEST",expires:"INVALID"}}],when),false);
 assert.equal(hasActiveRequiredCoupons(dateOnly,[{promocode:{code:"OTHER",expires:"2026-10-31"}}],when),false);
-assert.equal(Boolean(getStoreExtra("winlab")?.requiredActiveCodes?.length),true);
+assert.equal(Boolean(getStoreExtra("samokat")?.requiredActiveCodes?.length),true);
 
 // Navigation is SSR inventory-driven, no empty/nonpayable promotions, and
 // each link points to a real canonical store + a real page anchor.

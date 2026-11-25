@@ -6,7 +6,6 @@ register("./scripts/ts-loader.mjs", pathToFileURL("./"));
 
 const { PERFLUENCE_OCT28_PLACEMENTS, PERFLUENCE_OCT28_OFFERS, isApprovedOct28PublisherPlacement } =
   await import("../src/lib/perfluenceOct28Website.ts");
-const { CUSTOM_COUPONS } = await import("../src/lib/customCoupons.ts");
 const { isApprovedPublicCouponPlacement } = await import("../src/lib/perfluence.ts");
 const { isCouponActive } = await import("../src/lib/couponExpiry.ts");
 
@@ -33,7 +32,6 @@ for (const [slug, code, link, expiry] of expected) {
   assert.equal(offer.affiliate.landingLink, link);
   assert.ok(offer.affiliate.ordText.includes("Реклама."));
   assert.ok(offer.affiliate.ordText.includes("erid: " + erid));
-  assert.ok(CUSTOM_COUPONS.some(c=>c.id===offer.id));
   assert.equal(isApprovedOct28PublisherPlacement(offer), true);
   assert.equal(isApprovedPublicCouponPlacement(offer), true);
   for (const mutation of [

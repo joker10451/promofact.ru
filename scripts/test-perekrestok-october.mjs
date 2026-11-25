@@ -47,9 +47,7 @@ assert.equal(merged.length,4);
 assert.equal(merged.find(c=>c.promocode.code==="171LREDEY")?.promocode.expires,approved["171LREDEY"].expires);
 assert.equal(merged.find(c=>c.promocode.code==="171LREDEY")?.affiliate.link,PEREKRESTOK_OCT16_LINK);
 
-const custom=fs.readFileSync("src/lib/customCoupons.ts","utf8");
 const perfluence=fs.readFileSync("src/lib/perfluence.ts","utf8");
-assert(custom.includes("...PEREKRESTOK_OCT16_OFFERS"));
 assert(perfluence.includes('if (c.store.slug === "perekrestok-dostavka")'));
 assert(perfluence.includes('c.affiliate.link === "'+PEREKRESTOK_OCT16_LINK+'"'));
 assert(perfluence.includes('c.affiliate.ordMarker === "'+PEREKRESTOK_OCT16_ERID+'"'));

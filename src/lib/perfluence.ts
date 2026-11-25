@@ -213,6 +213,8 @@ const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
   4025: { slug: "detskie-platezhnye-aksessuary-ot-sbera", name: "Детские платёжные аксессуары от Сбера" },
   4264: { slug: "pyaterochka", name: "Пятёрочка Доставка" },
   4362: { slug: "plati-po-miru", name: "Плати по миру" },
+  3203: { slug: "polzaru", name: "Польза.ru" },
+  4526: { slug: "chistaya-liniya", name: "Чистая Линия" },
   4700: { slug: "otp-bank", name: "ОТП Банк" },
   3000: { slug: "tutu", name: "Туту" },
 };
@@ -254,6 +256,15 @@ export function parsePayload(payloadJson: string): Coupon[] {
     // через общий нормализатор — тот же, что у Admitad и Saleads.
     const norm = normalizeStore(name, slug, categoryName);
 
+    const stable = STABLE_STORES[slug];
+    const rawConditions = stripHtml(project.subscribers_condition) || null;
+    const hasStalePastYear = Boolean(rawConditions && /\b20(?:1\d|2[0-5])\b/.test(rawConditions));
+    const cleanedConditions = rawConditions
+      ? rawConditions
+          .replace(/Предложение\s+до\s+\d{2}\.\d{2}\.20(?:1\d|2[0-5])\s*г\.?\s*/gi, "")
+          .trim() || null
+      : null;
+
     const store: Store = {
       id: projectId,
       name,
@@ -262,7 +273,7 @@ export function parsePayload(payloadJson: string): Coupon[] {
       category: norm.category,
       categorySlug: norm.categorySlug,
       about: stripHtml(project.product_info) || null,
-      conditions: stripHtml(project.subscribers_condition) || null,
+      conditions: hasStalePastYear && stable?.conditions ? stable.conditions : cleanedConditions ?? stable?.conditions ?? null,
       site,
       activeBloggers: num(project.activeBloggers ?? project.active_bloggers),
     };
@@ -967,7 +978,7 @@ const getCachedBaseSourceBuckets = unstable_cache(
   fetchBaseSourceBuckets,
   [
     "promofact",
-    "base-source-buckets-no-custom-v4-periodic",
+    "base-source-buckets-no-custom-v5-periodic",
     syncMeta.lastSuccessSync || "initial",
     process.env.E2E_FIXTURES === "true" && process.env.VERCEL !== "1" && process.env.VERCEL_ENV !== "production" ? "e2e" : "prod",
   ],

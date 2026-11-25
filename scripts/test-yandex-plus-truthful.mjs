@@ -44,18 +44,18 @@ for (const code of uncertain) {
 }
 const current = await getCombinedCoupons();
 const currentPlus = current.filter(c => c.store.slug === "yandex-plus");
-assert.ok(currentPlus.some(c => c.promocode.code === "FYBSF2X94G"));
+assert.ok(currentPlus.some(c => c.promocode.code === "2DPEP4GFQF"));
 assert.ok(currentPlus.every(c => !uncertain.includes(c.promocode.code)));
 
 const stores = await getAllStores();
 const store = stores.find(s => s.slug === "yandex-plus");
 assert.ok(store);
 assert.doesNotMatch(store.conditions || "", /2025/);
-assert.match(store.conditions || "", /FYBSF2X94G/);
+assert.match(store.conditions || "", /2DPEP4GFQF/);
 assert.doesNotMatch(STABLE_STORES["yandex-plus"].conditions || "", /2025/);
 const extras = getStoreExtra("yandex-plus");
 assert.ok(extras);
-assert.deepEqual(extras.requiredActiveCodes, ["FYBSF2X94G"]);
+assert.deepEqual(extras.requiredActiveCodes, ["2DPEP4GFQF"]);
 assert.ok(extras.customDescription("октябре").includes("45 дней"));
 const article = buildStoreArticle({
   name: store.name, category: store.category, categorySlug: store.categorySlug,

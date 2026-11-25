@@ -1,5 +1,5 @@
 import "server-only";
-import { SITE_URL, siteLink } from "@/lib/site";
+import { siteLink } from "@/lib/site";
 import type { Coupon } from "@/lib/types";
 
 const VK_API_VERSION = "5.199";

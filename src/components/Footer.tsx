@@ -1,4 +1,3 @@
-import Icon from "@/components/Icon";
 import Image from "next/image";
 import Link from "next/link";
 import { getCategories } from "@/lib/perfluence";

@@ -41,18 +41,6 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     site: "https://rgs.online/",
     activeBloggers: 1200,
   },
-  "sberbank": {
-    id: 4383,
-    slug: "sberbank",
-    name: "СберБанк",
-    logo: "/brands/sberbank.png",
-    category: "Сервисы и подписки",
-    categorySlug: "servisy-i-podpiski",
-    about: "СберБанк — крупнейший банк в России. Вклады с повышенной доходностью, кредиты, дебетовые и кредитные карты.",
-    conditions: "Условия начисления бонусов Спасибо и процентные ставки по вкладам определяются ПАО Сбербанк.",
-    site: "https://sberbank.ru",
-    activeBloggers: 10000,
-  },
   "vklad-v-sbere": {
     id: 4383,
     slug: "vklad-v-sbere",
@@ -771,18 +759,6 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "site": "https://tanukifamily.ru",
     "activeBloggers": 8447
   },
-  "foodband": {
-    "id": 18780,
-    "slug": "foodband",
-    "name": "Foodband",
-    "logo": "https://favicon.yandex.net/favicon/v2/foodband.ru?size=120",
-    "category": "Доставка из ресторанов",
-    "categorySlug": "dostavka-iz-restoranov",
-    "about": "Foodband — круглосуточная доставка пиццы, суши, вок и закусок в Москве и Московской области. Свежие продукты, большие порции и регулярные выгодные акции на сеты и подарки к заказу.",
-    "conditions": "Условия и сроки действия актуальных предложений указаны в карточках промокодов.",
-    "site": "https://foodband.ru",
-    "activeBloggers": 1200
-  },
   // Keep an existing Google-indexed landing route available after Perfluence
   // offers expire. This entry carries NO synthetic coupons or affiliate links.
   "tasty-coffee": {
@@ -949,21 +925,9 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "category": "Сервисы и подписки",
     "categorySlug": "servisy-i-podpiski",
     "about": "Яндекс Плюс - единая мультиподписка на сервисы Яндекса, включая Кинопоиск, Яндекс Музыку и Яндекс Книги. Мультиподписка позволяет копить и тратить баллы Плюса. Баллами можно оплатить как часть, так и полную стоимость товаров, услуг и билетов в сервисах Яндекса: Яндекс Go (такси и самокаты), Драйв, Яндекс Афиша, Кинопоиск, Яндекс Маркет, Заправки, Еда, Лавка, Путешествия.",
-    "conditions": "Для одобренного предложения Perfluence: 45 дней доступа бесплатно новым пользователям или 30 дней за 1 ₽ пользователям без активной мультиподписки. Применимость к аккаунту, необходимость привязки карты и стоимость автоматического продления проверяйте до активации. Промокод FYBSF2X94G действует до 31 декабря 2026 года, 23:59 МСК.",
+    "conditions": "Для одобренного предложения Perfluence: 45 дней доступа бесплатно новым пользователям или 30 дней за 1 ₽ пользователям без активной мультиподписки. Применимость к аккаунту, необходимость привязки карты и стоимость автоматического продления проверяйте до активации. Промокод 2DPEP4GFQF действует до 31 декабря 2026 года, 23:59 МСК.",
     "site": "https://plus.yandex.ru",
     "activeBloggers": 4676
-  },
-  "yandex-practicum": {
-    "id": 100011,
-    "slug": "yandex-practicum",
-    "name": "Яндекс Практикум",
-    "logo": "/brands/yandex-practicum.png",
-    "category": "Онлайн-образование",
-    "categorySlug": "onlayn-obrazovanie",
-    "about": "Яндекс Практикум — сервис онлайн-образования для освоения востребованных цифровых профессий: программирование на Python, веб-разработка, анализ данных, Data Science, QA-тестирование, менеджмент и дизайн. Интерактивные тренажеры, код-ревью экспертов, реальные кейсы в портфолио и поддержка Центра карьеры в трудоустройстве.",
-    "conditions": "Вводные модули всех программ и интерактивные тесты на профориентацию бесплатны. Скидки до 20% при единовременной оплате и беспроцентная рассрочка (Сплит) применяются на официальном сайте practicum.yandex.ru.",
-    "site": "https://practicum.yandex.ru",
-    "activeBloggers": 1250
   },
   "zolotoe-yabloko": {
     "id": 100008,
@@ -988,17 +952,5 @@ export const STABLE_STORES: Record<string, StableStoreMeta> = {
     "conditions": "Промокод действует при первом заказе в мобильном приложении. Проверяйте условия в корзине перед оплатой.",
     "site": "https://flowwow.com/",
     "activeBloggers": 2500
-  },
-  "platipomiru": {
-    "id": 4362,
-    "slug": "platipomiru",
-    "name": "Плати по всему миру",
-    "logo": "https://favicon.yandex.net/favicon/v2/platipomiru.ru?size=120",
-    "category": "Сервисы и подписки",
-    "categorySlug": "servisy-i-podpiski",
-    "about": "«Плати по всему миру» — сервис оформления международных виртуальных и пластиковых карт для оплаты зарубежных сервисов, покупок и путешествий.",
-    "conditions": "Условия выпуска карт и тарифы уточняйте на официальном сайте сервиса.",
-    "site": "https://platipomiru.ru/",
-    "activeBloggers": 450
   }
 };

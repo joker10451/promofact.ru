@@ -1,12 +1,18 @@
 /**
- * Устаревшие slug'ы магазинов/категорий из старых мок-данных и внешних ссылок.
- * Реальный Perfluence API отдаёт другие slug'и, поэтому старые URL'ы вели в 404.
- * Чтобы поисковики и пользователи не попадали на битые страницы, делаем 301-редирект
- * на ближайшую по смыслу живую категорию.
+ * Устаревшие и дублирующие slug'и магазинов/категорий.
+ * Поисковики и пользователи по старым URL'ам получают 301-редирект
+ * на канонический магазин или живую категорию.
  */
 export const LEGACY_STORE_REDIRECTS: Record<string, string> = {
-  "admitad-25914-yandex": "/store/yandex-practicum",
+  "admitad-25914-yandex": "/category/onlayn-obrazovanie",
+  "yandex-practicum": "/category/onlayn-obrazovanie",
   "admitad-23526-start": "/store/start-ru",
+  foodband: "/store/food-band",
+  polza: "/store/polzaru",
+  "polza-ru": "/store/polzaru",
+  platipomiru: "/store/plati-po-miru",
+  sberbank: "/store/debetovaya-sberkarta",
+  "arnest-yunirus-na-ozon": "/store/chistaya-liniya",
   ostin: "/category/marketpleysy",
   hoff: "/category/marketpleysy",
   "m-video": "/category/elektronika-i-tehnika",

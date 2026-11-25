@@ -60,9 +60,6 @@ assert(merged.includes('if (c.store.slug === "yandeks-puteshestviya")') &&
   merged.includes('c.affiliate.link === "' + newLink + '"') &&
   merged.includes('c.affiliate.ordMarker === "' + newMarker + '"'),
   "Previously banned code must be allowed only with current approved link and ERID");
-const custom = fs.readFileSync("src/lib/customCoupons.ts", "utf8");
-assert(custom.includes("...YANDEX_TRAVEL_ROTATED_OFFERS"),
-  "Fresh approved publisher vouchers must be in live custom source");
 
 const music = { ...offers[0], store: { ...offers[0].store, name: "МТС Музыка", slug: "mts-music" } };
 assert.deepEqual(withoutForbiddenTravelCoPromotion([music, ...offers]).map(c => c.store.slug),

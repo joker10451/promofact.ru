@@ -42,18 +42,6 @@ const DODO_ORD = "Реклама. ИП Гринев Денис Петрович,
 const LAVKA_LINK = "https://yalavka.prfl.me/sites/ixzlwz?erid=2RanyoHVWwN";
 const LAVKA_ORD = "Реклама. ООО «Яндекс.Лавка», ИНН 9718101499. erid: 2RanyoHVWwN";
 
-const PEREKRESTOK_LINK = "https://perekrestok.prfl.me/sites/me2ds4?erid=2RanykFbMxo";
-const PEREKRESTOK_ORD = "Реклама. ООО \"ИКС 5 ДИДЖИТАЛ\", ИНН 9722010808 erid: 2RanykFbMxo";
-
-const VKUSVILL_LINK = "https://vksvl.prfl.me/sites/ni6chn?erid=2RanyncweGj";
-const VKUSVILL_ORD =
-  "Реклама. АО ВкусВилл, ОГРН 1217700253671. Подробности на сайте vkusvill.ru erid: 2RanyncweGj";
-
-// Публикация Perfluence для аккаунта сайта (erid приходит в ordMarker виджета).
-const FARFOR_LINK = "https://farfor1.prfl.me/sites/4jt3nt?erid=2RanynrHXoq";
-const FARFOR_ORD = "Реклама. ООО «Фарфор Франчайзинг», ИНН 0276147339. erid: 2RanynrHXoq";
-
-
 const KINOPOISK_LINK = "https://kp45.prfl.me/sites/ncwwn8?erid=2RanykMXK6B";
 const KINOPOISK_ORD = "Реклама. ООО «ЯНДЕКС», ИНН 7736207543 erid: 2RanykMXK6B";
 

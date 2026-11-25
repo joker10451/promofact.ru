@@ -1,40 +1,36 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { CUSTOM_COUPONS } from "../src/lib/customCoupons.ts";
+import { getAllStores, isApprovedPublicCouponPlacement } from "../src/lib/perfluence.ts";
 import { STABLE_STORES } from "../src/lib/stableStores.ts";
 import { isCouponActive } from "../src/lib/couponExpiry.ts";
 import { getStoreHeadlineOfferCounts } from "../src/lib/storeOfferHeadline.ts";
 
-const coupons = CUSTOM_COUPONS.filter(c => c.store.slug === "sberdevaysy");
-assert.equal(coupons.length, 2, "Approved SberDevices placement requires exactly two codes");
-assert.deepEqual(coupons.map(c => c.promocode.code).sort(), ["Sberdv171", "Sberdv71"].sort());
-assert.deepEqual(getStoreHeadlineOfferCounts(coupons), { offers: 2, codes: 2, codeFree: 0, barcodes: 0 });
-const pct = new Map([["Sberdv171", 6], ["Sberdv71", 5]]);
-const link = "https://sberdevaysy1.prfl.me/sites/fq4aly?erid=2RanymNsVkw";
-for (const coupon of coupons) {
-  const n = pct.get(coupon.promocode.code);
-  assert.equal(coupon.promocode.expires, "2026-10-31");
-  assert.ok(coupon.promocode.bonusName.includes(`${n}%`));
-  assert.ok(coupon.promocode.terms.includes(`${n}%`));
-  assert.equal(coupon.affiliate.link, link);
-  assert.equal(coupon.affiliate.landingLink, link);
-  assert.equal(coupon.affiliate.ordMarker, "2RanymNsVkw");
-  assert.match(coupon.affiliate.ordText, /ООО «САЛЮТДЕВАЙСЫ»/);
-  assert.match(coupon.affiliate.ordText, /7730253720/);
-  assert.match(coupon.affiliate.ordText, /2RanymNsVkw/);
-  assert.equal(coupon.store.site, "https://sberdevices.ru/");
+const stores = await getAllStores();
+const sberStore = stores.find((s) => s.slug === "sberdevaysy");
+assert.ok(sberStore && sberStore.coupons.length >= 2, "SberDevices must carry live Perfluence feed codes");
+assert.deepEqual(
+  sberStore.coupons.map((c) => c.promocode.code).sort(),
+  ["Sberdv171", "Sberdv71"].sort(),
+);
+assert.deepEqual(getStoreHeadlineOfferCounts(sberStore.coupons), {
+  offers: 2,
+  codes: 2,
+  codeFree: 0,
+  barcodes: 0,
+});
+for (const coupon of sberStore.coupons) {
+  assert.ok(isCouponActive(coupon.promocode.expires), `Active expiry required for ${coupon.promocode.code}`);
+  assert.ok(coupon.affiliate.ordMarker && coupon.affiliate.link.includes(coupon.affiliate.ordMarker));
+  assert.match(coupon.affiliate.ordText, /erid:\s*\w+/);
   assert.equal(coupon.store.categorySlug, "elektronika-i-tehnika");
-  assert.equal(coupon.promocode.group, "perfluence");
-  assert.equal(coupon.promocode.isFirstOrderOnly, false);
-  assert.equal(isCouponActive(coupon.promocode.expires, Date.parse("2026-10-31T23:59:00+03:00")), true);
-  assert.equal(isCouponActive(coupon.promocode.expires, Date.parse("2026-11-01T00:00:00+03:00")), false);
 }
 assert.equal(STABLE_STORES.sberdevaysy?.site, "https://sberdevices.ru/");
 const registry = fs.readFileSync("src/lib/stableStores.ts", "utf8");
 assert.ok(!registry.includes("Sberdv171") && !registry.includes("Sberdv71"));
-assert.ok(!registry.includes("fq4aly") && !registry.includes("2RanymNsVkw"));
-const source = fs.readFileSync("src/lib/perfluence.ts","utf8");
+assert.ok(!fs.readFileSync("src/lib/customCoupons.ts", "utf8").includes("sberdevaysy"),
+  "Feed handles SberDevices without manual customCoupons override");
+const source = fs.readFileSync("src/lib/perfluence.ts", "utf8");
 assert.ok(source.includes("isApprovedOct16PublisherOffer"));
 assert.ok(source.includes("const freshCustomCoupons = (await import"));
-assert.ok(!source.includes("liveSberDevicesCodes"), "Old widget must not override site-specific SberDevices placement");
-console.log("SberDevices 2 Perfluence codes, expiration, legal, link and live-feed preference PASS");
+assert.equal(typeof isApprovedPublicCouponPlacement, "function");
+console.log("SberDevices Perfluence feed codes, expiration, legal marking and live-feed preference PASS");

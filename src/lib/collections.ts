@@ -164,7 +164,7 @@ export const COLLECTIONS: Collection[] = [
     description: "Промокоды на лекарства, витамины, медицинские товары и оптику в крупнейших интернет-аптеках и сервисах здоровья.",
     filter: (c) =>
       c.store.categorySlug === "zdorove-i-vitaminy" ||
-      ["eapteka", "zdravcity", "rigla", "polza-ru", "bud-zdorov", "zdorove"].includes(c.store.slug),
+      ["eapteka", "zdravcity", "rigla", "polzaru", "bud-zdorov", "zdorove"].includes(c.store.slug),
   },
   {
     slug: "tsvety-i-podarki",
@@ -173,7 +173,7 @@ export const COLLECTIONS: Collection[] = [
     description: "Скидки на доставку свежих букетов, цветочных композиций и подарков. Проверяйте условия каждого предложения на отдельной странице магазина.",
     filter: (c) =>
       c.store.categorySlug === "tsvety" ||
-      ["yandex-tsvety", "flowwow", "flor2u", "amf", "fmart"].includes(c.store.slug) ||
+      ["yandeks-tsvety", "yandex-tsvety", "flowwow", "flor2u", "amf", "fmart"].includes(c.store.slug) ||
       c.store.name.toLowerCase().includes("цвет") ||
       c.store.name.toLowerCase().includes("букет"),
   },

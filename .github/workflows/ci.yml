@@ -36,6 +36,9 @@ jobs:
       - name: Article covers
         run: npm run test:article-cover
 
+      - name: Lint
+        run: npm run lint
+
       - name: Security, posting reliability and geo indexing
         run: |
           npm run test:trust
@@ -89,9 +92,6 @@ jobs:
 
       - name: Dynamic SEO & Inventory Audit
         run: npm run test:seo
-
-      - name: Lint
-        run: npm run lint
 
       # Примечание: `npm run build:check` (fail, если 0 SEO-страниц) НЕ запускаем
       # в CI — он валиден только в прод-окружении Vercel, где задан

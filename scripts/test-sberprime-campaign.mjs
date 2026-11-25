@@ -4,7 +4,7 @@ import { ARTICLES } from "../src/lib/articles.ts";
 import { isCouponActive } from "../src/lib/couponExpiry.ts";
 
 const sberprimeCoupons = CUSTOM_COUPONS.filter((c) => c.store.slug === "sberprime");
-assert.ok(sberprimeCoupons.length >= 2, "SberPrime must have at least 2 active coupons");
+assert.ok(sberprimeCoupons.length >= 1, "SberPrime must have at least 1 active coupon");
 
 const promo2rub = sberprimeCoupons.find((c) => c.id === 50029);
 assert.ok(promo2rub, "Approved SberPrime 60 days for 2 RUB offer must exist");

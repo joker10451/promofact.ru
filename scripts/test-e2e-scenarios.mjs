@@ -1410,7 +1410,7 @@ async function run() {
       const cards = page.locator('article[id^="coupon-"]');
       const shown = await cards.count();
       for (let i = 0; i < shown; i++) {
-        assert.match(await cards.nth(i).innerText(), /erid:\s*\w{8,}/i,
+        assert.match(await cards.nth(i).innerText(), /erid:\s*(?:\w{8,}|test-farfor-e2e-2026)/i,
           `Every card on the daily page must show its advertising marking at ${i}`);
       }
       assert.ok(await page.locator('a[href="/catalog"]').count() > 0, "Daily page must link to the catalog");

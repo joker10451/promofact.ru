@@ -10,7 +10,7 @@ import type { Coupon } from "@/lib/types";
 const MEDICAL_SLUGS = new Set(["sberzdorovie", "sberanalizy"]);
 const REGULATED_SLUGS = new Set([
   ...MEDICAL_SLUGS,
-  "polzaru", "admitad-185231-maksavit",
+  "polzaru", "polza", "admitad-185231-maksavit",
   "sberbank", "vklad-v-sbere", "debetovaya-sberkarta", "kreditnaya-sberkarta", "detskaya-sberkarta",
   "ulybatl-oplata-ulybkoy", "t-bank-junior", "admitad-188182-tbank", "otp-bank",
   "rosgosstrakh", "platipomiru", "plati-po-miru",
