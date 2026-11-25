@@ -1,6 +1,6 @@
 {
-  "lastSuccessSync": "2026-11-25T09:45:24.068Z",
-  "lastAttemptAt": "2026-11-25T09:45:24.068Z",
+  "lastSuccessSync": "2026-11-25T11:14:25.925Z",
+  "lastAttemptAt": "2026-11-25T11:14:25.925Z",
   "status": "success",
   "source": "perfluence-api",
   "projectCount": 53,
@@ -13,5 +13,5 @@
   "totalOffers": 105,
   "activeOffers": 105,
   "expiredOffers": 0,
-  "updatedAt": "2026-11-25T09:45:24.068Z"
+  "updatedAt": "2026-11-25T11:14:25.925Z"
 }
