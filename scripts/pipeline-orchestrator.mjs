@@ -21,9 +21,12 @@ import { pingIndexNow } from "./indexnow-ping.mjs";
 import { getProxyUrl, requestJson } from "./http-client.mjs";
 import {
   buildArticleCandidates,
+  buildDigestCandidates,
   buildPampaduCandidates,
+  canAutoPostNow,
   escapeHtml,
   fitCaption,
+  getTgBotLink,
   loadStableStoreSlugs,
   loadTgHistory,
   parseExpiryMs,
@@ -659,19 +662,32 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
 
   const pampaduCandidates = buildPampaduCandidates(tgHistory, now, { force: mode === "pampadu" });
   const articleCandidates = buildArticleCandidates(tgHistory, now);
+  const digestCandidates = buildDigestCandidates(tgHistory, now, { force: mode === "digest" });
   const track = selectHybridTrack({
     mode,
     hasPerfluenceCandidate: Boolean(selected),
     hasUrgentFlashDeal: Boolean(selected?.flashDeal),
     hasPampaduCandidate: pampaduCandidates.length > 0,
     hasArticleCandidate: articleCandidates.length > 0,
+    hasDigestCandidate: digestCandidates.length > 0,
     history: tgHistory,
     nowDate: new Date(now),
   });
 
+  const cadence = canAutoPostNow(tgHistory, {
+    nowMs: now,
+    isUrgentFlashDeal: Boolean(selected?.flashDeal),
+    force: Boolean(options.force),
+  });
+
   console.log(
-    ` -> [Гибридный выбор] perfluence=${Boolean(selected)}, pampadu=${pampaduCandidates.length}, articles=${articleCandidates.length} => трек "${track || "none"}"`,
+    ` -> [Гибридный выбор] perfluence=${Boolean(selected)}, pampadu=${pampaduCandidates.length}, articles=${articleCandidates.length}, digest=${digestCandidates.length} => трек "${track || "none"}" | антиспам: ${cadence.allowed ? "OK" : cadence.reason}`,
   );
+
+  if (!cadence.allowed && !options.dryRun) {
+    console.log(`\n⏸ Автопост в ${CHANNEL_ID} пропущен (${cadence.reason}). Используйте --force для внеочередного запуска.`);
+    return;
+  }
 
   let activePost = null;
   if (track === "perfluence" && selected) {
@@ -705,7 +721,8 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
     }
 
     const details = cleanText(selected.terms) || cleanText(selected.about);
-    if (details) bodyLines.push(`\nℹ️ ${escapeHtml(details.slice(0, 180))}`);
+    if (details) bodyLines.push(`\nℹ️ ${escapeHtml(details.slice(0, 160))}`);
+    bodyLines.push(`\n💬 <i>Сработало у вас? Оставьте реакцию или напишите в комментариях 👇</i>`);
 
     const eridLine = selected.ordMarker && !selected.ordText.includes(selected.ordMarker)
       ? `${selected.ordText} erid: ${selected.ordMarker}`
@@ -724,10 +741,11 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
     const buttons = [
       [{ text: `🛍 В магазин ${selected.storeName} →`, url: selected.affUrl }],
       [{ text: `🌐 Все промокоды ${selected.storeName}`, url: tgStorePageUrl }],
+      [{ text: `🔍 Найти код по другим магазинам`, url: getTgBotLink(`store_${selected.storeSlug}`) }],
     ];
 
     const bgTemplateUrl = await fetchProjectTemplateImage(selected.storeId);
-    let bannerPath = bgTemplateUrl;
+    let bannerPath = bgTemplateUrl || "https://promofact.ru/og-image.png";
     try {
       bannerPath = await generatePromoBanner({
         storeName: selected.storeName,
@@ -767,9 +785,29 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
   } else if (track === "pampadu" && pampaduCandidates.length > 0) {
     activePost = pampaduCandidates[0];
     console.log(`\n[Фаза 4] Гибридный трек PAMPADU: "${activePost.storeName}" (коды: ${activePost.codes.join(", ")})`);
+  } else if (track === "digest" && digestCandidates.length > 0) {
+    activePost = digestCandidates[0];
+    console.log(`\n[Фаза 4] Гибридный трек DIGEST: "${activePost.storeName}" (${activePost.url})`);
   } else if (track === "article" && articleCandidates.length > 0) {
     activePost = articleCandidates[0];
     console.log(`\n[Фаза 4] Гибридный трек ARTICLE: "${activePost.storeName}" (${activePost.url})`);
+  }
+
+  if (activePost && !activePost.bannerPath && activePost.bannerSpec && !options.dryRun) {
+    try {
+      activePost.bannerPath = await generatePromoBanner({
+        storeName: activePost.bannerSpec.storeName,
+        code: activePost.bannerSpec.code,
+        bonus: activePost.bannerSpec.bonus,
+        badgeText: activePost.bannerSpec.badgeText,
+      });
+      console.log(` -> 🎨 Сгенерирован баннер для ${activePost.kind}: ${activePost.bannerPath}`);
+    } catch (genErr) {
+      console.warn(`⚠ Баннер ${activePost.kind} не сгенерирован, используем og-image:`, genErr.message);
+      if (activePost.postMode === "photo") activePost.bannerPath = "https://promofact.ru/og-image.png";
+    }
+  } else if (activePost && !activePost.bannerPath && activePost.bannerSpec && options.dryRun) {
+    activePost.bannerPath = `[dynamic-banner:${activePost.bannerSpec.storeName}/${activePost.bannerSpec.code}]`;
   }
 
   if (!activePost) {
@@ -901,6 +939,51 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
     }
   }
 
+  // Персональные алерты подписчикам бота на этот магазин (только при наличии Supabase + токена)
+  const sbUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || fileEnv.NEXT_PUBLIC_SUPABASE_URL || "").trim();
+  const sbKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || fileEnv.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  const publicBotToken = (process.env.TELEGRAM_PUBLIC_BOT_TOKEN || fileEnv.TELEGRAM_PUBLIC_BOT_TOKEN || BOT_TOKEN || "").trim();
+  if (sbUrl.startsWith("http") && sbKey && !sbKey.includes("SENSITIVE") && publicBotToken && activePost.storeSlug) {
+    try {
+      const subsUrl = `${sbUrl}/rest/v1/tg_store_subscriptions?select=id,telegram_user_id,last_notified_at&store_slug=eq.${encodeURIComponent(activePost.storeSlug)}&limit=50`;
+      const subsRes = await fetch(subsUrl, { headers: { apikey: sbKey, Authorization: `Bearer ${sbKey}` } });
+      if (subsRes.ok) {
+        const subs = await subsRes.json();
+        const cutoffMs = Date.now() - 24 * 60 * 60 * 1000;
+        let sentCount = 0;
+        for (const sub of Array.isArray(subs) ? subs : []) {
+          const lastMs = sub.last_notified_at ? Date.parse(sub.last_notified_at) : 0;
+          if (Number.isFinite(lastMs) && lastMs > cutoffMs) continue;
+          const storeWebUrl = withUtm(`https://promofact.ru/store/${activePost.storeSlug}`, "tg_alert", "bot", activePost.storeSlug);
+          await fetch(`https://api.telegram.org/bot${publicBotToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: sub.telegram_user_id,
+              text: `🔔 <b>Новые акции в ${escapeHtml(activePost.storeName)}!</b>\n\nМы обновили подборку предложений и опубликовали пост в @smart_zakupka.\n\nОткрой все актуальные коды в 1 клик:`,
+              parse_mode: "HTML",
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: `🛍 Открыть ${activePost.storeName}`, web_app: { url: storeWebUrl } }],
+                  [{ text: "📢 Читать пост в канале", url: postUrl }],
+                ],
+              },
+            }),
+          }).catch(() => {});
+          await fetch(`${sbUrl}/rest/v1/tg_store_subscriptions?id=eq.${sub.id}`, {
+            method: "PATCH",
+            headers: { apikey: sbKey, Authorization: `Bearer ${sbKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ last_notified_at: new Date().toISOString() }),
+          }).catch(() => {});
+          sentCount += 1;
+        }
+        if (sentCount > 0) console.log(` -> 🔔 Отправлено персональных алертов подписчикам бота: ${sentCount}`);
+      }
+    } catch (alertErr) {
+      console.warn(" -> ⚠ Рассылка алертов бота пропущена:", alertErr.message);
+    }
+  }
+
   // Уведомление в ЛС админу
   if (ADMIN_CHAT_ID) {
     try {
@@ -923,8 +1006,9 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
 if (process.argv[1]?.endsWith("pipeline-orchestrator.mjs")) {
   const dryRun = process.argv.includes("--dry-run");
   const noTake = process.argv.includes("--no-take");
+  const force = process.argv.includes("--force");
   const modeArg = process.argv.find((a) => a.startsWith("--mode="));
   const mode = modeArg ? modeArg.slice("--mode=".length).trim() : "auto";
   // Тестовый прогон не должен ничего менять в кабинете: не берём офферы и не активируем флеш-акции.
-  runPipeline({ dryRun, takeOffers: !noTake && !dryRun, mode }).catch(console.error);
+  runPipeline({ dryRun, takeOffers: !noTake && !dryRun, mode, force }).catch(console.error);
 }

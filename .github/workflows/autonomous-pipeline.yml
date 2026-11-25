@@ -1,10 +1,11 @@
 name: Perfluence & Telegram Pipeline — Автономный конвейер
 
 on:
-  # 10:15, 14:15 и вечерний прайм-тайм 19:00 МСК. Плановый запуск идёт с --no-take: в кабинете Perfluence ничего не создаёт.
+  # 11:45 и 18:30 МСК — 2 сбалансированных слота в день (внутри оркестратора действует антиспам-кулдаун 3.5ч).
+  # Плановый запуск идёт с --no-take: в кабинете Perfluence ничего не создаёт.
   schedule:
-    - cron: '15 7,11 * * *'
-    - cron: '0 16 * * *'
+    - cron: '45 8 * * *'
+    - cron: '30 15 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -12,8 +13,13 @@ on:
         type: boolean
         required: false
         default: false
+      force:
+        description: 'Игнорировать антиспам-кулдаун (только для ручного запуска)'
+        type: boolean
+        required: false
+        default: false
       mode:
-        description: 'Режим контента: auto | perfluence | pampadu | article'
+        description: 'Режим контента: auto | perfluence | pampadu | article | digest'
         type: choice
         required: false
         default: 'auto'
@@ -22,6 +28,7 @@ on:
           - perfluence
           - pampadu
           - article
+          - digest
 
 permissions:
   contents: write
@@ -54,8 +61,12 @@ jobs:
           PERFLUENCE_RESULTS_URL: ${{ secrets.PERFLUENCE_RESULTS_URL }}
           PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_PUBLIC_BOT_TOKEN: ${{ secrets.TELEGRAM_PUBLIC_BOT_TOKEN }}
+          NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ${{ secrets.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID || '@smart_zakupka' }}
           TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           VK_ACCESS_TOKEN: ${{ secrets.VK_ACCESS_TOKEN }}
           VK_USER_TOKEN: ${{ secrets.VK_USER_TOKEN }}
           VK_OWNER_ID: ${{ secrets.VK_OWNER_ID || '-240879299' }}
@@ -70,10 +81,14 @@ jobs:
           
           # Запуск оркестратора
           MODE="${{ github.event.inputs.mode || 'auto' }}"
+          FORCE_FLAG=""
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            node scripts/pipeline-orchestrator.mjs --dry-run --mode="$MODE"
+            node scripts/pipeline-orchestrator.mjs --dry-run --mode="$MODE" $FORCE_FLAG
           else
-            node scripts/pipeline-orchestrator.mjs --no-take --mode="$MODE"
+            node scripts/pipeline-orchestrator.mjs --no-take --mode="$MODE" $FORCE_FLAG
           fi
 
       - name: 💾 Сохранение истории публикаций

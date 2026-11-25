@@ -25,6 +25,27 @@ export const CHANNELS = {
 };
 
 /**
+ * Публичный Telegram-бот поиска промокодов и алертов.
+ * Пока не заведён отдельный публичный username через NEXT_PUBLIC_TELEGRAM_BOT_USERNAME,
+ * используется текущий бот рассылки с сохранением совместимости deep-link параметров.
+ */
+export const TELEGRAM_BOT_USERNAME = (
+  process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "SmartZakupkaPoster_bot"
+)
+  .replace(/^@/, "")
+  .trim();
+
+export function telegramBotLink(startParam?: string): string {
+  const base = `https://t.me/${TELEGRAM_BOT_USERNAME}`;
+  if (!startParam) return base;
+  const sanitized = startParam
+    .replace(/[^a-zA-Z0-9_-]/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 64);
+  return sanitized ? `${base}?start=${sanitized}` : base;
+}
+
+/**
  * Владелец сайта и оператор персональных данных (152-ФЗ).
  * Используется в политике конфиденциальности, контактах и «О проекте».
  */

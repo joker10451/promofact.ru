@@ -19,6 +19,79 @@ const GENERATED_ARTICLES_PATH = path.join(process.cwd(), "src", "data", "generat
 const STATIC_ARTICLES_PATH = path.join(process.cwd(), "src", "lib", "articles.ts");
 const STABLE_STORES_PATH = path.join(process.cwd(), "src", "lib", "stableStores.ts");
 
+export function getTgBotLink(startParam = "") {
+  const username = (
+    process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "SmartZakupkaPoster_bot"
+  )
+    .replace(/^@/, "")
+    .trim();
+  const base = `https://t.me/${username}`;
+  if (!startParam) return base;
+  const clean = String(startParam)
+    .replace(/[^a-zA-Z0-9_-]/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 64);
+  return clean ? `${base}?start=${clean}` : base;
+}
+
+function getMskDayKey(tsMs) {
+  const mskDate = new Date(tsMs + 3 * 60 * 60 * 1000);
+  return mskDate.toISOString().slice(0, 10);
+}
+
+/**
+ * Жёсткий антиспам-гейт для автопостинга в @smart_zakupka:
+ * ограничивает частоту публикаций (по умолчанию не чаще 1 раза в 3.5 ч
+ * и не более 3 обычных постов в день МСК), чтобы канал не тонул и сохранял ERR.
+ */
+export function canAutoPostNow(
+  history,
+  {
+    nowMs = Date.now(),
+    minCooldownHours = Number(process.env.POST_TELEGRAM_COOLDOWN_HOURS || 3.5),
+    maxPerDay = 3,
+    isUrgentFlashDeal = false,
+    force = false,
+  } = {},
+) {
+  const list = Array.isArray(history) ? history : [];
+  const todayKey = getMskDayKey(nowMs);
+
+  let latestTs = 0;
+  let postsToday = 0;
+  for (const item of list) {
+    const ts = Date.parse(item?.date || "");
+    if (!Number.isFinite(ts) || ts > nowMs + 60_000) continue;
+    if (ts > latestTs) latestTs = ts;
+    if (getMskDayKey(ts) === todayKey) postsToday += 1;
+  }
+
+  const hoursSinceLast = latestTs > 0 ? (nowMs - latestTs) / 3_600_000 : 999;
+  const effectiveCooldown = isUrgentFlashDeal ? Math.min(minCooldownHours, 1.5) : minCooldownHours;
+  const effectiveMaxPerDay = isUrgentFlashDeal ? maxPerDay + 1 : maxPerDay;
+
+  if (force) {
+    return { allowed: true, reason: "Принудительный запуск (--force)", hoursSinceLast, postsToday };
+  }
+  if (postsToday >= effectiveMaxPerDay) {
+    return {
+      allowed: false,
+      reason: `Достигнут дневной лимит постов (${postsToday}/${effectiveMaxPerDay} за ${todayKey} МСК)`,
+      hoursSinceLast,
+      postsToday,
+    };
+  }
+  if (hoursSinceLast < effectiveCooldown) {
+    return {
+      allowed: false,
+      reason: `Кулдаун между постами: прошло ${hoursSinceLast.toFixed(1)} ч из ${effectiveCooldown} ч`,
+      hoursSinceLast,
+      postsToday,
+    };
+  }
+  return { allowed: true, reason: "OK", hoursSinceLast, postsToday };
+}
+
 const BANK_DISPLAY_NAMES = {
   "yandex-pay": "Яндекс Пэй",
   zenit: "Банк ЗЕНИТ",
@@ -161,6 +234,7 @@ export function classifyHistoryEntry(entry) {
   const url = String(entry.url || "");
   const store = String(entry.store || "");
   if (entry.sourceType) return entry.sourceType;
+  if (store.startsWith("digest-")) return "digest";
   if (url.includes("/sovety/")) return "article";
   if (
     store === "finance" ||
@@ -235,6 +309,8 @@ export function buildPampaduCandidates(history, nowMs = Date.now(), { force = fa
       ``,
       `📌 Совет: на покупках перед Новым годом беспроцентный период 120 дней или Сплит 0% позволяют сохранить скидку по промокоду и не замораживать всю сумму сразу.`,
       ``,
+      `💬 <i>Какой формат карт вам выгоднее: длинная рассрочка (👍) или высокий кэшбэк на супермаркеты (🔥)?</i>`,
+      ``,
       `👉 <a href="${withUtm(`${SITE_URL}/collections/finansy-i-karty`, "telegram", "social", "credit-cards")}">Сравнить условия всех карт на ПромоФакте →</a>`,
       ``,
       `⚖️ <i>${escapeHtml(eridFooter)}</i>`,
@@ -248,6 +324,7 @@ export function buildPampaduCandidates(history, nowMs = Date.now(), { force = fa
         },
       ]),
       [{ text: "💼 Все карты и кэшбэк →", url: withUtm(`${SITE_URL}/collections/finansy-i-karty`, "telegram", "social", "credit-cards") }],
+      [{ text: "🔍 Поиск промокодов по магазинам", url: getTgBotLink("src_channel_btn") }],
     ];
 
     candidates.push({
@@ -288,23 +365,35 @@ export function buildPampaduCandidates(history, nowMs = Date.now(), { force = fa
     const siteStoreUrl = `${SITE_URL}/store/${o.storeSlug}`;
     const tgSiteStoreUrl = withUtm(siteStoreUrl, "telegram", "social", o.storeSlug);
 
-    const text = [
+    const bodyPart = [
       `💳 <b>${escapeHtml(o.bonusName)}</b>`,
       ``,
       escapeHtml(o.terms),
       bullets.length ? `\n${bullets.join("\n")}` : null,
       ``,
-      `👉 <a href="${o.link}">Оформить карту ${escapeHtml(bankName)} на официальной странице →</a>`,
-      `🌐 <a href="${tgSiteStoreUrl}">Все предложения ${escapeHtml(bankName)} на ПромоФакте</a>`,
-      ``,
-      `⚖️ <i>${escapeHtml(o.ordText)}</i>`,
+      `💬 <i>Пользуетесь картой ${escapeHtml(bankName)} для кэшбэка на доставку? Делитесь опытом в комментариях 👇</i>`,
     ]
       .filter((line) => line !== null)
       .join("\n");
 
+    const footerPart = [
+      `👉 <a href="${o.link}">Оформить карту ${escapeHtml(bankName)} →</a>`,
+      `🌐 <a href="${tgSiteStoreUrl}">Все предложения ${escapeHtml(bankName)}</a>`,
+      ``,
+      `⚖️ <i>${escapeHtml(o.ordText)}</i>`,
+    ].join("\n");
+
+    const text = fitCaption(bodyPart, footerPart, 960);
+
     candidates.push({
       kind: "pampadu",
-      postMode: "message",
+      postMode: "photo",
+      bannerSpec: {
+        storeName: bankName,
+        code: o.productType === "credit" ? "0% ПЕРИОД" : "КЭШБЭК 0 ₽",
+        bonus: o.bonusName,
+        badgeText: "💳 ВЫГОДНАЯ КАРТА",
+      },
       storeSlug: o.storeSlug,
       storeName: bankName,
       codes: [o.code],
@@ -318,6 +407,7 @@ export function buildPampaduCandidates(history, nowMs = Date.now(), { force = fa
       buttons: [
         [{ text: `💳 Оформить ${bankName}`, url: o.link }],
         [{ text: `📋 Подробнее о карте на сайте`, url: tgSiteStoreUrl }],
+        [{ text: "🔍 Найти промокод по магазину", url: getTgBotLink("src_channel_btn") }],
       ],
       score: Math.round((o.cpaRub || 1000) / 100) + Math.min(30, Math.round(ageDays)),
     });
@@ -444,29 +534,37 @@ export function buildArticleCandidates(history, nowMs = Date.now()) {
     const tgArticleUrl = withUtm(url, "telegram", "social", a.slug);
     const tgCtaHref = withUtm(ctaHref, "telegram", "social", a.slug);
 
-    const text = [
+    const articleBody = [
       `📰 <b>${escapeHtml(a.title)}</b>`,
       ``,
       a.description ? escapeHtml(a.description) : null,
       ``,
-      `👉 <a href="${tgArticleUrl}">Читать полный разбор и таблицу выгоды на ПромоФакте →</a>`,
-      ctaHref !== url
-        ? `🛍 <a href="${tgCtaHref}">Открыть актуальные промокоды по теме</a>`
-        : null,
+      `💬 <i>Пробовали уже такой способ экономии? Поставьте реакцию и напишите в комментариях 👇</i>`,
     ]
       .filter((line) => line !== null)
       .join("\n");
+
+    const articleFooter = [
+      `👉 <a href="${tgArticleUrl}">Читать полный разбор и таблицу выгоды →</a>`,
+      ctaHref !== url ? `🛍 <a href="${tgCtaHref}">Открыть актуальные промокоды по теме</a>` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const text = fitCaption(articleBody, articleFooter, 950);
 
     const buttons = [
       [{ text: "📖 Читать разбор →", url: tgArticleUrl }],
       ctaHref !== url
         ? [{ text: a.ctaButton?.text || "🛍 Промокоды по теме", url: tgCtaHref }]
         : [{ text: "🔍 Все магазины и скидки", url: withUtm(`${SITE_URL}/catalog`, "telegram", "social", a.slug) }],
+      [{ text: "🔎 Найти код на свой магазин (бот)", url: getTgBotLink(`src_post_${a.slug}`) }],
     ];
 
     candidates.push({
       kind: "article",
-      postMode: "message",
+      postMode: "photo",
+      bannerPath: `${SITE_URL}/sovety/${a.slug}/opengraph-image`,
       storeSlug: a.slug,
       storeName: a.title.slice(0, 60),
       codes: [a.slug],
@@ -478,7 +576,7 @@ export function buildArticleCandidates(history, nowMs = Date.now()) {
       vkTitle: a.title,
       text,
       buttons,
-      enableLinkPreview: true,
+      enableLinkPreview: false,
       score:
         (a.isGenerated ? 160 : 100) +
         (ageSincePublish <= 21 ? 45 : 0) +
@@ -497,7 +595,13 @@ export function buildArticleCandidates(history, nowMs = Date.now()) {
     const tgBfUrl = withUtm(bfUrl, "telegram", "social", "black-friday");
     candidates.push({
       kind: "article",
-      postMode: "message",
+      postMode: "photo",
+      bannerSpec: {
+        storeName: "Чёрная Пятница 2026",
+        code: "ВСЕ СКИДКИ",
+        bonus: "Промокоды + кэшбэк банков в одной подборке",
+        badgeText: "🔥 ГЛАВНАЯ ПОДБОРКА",
+      },
       storeSlug: "black-friday",
       storeName: "Чёрная Пятница 2026: сводный хаб скидок",
       codes: ["BLACKFRIDAY2026"],
@@ -510,19 +614,22 @@ export function buildArticleCandidates(history, nowMs = Date.now()) {
       text: [
         `🔥 <b>Чёрная Пятница и предновогодние распродажи 2026: какие промокоды действуют сейчас</b>`,
         ``,
-        `Мы собрали в одном разделе магазины с действующими кодами и флеш-акциями — от маркетплейсов и доставки продуктов до косметики, электроники и ювелирных украшений:`,
+        `Мы собрали в одном разделе магазины с действующими кодами и флеш-акциями — от доставки продуктов до косметики, электроники и карт:`,
         ``,
         `• Живые коды с проверкой сроков действия`,
-        `• Суммирование промокодов с банковским кэшбэком и рассрочкой 0%`,
+        `• Суммирование промокодов с кэшбэком и 0% рассрочкой`,
         `• Никаких устаревших купонов — только актуальная витрина`,
+        ``,
+        `💬 <i>Какой магазин ждёте на скидках больше всего? Пишите в комментах 👇</i>`,
         ``,
         `👉 <a href="${tgBfUrl}">Открыть хаб Чёрной Пятницы на ПромоФакте →</a>`,
       ].join("\n"),
       buttons: [
         [{ text: "🔥 Открыть все скидки распродажи →", url: tgBfUrl }],
         [{ text: "💳 Карты и кэшбэк 0%", url: withUtm(`${SITE_URL}/collections/finansy-i-karty`, "telegram", "social", "black-friday") }],
+        [{ text: "🔎 Найти код по магазину", url: getTgBotLink("bf") }],
       ],
-      enableLinkPreview: true,
+      enableLinkPreview: false,
       score: 95,
     });
   }
@@ -531,7 +638,108 @@ export function buildArticleCandidates(history, nowMs = Date.now()) {
 }
 
 /**
- * Выбирает трек публикации (`perfluence`, `pampadu` или `article`) с учётом `--mode`,
+ * Формирует тематические вечерние/обеденные дайджесты по разделам сайта без утечки /sites/ ERID в ТГ.
+ */
+export function buildDigestCandidates(history, nowMs = Date.now(), { force = false } = {}) {
+  const digests = [
+    {
+      slug: "digest-food-basket",
+      title: "Обеденная корзина: как экономить до 50% на доставке продуктов и еды сегодня",
+      bannerCode: "ДО −50% ЕДА",
+      badgeText: "🛒 ДАЙДЖЕСТ ДНЯ",
+      path: "/category/dostavka-produktov",
+      botParam: "repeat",
+      prompt: "Где сейчас чаще заказываете домой: Лавка 🔥 / Самокат 👍 / Пятёрочка ❤️?",
+      bullets: [
+        "Яндекс Лавка, Самокат, Пятёрочка, Перекрёсток и ВкусВилл в одном списке",
+        "Фильтр «На повторный заказ» — отдельно от кодов для новых клиентов",
+        "Уведомления о новых кодах на любимые магазины — через бота в 1 клик",
+      ],
+    },
+    {
+      slug: "digest-repeat-orders",
+      title: "Топ подборки кодов на повторный заказ + рабочие связки с кэшбэком",
+      bannerCode: "ПОВТОРНЫЕ",
+      badgeText: "🔁 БЕЗ НОВЫХ АККАУНТОВ",
+      path: "/catalog",
+      botParam: "repeat",
+      prompt: "На какие магазины разобрать повторные заказы завтра? Напишите бренд 👇",
+      bullets: [
+        "Не тратьте время на подбор кодов «только для новичков»",
+        "Собрали бренды с действующими скидками для постоянных покупателей",
+        "Подписывайтесь на конкретный магазин в боте — пришлём алерт при обновлении",
+      ],
+    },
+    {
+      slug: "digest-beauty-and-home",
+      title: "Вечерний дайджест выгоды: бьюти, аптеки и подписки со скидками 2026",
+      bannerCode: "ВЕЧЕРНИЙ ТОП",
+      badgeText: "✨ ЛУЧШЕЕ ЗА ДЕНЬ",
+      path: "/category/kosmetika-i-parfyumeriya",
+      botParam: "src_digest_beauty",
+      prompt: "Какие подборки выходят полезнее: продукты 🔥 или косметика/техника ⚡?",
+      bullets: [
+        "Актуальные акции на косметику, товары для дома и онлайн-кинотеатры",
+        "Живые сроки действия без просроченных купонов",
+        "Мгновенный поиск по 50+ брендам в нашем Telegram-боте",
+      ],
+    },
+  ];
+
+  const out = [];
+  for (let i = 0; i < digests.length; i += 1) {
+    const d = digests[i];
+    const lastSame = [...history].reverse().find((h) => h.store === d.slug);
+    const ageDays = lastSame ? daysSince(lastSame.date, nowMs) : 999;
+    if (!force && ageDays < 5) continue;
+
+    const targetUrl = `${SITE_URL}${d.path}`;
+    const tgTargetUrl = withUtm(targetUrl, "telegram", "social", d.slug);
+    const body = [
+      `🔥 <b>${escapeHtml(d.title)}</b>`,
+      ``,
+      ...d.bullets.map((b) => `• ${escapeHtml(b)}`),
+      ``,
+      `💬 <i>${escapeHtml(d.prompt)}</i>`,
+    ].join("\n");
+    const footer = [
+      `🌐 <a href="${tgTargetUrl}">Открыть подборку на ПромоФакте →</a>`,
+      `🤖 <a href="${getTgBotLink(d.botParam)}">Быстрый поиск в боте по любому магазину →</a>`,
+    ].join("\n");
+
+    out.push({
+      kind: "digest",
+      postMode: "photo",
+      bannerSpec: {
+        storeName: "ДАЙДЖЕСТ ПРОМОФАКТ",
+        code: d.bannerCode,
+        bonus: d.title,
+        badgeText: d.badgeText,
+      },
+      storeSlug: d.slug,
+      storeName: d.title.slice(0, 60),
+      codes: [d.bannerCode],
+      url: targetUrl,
+      affUrl: targetUrl,
+      ordMarker: "",
+      ordText: "",
+      vkUrl: targetUrl,
+      vkTitle: d.title,
+      text: fitCaption(body, footer, 950),
+      buttons: [
+        [{ text: "🔍 Открыть коды на повторные заказы (бот)", url: getTgBotLink(d.botParam) }],
+        [{ text: "🌐 Смотреть подборку на сайте →", url: tgTargetUrl }],
+      ],
+      enableLinkPreview: false,
+      score: 105 + Math.min(30, Math.round(ageDays)) - i,
+    });
+  }
+
+  return out.sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Выбирает трек публикации (`perfluence`, `pampadu`, `digest` или `article`) с учётом `--mode`,
  * времени суток (вечерний пик 18:00–21:00 МСК) и истории последних постов.
  */
 export function selectHybridTrack({
@@ -540,34 +748,39 @@ export function selectHybridTrack({
   hasUrgentFlashDeal,
   hasPampaduCandidate,
   hasArticleCandidate,
+  hasDigestCandidate = false,
   history,
   nowDate = new Date(),
 }) {
   if (mode === "perfluence") return hasPerfluenceCandidate ? "perfluence" : null;
   if (mode === "pampadu") return hasPampaduCandidate ? "pampadu" : null;
   if (mode === "article") return hasArticleCandidate ? "article" : null;
+  if (mode === "digest") return hasDigestCandidate ? "digest" : null;
 
   // --mode=auto
   const lastTwo = history.slice(-2).map(classifyHistoryEntry);
   const lastType = lastTwo[lastTwo.length - 1] || null;
   const bothPerfluence = lastTwo.length === 2 && lastTwo[0] === "perfluence" && lastTwo[1] === "perfluence";
 
-  // Если Perfluence пуст (нет одобренных для @smart_zakupka), мгновенно переключаемся на Pampadu или /sovety
+  // Если Perfluence пуст (нет одобренных для @smart_zakupka), переключаемся на Дайджест / Pampadu / Статьи
   if (!hasPerfluenceCandidate) {
+    if (lastType !== "digest" && hasDigestCandidate) return "digest";
     if (lastType === "pampadu" && hasArticleCandidate) return "article";
     if (hasPampaduCandidate) return "pampadu";
     if (hasArticleCandidate) return "article";
+    if (hasDigestCandidate) return "digest";
     return null;
   }
 
   // Горячие флеш-акции всегда идут в первую очередь
   if (hasUrgentFlashDeal) return "perfluence";
 
-  // Вечерний пик 18:00–21:00 МСК: чередуем статьи, финансы и ритейл
+  // Вечерний пик 18:00–21:00 МСК: чередуем дайджесты, статьи, финансы и ритейл
   const mskHour = (nowDate.getUTCHours() + 3) % 24;
   const isEveningPeak = mskHour >= 18 && mskHour <= 21;
 
   if (bothPerfluence || (isEveningPeak && lastType === "perfluence")) {
+    if (lastType !== "digest" && hasDigestCandidate) return "digest";
     if (lastType !== "article" && hasArticleCandidate) return "article";
     if (hasPampaduCandidate) return "pampadu";
     if (hasArticleCandidate) return "article";

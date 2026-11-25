@@ -24,7 +24,8 @@ import { getArticles } from "@/lib/articles";
 import { getOfferSchema, getOfferDisplayName } from "@/lib/seoOfferSchema";
 import { isRealPromoCode } from "@/lib/dedupe";
 import { formatStoreOfferTitle, formatPriorityStoreTitle, getStoreHeadlineOfferCounts, formatStoreOfferCounts } from "@/lib/storeOfferHeadline";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { getCouponAudience } from "@/lib/storeCouponAudience";
+import { CHANNELS, SITE_NAME, SITE_URL, telegramBotLink } from "@/lib/site";
 import { isStoreIndexable } from "@/lib/storeIndexing";
 
 // New site-scoped Admitad stores arrive after deployment. Do not 404 on
@@ -649,32 +650,54 @@ export default async function StorePage({
           </div>
         ))}
 
-        {/* Telegram-канал с промокодами магазина */}
-        <div className="mt-8 border-y border-line py-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start sm:items-center gap-3.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line text-[#0077b3]">
-                <Icon name="send" size={20} />
-              </div>
-              <div>
-                <h3 className="font-display text-base sm:text-lg font-extrabold text-ink">
-                  Свежие промокоды {store.name} в Telegram
-                </h3>
-                <p className="mt-0.5 text-xs sm:text-sm text-ink/65 leading-relaxed">
-                  Новые промокоды и акции магазинов — в канале @smart_zakupka
-                </p>
+        {/* Telegram-канал и бот уведомлений о промокодами магазина */}
+        {(() => {
+          const repeatReadyCount = store.coupons.filter((c) => {
+            const aud = getCouponAudience(c.promocode);
+            return aud === "repeat-order" || aud === "universal";
+          }).length;
+          return (
+            <div className="mt-8 border-y border-line py-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line text-[#0077b3]">
+                    <Icon name="send" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-base sm:text-lg font-extrabold text-ink">
+                      {repeatReadyCount === 0
+                        ? `Нужен промокод ${store.name} на повторный заказ?`
+                        : `Свежие промокоды ${store.name} первыми в Telegram`}
+                    </h3>
+                    <p className="mt-0.5 text-xs sm:text-sm text-ink/65 leading-relaxed">
+                      {repeatReadyCount === 0
+                        ? `Включите алерты в боте — пришлём сообщение, как только появятся коды ${store.name} для постоянных клиентов или новые флеш-акции.`
+                        : `Быстрый поиск рабочих кодов в боте (включая повторные заказы) и регулярные подборки в @smart_zakupka.`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                  <a
+                    href={telegramBotLink(`repeat_${store.slug}`)}
+                    target="_blank"
+                    rel="noopener nofollow"
+                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[#0077b3] hover:bg-[#00649a] px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white transition-colors"
+                  >
+                    🔔 Следить в боте →
+                  </a>
+                  <a
+                    href={CHANNELS.telegram}
+                    target="_blank"
+                    rel="noopener nofollow"
+                    className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-line bg-white hover:border-ink px-4 py-2.5 text-xs sm:text-sm font-bold text-ink transition-colors"
+                  >
+                    Канал @smart_zakupka
+                  </a>
+                </div>
               </div>
             </div>
-            <a
-              href="https://t.me/smart_zakupka"
-              target="_blank"
-              rel="noopener nofollow"
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[#0077b3] hover:bg-[#00649a] px-6 py-2.5 text-xs sm:text-sm font-extrabold text-white transition-colors shrink-0"
-            >
-              Подписаться на канал →
-            </a>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Быстрая сводка: только то, что подтверждено данными */}
         <p className="mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm text-ink/70">

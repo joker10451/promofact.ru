@@ -8,7 +8,7 @@ import StoreLogo from "@/components/StoreLogo";
 import { formatExpires, nbspMoney } from "@/lib/format";
 import { isCouponActive } from "@/lib/couponExpiry";
 import { ymReachGoal } from "@/components/YandexMetrika";
-import { CHANNELS } from "@/lib/site";
+import { CHANNELS, telegramBotLink } from "@/lib/site";
 import { CheckIcon } from "@/components/CheckIcon";
 import { refineOffer } from "@/lib/offerRefiner";
 import type { CatalogCoupon } from "@/lib/catalogCoupon";
@@ -943,7 +943,7 @@ export default function CouponTicket({
                 : `Вставьте промокод в поле купона при оплате в ${store.name}.`}
             </div>
             <a
-              href={CHANNELS.telegram}
+              href={telegramBotLink(`repeat_${store.slug}`)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
@@ -955,11 +955,11 @@ export default function CouponTicket({
               <span className="flex items-center gap-2">
                 <Icon name="send" size={14} />
                 <span>
-                  <span className="block font-bold text-white">Новые коды {store.name} — в Telegram</span>
-                  <span className="block text-white/60">Подборки промокодов и скидок</span>
+                  <span className="block font-bold text-white">Ждёте скидку на повторный заказ?</span>
+                  <span className="block text-white/60">Уведомим в ТГ о новых кодах {store.name}</span>
                 </span>
               </span>
-              <span className="shrink-0 rounded-lg bg-yellow px-2.5 py-1 font-bold text-ink">Подписаться</span>
+              <span className="shrink-0 rounded-lg bg-yellow px-2.5 py-1 font-bold text-ink">Уведомить →</span>
             </a>
           </div>,
           document.body

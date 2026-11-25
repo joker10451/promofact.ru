@@ -1,4 +1,4 @@
-import { SITE_URL, siteLink } from "@/lib/site";
+import { SITE_URL, siteLink, telegramBotLink } from "@/lib/site";
 import type { Coupon } from "@/lib/types";
 
 export interface TelegramPostOptions {
@@ -131,6 +131,7 @@ export function formatTelegramPost(coupon: Coupon): {
   if (coupon.store.slug !== "flor2u") {
     buttons.push([{ text: `🌐 Все купоны ${coupon.store.name} на сайте`, url: storeUrl }]);
   }
+  buttons.push([{ text: "🔍 Найти промокод по другим магазинам", url: telegramBotLink("src_channel_btn") }]);
 
   return {
     text: lines.join("\n"),

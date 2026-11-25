@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { telegramBotLink } from "@/lib/site";
 
 export default function TelegramFloatingPill() {
   const [visible, setVisible] = useState(false);
@@ -53,7 +54,7 @@ export default function TelegramFloatingPill() {
     >
       <div className="relative flex items-center">
         <a
-          href="https://t.me/smart_zakupka"
+          href={telegramBotLink("src_floating_pill")}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleClick}
@@ -75,10 +76,10 @@ export default function TelegramFloatingPill() {
 
           <div className="flex flex-col text-left">
             <span className="text-[10px] uppercase font-bold tracking-wider text-yellow leading-tight">
-              Чёрная Пятница 🔥
+              Повторные коды и скидки
             </span>
             <span className="text-xs md:text-sm font-extrabold leading-tight text-white drop-shadow-sm">
-              Скидки и промокоды в ТГ
+              Поиск в ТГ-боте и @smart_zakupka
             </span>
           </div>
         </a>
