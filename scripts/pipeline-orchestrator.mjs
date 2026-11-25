@@ -11,14 +11,27 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { register } from "node:module";
+import { pathToFileURL } from "node:url";
 import { submitReport } from "./perfluence-report.mjs";
-import { takeNewOffers } from "./perfluence-take-offers.mjs";
-import { generatePromoBanner } from "./banner-generator.mjs";
-import { getFlashDeals, autoActivateFlashProjects } from "./perfluence-flash-deals.mjs";
+import { getFlashDeals } from "./perfluence-flash-deals.mjs";
 import { postToVk } from "./vk-crossposter.mjs";
 import { checkNewEarnings } from "./perfluence-earnings-monitor.mjs";
 import { pingIndexNow } from "./indexnow-ping.mjs";
 import { getProxyUrl, requestJson } from "./http-client.mjs";
+
+let _autopilotPromise = null;
+async function getPerfluenceAutopilot() {
+  if (!_autopilotPromise) {
+    _autopilotPromise = (async () => {
+      try {
+        register("./scripts/ts-loader.mjs", pathToFileURL("./"));
+      } catch {}
+      return await import("../src/lib/perfluenceAutopilot.ts");
+    })();
+  }
+  return _autopilotPromise;
+}
 import {
   buildArticleCandidates,
   buildDigestCandidates,
@@ -353,19 +366,25 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
   const historyData = loadHistory();
   const now = Date.now();
   let cleanedCount = 0;
+  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
   for (const item of historyData.history) {
-    if (!item.deleted && item.messageId && item.expires) {
-      const expTime = parseExpiryMs(item.expires);
-      if (expTime !== null && now > expTime) {
-        console.log(` -> Оффер "${item.store}" (${item.code}) истек ${item.expires}. Удаление #${item.messageId}...`);
+    if (!item.deleted && item.messageId) {
+      const expTime = item.expires ? parseExpiryMs(item.expires) : null;
+      const isExpired = expTime !== null && now > expTime;
+      const postedAtMs = item.date ? Date.parse(item.date) : NaN;
+      const isOver30Days = Number.isFinite(postedAtMs) && now - postedAtMs >= THIRTY_DAYS_MS;
+
+      if (isExpired || isOver30Days) {
+        const reason = isExpired ? `истек ${item.expires}` : "прошло 30 дней (ОРД лимит)";
+        console.log(` -> Оффер "${item.store}" (${item.code || "—"}) ${reason}. Удаление #${item.messageId}...`);
         if (!options.dryRun) {
           const delRes = await deleteTelegramMessage(item.messageId);
-          if (delRes.ok) {
+          if (delRes.ok || /message to delete not found/i.test(delRes.description || "")) {
             item.deleted = true;
             item.deletedAt = new Date().toISOString();
             cleanedCount++;
-            console.log(`    ✓ Сообщение #${item.messageId} удалено из канала.`);
+            if (delRes.ok) console.log(`    ✓ Сообщение #${item.messageId} удалено из канала.`);
           }
         }
       }
@@ -373,17 +392,35 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
   }
   if (cleanedCount > 0) saveHistory(historyData);
 
-  // ФАЗА 2: Автоматический поиск и взятие новых офферов в Perfluence
+  // ФАЗА 2: Полный автопилот Perfluence (Доступные, Получить промокод, Повторить публикацию, pending_removal, сайт-отчёты)
+  let autopilotReport = null;
   const wantPerfluence = mode === "auto" || mode === "perfluence";
-  if (wantPerfluence && options.takeOffers && fs.existsSync(SESSION_FILE)) {
-    console.log("\n[Фаза 2] Сканирование каталога и авто-взятие новых офферов...");
+  if (wantPerfluence && fs.existsSync(SESSION_FILE)) {
+    console.log(`\n[Фаза 2] Запуск автопилота Perfluence (takeOffers=${Boolean(options.takeOffers)})...`);
     try {
-      await takeNewOffers({ maxOffers: 2, headless: true });
+      const { runPerfluenceAutopilotCycle } = await getPerfluenceAutopilot();
+      autopilotReport = await runPerfluenceAutopilotCycle({
+        dryRun: Boolean(options.dryRun),
+        enableTakeAvailable: Boolean(options.takeOffers),
+        enableActivateNewLandings: Boolean(options.takeOffers),
+        enableRepeatMissing: Boolean(options.takeOffers),
+        enableAutoReportSite: !options.dryRun,
+        enablePendingRemovalSync: true,
+        enableTelegramCleanup: !options.dryRun,
+        botToken: BOT_TOKEN,
+        channelId: CHANNEL_ID,
+      });
+      console.log(
+        ` -> Perfluence: заявок=${autopilotReport.appliedRequests.length}, активаций=${autopilotReport.activatedLandings.length}, авто-отчётов(сайт)=${autopilotReport.reportedSitePosts.length}, ждут скриншота=${autopilotReport.needsScreenshotPosts.length}, удалено_ТГ=${autopilotReport.deletedTelegramMessageIds.length}`,
+      );
+      if (autopilotReport.sessionExpired) {
+        console.warn(" -> ⚠ Сессия Perfluence истекла! Требуется повторный вход (node scripts/perfluence-auth.mjs).");
+      }
     } catch (err) {
-      console.warn(`[Фаза 2] Авто-взятие пропущено: ${err.message}`);
+      console.warn(`[Фаза 2] Ошибка автопилота Perfluence: ${err.message}`);
     }
   } else {
-    console.log(`\n[Фаза 2] Авто-взятие пропущено (mode=${mode}, takeOffers=${Boolean(options.takeOffers)}).`);
+    console.log(`\n[Фаза 2] Автопилот Perfluence пропущен (mode=${mode}, hasSession=${fs.existsSync(SESSION_FILE)}).`);
   }
 
   // ФАЗА 3: Загрузка готовых офферов из виджета Perfluence (если выбран трек Perfluence/auto)
@@ -491,16 +528,12 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
     "СберПрайм"
   ];
 
-  // [Фаза 3.1] Мониторинг и авто-активация «Флеш-акций» и повышенных ставок
+  // [Фаза 3.1] Мониторинг флеш-акций (активация уже выполнена на Фазе 2 при takeOffers)
   let flashDeals = [];
   const flashMap = new Map();
   if (wantPerfluence) {
-    console.log("\n[Фаза 3.1] Мониторинг и авто-активация «Флеш-акций» рекламодателей...");
+    console.log("\n[Фаза 3.1] Мониторинг «Флеш-акций» и повышенных ставок рекламодателей...");
     try {
-      // 1. Авто-активация проектов с флеш-акциями в 1 клик
-      if (options.takeOffers !== false) {
-        await autoActivateFlashProjects();
-      }
 
       flashDeals = await getFlashDeals();
       for (const d of flashDeals) {
@@ -928,7 +961,7 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
     console.warn(" -> ⚠ Ошибка отправки IndexNow:", idxErr.message);
   }
 
-  // ФАЗА 5: Авто-сдача отчета в Perfluence (только для трека Perfluence и при наличии сессии)
+  // ФАЗА 5: Авто-сдача отчета в Perfluence (включая отложенные посты со скриншотом через Playwright)
   if (activePost.kind === "perfluence" && fs.existsSync(SESSION_FILE) && activePost.storeId) {
     console.log(`\n[Фаза 5] Авто-сдача отчета в Perfluence для проекта #${activePost.storeId}...`);
     try {
@@ -936,6 +969,19 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
       console.log("✓ Отчет успешно сдан модераторам!");
     } catch (repErr) {
       console.warn("⚠ Сдача отчета через Playwright:", repErr.message);
+    }
+  }
+
+  // Досдаём отложенные отчёты сайта (где нужен скриншот) и недавно вышедшие посты @smart_zakupka
+  if (fs.existsSync(SESSION_FILE) && autopilotReport?.needsScreenshotPosts?.length) {
+    console.log(`\n[Фаза 5.1] Сдача ${autopilotReport.needsScreenshotPosts.length} сайт-отчётов со скриншотом...`);
+    for (const pending of autopilotReport.needsScreenshotPosts.slice(0, 5)) {
+      try {
+        await submitReport(pending.postId, pending.postUrl, { headless: true });
+        console.log(` ✓ Сайт-отчёт #${pending.postId} (${pending.postUrl}) сдан со скриншотом!`);
+      } catch (shotErr) {
+        console.warn(` ⚠ Не удалось сдать #${pending.postId}:`, shotErr.message);
+      }
     }
   }
 

@@ -128,5 +128,9 @@ jobs:
           if [ -n "${TELEGRAM_BOT_TOKEN_DEPLOYED:-}" ] || [ -n "${TELEGRAM_BOT_TOKEN:-}" ] || [ -n "${TELEGRAM_PUBLIC_BOT_TOKEN:-}" ]; then
             node scripts/setup-telegram-bot.mjs --apply
           fi
-          echo "deployed $(git rev-parse --short HEAD)"
+          sed -i 's/\r$//' /srv/promofact/scripts/vps-autopilot-cron.sh
+          chmod +x /srv/promofact/scripts/vps-autopilot-cron.sh
+          CRON_LINE="*/20 * * * * /bin/bash /srv/promofact/scripts/vps-autopilot-cron.sh >> /tmp/promofact-autopilot.log 2>&1 # PROMOFACT_LIVE_AUTOPILOT"
+          (crontab -l 2>/dev/null | grep -v 'PROMOFACT_LIVE_AUTOPILOT' || true; echo "$CRON_LINE") | crontab -
+          echo "installed VPS live autopilot cron + deployed $(git rev-parse --short HEAD)"
           REMOTE

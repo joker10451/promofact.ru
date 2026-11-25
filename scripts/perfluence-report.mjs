@@ -179,56 +179,105 @@ async function submitReportHttp(postId, postUrl) {
   const location = submitRes.headers.get("location");
   console.log(`[Report/HTTP] Ответ сервера: HTTP ${status} (Location: ${location || "нет"})`);
 
-  // Успешная отправка в Yii2 обычно сопровождается редиректом 302 на /posts или страницу поста
-  if (status === 302 || status === 200) {
+  // Успешная отправка в Yii2 сопровождается редиректом 302 (не на login). При 200 ActiveForm перерисовывает ошибки.
+  if (status === 302 && (!location || !/login/i.test(location))) {
     return { success: true, method: "http", postId, location };
   }
 
   const respText = await submitRes.text();
-  throw new Error(`Неожиданный ответ сервера: HTTP ${status}, текст: ${respText.slice(0, 200)}`);
+  const errMatch = respText.match(/class="error-summary[^"]*"[^>]*>([\s\S]*?)<\/div>/i)?.[1] || "";
+  const cleanErr = errMatch.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  throw new Error(`Ответ HTTP ${status}${cleanErr ? `: ${cleanErr}` : ""}`);
+}
+
+async function captureProofScreenshot(browser, postId, postUrl) {
+  const proofDir = path.join(process.cwd(), "data", "debug");
+  if (!fs.existsSync(proofDir)) fs.mkdirSync(proofDir, { recursive: true });
+  const proofPath = path.join(proofDir, `proof-${postId}.png`);
+  // Для Telegram-постов открываем публичный web-превью t.me/s/..., чтобы страница отрисовалась без клиента TG.
+  const renderUrl = postUrl.replace(/^https:\/\/t\.me\/(?!s\/)([^/]+\/\d+)/i, "https://t.me/s/$1");
+  const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });
+  try {
+    await page.goto(renderUrl, { waitUntil: "domcontentloaded", timeout: 25000 });
+    await page.waitForTimeout(2500);
+    await page.screenshot({ path: proofPath, fullPage: false });
+    return proofPath;
+  } finally {
+    await page.close();
+  }
 }
 
 /**
- * Запасной Playwright-метод (на случай изменений структуры формы)
+ * Запасной Playwright-метод (на случай изменений структуры формы или обязательного скриншота)
  */
 async function submitReportPlaywright(postId, postUrl, options = { headless: true }) {
   console.log(`[Report/Browser] Запуск браузерного режима для поста #${postId}...`);
   const browser = await chromium.launch({ headless: options.headless });
-  const context = await browser.newContext({ storageState: SESSION_FILE });
-  const page = await context.newPage();
+  try {
+    const context = await browser.newContext({ storageState: SESSION_FILE });
+    const page = await context.newPage();
 
-  const targetUrl = `https://dash.perfluence.net/posts/update/${postId}`;
-  await page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 20000 });
+    const targetUrl = `https://dash.perfluence.net/posts/update/${postId}`;
+    await page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 20000 });
 
-  // Заполняем ссылку
-  const linkInput = await page.$('#post-post_link, input[name="Post[post_link]"]');
-  if (linkInput) {
-    await linkInput.fill(postUrl);
+    // Заполняем ссылку (учитываем формы и Post[...], и PostForm[...])
+    const linkInput = await page.$('#post-post_link, input[name="Post[post_link]"], input[name="PostForm[post_link]"]');
+    if (linkInput) {
+      await linkInput.fill(postUrl);
+    }
+
+    // Выбираем "Сегодня"
+    const daySelect = await page.$('#post-published_day, select[name="Post[published_day]"], select[name="PostForm[published_day]"]');
+    if (daySelect) {
+      await daySelect.selectOption("today").catch(() => {});
+    }
+    const todayBadge = await page.$('.badge-select-item[data-value="today"], label:has-text("Сегодня")');
+    if (todayBadge) {
+      await todayBadge.click().catch(() => {});
+    }
+
+    // При наличии поля загрузки скриншота автоматически снимаем доказательство с живой страницы
+    const fileInput = await page.$('input[type="file"][name="img"]');
+    if (fileInput) {
+      try {
+        const proofPath = await captureProofScreenshot(browser, postId, postUrl);
+        await fileInput.setInputFiles(proofPath);
+        await page.waitForTimeout(3000);
+      } catch (shotErr) {
+        console.warn(`[Report/Browser] Предупреждение при снятии скриншота: ${shotErr.message}`);
+      }
+    }
+
+    // Подтверждаем токен ОРД
+    const tokenCheckbox = await page.$('#post-is_ord_marker_approved, input[name="Post[is_ord_marker_approved]"], input[name="PostForm[is_ord_marker_approved]"]');
+    if (tokenCheckbox && !(await tokenCheckbox.isChecked())) {
+      await tokenCheckbox.check({ force: true });
+    }
+
+    // Нажимаем кнопку отправки
+    const submitBtn = await page.$(
+      'button[name="Post[status]"][value="published"], button[type="submit"]:has-text("Внести публикацию"), button[type="submit"]:has-text("Внести скриншот"), button:has-text("Отправить на проверку")',
+    );
+    if (submitBtn) {
+      await Promise.all([
+        page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => null),
+        submitBtn.click(),
+      ]);
+      await page.waitForTimeout(1500);
+    }
+
+    const formErrors = await page.evaluate(() => {
+      const sum = document.querySelector(".error-summary")?.innerText?.trim();
+      return sum || "";
+    });
+    if (formErrors && page.url().includes(`/posts/update/${postId}`)) {
+      throw new Error(`Perfluence отклонил форму поста #${postId}: ${formErrors}`);
+    }
+
+    return { success: true, method: "playwright", postId };
+  } finally {
+    await browser.close();
   }
-
-  // Выбираем "Сегодня"
-  const daySelect = await page.$('#post-published_day, select[name="Post[published_day]"]');
-  if (daySelect) {
-    await daySelect.selectOption("today");
-  }
-
-  // Подтверждаем токен
-  const tokenCheckbox = await page.$('#post-is_ord_marker_approved, input[name="Post[is_ord_marker_approved]"]');
-  if (tokenCheckbox && !(await tokenCheckbox.isChecked())) {
-    await tokenCheckbox.check();
-  }
-
-  // Нажимаем "Внести публикацию"
-  const submitBtn = await page.$('button[name="Post[status]"][value="published"], button:has-text("Внести публикацию")');
-  if (submitBtn) {
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => null),
-      submitBtn.click()
-    ]);
-  }
-
-  await browser.close();
-  return { success: true, method: "playwright", postId };
 }
 
 /**

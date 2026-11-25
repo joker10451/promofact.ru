@@ -30,7 +30,9 @@ export function isRegulatedAdvertiser(slug: string): boolean {
 
 export function isMedicalAdvertiser(slug: string): boolean {
   const s = norm(slug);
-  return MEDICAL_SLUGS.has(s) || s.split("-").some((part) => part === "telemed" || part === "apteka" || part === "apteki");
+  return MEDICAL_SLUGS.has(s) ||
+    s.startsWith("sberzdorov") ||
+    s.split("-").some((part) => part === "telemed" || part === "apteka" || part === "apteki");
 }
 
 /** Wording the partner supplies with medical ads: "ИМЕЮТСЯ ПРОТИВОПОКАЗАНИЯ, НЕОБХОДИМА КОНСУЛЬТАЦИЯ СПЕЦИАЛИСТА". */

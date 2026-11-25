@@ -16,6 +16,7 @@ import { isApprovedOct24Repost } from "@/lib/perfluenceRepeatsOct24";
 import { isApprovedOct26WebsitePlacement } from "@/lib/perfluenceOct26Website";
 import { isApprovedOct28PublisherPlacement } from "@/lib/perfluenceOct28Website";
 import { isPausedPublisherStore, withoutPausedPublisherOffers } from "@/lib/publisherPauses";
+import { PERFLUENCE_STORE_ALIASES } from "@/lib/perfluenceStoreAliases";
 import bundledFeed from "@/data/perfluence-feed.json";
 import syncMeta from "@/data/sync-meta.json";
 import earningsRank from "@/data/earnings-rank.json";
@@ -174,50 +175,7 @@ function collectPromos(item: Rec): { promo: Rec; group: Rec }[] {
  * Адреса совпадают с теми, что уже стоят в статьях, коротких ссылках
  * (next.config.ts) и баннерах, поэтому страницы не разъезжаются.
  */
-const STORE_ALIASES: Record<number, { slug: string; name?: string }> = {
-  2430: { slug: "ivi", name: "Иви" },
-  1623: { slug: "start-ru", name: "Start.ru" },
-  1653: { slug: "dodo-pizza", name: "Додо Пицца" },
-  900: { slug: "bethowen", name: "Бетховен" },
-  1483: { slug: "citydrive", name: "Ситидрайв" },
-  2576: { slug: "sberprime", name: "СберПрайм" },
-  2548: { slug: "m-kosmetik", name: "М.Косметик" },
-  3641: { slug: "cozy-home", name: "Cozy Home" },
-  3807: { slug: "librederm", name: "Librederm" },
-  4338: { slug: "geltek", name: "Geltek" },
-  4575: { slug: "carely", name: "Carely" },
-  4176: { slug: "poizon", name: "Poizon" },
-  1977: { slug: "vazhnaya-ryba", name: "Важная Рыба" },
-  4447: { slug: "carte-blanche", name: "Carte Blanche" },
-  4579: { slug: "fmart", name: "FMART" },
-  3611: { slug: "megamarket", name: "Мегамаркет" },
-  602: { slug: "tanukifamily", name: "Тануки" },
-  2233: { slug: "yandex-plus", name: "Яндекс Плюс" },
-  2582: { slug: "magnit-dostavka", name: "Магнит Доставка" },
-  1384: { slug: "yandex-eda", name: "Яндекс Еда" },
-  1408: { slug: "yandex-eda-gipermarkety", name: "Яндекс Еда Гипермаркеты" },
-  112: { slug: "delimobil", name: "Делимобиль" },
-  3161: { slug: "avito-puteshestviya", name: "Авито Путешествия" },
-  1409: { slug: "winlab", name: "ВинЛаб" },
-  3758: { slug: "rutube", name: "RUTUBE" },
-  3285: { slug: "t-puteshestviya-oteli", name: "Т-Путешествия. Отели" },
-  139: { slug: "t-bank-junior", name: "Т-Банк Джуниор" },
-  4677: { slug: "mark-formelle", name: "Mark Formelle" },
-  3468: { slug: "sberzdorovie", name: "СберЗдоровье" },
-  2332: { slug: "sberzdorovie", name: "СберЗдоровье" },
-  2271: { slug: "ostrovok", name: "Островок!" },
-  1102: { slug: "elementaree", name: "Elementaree" },
-  1100: { slug: "sunlight-ru", name: "SUNLIGHT" },
-  354: { slug: "yandeks-lavka", name: "Яндекс Лавка" },
-  2993: { slug: "iv-roshe", name: "Ив Роше" },
-  4025: { slug: "detskie-platezhnye-aksessuary-ot-sbera", name: "Детские платёжные аксессуары от Сбера" },
-  4264: { slug: "pyaterochka", name: "Пятёрочка Доставка" },
-  4362: { slug: "plati-po-miru", name: "Плати по миру" },
-  3203: { slug: "polzaru", name: "Польза.ru" },
-  4526: { slug: "chistaya-liniya", name: "Чистая Линия" },
-  4700: { slug: "otp-bank", name: "ОТП Банк" },
-  3000: { slug: "tutu", name: "Туту" },
-};
+const STORE_ALIASES: Record<number, { slug: string; name?: string }> = PERFLUENCE_STORE_ALIASES;
 
 export function parsePayload(payloadJson: string): Coupon[] {
   const body: { data?: unknown } = JSON.parse(payloadJson);
@@ -720,8 +678,8 @@ const WIDGET_BLOCKED_STORES = new Set(["winlab", "flor2u"]);
 export function isPublishableWidgetOffer(c: Coupon): boolean {
   return isPublicPerfluenceWidgetCoupon(c) &&
     !WIDGET_BLOCKED_STORES.has(c.store.slug) &&
-    // Medicine, finance, insurance and payments keep the hand-reviewed rules.
-    !isRegulatedAdvertiser(c.store.slug);
+    // Medical offers remain blocked unless the advertiser supplies the mandatory warning.
+    meetsMandatoryDisclaimers(c);
 }
 
 /** Raw, read-only diagnostics: never consume this result for publication. */
@@ -803,19 +761,6 @@ async function fetchData(): Promise<Coupon[]> {
 
       const top = topLevelCount(text);
       const coupons = parsePayload(text);
-
-      // Дополняем купонами из локального фида для проектов, ещё не включённых в виджет
-      if (bundledFeed && typeof bundledFeed === "object" && "data" in bundledFeed) {
-        try {
-          const bundledCoupons = parsePayload(JSON.stringify(bundledFeed));
-          const existingIds = new Set(coupons.map((c) => c.store.id));
-          for (const bc of bundledCoupons) {
-            if (!existingIds.has(bc.store.id)) {
-              coupons.push(bc);
-            }
-          }
-        } catch {}
-      }
 
       console.log(
         "[perfluence] status:",
@@ -983,7 +928,7 @@ const getCachedBaseSourceBuckets = unstable_cache(
     process.env.E2E_FIXTURES === "true" && process.env.VERCEL !== "1" && process.env.VERCEL_ENV !== "production" ? "e2e" : "prod",
   ],
   // Refresh approved partner offers rather than pinning an old snapshot forever.
-  { revalidate: 3600 },
+  { revalidate: 3600, tags: ["perfluence-catalog"] },
 );
 
 export async function getCombinedCoupons(): Promise<Coupon[]> {
@@ -1037,9 +982,9 @@ export async function getCombinedCoupons(): Promise<Coupon[]> {
   // prfl.me link and legal text) publishes without a hand-kept code list.
   // Dated allowlists still govern manually managed Perfluence offers.
   const widgetCoupons = new Set(sources.find((s) => s.source === "perfluence")?.coupons ?? []);
-  // Regulated advertisers (medicine, finance, insurance, payments) never take the
-  // automatic widget path: a widget offer there goes through the reviewed rules.
-  const viaWidgetRule = (c: Coupon) => widgetCoupons.has(c) && !isRegulatedAdvertiser(c.store.slug);
+  // Auto-publish all verified widget placements (regulated finance/insurance included
+  // when ERID + prfl.me are valid; medicine still gated by meetsMandatoryDisclaimers).
+  const viaWidgetRule = (c: Coupon) => widgetCoupons.has(c) && (isRegulatedAdvertiser(c.store.slug) ? meetsMandatoryDisclaimers(c) : true);
   return withoutPausedPublisherOffers(coupons)
     .filter((c) => viaWidgetRule(c)
       ? isPublishableWidgetOffer(c)
@@ -1325,4 +1270,14 @@ export async function getUsesStats(): Promise<UsesStats> {
   // The results feed has no verified approval schema. Do not turn its rows
   // (or test fixtures) into claims of confirmed customer orders.
   return { usesByCode: new Map(), usesByStore: new Map() };
+}
+
+/** Reset in-memory widget & results caches so VPS autopilot reflects live updates immediately. */
+export function invalidatePerfluenceRuntimeCache(): void {
+  cache = null;
+  cacheFailed = false;
+  cacheFilledAt = 0;
+  failedAt = 0;
+  resultsCache = null;
+  resultsCacheExpiresAt = 0;
 }

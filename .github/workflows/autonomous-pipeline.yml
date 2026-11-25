@@ -2,7 +2,7 @@ name: Perfluence & Telegram Pipeline — Автономный конвейер
 
 on:
   # 11:45 и 18:30 МСК — 2 сбалансированных слота в день (внутри оркестратора действует антиспам-кулдаун 3.5ч).
-  # Плановый запуск идёт с --no-take: в кабинете Perfluence ничего не создаёт.
+  # Полный автопилот: взятие одобренных/доступных акций, постинг с баннером, авто-сдача отчётов и 30-дневная очистка.
   schedule:
     - cron: '45 8 * * *'
     - cron: '30 15 * * *'
@@ -45,7 +45,7 @@ jobs:
       - name: ⚙️ Установка Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: 📦 Установка зависимостей
@@ -88,7 +88,7 @@ jobs:
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             node scripts/pipeline-orchestrator.mjs --dry-run --mode="$MODE" $FORCE_FLAG
           else
-            node scripts/pipeline-orchestrator.mjs --no-take --mode="$MODE" $FORCE_FLAG
+            node scripts/pipeline-orchestrator.mjs --mode="$MODE" $FORCE_FLAG
           fi
 
       - name: 💾 Сохранение истории публикаций

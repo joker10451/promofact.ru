@@ -1,4 +1,5 @@
 import type { Coupon } from "@/lib/types";
+import dynamicOverdueFeed from "@/data/dynamic-overdue-erids.json";
 
 /**
  * ERIDs of publications that Perfluence lists under "Необходимо удалить" (offer clause 6.16):
@@ -107,6 +108,32 @@ export const OVERDUE_PLACEMENT_ERIDS: ReadonlySet<string> = new Set([
   "2Ranymrx6MZ",
 ]);
 
+const DYNAMIC_OVERDUE_ERIDS = new Set<string>(
+  Array.isArray((dynamicOverdueFeed as { erids?: unknown }).erids)
+    ? (dynamicOverdueFeed as { erids: unknown[] }).erids.filter((e): e is string => typeof e === "string" && e.length >= 6)
+    : [],
+);
+const RUNTIME_OVERDUE_ERIDS = new Set<string>();
+
+/** Register 30-day overdue ERIDs discovered live on VPS without waiting for git rebuild. */
+export function addRuntimeOverdueErids(erids: Iterable<string>): number {
+  let added = 0;
+  for (const raw of erids) {
+    const clean = String(raw || "").trim();
+    if (clean.length >= 6 && !OVERDUE_PLACEMENT_ERIDS.has(clean) && !DYNAMIC_OVERDUE_ERIDS.has(clean) && !RUNTIME_OVERDUE_ERIDS.has(clean)) {
+      RUNTIME_OVERDUE_ERIDS.add(clean);
+      added++;
+    }
+  }
+  return added;
+}
+
+export function isOverdueErid(erid: string | undefined | null): boolean {
+  const clean = String(erid || "").trim();
+  if (!clean) return false;
+  return OVERDUE_PLACEMENT_ERIDS.has(clean) || DYNAMIC_OVERDUE_ERIDS.has(clean) || RUNTIME_OVERDUE_ERIDS.has(clean);
+}
+
 function eridsIn(text: string | undefined | null): string[] {
   return [...(text ?? "").matchAll(/erid[=: ]+([A-Za-z0-9]{8,})/gi)].map((m) => m[1]);
 }
@@ -119,7 +146,7 @@ export function carriesOverduePlacement(c: Pick<Coupon, "affiliate"> & { extraLi
     ...eridsIn(a.link), ...eridsIn(a.landingLink), ...eridsIn(a.ordText),
     ...(c.extraLinks ?? []).flatMap((l) => eridsIn(l.link)),
   ];
-  return found.some((e) => !!e && OVERDUE_PLACEMENT_ERIDS.has(e));
+  return found.some((e) => isOverdueErid(e));
 }
 
 /** Codes the partner reports as used up ("закончились промокоды"); they must not be shown even while the widget still lists them. */

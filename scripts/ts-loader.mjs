@@ -14,7 +14,7 @@ export async function resolve(specifier, context, nextResolve) {
 
   if (specifier === "next/cache") {
     return {
-      url: "data:text/javascript,export function unstable_cache(fn) { return fn; };",
+      url: "data:text/javascript,export function unstable_cache(fn) { return fn; } export function revalidatePath() {} export function revalidateTag() {}",
       shortCircuit: true,
     };
   }

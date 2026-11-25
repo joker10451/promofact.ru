@@ -71,6 +71,20 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # 3c. Sync 30-day pending_removal ERIDs so overdue placements drop before build
+      - name: Sync dynamic overdue ERIDs
+        id: overdue_sync
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID || '@smart_zakupka' }}
+        run: |
+          node scripts/sync-overdue-erids.mjs
+          if git diff --quiet -- src/data/dynamic-overdue-erids.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       # 4. Проверка результата синхронизации (success vs fallback/failed)
       - name: Verify sync status
         id: verify_sync
@@ -115,18 +129,18 @@ jobs:
 
       # 11. Автоматический коммит и пуш в main при наличии подтвержденных изменений каталога
       - name: Commit and push changes directly to main
-        if: success() && (steps.check_changes.outputs.has_changes == 'true' || steps.earnings.outputs.changed == 'true')
+        if: success() && (steps.check_changes.outputs.has_changes == 'true' || steps.earnings.outputs.changed == 'true' || steps.overdue_sync.outputs.changed == 'true')
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/perfluence-feed.json src/data/sync-meta.json src/data/earnings-rank.json
+          git add src/data/perfluence-feed.json src/data/sync-meta.json src/data/earnings-rank.json src/data/dynamic-overdue-erids.json
           git commit -m "chore(catalog): регулярное автообновление каталога партнерских предложений"
           git push origin main
 
       # Пуш от github-actions[bot] (GITHUB_TOKEN) не запускает workflow по push, поэтому
       # «Deploy to VPS» сам не стартует и новый фид не доезжал до сайта. Запускаем деплой явно.
       - name: Deploy the new feed to the VPS
-        if: success() && (steps.check_changes.outputs.has_changes == 'true' || steps.earnings.outputs.changed == 'true')
+        if: success() && (steps.check_changes.outputs.has_changes == 'true' || steps.earnings.outputs.changed == 'true' || steps.overdue_sync.outputs.changed == 'true')
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run deploy-vps.yml --ref main -f feed_sync=true
