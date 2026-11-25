@@ -89,7 +89,12 @@ const CATEGORY_BUCKETS: Record<
 };
 
 export function resolvePublicBotToken(): string {
-  return (process.env.TELEGRAM_PUBLIC_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || "")
+  return (
+    process.env.TELEGRAM_PUBLIC_BOT_TOKEN ||
+    process.env.TELEGRAM_BOT_TOKEN_DEPLOYED ||
+    process.env.TELEGRAM_BOT_TOKEN ||
+    ""
+  )
     .replace(/["'\r\n]/g, "")
     .trim();
 }

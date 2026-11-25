@@ -7,6 +7,10 @@ export interface TelegramPostOptions {
   disableWebPagePreview?: boolean;
 }
 
+function resolveChannelBotToken(opts?: TelegramPostOptions): string | undefined {
+  return opts?.botToken || process.env.TELEGRAM_BOT_TOKEN_DEPLOYED || process.env.TELEGRAM_BOT_TOKEN;
+}
+
 export interface TelegramButton {
   text: string;
   url: string;
@@ -146,7 +150,7 @@ export async function sendCouponToTelegram(
   coupon: Coupon,
   opts?: TelegramPostOptions,
 ): Promise<{ ok: boolean; messageId?: number; error?: string }> {
-  const token = opts?.botToken || process.env.TELEGRAM_BOT_TOKEN;
+  const token = resolveChannelBotToken(opts);
   const chatId = opts?.channelId || process.env.TELEGRAM_CHANNEL_ID;
 
   if (!token) {
@@ -286,7 +290,7 @@ export async function deleteTelegramMessage(
   messageId: number,
   opts?: TelegramPostOptions,
 ): Promise<boolean> {
-  const token = opts?.botToken || process.env.TELEGRAM_BOT_TOKEN;
+  const token = resolveChannelBotToken(opts);
   const chatId = opts?.channelId || process.env.TELEGRAM_CHANNEL_ID;
   if (!token || !chatId) return false;
   try {
@@ -435,7 +439,7 @@ export async function sendCustomPostToTelegram(
   meta?: { storeId?: number; storeName?: string; promoCodes?: string[] },
   opts?: TelegramPostOptions,
 ): Promise<{ ok: boolean; messageId?: number; error?: string }> {
-  const token = opts?.botToken || process.env.TELEGRAM_BOT_TOKEN;
+  const token = resolveChannelBotToken(opts);
   const chatId = opts?.channelId || process.env.TELEGRAM_CHANNEL_ID;
 
   if (!token) return { ok: false, error: "TELEGRAM_BOT_TOKEN не задан" };

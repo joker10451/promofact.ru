@@ -36,6 +36,8 @@ const fileEnv = loadEnvFiles();
 const BOT_TOKEN = pickSecret(
   process.env.TELEGRAM_PUBLIC_BOT_TOKEN,
   fileEnv.TELEGRAM_PUBLIC_BOT_TOKEN,
+  process.env.TELEGRAM_BOT_TOKEN_DEPLOYED,
+  fileEnv.TELEGRAM_BOT_TOKEN_DEPLOYED,
   process.env.TELEGRAM_BOT_TOKEN,
   fileEnv.TELEGRAM_BOT_TOKEN,
 );
@@ -69,6 +71,10 @@ async function main() {
 
   const me = await tg("getMe");
   console.log("🤖 Bot getMe:", me.ok ? `@${me.result.username} (id: ${me.result.id})` : me);
+  if (APPLY && !me.ok) {
+    console.error("❌ Bot token не прошёл getMe — проверьте TELEGRAM_PUBLIC_BOT_TOKEN / TELEGRAM_BOT_TOKEN_DEPLOYED");
+    process.exit(1);
+  }
 
   const wh = await tg("getWebhookInfo");
   console.log("🔗 WebhookInfo:", wh.ok ? {

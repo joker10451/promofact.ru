@@ -7,6 +7,7 @@ import {
   isBotWebhookAuthorized,
   parseBotStartParam,
   processTelegramBotUpdate,
+  resolvePublicBotToken,
 } from "../src/lib/telegramBot.ts";
 import { POST as botWebhookPost, GET as botWebhookGet } from "../src/app/api/telegram/bot/route.ts";
 import {
@@ -43,8 +44,23 @@ assert.deepEqual(parseBotStartParam("src_dzen_statya"), {
   source: "dzen_statya",
 });
 
-// 2. Webhook secret authorization (fail-closed)
+// 2. Webhook secret authorization & token precedence (VPS shadowing guard)
 const oldSecret = process.env.TELEGRAM_BOT_WEBHOOK_SECRET;
+const oldPublicTok = process.env.TELEGRAM_PUBLIC_BOT_TOKEN;
+const oldDeployedTok = process.env.TELEGRAM_BOT_TOKEN_DEPLOYED;
+const oldRawTok = process.env.TELEGRAM_BOT_TOKEN;
+
+delete process.env.TELEGRAM_PUBLIC_BOT_TOKEN;
+process.env.TELEGRAM_BOT_TOKEN = "stale-systemd-token";
+process.env.TELEGRAM_BOT_TOKEN_DEPLOYED = "fresh-deployed-token";
+assert.equal(resolvePublicBotToken(), "fresh-deployed-token");
+process.env.TELEGRAM_PUBLIC_BOT_TOKEN = "public-bot-token";
+assert.equal(resolvePublicBotToken(), "public-bot-token");
+
+if (oldPublicTok === undefined) delete process.env.TELEGRAM_PUBLIC_BOT_TOKEN; else process.env.TELEGRAM_PUBLIC_BOT_TOKEN = oldPublicTok;
+if (oldDeployedTok === undefined) delete process.env.TELEGRAM_BOT_TOKEN_DEPLOYED; else process.env.TELEGRAM_BOT_TOKEN_DEPLOYED = oldDeployedTok;
+if (oldRawTok === undefined) delete process.env.TELEGRAM_BOT_TOKEN; else process.env.TELEGRAM_BOT_TOKEN = oldRawTok;
+
 process.env.TELEGRAM_BOT_WEBHOOK_SECRET = "tg-webhook-secret-test";
 try {
   assert.equal(isBotWebhookAuthorized(null), false);
