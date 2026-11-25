@@ -11,6 +11,17 @@
   ],
   "history": [
     {
+      "id": 1795628385799,
+      "sourceType": "perfluence",
+      "code": "198N7PARH",
+      "store": "Перекрёсток Доставка",
+      "storeSlug": "perekrestok-dostavka",
+      "messageId": 132,
+      "postUrl": "https://t.me/smart_zakupka/132",
+      "expires": "30.11.2026",
+      "date": "2026-11-25T17:39:45.799Z"
+    },
+    {
       "id": 1795546456813,
       "code": "ESR9VCG7",
       "store": "Cozy home на Ozon|WB",
@@ -152,7 +163,9 @@
       "storeSlug": "vk-mesta",
       "postUrl": "https://t.me/smart_zakupka/41",
       "date": "2026-08-20T17:30:00.000Z",
-      "messageId": 41
+      "messageId": 41,
+      "deleted": true,
+      "deletedAt": "2026-11-25T17:38:27.541Z"
     },
     {
       "id": 50040,
@@ -178,7 +191,9 @@
       "storeSlug": "fmart",
       "postUrl": "https://t.me/smart_zakupka/49",
       "date": "2026-08-31T16:00:18.248Z",
-      "messageId": 49
+      "messageId": 49,
+      "deleted": true,
+      "deletedAt": "2026-11-25T17:38:27.898Z"
     },
     {
       "id": 1790074293689,

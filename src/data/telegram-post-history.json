@@ -110,5 +110,17 @@
       "ZENIT120CARD"
     ],
     "url": "https://promofact.ru/collections/finansy-i-karty"
+  },
+  {
+    "messageId": 132,
+    "store": "perekrestok-dostavka",
+    "storeName": "Перекрёсток Доставка",
+    "date": "2026-11-25T17:39:45.800Z",
+    "channel": "@smart_zakupka",
+    "sourceType": "perfluence",
+    "codes": [
+      "198N7PARH"
+    ],
+    "url": "https://promofact.ru/store/perekrestok-dostavka"
   }
 ]
