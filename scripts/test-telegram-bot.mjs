@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { telegramBotLink, SITE_URL } from "../src/lib/site.ts";
+import { sendCustomPostToTelegram } from "../src/lib/telegram.ts";
 import {
   buildStoreReplyPayload,
   canUseDirectTelegramAffiliateLink,
@@ -280,5 +281,44 @@ assert.equal(
   }),
   "digest",
 );
+
+// 6. Guard against bogus "Золотое Яблоко / smart_zakupka/6" admin report when sending alerts directly to TELEGRAM_ADMIN_CHAT_ID
+const sentPayloads = [];
+const prevFetch = globalThis.fetch;
+const prevAdminId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+const prevChanId = process.env.TELEGRAM_CHANNEL_ID;
+process.env.TELEGRAM_ADMIN_CHAT_ID = "6141363106";
+process.env.TELEGRAM_CHANNEL_ID = "@smart_zakupka";
+globalThis.fetch = async (_url, init) => {
+  if (init?.body) sentPayloads.push(JSON.parse(String(init.body)));
+  return new Response(JSON.stringify({ ok: true, result: { message_id: 6 } }), { status: 200 });
+};
+try {
+  await sendCustomPostToTelegram(
+    { text: "Radar alert" },
+    undefined,
+    { botToken: "tok", channelId: "6141363106" },
+  );
+  assert.equal(
+    sentPayloads.length,
+    1,
+    "Sending alert to TELEGRAM_ADMIN_CHAT_ID must NOT emit a secondary Perfluence channel report",
+  );
+
+  sentPayloads.length = 0;
+  await sendCustomPostToTelegram(
+    { text: "Channel promo post" },
+    { storeId: 1707, storeName: "Золотое Яблоко", promoCodes: ["PERF"] },
+    { botToken: "tok", channelId: "@smart_zakupka" },
+  );
+  assert.equal(sentPayloads.length, 2, "Real channel post must still notify admin with link");
+  assert.ok(sentPayloads[1].text.includes("https://t.me/smart_zakupka/6"));
+} finally {
+  globalThis.fetch = prevFetch;
+  if (prevAdminId === undefined) delete process.env.TELEGRAM_ADMIN_CHAT_ID;
+  else process.env.TELEGRAM_ADMIN_CHAT_ID = prevAdminId;
+  if (prevChanId === undefined) delete process.env.TELEGRAM_CHANNEL_ID;
+  else process.env.TELEGRAM_CHANNEL_ID = prevChanId;
+}
 
 console.log("Telegram bot & channel growth verification PASS");

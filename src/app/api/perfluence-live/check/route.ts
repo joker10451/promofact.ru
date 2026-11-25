@@ -102,7 +102,7 @@ async function handleCheck(req: NextRequest) {
             ],
           },
           undefined,
-          { channelId: adminChatId },
+          { channelId: adminChatId, notifyAdmin: false },
         );
 
         alertSent = alertRes.ok;

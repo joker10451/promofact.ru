@@ -5,10 +5,67 @@ export interface TelegramPostOptions {
   botToken?: string;
   channelId?: string;
   disableWebPagePreview?: boolean;
+  /** Отправлять ли в ЛС админу отчёт со ссылкой для сдачи в Perfluence (отключается для служебных алертов в ЛС). */
+  notifyAdmin?: boolean;
 }
 
 function resolveChannelBotToken(opts?: TelegramPostOptions): string | undefined {
   return opts?.botToken || process.env.TELEGRAM_BOT_TOKEN_DEPLOYED || process.env.TELEGRAM_BOT_TOKEN;
+}
+
+async function notifyAdminAboutChannelPost(params: {
+  token: string;
+  targetChatId: string;
+  messageId?: number;
+  storeId?: number;
+  storeName: string;
+  promoCodesText: string;
+  notifyAdmin?: boolean;
+}): Promise<void> {
+  const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID?.trim();
+  const { token, targetChatId, messageId, storeId, storeName, promoCodesText, notifyAdmin } = params;
+  if (notifyAdmin === false || !adminChatId || !messageId) return;
+  // Служебные алерты (например, Perfluence Live Radar) уже уходят в ЛС админа — не дублируем отчёт о посте канала.
+  if (String(targetChatId).trim() === adminChatId) return;
+
+  const channelUsername = (process.env.TELEGRAM_CHANNEL_ID || "@smart_zakupka").replace("@", "");
+  const postUrl = `https://t.me/${channelUsername}/${messageId}`;
+  const perfluenceProjectUrl = storeId
+    ? `https://dash.perfluence.net/my-projects/${storeId}`
+    : "https://dash.perfluence.net";
+
+  const adminText = [
+    `📢 <b>Опубликован пост для отчета Perfluence!</b>`,
+    ``,
+    `🏬 Магазин: <b>${escapeHtml(storeName)}</b>`,
+    `🎟 Промокод: <code>${escapeHtml(promoCodesText)}</code>`,
+    ``,
+    `🔗 <b>Ссылка на пост (нажмите, чтобы скопировать):</b>`,
+    `<code>${postUrl}</code>`,
+  ].join("\n");
+
+  const adminMarkup = {
+    inline_keyboard: [
+      [{ text: "⚡ Сдать отчет в Perfluence →", url: perfluenceProjectUrl }],
+      [{ text: "👁 Открыть пост в канале", url: postUrl }],
+    ],
+  };
+
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: adminChatId,
+        text: adminText,
+        parse_mode: "HTML",
+        reply_markup: adminMarkup,
+        disable_web_page_preview: true,
+      }),
+    });
+  } catch (adminErr) {
+    console.error("Admin notification error:", adminErr);
+  }
 }
 
 export interface TelegramButton {
@@ -236,46 +293,15 @@ export async function sendCouponToTelegram(
 
     const messageId = data.result?.message_id;
 
-    // Авто-уведомление администратора в ЛС со ссылкой для сдачи отчета в Perfluence
-    const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
-    if (adminChatId && messageId) {
-      const channelUsername = (process.env.TELEGRAM_CHANNEL_ID || "@smart_zakupka").replace("@", "");
-      const postUrl = `https://t.me/${channelUsername}/${messageId}`;
-      const perfluenceProjectUrl = `https://dash.perfluence.net/my-projects/${coupon.store.id}`;
-
-      const adminText = [
-        `📢 <b>Опубликован пост для отчета Perfluence!</b>`,
-        ``,
-        `🏬 Магазин: <b>${escapeHtml(coupon.store.name)}</b>`,
-        `🎟 Промокод: <code>${escapeHtml(coupon.promocode.code)}</code>`,
-        ``,
-        `🔗 <b>Ссылка на пост (нажмите, чтобы скопировать):</b>`,
-        `<code>${postUrl}</code>`,
-      ].join("\n");
-
-      const adminMarkup = {
-        inline_keyboard: [
-          [{ text: "⚡ Сдать отчет в Perfluence →", url: perfluenceProjectUrl }],
-          [{ text: "👁 Открыть пост в канале", url: postUrl }],
-        ],
-      };
-
-      try {
-        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: adminChatId,
-            text: adminText,
-            parse_mode: "HTML",
-            reply_markup: adminMarkup,
-            disable_web_page_preview: true,
-          }),
-        });
-      } catch (adminErr) {
-        console.error("Admin notification error:", adminErr);
-      }
-    }
+    await notifyAdminAboutChannelPost({
+      token,
+      targetChatId: chatId,
+      messageId,
+      storeId: coupon.store.id,
+      storeName: coupon.store.name,
+      promoCodesText: coupon.promocode.code,
+      notifyAdmin: opts?.notifyAdmin,
+    });
 
     return { ok: true, messageId };
   } catch (err) {
@@ -509,47 +535,15 @@ export async function sendCustomPostToTelegram(
 
     const messageId = data.result?.message_id;
 
-    const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
-    if (adminChatId && messageId) {
-      const channelUsername = (process.env.TELEGRAM_CHANNEL_ID || "@smart_zakupka").replace("@", "");
-      const postUrl = `https://t.me/${channelUsername}/${messageId}`;
-      const perfluenceProjectUrl = meta?.storeId
-        ? `https://dash.perfluence.net/my-projects/${meta.storeId}`
-        : "https://dash.perfluence.net";
-
-      const adminText = [
-        `📢 <b>Опубликован пост для отчета Perfluence!</b>`,
-        ``,
-        `🏬 Магазин: <b>${escapeHtml(meta?.storeName || "Золотое Яблоко")}</b>`,
-        `🎟 Промокоды: <code>${(meta?.promoCodes || []).join(", ") || "Все"}</code>`,
-        ``,
-        `🔗 <b>Ссылка на пост (нажмите, чтобы скопировать):</b>`,
-        `<code>${postUrl}</code>`,
-      ].join("\n");
-
-      const adminMarkup = {
-        inline_keyboard: [
-          [{ text: "⚡ Сдать отчет в Perfluence →", url: perfluenceProjectUrl }],
-          [{ text: "👁 Открыть пост в канале", url: postUrl }],
-        ],
-      };
-
-      try {
-        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: adminChatId,
-            text: adminText,
-            parse_mode: "HTML",
-            reply_markup: adminMarkup,
-            disable_web_page_preview: true,
-          }),
-        });
-      } catch (adminErr) {
-        console.error("Admin notification error:", adminErr);
-      }
-    }
+    await notifyAdminAboutChannelPost({
+      token,
+      targetChatId: chatId,
+      messageId,
+      storeId: meta?.storeId,
+      storeName: meta?.storeName || "Без названия",
+      promoCodesText: (meta?.promoCodes || []).join(", ") || "Все",
+      notifyAdmin: opts?.notifyAdmin,
+    });
 
     return { ok: true, messageId };
   } catch (err) {
