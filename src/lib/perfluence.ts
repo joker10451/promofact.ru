@@ -223,6 +223,7 @@ export function parsePayload(payloadJson: string): Coupon[] {
 
   const coupons: Coupon[] = [];
   const seenSlugs = new Set<string>();
+  const seenPromoIds = new Set<number>();
   let fallbackPromoId = 0;
 
   for (const raw of items as unknown[]) {
@@ -348,7 +349,20 @@ export function parsePayload(payloadJson: string): Coupon[] {
           : "45 дней доступа к Яндекс Музыке бесплатно";
       }
 
-      const promoId = num(p.id ?? p.post_id ?? p.bonus_id);
+      const explicitId = num(p.id);
+      const bonusId = num(p.bonus_id);
+      const postId = num(p.post_id);
+      const basePromoId =
+        explicitId ||
+        (postId && bonusId ? postId * 100000 + (bonusId % 100000) : 0) ||
+        bonusId ||
+        postId;
+      let promoId = basePromoId;
+      while (!promoId || seenPromoIds.has(promoId)) {
+        fallbackPromoId += 1;
+        promoId = basePromoId ? basePromoId * 100 + fallbackPromoId : fallbackPromoId;
+      }
+      seenPromoIds.add(promoId);
       fallbackPromoId += 1;
       let customerTypeLabel: string | null = null;
       const combinedText = `${p.name || ""} ${p.comment || ""} ${p.promo_terms || ""} ${p.terms || ""}`.toLowerCase();
@@ -370,7 +384,7 @@ export function parsePayload(payloadJson: string): Coupon[] {
       }
 
       const promocode: Promocode = {
-        id: promoId || fallbackPromoId,
+        id: promoId,
         code: str(p.code).trim(),
         bonusName: cleanBonus,
         terms: stripHtml(p.promo_terms || p.terms) || null,

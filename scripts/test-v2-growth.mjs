@@ -75,6 +75,7 @@ const { getAllStores } = await import("../src/lib/perfluence.ts");
 const stores = await getAllStores();
 const vkusvill = stores.find((s) => s.slug === "vkusvill-dostavka");
 assert.ok(vkusvill && vkusvill.coupons.length === 5, "VkusVill must keep 5 active offers from live Perfluence feed");
+assert.equal(new Set(vkusvill.coupons.map((c) => c.id)).size, 5, "All 5 VkusVill coupons must have distinct coupon IDs");
 const vkusvillAmounts = new Set(vkusvill.coupons.map((c) => c.promocode.bonusName.match(/(\d+)\s*₽/)?.[1]).filter(Boolean));
 assert.deepEqual(vkusvillAmounts, new Set(["600", "350", "300", "250", "200"]), "VkusVill must not regress to duplicate nominal amounts");
 assert.ok(vkusvill.coupons.every((c) => c.affiliate.ordMarker === "2Ranyo8ey8Q"), "VkusVill must carry unified renewed ERID 2Ranyo8ey8Q");
