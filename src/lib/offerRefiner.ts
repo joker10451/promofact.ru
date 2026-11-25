@@ -158,7 +158,7 @@ export function refineOffer(
   }
 
   // 1.5. Банковские карты (льготный период, рассрочка 0%, кэшбэк по картам)
-  if (/(?:кредитн|дебетов)[а-яё]*(?:\s+[а-яa-z0-9-]+)?\s+карт/iu.test(title)) {
+  if (/(?:(?:кредитн|дебетов)[а-яё]*(?:\s+[а-яёa-z0-9]+){0,2}[\s-]+карт|(?:альфа-карт|сберкарт))/iu.test(title)) {
     const afterColon = title.includes(":") ? title.split(":").slice(1).join(":").trim() : title;
     const graceMatch = title.match(/(\d+)\s*дн(?:ей|я|ь)\s+без\s*%/iu);
     if (graceMatch) {
