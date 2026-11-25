@@ -967,7 +967,7 @@ const getCachedBaseSourceBuckets = unstable_cache(
   fetchBaseSourceBuckets,
   [
     "promofact",
-    "base-source-buckets-no-custom-v3-periodic",
+    "base-source-buckets-no-custom-v4-periodic",
     syncMeta.lastSuccessSync || "initial",
     process.env.E2E_FIXTURES === "true" && process.env.VERCEL !== "1" && process.env.VERCEL_ENV !== "production" ? "e2e" : "prod",
   ],
