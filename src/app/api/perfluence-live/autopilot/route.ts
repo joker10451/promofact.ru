@@ -48,24 +48,23 @@ async function notifyAdminSummary(report: AutopilotReport, dryRun: boolean) {
     return;
   }
 
+  const appliedOk = report.appliedRequests.filter((r) => r.ok);
+  const activatedOk = report.activatedLandings.filter((a) => a.ok);
   const actionsTotal =
-    report.appliedRequests.filter((r) => r.ok).length +
-    report.activatedLandings.filter((a) => a.ok).length +
+    appliedOk.length +
+    activatedOk.length +
     report.reportedSitePosts.length +
     report.deletedTelegramMessageIds.length +
     report.addedOverdueEridsCount;
 
-  if (actionsTotal === 0 && report.needsScreenshotPosts.length === 0) return;
+  // Не шлём пустые или однотипные уведомления каждые 20 минут, пока отчёты просто ждут планового скриншота в GitHub Actions.
+  if (actionsTotal === 0) return;
 
   const lines = [
     "🤖 <b>PromoFact Автопилот (VPS)</b>",
     "",
-    report.appliedRequests.length > 0
-      ? `📩 Новых заявок в «Доступные»: ${report.appliedRequests.filter((r) => r.ok).length}`
-      : null,
-    report.activatedLandings.length > 0
-      ? `⚡ Активировано акций в Perfluence: ${report.activatedLandings.filter((a) => a.ok).length}`
-      : null,
+    appliedOk.length > 0 ? `📩 Новых заявок в «Доступные»: ${appliedOk.length}` : null,
+    activatedOk.length > 0 ? `⚡ Активировано акций в Perfluence: ${activatedOk.length}` : null,
     report.reportedSitePosts.length > 0
       ? `✅ Сдано отчётов сайта: ${report.reportedSitePosts.map((p) => `/store/${p.slug}`).join(", ")}`
       : null,
@@ -76,7 +75,7 @@ async function notifyAdminSummary(report: AutopilotReport, dryRun: boolean) {
       ? `🗑 Удалено старых постов (30+ дн.) в ТГ: ${report.deletedTelegramMessageIds.length}`
       : null,
     report.needsScreenshotPosts.length > 0
-      ? `📸 Передано на досдачу со скриншотом: ${report.needsScreenshotPosts.length}`
+      ? `📸 Ожидают скриншота (планово в GitHub Actions): ${report.needsScreenshotPosts.length}`
       : null,
   ].filter(Boolean);
 
@@ -115,7 +114,7 @@ async function handleRun(req: NextRequest) {
             revalidateCatalogPages();
           },
         });
-        if (!dryRun && (report.activatedLandings.length > 0 || report.addedOverdueEridsCount > 0)) {
+        if (!dryRun && (report.activatedLandings.some((a) => a.ok) || report.addedOverdueEridsCount > 0)) {
           revalidateCatalogPages();
         }
         await notifyAdminSummary(report, dryRun);

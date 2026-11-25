@@ -16,10 +16,31 @@ const FORBIDDEN_KEYWORD_RE =
 const PERFLUENCE_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
-// In-memory cache across warm runs so unchanged pending_removal rows are not re-fetched every cycle.
+// In-memory cache across warm runs so unchanged pending_removal / non-auto-activatable rows are not re-hit every cycle.
 const pendingRemovalEridCache = new Map<string, string[]>();
 const attemptedTgDeletes = new Set<string>();
 const attemptedSiteRechecks = new Set<string>();
+const rejectedActivationHrefs = new Map<string, number>();
+const ACTIVATION_REJECT_TTL_MS = 6 * 60 * 60 * 1000;
+
+function isActivationHrefCoolingDown(href: string, nowMs = Date.now()): boolean {
+  const ts = rejectedActivationHrefs.get(href);
+  if (!ts) return false;
+  if (nowMs - ts >= ACTIVATION_REJECT_TTL_MS) {
+    rejectedActivationHrefs.delete(href);
+    return false;
+  }
+  return true;
+}
+
+function markActivationHrefRejected(href: string, nowMs = Date.now()): void {
+  rejectedActivationHrefs.set(href, nowMs);
+  if (rejectedActivationHrefs.size > 400) {
+    for (const [key, ts] of rejectedActivationHrefs) {
+      if (nowMs - ts >= ACTIVATION_REJECT_TTL_MS) rejectedActivationHrefs.delete(key);
+    }
+  }
+}
 
 export interface ScheduledPostItem {
   postId: string;
@@ -104,6 +125,55 @@ export function isProjectAllowed(projectId: number, projectName: string, account
   const slug = resolveStoreSlug(projectId, projectName);
   if (slug && isPausedPublisherStore(slug)) return false;
   if (accountId === WEBSITE_ACCOUNT_ID && (slug === "winlab" || slug === "flor2u")) return false;
+  return true;
+}
+
+export function isActivationResponseAccepted(res: {
+  ok: boolean;
+  status: number;
+  html: string;
+  location: string | null;
+}): boolean {
+  if (res.status >= 300 && res.status < 400 && res.location && !/\/(?:site\/)?login/i.test(res.location)) {
+    return true;
+  }
+  if (!res.ok) return false;
+  const body = (res.html || "").trim();
+  if (/open-url-modal|request-promo-with-moderation/i.test(body)) return false;
+  if (/alert-danger|alert-warning|alert-info|у тебя уже есть запланирован|закончилис|лимит исчерпан|недоступн/i.test(body)) {
+    return false;
+  }
+  if (body.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(body) as { actions?: Array<{ action?: string; content?: string }> };
+      if (Array.isArray(parsed.actions)) {
+        const hasSuccessAction = parsed.actions.some(
+          (a) =>
+            a?.action === "reload" ||
+            a?.action === "redirect" ||
+            a?.action === "refresh" ||
+            /alert-success/i.test(a?.content || ""),
+        );
+        return hasSuccessAction;
+      }
+    } catch {
+      // Fallback to positive response check below
+    }
+  }
+  return true;
+}
+
+export function isRequestResponseAccepted(res: {
+  ok: boolean;
+  status: number;
+  html: string;
+  location: string | null;
+}): boolean {
+  if (res.status >= 300 && res.status < 400 && res.location && !/\/(?:site\/)?login/i.test(res.location)) {
+    return true;
+  }
+  if (!res.ok) return false;
+  if (/alert-danger|alert-warning|недоступн|отклонен/i.test(res.html || "")) return false;
   return true;
 }
 
@@ -585,6 +655,7 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
   const hotSet = new Set(report.hotNewsProjectIds);
   let requestCount = 0;
   let activationCount = 0;
+  let activationAttempts = 0;
 
   await runPool(candidateIds, 5, async (projectId) => {
     if (report.sessionExpired) return;
@@ -612,6 +683,7 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
       if (
         options.enableTakeAvailable !== false &&
         parsed.requestHref &&
+        !isActivationHrefCoolingDown(parsed.requestHref) &&
         availSet.has(projectId) &&
         requestCount < maxRequests
       ) {
@@ -622,7 +694,11 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
             report.sessionExpired = true;
             return;
           }
-          report.appliedRequests.push({ projectId, accountId, ok: r.ok, status: r.status });
+          if (!isRequestResponseAccepted(r)) {
+            markActivationHrefRejected(parsed.requestHref);
+            continue;
+          }
+          report.appliedRequests.push({ projectId, accountId, ok: true, status: r.status });
         } else {
           report.appliedRequests.push({ projectId, accountId, ok: true, status: 200 });
         }
@@ -632,51 +708,50 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
       if (!parsed.approved || activationCount >= maxActivations) continue;
       if (scheduledKeys.has(`${projectId}:${accountId}`)) continue;
 
-      // B) Brand-new unactivated "Получить промокод" landing (cap TG backlog to avoid stockpiling unposted slots)
+      // B/C) Brand-new "Получить промокод" (respecting TG backlog cap) or missing "Повторить публикацию"
       const isHotFlashTg = accountId === TELEGRAM_ACCOUNT_ID && hotSet.has(projectId);
       const tgBacklogFull = accountId === TELEGRAM_ACCOUNT_ID && scheduledTgCount >= MAX_SCHEDULED_TG_BACKLOG && !isHotFlashTg;
-      if (options.enableActivateNewLandings !== false && parsed.newLandingHrefs.length > 0 && !tgBacklogFull) {
-        const href = parsed.newLandingHrefs[0];
-        activationCount++;
-        scheduledKeys.add(`${projectId}:${accountId}`);
-        if (accountId === TELEGRAM_ACCOUNT_ID) scheduledTgCount++;
-        if (!dryRun) {
-          const act = await pfFetch(href, cookieHeader, { headers: { "X-Requested-With": "XMLHttpRequest" } });
-          if (act.sessionExpired) {
-            report.sessionExpired = true;
-            return;
-          }
-          report.activatedLandings.push({ projectId, accountId, kind: "new_landing", href, ok: act.ok });
-        } else {
-          report.activatedLandings.push({ projectId, accountId, kind: "new_landing", href, ok: true });
-        }
-        continue;
-      }
-
-      // C) "Повторить публикацию" when website lost project from live widget, or hot TG news lacks active link
+      const newHref =
+        options.enableActivateNewLandings !== false && !tgBacklogFull
+          ? parsed.newLandingHrefs.find((h) => !isActivationHrefCoolingDown(h))
+          : undefined;
       const shouldRepeatSite =
         accountId === WEBSITE_ACCOUNT_ID &&
         liveWidgetProjectIds.size > 0 &&
         !liveWidgetProjectIds.has(projectId);
       const shouldRepeatTg =
         accountId === TELEGRAM_ACCOUNT_ID && hotSet.has(projectId) && !parsed.hasActiveUrl && scheduledTgCount < MAX_SCHEDULED_TG_BACKLOG;
+      const repeatHref =
+        !newHref && options.enableRepeatMissing !== false && (shouldRepeatSite || shouldRepeatTg)
+          ? parsed.repeatHrefs.find((h) => !isActivationHrefCoolingDown(h))
+          : undefined;
 
-      if (options.enableRepeatMissing !== false && parsed.repeatHrefs.length > 0 && (shouldRepeatSite || shouldRepeatTg)) {
-        const href = parsed.repeatHrefs[0];
+      const targetHref = newHref || repeatHref;
+      const targetKind: "new_landing" | "repeat" = newHref ? "new_landing" : "repeat";
+      if (!targetHref) continue;
+
+      scheduledKeys.add(`${projectId}:${accountId}`);
+      if (dryRun) {
         activationCount++;
-        scheduledKeys.add(`${projectId}:${accountId}`);
         if (accountId === TELEGRAM_ACCOUNT_ID) scheduledTgCount++;
-        if (!dryRun) {
-          const act = await pfFetch(href, cookieHeader, { headers: { "X-Requested-With": "XMLHttpRequest" } });
-          if (act.sessionExpired) {
-            report.sessionExpired = true;
-            return;
-          }
-          report.activatedLandings.push({ projectId, accountId, kind: "repeat", href, ok: act.ok });
-        } else {
-          report.activatedLandings.push({ projectId, accountId, kind: "repeat", href, ok: true });
-        }
+        report.activatedLandings.push({ projectId, accountId, kind: targetKind, href: targetHref, ok: true });
+        continue;
       }
+
+      if (activationAttempts >= maxActivations * 2) continue;
+      activationAttempts++;
+      const act = await pfFetch(targetHref, cookieHeader, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+      if (act.sessionExpired) {
+        report.sessionExpired = true;
+        return;
+      }
+      if (!isActivationResponseAccepted(act)) {
+        markActivationHrefRejected(targetHref);
+        continue;
+      }
+      activationCount++;
+      if (accountId === TELEGRAM_ACCOUNT_ID) scheduledTgCount++;
+      report.activatedLandings.push({ projectId, accountId, kind: targetKind, href: targetHref, ok: true });
     }
   });
   if (report.sessionExpired) return report;

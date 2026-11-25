@@ -3,6 +3,7 @@ import fs from "node:fs";
 import { NextRequest } from "next/server";
 
 const {
+  isActivationResponseAccepted,
   isProjectAllowed,
   MAX_SCHEDULED_TG_BACKLOG,
   parseAccountTileActions,
@@ -347,4 +348,161 @@ try {
   else process.env.PERFLUENCE_SESSION_B64 = prevB64Http;
 }
 
-console.log("PASS: Perfluence autopilot parsing, safety denylist, API auth, Yii2 validation, Netprint pause, TG cap, #post-screen_post upload & HTTP screenshot upload");
+// 11. isActivationResponseAccepted rejects Perfluence moderation modals and alert errors
+assert.equal(
+  isActivationResponseAccepted({
+    ok: true,
+    status: 200,
+    html: JSON.stringify({
+      actions: [
+        {
+          action: "open-url-modal",
+          href: "/blogger/posts/request-promo-with-moderation?projectId=2576&accountId=3074542",
+        },
+      ],
+    }),
+    location: null,
+  }),
+  false,
+);
+assert.equal(
+  isActivationResponseAccepted({
+    ok: true,
+    status: 200,
+    html: JSON.stringify({
+      actions: [
+        {
+          action: "open-modal",
+          content: '<div class="alert alert-info">У тебя уже есть запланированная публикация</div>',
+        },
+      ],
+    }),
+    location: null,
+  }),
+  false,
+);
+assert.equal(
+  isActivationResponseAccepted({
+    ok: true,
+    status: 200,
+    html: JSON.stringify({ actions: [{ action: "reload" }] }),
+    location: null,
+  }),
+  true,
+);
+assert.equal(
+  isActivationResponseAccepted({ ok: false, status: 302, html: "", location: "/posts/update/123" }),
+  true,
+);
+assert.equal(
+  isActivationResponseAccepted({ ok: false, status: 302, html: "", location: "/site/login" }),
+  false,
+);
+
+// 12. VPS route suppresses Telegram notification spam when only moderation modals and pending screenshots exist
+const prevRouteSecret = process.env.TELEGRAM_POSTING_SECRET;
+const prevAdminChat = process.env.TELEGRAM_ADMIN_CHAT_ID;
+const prevBotTok = process.env.TELEGRAM_BOT_TOKEN;
+const prevBotTokDep = process.env.TELEGRAM_BOT_TOKEN_DEPLOYED;
+const prevSess12 = process.env.PERFLUENCE_SESSION_B64;
+const prevSessDep12 = process.env.PERFLUENCE_SESSION_B64_DEPLOYED;
+const prevWidget12 = process.env.PERFLUENCE_WIDGET_URL;
+const origFetchRoute = globalThis.fetch;
+let tgCalls = 0;
+try {
+  process.env.TELEGRAM_POSTING_SECRET = "route-secret-12";
+  process.env.TELEGRAM_ADMIN_CHAT_ID = "999999999";
+  process.env.TELEGRAM_BOT_TOKEN = "123456:TEST";
+  delete process.env.TELEGRAM_BOT_TOKEN_DEPLOYED;
+  delete process.env.PERFLUENCE_WIDGET_URL;
+  delete process.env.PERFLUENCE_SESSION_B64_DEPLOYED;
+  process.env.PERFLUENCE_SESSION_B64 = Buffer.from(
+    JSON.stringify({ cookies: [{ domain: ".perfluence.net", name: "_pf_vps", value: "ok" }] }),
+  ).toString("base64");
+
+  globalThis.fetch = async (url, init) => {
+    const u = String(url);
+    if (u.includes("api.telegram.org")) {
+      tgCalls += 1;
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 1 } }), { status: 200 });
+    }
+    if (u.includes("/posts/list/scheduled?page=1")) {
+      return new Response(
+        '<div class="post-tile-widget"><a href="/posts/update/17496042">Edit</a><a href="/project/1483">Ситидрайв</a><span title="Аккаунт promofact.ru"></span></div>',
+        { status: 200 },
+      );
+    }
+    if (u.includes("/posts/list/scheduled?page=") || u.includes("/posts/list/pending_removal?page=")) {
+      return new Response("<html></html>", { status: 200 });
+    }
+    if (u.includes("/notifications/block")) {
+      return new Response(JSON.stringify({ data: [] }), { status: 200 });
+    }
+    if (u.includes("/projects/my?page=1")) {
+      return new Response('<a href="/project/2576">Проект 2576</a>', { status: 200 });
+    }
+    if (u.includes("/projects")) {
+      return new Response("<html></html>", { status: 200 });
+    }
+    if (u.includes("/project/2576/accounts")) {
+      return new Response(
+        `<title>Проект "2576"</title>
+         <div id="pb-tile-3074542">Аккаунт одобрен promofact.ru <a href="/blogger/posts/create-publication?projectId=2576&amp;landing_id=12800&amp;accountId=3074542">Получить промокод</a></div>`,
+        { status: 200 },
+      );
+    }
+    if (u.includes("/blogger/posts/create-publication")) {
+      return new Response(
+        JSON.stringify({
+          actions: [
+            {
+              action: "open-url-modal",
+              href: "/blogger/posts/request-promo-with-moderation?projectId=2576&accountId=3074542&landing_id=12800",
+            },
+          ],
+        }),
+        { status: 200 },
+      );
+    }
+    if (u.includes("/store/citydrive")) {
+      return new Response('<a href="https://cd.prfl.me/a?erid=2RanyTest123">erid: 2RanyTest123</a>', { status: 200 });
+    }
+    if (u.includes("/posts/update/17496042")) {
+      if (init?.method === "POST") {
+        return new Response("<div>Исправьте следующие ошибки: Необходимо заполнить Скрин публикации</div>", {
+          status: 200,
+        });
+      }
+      return new Response('<form><input name="_csrf" value="tok"><input name="Post[post_link]"></form>', { status: 200 });
+    }
+    throw new Error("Unexpected URL in Test 12: " + u);
+  };
+
+  const apiRes = await POST(
+    new NextRequest("https://promofact.ru/api/perfluence-live/autopilot", {
+      method: "POST",
+      headers: { Authorization: "Bearer route-secret-12" },
+    }),
+  );
+  assert.equal(apiRes.status, 200);
+  const apiJson = await apiRes.json();
+  assert.equal(apiJson.ok, true);
+  assert.equal(apiJson.report.activatedLandings.length, 0);
+  assert.equal(apiJson.report.needsScreenshotPosts.length, 1);
+  assert.equal(tgCalls, 0, "idle VPS cycle with only modal rejections + pending screenshot must not spam Telegram");
+} finally {
+  globalThis.fetch = origFetchRoute;
+  if (prevRouteSecret === undefined) delete process.env.TELEGRAM_POSTING_SECRET;
+  else process.env.TELEGRAM_POSTING_SECRET = prevRouteSecret;
+  if (prevAdminChat === undefined) delete process.env.TELEGRAM_ADMIN_CHAT_ID;
+  else process.env.TELEGRAM_ADMIN_CHAT_ID = prevAdminChat;
+  if (prevBotTok === undefined) delete process.env.TELEGRAM_BOT_TOKEN;
+  else process.env.TELEGRAM_BOT_TOKEN = prevBotTok;
+  if (prevBotTokDep !== undefined) process.env.TELEGRAM_BOT_TOKEN_DEPLOYED = prevBotTokDep;
+  if (prevSess12 === undefined) delete process.env.PERFLUENCE_SESSION_B64;
+  else process.env.PERFLUENCE_SESSION_B64 = prevSess12;
+  if (prevSessDep12 !== undefined) process.env.PERFLUENCE_SESSION_B64_DEPLOYED = prevSessDep12;
+  if (prevWidget12 !== undefined) process.env.PERFLUENCE_WIDGET_URL = prevWidget12;
+}
+
+console.log("PASS: Perfluence autopilot parsing, safety denylist, API auth, Yii2 validation, Netprint pause, TG cap, #post-screen_post upload, HTTP screenshot upload, modal rejection & idle alert suppression");
