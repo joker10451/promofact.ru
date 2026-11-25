@@ -12,7 +12,7 @@ const {
   WEBSITE_ACCOUNT_ID,
   TELEGRAM_ACCOUNT_ID,
 } = await import("../src/lib/perfluenceAutopilot.ts");
-const { submitReportPlaywright } = await import("./perfluence-report.mjs");
+const { submitReportHttp, submitReportPlaywright } = await import("./perfluence-report.mjs");
 const {
   OVERDUE_PLACEMENT_ERIDS,
   addRuntimeOverdueErids,
@@ -290,4 +290,61 @@ await assert.rejects(
   /Perfluence отклонил форму поста #17495973/,
 );
 
-console.log("PASS: Perfluence autopilot parsing, safety denylist, API auth, Yii2 validation, Netprint pause, TG cap & #post-screen_post upload");
+// 10. submitReportHttp uploads PNG via /upload/image/post_screen and re-submits Post[screen_post] over HTTP
+const prevB64Http = process.env.PERFLUENCE_SESSION_B64;
+const origFetchReport = globalThis.fetch;
+let postAttempts = 0;
+let uploadedScreenPayload = false;
+try {
+  process.env.PERFLUENCE_SESSION_B64 = Buffer.from(
+    JSON.stringify({ cookies: [{ domain: ".perfluence.net", name: "_pf_http", value: "ok" }] }),
+  ).toString("base64");
+
+  globalThis.fetch = async (url, init) => {
+    const u = String(url);
+    if (u.includes("/posts/update/8888888") && (!init?.method || init.method === "GET")) {
+      return new Response(
+        '<meta name="csrf-token" content="meta_tok"><form><input name="_csrf" value="form_tok"><input name="Post[post_link]"><input id="post-screen_post" name="Post[screen_post]"><input type="hidden" value="/upload/image/post_screen"></form>',
+        { status: 200 },
+      );
+    }
+    if (u.includes("/upload/image/post_screen") && init?.method === "POST") {
+      uploadedScreenPayload = init.body instanceof FormData;
+      return new Response(JSON.stringify({ success: true, filename: "@s3cloud/screens/http-proof.png" }), {
+        status: 200,
+      });
+    }
+    if (u.includes("/posts/update/8888888") && init?.method === "POST") {
+      postAttempts += 1;
+      const bodyStr = String(init.body || "");
+      if (postAttempts === 1) {
+        assert.equal(bodyStr.includes("screen_post"), false);
+        return new Response("<div>Исправьте следующие ошибки: Необходимо заполнить Скрин публикации</div>", {
+          status: 200,
+        });
+      }
+      assert.ok(
+        bodyStr.includes("Post%5Bscreen_post%5D=%40s3cloud%2Fscreens%2Fhttp-proof.png"),
+        `second POST must include Post[screen_post], got: ${bodyStr}`,
+      );
+      return new Response("", { status: 302, headers: { location: "/posts/update/8888888" } });
+    }
+    throw new Error("Unexpected fetch URL in Test 10: " + u);
+  };
+
+  const httpShotRes = await submitReportHttp("8888888", "https://t.me/smart_zakupka/132", {
+    headless: true,
+    _chromium: okChromium,
+  });
+  assert.equal(uploadedScreenPayload, true);
+  assert.equal(postAttempts, 2);
+  assert.equal(httpShotRes.success, true);
+  assert.equal(httpShotRes.method, "http-screenshot");
+  assert.equal(httpShotRes.screenKey, "@s3cloud/screens/http-proof.png");
+} finally {
+  globalThis.fetch = origFetchReport;
+  if (prevB64Http === undefined) delete process.env.PERFLUENCE_SESSION_B64;
+  else process.env.PERFLUENCE_SESSION_B64 = prevB64Http;
+}
+
+console.log("PASS: Perfluence autopilot parsing, safety denylist, API auth, Yii2 validation, Netprint pause, TG cap, #post-screen_post upload & HTTP screenshot upload");

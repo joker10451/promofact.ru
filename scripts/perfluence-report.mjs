@@ -21,11 +21,19 @@ const SESSION_FILE = path.join(process.cwd(), "data", "perfluence_session.json")
 const TG_ACCOUNT_ID = "3066585"; // @smart_zakupka
 
 function getSessionCookies() {
+  const b64 = process.env.PERFLUENCE_SESSION_B64_DEPLOYED || process.env.PERFLUENCE_SESSION_B64;
+  if (b64) {
+    try {
+      const session = JSON.parse(Buffer.from(b64, "base64").toString("utf8"));
+      const cookieHeader = (session.cookies || []).map((c) => `${c.name}=${c.value}`).join("; ");
+      if (cookieHeader) return { session, cookieHeader };
+    } catch {}
+  }
   if (!fs.existsSync(SESSION_FILE)) {
     throw new Error(`Файл сессии ${SESSION_FILE} не найден. Требуется: node scripts/perfluence-auth.mjs`);
   }
   const session = JSON.parse(fs.readFileSync(SESSION_FILE, "utf8"));
-  const cookieHeader = session.cookies.map(c => `${c.name}=${c.value}`).join("; ");
+  const cookieHeader = (session.cookies || []).map((c) => `${c.name}=${c.value}`).join("; ");
   return { session, cookieHeader };
 }
 
@@ -123,31 +131,153 @@ export async function createOrRepeatPublication(projectId, accountId = TG_ACCOUN
   }
 }
 
+function parseFormFieldPrefix(formHtml) {
+  return formHtml.includes("PostForm[post_link]") ? "PostForm" : "Post";
+}
+
+function parseSelectedPostType(formHtml, prefix) {
+  const selectRe = new RegExp(
+    `<select[^>]+name="${prefix}\\[type\\]"[\\s\\S]*?<option[^>]*value="([^"]+)"[^>]*selected`,
+    "i",
+  );
+  return formHtml.match(selectRe)?.[1] || "post";
+}
+
+function parseUploadPath(formHtml) {
+  return formHtml.match(/value="(\/upload\/image\/[^"]+)"/i)?.[1] || "/upload/image/post_screen";
+}
+
+function extractYiiErrorSummary(html) {
+  const errMatch = html.match(/class="error-summary[^"]*"[^>]*>([\s\S]*?)<\/div>/i)?.[1] || "";
+  const clean = errMatch.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  if (clean) return clean;
+  const inline = html.match(/Исправьте следующие ошибки:[\s\S]{0,250}/i)?.[0] || "";
+  return inline.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+export async function uploadScreenshotHttp(
+  cookieHeader,
+  formHtml,
+  formUrl,
+  postId,
+  postUrl,
+  options = { headless: true },
+) {
+  const browserEngine = options._chromium || chromium;
+  const browser = await browserEngine.launch({ headless: options.headless ?? true });
+  let proofPath;
+  try {
+    proofPath = await captureProofScreenshot(browser, postId, postUrl);
+  } finally {
+    await browser.close();
+  }
+
+  const pngBuf = fs.existsSync(proofPath) ? fs.readFileSync(proofPath) : Buffer.from([]);
+  const uploadPath = parseUploadPath(formHtml);
+  const uploadUrl = uploadPath.startsWith("http") ? uploadPath : `https://dash.perfluence.net${uploadPath}`;
+  const metaCsrf =
+    formHtml.match(/name="csrf-token"\s+content="([^"]+)"/i)?.[1] ||
+    formHtml.match(/name="_csrf"\s+value="([^"]+)"/i)?.[1] ||
+    "";
+
+  const formData = new FormData();
+  formData.append("img", new Blob([pngBuf], { type: "image/png" }), `proof-${postId}.png`);
+
+  const upRes = await fetch(uploadUrl, {
+    method: "POST",
+    headers: {
+      Cookie: cookieHeader,
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "X-Requested-With": "XMLHttpRequest",
+      Referer: formUrl,
+      ...(metaCsrf ? { "X-CSRF-Token": metaCsrf } : {}),
+    },
+    body: formData,
+  });
+
+  const upText = await upRes.text();
+  let upJson = null;
+  try {
+    upJson = JSON.parse(upText);
+  } catch {
+    throw new Error(`Некорректный ответ ${uploadPath}: HTTP ${upRes.status}`);
+  }
+  if (!upRes.ok || !upJson?.success || !upJson?.filename) {
+    throw new Error(`Не удалось загрузить скриншот в ${uploadPath}: HTTP ${upRes.status} (${upText.slice(0, 180)})`);
+  }
+  console.log(`[Report/HTTP] ✓ Скриншот загружен в ${uploadPath}: ${upJson.filename}`);
+  return upJson.filename;
+}
+
 /**
- * Быстрая и надежная сдача отчета через HTTP POST API (без зависаний)
+ * Быстрая и надежная сдача отчета через HTTP POST API (+ авто-дозагрузка скрина на /upload/image/post_screen)
  */
-async function submitReportHttp(postId, postUrl) {
+export async function submitReportHttp(postId, postUrl, options = { headless: true }) {
   const { cookieHeader } = getSessionCookies();
   const formUrl = `https://dash.perfluence.net/posts/update/${postId}`;
 
   console.log(`[Report/HTTP] Получение формы и CSRF-токена: ${formUrl}...`);
   const formRes = await fetch(formUrl, {
     headers: {
-      "Cookie": cookieHeader,
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
+      Cookie: cookieHeader,
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    },
+    redirect: "manual",
   });
 
+  const formLoc = formRes.headers.get("location");
+  if (formRes.status >= 300 && formRes.status < 400 && formLoc && /\/(?:site\/)?login/i.test(formLoc)) {
+    throw new Error(`Сессия Perfluence истекла при открытии формы #${postId}`);
+  }
   if (!formRes.ok) {
     throw new Error(`Ошибка открытия формы поста #${postId}: HTTP ${formRes.status}`);
   }
 
   const formHtml = await formRes.text();
+  if (/action="\/(?:site\/)?login"|Вход в личный кабинет/i.test(formHtml) && !formHtml.includes("logout")) {
+    throw new Error(`Сессия Perfluence не авторизована при открытии формы #${postId}`);
+  }
+
   const csrfMatch = formHtml.match(/name="_csrf"\s+value="([^"]+)"/i);
   if (!csrfMatch) {
     throw new Error("Не удалось извлечь CSRF-токен из формы Perfluence.");
   }
   const csrf = csrfMatch[1];
+  const prefix = parseFormFieldPrefix(formHtml);
+  const postType = parseSelectedPostType(formHtml, prefix);
+
+  async function sendForm(screenKey = null) {
+    const params = new URLSearchParams();
+    params.append("_csrf", csrf);
+    params.append(`${prefix}[type]`, postType);
+    params.append(`${prefix}[published_day]`, "today");
+    params.append(`${prefix}[post_link]`, postUrl);
+    if (screenKey) {
+      params.append(`${prefix}[screen_post]`, screenKey);
+    }
+    params.append(`${prefix}[is_ord_marker_approved]`, "1");
+    params.append(`${prefix}[status]`, "published");
+
+    const submitRes = await fetch(formUrl, {
+      method: "POST",
+      headers: {
+        Cookie: cookieHeader,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Referer: formUrl,
+      },
+      body: params.toString(),
+      redirect: "manual",
+    });
+
+    const status = submitRes.status;
+    const location = submitRes.headers.get("location");
+    console.log(`[Report/HTTP] Ответ сервера: HTTP ${status} (Location: ${location || "нет"})`);
+    if (status === 302 && (!location || !/login/i.test(location))) {
+      return { ok: true, status, location, body: "" };
+    }
+    return { ok: false, status, location, body: await submitRes.text() };
+  }
 
   console.log(`[Report/HTTP] Отправка данных отчета:`);
   console.log(`  - Пост: ${postUrl}`);
@@ -155,39 +285,32 @@ async function submitReportHttp(postId, postUrl) {
   console.log(`  - День публикации: Сегодня`);
   console.log(`  - Статус: Опубликован`);
 
-  const params = new URLSearchParams();
-  params.append("_csrf", csrf);
-  params.append("Post[type]", "post");
-  params.append("Post[published_day]", "today");
-  params.append("Post[post_link]", postUrl);
-  params.append("Post[is_ord_marker_approved]", "1");
-  params.append("Post[status]", "published");
-
-  const submitRes = await fetch(formUrl, {
-    method: "POST",
-    headers: {
-      "Cookie": cookieHeader,
-      "Content-Type": "application/x-www-form-urlencoded",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      "Referer": formUrl
-    },
-    body: params.toString(),
-    redirect: "manual"
-  });
-
-  const status = submitRes.status;
-  const location = submitRes.headers.get("location");
-  console.log(`[Report/HTTP] Ответ сервера: HTTP ${status} (Location: ${location || "нет"})`);
-
-  // Успешная отправка в Yii2 сопровождается редиректом 302 (не на login). При 200 ActiveForm перерисовывает ошибки.
-  if (status === 302 && (!location || !/login/i.test(location))) {
-    return { success: true, method: "http", postId, location };
+  const firstAttempt = await sendForm(null);
+  if (firstAttempt.ok) {
+    return { success: true, method: "http", postId, location: firstAttempt.location };
   }
 
-  const respText = await submitRes.text();
-  const errMatch = respText.match(/class="error-summary[^"]*"[^>]*>([\s\S]*?)<\/div>/i)?.[1] || "";
-  const cleanErr = errMatch.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  throw new Error(`Ответ HTTP ${status}${cleanErr ? `: ${cleanErr}` : ""}`);
+  const hasUploadWidget =
+    formHtml.includes("screen_post") || formHtml.includes("/upload/image/post_screen");
+  const firstErr = extractYiiErrorSummary(firstAttempt.body);
+  if (firstAttempt.status === 200 && hasUploadWidget) {
+    console.log(`[Report/HTTP] Форма #${postId} требует скриншот (${firstErr || "screen_post"}). Снимаем и загружаем по HTTP...`);
+    const screenKey = await uploadScreenshotHttp(cookieHeader, formHtml, formUrl, postId, postUrl, options);
+    const secondAttempt = await sendForm(screenKey);
+    if (secondAttempt.ok) {
+      return {
+        success: true,
+        method: "http-screenshot",
+        postId,
+        location: secondAttempt.location,
+        screenKey,
+      };
+    }
+    const secondErr = extractYiiErrorSummary(secondAttempt.body);
+    throw new Error(`Ответ HTTP ${secondAttempt.status} после загрузки скрина${secondErr ? `: ${secondErr}` : ""}`);
+  }
+
+  throw new Error(`Ответ HTTP ${firstAttempt.status}${firstErr ? `: ${firstErr}` : ""}`);
 }
 
 async function captureProofScreenshot(browser, postId, postUrl) {
@@ -196,10 +319,14 @@ async function captureProofScreenshot(browser, postId, postUrl) {
   const proofPath = path.join(proofDir, `proof-${postId}.png`);
   // Для Telegram-постов открываем публичный web-превью t.me/s/..., чтобы страница отрисовалась без клиента TG.
   const renderUrl = postUrl.replace(/^https:\/\/t\.me\/(?!s\/)([^/]+\/\d+)/i, "https://t.me/s/$1");
+  const tgMatch = postUrl.match(/^https:\/\/t\.me\/(?:s\/)?([^/]+\/\d+)/i);
   const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });
   try {
     await page.goto(renderUrl, { waitUntil: "domcontentloaded", timeout: 25000 });
     await page.waitForTimeout(2500);
+    if (tgMatch && typeof page.locator === "function") {
+      await page.locator(`[data-post="${tgMatch[1]}"]`).first().scrollIntoViewIfNeeded().catch(() => {});
+    }
     await page.screenshot({ path: proofPath, fullPage: false });
     return proofPath;
   } finally {
@@ -218,6 +345,8 @@ export async function submitReportPlaywright(postId, postUrl, options = { headle
     const context = await browser.newContext({
       storageState: options._storageState ?? SESSION_FILE,
       viewport: { width: 1280, height: 860 },
+      userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
     });
     const page = await context.newPage();
 
@@ -274,10 +403,15 @@ export async function submitReportPlaywright(postId, postUrl, options = { headle
       await page.waitForTimeout(4000);
     }
 
-    // Подтверждаем токен ОРД
+    // Подтверждаем токен ОРД (на скрытом/кастомном checkbox обычный .check() может падать outside viewport)
     const tokenCheckbox = page.locator('#post-is_ord_marker_approved, input[type="checkbox"][name="Post[is_ord_marker_approved]"], input[type="checkbox"][name="PostForm[is_ord_marker_approved]"]').first();
     if ((await tokenCheckbox.count()) && !(await tokenCheckbox.isChecked())) {
-      await tokenCheckbox.check({ force: true });
+      await tokenCheckbox.check({ force: true }).catch(async () => {
+        await tokenCheckbox.evaluate((el) => {
+          el.checked = true;
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      });
     }
 
     // Нажимаем кнопку отправки
@@ -285,7 +419,8 @@ export async function submitReportPlaywright(postId, postUrl, options = { headle
       'button[name="Post[status]"][value="published"], button[type="submit"]:has-text("Внести публикацию"), button[type="submit"]:has-text("Внести скриншот"), button:has-text("Отправить на проверку")',
     ).first();
     if (!(await submitBtn.count())) {
-      throw new Error(`Кнопка отправки отчёта не найдена на форме #${postId}`);
+      const curTitle = await page.title().catch(() => "");
+      throw new Error(`Кнопка отправки отчёта не найдена на форме #${postId} (${page.url()} | ${curTitle})`);
     }
 
     await Promise.all([
@@ -346,9 +481,9 @@ export async function submitReport(projectIdOrPostId, postUrl, options = { headl
     throw new Error(`Не найден ID публикации для проекта #${projectIdOrPostId}`);
   }
 
-  // Шаг 1: Пробуем быстрый HTTP-метод
+  // Шаг 1: Пробуем быстрый HTTP-метод (+ при необходимости авто-дозагрузка скрина через /upload/image/post_screen)
   try {
-    const res = await submitReportHttp(postId, postUrl);
+    const res = await submitReportHttp(postId, postUrl, options);
     console.log(`[Report] ✓ Отчет по публикации #${postId} успешно отправлен в Perfluence!`);
     return res;
   } catch (httpErr) {

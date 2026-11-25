@@ -249,6 +249,10 @@ function findRecentTgPostUrl({
 
     const ts = Date.parse(item.date || "");
     if (!Number.isFinite(ts) || nowMs - ts < 0 || nowMs - ts > MAX_AGE_MS) continue;
+    if (item.expires) {
+      const expMs = parseExpiryMs(item.expires);
+      if (expMs !== null && nowMs > expMs) continue;
+    }
 
     const itemProjectId = Number(item.storeId || 0);
     const matchesById =
