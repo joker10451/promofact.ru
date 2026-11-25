@@ -210,71 +210,103 @@ async function captureProofScreenshot(browser, postId, postUrl) {
 /**
  * Запасной Playwright-метод (на случай изменений структуры формы или обязательного скриншота)
  */
-async function submitReportPlaywright(postId, postUrl, options = { headless: true }) {
+export async function submitReportPlaywright(postId, postUrl, options = { headless: true }) {
   console.log(`[Report/Browser] Запуск браузерного режима для поста #${postId}...`);
-  const browser = await chromium.launch({ headless: options.headless });
+  const browserEngine = options._chromium || chromium;
+  const browser = await browserEngine.launch({ headless: options.headless });
   try {
-    const context = await browser.newContext({ storageState: SESSION_FILE });
+    const context = await browser.newContext({
+      storageState: options._storageState ?? SESSION_FILE,
+      viewport: { width: 1280, height: 860 },
+    });
     const page = await context.newPage();
 
     const targetUrl = `https://dash.perfluence.net/posts/update/${postId}`;
-    await page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 20000 });
+    await page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 25000 });
 
     // Заполняем ссылку (учитываем формы и Post[...], и PostForm[...])
-    const linkInput = await page.$('#post-post_link, input[name="Post[post_link]"], input[name="PostForm[post_link]"]');
-    if (linkInput) {
+    const linkInput = page.locator('#post-post_link, input[name="Post[post_link]"], input[name="PostForm[post_link]"]').first();
+    if (await linkInput.count()) {
       await linkInput.fill(postUrl);
     }
 
     // Выбираем "Сегодня"
-    const daySelect = await page.$('#post-published_day, select[name="Post[published_day]"], select[name="PostForm[published_day]"]');
-    if (daySelect) {
+    const daySelect = page.locator('#post-published_day, select[name="Post[published_day]"], select[name="PostForm[published_day]"]').first();
+    if (await daySelect.count()) {
       await daySelect.selectOption("today").catch(() => {});
     }
-    const todayBadge = await page.$('.badge-select-item[data-value="today"], label:has-text("Сегодня")');
-    if (todayBadge) {
+    const todayBadge = page.locator('.badge-select-item[data-value="today"]').first();
+    if (await todayBadge.count()) {
       await todayBadge.click().catch(() => {});
     }
 
-    // При наличии поля загрузки скриншота автоматически снимаем доказательство с живой страницы
-    const fileInput = await page.$('input[type="file"][name="img"]');
-    if (fileInput) {
-      try {
-        const proofPath = await captureProofScreenshot(browser, postId, postUrl);
-        await fileInput.setInputFiles(proofPath);
-        await page.waitForTimeout(3000);
-      } catch (shotErr) {
-        console.warn(`[Report/Browser] Предупреждение при снятии скриншота: ${shotErr.message}`);
-      }
+    // На форме два input[type="file"][name="img"]: первый для сторис (#post-screen_stories, часто скрыт),
+    // второй именно для публикации (#post-screen_post). Бьём строго в контейнер #post-screen_post.
+    const postHiddenSelector = (await page.locator('#post-screen_post').count())
+      ? '#post-screen_post'
+      : (await page.locator('input[name="PostForm[screen_post]"]').count())
+        ? 'input[name="PostForm[screen_post]"]'
+        : null;
+
+    if (postHiddenSelector) {
+      const container = page.locator(postHiddenSelector).locator('xpath=ancestor::*[.//input[@type="file"][@name="img"]][1]');
+      const postFileInput = (await container.locator('input[type="file"][name="img"]').count())
+        ? container.locator('input[type="file"][name="img"]').first()
+        : page.locator('input[type="file"][name="img"]').last();
+
+      const proofPath = await captureProofScreenshot(browser, postId, postUrl);
+      await postFileInput.setInputFiles(proofPath);
+
+      // Ждём фактического ответа /upload/image/post_screen и заполнения hidden-поля!
+      await page.waitForFunction(
+        (sel) => {
+          const el = document.querySelector(sel);
+          return Boolean(el && typeof el.value === "string" && el.value.trim().length > 3);
+        },
+        postHiddenSelector,
+        { timeout: 15000 },
+      );
+      const uploadedKey = await page.locator(postHiddenSelector).inputValue();
+      console.log(`[Report/Browser] Скриншот загружен в ${postHiddenSelector}: ${uploadedKey}`);
+    } else if (await page.locator('input[type="file"][name="img"]:visible').count()) {
+      const proofPath = await captureProofScreenshot(browser, postId, postUrl);
+      await page.locator('input[type="file"][name="img"]:visible').first().setInputFiles(proofPath);
+      await page.waitForTimeout(4000);
     }
 
     // Подтверждаем токен ОРД
-    const tokenCheckbox = await page.$('#post-is_ord_marker_approved, input[name="Post[is_ord_marker_approved]"], input[name="PostForm[is_ord_marker_approved]"]');
-    if (tokenCheckbox && !(await tokenCheckbox.isChecked())) {
+    const tokenCheckbox = page.locator('#post-is_ord_marker_approved, input[type="checkbox"][name="Post[is_ord_marker_approved]"], input[type="checkbox"][name="PostForm[is_ord_marker_approved]"]').first();
+    if ((await tokenCheckbox.count()) && !(await tokenCheckbox.isChecked())) {
       await tokenCheckbox.check({ force: true });
     }
 
     // Нажимаем кнопку отправки
-    const submitBtn = await page.$(
+    const submitBtn = page.locator(
       'button[name="Post[status]"][value="published"], button[type="submit"]:has-text("Внести публикацию"), button[type="submit"]:has-text("Внести скриншот"), button:has-text("Отправить на проверку")',
-    );
-    if (submitBtn) {
-      await Promise.all([
-        page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => null),
-        submitBtn.click(),
-      ]);
-      await page.waitForTimeout(1500);
+    ).first();
+    if (!(await submitBtn.count())) {
+      throw new Error(`Кнопка отправки отчёта не найдена на форме #${postId}`);
     }
 
-    const formErrors = await page.evaluate(() => {
-      const sum = document.querySelector(".error-summary")?.innerText?.trim();
-      return sum || "";
-    });
-    if (formErrors && page.url().includes(`/posts/update/${postId}`)) {
-      throw new Error(`Perfluence отклонил форму поста #${postId}: ${formErrors}`);
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 20000 }).catch(() => null),
+      submitBtn.click(),
+    ]);
+    await page.waitForTimeout(1500);
+
+    // Жёсткая проверка: если остались на форме /posts/update/<id> с ошибкой или невыбранным скрином — бросаем ошибку
+    const finalUrl = page.url();
+    const bodyText = await page.evaluate(() => document.body?.innerText || "");
+    const stillUpdateUrl = finalUrl.includes(`/posts/update/${postId}`) || finalUrl.includes(`/posts/add-screenshot/${postId}`);
+    if (stillUpdateUrl && /Исправьте следующие ошибки|Необходимо заполнить/i.test(bodyText)) {
+      const snippet = bodyText.match(/Исправьте следующие ошибки:[\s\S]{0,200}/i)?.[0]?.replace(/\s+/g, " ")?.trim() || "ошибка валидации формы";
+      throw new Error(`Perfluence отклонил форму поста #${postId}: ${snippet}`);
+    }
+    if (stillUpdateUrl && !/Опубликован|На проверке|В запланированные/i.test(bodyText)) {
+      throw new Error(`Форма поста #${postId} не перешла в статус Опубликован (${finalUrl})`);
     }
 
-    return { success: true, method: "playwright", postId };
+    return { success: true, method: "playwright", postId, url: finalUrl };
   } finally {
     await browser.close();
   }

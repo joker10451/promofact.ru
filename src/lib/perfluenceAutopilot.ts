@@ -6,6 +6,7 @@ import { translit } from "@/lib/translit";
 
 export const WEBSITE_ACCOUNT_ID = "3074542";
 export const TELEGRAM_ACCOUNT_ID = "3066585";
+export const MAX_SCHEDULED_TG_BACKLOG = 3;
 
 const WEBSITE_BLOCKED_PROJECT_IDS = new Set([1409, 920, 112]); // WinLab, Flor2u (website review), Delimobil
 const GLOBAL_BLOCKED_PROJECT_IDS = new Set([112]); // Delimobil
@@ -81,6 +82,7 @@ export interface AutopilotReport {
     postUrl: string;
     reason: string;
   }>;
+  scheduledPosts: ScheduledPostItem[];
   pendingRemovalTotal: number;
   discoveredOverdueErids: string[];
   addedOverdueEridsCount: number;
@@ -95,11 +97,11 @@ export function resolveStoreSlug(projectId: number, projectName = ""): string {
   return translit(projectName) || "magazin";
 }
 
-function isProjectAllowed(projectId: number, projectName: string, accountId: string): boolean {
+export function isProjectAllowed(projectId: number, projectName: string, accountId: string): boolean {
   if (GLOBAL_BLOCKED_PROJECT_IDS.has(projectId)) return false;
   if (accountId === WEBSITE_ACCOUNT_ID && WEBSITE_BLOCKED_PROJECT_IDS.has(projectId)) return false;
   if (projectName && FORBIDDEN_KEYWORD_RE.test(projectName)) return false;
-  const slug = PERFLUENCE_STORE_ALIASES[projectId]?.slug;
+  const slug = resolveStoreSlug(projectId, projectName);
   if (slug && isPausedPublisherStore(slug)) return false;
   if (accountId === WEBSITE_ACCOUNT_ID && (slug === "winlab" || slug === "flor2u")) return false;
   return true;
@@ -421,6 +423,7 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
     activatedLandings: [],
     reportedSitePosts: [],
     needsScreenshotPosts: [],
+    scheduledPosts: [],
     pendingRemovalTotal: 0,
     discoveredOverdueErids: [],
     addedOverdueEridsCount: 0,
@@ -451,7 +454,9 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
     report.sessionExpired = true;
     return report;
   }
+  report.scheduledPosts = schedRes.posts;
   const scheduledKeys = new Set(schedRes.posts.map((p) => `${p.projectId}:${p.accountId || p.accountName}`));
+  let scheduledTgCount = schedRes.posts.filter((p) => p.accountId === TELEGRAM_ACCOUNT_ID).length;
 
   const liveWidgetProjectIds = new Set<number>();
   if (widgetUrl) {
@@ -627,11 +632,14 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
       if (!parsed.approved || activationCount >= maxActivations) continue;
       if (scheduledKeys.has(`${projectId}:${accountId}`)) continue;
 
-      // B) Brand-new unactivated "Получить промокод" landing (take at most 1 per account per cycle)
-      if (options.enableActivateNewLandings !== false && parsed.newLandingHrefs.length > 0) {
+      // B) Brand-new unactivated "Получить промокод" landing (cap TG backlog to avoid stockpiling unposted slots)
+      const isHotFlashTg = accountId === TELEGRAM_ACCOUNT_ID && hotSet.has(projectId);
+      const tgBacklogFull = accountId === TELEGRAM_ACCOUNT_ID && scheduledTgCount >= MAX_SCHEDULED_TG_BACKLOG && !isHotFlashTg;
+      if (options.enableActivateNewLandings !== false && parsed.newLandingHrefs.length > 0 && !tgBacklogFull) {
         const href = parsed.newLandingHrefs[0];
         activationCount++;
         scheduledKeys.add(`${projectId}:${accountId}`);
+        if (accountId === TELEGRAM_ACCOUNT_ID) scheduledTgCount++;
         if (!dryRun) {
           const act = await pfFetch(href, cookieHeader, { headers: { "X-Requested-With": "XMLHttpRequest" } });
           if (act.sessionExpired) {
@@ -651,12 +659,13 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
         liveWidgetProjectIds.size > 0 &&
         !liveWidgetProjectIds.has(projectId);
       const shouldRepeatTg =
-        accountId === TELEGRAM_ACCOUNT_ID && hotSet.has(projectId) && !parsed.hasActiveUrl;
+        accountId === TELEGRAM_ACCOUNT_ID && hotSet.has(projectId) && !parsed.hasActiveUrl && scheduledTgCount < MAX_SCHEDULED_TG_BACKLOG;
 
       if (options.enableRepeatMissing !== false && parsed.repeatHrefs.length > 0 && (shouldRepeatSite || shouldRepeatTg)) {
         const href = parsed.repeatHrefs[0];
         activationCount++;
         scheduledKeys.add(`${projectId}:${accountId}`);
+        if (accountId === TELEGRAM_ACCOUNT_ID) scheduledTgCount++;
         if (!dryRun) {
           const act = await pfFetch(href, cookieHeader, { headers: { "X-Requested-With": "XMLHttpRequest" } });
           if (act.sessionExpired) {
@@ -712,6 +721,7 @@ export async function runPerfluenceAutopilotCycle(options: AutopilotOptions = {}
       report.sessionExpired = true;
       return report;
     }
+    report.scheduledPosts = freshSched.posts;
 
     for (const post of freshSched.posts) {
       if (post.accountId !== WEBSITE_ACCOUNT_ID) continue;

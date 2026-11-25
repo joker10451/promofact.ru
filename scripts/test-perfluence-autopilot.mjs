@@ -3,12 +3,16 @@ import fs from "node:fs";
 import { NextRequest } from "next/server";
 
 const {
+  isProjectAllowed,
+  MAX_SCHEDULED_TG_BACKLOG,
   parseAccountTileActions,
   resolveStoreSlug,
+  runPerfluenceAutopilotCycle,
   submitPerfluenceReportHttp,
   WEBSITE_ACCOUNT_ID,
   TELEGRAM_ACCOUNT_ID,
 } = await import("../src/lib/perfluenceAutopilot.ts");
+const { submitReportPlaywright } = await import("./perfluence-report.mjs");
 const {
   OVERDUE_PLACEMENT_ERIDS,
   addRuntimeOverdueErids,
@@ -108,4 +112,182 @@ try {
 const cronBytes = fs.readFileSync("scripts/vps-autopilot-cron.sh", "utf8");
 assert.equal(cronBytes.includes("\r\n"), false, "vps-autopilot-cron.sh must use LF line endings for Ubuntu bash");
 assert.ok(WEBSITE_ACCOUNT_ID === "3074542" && TELEGRAM_ACCOUNT_ID === "3066585");
-console.log("PASS: Perfluence autopilot parsing, safety denylist, API auth, Yii2 validation & cron LF");
+
+// 7. Paused publisher stores (3077 Netprint) are blocked across both accounts & TG backlog cap constant
+assert.equal(resolveStoreSlug(3077, "Netprint"), "netprint");
+assert.equal(isProjectAllowed(3077, "Netprint", WEBSITE_ACCOUNT_ID), false);
+assert.equal(isProjectAllowed(3077, "Netprint", TELEGRAM_ACCOUNT_ID), false);
+assert.equal(isProjectAllowed(1409, "WinLab", WEBSITE_ACCOUNT_ID), false);
+assert.equal(isProjectAllowed(3611, "Мегамаркет СРА", WEBSITE_ACCOUNT_ID), true);
+assert.equal(MAX_SCHEDULED_TG_BACKLOG, 3);
+
+// 8. runPerfluenceAutopilotCycle returns scheduledPosts, skips paused 3077 Netprint, and enforces MAX_SCHEDULED_TG_BACKLOG
+const prevSessionB64 = process.env.PERFLUENCE_SESSION_B64;
+const prevSessionDeployed = process.env.PERFLUENCE_SESSION_B64_DEPLOYED;
+const origFetchAutopilot = globalThis.fetch;
+try {
+  process.env.PERFLUENCE_SESSION_B64 = Buffer.from(
+    JSON.stringify({ cookies: [{ domain: ".perfluence.net", name: "_pf_test", value: "1" }] }),
+  ).toString("base64");
+  delete process.env.PERFLUENCE_SESSION_B64_DEPLOYED;
+
+  const activatedHrefs = [];
+  const reportedLinks = [];
+
+  globalThis.fetch = async (url, init) => {
+    const u = String(url);
+    if (u.includes("/posts/list/scheduled?page=1")) {
+      return new Response(
+        [
+          '<div class="post-tile-widget"><a href="/posts/update/9001">Edit</a><a href="/project/2233">Яндекс Плюс</a><span title="Аккаунт smart_zakupka"></span></div>',
+          '<div class="post-tile-widget"><a href="/posts/update/9002">Edit</a><a href="/project/1483">Ситидрайв</a><span title="Аккаунт smart_zakupka"></span></div>',
+          '<div class="post-tile-widget"><a href="/posts/update/9003">Edit</a><a href="/project/4328">Перекрёсток Доставка</a><span title="Аккаунт smart_zakupka"></span></div>',
+          '<div class="post-tile-widget"><a href="/posts/update/17495987">Edit</a><a href="/project/3077">Netprint</a><span title="Аккаунт promofact.ru"></span></div>',
+        ].join(""),
+        { status: 200 },
+      );
+    }
+    if (u.includes("/posts/list/scheduled?page=")) return new Response("<html></html>", { status: 200 });
+    if (u.includes("/posts/list/pending_removal?page=")) return new Response("<html></html>", { status: 200 });
+    if (u.includes("https://mock.widget/data")) return new Response(JSON.stringify({ data: [] }), { status: 200 });
+    if (u.includes("/notifications/block")) return new Response(JSON.stringify({ data: [] }), { status: 200 });
+    if (u.includes("/projects/my?page=1")) {
+      return new Response('<a href="/project/3077">Netprint</a><a href="/project/3611">Мегамаркет</a>', { status: 200 });
+    }
+    if (u.includes("/projects")) return new Response("<html></html>", { status: 200 });
+    if (u.includes("/project/3077/accounts")) {
+      return new Response(
+        `<title>Проект "Netprint"</title>
+         <div id="pb-tile-3066585">Аккаунт одобрен smart_zakupka <a href="/blogger/posts/create-publication?projectId=3077&amp;landing_id=1&amp;accountId=3066585">Получить промокод</a></div>
+         <div id="pb-tile-3074542">Аккаунт одобрен promofact.ru <a href="/blogger/posts/create-publication?projectId=3077&amp;landing_id=2&amp;accountId=3074542">Получить промокод</a></div>`,
+        { status: 200 },
+      );
+    }
+    if (u.includes("/project/3611/accounts")) {
+      return new Response(
+        `<title>Проект "Мегамаркет"</title>
+         <div id="pb-tile-3066585">Аккаунт одобрен smart_zakupka <a href="/blogger/posts/create-publication?projectId=3611&amp;landing_id=101&amp;accountId=3066585">Получить промокод</a></div>
+         <div id="pb-tile-3074542">Аккаунт одобрен promofact.ru <a href="/blogger/posts/create-publication?projectId=3611&amp;landing_id=102&amp;accountId=3074542">Получить промокод</a></div>`,
+        { status: 200 },
+      );
+    }
+    if (u.includes("/blogger/posts/create-publication")) {
+      activatedHrefs.push(u);
+      return new Response("ok", { status: 200 });
+    }
+    if (u.includes("promofact.ru/store/")) {
+      reportedLinks.push(u);
+      return new Response("not ready", { status: 404 });
+    }
+    if (init?.method === "POST") return new Response("", { status: 302, headers: { location: "/posts" } });
+    throw new Error("Unexpected URL in mock autopilot fetch: " + u);
+  };
+
+  const cycle = await runPerfluenceAutopilotCycle({
+    dryRun: false,
+    widgetUrl: "https://mock.widget/data",
+    enableTelegramCleanup: false,
+  });
+  assert.equal(cycle.scheduledPosts.length, 4);
+  assert.equal(activatedHrefs.some((h) => h.includes("projectId=3077")), false, "paused 3077 Netprint must never activate");
+  assert.equal(activatedHrefs.some((h) => h.includes(`accountId=${TELEGRAM_ACCOUNT_ID}`)), false, "non-hot TG activation must be gated when scheduledTgCount >= MAX_SCHEDULED_TG_BACKLOG");
+  assert.equal(activatedHrefs.some((h) => h.includes("projectId=3611") && h.includes(`accountId=${WEBSITE_ACCOUNT_ID}`)), true, "eligible website landing activates normally");
+  assert.equal(reportedLinks.some((u) => u.includes("/store/netprint")), false, "paused 3077 Netprint must not be verified/reported");
+} finally {
+  globalThis.fetch = origFetchAutopilot;
+  if (prevSessionB64 === undefined) delete process.env.PERFLUENCE_SESSION_B64;
+  else process.env.PERFLUENCE_SESSION_B64 = prevSessionB64;
+  if (prevSessionDeployed !== undefined) process.env.PERFLUENCE_SESSION_B64_DEPLOYED = prevSessionDeployed;
+}
+
+// 9. submitReportPlaywright uploads strictly into #post-screen_post container and rejects Yii2 errors
+function makeFakeLocator(actions, key) {
+  const self = {
+    count: async () => (key === 'input[name="PostForm[screen_post]"]' || key.includes(":visible") ? 0 : 1),
+    first: () => self,
+    last: () => self,
+    locator: (sub) => makeFakeLocator(actions, `${key} >> ${sub}`),
+    fill: async (val) => {
+      actions.fills.push({ key, val });
+    },
+    selectOption: async (val) => {
+      actions.selects.push({ key, val });
+    },
+    click: async () => {
+      actions.clicks.push(key);
+    },
+    isChecked: async () => true,
+    check: async () => {},
+    setInputFiles: async (file) => {
+      actions.files.push({ key, file });
+    },
+    inputValue: async () => "@s3cloud/screens/test-proof.png",
+  };
+  return self;
+}
+
+function createFakeChromium({ failValidation = false } = {}) {
+  const actions = { fills: [], selects: [], clicks: [], files: [], evaluated: [] };
+  const engine = {
+    actions,
+    launch: async () => ({
+      newPage: async () => ({
+        goto: async () => {},
+        waitForTimeout: async () => {},
+        screenshot: async () => {},
+        close: async () => {},
+      }),
+      newContext: async () => ({
+        newPage: async () => {
+          let currentUrl = "https://dash.perfluence.net/posts/update/17495973";
+          return {
+            goto: async (url) => {
+              currentUrl = url;
+            },
+            url: () => currentUrl,
+            locator: (sel) => makeFakeLocator(actions, sel),
+            waitForFunction: async (fn, arg) => {
+              actions.evaluated.push({ fn: fn.toString(), arg });
+            },
+            waitForTimeout: async () => {},
+            waitForNavigation: async () => {
+              if (!failValidation) currentUrl = "https://dash.perfluence.net/posts/list/published";
+            },
+            evaluate: async () =>
+              failValidation
+                ? "Исправьте следующие ошибки: Необходимо заполнить Скрин публикации"
+                : "Опубликован",
+          };
+        },
+      }),
+      close: async () => {},
+    }),
+  };
+  return engine;
+}
+
+const okChromium = createFakeChromium({ failValidation: false });
+const pwRes = await submitReportPlaywright("17495973", "https://promofact.ru/store/megamarket", {
+  headless: true,
+  _storageState: {},
+  _chromium: okChromium,
+});
+assert.equal(pwRes.success, true);
+assert.equal(okChromium.actions.files.length, 1);
+assert.ok(
+  okChromium.actions.files[0].key.includes("#post-screen_post") &&
+    okChromium.actions.files[0].key.includes('input[type="file"][name="img"]'),
+  `must target #post-screen_post ancestor file input, got: ${okChromium.actions.files[0].key}`,
+);
+
+const failChromium = createFakeChromium({ failValidation: true });
+await assert.rejects(
+  submitReportPlaywright("17495973", "https://promofact.ru/store/megamarket", {
+    headless: true,
+    _storageState: {},
+    _chromium: failChromium,
+  }),
+  /Perfluence отклонил форму поста #17495973/,
+);
+
+console.log("PASS: Perfluence autopilot parsing, safety denylist, API auth, Yii2 validation, Netprint pause, TG cap & #post-screen_post upload");

@@ -69,4 +69,7 @@ export const PERFLUENCE_STORE_ALIASES: Record<number, { slug: string; name?: str
   4328: { slug: "perekrestok-dostavka", name: "Перекрёсток Доставка" },
   3752: { slug: "debetovaya-sberkarta", name: "Дебетовая СберКарта" },
   920: { slug: "flor2u", name: "Flor2u" },
+  3077: { slug: "netprint", name: "Netprint" },
+  2728: { slug: "vozmischastevdom", name: "Возьми счастье в дом" },
+  4740: { slug: "esim-world", name: "Esim World" },
 };
