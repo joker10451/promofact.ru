@@ -11,6 +11,18 @@
   ],
   "history": [
     {
+      "id": 1795634479602,
+      "sourceType": "perfluence",
+      "code": "SZHM954C1C25",
+      "store": "Carte Blanche || Gala",
+      "storeSlug": "carte-blanche-gala",
+      "storeId": 4447,
+      "messageId": 133,
+      "postUrl": "https://t.me/smart_zakupka/133",
+      "expires": "25.11.2026",
+      "date": "2026-11-25T19:21:19.602Z"
+    },
+    {
       "id": 1795628385799,
       "sourceType": "perfluence",
       "code": "198N7PARH",
