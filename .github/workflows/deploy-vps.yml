@@ -88,12 +88,18 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           TELEGRAM_POSTING_SECRET: ${{ secrets.TELEGRAM_POSTING_SECRET }}
           PERFLUENCE_SESSION_B64: ${{ secrets.PERFLUENCE_SESSION_B64 }}
+          TELEGRAM_PUBLIC_BOT_TOKEN: ${{ secrets.TELEGRAM_PUBLIC_BOT_TOKEN }}
+          TELEGRAM_BOT_WEBHOOK_SECRET: ${{ secrets.TELEGRAM_BOT_WEBHOOK_SECRET }}
+          NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ${{ secrets.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME }}
         run: |
           [ -n "$TELEGRAM_POSTING_SECRET" ] || { echo "TELEGRAM_POSTING_SECRET not set, skipping"; exit 0; }
           {
             printf 'TELEGRAM_POSTING_SECRET_DEPLOYED=%s\n' "$(printf '%s' "$TELEGRAM_POSTING_SECRET" | tr -d '\r\n')"
             # Сессия кабинета Perfluence для радара уведомлений (/api/perfluence-live/check).
             [ -z "$PERFLUENCE_SESSION_B64" ] || printf 'PERFLUENCE_SESSION_B64_DEPLOYED=%s\n' "$(printf '%s' "$PERFLUENCE_SESSION_B64" | tr -d '\r\n')"
+            [ -z "$TELEGRAM_PUBLIC_BOT_TOKEN" ] || printf 'TELEGRAM_PUBLIC_BOT_TOKEN=%s\n' "$(printf '%s' "$TELEGRAM_PUBLIC_BOT_TOKEN" | tr -d '\r\n')"
+            [ -z "$TELEGRAM_BOT_WEBHOOK_SECRET" ] || printf 'TELEGRAM_BOT_WEBHOOK_SECRET=%s\n' "$(printf '%s' "$TELEGRAM_BOT_WEBHOOK_SECRET" | tr -d '\r\n')"
+            [ -z "$NEXT_PUBLIC_TELEGRAM_BOT_USERNAME" ] || printf 'NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=%s\n' "$(printf '%s' "$NEXT_PUBLIC_TELEGRAM_BOT_USERNAME" | tr -d '\r\n')"
           } | ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes app@"$VPS_HOST" \
                 'umask 077; cat > /srv/promofact/.env.production.local'
 
@@ -106,11 +112,19 @@ jobs:
           cd /srv/promofact
           git fetch --depth 1 origin main
           git reset --hard origin/main
-          set -a; . /etc/promofact.env; set +a
+          set -a
+          . /etc/promofact.env
+          [ -f /srv/promofact/.env.production.local ] && . /srv/promofact/.env.production.local
+          set +a
           npm ci --include=dev --no-audit --no-fund
           NODE_OPTIONS=--max-old-space-size=1536 npm run build
           sudo /bin/systemctl restart promofact
           sleep 5
           curl -fsS -o /dev/null -H "Host: promofact.ru" -H "X-Forwarded-Proto: https" http://127.0.0.1:3000/
+          curl -fsS -H "Host: promofact.ru" -H "X-Forwarded-Proto: https" http://127.0.0.1:3000/api/telegram/bot
+          echo ""
+          if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] || [ -n "${TELEGRAM_PUBLIC_BOT_TOKEN:-}" ]; then
+            node scripts/setup-telegram-bot.mjs --apply
+          fi
           echo "deployed $(git rev-parse --short HEAD)"
           REMOTE

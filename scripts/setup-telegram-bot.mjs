@@ -8,35 +8,45 @@
 import fs from "node:fs";
 import path from "node:path";
 
-function loadLocalEnv() {
-  const envPath = path.join(process.cwd(), ".env.local");
-  if (!fs.existsSync(envPath)) return {};
+function loadEnvFiles() {
   const out = {};
-  for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const idx = line.indexOf("=");
-    if (idx <= 0 || line.trim().startsWith("#")) continue;
-    const key = line.slice(0, idx).trim();
-    const val = line.slice(idx + 1).trim().replace(/^["']|["']$/g, "");
-    if (!process.env[key]) out[key] = val;
+  for (const name of [".env.local", ".env.production.local"]) {
+    const envPath = path.join(process.cwd(), name);
+    if (!fs.existsSync(envPath)) continue;
+    for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
+      const idx = line.indexOf("=");
+      if (idx <= 0 || line.trim().startsWith("#")) continue;
+      const key = line.slice(0, idx).trim();
+      const val = line.slice(idx + 1).trim().replace(/^["']|["']$/g, "");
+      if (val && !val.includes("SENSITIVE")) out[key] = val;
+    }
   }
   return out;
 }
 
-const fileEnv = loadLocalEnv();
-const BOT_TOKEN = (
-  process.env.TELEGRAM_PUBLIC_BOT_TOKEN ||
-  fileEnv.TELEGRAM_PUBLIC_BOT_TOKEN ||
-  process.env.TELEGRAM_BOT_TOKEN ||
-  fileEnv.TELEGRAM_BOT_TOKEN ||
-  ""
-).trim();
-const WEBHOOK_SECRET = (
-  process.env.TELEGRAM_BOT_WEBHOOK_SECRET ||
-  fileEnv.TELEGRAM_BOT_WEBHOOK_SECRET ||
-  process.env.TELEGRAM_POSTING_SECRET ||
-  fileEnv.TELEGRAM_POSTING_SECRET ||
-  ""
-).trim();
+function pickSecret(...candidates) {
+  for (const raw of candidates) {
+    const val = String(raw || "").trim();
+    if (val && !val.includes("SENSITIVE")) return val;
+  }
+  return "";
+}
+
+const fileEnv = loadEnvFiles();
+const BOT_TOKEN = pickSecret(
+  process.env.TELEGRAM_PUBLIC_BOT_TOKEN,
+  fileEnv.TELEGRAM_PUBLIC_BOT_TOKEN,
+  process.env.TELEGRAM_BOT_TOKEN,
+  fileEnv.TELEGRAM_BOT_TOKEN,
+);
+const WEBHOOK_SECRET = pickSecret(
+  process.env.TELEGRAM_BOT_WEBHOOK_SECRET,
+  fileEnv.TELEGRAM_BOT_WEBHOOK_SECRET,
+  process.env.TELEGRAM_POSTING_SECRET,
+  process.env.TELEGRAM_POSTING_SECRET_DEPLOYED,
+  fileEnv.TELEGRAM_POSTING_SECRET,
+  fileEnv.TELEGRAM_POSTING_SECRET_DEPLOYED,
+);
 const CHANNEL_ID = (process.env.TELEGRAM_CHANNEL_ID || fileEnv.TELEGRAM_CHANNEL_ID || "@smart_zakupka").trim();
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://promofact.ru").replace(/\/+$/, "");
 const APPLY = process.argv.includes("--apply");
@@ -82,7 +92,7 @@ async function main() {
   }
 
   if (!WEBHOOK_SECRET) {
-    console.error("❌ Для --apply требуется TELEGRAM_BOT_WEBHOOK_SECRET или TELEGRAM_POSTING_SECRET");
+    console.error("❌ Для --apply требуется TELEGRAM_BOT_WEBHOOK_SECRET или TELEGRAM_POSTING_SECRET (не [SENSITIVE])");
     process.exit(1);
   }
 
@@ -93,6 +103,21 @@ async function main() {
     allowed_updates: ["message", "callback_query"],
   });
   console.log("setWebhook =>", setWh);
+
+  const setName = await tg("setMyName", {
+    name: "ПромоФакт — Поиск промокодов",
+  });
+  console.log("setMyName =>", setName);
+
+  const setShortDesc = await tg("setMyShortDescription", {
+    short_description: "Быстрый поиск рабочих промокодов Promofact.ru и алерты на повторные заказы из @smart_zakupka.",
+  });
+  console.log("setMyShortDescription =>", setShortDesc);
+
+  const setDesc = await tg("setMyDescription", {
+    description: "Напишите название любого магазина (Лавка, Самокат, Пятёрочка, Т-Банк) — сразу покажу рабочие скидки и открою каталог без лишней рекламы. Подписчикам @smart_zakupka доступны алерты на повторные заказы!",
+  });
+  console.log("setMyDescription =>", setDesc);
 
   const setCmd = await tg("setMyCommands", {
     commands: [
@@ -113,6 +138,13 @@ async function main() {
     },
   });
   console.log("setChatMenuButton =>", setMenu);
+
+  const postCheck = await tg("getWebhookInfo");
+  console.log("Verified live webhook =>", postCheck.ok ? {
+    url: postCheck.result.url,
+    pending_update_count: postCheck.result.pending_update_count,
+    last_error_message: postCheck.result.last_error_message || null,
+  } : postCheck);
 }
 
 main().catch((err) => {

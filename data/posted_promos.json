@@ -17,7 +17,9 @@
       "messageId": 131,
       "postUrl": "https://t.me/smart_zakupka/131",
       "expires": "24.11.2026",
-      "date": "2026-11-24T18:54:16.813Z"
+      "date": "2026-11-24T18:54:16.813Z",
+      "deleted": true,
+      "deletedAt": "2026-11-25T12:27:21.046Z"
     },
     {
       "id": 1795274609996,
