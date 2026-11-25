@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      feed_sync:
+        description: "Set true when triggered purely by Perfluence catalog feed sync"
+        type: boolean
+        default: false
+        required: false
 
 concurrency:
   group: deploy-vps
@@ -13,7 +19,52 @@ permissions:
   contents: read
 
 jobs:
+  gate:
+    name: Pre-Deploy Verification Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Production dependency security audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Feed & Runtime Safety Gates
+        run: |
+          npm run test:perfluence-affiliate-safety
+          npm run test:runtime-perfluence
+          npm run test:article-cover
+          npm run test:trust
+          npm run test:reliability
+          npm run test:geo-indexing
+          npm run test:store-display-name
+          node scripts/test-indexnow-push.mjs
+          node --loader ./scripts/ts-loader.mjs scripts/test-internal-graph.mjs
+
+      - name: Unit & Regression Tests
+        if: ${{ inputs.feed_sync != true && inputs.feed_sync != 'true' }}
+        run: npm test
+
+      - name: Build Verification
+        env:
+          E2E_FIXTURES: "true"
+        run: npm run build
+
   deploy:
+    needs: gate
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

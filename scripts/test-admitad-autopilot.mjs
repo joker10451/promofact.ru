@@ -1257,22 +1257,16 @@ const testPublishedMeta = (campaignId, suffix) => ({
   }
 }
 
-// 32. Тест: Workflow YAML — отсутствие неявного fallback '45863' и required: true
+// 32. Тест: Устаревший Admitad autopilot workflow удалён из .github/workflows (регресс исключён)
 {
-  const workflowContent = fs.readFileSync(path.join(process.cwd(), ".github/workflows/admitad-sync.yml"), "utf8");
-  // Не должно быть литерала '45863' в fallback chain
-  assert.ok(!workflowContent.includes("|| '45863'"), "Workflow не должен содержать неявный fallback '45863'");
-  assert.ok(!workflowContent.includes('|| "45863"'), "Workflow не должен содержать неявный fallback \"45863\"");
-  // Должно быть required: true
-  assert.ok(workflowContent.includes("required: true"), "Workflow input approved_campaigns должен быть required: true");
-  // Не должно быть default: "45863"
-  assert.ok(!workflowContent.includes('default: "45863"'), "Workflow не должен содержать default: \"45863\"");
-  assert.ok(!workflowContent.includes("default: '45863'"), "Workflow не должен содержать default: '45863'");
-  // ADMITAD_APPROVED_CAMPAIGNS должен оканчиваться на || '' (пустая строка)
-  assert.ok(workflowContent.includes("|| '' }}"), "Workflow fallback должен оканчиваться на пустую строку, а не '45863'");
+  assert.strictEqual(
+    fs.existsSync(path.join(process.cwd(), ".github/workflows/admitad-sync.yml")),
+    false,
+    "Устаревший workflow admitad-sync.yml должен быть удалён из активного CI",
+  );
 
   passed++;
-  console.log("✓ Тест 32: Workflow YAML — нет неявного fallback, required: true подтверждён (PASS)");
+  console.log("✓ Тест 32: Устаревший admitad-sync.yml удалён из .github/workflows (PASS)");
 }
 
 // 33. Тест: CATASTROPHIC_DROP и атомарность RPC при пилотном снимке

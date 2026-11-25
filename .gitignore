@@ -83,6 +83,11 @@ REVENUE_ATTRIBUTION_DATA.csv
 /src/data/admitad-snapshot.json
 /src/data/admitad-sync-meta.json
 /data/local/
+# local video / audio generation assets & scratch artifacts
+/data/proofs/
+/data/notifications-*.js
+scripts/record-*.mjs
+
 # Локальная конфигурация запуска дев-сервера
 /.claude/
 .youtube-token.json

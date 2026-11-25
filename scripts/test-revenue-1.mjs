@@ -90,7 +90,6 @@ assert.equal(safeRevenueFailure(new Error("Unauthorized: Bearer abc-secret")),
  "REVENUE_UNEXPECTED_ERROR");
 
 const runner=fs.readFileSync("scripts/revenue-1-preview.mjs","utf8");
-const workflow=fs.readFileSync(".github/workflows/revenue-1-preview.yml","utf8");
 assert.match(runner,/scopes:"statistics"/);
 assert.match(runner,/statistics\/actions\//);
 assert.match(runner,/searchParams\.set\("website",websiteId\)/);
@@ -98,8 +97,5 @@ assert.match(runner,/REVENUE_1_PRIVATE_REPORT/);
 assert.match(runner,/GITHUB_ACTIONS !== "true"/);
 assert.match(runner,/REVENUE_1_FAILED/);
 assert.ok(!runner.includes("getSupabaseAdmin")&&!runner.includes("service_role"));
-assert.match(workflow,/workflow_dispatch:/);
-assert.ok(!workflow.includes("schedule:"));
-assert.match(workflow,/REVENUE_1_PRIVATE_REPORT: 'false'/);
-assert.ok(!workflow.includes("SUPABASE_SERVICE_ROLE_KEY"));
+assert.equal(fs.existsSync(".github/workflows/revenue-1-preview.yml"), false, "Retired revenue-1-preview.yml removed");
 console.log("REVENUE-1: official statuses, dedupe, multi-currency, attribution, sensitive redaction and no-write gates PASS");

@@ -120,16 +120,11 @@ try {
   assert.match(runner,/ADMITAD_FIVE_READ_ONLY_PREVIEW/);
   assert.ok(runner.indexOf("if(previewOnly) {") < runner.indexOf("const applied=await runAdmitadSafeSync(opts)"),
     "Read-only preview MUST return before database publishing");
-  const workflow=fs.readFileSync(".github/workflows/admitad-batch.yml","utf8");
-  assert.match(workflow,/preview_only:/);
-  assert.match(workflow,/ADMITAD_BATCH_PREVIEW_ONLY:/);
-
-  // The recurring batch job must not undo personal/site-scoped coupons
-  // published through the separate, explicitly confirmed full-catalog workflow.
-  assert.match(workflow,/ADMITAD_PUBLISH_WEBSITE_COUPONS:/);
-  assert.match(workflow,/inputs\.mode == 'recurring' && inputs\.batch == 'existing-three'/);
-  assert.doesNotMatch(workflow,/\bschedule:/, "Legacy batch must not run on a cron");
-  assert.match(workflow,/github\.event_name == 'workflow_dispatch'/);
+  assert.strictEqual(
+    fs.existsSync(".github/workflows/admitad-batch.yml"),
+    false,
+    "Legacy admitad-batch.yml workflow must remain removed",
+  );
   assert.match(runner,/PUBLISHER_REFRESH_SCOPE_INVALID/);
   assert.match(runner,/mode!=="recurring" \|\| csv!==PREVIOUS_BATCH/);
   console.log("Publisher site-scoped post-release recurring refresh guard PASS");

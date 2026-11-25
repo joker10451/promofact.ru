@@ -80,27 +80,14 @@ assert.equal(redactedFailure(new Error("SECRET https://example?token=abc")),"CAT
 
 const worker = fs.readFileSync("src/lib/admitadSyncWorker.ts","utf8");
 const runner = fs.readFileSync("scripts/catalog-1-refresh.mjs","utf8");
-const workflow = fs.readFileSync(".github/workflows/admitad-publisher-catalog.yml","utf8");
 assert.ok(worker.includes("PUBLISHER_COUPON_ID_CAMPAIGN_CHANGED"),
   "Coupon IDs cannot silently transfer between different merchants");
 assert.ok(runner.includes("assertSnapshotUnchanged") && runner.includes("skipDbWrite: true") &&
   runner.includes("ADMITAD_CATALOG_PUBLISH_APPROVED"),
   "Runner must preview first and require explicit approval");
-assert.doesNotMatch(workflow,/\bschedule:/,
-  "The catalog refresh must not run on a schedule");
-assert.match(workflow,/ADMITAD_PUBLISHER_CATALOG_DRY_RUN:\s*['"]true['"]/,
-  "Catalog workflow must be preview-only");
-assert.match(workflow,/ADMITAD_CATALOG_PUBLISH_APPROVED:\s*['"]false['"]/,
-  "Catalog workflow must never enable publishing");
-assert.doesNotMatch(workflow,/inputs\.publish\b|confirm:/,
-  "Catalog workflow must not expose a publish authorization input");
-assert.match(workflow,/github\.event_name == 'pull_request'[\s\S]*head\.repo\.full_name == github\.repository/,
-  "PR execution must require a trusted same-repository head");
-assert.match(workflow,/github\.event_name == 'workflow_dispatch'/,
-  "Manual workflow dispatch may run the read-only preview");
-assert.ok(!workflow.includes("git push"), "Scheduled DB refresh must not push or deploy");
-const oldBatch = fs.readFileSync(".github/workflows/admitad-batch.yml", "utf8");
-assert.doesNotMatch(oldBatch,/\bschedule:/, "Old narrower cron must remain disabled");
-assert.match(workflow,/concurrency:/);
-assert.match(workflow,/catalog-1-refresh\.mjs/);
-console.log("CATALOG-1: preview-only workflow, new-program guard, retention and identity PASS");
+assert.equal(fs.existsSync(".github/workflows/admitad-publisher-catalog.yml"), false,
+  "Retired Admitad catalog workflow must stay removed");
+assert.equal(fs.existsSync(".github/workflows/admitad-batch.yml"), false,
+  "Retired Admitad batch workflow must stay removed");
+assert.ok(runner.includes("catalog-1-guards.mjs"));
+console.log("CATALOG-1: preview-only guards, new-program guard, retention and retired workflows PASS");

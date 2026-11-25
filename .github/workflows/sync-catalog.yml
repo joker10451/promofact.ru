@@ -129,7 +129,7 @@ jobs:
         if: success() && (steps.check_changes.outputs.has_changes == 'true' || steps.earnings.outputs.changed == 'true')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run deploy-vps.yml --ref main
+        run: gh workflow run deploy-vps.yml --ref main -f feed_sync=true
 
       # One persistent issue instead of silent failures; closed on next success.
       - name: Report feed sync status
