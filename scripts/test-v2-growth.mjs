@@ -28,8 +28,8 @@ assert.equal(headlineCounts.codeFree, 1, "Pampadu finance card should be counted
 
 const otpMeta = buildStoreDescription({
   name: "ОТП Банк",
-  category: "Сервисы и подписки",
-  categorySlug: "servisy-i-podpiski",
+  category: "Банки и финансы",
+  categorySlug: "finansy",
   coupons: [{ code: otpPampadu.promocode.code, bonusName: otpPampadu.promocode.bonusName, isBarcode: false, group: "pampadu" }],
   couponCount: 1,
   maxDiscount: null,
@@ -189,5 +189,15 @@ assert.equal(fs.readFileSync("src/lib/storeExtras.ts", "utf8").includes("kv7qjyp
 const nextCfgSrc = fs.readFileSync("next.config.ts", "utf8");
 assert.ok(nextCfgSrc.includes("poweredByHeader: false") && nextCfgSrc.includes("Strict-Transport-Security"),
   "Next config must expose security headers and disable X-Powered-By");
+
+// 10. All bank/financial storefronts belong to canonical category "finansy" ("Банки и финансы")
+for (const finSlug of ["otp-bank", "debetovaya-sberkarta", "vklad-v-sbere", "plati-po-miru", "t-bank", "alfa-bank", "yandex-pay", "zenit"]) {
+  const s = stores.find((item) => item.slug === finSlug);
+  assert.ok(s, `Finance store missing: ${finSlug}`);
+  assert.equal(s.categorySlug, "finansy", `Expected ${finSlug} in category finansy, got ${s.categorySlug}`);
+  assert.equal(s.category, "Банки и финансы", `Expected ${finSlug} category label "Банки и финансы", got ${s.category}`);
+}
+const sberprimeStore = stores.find((item) => item.slug === "sberprime");
+assert.equal(sberprimeStore?.categorySlug, "servisy-i-podpiski", "SberPrime subscription stays in servisy-i-podpiski");
 
 console.log("V2-GROWTH: Pampadu 1-click UX, SEO metadata, newest-first sorting, Dec seasonality, UTM & clean store parity PASS");

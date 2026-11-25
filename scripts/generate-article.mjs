@@ -259,7 +259,7 @@ function pickTopicBrief({ slot, storeOffers, pampaduOffers, existingSlugs, exist
   if (slot === "retail") {
     const candidates = [...storeOffers.values()]
       .filter((s) => {
-        if (s.categorySlug === "servisy-i-podpiski" && /bank|sber|t-bank|alfa|zenit|otp/.test(s.slug)) return false;
+        if (s.categorySlug === "finansy" || (s.categorySlug === "servisy-i-podpiski" && /bank|sber|t-bank|alfa|zenit|otp/.test(s.slug))) return false;
         const candidateSlug = `promokody-${s.slug}`;
         if (existingSlugs.has(candidateSlug)) return false;
         // Проверяем, нет ли уже отдельного обзорного гайда про этот бренд

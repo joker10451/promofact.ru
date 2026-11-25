@@ -30,6 +30,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   "marketpleysy": "📦",
   "onlayn-kinoteatry": "🎬",
   "servisy-i-podpiski": "✨",
+  "finansy": "💳",
   "odezhda-i-obuv": "👗",
   "kosmetika-i-parfyumeriya": "💄",
   "elektronika": "📱",

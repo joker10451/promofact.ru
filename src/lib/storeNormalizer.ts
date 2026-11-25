@@ -28,8 +28,53 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
   },
   "detskie-platezhnye-aksessuary-ot-sbera": {
     name: "Детские платёжные аксессуары от Сбера",
-    category: "Сервисы и подписки",
-    categorySlug: "servisy-i-podpiski",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
+  },
+  "rosgosstrakh": {
+    name: "Росгосстрах",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
+  },
+  "vklad-v-sbere": {
+    name: "Вклад в Сбере",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
+  },
+  "debetovaya-sberkarta": {
+    name: "Дебетовая СберКарта",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
+  },
+  "detskaya-sberkarta": {
+    name: "Детская СберКарта",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
+  },
+  "t-bank": {
+    name: "Т-Банк",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
+  },
+  "t-bank-junior": {
+    name: "Т-Банк Джуниор",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
+  },
+  "alfa-bank": {
+    name: "Альфа-Банк",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
+  },
+  "yandex-pay": {
+    name: "Яндекс Пэй",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
+  },
+  "zenit": {
+    name: "Банк Зенит",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
   },
   "yandeks-lavka": {
     name: "Яндекс Лавка",
@@ -183,13 +228,13 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
   },
   "plati-po-miru": {
     name: "Плати по миру",
-    category: "Сервисы и подписки",
-    categorySlug: "servisy-i-podpiski",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
   },
   "otp-bank": {
     name: "ОТП Банк",
-    category: "Сервисы и подписки",
-    categorySlug: "servisy-i-podpiski",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
   },
   "fmart": {
     name: "FMART",
@@ -251,8 +296,8 @@ const STORE_OVERRIDES: Record<string, NormalizedStoreMeta> = {
   },
   "kreditnaya-sberkarta": {
     name: "Кредитная СберКарта",
-    category: "Сервисы и подписки",
-    categorySlug: "servisy-i-podpiski",
+    category: "Банки и финансы",
+    categorySlug: "finansy",
   },
   "agni": {
     name: "Agni",
@@ -315,7 +360,13 @@ export function inferCategory(text: string): { name: string; slug: string } {
   if (/спорт|фитнес|тренировк|велосипед|sport|fitness/i.test(t)) {
     return { name: "Спорт и отдых", slug: "sport-i-otdyh" };
   }
-  if (/впн|vpn|антивирус|\bсофт|подписк|стриминг|финанс|банк|кредит|страхов|сервис|pro32|service/i.test(t)) {
+  if (
+    !/сбердевайс|сберздоров|сберпрайм|т-путешеств/i.test(t) &&
+    /финанс|банк|банковск|кредит|дебетов|вклад|сберкарт|ипотек|страхов|rgs\b|\bbank\b/i.test(t)
+  ) {
+    return { name: "Банки и финансы", slug: "finansy" };
+  }
+  if (/впн|vpn|антивирус|\bсофт|подписк|стриминг|сервис|pro32|service/i.test(t)) {
     return { name: "Сервисы и подписки", slug: "servisy-i-podpiski" };
   }
 

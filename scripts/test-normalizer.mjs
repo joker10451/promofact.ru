@@ -880,7 +880,7 @@ const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8"
   const sberKids = stores.find((s) => s.slug === "detskie-platezhnye-aksessuary-ot-sbera");
   assert.ok(sberKids, "Магазин 'detskie-platezhnye-aksessuary-ot-sbera' должен присутствовать в getAllStores()");
   assert.strictEqual(sberKids.id, 4025, "ID магазина должен быть 4025");
-  assert.strictEqual(sberKids.categorySlug, "servisy-i-podpiski", "Категория должна быть 'servisy-i-podpiski'");
+  assert.strictEqual(sberKids.categorySlug, "finansy", "Категория должна быть 'finansy'");
 
   // 2. Проверяем дедупликацию: если в фид приходит активный оффер 4025
   const mockPayloadWith4025 = JSON.stringify({
@@ -916,7 +916,7 @@ const realMetaContentBefore = fs.readFileSync("src/data/sync-meta.json", "utf-8"
   assert.strictEqual(parsedCoupons.length, 1, "Должен распарситься 1 купон");
   assert.strictEqual(parsedCoupons[0].store.slug, "detskie-platezhnye-aksessuary-ot-sbera");
   assert.strictEqual(parsedCoupons[0].store.id, 4025);
-  assert.strictEqual(parsedCoupons[0].store.categorySlug, "servisy-i-podpiski");
+  assert.strictEqual(parsedCoupons[0].store.categorySlug, "finansy");
 
   console.log("✓ Test 35 [Hotfix]: Fallback store 4025 доступен без офферов и дедуплицируется (PASS)");
   passed++;

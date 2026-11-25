@@ -61,6 +61,7 @@ export function formatTelegramPost(coupon: Coupon): {
     "odezhda-i-obuv": "👗",
     "elektronika": "📱",
     "servisy-i-podpiski": "🎬",
+    "finansy": "💳",
     "tsvety": "💐",
     "travel": "✈️",
     "zdorove-i-apteki": "💊",

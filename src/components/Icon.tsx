@@ -317,7 +317,7 @@ export default function Icon({
   className = "",
   size = 20,
 }: IconProps & { name: string }) {
-  const key = GROUP_ALIAS[name] ?? COLLECTION_ALIAS[name] ?? name;
+  const key = GROUP_ALIAS[name] ?? COLLECTION_ALIAS[name] ?? (name === "finansy" ? "card" : name);
   const path = PATHS[key] ?? PATHS.raznoe;
 
   return (
