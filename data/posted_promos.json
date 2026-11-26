@@ -11,6 +11,17 @@
   ],
   "history": [
     {
+      "id": 1795718495425,
+      "sourceType": "digest",
+      "code": "ДО −50% ЕДА",
+      "store": "Обеденная корзина: как экономить до 50% на доставке продукто",
+      "storeSlug": "digest-food-basket",
+      "messageId": 135,
+      "postUrl": "https://t.me/smart_zakupka/135",
+      "expires": null,
+      "date": "2026-11-26T18:41:35.425Z"
+    },
+    {
       "id": 1795634479602,
       "sourceType": "perfluence",
       "code": "SZHM954C1C25",
@@ -20,7 +31,9 @@
       "messageId": 133,
       "postUrl": "https://t.me/smart_zakupka/133",
       "expires": "25.11.2026",
-      "date": "2026-11-25T19:21:19.602Z"
+      "date": "2026-11-25T19:21:19.602Z",
+      "deleted": true,
+      "deletedAt": "2026-11-26T18:39:43.672Z"
     },
     {
       "id": 1795628385799,
