@@ -962,6 +962,10 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
         code: activePost.bannerSpec.code,
         bonus: activePost.bannerSpec.bonus,
         badgeText: activePost.bannerSpec.badgeText,
+        mode: activePost.bannerSpec.mode,
+        ctaLabel: activePost.bannerSpec.ctaLabel,
+        ctaHint: activePost.bannerSpec.ctaHint,
+        ctaPill: activePost.bannerSpec.ctaPill,
       });
       console.log(` -> 🎨 Сгенерирован баннер для ${activePost.kind}: ${activePost.bannerPath}`);
     } catch (genErr) {
@@ -969,7 +973,7 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
       if (activePost.postMode === "photo") activePost.bannerPath = "https://promofact.ru/og-image.png";
     }
   } else if (activePost && !activePost.bannerPath && activePost.bannerSpec && options.dryRun) {
-    activePost.bannerPath = `[dynamic-banner:${activePost.bannerSpec.storeName}/${activePost.bannerSpec.code}]`;
+    activePost.bannerPath = `[dynamic-banner:${activePost.bannerSpec.storeName}/${activePost.bannerSpec.ctaPill || activePost.bannerSpec.code || "editorial"}]`;
   }
 
   if (!activePost) {

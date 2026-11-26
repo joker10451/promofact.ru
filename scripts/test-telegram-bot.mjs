@@ -17,6 +17,7 @@ import {
   getTgBotLink,
   selectHybridTrack,
 } from "./hybrid-post-sources.mjs";
+import { buildBannerHtml } from "./banner-generator.mjs";
 
 // 1. Deeplink & URL helpers
 assert.equal(
@@ -266,7 +267,15 @@ const forcedOverride = canAutoPostNow([{ date: "2026-11-25T15:20:00Z" }], { nowM
 assert.equal(forcedOverride.allowed, true);
 
 const digests = buildDigestCandidates([], nowMs);
-assert.ok(digests.length >= 2 && digests[0].bannerSpec && digests[0].postMode === "photo");
+assert.ok(digests.length >= 3 && digests[0].bannerSpec && digests[0].postMode === "photo");
+assert.equal(digests[0].bannerSpec.mode, "editorial");
+assert.ok(!digests[0].bannerSpec.storeName.includes("ДАЙДЖЕСТ ПРОМОФАКТ"));
+const editorialHtml = buildBannerHtml(digests[0].bannerSpec);
+assert.ok(!editorialHtml.includes("Ваш промокод"), "Editorial digest banner must not render fake promocode ticket");
+assert.ok(!editorialHtml.includes("Нажми на код"), "Editorial digest banner must not ask to copy fake code");
+assert.ok(editorialHtml.includes(digests[0].bannerSpec.ctaPill));
+const promoHtml = buildBannerHtml({ storeName: "Яндекс Лавка", code: "PROMO15", bonus: "Скидка 15%" });
+assert.ok(promoHtml.includes("Ваш промокод:") && promoHtml.includes("PROMO15"));
 assert.ok(digests[0].buttons.flat().some((b) => b.url.includes(getTgBotLink().split("?")[0])));
 assert.equal(
   selectHybridTrack({
