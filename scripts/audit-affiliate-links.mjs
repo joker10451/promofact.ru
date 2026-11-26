@@ -98,6 +98,8 @@ async function main() {
 
   const successAt = metaResult.data?.last_success_at;
   const hoursSinceSync = successAt ? Math.round((Date.now() - new Date(successAt).getTime()) / 3600000) : null;
+  // Admitad scheduled sync was retired when the public catalog became Perfluence-only.
+  const enforceAdmitadFreshness = process.env.ENFORCE_ADMITAD_SYNC_FRESHNESS === "true";
   const report = {
     admitad: {
       stored: rows.length, markedActive: active.length, notExpiredActive: eligible.length,
@@ -112,6 +114,7 @@ async function main() {
         ...broken.map(r => issueSample(r,"BAD_LINK_OR_ERID")),
         ...unexpectedPublisher.map(r => issueSample(r,"PUBLISHER_FRAGMENT_DIFFERENT"))].slice(0,20),
       lastSuccess: successAt || null, hoursSinceSync, syncStatus: metaResult.data?.last_status || null,
+      syncFreshnessEnforced: enforceAdmitadFreshness,
     },
     perfluenceBundledSnapshot: {
       offers: perfluenceOffers, missingLink: missingPerfluenceLink,
@@ -122,8 +125,8 @@ async function main() {
     limits: "Syntactic and metadata checks only; no clicks, order attribution or final merchant redirects verified",
   };
   console.log(JSON.stringify(report, null, 2));
-  const unhealthy = broken.length || unexpectedPublisher.length || crossStoreCampaigns.length ||
-    !successAt || (hoursSinceSync !== null && hoursSinceSync > 48);
+  const staleAdmitad = enforceAdmitadFreshness && (!successAt || (hoursSinceSync !== null && hoursSinceSync > 48));
+  const unhealthy = broken.length || unexpectedPublisher.length || crossStoreCampaigns.length || staleAdmitad;
   if (unhealthy) process.exitCode = 1;
 }
 main().catch(err => { console.error("Affiliate audit failed:", err.message); process.exitCode = 2; });
