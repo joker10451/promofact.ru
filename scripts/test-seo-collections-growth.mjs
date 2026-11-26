@@ -9,7 +9,7 @@ const { COLLECTIONS, getCollectionCoupons, MIN_INDEXABLE_COLLECTION_OFFERS } =
 
 assert.equal(MIN_INDEXABLE_COLLECTION_OFFERS, 3);
 const priority = ["first-order", "food-delivery", "vecher-kino",
-  "krasota-i-parfyum", "vygodnye-oteli"];
+  "krasota-i-parfyum", "vygodnye-oteli", "novyy-god-2027", "povtornyy-zakaz"];
 for (const slug of priority) {
   const col = COLLECTIONS.find(c => c.slug === slug);
   assert(col, "Missing established collection " + slug);
@@ -60,4 +60,28 @@ assert.equal(bf.filter(mk("letual", "черный", "Скидка 60% от 7 000
 assert.equal(bf.filter(mk("letual", "ПЯТНИЦА", "Скидка 20% от 4 000 ₽")), false);
 assert.equal(bf.filter(mk("otello", "ЧЕРНЫЙ", "Скидка 5%")), false);
 assert.equal(bf.filter(mk("any", "", "Чёрная пятница: −30%")), true);
-console.log("SEO collection growth: 5 buyer guides, dynamic ISR, coherent robots/sitemap and placement rules PASS");
+
+// Repeat-order collection must exclude first-order-only offers and accept repeat/universal ones.
+const repeatCol = COLLECTIONS.find(c => c.slug === "povtornyy-zakaz");
+assert(repeatCol, "Missing povtornyy-zakaz collection");
+assert.equal(repeatCol.filter({
+  store: { slug: "samokat", name: "Самокат" },
+  promocode: { code: "NEW1", isFirstOrderOnly: true, customerTypeLabel: "Первый и повторный заказ", bonusName: "Скидка", terms: null },
+}), false);
+assert.equal(repeatCol.filter({
+  store: { slug: "samokat", name: "Самокат" },
+  promocode: { code: "NEW2", isFirstOrderOnly: false, customerTypeLabel: "Только для новых", bonusName: "Скидка на первый заказ", terms: null },
+}), false);
+assert.equal(repeatCol.filter({
+  store: { slug: "samokat", name: "Самокат" },
+  promocode: { code: "REP1", isFirstOrderOnly: false, customerTypeLabel: "Первый и повторный заказ", bonusName: "Скидка 10%", terms: null },
+}), true);
+
+const nyCol = COLLECTIONS.find(c => c.slug === "novyy-god-2027");
+assert(nyCol, "Missing novyy-god-2027 collection");
+assert.equal(nyCol.filter({
+  store: { slug: "podruzhka", name: "Подружка", categorySlug: "kosmetika-i-parfyumeriya" },
+  promocode: { code: "NY27", bonusName: "Скидка 20%", terms: null },
+}), true);
+
+console.log("SEO collection growth: buyer guides, dynamic ISR, coherent robots/sitemap, NY 2027 & repeat-order hubs PASS");

@@ -310,6 +310,8 @@ const COLLECTION_ALIAS: Record<string, string> = {
   "vecher-kino": "onlayn-kinoteatry",
   "krasota-i-parfyum": "kosmetika-i-parfyumeriya",
   "vygodnye-oteli": "puteshestviya-i-turizm",
+  "novyy-god-2027": "gift",
+  "povtornyy-zakaz": "repeat",
 };
 
 export default function Icon({

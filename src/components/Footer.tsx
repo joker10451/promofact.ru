@@ -134,6 +134,18 @@ export default async function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/collections/novyy-god-2027" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                Новый Год 2027
+              </Link>
+            </li>
+            <li>
+              <Link href="/collections/povtornyy-zakaz" className={footerLink}>
+                <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
+                На повторный заказ
+              </Link>
+            </li>
+            <li>
               <Link href="/collections/finansy-i-karty" className={footerLink}>
                 <span className="h-1 w-1 rounded-full bg-white/30 transition-colors group-hover/fl:bg-yellow" />
                 Карты и вклады
