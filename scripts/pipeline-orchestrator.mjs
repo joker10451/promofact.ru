@@ -469,56 +469,72 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
     console.log(`\n[Фаза 2] Автопилот Perfluence пропущен (mode=${mode}, hasSession=${fs.existsSync(SESSION_FILE)}).`);
   }
 
-  // ФАЗА 2.1: Сразу досдаём отложенные сайт-отчёты и сопоставленные посты @smart_zakupka со скриншотом через Playwright (даже если ТГ-постинг на кулдауне)
-  if (!options.dryRun && fs.existsSync(SESSION_FILE) && autopilotReport) {
-    const pendingSiteShots = autopilotReport.needsScreenshotPosts || [];
-    if (pendingSiteShots.length > 0) {
-      console.log(`\n[Фаза 2.1] Сдача ${Math.min(pendingSiteShots.length, 20)} из ${pendingSiteShots.length} сайт-отчётов со скриншотом...`);
-      for (const pending of pendingSiteShots.slice(0, 20)) {
-        try {
-          await submitReport(pending.postId, pending.postUrl, { headless: true });
-          console.log(` ✓ Сайт-отчёт #${pending.postId} (${pending.postUrl}) сдан со скриншотом!`);
-        } catch (shotErr) {
-          console.warn(` ⚠ Не удалось сдать #${pending.postId}:`, shotErr.message);
+  // ФАЗА 2.1: Сразу досдаём отложенные сайт-отчёты и сопоставленные посты @smart_zakupka со скриншотом через Playwright (даже если ТГ-постинг на кулдауне или Фаза 2 завершилась частично)
+  if (!options.dryRun && fs.existsSync(SESSION_FILE)) {
+    const { resolveStoreSlug, TELEGRAM_ACCOUNT_ID, fetchScheduledPosts } = await getPerfluenceAutopilot();
+    if (!autopilotReport) {
+      try {
+        const { getPerfluenceCookieString } = await import("../src/lib/perfluenceLiveSync.ts");
+        const cookie = getPerfluenceCookieString();
+        if (cookie) {
+          const sched = await fetchScheduledPosts(cookie);
+          if (!sched.sessionExpired) {
+            autopilotReport = { needsScreenshotPosts: [], scheduledPosts: sched.posts || [] };
+          }
         }
+      } catch (fallbackErr) {
+        console.warn(" ⚠ Не удалось загрузить запланированные посты для Фазы 2.1:", fallbackErr.message);
       }
-      autopilotReport.needsScreenshotPosts = [];
     }
+    if (autopilotReport) {
+      const pendingSiteShots = autopilotReport.needsScreenshotPosts || [];
+      if (pendingSiteShots.length > 0) {
+        console.log(`\n[Фаза 2.1] Сдача ${Math.min(pendingSiteShots.length, 20)} из ${pendingSiteShots.length} сайт-отчётов со скриншотом...`);
+        for (const pending of pendingSiteShots.slice(0, 20)) {
+          try {
+            await submitReport(pending.postId, pending.postUrl, { headless: true });
+            console.log(` ✓ Сайт-отчёт #${pending.postId} (${pending.postUrl}) сдан со скриншотом!`);
+          } catch (shotErr) {
+            console.warn(` ⚠ Не удалось сдать #${pending.postId}:`, shotErr.message);
+          }
+        }
+        autopilotReport.needsScreenshotPosts = [];
+      }
 
-    const { resolveStoreSlug, TELEGRAM_ACCOUNT_ID } = await getPerfluenceAutopilot();
-    const tgScheduled = (autopilotReport.scheduledPosts || []).filter((p) => p.accountId === TELEGRAM_ACCOUNT_ID);
-    const tgMatches = [];
-    for (const schedPost of tgScheduled) {
-      if (tgMatches.length >= 8) break;
-      const matchedUrl = findRecentTgPostUrl({
-        projectId: schedPost.projectId,
-        projectName: schedPost.projectName,
-        historyEntries: historyData.history,
-        tgEntries: tgHistory,
-        resolveStoreSlug,
-        channelId: CHANNEL_ID,
-        nowMs: now,
-      });
-      if (matchedUrl) {
-        tgMatches.push({ schedPost, matchedUrl });
-      }
-    }
-    if (tgMatches.length > 0) {
-      console.log(`\n[Фаза 2.1] Сдача ${tgMatches.length} запланированных ТГ-отчётов @smart_zakupka по недавним постам...`);
-      const closedTgPostIds = new Set();
-      for (const { schedPost, matchedUrl } of tgMatches) {
-        try {
-          await submitReport(schedPost.postId, matchedUrl, { headless: true });
-          closedTgPostIds.add(schedPost.postId);
-          console.log(` ✓ ТГ-отчёт #${schedPost.postId} (${matchedUrl}) сдан!`);
-        } catch (tgShotErr) {
-          console.warn(` ⚠ Не удалось сдать ТГ-отчёт #${schedPost.postId}:`, tgShotErr.message);
+      const tgScheduled = (autopilotReport.scheduledPosts || []).filter((p) => p.accountId === TELEGRAM_ACCOUNT_ID);
+      const tgMatches = [];
+      for (const schedPost of tgScheduled) {
+        if (tgMatches.length >= 8) break;
+        const matchedUrl = findRecentTgPostUrl({
+          projectId: schedPost.projectId,
+          projectName: schedPost.projectName,
+          historyEntries: historyData.history,
+          tgEntries: tgHistory,
+          resolveStoreSlug,
+          channelId: CHANNEL_ID,
+          nowMs: now,
+        });
+        if (matchedUrl) {
+          tgMatches.push({ schedPost, matchedUrl });
         }
       }
-      if (closedTgPostIds.size > 0 && Array.isArray(autopilotReport.scheduledPosts)) {
-        autopilotReport.scheduledPosts = autopilotReport.scheduledPosts.filter(
-          (p) => !closedTgPostIds.has(p.postId),
-        );
+      if (tgMatches.length > 0) {
+        console.log(`\n[Фаза 2.1] Сдача ${tgMatches.length} запланированных ТГ-отчётов @smart_zakupka по недавним постам...`);
+        const closedTgPostIds = new Set();
+        for (const { schedPost, matchedUrl } of tgMatches) {
+          try {
+            await submitReport(schedPost.postId, matchedUrl, { headless: true });
+            closedTgPostIds.add(schedPost.postId);
+            console.log(` ✓ ТГ-отчёт #${schedPost.postId} (${matchedUrl}) сдан!`);
+          } catch (tgShotErr) {
+            console.warn(` ⚠ Не удалось сдать ТГ-отчёт #${schedPost.postId}:`, tgShotErr.message);
+          }
+        }
+        if (closedTgPostIds.size > 0 && Array.isArray(autopilotReport.scheduledPosts)) {
+          autopilotReport.scheduledPosts = autopilotReport.scheduledPosts.filter(
+            (p) => !closedTgPostIds.has(p.postId),
+          );
+        }
       }
     }
   }

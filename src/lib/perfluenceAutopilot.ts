@@ -8,7 +8,7 @@ export const WEBSITE_ACCOUNT_ID = "3074542";
 export const TELEGRAM_ACCOUNT_ID = "3066585";
 export const MAX_SCHEDULED_TG_BACKLOG = 3;
 
-const WEBSITE_BLOCKED_PROJECT_IDS = new Set([1409, 920, 112]); // WinLab, Flor2u (website review), Delimobil
+const WEBSITE_BLOCKED_PROJECT_IDS = new Set([1409, 920, 112, 2728]); // WinLab, Flor2u (website review), Delimobil, charity 2728 (no storefront)
 const GLOBAL_BLOCKED_PROJECT_IDS = new Set([112]); // Delimobil
 const FORBIDDEN_KEYWORD_RE =
   /винлаб|winlab|алко|вино|пиво|табак|кальян|vape|вейп|казино|букмекер|делимобиль|delimobil/i;
@@ -193,22 +193,32 @@ async function pfFetch(
   init: RequestInit = {},
 ): Promise<{ ok: boolean; status: number; sessionExpired: boolean; html: string; location: string | null }> {
   const url = pathOrUrl.startsWith("http") ? pathOrUrl : `https://dash.perfluence.net${pathOrUrl}`;
-  const res = await fetch(url, {
-    ...init,
-    redirect: "manual",
-    signal: init.signal ?? AbortSignal.timeout(15_000),
-    headers: {
-      Cookie: cookieHeader,
-      "User-Agent": PERFLUENCE_UA,
-      ...(init.headers || {}),
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...init,
+      redirect: "manual",
+      signal: init.signal ?? AbortSignal.timeout(15_000),
+      headers: {
+        Cookie: cookieHeader,
+        "User-Agent": PERFLUENCE_UA,
+        ...(init.headers || {}),
+      },
+    });
+  } catch {
+    return { ok: false, status: 0, sessionExpired: false, html: "", location: null };
+  }
 
   const location = res.headers.get("location");
   if (res.status >= 300 && res.status < 400 && location && /\/(?:site\/)?login/i.test(location)) {
     return { ok: false, status: res.status, sessionExpired: true, html: "", location };
   }
-  const html = await res.text();
+  let html = "";
+  try {
+    html = await res.text();
+  } catch {
+    return { ok: false, status: res.status, sessionExpired: false, html: "", location };
+  }
   if (/action="\/(?:site\/)?login"|Вход в личный кабинет/i.test(html) && !html.includes("logout")) {
     return { ok: false, status: res.status, sessionExpired: true, html, location };
   }
@@ -431,17 +441,21 @@ async function verifyLiveStorePage(
   slug: string,
 ): Promise<{ ready: boolean; html: string }> {
   const url = `${siteBaseUrl.replace(/\/$/, "")}/store/${slug}`;
-  const res = await fetch(url, {
-    headers: {
-      ...(siteHostHeader ? { Host: siteHostHeader } : {}),
-      "Cache-Control": "no-cache",
-    },
-    signal: AbortSignal.timeout(12_000),
-  });
-  if (!res.ok) return { ready: false, html: "" };
-  const html = await res.text();
-  const ready = /https?:\/\/[a-z0-9.-]+\.prfl\.me\//i.test(html) && /erid/i.test(html);
-  return { ready, html };
+  try {
+    const res = await fetch(url, {
+      headers: {
+        ...(siteHostHeader ? { Host: siteHostHeader } : {}),
+        "Cache-Control": "no-cache",
+      },
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!res.ok) return { ready: false, html: "" };
+    const html = await res.text();
+    const ready = /https?:\/\/[a-z0-9.-]+\.prfl\.me\//i.test(html) && /erid/i.test(html);
+    return { ready, html };
+  } catch {
+    return { ready: false, html: "" };
+  }
 }
 
 async function deleteChannelPost(
@@ -449,18 +463,22 @@ async function deleteChannelPost(
   channelId: string,
   messageId: string,
 ): Promise<{ ok: boolean; permanentSkip: boolean; alreadyMissing: boolean; description?: string }> {
-  const res = await fetch(`https://api.telegram.org/bot${botToken}/deleteMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: channelId, message_id: Number(messageId) }),
-    signal: AbortSignal.timeout(10_000),
-  });
-  const json = (await res.json().catch(() => ({}))) as { ok?: boolean; description?: string };
-  if (json.ok) return { ok: true, permanentSkip: true, alreadyMissing: false };
-  const desc = json.description || `HTTP ${res.status}`;
-  const alreadyMissing = /message to delete not found/i.test(desc);
-  const permanentSkip = alreadyMissing || /can't be deleted/i.test(desc);
-  return { ok: false, permanentSkip, alreadyMissing, description: desc };
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/deleteMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: channelId, message_id: Number(messageId) }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    const json = (await res.json().catch(() => ({}))) as { ok?: boolean; description?: string };
+    if (json.ok) return { ok: true, permanentSkip: true, alreadyMissing: false };
+    const desc = json.description || `HTTP ${res.status}`;
+    const alreadyMissing = /message to delete not found/i.test(desc);
+    const permanentSkip = alreadyMissing || /can't be deleted/i.test(desc);
+    return { ok: false, permanentSkip, alreadyMissing, description: desc };
+  } catch (err) {
+    return { ok: false, permanentSkip: false, alreadyMissing: false, description: (err as Error).message };
+  }
 }
 
 async function runPool<T>(items: T[], concurrency: number, worker: (item: T) => Promise<void>): Promise<void> {

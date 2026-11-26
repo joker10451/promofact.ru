@@ -44,6 +44,12 @@ assert.equal(resolveStoreSlug(3611, "Мегамаркет СРА"), "megamarket"
 assert.equal(resolveStoreSlug(1135, "Яндекс Путешествия"), "yandeks-puteshestviya");
 assert.equal(resolveStoreSlug(4815, "Сберздоровье_Умные устройства"), "sberzdorovie");
 assert.equal(resolveStoreSlug(2004, "Яндекс Аптеки"), "yandeks-apteki");
+assert.equal(resolveStoreSlug(832, "Альфа-Банк. Альфа Карта дебетовая"), "alfa-bank");
+assert.equal(resolveStoreSlug(4383, "Вклад в Сбере"), "vklad-v-sbere");
+assert.equal(resolveStoreSlug(1174, ""), "randewoo");
+assert.equal(resolveStoreSlug(2584, ""), "eeeeeee-ex-ebidoebi");
+assert.equal(resolveStoreSlug(4247, "Нетология"), "netology");
+assert.equal(isProjectAllowed(2728, "Благотворительный Фонд", WEBSITE_ACCOUNT_ID), false);
 
 // 3. Runtime dynamic overdue ERIDs never mutate OVERDUE_PLACEMENT_ERIDS.size (91 contract)
 assert.equal(OVERDUE_PLACEMENT_ERIDS.size, 91);
@@ -490,6 +496,28 @@ try {
   assert.equal(apiJson.report.activatedLandings.length, 0);
   assert.equal(apiJson.report.needsScreenshotPosts.length, 1);
   assert.equal(tgCalls, 0, "idle VPS cycle with only modal rejections + pending screenshot must not spam Telegram");
+
+  // Timeout on one Perfluence project page must not abort runPerfluenceAutopilotCycle
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/posts/list/") || u.includes("/notifications/block") || u.includes("/projects")) {
+      return new Response(u.includes("/projects/my?page=1") ? '<a href="/project/2576">Проект</a>' : "<html></html>", {
+        status: 200,
+      });
+    }
+    if (u.includes("/posts")) {
+      return new Response("<html></html>", { status: 200 });
+    }
+    throw new DOMException("The operation was aborted due to timeout", "TimeoutError");
+  };
+  const timeoutSafeReport = await runPerfluenceAutopilotCycle({
+    dryRun: false,
+    enablePendingRemovalSync: false,
+    enableTelegramCleanup: false,
+    enableAutoReportSite: false,
+  });
+  assert.equal(timeoutSafeReport.sessionExpired, false);
+  assert.equal(timeoutSafeReport.myProjectIds.length, 1);
 } finally {
   globalThis.fetch = origFetchRoute;
   if (prevRouteSecret === undefined) delete process.env.TELEGRAM_POSTING_SECRET;

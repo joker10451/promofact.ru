@@ -51,7 +51,7 @@ export const PERFLUENCE_STORE_ALIASES: Record<number, { slug: string; name?: str
   4815: { slug: "sberzdorovie", name: "СберЗдоровье" },
   1790: { slug: "ashan", name: "Ашан" },
   2860: { slug: "kion", name: "КИОН" },
-  4247: { slug: "netologiya", name: "Нетология" },
+  4247: { slug: "netology", name: "Нетология" },
   4811: { slug: "sberkot", name: "Игра со СберКотом" },
   1135: { slug: "yandeks-puteshestviya", name: "Яндекс Путешествия" },
   2657: { slug: "podruzhka", name: "Подружка" },
@@ -72,4 +72,8 @@ export const PERFLUENCE_STORE_ALIASES: Record<number, { slug: string; name?: str
   3077: { slug: "netprint", name: "Netprint" },
   2728: { slug: "vozmischastevdom", name: "Возьми счастье в дом" },
   4740: { slug: "esim-world", name: "Esim World" },
+  832: { slug: "alfa-bank", name: "Альфа-Банк" },
+  4383: { slug: "vklad-v-sbere", name: "Вклад в Сбере" },
+  1174: { slug: "randewoo", name: "Randewoo" },
+  2584: { slug: "eeeeeee-ex-ebidoebi", name: "Ёёёёёёё (ex. Ёбидоёби)" },
 };
