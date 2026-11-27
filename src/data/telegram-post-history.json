@@ -186,5 +186,18 @@
       "15PL"
     ],
     "url": "https://promofact.ru/store/chistaya-liniya"
+  },
+  {
+    "messageId": 139,
+    "store": "sunlight",
+    "storeName": "Sunlight",
+    "storeId": 1100,
+    "date": "2026-11-27T23:43:06.417Z",
+    "channel": "@smart_zakupka",
+    "sourceType": "perfluence",
+    "codes": [
+      "pfnn153513"
+    ],
+    "url": "https://promofact.ru/store/sunlight"
   }
 ]

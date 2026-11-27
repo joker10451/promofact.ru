@@ -11,6 +11,18 @@
   ],
   "history": [
     {
+      "id": 1795822986417,
+      "sourceType": "perfluence",
+      "code": "pfnn153513",
+      "store": "Sunlight",
+      "storeSlug": "sunlight",
+      "storeId": 1100,
+      "messageId": 139,
+      "postUrl": "https://t.me/smart_zakupka/139",
+      "expires": "30.11.2026",
+      "date": "2026-11-27T23:43:06.417Z"
+    },
+    {
       "id": 1795804283999,
       "sourceType": "perfluence",
       "code": "15PL",
