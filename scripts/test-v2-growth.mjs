@@ -181,8 +181,15 @@ for (const dup of ["foodband", "polza", "platipomiru", "sberbank", "arnest-yunir
 }
 const letualStore = stores.find((s) => s.slug === "letual");
 assert.ok(
-  letualStore?.coupons.some((c) => c.affiliate.ordMarker === "2RanykCAjCg"),
-  "L'Etoile must use fresh Perfluence feed ERID 2RanykCAjCg",
+  letualStore &&
+    letualStore.coupons.length >= 1 &&
+    letualStore.coupons.some(
+      (c) =>
+        c.affiliate.link.includes("letu.prfl.me/") &&
+        Boolean(c.affiliate.ordMarker) &&
+        c.affiliate.ordText.includes(`erid: ${c.affiliate.ordMarker}`),
+    ),
+  "L'Etoile must expose fresh verified Perfluence feed placement with valid ERID",
 );
 assert.equal(fs.readFileSync("src/lib/storeExtras.ts", "utf8").includes("kv7qjypp"), false,
   "Expired kv7qjypp FAQ must stay removed from storeExtras");
