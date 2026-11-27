@@ -11,6 +11,18 @@
   ],
   "history": [
     {
+      "id": 1795768088412,
+      "sourceType": "perfluence",
+      "code": "tbch8zjh",
+      "store": "PREMIER",
+      "storeSlug": "premier",
+      "storeId": 812,
+      "messageId": 137,
+      "postUrl": "https://t.me/smart_zakupka/137",
+      "expires": "29.11.2026",
+      "date": "2026-11-27T08:28:08.412Z"
+    },
+    {
       "id": 1795737674685,
       "sourceType": "perfluence",
       "code": "pf24b5xgj555",

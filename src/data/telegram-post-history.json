@@ -160,5 +160,18 @@
       "pf24b5xgj555"
     ],
     "url": "https://promofact.ru/store/start-ru"
+  },
+  {
+    "messageId": 137,
+    "store": "premier",
+    "storeName": "PREMIER",
+    "storeId": 812,
+    "date": "2026-11-27T08:28:08.413Z",
+    "channel": "@smart_zakupka",
+    "sourceType": "perfluence",
+    "codes": [
+      "tbch8zjh"
+    ],
+    "url": "https://promofact.ru/store/premier"
   }
 ]
