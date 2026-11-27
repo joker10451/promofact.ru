@@ -173,5 +173,18 @@
       "tbch8zjh"
     ],
     "url": "https://promofact.ru/store/premier"
+  },
+  {
+    "messageId": 138,
+    "store": "chistaya-liniya",
+    "storeName": "Арнест ЮниРусь на Ozon",
+    "storeId": 4526,
+    "date": "2026-11-27T18:31:24.000Z",
+    "channel": "@smart_zakupka",
+    "sourceType": "perfluence",
+    "codes": [
+      "15PL"
+    ],
+    "url": "https://promofact.ru/store/chistaya-liniya"
   }
 ]

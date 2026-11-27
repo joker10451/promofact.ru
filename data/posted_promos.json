@@ -11,6 +11,18 @@
   ],
   "history": [
     {
+      "id": 1795804283999,
+      "sourceType": "perfluence",
+      "code": "15PL",
+      "store": "Арнест ЮниРусь на Ozon",
+      "storeSlug": "chistaya-liniya",
+      "storeId": 4526,
+      "messageId": 138,
+      "postUrl": "https://t.me/smart_zakupka/138",
+      "expires": "30.11.2026",
+      "date": "2026-11-27T18:31:23.999Z"
+    },
+    {
       "id": 1795768088412,
       "sourceType": "perfluence",
       "code": "tbch8zjh",
