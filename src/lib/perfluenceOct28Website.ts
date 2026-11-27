@@ -113,6 +113,16 @@ export function isApprovedOct28PublisherPlacement(c: Coupon): boolean {
   if (c.store.slug === "rutube" && c.affiliate.ordMarker === "2RanykXMAsE") return true;
   // Allow November 6 renewed Ostrovok placement
   if (c.store.slug === "ostrovok" && c.affiliate.ordMarker === "2RanykdK97S" || c.affiliate.ordMarker === "2Ranyk9Ckdz") return true;
+  // Allow November 27 verified site placements for PREMIER (promofact.ru)
+  if (
+    c.store.slug === "premier" &&
+    ((c.affiliate.ordMarker === "2RanymRJo7A" &&
+      c.affiliate.link === "https://premier.prfl.me/sites/9zztzk?erid=2RanymRJo7A") ||
+      (c.affiliate.ordMarker === "2RanynPoPjz" &&
+        c.affiliate.link === "https://premier.prfl.me/sites/ga7ey8?erid=2RanynPoPjz"))
+  ) {
+    return true;
+  }
   if (c.promocode.group === "admitad") return true;
   return PERFLUENCE_OCT28_OFFERS.some((approved) =>
     approved.id === c.id &&

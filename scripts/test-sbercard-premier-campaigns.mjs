@@ -20,6 +20,15 @@ assert.ok(premierStore && premierStore.coupons.length >= 1, "PREMIER must stay a
 for (const c of premierStore.coupons) {
   assert.equal(carriesOverduePlacement(c), false, "PREMIER feed offer must not use overdue ERID");
   assert.ok(c.affiliate.ordMarker && c.affiliate.ordText.includes(`erid: ${c.affiliate.ordMarker}`));
+  assert.ok(c.affiliate.link.includes("/sites/"), `PREMIER site offer must use /sites/ link, got ${c.affiliate.link}`);
 }
+assert.ok(
+  premierStore.coupons.some((c) => c.promocode.code === "yrgm69y3" && c.affiliate.ordMarker === "2RanymRJo7A"),
+  "PREMIER must expose promofact.ru code yrgm69y3 with erid 2RanymRJo7A",
+);
+assert.ok(
+  premierStore.coupons.some((c) => c.promocode.code === "" && c.affiliate.ordMarker === "2RanynPoPjz"),
+  "PREMIER must expose promofact.ru 70-day link offer with erid 2RanynPoPjz",
+);
 
 console.log("SberCard (canonical) and PREMIER Perfluence feed ERID and legal checks PASS");

@@ -230,6 +230,67 @@ export const CUSTOM_COUPONS: Coupon[] = [
     },
     extraLinks: [],
   },
+  // Verified promofact.ru site placements for PREMIER (project 812) — keeps /sites/ ERID separate from @smart_zakupka widget
+  {
+    id: 81202611271,
+    promocode: {
+      id: 81202611271,
+      code: "yrgm69y3",
+      bonusName: "65 дней доступа к PREMIER + RUTUBE или 15 дней за 1 ₽",
+      terms:
+        "Оформить бесплатный период на 65 дней доступа к сервисам PREMIER + RUTUBE или оформить подписку на 15 дней за 1 ₽ по промокоду yrgm69y3. Действует до 29 ноября 2026 года 23:59 МСК.",
+      expires: "2026-11-29T23:59:59+03:00",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Новым или без активной подписки",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["premier"],
+      activeBloggers: STABLE_STORES["premier"].activeBloggers ?? 0,
+    },
+    affiliate: {
+      link: "https://premier.prfl.me/sites/9zztzk?erid=2RanymRJo7A",
+      landingLink: "https://premier.prfl.me/sites/9zztzk?erid=2RanymRJo7A",
+      ordMarker: "2RanymRJo7A",
+      ordText: 'Реклама. Рекламодатель: ООО "ПРЕМЬЕР" 16+ ИНН 9702011190 erid: 2RanymRJo7A',
+    },
+    extraLinks: [],
+  },
+  {
+    id: 81202611272,
+    promocode: {
+      id: 81202611272,
+      code: "",
+      bonusName: "70 дней доступа к PREMIER + RUTUBE или 15 дней за 1 ₽",
+      terms:
+        "Флеш-акция: оформите бесплатный период на 70 дней доступа к сервисам PREMIER + RUTUBE или подписку на 15 дней за 1 ₽ по ссылке. С 27 по 29 ноября 2026 года.",
+      expires: "2026-11-29T23:59:59+03:00",
+      isHit: true,
+      isUniversal: false,
+      isFirstOrderOnly: true,
+      customerTypeLabel: "Флеш-акция до 29 ноября",
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: {
+      ...STABLE_STORES["premier"],
+      activeBloggers: STABLE_STORES["premier"].activeBloggers ?? 0,
+    },
+    affiliate: {
+      link: "https://premier.prfl.me/sites/ga7ey8?erid=2RanynPoPjz",
+      landingLink: "https://premier.prfl.me/sites/ga7ey8?erid=2RanynPoPjz",
+      ordMarker: "2RanynPoPjz",
+      ordText: 'Реклама. Рекламодатель: ООО "ПРЕМЬЕР" 16+ ИНН 9702011190 erid: 2RanynPoPjz',
+    },
+    extraLinks: [],
+  },
 ];
 
 const PUBLISH_FROM: Record<number, string> = {};

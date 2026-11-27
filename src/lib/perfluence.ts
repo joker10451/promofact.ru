@@ -676,6 +676,9 @@ export function isApprovedPublicCouponPlacement(c: Coupon): boolean {
 const WIDGET_BLOCKED_STORES = new Set(["winlab", "flor2u"]);
 
 export function isPublishableWidgetOffer(c: Coupon): boolean {
+  if (c.store.slug === "premier" && !c.affiliate.link.includes("/sites/")) {
+    return false;
+  }
   return isPublicPerfluenceWidgetCoupon(c) &&
     !WIDGET_BLOCKED_STORES.has(c.store.slug) &&
     // Medical offers remain blocked unless the advertiser supplies the mandatory warning.

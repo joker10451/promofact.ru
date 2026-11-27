@@ -325,7 +325,12 @@ async function captureProofScreenshot(browser, postId, postUrl) {
     await page.goto(renderUrl, { waitUntil: "domcontentloaded", timeout: 25000 });
     await page.waitForTimeout(2500);
     if (tgMatch && typeof page.locator === "function") {
-      await page.locator(`[data-post="${tgMatch[1]}"]`).first().scrollIntoViewIfNeeded().catch(() => {});
+      const postEl = page.locator(`[data-post="${tgMatch[1]}"]`).first();
+      if (await postEl.count()) {
+        await postEl.scrollIntoViewIfNeeded().catch(() => {});
+        await postEl.screenshot({ path: proofPath });
+        return proofPath;
+      }
     }
     await page.screenshot({ path: proofPath, fullPage: false });
     return proofPath;
