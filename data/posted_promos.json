@@ -11,6 +11,18 @@
   ],
   "history": [
     {
+      "id": 1795737674685,
+      "sourceType": "perfluence",
+      "code": "pf24b5xgj555",
+      "store": "Start.ru",
+      "storeSlug": "start-ru",
+      "storeId": 1623,
+      "messageId": 136,
+      "postUrl": "https://t.me/smart_zakupka/136",
+      "expires": "31.12.2026",
+      "date": "2026-11-27T00:01:14.685Z"
+    },
+    {
       "id": 1795718495425,
       "sourceType": "digest",
       "code": "ДО −50% ЕДА",

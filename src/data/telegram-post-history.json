@@ -147,5 +147,18 @@
       "ДО −50% ЕДА"
     ],
     "url": "https://promofact.ru/category/dostavka-produktov"
+  },
+  {
+    "messageId": 136,
+    "store": "start-ru",
+    "storeName": "Start.ru",
+    "storeId": 1623,
+    "date": "2026-11-27T00:01:14.686Z",
+    "channel": "@smart_zakupka",
+    "sourceType": "perfluence",
+    "codes": [
+      "pf24b5xgj555"
+    ],
+    "url": "https://promofact.ru/store/start-ru"
   }
 ]
