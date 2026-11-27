@@ -46,6 +46,8 @@ import {
   parseExpiryMs,
   recordTgHistory,
   selectHybridTrack,
+  truncateAtWord,
+  visibleTelegramLength,
   withUtm,
 } from "./hybrid-post-sources.mjs";
 
@@ -872,19 +874,15 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
     bodyLines.push("📌 <b>Условия:</b>");
     facts.forEach((f) => bodyLines.push(`• ${escapeHtml(f)}`));
 
-    const others = (selected.otherPromos || []).slice(0, 3);
-    if (others.length) {
-      bodyLines.push(`\n🎁 <b>Ещё коды ${escapeHtml(selected.storeName)}:</b>`);
-      for (const o of others) {
-        const until = o.expires ? ` (до ${formatExpires(o.expires)})` : "";
-        const what = escapeHtml(cleanText(o.bonus).slice(0, 70));
-        bodyLines.push(`• <code>${escapeHtml(o.code)}</code> — ${what}${until}`);
-      }
-    }
+    const otherBullets = (selected.otherPromos || []).slice(0, 3).map((o) => {
+      const until = o.expires ? ` (до ${formatExpires(o.expires)})` : "";
+      const what = escapeHtml(truncateAtWord(cleanText(o.bonus), 115));
+      return `• <code>${escapeHtml(o.code)}</code> — ${what}${until}`;
+    });
 
     const details = cleanText(selected.terms) || cleanText(selected.about);
-    if (details) bodyLines.push(`\nℹ️ ${escapeHtml(details.slice(0, 160))}`);
-    bodyLines.push(`\n💬 <i>Сработало у вас? Оставьте реакцию или напишите в комментариях 👇</i>`);
+    const detailsLine = details ? `\nℹ️ ${escapeHtml(truncateAtWord(details, 180))}` : null;
+    const ctaLine = `\n💬 <i>Сработало у вас? Оставьте реакцию или напишите в комментариях 👇</i>`;
 
     const eridLine = selected.ordMarker && !selected.ordText.includes(selected.ordMarker)
       ? `${selected.ordText} erid: ${selected.ordMarker}`
@@ -898,8 +896,40 @@ export async function runPipeline(options = { dryRun: false, takeOffers: true, m
       ``,
       `⚖️ <i>${escapeHtml(eridLine)}</i>`,
     ];
+    const footerText = footerLines.join("\n");
 
-    const postText = fitCaption(bodyLines.join("\n"), footerLines.join("\n"), 980);
+    const buildBody = (bulletCount, withDetails, withCta) => {
+      const lines = [...bodyLines];
+      if (bulletCount > 0) {
+        lines.push(`\n🎁 <b>Ещё коды ${escapeHtml(selected.storeName)}:</b>`);
+        lines.push(...otherBullets.slice(0, bulletCount));
+      }
+      if (withDetails && detailsLine) lines.push(detailsLine);
+      if (withCta) lines.push(ctaLine);
+      return lines.join("\n");
+    };
+
+    let chosenBody = buildBody(otherBullets.length, true, true);
+    const variants = [
+      [otherBullets.length, true, true],
+      [otherBullets.length, false, true],
+      [otherBullets.length, false, false],
+      ...[2, 1, 0]
+        .filter((k) => k < otherBullets.length)
+        .flatMap((k) => [
+          [k, false, true],
+          [k, false, false],
+        ]),
+    ];
+    for (const [k, wd, wc] of variants) {
+      const candidateBody = buildBody(k, wd, wc);
+      if (visibleTelegramLength(`${candidateBody}\n\n${footerText}`) <= 990) {
+        chosenBody = candidateBody;
+        break;
+      }
+    }
+
+    const postText = fitCaption(chosenBody, footerText, 990);
     const buttons = [
       [{ text: `🛍 В магазин ${selected.storeName} →`, url: selected.affUrl }],
       [{ text: `🌐 Все промокоды ${selected.storeName}`, url: tgStorePageUrl }],

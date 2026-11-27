@@ -179,25 +179,154 @@ export function loadStableStoreSlugs() {
 }
 
 /**
- * Гарантирует, что подпись к `sendPhoto` не превысит `maxLen` (по умолчанию 980)
- * и НИКОГДА не обрежет нижний блок с прямой ссылкой и обязательной маркировкой erid.
+ * Обрезает текст по границе слова до maxLen символов без обрыва слова посередине.
  */
-export function fitCaption(bodyHtml, footerHtml, maxLen = 980) {
+export function truncateAtWord(text, maxLen = 120) {
+  const s = String(text || "").replace(/\s+/g, " ").trim();
+  if (!s || maxLen <= 0) return "";
+  if (s.length <= maxLen) return s;
+  if (maxLen === 1) return s.slice(0, 1);
+
+  const budget = maxLen - 1;
+  let cut = s.slice(0, budget);
+  const nextChar = s[budget] || "";
+  const prevChar = cut.slice(-1);
+
+  if (/[A-Za-zА-Яа-яЁё0-9]/.test(nextChar) && /[A-Za-zА-Яа-яЁё0-9]/.test(prevChar)) {
+    const lastSpace = cut.search(/\s+\S*$/);
+    if (lastSpace >= Math.floor(budget * 0.45)) {
+      cut = cut.slice(0, lastSpace);
+    }
+  }
+
+  cut = cut.replace(/[\s,.;:!?—-]+$/g, "").trim();
+  return `${cut}…`;
+}
+
+/**
+ * Считает видимую длину HTML-подписи после парсинга Telegram-тегов и HTML-сущностей
+ * (Telegram Bot API ограничивает именно видимый текст sendPhoto caption до 1024 символов).
+ */
+export function visibleTelegramLength(html) {
+  return String(html || "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&(?:#\d+|#x[0-9a-f]+|[a-z]+);/gi, "x")
+    .length;
+}
+
+const VOID_OR_UNCLOSED_IGNORED = new Set(["br"]);
+
+function closeUnclosedHtmlTags(html) {
+  const stack = [];
+  const tagRe = /<\/?([a-z][a-z0-9]*)(?:\s[^>]*)?>/gi;
+  for (const m of html.matchAll(tagRe)) {
+    const full = m[0];
+    const tag = m[1].toLowerCase();
+    if (VOID_OR_UNCLOSED_IGNORED.has(tag)) continue;
+    if (full.startsWith("</")) {
+      const idx = stack.lastIndexOf(tag);
+      if (idx !== -1) stack.splice(idx, 1);
+    } else if (!full.endsWith("/>")) {
+      stack.push(tag);
+    }
+  }
+  return html + stack.reverse().map((t) => `</${t}>`).join("");
+}
+
+function truncateHtmlByVisibleLen(html, maxVisibleLen) {
+  const s = String(html || "");
+  if (visibleTelegramLength(s) <= maxVisibleLen) return s;
+  if (maxVisibleLen <= 1) return "";
+
+  const target = maxVisibleLen - 1;
+  let visibleCount = 0;
+  let rawEnd = 0;
+  let lastWordBoundaryRaw = -1;
+  let inTag = false;
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === "<") {
+      inTag = true;
+      continue;
+    }
+    if (inTag) {
+      if (ch === ">") inTag = false;
+      continue;
+    }
+
+    let stepRaw = 1;
+    if (ch === "&") {
+      const ent = s.slice(i).match(/^&(?:#\d+|#x[0-9a-f]+|[a-z]+);/i);
+      if (ent) stepRaw = ent[0].length;
+    }
+
+    if (/\s/.test(ch)) {
+      lastWordBoundaryRaw = i;
+    }
+
+    if (visibleCount + 1 > target) {
+      rawEnd = i;
+      break;
+    }
+    visibleCount += 1;
+    rawEnd = i + stepRaw;
+    i += stepRaw - 1;
+  }
+
+  let cut = s.slice(0, rawEnd);
+  const nextRawChar = s[rawEnd] || "";
+  if (
+    lastWordBoundaryRaw > 0 &&
+    /[A-Za-zА-Яа-яЁё0-9]/.test(nextRawChar) &&
+    visibleCount >= 10
+  ) {
+    const candidate = s.slice(0, lastWordBoundaryRaw);
+    if (visibleTelegramLength(candidate) >= Math.floor(target * 0.5)) {
+      cut = candidate;
+    }
+  }
+
+  cut = cut.replace(/<[^>]*$/, "").replace(/[\s,.;:!?—-]+$/g, "").trim();
+  return closeUnclosedHtmlTags(`${cut}…`);
+}
+
+/**
+ * Гарантирует, что подпись к `sendPhoto` не превысит `maxLen` видимых символов (по умолчанию 990)
+ * и НИКОГДА не обрежет нижний блок с прямой ссылкой и обязательной маркировкой erid.
+ * Сначала убирает опциональные строки целиком (не обрывая пункты списков посередине слова).
+ */
+export function fitCaption(bodyHtml, footerHtml, maxLen = 990) {
   const footer = String(footerHtml || "").trim();
   const body = String(bodyHtml || "").trim();
   const full = footer ? `${body}\n\n${footer}` : body;
-  if (full.length <= maxLen) return full;
+  if (visibleTelegramLength(full) <= maxLen) return full;
 
-  const budget = Math.max(80, maxLen - footer.length - 6);
-  let cut = body.slice(0, budget);
-  // Не режем HTML-тег посередине
-  const lastOpen = cut.lastIndexOf("<");
-  const lastClose = cut.lastIndexOf(">");
-  if (lastOpen > lastClose) {
-    cut = cut.slice(0, lastOpen);
+  const lines = body.split("\n");
+  while (lines.filter((l) => l.trim()).length > 2) {
+    const currentBody = lines.join("\n").trim();
+    const candidate = footer ? `${currentBody}\n\n${footer}` : currentBody;
+    if (visibleTelegramLength(candidate) <= maxLen) return candidate;
+
+    lines.pop();
+    while (lines.length > 0 && !lines[lines.length - 1].trim()) lines.pop();
+    while (
+      lines.length > 1 &&
+      /:<\/[bi]>\s*$|^[^<]*:\s*$/.test(lines[lines.length - 1].trim())
+    ) {
+      lines.pop();
+      while (lines.length > 0 && !lines[lines.length - 1].trim()) lines.pop();
+    }
   }
-  cut = cut.replace(/[\s,.;:!?-]+$/g, "").trim();
-  return footer ? `${cut}…\n\n${footer}` : `${cut}…`;
+
+  const trimmedBody = lines.join("\n").trim();
+  const afterDrop = footer ? `${trimmedBody}\n\n${footer}` : trimmedBody;
+  if (visibleTelegramLength(afterDrop) <= maxLen) return afterDrop;
+
+  const footerVisible = visibleTelegramLength(footer);
+  const bodyBudget = Math.max(60, maxLen - footerVisible - (footer ? 2 : 0));
+  const safeBody = truncateHtmlByVisibleLen(trimmedBody, bodyBudget);
+  return footer ? `${safeBody}\n\n${footer}` : safeBody;
 }
 
 /**

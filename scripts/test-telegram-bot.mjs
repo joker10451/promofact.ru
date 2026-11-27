@@ -14,8 +14,11 @@ import { POST as botWebhookPost, GET as botWebhookGet } from "../src/app/api/tel
 import {
   buildDigestCandidates,
   canAutoPostNow,
+  fitCaption,
   getTgBotLink,
   selectHybridTrack,
+  truncateAtWord,
+  visibleTelegramLength,
 } from "./hybrid-post-sources.mjs";
 import { buildBannerHtml } from "./banner-generator.mjs";
 
@@ -329,5 +332,47 @@ try {
   if (prevChanId === undefined) delete process.env.TELEGRAM_CHANNEL_ID;
   else process.env.TELEGRAM_CHANNEL_ID = prevChanId;
 }
+
+// 7. Word-boundary truncation and Telegram caption visible-length accounting
+const p70 = truncateAtWord(
+  "Скидка 500 ₽ на первый заказ от 1200 ₽ в приложении Перекрёсток Доставка",
+  70,
+);
+assert.ok(!p70.includes("Достав…"), `Must not slice mid-word: ${p70}`);
+assert.ok(p70.length <= 70 && p70.endsWith("…"));
+assert.equal(
+  truncateAtWord("Скидка 500 ₽ на первый заказ от 1200 ₽ в приложении Перекрёсток Доставка", 115),
+  "Скидка 500 ₽ на первый заказ от 1200 ₽ в приложении Перекрёсток Доставка",
+);
+
+const longHtmlFooter = [
+  `👉 <a href="https://dash.perfluence.net/some/very/long/affiliate/tracking/url?utm_source=telegram&utm_medium=social&utm_campaign=perekrestok-dostavka&erid=2VtzqwXYZ123456">Активировать в Перекрёсток Доставка →</a>`,
+  `🌐 <a href="https://promofact.ru/store/perekrestok-dostavka?utm_source=telegram&utm_medium=social&utm_campaign=perekrestok-dostavka">Все промокоды Перекрёсток Доставка на ПромоФакте</a>`,
+  `⚖️ <i>Реклама. ООО "Перекресток" erid: 2VtzqwXYZ</i>`,
+].join("\n");
+const richBody = [
+  `🔥 <b>Перекрёсток Доставка — Скидка 600 ₽ от 1500 ₽</b>`,
+  `🎟 Промокод: <code>198N7PARH</code>`,
+  `🎁 <b>Ещё коды Перекрёсток Доставка:</b>`,
+  `• <code>207NAPFM6</code> — Скидка 500 ₽ на первый заказ от 1200 ₽ в приложении Перекрёсток Доставка (до 27 ноября)`,
+  `• <code>196DULY6U</code> — Скидка 300 ₽ на первый заказ от 1200 ₽ в приложении Перекрёсток Доставка (до 30 ноября)`,
+  `• <code>1975VWVT7</code> — Скидка 99% на товары из категории готовой еды при заказе от 1000 ₽ (до 30 ноября)`,
+].join("\n");
+const fittedRich = fitCaption(richBody, longHtmlFooter, 990);
+assert.ok(visibleTelegramLength(fittedRich) <= 990);
+assert.ok(fittedRich.includes("1975VWVT7"), "Long <a> href HTML tags must not force premature bullet truncation");
+assert.ok(fittedRich.includes("готовой еды"), "Third bullet must remain complete without 'катег…' cut");
+
+const overlongBody = [
+  `🔥 <b>Тест — Скидка 50%</b>`,
+  `🎟 Промокод: <code>CODE1</code>`,
+  `🎁 <b>Ещё коды Тест:</b>`,
+  `• <code>C1</code> — ${"Очень длинное описание предложения для первого пункта списка ".repeat(7).trim()}`,
+  `• <code>C2</code> — ${"Очень длинное описание предложения для второго пункта списка ".repeat(7).trim()}`,
+].join("\n");
+const droppedCleanly = fitCaption(overlongBody, longHtmlFooter, 990);
+assert.ok(visibleTelegramLength(droppedCleanly) <= 990);
+assert.ok(!droppedCleanly.includes("<code>C2</code>"), "Excess bullet should drop as a whole line");
+assert.ok(droppedCleanly.includes("2VtzqwXYZ"), "Mandatory erid footer must stay intact");
 
 console.log("Telegram bot & channel growth verification PASS");
