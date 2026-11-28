@@ -151,9 +151,17 @@ export function carriesOverduePlacement(c: Pick<Coupon, "affiliate"> & { extraLi
 
 /** Codes the partner reports as used up ("закончились промокоды"); they must not be shown even while the widget still lists them. */
 export const EXHAUSTED_PROMO_CODES: ReadonlySet<string> = new Set([
-  "PERPREGA309361", // СберЗдоровье: 30% на анализы для беременных, 11 Nov 2026
+  "PERPREGA309361", // СберЗдоровье: старое размещение 11 Nov 2026; обновлённая ссылка 28 Nov (sites/4fkgs6?erid=2RanynAWCDA) разрешена явно
 ]);
 
-export function isExhaustedCode(c: Pick<Coupon, "promocode">): boolean {
-  return EXHAUSTED_PROMO_CODES.has(c.promocode.code.trim().toUpperCase());
+export function isExhaustedCode(c: Pick<Coupon, "promocode"> & Partial<Pick<Coupon, "affiliate">>): boolean {
+  const code = c.promocode.code.trim().toUpperCase();
+  if (
+    code === "PERPREGA309361" &&
+    c.affiliate?.ordMarker === "2RanynAWCDA" &&
+    c.affiliate?.link === "https://sberanalizy.prfl.me/sites/4fkgs6?erid=2RanynAWCDA"
+  ) {
+    return false;
+  }
+  return EXHAUSTED_PROMO_CODES.has(code);
 }

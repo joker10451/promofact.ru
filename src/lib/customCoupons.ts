@@ -2,7 +2,7 @@ import type { Coupon } from "@/lib/types";
 import { STABLE_STORES } from "@/lib/stableStores";
 import { isCouponActive } from "@/lib/couponExpiry";
 import { isPausedPublisherStore } from "@/lib/publisherPauses";
-import { SBER_ANALIZY_OCT29_OFFERS } from "@/lib/perfluenceSberAnalizyOct29";
+import { SBER_ANALIZY_NOV28_OFFERS, SBER_ANALIZY_OCT29_OFFERS } from "@/lib/perfluenceSberAnalizyOct29";
 import pampaduOffersData from "@/data/pampadu-offers.json";
 
 /**
@@ -62,6 +62,7 @@ const PAMPADU_COUPONS: Coupon[] = pampaduOffersData.offers.map((offer) => {
 export const CUSTOM_COUPONS: Coupon[] = [
   ...PAMPADU_COUPONS,
   // Verified medical placements for SberZdorovie with mandatory contraindications marking
+  ...SBER_ANALIZY_NOV28_OFFERS,
   ...SBER_ANALIZY_OCT29_OFFERS.filter(
     (c) => c.promocode.code === "SHD56E28" || c.promocode.code === "PERE7A4E5",
   ),

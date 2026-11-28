@@ -63,46 +63,77 @@ export const SBER_ANALIZY_OCT29_PLACEMENTS: readonly Placement[] = [
   },
 ];
 
+export const SBER_ANALIZY_NOV28_PLACEMENTS: readonly Placement[] = [
+  {
+    id: 826233205,
+    code: "SH403216B6",
+    title: "Скидка до 40% на любые анализы + бесплатная расшифровка с врачом",
+    terms:
+      "Флеш-акция в проекте «СберЗдоровье (Анализы)»: скидка 40% на анализы в Гемотест, KDL, Хеликс и Ситилаб (10% в Инвитро), а также бесплатная расшифровка результатов анализов с врачом по промокоду SH403216B6. Действует с 28 по 29 ноября 2026 года, 23:59 МСК.",
+    audience: "Флеш-акция до 29 ноября · любые анализы",
+    link: "https://sberanalizy.prfl.me/sites/5d58pj?erid=2RanynBzBVW",
+    erid: "2RanynBzBVW",
+    expires: "2026-11-29T23:59:59+03:00",
+  },
+  {
+    id: 826233206,
+    code: "PERPREGA309361",
+    title: "Скидка 30% на первые и все повторные анализы для беременных от 1 000 ₽",
+    terms:
+      "Скидка 30% на первые и все повторные анализы для беременных от 1 000 ₽ по промокоду PERPREGA309361 в проекте «СберЗдоровье (Анализы)». Обновлённая ссылка для promofact.ru. До 30 ноября 2026 года, 23:59 МСК.",
+    audience: "Первый и повторный от 1 000 ₽",
+    link: "https://sberanalizy.prfl.me/sites/4fkgs6?erid=2RanynAWCDA",
+    erid: "2RanynAWCDA",
+    expires: "2026-11-30T23:59:59+03:00",
+  },
+];
+
 const store = STABLE_STORES["sberzdorovie"];
 
-export const SBER_ANALIZY_OCT29_OFFERS: Coupon[] = SBER_ANALIZY_OCT29_PLACEMENTS.map(p => ({
-  id: p.id,
-  promocode: {
+const mapSberPlacements = (placements: readonly Placement[], hitCode: string): Coupon[] =>
+  placements.map((p) => ({
     id: p.id,
-    code: p.code,
-    bonusName: p.title,
-    terms: p.terms,
-    expires: p.expires ?? expiry,
-    isHit: p.code === "SH40NOV0I6VB",
-    isUniversal: false,
-    isFirstOrderOnly: false,
-    customerTypeLabel: p.audience,
-    region: "RU",
-    isBarcode: false,
-    barcodeImage: null,
-    group: "perfluence",
-  },
-  store: { ...store, activeBloggers: store.activeBloggers ?? 0 },
-  affiliate: {
-    link: p.link,
-    landingLink: p.link,
-    ordMarker: p.erid,
-    ordText: `${legal} erid: ${p.erid}. ${medicalWarning}`,
-  },
-  extraLinks: [],
-}));
+    promocode: {
+      id: p.id,
+      code: p.code,
+      bonusName: p.title,
+      terms: p.terms,
+      expires: p.expires ?? expiry,
+      isHit: p.code === hitCode || p.code === "PERPREGA309361",
+      isUniversal: false,
+      isFirstOrderOnly: false,
+      customerTypeLabel: p.audience,
+      region: "RU",
+      isBarcode: false,
+      barcodeImage: null,
+      group: "perfluence",
+    },
+    store: { ...store, activeBloggers: store.activeBloggers ?? 0 },
+    affiliate: {
+      link: p.link,
+      landingLink: p.link,
+      ordMarker: p.erid,
+      ordText: `${legal} erid: ${p.erid}. ${medicalWarning}`,
+    },
+    extraLinks: [],
+  }));
+
+export const SBER_ANALIZY_OCT29_OFFERS: Coupon[] = mapSberPlacements(SBER_ANALIZY_OCT29_PLACEMENTS, "SH40NOV0I6VB");
+export const SBER_ANALIZY_NOV28_OFFERS: Coupon[] = mapSberPlacements(SBER_ANALIZY_NOV28_PLACEMENTS, "SH403216B6");
 
 /** Fail closed for stale widget/Supabase offers with the same code but old links. */
 export function isApprovedOct29SberAnalizyPlacement(c: Coupon): boolean {
   if (c.store.slug !== "sberzdorovie" || c.promocode.group !== "perfluence") return false;
-  const approved = SBER_ANALIZY_OCT29_OFFERS.find(x =>
-    x.promocode.code.toUpperCase() === c.promocode.code.trim().toUpperCase());
-  return Boolean(approved &&
+  const approvedList = [...SBER_ANALIZY_NOV28_OFFERS, ...SBER_ANALIZY_OCT29_OFFERS].filter((x) =>
+    x.promocode.code.toUpperCase() === c.promocode.code.trim().toUpperCase(),
+  );
+  return approvedList.some((approved) =>
     c.promocode.expires === approved.promocode.expires &&
     c.affiliate.link === approved.affiliate.link &&
     c.affiliate.landingLink === approved.affiliate.landingLink &&
     c.affiliate.ordMarker === approved.affiliate.ordMarker &&
     c.affiliate.ordText.includes(legal) &&
     c.affiliate.ordText.includes("erid: " + approved.affiliate.ordMarker) &&
-    c.affiliate.ordText.includes(medicalWarning));
+    c.affiliate.ordText.includes(medicalWarning),
+  );
 }

@@ -24,7 +24,10 @@ for (const slug of ["premier", "poizon", "yandeks-lavka", "sberprime"]) {
   );
 }
 
-assert.deepEqual(all.filter(([, c]) => c.promocode.code.toUpperCase() === "PERPREGA309361").length, 0, "exhausted code must not be shown");
+const legacyExhausted = all.filter(
+  ([, c]) => c.promocode.code.toUpperCase() === "PERPREGA309361" && c.affiliate.ordMarker !== "2RanynAWCDA",
+);
+assert.deepEqual(legacyExhausted.length, 0, "legacy exhausted PERPREGA309361 placement must not be shown");
 
 // Hand-written pages (articles, banners): no overdue ERID outside the denylist and the raw feed data.
 // promoBanners: expired banners are hidden by endsAt. AdminClient: placeholder text.
